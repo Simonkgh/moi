@@ -1,0 +1,285 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - MyBatis Caching</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>MyBatis Caching</h1>
+    <aside>First published on: July 8, 2013</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      <p>MyBatis is a Java library that helps to map Java objects to/from SQL database tables. The MyBatis “local cache” is important yet hardly mentioned in the online MyBatis documentation; the following info is useful to know when working with MyBatis (version 3.2 or similar).</p>
+
+<p>MyBatis has two layers of caching:</p>
+
+<ul>
+  <li>a “local cache” which is always enabled</li>
+  <li>a “second level cache” which is optional (enabled via a <code>&lt;cache&gt;</code> element in the config file)</li>
+</ul>
+
+<h1 id="the-local-cache">The Local Cache</h1>
+
+<p>The local cache is always enabled, even when the main config file sets cacheEnabled=false or an individual statement sets useCache=false (these affect the second-level cache only). The only configuration setting that affects the local cache is:</p>
+
+<pre><code>  localCacheScope=SESSION|STATEMENT     (default = SESSION)
+</code></pre>
+
+<p>This local cache is a map where:</p>
+
+<ul>
+  <li>key = (mybatis-namespace + stmt-name) + (raw sql including parameter placeholders) + (actual SQL parameter values)</li>
+  <li>value = (list of Java objects resulting from that query)</li>
+</ul>
+
+<p>When localCacheScope=STATEMENT then the cache is cleared at the end of each MyBatis statement.</p>
+
+<p>When localCacheScope=SESSION, then the cache is cleared:</p>
+
+<ol>
+  <li>at the end of the current transaction (or end of each statement when autoCommit=true)</li>
+  <li>whenever any insert/update/delete statement is executed</li>
+</ol>
+
+<p>The local cache data is stored in a member of a SimpleExecutor instance, which belongs to an SqlSession object.</p>
+
+<p>When Spring transactions are enabled, a single SqlSession is shared between all MyBatis DAO instances that execute within that same transaction, and is discarded when the transaction completes. The sqlSession property of the DAO classes (which extend Spring’s SqlSessionDaoSupport) is actually an SqlSessionTemplate which retrieves the SqlSession object to use from the current transaction’s properties. Operations that do not run within a transaction create a temporary SqlSession. The result is that when localCacheScope=SESSION:</p>
+
+<ul>
+  <li>within the same transaction, executing the same SQL statement with the same parameters ends up returning a reference to the same Java object (and the DB query is not run)</li>
+  <li>objects are never shared between different transactions</li>
+</ul>
+
+<p>The primary use for this cache is where a mapping uses sub-selects to populate collection properties; in this case, repeatly executing the same query simply returns a reference to the same object instance from the cache. Example:</p>
+
+<pre><code>    &lt;resultMap id="ToolboxMap" type="Toolbox"&gt;
+        &lt;id property="id" column="ID" javaType="long"/&gt;
+        &lt;result property="name" column="NAME" /&gt;
+        &lt;result property="colour" column="COLOUR"/&gt;
+
+        &lt;collection property="screwDrivers" javaType="ArrayList" select="net.vonos.tools.Screwdrivers_query" column="ID" /&gt;
+        &lt;collection property="allenKeys" javaType="ArrayList" select="net.vonos.tools.AllenKeys_query" column="ID" /&gt;
+        &lt;collection property="drillBits" javaType="ArrayList" select="net.vonos.tools.DrillBits_query" column="ID" /&gt;
+    &lt;/resultMap&gt;
+</code></pre>
+
+<p>A secondary use is when a method uses transactions (either explicitly or via annotations) to perform multiple database operations within a single transaction, and can potentially execute the same MyBatis select statement with the same parameters multiple times.</p>
+
+<p>The local cache key includes the raw SQL that would be sent to the database plus the actual parameter values that would be sent to the database. In other words, any “executable” expressions in the MyBatis mapping such as the following are first expanded before being used in the local cache “key”. The following example is expanded (if-condition evaluated) and the resulting string is part of the key:</p>
+
+<pre><code>&lt;where&gt;
+  id=#{id}
+  &lt;if test="foo != null'"&gt;
+    and foo=#{foo}
+  &lt;/if&gt;
+&lt;/where&gt;
+</code></pre>
+
+<p>Note in particular that repeatedly reading the same row from the database will return multiple references to the same object instance <em>when within the same transaction</em>, and references to different objects when <em>not within the same transaction</em>.</p>
+
+<h1 id="the-second-level-cache">The Second-level Cache</h1>
+
+<p>When performing a query, the second-level cache is consulted first.</p>
+
+<p>The second-level cache:</p>
+
+<ul>
+  <li>Shares data between transactions</li>
+  <li>By default, returns a <em>copy</em> of the cached object created via serialize/deserialize - which requires all cacheable objects to implement Serializable</li>
+  <li>Can hook into “enterprise” caching systems, or use a simple in-memory cache. The in-memory approach works only when the DB is exclusively updated by a single process</li>
+  <li>By default, flushes the entire cache whenever an <code>&lt;insert&gt;</code>, <code>&lt;update&gt;</code> or <code>&lt;delete&gt;</code> MyBatis statement is executed.</li>
+  <li>Keys cache entries by the same key for the local cache, ie a string built from (mybatis-namespace + stmt-name) + (raw sql) + (actual parameter values)</li>
+</ul>
+
+<p>The second-level cache can return “shared” references to a common object if the “readOnly” attribute is set on the cache declaration. This should be used with care - if the returned object is modified by the caller then that modifies the object stored in the cache.</p>
+
+<p>The second-level cache is effectively held at the MyBatis Configuration level. If you application follows a pattern where each DAO instance has its own MyBatis configuration object then the second-level cache does not share data between DAOs.</p>
+
+<p>In order to share a cache between multiple MyBatis statements and multiple callers, the cache is <em>locked</em> for the period of execution of a MyBatis statement. There are separate read and write locks (ie multiple callers can concurrently lock-for-read, and a writer must wait until all readers release their locks).</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>Because the local cache only stores data for the duration of a transaction (at most) it is simple and effective. However it cannot optimise access to read-only or mostly-read-only data.  The second-level cache can optimise access to such data, but must be very carefully configured to suit the access-patterns in the deployed environment otherwise it may return stale data. The second-level cache copies objects unless attribute readOnly=true is set.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/mybatis-caching/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

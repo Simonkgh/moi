@@ -1,0 +1,262 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - The Eclipse P2 Artifact Repository</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>The Eclipse P2 Artifact Repository</h1>
+    <aside>First published on: December 19, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/OSGi/'>OSGi</a></p>
+      <h1 id="overview">Overview</h1>
+
+<p>The Eclipse project (which produces the Eclipse RCP platform and the Eclipse IDE) has invented its own “provisioning platform” software, called P2, for the purposes of managing <em>plugins</em>, ie extensions to the core framework implemented as OSGi bundles (jarfiles). This article looks briefly at the functionality of Eclipse P2.</p>
+
+<p>In short, P2 does a similar job to <em>apt</em> or <em>dnf</em> for Linux - it is a package manager for OSGi bundles. Like dpkg/rpm files, OSGi bundles declare requirements. And like apt/dnf, “remote repositories” contain pools of bundles from which those requirements can be fulfilled. However in P2 the “install” step is simply storing the downloaded bundle into a local pool; when an Eclipse application is started P2 is then responsible for taking a features-file and passing the appropriate individual bundles (jarfiles) to the OSGi runtime.</p>
+
+<p>Unlike apt/yum, P2 is a “per application” package manager, rather than a “distribution” package manager. However if configured appropriately, it can share installed bundles with other P2-based applications on the same machine.</p>
+
+<p>An alternative comparison can be made with “cpan” for perl, “rvm” for Ruby, “npm” tool for node.js, etc.</p>
+
+<p>There is a graphical user interface for P2 inside of the Eclipse IDE, and a command-line one, for the purpose of installing bundles and features. Other interfaces could be built if desired. An OSGi environment then needs to use P2 APIs to locate the installed bundles at startup.</p>
+
+<p>Provisioning is a somewhat more advanced concept than a simple “artifact repository” as supported by Maven, etc. The general concepts behind provisioning are discussed in <a href="/java/osgi-depres">this article on OSGi artifact resolution</a>.</p>
+
+<p>Warning: this article is pretty rough and incomplete. I have published it in its current state only because I’m not aware of any better overview of P2 than these rough notes. The official documentation is linked to from the “resources” section at the end of this article, but at the current time this (IMO) provides very little help in understanding the overall concepts behind P2.</p>
+
+<h1 id="bundles-plugins-features-artifacts-and-installable-units">Bundles, Plugins, Features, Artifacts and Installable Units</h1>
+
+<p>A “plugin” is equivalent to an OSGi <em>bundle</em>, ie a jarfile with embedded metadata. Actually, an eclipse “plugin” is a superset of an OSGi bundle, with additional entries in MANIFEST.MF and assumptions in the Java classes about the environment it will find itself in. However every Eclipse Plugin is a valid OSGi bundle.</p>
+
+<p>A “feature” is an XML file that lists the plugins (ie bundles) that the feature directly provides, and lists the plugins (ie bundles) or other features that it depends on, ie requires to have been already installed in the environment by some other mechanism. This works similarly to Apache Karaf features-files.</p>
+
+<p>An “artifact” is anything that can be installed. In 99.9% of cases, it is a plugin.</p>
+
+<p>An “installable unit” (aka IU) is a descriptor (metadata) for an artifact. The original Eclipse “plugin manager” component dealt only in plugins and features. However there are a few things that are <em>not</em> plugins or features. In particular, core components of Eclipse itself such as the Equinox libraries are not plugins (OSGi bundles) and so cannot be managed at this level. This was the primary motivator for replacing the original manager code with P2. It is also the reason why P2 uses the terms “installable unit (IU)” and “artifact” throughout its user-interface, configuration files, and API. Nevertheless, 99.9% of the time the things that P2 manages are features and the plugins (OSGi bundles) they reference.</p>
+
+<p>A P2 repository is a directory tree of files defining “installable units”, features, and artifacts(ie plugins).</p>
+
+<h1 id="touchpoints">Touchpoints</h1>
+
+<p>P2 documentation uses the terminology “touchpoint”, but doesn’t do a good job of describing it. As far as I can tell, these are needed for installing “non-plugin” artifacts. When an artifact is a plugin or feature, then the “plugin” touchpoint simply writes the artifacts to the bundle directory. However when the artifact is of type “launcher” (ie an executable with associated name and icon) then it is passed to a corresponding touchpoint-type which knows how to register the executable in the local desktop environment, eg create entry in the desktop menus and place an icon on the desktop.</p>
+
+<h1 id="installing-bundles-using-p2">Installing Bundles Using P2</h1>
+
+<p>P2 supports installing plugins in two ways: “ahead of time” and “at runtime”.</p>
+
+<p>Plugins installed “ahead of time” are installed using the P2 configuration api - eg the Eclipse configuration dialogs, the P2 commandline tool, or any other front-end that invokes the P2 library. P2 then places the installed jars into its own internal directory structures, and builds caches of the relevant information for quick startup. When plugins declare dependencies then (like apt/yum) these are automatically downloaded if necessary. And when plugins “conflict” in ways that OSGi cannot handle, then an installation failure (with appropriate message) occurs.</p>
+
+<p>Plugins can also be installed “at runtime” by simply dropping the appropriate jar into a monitored directory (called a “dropin directory”). Uninstalling the plugins is simply a matter of deleting the file. This simplifies things for some users/use-cases. However the P2-using application will start slower, as it needs to run all P2 logic for dependency/conflict analysis on each startup.</p>
+
+<p>P2 supports “bundle pooling”, where multiple applications that use P2 (currently, meaning multiple eclipse-based applications) can share common plugin jars. The system presumably ensures that when a new <em>compatible</em> jar is found by one app, it replaces the existing one in the pool so that other apps see the new jar when restarted (or maybe even live). Maybe it also removes obsolete dependencies? And when a new <em>incompatible</em> jar is found, it keeps both versions.</p>
+
+<p>Each installed bundle is placed in “$(P2<em>BASE)/plugins/{bundle:id}</em>{bundle:version}.jar”. Note however that removing the bundle is <em>not</em> just a matter of removing the jarfile, as cached indexes also need to be cleaned up - use the P2 API instead.</p>
+
+<h1 id="installing-features-using-p2">Installing features using P2</h1>
+
+<p>P2 can also install a “feature”, ie a set of plugins (and recursively, other features) defined in a “feature.xml” file.</p>
+
+<p>Once all bundles are installed, the feature.xml file is placed in “$(P2<em>BASE)/features/{feature:id}</em>{feature:version}.xml”. Note however that removing the feature is <em>not</em> just a matter of removing the feature.xml file - the referenced bundles and various cached indexes also needed to be cleaned up - use the P2 API instead.</p>
+
+<p>Features cannot be installed through the “dropin” directory.</p>
+
+<h1 id="native-osgi-provisioning">Native OSGi Provisioning</h1>
+
+<p>The OSGi specification defines <a href="/java/osgi-depres">provisioning functionality</a> known as the “repository service” and “resolver service” which is similar to what P2 provides for managing bundles and features. The OSGi specification had been around in “beta” form for a long while before being officially part of the standard, during which time it was known as OBR.</p>
+
+<p>The OSGi repository/resolver services do not provide any equivalent to P2’s ability to manage non-bundle artifacts or install them via “touchpoints”.</p>
+
+<p>It is a shame that both OSGi provisioning and P2 exist for managing bundles (which is what P2 does 99% of the time); the two address basically the same issue, and in similar ways.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://wiki.eclipse.org/Equinox/p2">Eclipse wiki: P2</a></li>
+  <li><a href="http://eclipsesource.com/blogs/tutorials/eclipse-p2-tutorial-managing-metadata/">Eclipse: p2 tutorial</a></li>
+  <li>
+<a href="http://www.aosabook.org/en/eclipse.html">AOSA Eclipse Book</a> – see section “p2 Concepts”</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/eclipse-p2/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

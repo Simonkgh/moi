@@ -1,0 +1,660 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Apache HBase Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Apache HBase Overview</h1>
+    <aside>First published on: June 20, 2016</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>The <a href="/bigdata/datastorage">big data storage article</a> on this site briefly describes <a href="http://hbase.apache.org">HBase</a> in the context of many other storage technologies. This article addresses HBase specifically.</p>
+
+<p>The term “datastore” is used in this article rather than database because readers who are familiar with relational systems (and this is probably the majority of readers) often consider “database” and “relational database” to be synonyms. However HBase is <em>not</em> a relational database.</p>
+
+<p>The <a href="https://hbase.apache.org/book.html">official HBase book</a> is quite good, and covers most of the topics below better than I can. Start reading from the <a href="https://hbase.apache.org/book.html#datamodel">Data Model</a> section for general information about HBase (the first chapters conver installation and configuration in huge detail). However the book is very detailed, and long; hopefully this relatively brief summary of HBase acts as a good introduction before diving into the full official docs.</p>
+
+<h1 id="what-is-hbase">What is HBase?</h1>
+
+<ul>
+  <li>a distributed, highly scalable, moderately-available datastore with good read and write performance for individual records, and reasonable batch-read performance</li>
+  <li>a member of the “BigTable-like” datastore family, with the typical BigTable-like features (see “Data Model” below)</li>
+  <li>strongly consistent (stale data is never returned by reads, at the price of lower availability in the presence of node or network failures)</li>
+  <li>schema-free, ie tables have no predeclared structure (columns can be dynamically added), and columns have no predeclared types (column values are just byte-arrays to HBase)</li>
+  <li>only supports lookup by key, not lookup by column</li>
+  <li>support efficient scanning over key-ranges</li>
+  <li>does not support transactions or foreign keys (referential integrity).</li>
+  <li>allows columns (ie individual cells) to hold up to 100kb of data; larger than that needs special handling (see MOB).</li>
+  <li>provides only a programming API, no query language (though external tools provide query language support)</li>
+  <li>doesn’t use Hadoop YARN or a similar technology for clustering; HBase instances are individually installed to form a cluster</li>
+  <li>stores table data in files within a distributed filesystem (eg Hadoop HDFS)</li>
+</ul>
+
+<p>Like other BigTable-like datastores, HBase has some resemblance to a relational database - the data it stores can be viewed as tables/columns. Alternately, the stored data can be viewed as a “sorted persistent map”; see the next section on the HBase Data Model.</p>
+
+<p>HBase can handle billions of rows, and append-rates of thousands of rows per second, while still allowing interactive access.</p>
+
+<h1 id="the-data-model">The Data Model</h1>
+
+<p>HBase is a data storage system, but not a relational one. There are a number of very good descriptions of how HBase models data, including the <a href="https://hbase.apache.org/book.html#datamodel">official documentation</a> and <a href="http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable">Jim Wilson’s article</a>. However I find the actual implementation (ie looking at how the code really works) clearer than any of the “abstract” explanations, hence the following alternative description..</p>
+
+<p>HBase is a kind of (key, value) store where the key has some internal structure:</p>
+
+<pre><code>((namespace, tablename, region-id, column-family-name), (rowkey, column-name, version)) -&gt; bytearray
+</code></pre>
+
+<p>Such an entry (the value of a specific column in a specific row) is known as a <em>cell</em>.</p>
+
+<p>Yes, you can retrieve that byte-array value by providing the full set of “key” values listed above. However because of the carefully-chosen internal structure of this “key”, and because cells are stored <em>sorted by key</em>, HBase can do more. A typical HBase query performs a <em>table scan</em> over one or more ranges of keys and returns a <em>set of matching cells</em>, eg a subset of cells for a specific <em>rowkey</em> or the cells for a specific <em>column</em> over a range of rowkeys. The result is somewhat like executing an SQL select statement and receiving a result-set.</p>
+
+<p>The (namespace, tablename, region-id, column-family-name) tuple is not physically stored, but <em>derived</em> from other information when needed; the namespace, tablename and column-family-name are always specified as part of a query, and the region-id is determined by a lookup of the rowkey in a dynamic cluster-wide table of region-ranges. This tuple is used by HBase to determine which <em>DFS filesystem directory</em> to look in. That directory will contain a “store-file” holding the data for a specific “column family”. Actually, when the table is being actively updated then the directory can contain a <em>set</em> of store-files, but that’s a minor point that will be discussed later. The “namespace” allows multiple independent “sets of tables” within an HBase cluster; the tablename is hopefully obvious. The region-id is discussed in the section on <em>sharding</em> and the column-family-name component is also discussed later.</p>
+
+<p>Within a single store-file, all entries are kept sorted by the second part - (rowkey, column-name, version). Thus:</p>
+
+<ul>
+  <li>it is reasonably easy for HBase to find the first entry for a specific rowkey (binary search at the worst, actually there is metadata included in the file to optimise that); and</li>
+  <li>it is easy to get all of the “columns” associated with a single rowkey - they are in sequential order in the file. Just keep gathering data until the next entry has a different rowkey and you’ve got all “columns” for that row.</li>
+</ul>
+
+<p>What is different from traditional relational databases is that the column-names really are there in the file. Relational databases tend to <em>deduce</em> them based upon some schema; it is <em>known</em> from a schema that a table has exactly N columns, with names C1, C2, C3, C4, C5 and therefore the column-names do not need to be stored within the file on disk - they are implicit. While HBase (and other BigTable-like systems) needs more disk-space to store data, due to actually storing the column-name as part of each individual cell, it gets a number of interesting features:</p>
+
+<ul>
+  <li>no schema is needed</li>
+  <li>columns can be dynamically added</li>
+  <li>different rows in a table can have different columns (thus “table” is perhaps not the right word)</li>
+  <li>null columns don’t take any space - they just aren’t there</li>
+</ul>
+
+<p>The rowkey is also stored as part of each <em>cell</em>. This takes even more disk-space (same rowkey value stored many times in the file), but means that the contents of a row can be scattered over a “base” file and zero or more “overlay” files; as long as each file has the same sort-order the content can be efficiently merged at runtime. See later for more information on this.</p>
+
+<p>Note that simply keeping entries sorted by (rowkey, column-name), and providing a way to iterate over adjacent entries in the file has turned a simple key-value store into something much more interesting - and much more like a relational database.</p>
+
+<p>HBase allows a “row” to have a very large number of “columns” - many millions if desired. They are simply adjacent entries in a file.</p>
+
+<p>Rather than looking at a table as a sequence of “rows”, it is sometimes more useful to look at it like a <code>java.util.Map</code> or Python <code>Dictionary</code> object holding a sorted set of entries where each entry has a rowkey as key and a map/dictionary as value. This inner map/dictionary contains whatever data the client applications have inserted - and entries can be added/removed at any time. This way of looking at HBase is covered well in the external resources linked to at the start of this section.</p>
+
+<p>See the official HBase book, section “Data Model”, for more information.</p>
+
+<h1 id="data-versioning">Data Versioning</h1>
+
+<p>HBase (like other BigTable-like datastores) has built-in support for storing different versions of data over time. When an update is made, a new (rowkey, column-name, version) entry is stored with an appropriate version value. The number of versions to keep is configurable, and periodically old data (versions older than the limit) is discarded. By default, number of versions to keep is set to 1, ie versioning is effectively disabled.</p>
+
+<p>Requests to HBase to fetch data may include information on which version(s) to retrieve. By default, only the latest version of each cell is returned but the client application can deliberately fetch earlier data if desired - or even multiple versions.</p>
+
+<p>An HBase server buffers data in memory before writing it to disk. I presume that when versioning is disabled (max versions=1) then old data is overwritten directly in memory without being flushed to disk, and therefore in practice values which change rapidly on a table with versioning disabled do <em>not</em> end up consuming vast amounts of disk-space until the next “cleanup”. See later for more information about in-memory buffering.</p>
+
+<p>It is usual for the version field to be a millisecond-resolution timestamp. It is possible for a client application to instead use an incrementing integer or similar approach, but a few features of HBase (eg the “time to live”) do assume the version field is a timestamp and therefore will not work as expected.</p>
+
+<p>Data versioning makes a few other things simpler, including replication and inserting data into tables from external applications. In both cases, it doesn’t matter if data is written into tables <em>out of order</em> because the versioning system (together with the fact that data is never <em>overwritten</em>) sort that out.</p>
+
+<h1 id="store-files-and-overlays">Store Files and Overlays</h1>
+
+<p>It was mentioned above that the directory for a specific (namespace, tablename, column-family-name) can sometimes hold more than one file.</p>
+
+<p>Within a single directory, multiple files act like “layers”, from oldest to newest, and when looking for data all files are consulted at the same time, effectively “merging” them. Or in other words, newer files are “overlays” on older files. Because all files are sorted identically, and each cell contains its complete (rowkey, column-name, version) identifier with it, the merge is efficient to implement.</p>
+
+<p>A ((rowkey, column-name, version) -&gt; value) cell in an overlay is simply an <em>addition</em> that is effectively “merged” with the data in other files. Inserting data into an existing row is therefore just a matter of creating a new entry with the original (rowkey, column-name) and a new version and value. Note that due to the version field, an <em>update</em> is effectively the same thing as an <em>insert</em> - a new cell with its own unique version-number. The data versioning process described earlier ensures that unwanted old data is purged at some time. Deletion of data is done by writing “tombstone” records into an overlay, effectively hiding all records with version-number less than the tombstone record.</p>
+
+<p>In addition to the store-files on disk, a similar structure is kept in memory; this is usually referred to as a “mem-store”. All inserts/updates/deletes are first written to disk as a write-ahead-log (WAL), and then the change is applied to the mem-store structure. When the mem-store structure grows too large, it is written to disk as a new store-file, the current write-ahead log is deleted, and a fresh mem-store is started. The existence of this large mem-store buffer means that one process must be responsible for all reads and writes for the data in those files. Scaling up to large amounts of data is therefore done via <em>sharding</em> - see later. If such a process crashes, the mem-store contents are of course lost, but it can be re-created by replaying all operations in the write-ahead-log.</p>
+
+<p>Store-files are immutable, unlike files in traditional relational systems. This means that index information can be added as a “footer” to each file, making it easy to find the first entry for any row. Because a file never changes, the index information for a file never needs updating. As noted earlier, mem-store structures are periodically flushed to disk as a new store-file. A background task merges sets of store-files in the same directory into a new store-file, then deletes the old files (note: still no modification of existing files!). This merge/cleanup (known as <em>compaction</em>) does not occur often - perhaps once per day or once per week.</p>
+
+<p>Because store-files are immutable, they can be effectively cached in memory, for an extra performance boost.</p>
+
+<p>All files (both store-files and the write-ahead-log), are stored in a distributed filesystem - usually <a href="/bigdata/hdfs/">HDFS</a>. This is useful:</p>
+
+<ul>
+  <li>for robustness against storage device failures;</li>
+  <li>for failover when an HBase instance crashes; and</li>
+  <li>for scalable analysis of stored data (via MapReduce, Spark, etc)</li>
+</ul>
+
+<p>See the official HBase book, section 70, for information about the HFile format.</p>
+
+<h1 id="column-families">Column Families</h1>
+
+<p>As described above, a column-family indicates a directory with its own set of store-files (including the current in-memory one). A “table” with multiple column-families therefore acts in many ways like multiple separate tables that happen to share the same key.</p>
+
+<p>The primary benefit of column-families is that they minimise disk IO; queries that do not reference any column in a column-family do not need to read the store-files for that column-family at all. Similarly, an insert or update which does not touch any column in a specific column-family do not need to look at the store-files for that other column-family, saving IO.</p>
+
+<p>However unlike separate tables:</p>
+
+<ul>
+  <li>operations on multiple columns of the same row are atomic, even when they affect different column-families</li>
+  <li>when sharding a table, a single row is always kept on the same server even for data in different column-families</li>
+</ul>
+
+<p>In general, data that needs to be fetched together, updated together, or queried at the same time during “selects” should be in the same column-family.</p>
+
+<p>While the set of columns within an HBase column-family is dynamic, the set of column-families for a table is defined at the time the table is declared. Adding or removing a column-family can be done by an administrator (similar to an “alter table” command for a relational database).</p>
+
+<p>The existence of both columns and column-families means that HBase is a kind of hybrid row-store and <a href="/bigdata/columndbs">column-store</a> database, with the benefits of both - as long as you allocate columns to column-families appropriately. A table with all columns in a single column-family is using pure “row-store” format like a traditional relational database, while a table with each column in a separate column-family is using pure “column store” format. Each approach has its advantages and disadvantages, depending on usage patterns. Having both options available makes it possible to tune HBase (and other BigTable-like datastores) on a per-table basis.</p>
+
+<h1 id="rowkeys">Rowkeys</h1>
+
+<p>A “rowkey” is simply a sequence of bytes. It can be whatever you want.</p>
+
+<p>In HBase (as with other BigTable-like datastores) you don’t nominate one (or more) of the columns as key-fields; the key is separate from the columns. It is a single array of bytes - if you want a “compound key” then you need to build it yourself by combining (eg concatenating) other values.</p>
+
+<p>Choosing a good rowkey is very important for query performance. Rows of data which you are likely to later query together should have rowkeys that share a common prefix; this will place them near each other in a store-file, and usually keep them within the same table <em>shard</em> (region). See later for information on sharding.</p>
+
+<p>Choosing a good rowkey is also very important for proper distribution of data across the cluster. As just mentioned above, rowkeys with common prefixes are kept together which is good for “table scans” involving dozens of rows. However for very large queries it is better to use rowkeys that scatter data across the cluster so that each member of the cluster can be searching in parallel. And when performing many <em>inserts</em>, rowkeys with common prefixes are bad as all insert operations are handled by a single cluster node rather than having the work distributed. See later for some brief information on sharding. For advice on designing good keys, see some of the fine articles available on the internet or in books - it is a non-trivial topic.</p>
+
+<p>Because the rowkey value is repeated for each “cell”, it should not be too large. When a table needs a rowkey which is a large string, or concatenation of large strings, then one option is to use the <em>hash</em> of the string field(s) in the rowkey, and then store the original full value as a column in the same row. If hash-collisions are a concern, then filters or application logic can be used to verify that the returned row (selected by hash) really is the desired one by verifying the full string value on server side (via a filter) or client side.</p>
+
+<h1 id="columns">Columns</h1>
+
+<p>Column names are repeated frequently in the files on disk, and in memory. It therefore really makes a measurable difference when column names are kept short.</p>
+
+<p>Column names are actually byte-arrays, and are sometimes used to hold data.</p>
+
+<p>HBase does not track the type of columns; they are all simply byte-arrays. As described later under “Querying HBase”, HBase natively supports filtering columns only by equal/not-equal/starts-with, where the value being compared against is also a byte-array.</p>
+
+<p>Applications often store lists of items as multiple columns whose names include an index-number. Nested structures can be represented as columns with names of form “outer.nested”. Because a cell can hold binary data, it is also possible to store complex objects in a form such as JSON or AVRO within a single cell - but then (unlike the two previous options) the entire structure must be read or written as a single block of data.</p>
+
+<h1 id="clustering-and-sharding">Clustering and Sharding</h1>
+
+<h2 id="overview">Overview</h2>
+
+<p>An HBase cluster consists of a single HMaster process which supervises the cluster, and one or more HRegionServer instances which handle read/write requests. There must also be a distributed filesystem available (eg HDFS), and a ZooKeeper cluster for communication between the various nodes.</p>
+
+<p>To allow HBase to store and process large amounts of data, tables can be split by rowkey ranges into separate <em>regions</em>, with different HBase processes handling different ranges (regions) of the same table. This approach is used by many datastores (including relational databases) and is called <em>sharding</em>.</p>
+
+<p>For each single table, HBase tracks (in a table named “hbase:meta”) the <em>regions</em> into which the table has been split. Each HRegionServer instance handles read/write requests for a set of <em>regions</em>. A client application wishing to perform a read or update on a table determines the relevant HRegionServer instance(s) first, and then send requests directly to the relevant HRegionServer instance.</p>
+
+<p>It is possible to set up a cluster with just one HRegionServer (not very scalable, but possible), in which case this single instance handles all regions of all tables. When more HRegionServer instances are available, the HMaster ensures that each instance handles “a fair share” of the regions.</p>
+
+<p>In the distributed filesystem, there is a separate directory for each region, ie a table’s data is distributed over a set of directories with names of form “namespace/table/region/column-family”. There is never more than one HRegionServer currently responsible for each unique “namespace/table/region”. That HRegionServer instance handles all read and write requests for that region (necessary, as it has a mem-store structure that holds the latest data for that region in memory). As “column-family” is a subdirectory, all column-families for rowkeys within the region are managed together - thus keeping data for a single row together and allowing “atomic” updates for the columns of a row even across column-families.</p>
+
+<p>If an HRegionServer instance should become unavailable (eg network failure, or crash) then the HMaster instance will detect the situation and command another existing HRegionServer instance to “take over” that region. All necessary data (the store-files and the write-ahead-log) are available via the distributed filesystem - although performance may be slower until the region-server builds up relevant data in memory. This approach is different to many other systems in which a standby server for each shard is kept “warm” and ready at all times via direct replication between nodes. The HBase approach of relying upon the distributed filesystem is very simple and reliable, but not particularly fast - failover can take tens of seconds (and potentially minutes).</p>
+
+<p>The HMaster instance is also responsible for keeping the cluster workload <em>balanced</em>, migrating responsibility for regions from overworked nodes to underused nodes when necessary.</p>
+
+<p>To handle failure of the HMaster instance itself, standby HMaster instances may be configured, waiting to take over supervision of the HRegionServer nodes if the primary master fails.</p>
+
+<h2 id="defining-regions">Defining Regions</h2>
+
+<p>The performance of this <em>sharding</em> approach depends upon choosing appropriate <em>ranges of rowkeys</em> for each region. There are two basic approaches:</p>
+
+<ul>
+  <li>automatic, based upon splitting existing regions which reach a specific size, and</li>
+  <li>manual</li>
+</ul>
+
+<p>The automatic approach is certainly convenient, and simply requires specifying a “threshold region size” for a table. An empty table starts with a single region which is handled by a single HRegionServer; every insert is sent to that region-server instance, as is every read-request. When enough inserts have been performed to cause that initial region of the table to grow beyond its threshold size, then the region-server determines the “median rowkey” for the data in the region, and splits the region into two - one with range up to that middle value, and another with range from that middle value upwards. Initially, the region-server still handles requests for both of the new regions but the HMaster instance will usually arrange for responsibility for one of the new regions to be migrated to a less-busy node in the cluster in the near future.</p>
+
+<p>In the manual approach, the HBase administrator defines a set of regions (ie ranges of rowkeys) directly. The HMaster instance is still responsible for allocating these regions to HRegionServer instances for best load-balancing.</p>
+
+<p>The automatic approach has some disadvantages. In particular, initial inserts into an empty table all go to a single HRegionServer instance which may cause significant load until the first “split” occurs. Similarly, all reads of the table before it reaches the “threshold” size will go to a single HRegionServer instance.</p>
+
+<p>The manual approach requires careful analysis to determine typical values for <em>rowkeys</em> in order to correctly distribute load across multiple regions. Often the structure of the <em>rowkey</em> itself must be correctly chosen for proper load distribution (eg using <em>salting</em> to ensure that sequential inserts are distributed across regions rather than all falling into the same range and thus the same region).</p>
+
+<p>Manually-defined regions can be explicitly split or merged by the HBase administrator if necessary.</p>
+
+<p>Correctly choosing a rowkey, and defining regions correctly, is a complex process. See the available documentation (online or books) for more information on this topic.</p>
+
+<h1 id="indexes-views-and-joins">Indexes, Views, and Joins</h1>
+
+<p>HBase does not support anything like relational indexes. Obviously, lookup of one or more column values for a specific record is efficient given the exact rowkey. Other lookups involve a <em>scan</em> over the range of all possible rowkeys, whose efficiency depends upon how much the lookup can restrict the range of rowkeys. When the rowkey is a <em>compound key</em> formed by concatenating multiple columns, then knowing the first components of the compound key is important. As an example, given a rowkey built by concatenating colX, colY and colZ (in that order), a lookup with known values for colX and colY will have a reasonably restricted range to scan over; knowing colY and colZ but not colX is much worse and results in effectively a complete scan over every record in the table.</p>
+
+<p>HBase does support basic <em>filtering</em> of scanned rows based on values other than the rowkey, but this only reduces the amount of data returned by the query, not the amount of work done to find those records - the set of scanned records can only be limited by knowing a prefix for the rowkey.</p>
+
+<p>If it is really necessary to look up records by columns which are not prefixes of the rowkey, then a second table must be built with the desired columns as part of the rowkey, and the two tables must be kept in sync (ie inserts/updates/deletes must be applied to both). This is effectively what a relational databsase does automatically when an index has been declared for a table. If such a table really is necessary, then it may be advisable to make this a <em>covering index</em>, ie include in the “index table” the columns whose values are actually desired rather than just the corresponding rowkey. This is denormalization, but a controlled form.</p>
+
+<p>There are a few add-ons for HBase which can automatically maintain indexes for HBase tables (eg Phoenix). These should be used only with caution - maintaining such an index has obvious performance issues, and making these performance issues hard to see is not necessarily beneficial for your project.</p>
+
+<p>HBase does not itself offer anything equivalent to SQL “views” either. There are some projects (eg Phoenix) which do offer this.</p>
+
+<p>HBase does not support joins natively. Hive, Phoenix, SparkQL, etc. do allow users to write SQL-like statements including joins, but these are seldom efficient. Joins are simply an inefficient operation; relational systems work around this by using extensive in-memory caching of data but that solution does not scale to large tables, and works very poorly for distributed systems where no single node <em>has</em> all the data. As described in more detail in <a href="/bigdata/nosql">my overview of NoSQL</a>, there are two kinds of relations between objects where joins are commonly used:</p>
+
+<ul>
+  <li>aggregated data which <em>belongs</em> to a parent item of data, and has no independent lifecycle</li>
+  <li>referenced data which is <em>associated</em> with other data but can also exist independently</li>
+</ul>
+
+<p>The first case should be handled by storing the aggregate data as columns on the parent record - ie remove the need for a join. In OLTP-style systems, the second case should often be handled by having the “referencing” record contain the <em>key(s)</em> of the “referenced” records, and have the client application simply make two requests to the database. These approaches are exactly the natural implementation used for <em>in memory</em> datastructures. For reporting/OLAP usecases, joins may still be the best solution for dealing with the second case.</p>
+
+<h1 id="storing-metadata">Storing MetaData</h1>
+
+<p>HBase stores metadata about tables and namespaces, and (elegantly) does so in an HBase table with name ‘hbase:meta’. The table has a row per region, with column “regioninfo” holding information about the region (startkey, endkey) and column “server” specifying the host/port on which the corresponding HRegionServer is located. As usual, an HRegionServer instance is responsible for serving data from this table, and the data can be queried in the normal manner. This table was referred to as “ROOT” in early versions of HBase.</p>
+
+<p>The HBase client library caches this metadata for efficiency. If a request is sent to the wrong HRegionServer due to having stale metadata, then a “region-moved” error code will be returned and the client library then refreshes its metadata.</p>
+
+<p>The following example hbase-shell command shows the first few rows of this table:</p>
+
+<pre><code>scan 'hbase:meta', {'LIMIT' =&gt; 5}
+</code></pre>
+
+<h1 id="querying-hbase">Querying HBase</h1>
+
+<h2 id="via-the-hbase-native-api">Via the HBase Native API</h2>
+
+<p>Client applications interact with HBase to save and retrieve data using the HBase API. This is nothing like JDBC (which is mostly a transport and wrapper for SQL). The HBase API provides basically:</p>
+
+<ul>
+  <li>PUT - takes a single (namespace, table, rowkey) and a list of zero or more (column-family, column, version, value) and sends them off to the relevant region-server instance, which adds them to the write-ahead-log and updates its memstore structure.</li>
+  <li>DELETE - takes a (namespace, table, rowkey) and a list of (column-family, column, version) and sends this off to the relevant region-server which then writes “tombstone” entries. These tombstone entries block queries from seeing data older than the specified version (unless it is explicitly requested).</li>
+  <li>SCAN - takes (namespace, table), a start-rowkey and end-rowkey, and various filter-criteria, and sends them off to the relevant region-servers (plural) which return all data matching the filter-criteria.</li>
+  <li>GET - takes a single (namespace, table, rowkey) and a list of zero or more (column-family, column, version-range) and sends them off to the relevant region-server which returns the specified columns. The GET operation is simply a wrapper around SCAN, using appropriate filter-criteria.</li>
+</ul>
+
+<p>Note that a PUT can set values for multiple columns (across multiple column-families) for a single row, and do it atomically.</p>
+
+<p>SCAN supports a moderate set of possible filter-criteria, including whether a column exists, whether it is equal/greater/less/starts-with a constant, etc. The filter-criteria also control which columns are returned. That’s it - no substrings, date-comparisons, joins - at least not with plain HBase itself.</p>
+
+<p>AFAIK, the HBase client library does not parallelise SCAN calls; the request is first applied to the “lowest” region whose rowkey-range overlaps the SCAN request’s start-key. After all matches have been returned for that region, the SCAN request is applied to the next higher region, and so on. It is reasonably easy for an application to “parallelise” a scan if it wishes; the HBase native API provides easy access to the current list of regions so the client can spawn a set of threads and make a separate request for the rowkey range associated with each region.</p>
+
+<p>SCAN operations have an associated “batch size”; when an HRegionServer has found that amount of matching data, the scan operation is suspended and the current results returned to the client. When the client has consumed all data from the batch, then scanning is resumed by the HRegionServer. This effectively implements “streaming” of very large sets of matching data from server to client. If the client decides not to consume all available data, then it is important that it explicitly terminate the scan operation on the client side so the server can release associated resources.</p>
+
+<p>As noted earlier, the filter-criteria in a SCAN operation do not reduce the number of records which are read/evaluated by HBase; they only reduce the amount of data which gets returned to the caller. The only way to reduce the number of records scanned during the operation is to provide good start-rowkey and end-rowkey values, ie provide a good rowkey-prefix.</p>
+
+<p>Those readers with a relational background might find this emphasis on table-scans ugly. However due to the linear and sorted layout of records within HBase store-files, such scanning is very efficient. It is disk <em>seeks</em> which have the worst impact on throughput - and this is true even when using SSDs, due to not allowing the operating-system to perform read-ahead and os-level caching. The most important factor in HBase performance is good design of the rowkey (matching its contents to the expected queries) so queries correspond to scans over bounded key-ranges.</p>
+
+<p>For further information on querying HBase via its native API, see the official HBase book, sections 66 (“Client”), 67 (“Client Request Filters”), and 75 (“Apache HBase APIs”).</p>
+
+<h2 id="via-phoenix">Via Phoenix</h2>
+
+<p>The <a href="http://phoenix.apache.org/">Apache Phoenix</a> project allows HBase tables to be read and updated using almost standard SQL. Given that HBase is decidedly non-relational, Phoenix works surprisingly well.</p>
+
+<p>Phoenix consists of:</p>
+
+<ul>
+  <li>a server-side plugin (coprocessor) which must be loaded by each HBase HRegionServer instance</li>
+  <li>a custom (and complex) JDBC driver</li>
+</ul>
+
+<p>The server-side plugin hooks into the HBase code which receives PUT/DELETE/GET/SCAN requests from clients, to:</p>
+
+<ul>
+  <li>extend the set of filter-criteria that a scan request may include to allow things like substring-comparisons, date-range comparisons, and all the usual SQL operations used in select-statements;</li>
+  <li>dynamically insert additional filter-criteria into GET and SCAN requests to implement view-like functionality;</li>
+  <li>automatically update associated “index tables” when data in an “indexed” table is modified.</li>
+</ul>
+
+<p>The client-side JDBC driver accepts SQL-like select statements (and parameters) from client code, and “compiles” these expressions into HBase GET/SCAN operations that include filter-criteria which the server-side component of Phoenix knows how to interpret.</p>
+
+<p>Note that no separate processes/servers are needed by Phoenix; all the work is done either in the client JDBC driver, or in the “CoProcessor” module running within each HRegionServer instance.</p>
+
+<p>In order to properly “compile” SQL statements, Phoenix needs a traditional SQL-style schema for the HBase tables being queried. Phoenix is unable to take advantage of the “dynamic columns” capabilities of HBase, and thus is unable to support storing “list” and “structured” data in columns. Phoenix also expects that a specific column has the same <em>type</em> over all rows - as relational systems do.  Phoenix does handle “null” columns in the HBase way (by just not inserting them), correctly handles sharded tables, and has basic support for versioned data. Phoenix queries <em>do</em> have some limited ability to query columns that have not been explicitly declared in the schema, via a <a href="https://github.com/forcedotcom/phoenix/wiki/Dynamic-Columns">non-standard SQL extension</a>.</p>
+
+<p>Phoenix supports using DDL statements to define new tables - these create an underlying HBase table and define the Phoenix meta-data for the table at the same time. Non-standard SQL extensions are supported to set specific hbase features. Alternatively, a create-table statement can associated Phoenix metadata with an existing HBase table. Interestingly, this meta-data is itself stored in an HBase table (named SYSTEM.CATALOG) - and it takes advantage of HBase’s “data versioning” ability to keep previous versions of the schema definitions. Table SYSTEM.STATS is used to hold table-statistics used to guide SQL query optimisation.</p>
+
+<p>Updating a table through Phoenix and reading it directly with HBase is possible. In general, it is also possible to insert data directly with HBase, and read via Phoenix - as long as the Phoenix invariants for the table are obeyed. In particular, the server-side part of Phoenix will correctly update indexes.</p>
+
+<p>Maintaining an index on a table is equivalent to maintaining a second table with a different sort-order; each insert/update/delete must be performed not only on the primary table but also on each index-table. Read-mostly systems will therefore benefit more from indexes than write-mostly systems.</p>
+
+<p>The Phoenix SQL and JDBC-driver support is good enough to allow many applications that expect to be used with a true relational database to work correctly. Tools such as <a href="http://www.dbvis.com/">DbVisualizer</a> or <a href="http://www.squirrelsql.org/">Squirrel</a> have no problems connecting to and accessing data in HBase via Phoenix.</p>
+
+<p>Phoenix has one minor quirk that is visible when viewing a table directly in HBase. An HBase table can have multiple column-families, and a row (ie a rowkey) can potentially have multiple columns defined for some column-families, and no columns defined in other column-families. Normally, HBase would represent this by simply having no entry for that row in the column-family’s store-file. Phoenix doesn’t like this - for each row, it requires the <em>first column family</em> of a table to have at least one column populated, and so will set the first column of the first column-family to a “null value” (presumably meaning a zero-length bytearray) if the row exists for any other column-family.</p>
+
+<p>I personally am reluctant to recommend Phoenix, despite its feature-set. HBase requires careful matching of rowkey structure and region-splitting to expected access patterns in order to give good performance. In addition, as noted above joins should be avoided by <em>nesting</em> dependent data in the parent record where possible. And there are high costs to maintaining indexes on data (sometimes worth paying, but only after careful consideration). Accessing HBase via Phoenix tends to hide these issues, and makes it very easy to create performance problems which would be far more obvious when using HBase via its native API.</p>
+
+<h2 id="via-hive">Via Hive</h2>
+
+<p>The <a href="http://hive.apache.org/">Apache Hive</a> project is an “SQL compilation engine” which accepts queries in an SQL-like language, and generates code “on the fly” that runs against various data-sources to return the appropriate results. Hive provides a JDBC driver which submits SQL queries to a <em>hive server</em> which compiles the request then executes the compilation output (eg by starting a Spark or MapReduce job). Unlike Phoenix, hive-via-jdbc therefore requires an additional server process.</p>
+
+<p>HiveQL is fairly similar to standard SQL, supporting select/where/order-by/join and other traditional relational operations.</p>
+
+<p>Hive is mostly known for running SQL-like queries on data in static files, whether in plain comma-separated-values format or more complex formats such as ORCFile. However it has a generic “Storage Handler” plugin API which allows it to use other data-sources, and an implementation exists for HBase. Some more information on Hive itself is available <a href="/bigdata/dataprocessing/">here</a>.</p>
+
+<p>When <a href="http://de.hortonworks.com/blog/hbase-via-hive-part-1/">querying data in HBase via Hive</a>, Hive compiles the query into a suitable Spark/Tez/MapReduce job which is then executed on a local cluster.  These jobs then connect back to HBase over the network, performing GET/SCAN requests as usual.  As SQL-like langages require information about the type of data in each column, the “schema” of each HBase table must be declared in Hive. See the <a href="https://cwiki.apache.org/confluence/display/Hive/HBaseIntegration">official docs</a> for more information on using hive-over-hbase.</p>
+
+<p>The documentation for the Hive/HBase integration feature is currently poor, and it is not clear exactly what is going on. The documentation mentions the following classes; as far as I can tell, their roles are:</p>
+
+<ul>
+  <li>class <code>org.apache.hadoop.hbase.mapreduce.TableInputFormatBase</code> maps API calls to network-based GET/SCAN operations</li>
+  <li>class <code>org.apache.hadoop.hbase.mapreduce.TableOutputFormat</code> maps API calls to network-based PUT/DELETE operations</li>
+  <li>classes <code>HiveBHaseTableInputFormat</code> and <code>HiveHBaseTableOutputFormat</code> wrap the two classes above for use in Hive</li>
+  <li>and class <code>HBaseStorageHandler</code> wraps the above two classes.</li>
+</ul>
+
+<p>The Hive/HBase integration classes use region-server information to determine where the data to process is, and then try to locate the processing logic near to the relevant HRegionServer instances (ie are “location aware”). This can make a significant difference for queries that perform significant logic on the data, eg aggregation or sorting operations.</p>
+
+<p>In general, Apache Drill (see below) seems to provide both better support and documentation for SQL-over-HBase than Hive, with the primary advantage of Hive being that it executes over a standard YARN cluster (which may already exist) rather than requiring a separate cluster of dedicated servers as for Drill. Note that early (and current) versions of Hive have a reputation for high “start up” overheads, ie high latency for short queries, leading to projects such as Impala which aim to fix this via long-lived processes. The Hive project is actively working on this latency issue and making good progress (see Hive LLAP) so this may not be a relevant issue for long.</p>
+
+<h2 id="via-sparkql">Via SparkQL</h2>
+
+<p>The Spark project provides their own version of SQL which is “compiled” to Spark applications that execute that query - similar in architecture to Hive. And as with Hive, there is an adapter for Spark which maps the “read-data/write-data” operations needed by Spark to GET/SCAN/PUT/DELETE network requests to the relevant HRegionServer instances. Spark thus does the work of interpreting the SQL while HBase still does the work of accessing the actual records.</p>
+
+<p>As with Hive, Spark uses a YARN (or Mesos) cluster to execute the code generated to implement the query. Spark has, however, traditionally been better at caching and reusing cluster resources than Hive and thus had better latency for short queries.</p>
+
+<p>Spark can also access HBase <a href="https://blogs.apache.org/phoenix/entry/spark_integration_in_apache_phoenix">via Phoenix</a>.</p>
+
+<h2 id="via-drill">Via Drill</h2>
+
+<p><a href="http://drill.apache.org/">Apache Drill</a> provides a server process which accepts a superset of traditional SQL and compiles it for execution against various supported “back ends”, including HBase, MongoDB, plain JSON data, and any file-format supported by Hive. Drill even supports traditional relational databases as back-ends. Drill therefore has some similarity and functional overlap with Hive.</p>
+
+<p>For performance, a cluster of Drill instances must be installed and managed, and queries are distributed/executed over this cluster. Drill does not use YARN, MapReduce, Spark, or similar technologies - all work is done by the cluster of Drill servers. As with Hive or SparkQL, Drill eventually use network GET/SCAN/PUT operations against HRegionServer instances - and like Hive or Spark, it is “location aware” so it can minimise network traffic by executing logic “near to” the region-server instances with the relevant data.</p>
+
+<p>Drill provides a standards-compliant JDBC driver which can be used by client applications to access any of the supported datastores. For Drill-aware clients, additional SQL operations are available to access non-sql features such as lists and complex (structured) column types.</p>
+
+<p>Unlike Phoenix and some other technologies, drill supports only read-only operations (ie no inserts, updates or deletes) and is primarily intended for providing access to NoSQL datastores for reporting and business analysis. SQL joins, aggregate operations, subselects, group-by and order-by, and other standard SQL features are all supported. Drill can join data from tables from multiple back-ends; including joins between multiple relational databases if desired (eg a table from oracle and one from postgresql)!</p>
+
+<p>Unlike Phoenix and Hive, Drill does not require a relational-style schema to be “declared” for the target tables before queries can be executed; Drill will use whatever metadata can be obtained from the chosen datasource (eg AVRO or Parquet files). Where no schema info is available (eg with HBase), the executed SQL needs to include appropriate “cast” operators to tell drill how to interpret the data.</p>
+
+<p>Drill’s online documentation is excellent; see the Drill site for more information.</p>
+
+<h2 id="via-mapreduce">Via MapReduce</h2>
+
+<p>The HBase project provides class <code>org.apache.hadoop.hbase.mapreduce.TableInputFormatBase</code> which provides a MapReduce master application with the APIs it needs to configure its child tasks (mostly, region information), and provide those child tasks with the APIs they need to read HBase data. These APIs simply map to network operations against HRegionServer instances. The efficiency of a MapReduce job running against HBase is therefore not as good as a MapReduce job running against HDFS files directly; the “locality benefit” is significantly reduced. Nevertheless, MapReduce receives sufficient information to run processing logic <em>near</em> the relevant HRegionServer instances to at least limit network traffic to the local host or the local rack in many cases.</p>
+
+<h2 id="direct-file-access">Direct File Access</h2>
+
+<p>The HBase project is open-source, and therefore the Java classes that implement reading and writing of the raw “store-file” format are also available; these can be found in Java package <code>org.apache.hadoop.hbase.io.hfile</code>. And as HBase stores its files in a distributed filesystem (such as HDFS), it is possible to access them directly.</p>
+
+<p>However direct reads and writes should not be performed while HBase is actively using the file, as (a) there would be race-conditions with region splitting, mem-store flushes, etc, and (b) the latest table data will be in-memory in the HRegionServer’s mem-store structure (and of course in the write-ahead-log, but that isn’t expected to be read by anything other than HBase). Direct access to the HBase files is tricky even when HBase is not running or using the files, as a table can have multiple regions, and a single region can potentially have multiple “store-files” (waiting for compaction). There can also potentially be data sitting in WAL-files waiting for insertion into the table.</p>
+
+<p>There are classes which provide access from MapReduce/etc to HBase: TableInputFormat/TableOutputFormat/etc. However these do <em>not</em> perform direct file access; they instead open a network connection to HBase and perform regular network operations. See the section on Hive for a little more information.</p>
+
+<p>One case where direct file access is important is for “bulk import”. Actually writing files directly in HBase native format isn’t easy - HBase itself builds large mem-store structures in memory, then creates new HFile-format files with many records at once. The <a href="https://cwiki.apache.org/confluence/display/Hive/HBaseBulkLoad">recommended procedure for bulk loading</a> data from tools like MapReduce is therefore to write to an intermediate format that uses the (key,value) cell-based structure of HBase but doesn’t have the other complexities like headers with meta-data and bloom-filters. A tool is then used to convert the contents of such a file into a “real” HFile. This intermediate format can be appended to record-by-record, something that HFile format cannot do. The intermediate format is implemented by class <code>org.apache.hadoop.hive.hbase.HiveHFileOutputFormat</code>.</p>
+
+<h1 id="failover-and-replication">Failover and Replication</h1>
+
+<p>Some datastores/databases support high-availability by replicating data within a cluster so that on failure of a node, some other node is ready to take over. HBase does not support this; instead it relies on region-servers writing store-files and write-ahead-logs to a distributed filesystem (eg HDFS), which allows other existing region-servers to “take over” handling of the regions previously managed by a failed region-server instance. This works without any explicit replication (other than that happening at the distributed-filesystem level), but is not particularly fast.</p>
+
+<p>It is the HMaster process which is responsible for monitoring all nodes and, on failure of a node, distributing responsibility for all regions managed by the failed node across the other nodes in the cluster. The HMaster does not participate in normal queries, and in fact an HBase cluster can run for a while without any HMaster instance at all - though “compaction” will not take place, region-splits cannot be completed, and handling of failed region-servers will not be performed. It is therefore normal to have one or more “standby” HMaster instances in systems that require high-availability.</p>
+
+<p>There are two other primary reasons for replicating data from a datastore:</p>
+
+<ul>
+  <li>Creating read-only copies of a database to handle read-only queries, ie scale to many read-only queries per second.</li>
+  <li>Copy data to a distant location from which operations can continue if a disaster hits the primary data-center.</li>
+</ul>
+
+<p>Read-only copies aren’t particularly needed for HBase, as it scales pretty well all by itself - just keep the regions small and scale the main cluster. However it’s possible if really wanted. The disaster-recovery scenario is definitely important.</p>
+
+<p>The facts that HBase never modifies existing files, and that every cell has its own (rowkey, column-name, timestamp) identifier makes replication actually quite simple to implement and configure. In fact, immutability plus timestamps mean that replication can be set up <em>first</em>, and then old content copied over later if desired! As entire store-files are synced over, they simply become part of the set of files that are considered by each query. There is no danger of old data “overwriting” new data, because overwrites are never done by HBase - only “overlays” - and version info (usually a timestamp) always accompany each item of data.</p>
+
+<p>Versioned data also makes bidirectional replication (or even more complicated setups) easy; master-to-master replication is very tricky in relational systems (and even in some NoSQL systems), to handle cases where the same data is created/updated on two different nodes. With HBase (and other BigTable systems), the “same data” is never created on multiple nodes - the timestamps will always be different. The data can therefore always be copied to other members of the cluster, and the usual rules for returning data with the appropriate timestamp then apply.</p>
+
+<p>HBase documentation on replication states that each HRegionServer replicates the changes in its WAL file to “a random member of the target cluster”. This is done because an HRegionServer handles multiple regions, but has (by default in the current HBase version) only one WAL file holding changes for all the regions it manages. As the target cluster may potentially have partitioned each table into different regions (ie have different split-points for the table), and the regions will usually be distributed differently across its HRegionServer instances, there is no way to efficiently send changes from the WAL file <em>directly</em> to the relevant HRegionServer. Instead, servers designated as “sinks” (recipients for replication information) accept data for all tables/regions and forward this within the target cluster appropriately. There is currently work in progress on implementing separate WAL files per region, but as region splits may be different, the “forwarding” of replicated data may still be necessary.</p>
+
+<p>More information on setting up replication can be found <a href="https://hbase.apache.org/0.94/replication.html">here</a>.</p>
+
+<h1 id="interactions-with-hdfs">Interactions with HDFS</h1>
+
+<p>HBase stores its data in a distributed filesystem, as described in section “Store Files and Overlays”. The filesystem usually used with HBase is HDFS.</p>
+
+<p>HDFS has the useful behaviour that writes are usually stored first on a storage devices directly attached to the server where the write occurs, with a second copy then stored <em>on a server in the same rack</em>, and further copies (however many are configured) elsewhere in the datacenter. Reads are served from the “nearest source”, so when an HRegionServer reads data it has previously written, this normally comes from a directly-attached (local) storage device for maximum performance.</p>
+
+<p>If the local storage devices become full, then HDFS data will be stored on some device in the local rack, thus minimising network traffic.</p>
+
+<p>On failover, the new HRegionServer will read from the distributed filesystem; HDFS will automatically source its data from the nearest node which has that data. As the new owner of the region performs writes (dumps mem-stores to disk), these will be stored on local storage devices. When a “compaction” pass eventually merges multiple store-files for a region into a single new file, that file will be completely on storage local to the HRegionServer (assuming the table does receive inserts/updates, ie is not read-only).</p>
+
+<h1 id="snapshots">Snapshots</h1>
+
+<p>HBase supports making <em>snapshots</em> of tables. This is a low-overhead operation, which not only allows restoring a table in the case of problems but also supports online-backups and various other interesting operations. See the HBase documentation for more details.</p>
+
+<h1 id="transactions">Transactions</h1>
+
+<p>HBase does not support cross-record or cross-table transactions. Updating the columns on a single row is atomic (ie no other process will ever see some columns updated but not others),
+but no other guarantees are available.</p>
+
+<p>Given that a region is only ever managed by a single HRegionServer instance at a time, the issues of “eventual consistency” are not relevant - either the process managing that region
+is running correctly, or the region is not available (until the HMaster instance appoints a new manager for that region). HBase is therefore not entirely “highly available”, but is
+simple to manage and reason about.</p>
+
+<h1 id="co-processors">Co-processors</h1>
+
+<p>Relational databases usually support “triggers” and “stored procedures” for performing database-side processing. The closest equivalent in HBase are “CoProcessors”, in which custom Java code can be loaded into HRegionServer instances to perform similar tasks:</p>
+
+<ul>
+  <li>
+    <p>“Observer” coprocessors are roughly equivalent to “triggers”, ie they are executed on any change to data (inserts/updates/deletes, region-changes, and other events) and can take just about any action including rejecting the operation, or updating other tables.</p>
+  </li>
+  <li>
+    <p>“Endpoint” coprocessors are roughly eqivalent to “stored procedures”, and are explicitly invoked by clients via a filter attached to a SCAN operation. The coprocessor code can then include its output as part of the response to the client. Among other things, this can implement aggregation operations such as “sum” efficiently on the server side.</p>
+  </li>
+</ul>
+
+<p>Coprocessors may be defined in the HRegionServer configuration file, in which case they will be loaded during HRegionServer startup and can apply themselves to any table in the system. They may also be defined as meta-data on a specific table in which case the specified jarfile will be dynamically loaded (usually from the distributed filesystem) when the metadata is first defined - ie this can be performed while the system is running. Dynamically-loaded coprocessors only apply to the specific table where the metadata is defined.</p>
+
+<h1 id="installing-and-running-hbase">Installing and Running HBase</h1>
+
+<p>Because HBase depends on Hadoop, it bundles an instance of the Hadoop jar under its lib directory. The bundled jar is ONLY for use in standalone mode. In distributed mode, it is critical that the version of Hadoop that is out on your cluster match what is under HBase. Replace the hadoop jar found in the HBase lib directory with the hadoop jar you are running on your cluster to avoid version mismatch issues. Make sure you replace the jar in HBase everywhere on your cluster. Hadoop version mismatch issues have various manifestations but often all looks like its hung up.</p>
+
+<h1 id="a-quick-comparison-with-hive">A Quick Comparison with Hive</h1>
+
+<p>Another well-known “big data NoSQL” approach to storing and processing data is Hive. As noted above, Hive is an “SQL compilation engine” which can itself use HBase as its “back end”, but this is not the use-case being addressed here. Hive can be used to apply SQL directly to <em>files</em> stored in a distributed filesystem such as HDFS, as long as there is a suitable “adapter” for that file-format. For some formats, it is only possible to create a “read-only” adapter (eg csv-format files), which allow Hive to perform “selects” but not updates. Other file formats have adapters that support both read and write, allowing Hive to also map SQL insert/update/delete operations to operations against target files. The most commonly used “read/write” format is ORCFile, which allows Hive to act somewhat like a real database.</p>
+
+<p>HBase has the following disadvantages compared to Hive:</p>
+
+<ul>
+  <li>HBase cannot use pre-existing datafiles; data must be “loaded” into HBase similar to importing data into a relational database.</li>
+  <li>HBase storage format is less space-efficient than many formats supported by Hive (including ORCFile). In particular, storing large amounts of append-only data is more efficient in Hive.</li>
+  <li>HBase is less efficient at performing large “batch scans” than Hive, ie running analyses which read most/all the rows of a database. Batch access to HBase data is always done via network GET/SCAN requests, while Hive with other adapters (eg using ORCFile or CSV format) can read directly from the underlying files. Hive also scales out over a YARN cluster while an HBase cluster has a fixed set of server nodes.</li>
+</ul>
+
+<p>And it has the following advantages:</p>
+
+<ul>
+  <li>HBase is much better at insert/update/delete operations (ie OLTP-style workloads)</li>
+  <li>HBase has lower latency for queries due to clients being able to quickly determine the relevant region(s) for a specific key.</li>
+  <li>HBase has lower latency for queries due to being “always running” rather than relying on YARN (though Hive is working on this via its LLAP project, and Hive-on-Spark also addresses this issue)</li>
+</ul>
+
+<h1 id="hbase-vs-oracle">HBase vs Oracle</h1>
+
+<p>In general, relational databases store records in whatever order they find most convenient - eg possibly in order of insertion, although later deletions and “garbage collection” may lead to reordering. There is a separate index-structure for the primary key, containing (key, address) pairs; entries are ordered by key (eg using a btree) and hold the address of the corresponding record.</p>
+
+<p>Bigtable-like systems such as HBase, however, really do store whole records on disk ordered by the primary key, and have no separate index-structure for the key. This allows efficient disk-io when iterating over a set of records whose keys are in a specific range.</p>
+
+<p>Oracle supports “Index Organised Tables” (IOTs) in which data is also physically sorted on disk, for efficient iteration over key-ranges. However as it does not support nested data (records within records), it is difficult to avoid joins - which introduce a significant performance penalty.</p>
+
+<h1 id="some-internal-details">Some Internal Details</h1>
+
+<p>While not necessary to understand how to use or even administer HBase, this section provides some information about how HBase stores data on disk.</p>
+
+<p>As noted earler, the (namespace, tablename, region-id, column-family-name) tuple determines which <em>DFS filesystem directory</em> holds the relevant data. Any “scan” operation always provides (namespace, tablename, column-family-name) explicitly and the set of region-ids is determined by looking up the start-key and end-key in the table of regions.</p>
+
+<p>HBase uses the BigTable/SSTable approach to store data. The set of records matching the (namespace, tablename, region-id, column-family-name) tuplea are stored as a set of files on disk, being a “base” file and a sequence of “overlay” files that have been created over time as modifications to the table occur. Each file contains a sequence of (rowkey, columnname, columnval) entries sorted by key and columnname. These files are <em>immutable</em>; updating or deleting a record is done by generating a new “overlay” file. A background task periodically merges the base and overlay files to create a new “base file”.</p>
+
+<p>Notice that each entry in the file represents a single column; a “record” is an implicit concept consisting of the set of columns with the same rowkey. This is why records in HBase are “wide” (a record can have very large numbers of columns), “dynamic” (columns can be added) and “sparse” (null columns are simply not stored).</p>
+
+<p>An HBase instance keeps the “current overlay” in memory, which allows efficient insert/update/delete operations. When the in-memory overlay exceeds a limit, then it is flushed to disk as a new overlay file (with entries first sorted appropriately). The larger the in-memory buffer, the better the write-performance.  To avoid dataloss in case of node crash, alterations to the in-memory overlay are written as a traditional-style DB “write-ahead log” (WAL) which can be replayed in case of failure to rebuild the in-memory overlay. This log is also in HDFS, and thus available to be replayed when another server takes over responsibility for the region.</p>
+
+<p>The existence of this in-memory cache gives a major speed boost, but does force the “single master per partition” approach, rather than a peer-to-peer approach. Cassandra is a competitor to HBase which somehow manages similar performance while being purely peer-to-peer.</p>
+
+<p>The default behaviour of HDFS on write is to store the first copy of a block on the localFS, the second copy on a server in the same rack, and additional copies elsewhere in the cluster. The fact that each written block gets stored by default on the local server works well with HBase - a RegionServer will normally find all the data it manages on its local disk, while backup copies are safely present elsewhere when needed. The process of rewriting files on disk to merge the “overlays” into the overlayed files also helps in the case of regionserver failover; the newly-written versions of files will (as normal for HDFS) have their first copy stored on the server that does the writing - ie the new RegionServer.</p>
+
+<p>The file-format used for storage is documented, and available as a library. In particular, it is available for use from MapReduce and Hive - HFileOutputFormat2. This allows MapReduce and Hive jobs to write data to files that HBase can then very easily import. The output files must correspond to existing regions in the HBase system.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>The HBase data model can be seen as a variant of a relational “table-style” model. However it can also be seen as a persistent “map” structure - or a nested three-level-deep map structure. Or a “sparse matrix of columns”. In the end, HBase is what it is - a BigTable-like system.</p>
+
+<h1 id="additional-reading">Additional Reading</h1>
+
+<ul>
+  <li>
+<a href="https://blog.cloudera.com/blog/2012/06/hbase-io-hfile-input-output/">Cloudera: HBase IO File Input Output</a> - the “HFile v2” section is the most relevant.</li>
+  <li><a href="https://hbase.apache.org/book.html">The official HBase book</a></li>
+  <li><a href="https://hbase.apache.org/book.html#datamodel">The Hbase datamodel (from the official book)</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/hbase/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,240 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - RabbitMQ Exchanges and Queues</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>RabbitMQ Exchanges and Queues</h1>
+    <aside>First published on: May 8, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a>, <a href='/category/Java/'>Java</a>, <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="exchanges-and-queues">Exchanges and Queues</h1>
+
+<p>I have worked with various message queue systems in the past, but RabbitMQ’s “exchanges” confused me at first. They are actually quite simple:</p>
+
+<ul>
+  <li>RabbitMQ message queues work like in-memory queue types - subscribers race to take messages of the queue, and when one has been removed then it is not seen by any other subscriber to the same queue.</li>
+  <li>Message publishers do not write directly to queues; instead they always write to an <em>exchange</em> and the exchange decides which queue(s) to place the message on. Like queues, exchanges also have names.</li>
+</ul>
+
+<p>Each queue is <em>bound</em> to one or more exchanges; an exchange only ever writes messages to queues which are bound to it. When a queue is bound to an exchange, “binding properties” are also specified: a <em>binding routing key</em> and a set of headers. The exact effect of the key and headers depends on the exchange <em>type</em>.</p>
+
+<p>When a publisher writes a message, it actually specifies (exchange-name, message-routing-key, headers, message-body).</p>
+
+<p>An exchange must be one of the following <em>types</em>:</p>
+
+<ul>
+  <li>fanout</li>
+  <li>direct</li>
+  <li>topic</li>
+  <li>headers</li>
+</ul>
+
+<p>Exchanges of type <code>fanout</code> are the simplest: a message written to such an exchange is placed on every queue bound to the exchange. The “binding properties” associated with each queue are completely ignored.</p>
+
+<p>Exchanges of type <code>direct</code> place incoming messages on every queue where the <em>message routing key</em> associated with the published message matches the <em>binding routing key</em> associated with the queue. This is a simple string-equality comparison. The “headers” binding parameter for each queue is ignored.</p>
+
+<p>Exchanges of type <code>topic</code> are a more flexible version of <code>direct</code>. The routing-key string of the published message is split on char “.” to produce a list of tokens. This is then matched against the list of tokens specified in the <em>binding routing key</em> for each queue. The message is written to each queue which “matches”. The binding parameter may include wildcards, eg “<code>sport.*.cycling.#</code>” will match a message routing key of “<code>sport.team.cycling.english.amateur</code>”. This isn’t regular-expression type matching; it reminds me more of “pattern matching” from functional languages - possibly not a coincidence. See the RabbitMQ manuals for a full definition of the matching process.</p>
+
+<p>Exchanges of type <code>headers</code> ignore the routing-key of the incoming message, and instead check for a match between the headers of the published message and the headers binding-parameter for each queue. See the RabbitMQ manuals for the full details.</p>
+
+<p>There is a single <em>inbuilt</em> exchange called the <em>default</em> exchange, whose name is the empty string. This exchange is of type <code>direct</code> and every queue defined in RabbitMQ is automatically bound to the default exchange with binding-parameter routing-key set to the name of the queue. This means that any RabbitMQ client application can place a message on any queue by publishing to the default exchange with routing-key set to queue-name.</p>
+
+<p>Client applications (or system administrators) can define additional exchanges for any desired purpose, and bind queues to them in whatever way is appropriate.</p>
+
+<p>Broadcast-type message patterns, where a single message is received by multiple consumers, is configured in RabbitMQ by defining a separate queue for each consumer and then attaching those queues to the same exchange with either type=fanout or with identical binding-parameters. As each message is written to that exchange, it is then placed on multiple queues simultaneously. Each consumer application then reads from its own queue, at its own pace.</p>
+
+<h1 id="queues-and-clusters">Queues and Clusters</h1>
+
+<p>As noted on the <a href="https://www.rabbitmq.com/clustering.html">RabbitMQ clustering page</a> page:</p>
+
+<blockquote>
+  <p>All data/state required for the operation of a RabbitMQ broker is replicated across all nodes. An exception to this are message queues, which by default reside on one node, though they are visible and reachable from all nodes. To replicate queues across nodes in a cluster, see the documentation on high availability (note that you will need a working cluster first).</p>
+</blockquote>
+
+<p>As noted on the <a href="https://www.rabbitmq.com/ha.html">RabbitMQ High Availability</a> page, mirroring (replication) of queues should be configured via <em>policies</em>.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/rabbitmq-exchanges/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

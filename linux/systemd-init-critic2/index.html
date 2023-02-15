@@ -1,0 +1,290 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - systemd-init review of criticism part 2</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>systemd-init review of criticism part 2</h1>
+    <aside>First published on: October 25, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>Since I wrote <a href="/linux/systemd-init-overview">an article on systemd-init</a>, a <a href="http://blog.darknedgy.net/technology/2015/10/11/0/">further interesting article</a> was posted by the author of the “darknedgy” (DNE) site, and author of the (now abandoned) “uselessd” project, who also posted the quite reasonable <a href="http://uselessd.darknedgy.net/ProSystemdAntiSystemd/">pro-systemd, anti-systemd</a> article referred to earlier. The author is clearly experienced in this area, and has dedicated significant time to analysing systemd-init and related issues. I personally agree with some of the points made, but not all of them. The article criticises many parts of systemd-init, but does not make an explicit recommendation for an alternative; nevertheless it seems to imply that daemontools/runsv/s6-like solutions are superior (my interpretation), also something I do not agree with, at least in the general case. Note however that the author is doubtless more an expert in this area than I am - you need to make up your own mind.</p>
+
+<p>The DNE article is <em>extremely</em> detailed, and very long. It also assumes the reader is already familiar with systemd-init. This reply also assumes the reader is familiar with systemd-init - or at least has read my original article.</p>
+
+<h1 id="issues">Issues</h1>
+
+<h2 id="architecture-rephrased">Architecture, Rephrased</h2>
+
+<p>The first point made in the DNE article is that systemd-init should be considered a way of uniformly representing system resources (eg services, sockets), and a transactional job scheduling engine for controlling those resources. I agree, but would phrase it slightly differently: a unit is a resource, and systemd-init is a kind of “constraint satisfaction system” that is applied to these resources.</p>
+
+<h2 id="dynamic-reconfiguration">Dynamic Reconfiguration</h2>
+
+<p>It is claimed that “systemd is not well amenable to dynamic execution environment modification”. I would agree this is true: systemd-init isn’t really designed to have new resources and dependencies added “on the fly”; it is possible to drop new unit-files into the /run/systemd directory to do so, but that is somewhat clumsy. It is claimed in the same paragraph that there is no mechanism to adjust dependency information for existing units; I suspect it is possible to do so via “override” unit-files in the /run/systemd directory - but the bigger question is why would this be desirable? The article does not present any <em>use cases</em> for such functionality, and I can’t think of any convincing ones.</p>
+
+<h2 id="snapshot-units">Snapshot Units</h2>
+
+<p>It is stated that “snapshot units are peculiar”, and they “only preserve information about what is running” and it is thus “infeasable to create checkpoints of the dependency graph”. I must admit, I don’t know exactly what the article is getting at here. Snapshots do appear to work for the purpose they were designed for: switching temporarily to some other “target” then switching back. Anyway, this is a very minor feature of systemd-init, and AFAIK not one that any other init-system even tries to offer so criticising systemd-init for it seems somewhat unfair.</p>
+
+<h2 id="dependencies-and-jobs">Dependencies and Jobs</h2>
+
+<p>The article contains comments related to “jobs”. So first, some relevant background info: when some units become “active” they place a “job” on the systemd-init workqueue to do some work (often, to execute a binary from the filesystem). Examples are starting a single service unit, or starting a target (a set of units). Jobs already on the work-queue are performed first. Systemctl has a “–job-mode” option which defines what shall be done when there are already jobs on the queue which “conflicts” with the current one. AFAIK, this is a reasonably obscure option with the possible exception of “isolate” which is somewhat unlike the others and possibly should be a different flag. systemctl has a “list-jobs” subcommand that shows the currently-queued operations.</p>
+
+<p>The article states that a job is also a Unit, but inconsistent with other units. I’m not aware of anywhere in the systemd-init user interface which exposes jobs as units; if they happen to be implemented so internally then that is IMO an irrelevant implementation detail. It is also stated that a “timer unit” happens to also be a “job”; a user could certainly think of it so, but could also consider a timer a passive <em>resource with constraint and associated job</em> rather than itself being a job - which <em>is</em> consistent with other unit-types. If a timer unit is defined and started, it appears under “list-units” but not under “list-jobs”. How jobs/timers happens to be implemented internally isn’t justification for claiming “inconsistency” at the user-interface level.</p>
+
+<p>It is stated that there is a system for <em>coalescing jobs on the internal work-queue</em> (true), and then criticises this part of the code for using <em>heuristics</em>. AFAIK, this coalescing is just an optimisation - and that if the heuristics don’t perfectly coalesce jobs together, then the optimisation is less than 100% - but the system will neverthess work correctly. If stripping out this code completely would still leave a correctly-functioning system, then is it fair to criticise a <em>partial optimisation</em> for not being perfect? It is true that the user can see this less-than-perfect coalescing via “systemctl list-jobs” but does anyone really care? Not coalescing would AFAIK work ok, but be clumsier to use. And AFAIK no other init-system tries to offer anything comparable (using the commandline to view the current progress of a set of resource-configuration operations such as starting services and mounting disks).</p>
+
+<p>The article includes the statement “in init systems, one doesn’t care about the services, rather about the resources exported by the services. The service dependency is a reasonable proxy for it.”. I would agree completely, and this is a fine point. A graphical program A doesn’t depend upon the X server, but instead on a functioning socket at <code>/tmp/.X11-unix/X${DISPLAY}</code> where that socket is the <em>resource exported by</em> the X service. However in practice, saying that “A depends on X” is a <em>reasonable proxy</em> for that dependency. As it happens, systemd-init (inspired by launchd) does partially support this “resource dependency” via socket-units, where A.service can depend on X.socket and X.socket can trigger X.service on demand. I think further decoupling could be possible, but AFAIK no other unix init-system supports anything other than direct service <code>-&gt;</code> service dependencies.</p>
+
+<p>It is stated that “dependency problems can be reduced to ordering problems”  - I’m not sure what the author is trying to say here. A dependency which requires service A to be <em>stopped</em> if service B (which it depends on) stops is not obviously an ordering-problem. The “conflicts” dependency constraint does not appear to be one at all - unless the definition of “ordering” becomes so wide that it is equivalent to “dependency management”. The same paragraph states that dependencies are about parallelism which is about startup speed.  However this is not true: dependencies are about <em>correct startup</em>, where the things started actually work because the things they depend upon are also up. Using the same info for performance is just a nice bonus. The article states that “dependencies are not the same as relationships” - but if they are not, then what is actually meant by “dependency” in the article (is it equivalent to “positive relationship”)?</p>
+
+<p>The statement “none of jobs, transactions, unit semantics or systemd-style dependencies map to the Unix process model” is certainly true. The semantics of the HTTP or MIME protocols don’t map to unix processes either, yet we don’t give up on webservers or email. I think the point here is that daemontools, runit, and similar start a dedicated “monitor process” for each service they start while systemd-init instead represents them as unit-objects in memory. I don’t personally see the process-centric model as superior. It is probably true that a simple monitor app running in its own namespace is less likely to crash than a centralised app managing multiple services - but in the real world there hasn’t been a plague of crashing systemd-init reports. On the other hand, how does an isolated monitor app know to stop its service when a dependency is no longer available? And how does a new service to be started know whether a conflicting service is currently running? These are tasks that are straight-forward in a central service-manager.</p>
+
+<p>The “dependency loops” issue raised in the article sounds nasty, I agree. However the linked bugreports seem to show systemd-init handling it as elegantly as possible. First, it dropped services one at a time until it found a way to continue booting (rather than hanging). It also logged what it did in a reasonable manner. And the nfs/rpcbind issue was primarily caused by trying to support old sysv-rc service scripts during boot, where some just didn’t fit at the phase they were being executed at; replacing the scripts with standard unit-files allowed the correct constraints to be applied. The ZoL link is somewhat difficult to evaluate as few details and no final diagnosis are present; I bet I could make most init-systems fail to come up with the appropriate misconfiguration. In the Xen issue, a socket-unit requires a mount-unit which requires a service-unit; having a socket-unit depend on a service-unit is the wrong way around (or at least very unusual, at which point using WantedBy=sockets.target is inappropriate). Could the configuration system be better designed to make it less likely for someone to make this mistake? perhaps. Could it do a better job of describing the problem in the logs? Yes, seems there is some room for improvement although the current logs weren’t too bad. Is this likely to bite a normal user? No, this kind of problem should be caught by the xen-devs or distro-maintainers fairly early. Would a completely different init-system have handled a broken dependency declaration like this significantly better? I can’t see how. Does it mean systemd-init is completely broken and unfixable? I don’t think so.</p>
+
+<p>The “jobs take too long” issue isn’t something I can take very seriously. When booting, and a critical service won’t start, what <em>should</em> an init-system do? There aren’t many good options. In the first linked issue, the distro installer created bad entries in <code>/etc/fstab</code> pointing to swap-devices that didn’t exist. As mounting a swap-device is a critical part of booting, I don’t see it as a failure of systemd-init’s design when it has some problems. The second link seems similar: the “udev-settle” service is a critical part of bootup, and for some reason some udev events were not being processed or a stream of events was being generated. What should an init-system do when it <em>should</em> run “udevadm settle”, but that fails to complete? The systemd-init logs appear to be reasonable to me (I could diagnose the problem pretty quick and am no expert), and I can’t see how a different architecture could deal with this kind of situation better.</p>
+
+<p>The complaint about “nondeterministic order” is partially justified, I think. The linked example is one where the declared dependencies were not complete. On a system which starts exactly one service at a time (no parallelisation) you may get away with this error, and coincidentally get the necessary dependencies loaded via some other chain before the app with the incomplete deps-declaration is loaded. At least on <em>a particular system</em>, a non-parallel boot will either succeed consistently or fail consistently. Running parallel-startup with broken dependency-declarations will produce less predictable results: sometimes it may work, and sometimes not depending on how fast different parts of the sequence run. Nevertheless, broken dependencies are broken, and will bite somebody somewhere sometime even on non-parallel-starting systems. Given the performance benefits of parallel startup, I’m willing to live with this disadvantage. Note that it’s a disadvantage that applies to <em>every</em> init-system with parallel-startup and is not specific to systemd-init’s architecture or implementation. I can’t see any justification for the article’s claims that the problem is “caused by the indirection of systemd’s execution engine”, is “more difficult to troubleshoot” or “requires a sophisticated mental model”. If A depends on B, but doesn’t declare that dependency then is it a surprise when A doesn’t start? And if C also depends on B, and A/C are started concurrently, is it any surprise that A sometimes starts correctly (B is there) and sometimes not?</p>
+
+<p>The <a href="http://fastboot.org">serel</a> init system is mentioned as one that “operates on explicit compiled graphs”, but the site and its <a href="http://sourceforge.net/projects/serel/">sourceforge project</a> appear to be very dead. I can only guess that the author is expressing their dislike of “auto-detected” dependencies. However there is no way to <em>reliably detect</em> such dependencies anyway (if an app opens “/run/foo” to talk to a service, and that service happens to be running, how can the init system detect that this dependency was never actually declared?).</p>
+
+<p>The “S6-rc” init system is also mentioned as using “compiled graphs”. However the <a href="http://skarnet.org/software/s6/index.html">S6</a> init system does not appear to have any service dependency management <em>at all</em> as far as I can see.</p>
+
+<h2 id="dbus">DBus</h2>
+
+<p>There is criticism of systemd-init’s use of DBus. While a simpler IPC mechanism for such a critical piece of the system (pid1) does have its appeal, there are also real benefits in (a) reusing existing code rather than inventing a new protocol, and (b) automatically supporting all the languages and libraries that already work with that existing protocol. For simple embedded systems, systemd-init <em>can</em> be used without dbus. For more complex systems, dbus is almost certainly required for other purposes anyway, so is not resource wastage. I would guess that the complaints (particularly the “ultimate irony” part) is that in daemontools and similar, a service can be launched by starting the “process monitor” just like any other unix process, with absolutely no IPC required at all. Due to the “single central daemon” approach of systemd-init, it is instead necessary to <em>request</em> that single daemon to launch the service instead - which requires IPC. Simple (no IPC) is good - but the centralized approach supports checking for/handling constraints like requires/conflicts which the simple non-centralized model doesn’t handle. Are the extra features worth the extra price? That obviously depends on context: for a server machine being administered by a unix profi and running a few critical processes which have few dependencies, the daemontools/runit approach may work better. For the millions of desktops being used by semi-professionals or complete newbies at home who just want to “start apache”, automatic and centralized dependency handling for services are critical - while <em>still</em> being suitable for the previous use-case too (at the small price of a little extra IPC overhead during service start).</p>
+
+<h2 id="cgroups">CGroups</h2>
+
+<p>Claim: “the main gist of cgroups is resource control and partitioning”. I say not: the primary concept of cgroups is process-grouping. Resource controllers can be applied to such groups - but don’t have to be. The use of cgroups to track the child processes spawned for a particular “service” seems entirely valid to me. The use of a netlink connector also seems like a reasonable solution on initial view, but doesn’t invalidate the use of cgroups; a systemd-init blog entry also indicates that they are aware of the netlink approach but find it “ugly and not scalable”.</p>
+
+<p>The following “additionally” point is only vaguely related. It is true that handling self-daemonizing services is tricky even with cgroups; it is necessary to identify the “primary process” of a service, as the convention is that (a) the service is “down” if exactly that process dies, but not if others die, and (b) that primary service is the one that should be sent “signals” related to operations such as reload-configuration. Systemd-init does indeed need to use some hacky methods to identify the “main process of a service” if it daemonizes - but no other init-system does any better, and the correct solution is to fix such services so they don’t daemonize on startup. It’s also not a common problem.</p>
+
+<p>There is a complaint that systemd-init wants to perform cgroup management itself rather than delegating to a <code>cgmanager</code> external process. The systemd-init team have given reasonable reasons why they don’t support this, including additional IPC, having init (pid1) depend on some other process, etc. Systemd-init is happy for cgroup “subtrees” to be managed externally, ie within a cgroup that it manages (such as a service), nested cgroups can be created without problems. This includes allowing the cgroup for a “container service” to be managed by processes within the container.</p>
+
+<h2 id="parsing-of-config-files">Parsing of Config Files</h2>
+
+<p>Re parsing of config-files: reasonable point, and one I have discussed in my original systemd-init article. It is indeed a bit scary that lots of text-processing code is in pid1, and inefficient for embedded systems. Solaris SMF has a “binary registry” that configuration gets loaded into, and that seems like a good idea. Interesting that the article points out that launchd also does parsing of config outside pid1. However (a) in practice systemd-init seems stable anyway, and (b) this is an implementation-detail that can be changed later if needed; it isn’t a fundamental part of the architecture.</p>
+
+<h2 id="socket-handling">Socket Handling</h2>
+
+<p>The bit about “socket handling” is simply saying that if a program already communicates over stdin/stdout then it needs no changes to be “socket activated”. I’m not sure of the point here, as systemd-init does handle such applications already, either for UDP (only one process required) or TCP (must start a separate process per client). Nevertheless, many modern apps don’t work that way, instead wanting to use a <em>listen socket</em> to support multiple client connections themselves rather than let something external handle that. And <em>that</em> mode does require code in the server to support the socket being “passed in” rather than created by the app itself. The old xinetd protocol does this, and systemd-init supports that. However it has limitations, and systemd-init has defined a simple alternate protocol - not sure why the article is complaining about that. The <em>optional</em> notification protocol suported by systemd-init is very simple, and does <em>not</em> (as claimed) require linking to any systemd libraries.</p>
+
+<p>The point about other systems being able to “compose execution state” more flexibly is possibly true, assuming I’ve understood this expression correctly. A script-based system can set up the initial environment for a service in any desired way, or a sequence of apps can each tweak the environment in some way then execute the next app until finally the desired service is launched in the desired environment. In contrast, the systemd-init config files does have a limited set of options available. However flexibility comes with a price: a script can have bugs, a script may not be portable, a script cannot be analysed by tools, and various other issues. Chains of “setup apps” have similar issues. Note also that if absolutely necessary then a systemd-init unit file can execute an <em>arbitrary helper</em> (script or otherwise) that performs custom setup before executing the actual service.</p>
+
+<h1 id="lazy-vs-eager">Lazy vs Eager</h1>
+
+<p>The article includes a discussion on laziness vs eagerness. It is true that one of the goals of systemd-init appears to be to allow dependencies to <em>not</em> be explicitly specified, but instead “discovered” automatically at runtime. The standard “sockets.target” unit tries to set up sockets for all services installed on the machine, so that any other application (including other services) can simply open that socket and trigger the startup of the corresponding service - without any explicit dependency being defined. Similarly, referencing a dbus interface can trigger startup of the relevant service. However in practice, there are many service-unit files that declare explicit dependencies. Interesting to hear that launchd works “purely on laziness” - though it appears that this requires support from the services themselves, ie an option on a closed system like Apple but not viable on Linux. A fair point is made that such undeclared dependencies make it harder for a sysadmin to determine the cause of some system problems (eg when a service satisfying a dependency has crashed, but that dependency isn’t obvious). I’m not sure I see a concrete alternative proposed here though; the referenced <a href="http://cr.yp.to/proto/ucspi.txt">UCSPI</a> is basically the way inetd interacts with its clients, and that has no dependency-management at all.</p>
+
+<p>The point about “readiness notification” seems rather off-track. When there is a before/after relation between two services then of course there needs to be <em>some</em> way of determining when the first one is “ready”. The approach taken by sysv-rc is that when the startup-script terminates then the service is ready. Unfortunately, that relies on the “self-daemonizing” approach which is undesirable for other reasons - and even then, I suspect many scripts/services get that wrong ie the service daemonizes and the script exits before the service is truly ready to service clients. Systemd-init offers a few ways of detecting when the “ready” state has been reached, and a little bit of custom code in the service to ping a “notify socket” is one of them. That approach isn’t perfect, but the article fails to indicate any better solution. Avoiding parallel service startup does not solve this problem.</p>
+
+<h2 id="general-architecture">General Architecture</h2>
+
+<p>In a couple of locations, the article suggests a radical rethink of the init-system: to boot once correctly, then <em>save</em> the system state via CRIU or similar and then on later reboots simply restore that state. It’s an interesting thought, and might make a good PhD research topic, but doesn’t seem to be a realistic idea to introduce into this kind of article.</p>
+
+<p>The “intertwining” section criticises the fact that systemd-init is one large process, rather than a family of cooperating ones. There are indeed benefits to be had in a “suite” of processes, but also costs. In particular, it requires extra IPC code and performance overhead for the parts to communicate and synchronize their behaviour. It also means that when one part fails, then the system can potentially become unstable in interesting ways. And it slows development. It is hard to judge such tradeoffs without detailed analysis, but it seems to me that systemd-init is not unreasonably coupling functionality here. Systems like daemontools/runit are split into a few more processes - but also fail to implement some useful systemd-init features that require coordination. I find it odd that this section also claims that systemd-init “cannot be used as a session manager” - that is exactly one of the goals of systemd-init, and AFAIK is already possible out-of-the-box.</p>
+
+<h2 id="logging">Logging</h2>
+
+<p>AFICT, the logging section is simply stating the author’s preference for capturing data written by a service to STDERR is one-logfile-per-service rather than one-logfile-per-system. A matter of taste I guess, and it is true that systemd-init doesn’t <em>currently</em> provide an option for one-logfile-per-service - but I don’t see any reason why that could not be implemented later if really wanted. As the article notes, the posix <code>syslog</code> function is another way services log, and that always goes through <code>/dev/log</code> ie that is always one-logfile-per-system.</p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>As is common in critical articles on systemd-init, the thing that is left out is the <em>use case</em>. I’m thinking first of which system I would like to see on the computers of my non-technical family members and non-technical friends, on the systems of partially-technical colleagues, on the desktop in which I “just want to do my work”, and on servers I administer. I see systemd-init as far superior to daemontools-like systems for all except the last. For the last item (production servers), a fair debate could be had - but given that systemd-init is needed for the other cases and adequate for that one too, it doesn’t seem worthwhile to introduce/maintain yet another init-system for that special situation.</p>
+
+<p>In my opinion, the DNE article does raise a few reasonable points, but also raises a number which are only relevant for a specific use-case (expert sysadmin in a server environment), a number that relate to personal taste/preferences, and a number about internal code structure (which I would consider irrelevant).</p>
+
+<p>Systemd-init is certainly not perfect, but I personally have not been convinced by this article that it is so “broken by design” that it should be avoided, nor that any other existing system is a better solution (except possibly in the usecase of a production server with expert admin).</p>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<ul>
+  <li>
+<a href="https://www.youtube.com/watch?v=o_AIw9bGogo&amp;list=WL&amp;index=5&amp;t=34s">[video] Benno Rice: The Tragedy of systemd</a> - a well-presented pro-systemd view</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/systemd-init-critic2/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

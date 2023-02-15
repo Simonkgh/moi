@@ -1,0 +1,741 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - CRSF and CORS - Cross-Site Request Forgery and Cross-Origin Resource Sharing</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>CRSF and CORS - Cross-Site Request Forgery and Cross-Origin Resource Sharing</h1>
+    <aside>First published on: June 30, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p><a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery">Cross-Site Request Forgery (CSRF)</a> is a way for an evil web-page loaded into a user’s browser to perform actions using credentials the user previously provided for use with other websites. The <a href="https://en.wikipedia.org/wiki/Same-origin_policy">Same Origin Policy</a> is a design principle that modern web browsers implement to partially protect their users against such attacks. However, the same-origin policy is too strict for some sites; <a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing">Cross-Origin Request Sharing (CORS)</a> provides a way for a web-site to inform a browser about what kinds of cross-origin requests are safe for that site.</p>
+
+<p>This article provides background information about these concepts and attacks which may be useful for an architect or software developer responsible for security of a website. It is assumed that you  are familiar with HTTP, Javascript and web development (both client and server side) in general.</p>
+
+<p>There is quite a lot of information about these topics already on the internet; some sites are very good. However when I needed to implement CSRF and CORS support for a website consisting of a Javascript-based rich client and server-side REST endpoints I found that none of the available articles put the issues in the right context for me. In particular, this article looks at the options for protecting a modern rich-client/rest-server combination; much of the available information online (including the <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet">OWASP site</a>) seems to be focused more on html-based traditional apps.</p>
+
+<p>This article is the result of notes I made from multiple sources and merged together into a hopefully correct and helpful whole. The primary resources I used are listed at the end of this article.</p>
+
+<p>And a warning: some articles (particularly some postings on Stack Overflow) are simply wrong; use care when reading any resource on the topic of security (including this one).</p>
+
+<h1 id="the-problem-with-cookies">The Problem With Cookies</h1>
+
+<p>Originally, web browsers would allow links and Javascript in one page to make requests of any type to any other site.  This turned out to be too trusting, however, and particularly with respect to <a href="https://en.wikipedia.org/wiki/Http_cookie">cookies</a>. When a browser has cached an authentication cookie from one site A, then any request to that site will automatically transmit that authentication cookie. If the user visits a different (evil) site which triggers a request to site A then that request will be executed with that cookie, ie with valid credentials.</p>
+
+<p>A user who has logged in to web-banking and then (in same or different tab) visits some other evil site may later find that bank transactions have been made on their behalf. Or someone logged into Facebook may find that posts have been made on their behalf.</p>
+
+<p>Such authentication cookies may be cached for long periods of time, making this attack feasable long after the user has logged into a site (potentially weeks). Explicitly logging out of a site avoids the problem (and is highly recommended after visiting sites such as online banking), but can be annoying for frequently-visited sites.</p>
+
+<p>Traditionally, any website can serve up an HTML page which contains references to other websites, including:</p>
+
+<ul>
+  <li>Links which navigate to any target site when clicked (hyperlinks)</li>
+  <li>Elements such as images which make a GET request to any target site immediately</li>
+  <li>Iframe fragments which make a GET request to any target site immediately</li>
+  <li>HTML forms which make a POST request to any target site when the submit button is clicked</li>
+  <li>Javascript fragments which make GET requests on any target site or submit a form to any target site.</li>
+</ul>
+
+<p>Attempts to use any of the above to perform undesired requests that take advantage of cached credentials in the user browser are named <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery">cross-site request forgery aka CSRF</a>.</p>
+
+<p>Web browsers can do some things to protect their users; the <a href="https://en.wikipedia.org/wiki/Same-origin_policy">same origin policy</a> is implemented by almost all web-browsers now and prevents HTML and Javascript from site B from making at least some types of request to site A. However:</p>
+
+<ol>
+  <li>the protections are not complete and the server needs to take some precautions too in order to completely close the related security problems, and</li>
+  <li>the same origin policy is sometimes too strict; site A might have some non-security-sensitive urls that other sites are allowed to access, or might have a trusted partnership with specific other sites.</li>
+</ol>
+
+<p>The first problem is addressed below under the title “CSRF Protection”. The second problem is addressed under the title “CORS Support”.</p>
+
+<p>One variant of problem 2 which caused me particular pain is when developing a front-end for a site providing rest services. In production the site and the rest endpoints are at the same location; however during development, it is convenient to serve the front-end pages from a local server while still calling rest-endpoints in a remote development environment. Unfortunately, a web-browser sees those requests as <em>cross site requests</em> and will block them by default! Solutions include adding CORS support to the server, and specify that localhost” is a trusted origin (for development server only), or disabling CORS in the browser (currently only Chrome supports this).</p>
+
+<h1 id="the-same-origin-policy">The Same Origin Policy</h1>
+
+<p>A browser treats two URLs as being for <em>the same site</em> (origin) if:</p>
+
+<ul>
+  <li>scheme (protocol) is same, eg both HTTPS</li>
+  <li>host is same</li>
+  <li>port is same</li>
+</ul>
+
+<p>It tracks the origin of each HTML page, and each Javascript file. Any request originating from HTML or Javascript associated with one origin and going to a different origin has to be validated against the <em>same origin policy</em>.</p>
+
+<p>The protections offered by the <em>same origin policy</em> are particularly relevant when a browser supports tabs, as there may be multiple pages loaded from different origins in memory at the same time. However it is still relevant when only one tab is open if the browser still holds cookies for other sites (user has not <em>logged out</em> to invalidate a cookie, and cookie lifetime has not expired).</p>
+
+<p>Some cross-origin HTTP requests are not blocked by the <em>same origin policy</em>. These include:</p>
+
+<ul>
+  <li>GET or HEAD requests with standard headers only</li>
+  <li>POST requests with standard headers only and content-type of form-encoded-data or plaintext</li>
+</ul>
+
+<p>The reason for excluding GET requests is fairly obvious - it is very common for HTML to fetch images, Javascript, and similar resources from origins other than the one that the HTML came from, and blocking this would be very inconvenient. That doesn’t mean that there are no security problems though - a cross-site get-request which includes authentication cookies can potentially return privacy-sensitive data (eg a bank balance). However in general, as GET requests are not intended to have side-effects (change server state) they are not considered as security-sensitive as other request types (eg POST). If a server really does need to ensure browser-side cross-origin GET requests are blocked, then it must check HTTP headers (see later).</p>
+
+<p>I suppose in some circumstances a cross-origin HEAD request could be a minor problem (eg indicate if a specific URL is valid), but it doesn’t seem to be a major concern.</p>
+
+<p>POST requests with body holding form-encoded-data or text are allowed simply for historical reasons; blocking these would break too many sites. Security-sensitive sites which are concerned about cross-origin requests should either avoid traditional HTML forms or take additional precautions (see later).</p>
+
+<p>Another way for a site to avoid problems with cross-origin GET/POST requests is to simply not use cookies for authentication; this is also described later.</p>
+
+<p>It is important to note that problems with cross-origin requests are not really a server-side problem; they are caused by insufficient cookie isolation in the client (the web browser). What the server sees in all cases is a properly-formed HTTP request with appropriate authentication information. However in practice, the browser just cannot properly isolate websites to protect its user while providing the user-experience that users now expect. It is therefore necessary for the browser and server to co-operate in order to block such attacks. This can be achieved by combining same-origin-policy, CORS, and additional checks of http requests on the server side.</p>
+
+<p>Note that preventing Javascript from reading cookies associated with other origins is not sufficient; when Javascript causes the browser to send a request to site A, all cookies for site A are sent with that request even when the triggering Javascript cannot read them. The inability to read them (or even see if they are present) does mean that evil Javascript is working “blind” but that is still sufficient to do significant harm.</p>
+
+<p>A related issue is whether Javascript from one site should be able to invoke Javascript from other sites, read variables set from such Javascript, or manipulate the HTML DOM of pages loaded from other sites. For reasonably obvious reasons, if this is allowed then the same-origin policy protections that block (some) requests to “foreign” addresses are useless. The same-origin policy therefore also prevents Javascript from one site performing such operations on Javascript/DOM data from other sites.</p>
+
+<p>Unfortunately, simply stripping out <em>all</em> cookies when a cross-origin request is made is not possible; there are non-authentication cookies which are useful for such requests, eg those indicating <em>user preferences</em> for a particular site.</p>
+
+<p>Same origin policy constraints:</p>
+
+<ul>
+  <li>reading cookies associated with other origins,</li>
+  <li>reading variables belonging to Javascript from other origins,</li>
+  <li>calling functions in Javascript from other origins,</li>
+  <li>making some kinds of HTTP requests to origins other than the one the Javascript was loaded from</li>
+</ul>
+
+<p>As noted above, the “same origin policy” does still allow the following (but requires the browser to set an “origin” header which the server can optionally check):</p>
+
+<ul>
+  <li>GET or HEAD requests with “standard” headers</li>
+  <li>POST requests with “standard” headers and “standard” content-type (HTML form)</li>
+</ul>
+
+<h1 id="cross-site-scripting-xss-attacks">Cross-Site Scripting (XSS) Attacks</h1>
+
+<p>This article is primarily about cross-site forgery attacks (CSRF), and how cross-origin policy, CORS and server-side checks can deal with them.</p>
+
+<p>There is a related attack called cross-site scripting (XSS) which avoids the cross-origin policy protection completely by having attacking code come from the site under attack. When the origin is the same, the cross-origin policy checks do not apply.</p>
+
+<p>If a server generates HTML responses which include data from a database, or echoes data from the request, and the database or request includes an HTML fragment with evil HTML or Javascript, then the resulting page will contain attacker-provided code whose “origin” is the site being attacked. The “same origin policy” therefore does not block that code from performing operations such as reading cookies or local variables, or triggering requests.</p>
+
+<p>The solution is simple in theory, even if implementing it 100% correctly can be tricky: a site should ensure that externally-provided code is never served from the site. In particular, servers should ensure they <em>escape</em> any untrusted data that they embed into their generated HTML pages. Standard Javascript frameworks do this automatically.</p>
+
+<p>See <a href="https://en.wikipedia.org/wiki/Cross-site_scripting">cross-site scripting aka XSS</a> for more information.</p>
+
+<h1 id="cookie-constraints">Cookie Constraints</h1>
+
+<p>A cookie is a block of data that an HTTP response can “associate” with the request URL. The browser should remember this data and resend it on later requests to the same URL.</p>
+
+<p>There are a few special flags that the webserver can associate with a cookie. Unfortunately while it is a good idea to set these flags when possible, they do not solve the CSRF problem. Just for reference, the relevant flags are:</p>
+
+<ul>
+  <li>
+<code>HttpOnly</code>: cookie is sent with requests, but is not readable from Javascript at all (even from the same origin). This helps a little with XSS attacks, but not CSRF.</li>
+  <li>
+<code>Secure</code>: cookie is only sent on HTTPS requests, never HTTP requests, which prevents mistakes/attacks which force a non-HTTPS request to be made which can then be intercepted by a man-in-the-middle to obtain the cookie contents.</li>
+</ul>
+
+<h1 id="csrf-protection">CSRF Protection</h1>
+
+<p>This section describes the steps that server-side code needs to take to prevent CSRF attacks against the website.</p>
+
+<p>It is assumed that every endpoint (URL handler) in the server-side code checks the authentication/authorization information in the incoming request correctly; this section addresses the additional steps needed to ensure that an evil site running code within an authenticated user’s browser cannot fake additional requests the user did not intend to make.</p>
+
+<p>The problem is that the cross-origin policy does not block GETs or POSTs with traditional content; an evil web-page can still trigger such requests to arbitrary URLs and cookies associated with that target URL are automatically sent. When such requests can be security-sensitive then the server needs to deal with them.</p>
+
+<p>The nearest that there is to an <em>official</em> guide to securing websites against CSRF is the <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet">OWASP CSRF Page</a>. It is written by experts, ie is technically correct, but I found it somewhat confusing at first - maybe the description below is easier to follow. If anything below contradicts the OWASP site though, trust OWASP (and please let me know)!</p>
+
+<h2 id="avoiding-cookies">Avoiding Cookies</h2>
+
+<p>One solution to the problem is to not use cookies for authentication at all. Instead, have every request which needs authentication be generated via client-side Javascript which explicitly stores authentication info into a custom HTTP header. Any CSRF attack which submits a request will thus not have the custom authentication header present, and will be rejected.</p>
+
+<p>The authentication info is generated by the Javascript itself making an HTTP request to an authentication service passing the user credentials and getting back the required token which it stores in a variable.</p>
+
+<p>This solution requires client-side Javascript to be available/enabled.</p>
+
+<p>This approach still allows the server to support URLs that do not require authentication; any site can still make those requests - they arrive without the Javascript-added headers (which are not needed).</p>
+
+<p>This solution relies on the browser’s cross-origin policy to prevent attacking code from a different origin from reading the relevant Javascript variable.</p>
+
+<p>This solution does make it impossible to have “long-term” credentials cached in the browser for that site. However possibly “single signon” can help here, allowing site-specific credentials to be reallocated when needed without having to prompt the user to log in again. See later for a quick note on single signon.</p>
+
+<h2 id="cookie-to-header">Cookie-to-Header</h2>
+
+<p>The cookie-to-header solution works by having the server set an additional cookie on the first response, and requiring the client to copy this “csrf-token” cookie into a custom HTTP header on each request. This verifies that the submitting page can run Javascript which can read the cookie - which should only be possible for Javascript served from the same site (see same-origin-policy). This does require every request to be submitted via Javascript.</p>
+
+<p>An attacker can potentially trigger a CSRF request to the site using GET or POST with traditional headers to avoid cross-origin-policy constraints, but cannot set the custom HTTP header. Not only should it be impossible to set the http header on the request, but setting the header also means that request does not fall into the “exempted” cross-origin requests (due to the custom header), and so the cross-origin-policy checks then apply (including preflight check).</p>
+
+<h2 id="sync-tokens-embed-additional-authentication-tokens-aka-synchronizer-token-protection">Sync Tokens (Embed Additional Authentication Tokens) aka Synchronizer Token Protection</h2>
+
+<p>Traditional websites make relatively simple GET or POST operations to the server, and the server returns a complete new HTML page including HTML links and forms that can be used to perform appropriate actions. This is in contrast to modern “rich client” web applications (often called “single page webapps”) where complex javascript makes calls to a webserver which return <em>data structures</em> and <em>html fragments</em> which are then used to update the page that the browser is already rendering.</p>
+
+<p>In traditional websites, the server can allocate a “next transaction id” (aka Sync Token) for each user, and embed it in the HTML links and forms within the HTML page it returns to a user after a request. On the next request from the user, the id will be included in the request; this should be checked against the expected value for that user, and then a new id allocated and embedded in all links and forms in the returned page.</p>
+
+<p>Because this ID changes on each request, and is not stored in any cookie, it is very difficult for a CSRF attack to predict the correct value that it should include in its faked request. Note that CSRF attacks do not have access to the “current page” in any way.</p>
+
+<p>The per-request ID should be checked <em>in addition to</em> checking authentication information stored in a cookie.</p>
+
+<p>This approach can be implemented without needing any client-side javascript. However it does require the server to store the “next id” for each user, ie <em>server-side user state</em>, which makes it more difficult to distribute requests across a cluster of webservers. It also requires dynamically embedding the token in all relevant places in the generated HTML - something that is only practical when the server side is using some kind of framework that supports the “sync token” approach.</p>
+
+<p>The same principle can be used with a rich-client webapp (where the server provides REST endpoints returning JSON rather than HTML); each REST request includes the “next id” value and Javascript inserts this id into each request. Each response includes the next value for the token. However using this approach for rich-client/REST-based applications is rather pointless; if client-side Javascript is being used for each request, then the approach described in “Avoiding Cookies” can be used instead, without the need for server-side per-user state.</p>
+
+<p>Of course the first time a user visits a site, they have no “sync token” to include in their request. The “entry pages” for the site should not require a sync-token - and should not perform any security-sensitive operations or return security-sensitive content (eg bank balance). The HTML returned from a visit to such an “entry page” may include buttons/forms/etc associated with security-sensitive URLS - together with the appropriate sync token. This makes it relatively safe to cache credentials in cookies; an attacker can trigger a CSRF request to an “entry page” but those are harmless. The attacker can also potentially trigger a CSRF request to a sensitive URL which is of a “simple” type (get or post with traditional headers), but as they cannot guess the right sync-token, those requests are rejected.</p>
+
+<h2 id="checking-referer-and-origin">Checking Referer and Origin</h2>
+
+<p>In this approach, the authentication information is stored in a cookie as usual. The server then relies on the browser to indicate whether a cross-origin request is being performed, and all such requests are rejected on the server side even when a valid authentication cookie is present.</p>
+
+<p>The point of the sync-token checks is that “simple” requests can arrive with credentials, but maybe not origin. However 99.9% of “simple” requests <em>will</em> have (origin or referer), and for some use-cases the app can simply <em>reject</em> requests that don’t have these. This allows a much simpler solution to the CSRF issue.</p>
+
+<p>As noted earlier, there are three kinds of requests that need to be dealt with separately:</p>
+
+<ul>
+  <li>gets or posts with traditional headers and content-type</li>
+  <li>all others (aka “complex requests”; see CORS “pre-flight” later)</li>
+</ul>
+
+<p>For the “all others”, the browser cross-origin policy should protect users from harm; the browser will detect cross-origin requests and first make an OPTIONS request to the target site to see if access is allowed. To verify the server is set up correctly (which is usually the case by default), the developer should make an OPTIONS request to the root url of the site and ensure that the response is either:</p>
+
+<ul>
+  <li>an HTTP error (4xx);</li>
+  <li>an HTTP success with no CORS headers; or</li>
+  <li>an HTTP success with CORS headers which only grant access to appropriate trusted sites.</li>
+</ul>
+
+<p>These results will ensure that any web-browser which supports CORS (which is all sane ones) will block such “other” requests when triggered via a CSRF attack. See CORS later for more info.</p>
+
+<p>To handle POST requests, the easiest case is for the server to simply reject POST with traditional content. This is common with “pure REST” webservers, where any POST request will be expected to have content-type of “<code>application/json</code>”. A CSRF attack therefore can submit POST-with-traditional-content and have it rejected by the server as “invalid content type” or submit POST-with-other-content-type and have it blocked by the browser due to falling into the “other” category above.</p>
+
+<p>Handling GET requests is the trickiest; it is quite likely that server-side code supports GET operations which return sensitive data for the calling user. There are two HTTP headers which can be used here:</p>
+
+<ul>
+  <li>
+<code>Referer</code> (yes, it is spelled wrong)</li>
+  <li><code>Origin</code></li>
+</ul>
+
+<p>Both of these are intended to state the origin of the HTML page or Javascript within the browser which “triggered” the request; if that is not the origin at which the webserver itself serves its own front-end code then this is an unexpected cross-origin request and an error-code can be returned.  Unfortunately, various web-browsers <a href="https://en.wikipedia.org/wiki/HTTP_referer">set these headers differently</a> so some care is needed.</p>
+
+<p>It can also sometimes be tricky for code in a webserver to know exactly which URL its front-end is served at (as seen by the browser), due to HTTP proxies and DNS mappings. Often the simplest solution is to provide the expected base URL to the webserver as a configuration-parameter. Header “host” is usually set by http proxies to help with this issue.</p>
+
+<p>Header <code>Referer</code> has been part of the HTTP specification for a long time, and is set on almost all requests. It was originally intended for a different purpose, but works well for CSRF protection.</p>
+
+<p>Header <code>Origin</code> was introduced as part of the CORS specification; it is always set by a browser which has detected a “complex” cross-origin request. Unfortunately some web-browsers set the header <em>only</em> for complex requests (ie it is not present on normal GET requests) while other web-browsers set the Origin header for any cross-origin request.</p>
+
+<p>The Origin header is easier to deal with than Referer as <code>origin</code> includes only the “base url” component (which is all that is relevant) while <code>referer</code> contains a complete URL which then needs to be truncated to just (scheme, host, port) before being checked - but that is not particularly difficult. However as Origin is not always present, it is best to use the Origin header if present, else the Referer header. There are (rarely) http proxies which strip out the Referer header to “protect user privacy”; the best way to deal with this is probably to just reject requests where neither Origin nor Referer is present, and require such users to use a browser that supports Origin for simple cross-origin requests.</p>
+
+<p>When navigating to a website via a bookmark or similar, neither Origin nor Referer will be set. However such a request will usually be to an “entry page” for the site, rather than being a security-sensitive request, and can be dealt with as a special case.</p>
+
+<p>The “same origin policy” ensures that <em>if</em> a cross-origin request is made, then HTTP header “origin:” is set to the <em>domain</em> of the page or Javascript from which the request was made. This is subtly different from the existing “referer:” (sic) header; because referer is the full originating URL some browsers consider it “privacy-sensitive” and suppress it under some conditions (eg following a link from an HTTPS page to an HTTP one). Because the origin is only the <em>domain</em> rather than the full URL, and is only set on “complex” cross-origin requests, it is less sensitive and so is not suppressed. As far as I can see, simply checking on the server that the “origin” header has an expected value fixes all known CSRF attacks, for all HTTP verbs (including GET). Nevertheless, an extra layer of protection is recommended  (the approaches listed earlier).</p>
+
+<p>Some online advice states that the Referer header is not trustworthy and should not be used. There were in the past cases where bugs or hacks could be used to insert a fake value into this header, but in my opinion these are very unlikely in modern browsers. In particular, the <em>Adobe flash plugin</em> could be abused at some time in the past to do this; fortunately this plugin is (a) fixed, and (b) now very rarely used. There is a “Referrer-Policy” header in the HTTP standard to control how the “Referer” field is populated by browsers; however IE and Edge do not support it, making it rather useless.</p>
+
+<p>It is extremely difficult for evil javascript to fake Referer or Origin headers; both are on the list of <a href="https://developer.mozilla.org/en-US/docs/Glossary/Forbidden_header_name">non-modifiable headers aka forbidden headers</a>.</p>
+
+<p>It is of course possible to fake headers such as Referer and Origin from custom code - or even just a tool like Curl. However that is not relevant; such requests will still need valid authentication information in the headers. CSRF is a problem specific to web browsers, due to the fact that logic from multiple sites is being executed in the same environment together with the fact that cookies are sent with a request to site A even when that request is triggered from site B. This whole complexity regarding CSRF protection is about cooperation between the browser and server to block that specific scenario; the problem does not occur with dedicated client applications.</p>
+
+<h1 id="authentication">Authentication</h1>
+
+<p>This article talks a lot about “credentials in cookies”. It is probably now a good time to add just a little more detail on that topic..</p>
+
+<h2 id="server-verification-of-user-authentication">Server Verification of User Authentication</h2>
+
+<p>In any client/server system, the server should validate client requests. Parameters provided should be valid, and most importantly each request which is related to a specific user should include some kind of authentication token - in the case of http, usually an http header containing either a “session id” or a cryptographically signed block of data representing a login session (userid, expiry-time, etc). And of course the token should only be transferred over an encrypted network connection (eg https).</p>
+
+<p>That’s really the limit of a server’s responsibility. Of course if any attacker manages to get hold of the authentication token then they can make requests as if they were the authenticated user, which is bad. Keeping the authentication token private on the client side is not really the server’s problem. Nevertheless, when the client is a web-browser then there are a few things that the server can do to <em>help</em> that web-browser.</p>
+
+<p>With a dedicated client application, keeping the authentication token secret is not particularly complex. Truly paranoid client apps will for example encrypt the token in memory to make it difficult for another app which manages to scan the memory-space of the client.</p>
+
+<p>When the client is a web-browser, however, keeping authentication tokens secret is trickier - and thus this whole article.</p>
+
+<h2 id="single-signon-and-csrf">Single Signon and CSRF</h2>
+
+<p>The above descriptions assume that some kind of site-credentials (typically a “session id”) are stored in a long-term cookie within the browser. This leaves a very large time window for CSRF attacks; as long as the cookie is valid, a CSRF attack is possible.</p>
+
+<p>An obvious solution is to reduce the lifetime for such cookies. Setting a lifetime to something like 15 minutes does not completely bypass CSRF attacks, but is definitely robuster. However that means that when the user has not interacted with the site for 15 minutes, they need to relogin - rather annoying.</p>
+
+<p>A solution to that problem is single signon. Here, a separate site X is responsible for authentication of the user and issuing of a session-id for some other site A. The general logic flow is:</p>
+
+<ul>
+  <li>user visits site A</li>
+  <li>site A detects that no credentials cookie for A exists, and redirects to site X</li>
+  <li>site X detects that no credentials cookie for X exists, and prompts the user to log in</li>
+  <li>site X validates credentials, returns a long-duration cookie for site X plus a short-duration cookie for site A, and redirects back to A</li>
+  <li>user continues using A</li>
+  <li>eventually, user sends a request to A with expired credentials; A then redirects to X</li>
+  <li>user browser follows the redirect to X, and includes the long-duration cookie associated with X</li>
+  <li>site X verifies that the long-duration cookie is valid, returns a new short-duration cookie for site A and redirects back to A</li>
+  <li>user continues using A without (probably) having noticed that their browser did a quick two-redirect step to refresh the short-term cookie for A</li>
+</ul>
+
+<p>The short lifetime of the credentials info for A (“session id”) makes access to A somewhat safer with regards to CSRF attacks. Site X is of course now in danger of CSRF attacks, but such single-signon sites (a) have a very small set of rest-endpoints, and (b) are very carefully coded to be safe against CSRF attacks.</p>
+
+<p>Single signon also provides the benefit that multiple sites can trust the same central authentication server, allowing a user to log in just once to access them all.</p>
+
+<h1 id="external-javascript-and-origins">External Javascript and Origins</h1>
+
+<p>When a page served from site A contains a tag like <code>&lt;script lang=javascript src=https://siteB/..&gt;</code> then despite the javascript having been loaded from a remote site, it is <em>part of the current page</em> and therefore that script runs <em>with origin site A</em>. A security-sensitive application should therefore never load javascript from sites that are not at least as well secured as itself; when an attacker can change the script code on site B then cross-origin protections are no longer helpful. A failure to follow this rule has been the cause of multiple security breaches, eg at <a href="https://www.itwire.com/security/83416-uk-researcher-says-one-line-of-code-caused-ticketmaster-breach.html">ticketmaster</a>.</p>
+
+<h1 id="cors-support">CORS Support</h1>
+
+<h2 id="defining-exemptions-from-the-cross-origin-policy">Defining exemptions from the cross-origin-policy</h2>
+
+<p>As noted, the <em>same origin policy</em> can sometimes be too strict. The CORS specification allows a server to inform a browser about what kinds of requests are safe to be performed when:</p>
+
+<ul>
+  <li>Site A stores authentication information in the browser as cookies, and</li>
+  <li>HTML or code from site B tries to send a request to site A (a <em>cross-site request</em>).</li>
+</ul>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing">Wikipedia article on CORS</a> gives a pretty good overview.</p>
+
+<p>There is one commonly-used term that is somewhat misleading or confusing: the “CORS preflight request”. The CORS specification, and lots of documentation on CORS says something like “for any complex-typed cross-origin request, a preflight request is first made to the root url of the target site using http verb OPTIONS”. I would describe it otherwise: any complex-typed cross-origin request is checked against the target site’s cross-origin policy. If no appropriate policy is available in the local browser cache, then one is fetched from the target site via a request to the root url for the site using http verb OPTIONS.” My point is that the response to an OPTIONS request explicitly specifies a cache duration (via header <code>Access-Control-Max-Age</code>), and the browser will cache those rules. The cache does need to be per-origin, but a valid site making many (allowed) cross-origin requests does not trigger a “preflight request” for each real request, just a “preflight check” against a cached policy.</p>
+
+<p>An alternative way to view CORS is that when a browser sets the origin header on a request, it provides enough information to allow the server to accept or reject any cross-origin request. However it is necessary for the browser to first verify that the server is expecting and validating the origin header - otherwise a CSRF vulnerability is possible. The CORS pre-flight check does this - asks the server whether it is expecting origin headers. However in the current CORS spec the response to a pre-flight request is more than just “ok, I’m ready for origin headers” - the returned headers can tell the browser to block different http verbs, headers, and more.</p>
+
+<h2 id="my-cors-use-case-google-cloud-iap">My CORS Use-Case (Google Cloud IAP)</h2>
+
+<p>My particular use-case was implementing a Java/Spring-based webserver running within the Google Cloud Platform AppEngine-flexible environment, with GCP’s IAP (identity-aware proxy) security enabled. The application provided rest services, and an HTML/Javascript rich client front-end which called those services (vue.js). In production, both the front-end resources and back-end rest endpoints are at the same address, ie no cross-site requests occur and CORS is not relevant. However during development, front-end developers on the project wanted to be able to serve Javascript and HTML from local servers but make rest requests to a back-end running within the Google cloud. The web-browser unfortunately sees these requests as cross-site requests, and blocks them by default. One browser (I forget which) does have a command-line option to disable the same-origin checks, but testing the front-end in other browsers was not possible. Modifying the server to return CORS headers solved the issue.</p>
+
+<p>Unfortunately, in this case the CORS support solved the issue only briefly. A few months after fixing this problem for developers, Google made some changes in IAP (in Feb 2018) which broke it again (and with no workaround possible). As noted in this article, a preflight request (OPTIONS request to the root url) is never sent with cookies, ie is always unauthenticated. The IAP proxy previously made an exception for such requests; it no longer does so and thus breaks CORS support for all servers behind IAP. After enquiries with Google, they stated that CORS compatibility in IAP was never an explicit feature. They agreed that it would in fact be a good idea to support this - but no timeline was given. Ah well, at least I got to learn about CORS.</p>
+
+<p>If you also wish to support web-developers with local dev-environment making calls to resources running in GCP, then the best solution is probably to use a local HTTP proxy running on developer machines which forwards requests for specific urls to GCP. The web browser thus sees all requests as being to <em>localhost</em>. I haven’t set this up personally though, and don’t know how complex such a proxy would need to be.</p>
+
+<h2 id="cors-pre-flight-requests">CORS Pre-flight requests</h2>
+
+<p>As noted earlier, browsers divide cross-origin requests into two categories:</p>
+
+<ul>
+  <li>simple (requests can be made immediately)</li>
+  <li>complex (preflight authentication required)</li>
+</ul>
+
+<p>The following are considered simple:</p>
+
+<ul>
+  <li>GET and HEAD with standard headers</li>
+  <li>POST with traditional content-types (eg form-encoded, but not JSON)</li>
+</ul>
+
+<p>All other operations are considered security-sensitive, and trigger a “pre-flight request”, eg:</p>
+
+<ul>
+  <li>PUT and DELETE operations</li>
+  <li>POST operations with content other than form-encoded (in particular, JSON content)</li>
+</ul>
+
+<p>The “same origin policy” causes all non-simple cross-origin requests to be checked against the known rules for the requesting origin to the target site; if no rules are currently cached for that (origin, method, headers, dest) combination then the request is suspended while the browser makes a “CORS pre-flight” request to the server. The target site response provides the rules that apply to a specified origin and settings; servers which do not have CORS configured will return a default response which causes the browser to block all complex operations. Thus with a standard non-cors-aware server, GET/HEAD/POST with standard headers and datatypes are allowed while other requests are blocked. CORS settings are not per-url, only per-site.</p>
+
+<p>Even when a CORS response indicates that specific complex operations are allowed, the http header <code>origin</code> is always set by the browser on such requests before sending them to the server.</p>
+
+<p>Cookies can optionally be marked “http-only” or “https-only”, which is an additional protection against XSS; even Javascript from the same domain is unable to read such cookies. They will of course still be added by the browser automatically each time a request is sent to the associated server. This is only weak protection; a successful XSS attack can still do anything that “real” Javascript for that domain could do, ie still perform operations “on behalf of the logged in user” - it just cannot send a copy of the cookie elsewhere if the cookie is “http-only”.</p>
+
+<p>A CORS request is simply an OPTIONS request to the <em>root url</em> of the server first (ie “OPTIONS /”), with the origin header set. The request includes the “method” (http verb) the origin is trying to apply, and a list of headers the origin is trying to send. If a 404 (not-found) or similar error code is returned (which is the default for a non-cors-aware server) then the request is blocked. Otherwise, the server returns an empty response with several headers set:</p>
+
+<ul>
+  <li>Access-Control-Allow-Origin  (which is either missing, identical with the request origin field, or value “<code>*</code>”)</li>
+  <li>Access-Control-Allow-Credentials (missing or “true”) - indicates whether browser should send cookies (and other stuff: http-auth, client-side-certs)</li>
+  <li>Access-Control-Allow-Methods - tells browser what “http verbs” this origin is allowed to send (others should be blocked)</li>
+  <li>Access-Control-Allow-Headers - tells browser what “http headers” this origin is allowed to send (others should be blocked)</li>
+  <li>Access-Control-Expose-Headers - tells browser what http response headers should be hidden from code running in the browser</li>
+</ul>
+
+<p>The Access-Control-Allow-Origin specifies whether the origin in the request is permitted to access this server (note that this is not url-specific, ie applies to all URLs in that domain). The Access-Control-Allow-Origin response does not “leak” the list of all allowed origins; it just confirms that the requested origin is allowed or “leaks” the fact that all origins are allowed. Allowing all origins for a site where login credentials or session ids are stored as cookies is obviously a <em>bad idea</em>, as it bypasses cross-origin protections.</p>
+
+<p>The Expose-Headers field is an interesting one; it ensures that headers with those names in the response are stripped by the browser before client-side code (eg javascript) can see them. I’m not sure what this would be useful for..</p>
+
+<p>The preflight request indicates what the following “complex” request will be doing, via request headers Access-Control-Request-Method (eg “POST”) and Access-Control-Request-Headers (eg “content-type”). The response will echo all allowed methods and headers, not just the ones matching the OPTIONS request. Note that the “standard” headers do not need to be listed here. However “content-type” should be listed, as that is permitted by default only for <em>some content types</em>; listing it as an allowed header permits it for all content types. A response to a preflight request may be cached by the browser, up to the value specified by header Access-Control-Max-Age.</p>
+
+<p>In general, CSRF attacks via “complex” requests are secured by the cross-origin-policy and CORS; no CSRF tokens are needed. This includes all JSON-based requests. CSRF attacks via “simple” requests need to be protected by CSRF tokens; this is possible because forms can include a field with the magic token and GET requests are generally not considered dangerous.</p>
+
+<p>A preflight request is always sent without cookies, ie is unauthorized. If the server app is enforcing authentication credentials for each incoming URL, an exception needs to be made for OPTIONS requests to the root url.</p>
+
+<p>Note that the “origin” header is not set on “302” cross-site redirects: <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet">https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet</a></p>
+
+<h2 id="cors-as-site-specific-permissions-mechanism">CORS as “site-specific permissions” mechanism</h2>
+
+<p>CORS headers returned from the server can be used to grant some sites specific rights. Per-URL control is not possible, but it is possible to allow specific HTTP verbs or HTTP headers based on the requesting site. The official CORS spec does not recommend using CORS in this way, and suggests that it would be better to have each request pass an OAuth token explicitly, either in header or in form field. The back-end can then ignore origins completely, and just check the token associated with the request.</p>
+
+<h2 id="cross-origin-policy-and-cookies">Cross-origin Policy and Cookies</h2>
+
+<p>Important: even when CORS is set up server-side to allow requests, client-side Javascript which initiates requests must <em>also</em> set a flag to tell the browser to send cookies when doing cross-site requests. With JS performing same-origin requests, cookies are sent automatically, but this is not the case with cross-origin.</p>
+
+<p>Here is the relevant info when using the old XMLHttpRequest API:</p>
+
+<ul>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials">https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials</a></li>
+</ul>
+
+<p>Here is the relevant code when using the new <code>fetch</code> API:</p>
+
+<pre><code>fetch("./", { credentials:"include" }).then(/* … */)
+</code></pre>
+
+<h1 id="html-document-domains">HTML Document Domains</h1>
+
+<p>As a side note, there is a way to allow cross-origin requests without using CORS: explicitly setting the <em>domain</em> on an HTML document. See section on <code>document.domain</code> in the <a href="https://en.wikipedia.org/wiki/Same-origin_policy">same-origin-policy page</a>.</p>
+
+<h1 id="references">References</h1>
+
+<p>General Information:</p>
+
+<ul>
+  <li>
+<a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet">OWASP: CSRF Prevention Cheat Sheet</a> - the most trustworthy reference on CSRF</li>
+  <li>
+<a href="https://www.w3.org/Security/wiki/Same_Origin_Policy">Wikipedia: Same Origin Policy</a> - Same origin policz overview</li>
+  <li>
+<a href="https://www.html5rocks.com/en/tutorials/cors/">HTML5Rocks: CORS Tutorial</a> – great tutorial, I just found the “big picture” missing.</li>
+  <li>
+<a href="https://www.w3.org/wiki/CORS">w3.org: CORS</a> - CORS overview from W3C (World Wide Web Consortium)</li>
+  <li>
+<a href="https://www.w3.org/TR/cors/">w3.org: CORS Specification</a> - the official CORS spec</li>
+  <li>
+<a href="https://fetch.spec.whatwg.org/#cors-protocol">whatwg.org: the Fetch Living Standard</a> - a specification of the <em>javascript fetch() API</em> and how it should be handled by browsers - including same-origin/CORS-related behaviour. Whatwg considers network operations triggered by other means (eg an html image node with a src url) to be equivalent to a call to the fetch api. Whatwg publications and w3c html-related specifications have significant overlap.</li>
+  <li>
+<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Mozilla: CORS</a> CORS overview from Mozilla</li>
+  <li><a href="http://www.cgisecurity.com/csrf-faq.html">CGISecurity: CSRF FAQ</a></li>
+</ul>
+
+<p>Browser Limitations:</p>
+
+<ul>
+  <li><a href="https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/10482384/">Microsoft: Origin header not set for POST</a></li>
+  <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=446344">Firefox: Origin header not set for POST</a></li>
+  <li>
+<a href="http://www.petefreitag.com/item/702.cfm">Firefox: Implementing the Origin header</a> - from 2009</li>
+</ul>
+
+<p>See here for further reading:</p>
+
+<ul>
+  <li>
+<a href="https://smerity.com/articles/2013/where_did_all_the_http_referrers_go.html">Smerity: Http referer</a> - why the referer header is sometimes missing</li>
+  <li>
+<a href="https://seclab.stanford.edu/websec/csrf/csrf.pdf">Barth et. al. at Stanford: Robust Defenses for CSRF</a> - academic paper on CSRF from Stanford researchers</li>
+  <li><a href="https://blog.jdriven.com/2014/10/stateless-spring-security-part-1-stateless-csrf-protection/">van Waveren at JDriven: Stateless Spring Security part 1: Stateless CSRF protection</a></li>
+</ul>
+
+<h1 id="appendix-cors-and-spring-framework">Appendix: CORS and Spring Framework</h1>
+
+<p>The Spring framework for Java is popular for building server applications that provide HTTP endpoints (traditional and REST). This section includes some spring-specific advice with regards to implementing CSRF protection server-side and defining CORS headers. This appendix is somewhat less organised than the main part of the article, being notes and code snippets from a project I was working on - they might be useful to you or not.</p>
+
+<p>Module <code>spring-security</code> provides many APIs for configuring security-related features for HTTP request and response handling, including functionality for defining the CORS headers to be returned for browser requests for “OPTIONS /”.</p>
+
+<p>CSRF protection is built in to Spring core code which is not part of the <code>spring-security</code> module. In particular, it is present in class <code>AbstractMappingHandler</code> which is the base for various “request handler mapping” classes, eg <code>RequestMappingHandlerMapping</code>, <code>SimpleUrlHandlerMapping</code>, <code>BeanNameUrlHandlerMapping</code>.</p>
+
+<p>Module spring-security has an optional “global” <code>CorsFilter</code> (enabled by calling method <code>HttpSecurity.cors()</code>). When enabled, every request which contains an “origin” header is validated:</p>
+
+<ul>
+  <li>origin must match a list of allowed origins</li>
+  <li>http method must be one of the permitted options</li>
+  <li>headers must all be in the permitted set</li>
+</ul>
+
+<p>and then appropriate cors-related headers are added to the response.</p>
+
+<p>The CorsFilter is not suitable for applications which have different CORS rules for different resources (urls) - but that is a fairly rare case; normally CORS rules are the same for all resources in an app.</p>
+
+<p>Class <code>CorsFilter</code> uses class <code>DefaultCorsProcessor</code> to do the actual CORS checks. It does not seem to be a good idea to try to customise CORS processing by subclassing <code>DefaultCorsProcessor</code> and using <code>CorsFilter.setCorsProcessor()</code> because <code>DefaultCorsProcessor</code> is also instantiated from class <code>AbstractHandlerMapping</code> which is subclassed many times, and instances of these many subclasses are created at runtime, ie there are more than half-a-dozen distinct instances of <code>DefaultCorsProcessor</code> at runtime; ensuring all are consistently overridden would be difficult. These subclasses include <code>RequestMappingHandlerMapping</code>, <code>PropertySourcedRequestMapperHandlerMapping</code>, <code>WebMvcConfigurationSupport$EmptyHandlerMapping</code>, <code>BeanNameUrlHandlerMapping</code>, <code>SimpleUrlHandlerMapping</code> (two instances), <code>WebMvcAutoConfiguration$WelcomePageHandlerMapping</code>. Fortunately all calls to these classes pass the same <code>CorsConfigurationSource</code> instance as parameter.</p>
+
+<ul>
+  <li><a href="https://developers.google.com/web/fundamentals/security/csp/">https://developers.google.com/web/fundamentals/security/csp/</a></li>
+</ul>
+
+<p>Spring CORS setup can limit the set of http verbs, http headers, and more. Maybe spring also enforces this, eg screens out verbs by origin? Of course, such requests should never happen…</p>
+
+<h2 id="implementing-csrf-protection-via-refererorigin-checks">Implementing CSRF protection via Referer/Origin checks</h2>
+
+<p>As described in the CSRF defenses section above, some types of server which do not need to support old browsers and ugly http proxies which strip referer and origin headers. In this case, it is sufficient to simply add code to the app to verify that one of headers <code>origin</code> or <code>referer</code> is present, and that the value is one of the supported origins. The code below implements this for a spring-based application.</p>
+
+<p>The code below also supports having a “development front-end server” serving front-end code which then makes REST requests to a separate server. It does this by configuring appropriate CORS headers, and enhancing the origin/referer checks above to allow multiple origins (including the front-end server in this case).</p>
+
+<pre><code>
+package net.vonos.spring.security;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
+
+import lombok.RequiredArgsConstructor;
+
+/**
+ * Default implementation for configuring authentication for incoming http requests.
+ */
+@RequiredArgsConstructor
+public abstract class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebSecurityConfig.class);
+
+    private final UserDetailsService userDetailsService;
+    
+    private final boolean enableCors;
+
+    private final boolean enableIap;
+
+    /**
+     * Tell Spring how to determine the Principal and Credentials for the incoming http request.
+     */
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        // By default, Spring enables "sync token" CSRF protection, ie assumes that POST operations are submitting an html form which was generated
+        // by a previous request to the server. In that use-case, the generated form includes a magic field and/or http header to prevent
+        // "cross-site request forgery" (CSRF) which is then included in the POST request and validated by the Spring security filter. That
+        // is NOT our use-case (POST is used for REST api methods, with json bodies), so we need to disable CSRF sync-token validation.
+        http.csrf().disable();
+
+        if (enableCors) {
+            LOGGER.debug("Enabling CORS...");
+            // Enable the CORS filter (ie adds class org.springframework.web.filter.CorsFilter to the servlet-filters which are applied to each request).
+            // When the javascript UI is served from exactly the same domain as the rest API, then this is not needed as browsers by default allow javascript
+            // from some origin to access all resources at the same origin. However when javascript is served in prod from a different server for performance
+            // reasons, or in dev from a dev-web-server for convenience, then the web-browser in which the javascript runs will generate CORS requests to this
+            // server, and so the CORS filter is required to allow such requests.
+            //
+            // Note that CORS is primarily about telling browsers to _relax_ the rules for "complex" cross-origin requests, but also is responsible for
+            // validating/rejecting "simple" requests which have an invalid origin header. Full protection against CSRF attacks requires additional steps.
+            //
+            // The standard Spring request-handling classes have support for CORS which allows configuration of CORS settings on a per-controller or even
+            // per-endpoint level (eg via annotations). The spring-security CorsFilter is an alternative which works at the "global" level via a filter on
+            // every request; the rules applied are therefore less flexible but more consistent across all resources.
+            //
+            // It is expected that projects using this common WebSecurityConfig class will configure CORS filter settings by defining a spring
+            // @configuration class containing a method with the following signature:
+            //    @Bean
+            //    @Lazy
+            //    CorsFilter corsFilter() {...}
+            // It is recommended that this config-method is defined on the concrete subclass of this abstract class.
+            //
+            // Note: CorsFilter uses class DefaultCorsProcessor to do the actual CORS checks. The CorsProcessor instance used for the _filtering_ approach
+            // can be overridden if necessary by calling CorsFilter.setCorsProcessor(). This does not change the CorsProcessor used by the other
+            // request-handler-based validation approach.
+            http.cors();
+        }
+
+        if (enableIap) {
+            LOGGER.debug("Enabling IAP...");
+            
+            // Object which creates a Principal object from a JWT header in the request
+            IapAuthenticationFilter filter = new IapAuthenticationFilter();
+            filter.setAuthenticationManager(authenticationManagerBean());
+            filter.afterPropertiesSet();
+    
+            // Object which maps the Principal object created above to a spring-standard UserDetails object
+            PreAuthenticatedAuthenticationProvider authenticationProvider = new PreAuthenticatedAuthenticationProvider();
+            authenticationProvider.setPreAuthenticatedUserDetailsService(userDetailsService);
+    
+            // Tell Spring how to apply security checks
+            http.addFilter(filter)
+                    .authenticationProvider(authenticationProvider)
+                    .authorizeRequests().anyRequest().authenticated().and() // specify who can access which urls
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // don't create server-side sessions
+        }
+    }
+
+    /**
+     * Tell Spring which webapp resources (incoming request URLs) to apply security to. The default implementation adds ignoring for
+     * '/google*.html' (website ownership verification) and a concrete implementation might want to extend that for e.g. healthcheck endpoints.
+     */
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        // ignoring website ownership verification
+        web.ignoring() .antMatchers("/google*.html");
+    }
+}
+
+</code></pre>
+
+<p>TODO: the code snippet associated with this comment appears to have been lost..</p>
+
+<pre><code>        /**
+         * Ensure that either http header "origin" or "referer" is valid; reject the request otherwise.
+         * &lt;p&gt;
+         * This test is not possible for some webapps due to users with weird browsers or behind weird proxies; such webapps therefore need more
+         * complex solutions such as "sync token" or "double submit cookie". However for most projects there are no such problems and so
+         * this test provides full CSRF protection with little complexity.
+         * &lt;/p&gt;
+         */
+</code></pre>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/cors/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

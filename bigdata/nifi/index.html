@@ -1,0 +1,600 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Apache Nifi Architecture</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Apache Nifi Architecture</h1>
+    <aside>First published on: April 17, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>The Apache NiFi project provides software for moving data (in various forms) from place to place - whether from server to server, or database to database.</p>
+
+<p>There is a lot of buzz around at the moment about Apache NiFi at the moment, so I have had a look. In particular, I’m a back-end and details person - scalability and reliability are of interest to me rather than glitzy UIs; how clustering is done and how power-failures are handled are more interesting than whether drag-and-drop is supported in a UI.</p>
+
+<p>I’m definitely no expert on NiFi - in fact, the following is based purely on documentation and presentations available on the internet. And unfortunately, the available documentation on the underlying principles of NiFi is fairly poor at the current time; it requires significant effort to discover what is going on “under the hood”.  Nevertheless, this information is (in my opinion) sufficient to draw some conclusions about NiFi. Any time I write “NiFi does this…” or “works like this” below, please understand that this is implicitly prefixed with “as far as I know” or “according to available documentation”…</p>
+
+<p>The <a href="https://nifi.apache.org/docs.html">official user NiFi documentation</a> is good, but of course biased. I think the feature-list in the documentation overview oversells NiFi somewhat, at least at its current young state of development; concerns and weaknesses are addressed in the remainder of this article.</p>
+
+<p>I assume you’ve already read some introductory articles/documents on NiFi, and looked at a few video that demonstrate its fancy interface; this is an “under the hood” look, not a gui-walkthrough.</p>
+
+<h1 id="nifi-in-context">NiFi in Context</h1>
+
+<p>NiFi provides data transfer, transform, and routing features for a wide (and expandable) set of datasource and datasink technologies. Its features are somewhat similar to aspects of an <a href="https://en.wikipedia.org/wiki/Enterprise_service_bus">Enterprise Service Bus</a>, but have more in common with an <a href="https://en.wikipedia.org/wiki/Extract,_transform,_load">ETL (extract-transform-load)</a> tool or an ‘event aggregator’. See also <a href="https://en.wikipedia.org/wiki/Core_data_integration">core data integration</a>.</p>
+
+<p>There are many well-known tools already addressing the problems of moving data around. They can generally be categorised as:</p>
+
+<ul>
+  <li>
+    <p>Heavyweight Enterprise Service Bus products (eg Mule or Camel). ESBs also move data from place to place, and can manipulate data specified in a high-level language (eg BPEL or JBI). Some ESB products allow such high-level logic to be defined graphically, as with NiFi. However ESBs often (sometimes exclusively) offer synchronous endpoints, while NiFi focuses on providing async dataflows (with minor exceptions, such as being able to control the HTTP response to an incoming HTTP POST request).</p>
+  </li>
+  <li>
+    <p>Medium-weight <a href="https://en.wikipedia.org/wiki/Data_integration">data integration</a> tools which provide the ability to move blocks of data (eg entire files) around</p>
+  </li>
+  <li>
+    <p>Lightweight tools which focus on forwarding, aggregating and transforming streams of small records (eg Flume, Logstash, Kafka Connect). Many of these have basic configurable data transformation operations, and the ability to host custom code for more specific transforms.</p>
+  </li>
+</ul>
+
+<p>These distinctions aren’t entirely clear-cut.</p>
+
+<p>NiFi fits somewhere in the middle. It isn’t an ESB, although it does provide an embedded graphical high-level programming language for basic data manipulation and routing. It is moderately scalable, but isn’t suitable for handing very large numbers of records. It isn’t really suitable for handling extremely large data-blocks (multiple Megabytes). It does have nice tools for visualizing the flow of data through the system, and inspecting system state (on a per-node basis).</p>
+
+<p>A number of tools include NiFi as part of their functionality, in particular:</p>
+
+<ul>
+  <li>Hortonworks Data Flow (HDF) - part of the Hortonworks suite</li>
+  <li>Kylo, an “all in one data lake” tool that is (at least partially) open-source but linked strongly to <em>Think Big</em> aka <em>Teradata</em>.</li>
+</ul>
+
+<p>A partial list of data-integration tools can be found <a href="https://solutionsreview.com/data-integration/data-integration-solutions-directory/">here</a> and <a href="http://www.capterra.com/integration-software/">here</a>. See also the Wikipedia definition for <a href="https://en.wikipedia.org/wiki/Core_data_integration">core data integration</a>. Interestingly, there appears to be little presence of open-source tools in this area; a number of large companies have open-sourced part of their commercial products (eg Talend, Pentaho) but AFAICT these tools are heavily driven by the parent company rather than a community. Perhaps the lack of pure community-driven open-source interest is to be expected - this is a rather dull and enterprise-related topic..</p>
+
+<h1 id="nifi-features">NiFi Features</h1>
+
+<p>There is no doubt that NiFi looks cool in demos. Each NiFi instance has an embedded webserver which provides a modern javascript interactive editor for defining “data flows”. There is a large number of videos available on the internet showing how to use this graphical interface.</p>
+
+<p>The list of things that NiFi can do is also impressive, including:</p>
+
+<ul>
+  <li>Interactive debugging of data flows</li>
+  <li>Interactive inspection of performance, with “messages per step per second” being updated on each node of a dataflow graph in near-real-time</li>
+  <li>Extensive audit trails showing what happened to records (aka provenance)</li>
+  <li>Detailed dashboard of NiFi instance status (per-instance only, not cluster-wide)</li>
+  <li>Support for back-pressure (stopping the inflow of new messages when the system is “full”)</li>
+  <li>Data prioritization - important data packets are processed before less-important ones, and when data must be discarded, then the lowest-priority ones go first.</li>
+  <li>Time-based data expiry (ie data that is only useful for a short time can be discarded if the system cannot process it within that time)</li>
+</ul>
+
+<p>However the following things are potentially weaknesses in the NiFi approach:</p>
+
+<ul>
+  <li>Scalability</li>
+  <li>Avalability</li>
+  <li>Preservation of data order</li>
+  <li>Version control of data-flows</li>
+  <li>Code reviews of changes to data-flows</li>
+</ul>
+
+<p>I’ll explain my concerns about the above in the following sections of this article, once the actual NiFi architecture has been presented.</p>
+
+<h1 id="nifi-history-and-maturity">NiFi History and Maturity</h1>
+
+<p>Current version (2017-04): 1.1.2</p>
+
+<ul>
+  <li>1.1.0: 2016-11-29  – Adds support to run custom processors in isolated classloaders (what, no OSGI??!).</li>
+  <li>
+    <p>1.0.0  2016-08-30  – First full open-source release. No longer a single master (single point of failure).</p>
+  </li>
+  <li>0.7.2: 2017-02-20 (maintenance release)</li>
+  <li>0.7.0: 2016-07-12</li>
+</ul>
+
+<p>At the current time, NiFi is still quite new, and still getting major features and changes (eg Kerberos support in mid 2016).</p>
+
+<p>The user forums are moderately busy. Expert feedback is sometimes available for questions, but not always - the development team is pretty small, and apparently there is not yet a significant pool of expert users contributing to the forums.</p>
+
+<p>For users of products which embed NiFi (eg Hortonworks HDF or <a href="https://kylo.io/">Kylo</a>), there is of course also support through those product forums. I have no idea if these are busier and more helpful than the NiFi ones.</p>
+
+<p>The NiFi forums show quite a few users having significant problems with NiFi; it is clearly still maturing.</p>
+
+<p>The NiFi wiki includes a section on <a href="https://cwiki.apache.org/confluence/display/NIFI/NiFi+Feature+Proposals">feature proposals</a> which is interesting for a view of areas where NiFi users and developers see a current lack of available functionality.</p>
+
+<h1 id="architecture-first-glance">Architecture First Glance</h1>
+
+<p>The architecture is described briefly here:</p>
+
+<ul>
+  <li><a href="https://cwiki.apache.org/confluence/display/NIFI/NiFi+Components">https://cwiki.apache.org/confluence/display/NIFI/NiFi+Components</a></li>
+</ul>
+
+<p>although a better (more detailed) architectural reference is:</p>
+
+<ul>
+  <li><a href="https://nifi.apache.org/docs/nifi-docs/html/nifi-in-depth.html">https://nifi.apache.org/docs/nifi-docs/html/nifi-in-depth.html</a></li>
+</ul>
+
+<p>Although NiFi is promoted as supporting clustering, that is really a thin add-on to standalone NiFi mode. It is easiest to understand NiFi first as as a single-process application, and then to look at the clustering features later. Without clustering enabled, NiFi is similar in deployment structure to tools such as Flume or Logstash which have no clustering support at all.</p>
+
+<p>NiFi is based on Java, and each instance runs as a single big JVM process. To process significant numbers of messages through a NiFi instance, it should be run on a powerful server with many CPUs, lots of RAM, and fast local disks.</p>
+
+<p>The data stored/managed by each NiFi instance is written to plain old locally-mounted disks. Of course these can be remote SAN devices if really desired - but for very high data volumes the network traffic that this causes has its own disadvantages. Data managed by a NiFi instance <em>belongs</em> to that instance and is not replicated or distributed. Moving data between NiFi instances requires explicit steps by the “programmer” (flow developer) and involves copying data from disk to disk over the network.  The total amount of data that can be managed by a single NiFi node is thus limited to the amount of storage that can be mounted on a single server (currently, around 8TB is a cost-effective limit, though more can be crammed in if price is no concern).</p>
+
+<p>As a data-item enters a NiFi instance, it is appended to an existing file in the local <em>content repository</em>, and a separate <em>metadata record</em> is created which references this content via (content-file, offset, length).  When the current output file grows too large, a new one is started. The content repository can thus hold many independent data-items without generating large numbers of small files in the local native filesystem. This approach to data storage is often called a commit-log, write-ahead-log or log-structured storage, and is used in many scalable systems; for example a Kafka message broker node stores data similarly. These files are never modifed (except for appending data to the current output file, and eventually deleting whole files when they “expire”). Combining multiple data items in a single file complicates discarding such data when it is no longer needed - but NiFi doesn’t bother; instead it simply keeps the files in the content repository for a fixed period of time, and calls this a <a href="https://lists.apache.org/thread.html/f2ad43b18f760094972cd520e9afcd564a1a630b4cf91835924659f4@%3Cusers.nifi.apache.org%3E">rolling buffer of history</a>. Old content is therefore accessible via the associated <em>provenance events</em> until it <a href="https://community.hortonworks.com/articles/82308/understanding-how-nifis-content-repository-archivi.html">ages out</a> of the system (also very Kafka-like). Provenance events may exist which point to data which has been deleted; this is considered normal.</p>
+
+<p>Actually, the <em>content repository</em> implementation is pluggable; as alternative to the FileContentRepository described above, there is a variant that simply stores its content in memory. This is of course fast, but has limited capacity and loses all data when the process terminates. There do not appear to be any other content repository implementations, and none planned.</p>
+
+<p>The <em>metadata record</em> generated for each incoming data item is called a <em>flow file</em>. This is a misleading name, as it is not itself a file, and does not <em>reference</em> a file but a byte-range within some file in the content-repository. These records are stored in a separate <em>repository</em> using a similar mechanism to content - by appending them to a file on disk. However unlike the <em>content</em> data, NiFi aggressively caches flowfile <em>metadata</em> content in memory (as much as possible); the metadata size is reasonably small regardless of the size of the content that it references. Flowfile objects are immutable; when modified by a processing step then a new copy is created. This provides an audit trail of the metadata associated with a data-item as it passes through NiFi, and this information can be later inspected. The (potentially larger) content is treated in the same way (copy-on-write), though it is less common to modify the content.</p>
+
+<p>Each flowfile record is present on exactly one NiFi internal work queue at a time, indicating which “processor” (logic step) should be applied to it next. These queues are (in some undefined way) maintained in a transactional manner so that they are not corrupted in the case of a process crash or immediate termination - on restart, any in-progress processing which was not <em>committed</em> appears to never have taken place, and the flowfile is present on the original work queue. Transactionality does not apply to any <em>side effects</em> a processor might have; in particular <em>data ingress</em> or <em>data egress</em> steps which have side-effects outside of NiFi.</p>
+
+<p>NiFi defines a Java interface for “processors”, which are provided with a flowfile as input, and generate a set of zero or more (output-connector, output-flow-file) pairs. NiFi provides a wide selection of standard processors, and custom ones can be implemented when needed. The most recent NiFi release (1.1) provides a way to load custom processors into the NiFi process via a dedicated classloader to minimise class version conflicts (though sadly, they invented their own solution here rather than using OSGi).</p>
+
+<p>Processors may implement “data ingress”, ie obtain data from the outside world either by actively polling for it, or by opening a network port and waiting for data to be pushed to them. By convention, these processors have names of form <code>Get*</code> or <code>Listen*</code> respectively. These processors write content to the <em>content repository</em> and generate flowfile objects. Note that this implies that NiFi cannot perform any management of a unit of data without copying it to the local filesystem; the ability to manage data without having to copy it is on the <em>proposed features</em> list.</p>
+
+<p>Processors may implement “data egress”, ie move managed data to the outside world. Such processors by convention have names of form <code>Put*</code>. The associated flowfile is usually marked as <em>done</em> at that point. However the associated flowfile record (and any previous versions existing due to flowfile copy-on-write behaviour) is retained for audit purposes.</p>
+
+<p>Processors may also “branch” a flow, sending content to two downstream processors. When the content is identical, then both generated flowfiles reference the same underlying content, ie it does not need to be copied on disk.</p>
+
+<p>Processors are invoked by the system using threadpools, ie multiple records on an input queue can be in-flight concurrently. This seems to imply that NiFi does not / cannot preserve the order of messages flowing through the system (unlike Kafka-based systems which use data partitioning to process in parallel while preserving order). Processors are also currently invoked by the system on a “timer” basis (eg every 30 msecs) regardless of whether data is available in the input queue or not (“event-triggered processing” is considered experimental at the current time). Such polling could potentially consume significant resources on an idle system.</p>
+
+<p>There are also <em>controller services</em> which are effectively singleton objects per NiFi instance which can be used to share resources between processor instances, eg SSL configuration settings.</p>
+
+<p>Processors are provided with an API to save their internal state to the local disk if desired.</p>
+
+<p>The general idea of flowfiles is that most decisions regarding routing of a unit of data (to another processor definition) can be performed by inspection of meta-data, without needing the content. When necessary, processors may inspect the content and set new metadata attributes which other processors may then access.</p>
+
+<p>Comments on the general architecture:</p>
+
+<ul>
+  <li>Consolidating multiple units of data into log-structured files within the content-repository is elegant (though not original).</li>
+  <li>Separating content from metadata, so that metadata can be cached agressively in memory for performance is elegant.</li>
+  <li>In general, the way content and metadata are stored in write-once logfiles (with periodic rewriting for garbage collection) seems good - a technique used quite widely in big-data tools. This approach does make it impossible to free disk space when the related data is no longer needed - which NiFi solves by using a simple fixed data retention time for all data (kafka-like). A fixed retention time has advantages (simple to understand and implement) and disadvantages.</li>
+  <li>Relying simply on local storage, without replication, is a concern for system availability. Presumably traditional techniques such as RAID and SANs will need to be applied if a highly reliable solution is needed. That still won’t provide a highly-available solution, however.</li>
+  <li>Having a single massive Java process does not seem so elegant (see later for comments on clustering) - although competing tools such as Flume and Logstash do the same. Kafka Connect has a more elegant approach.</li>
+  <li>The way that tutorials (official and otherwise) show quite deep processing pipelines is a concern, (a) for implementation and maintenance and (b) for performance when message volumes are high.</li>
+</ul>
+
+<h1 id="satellite-nifi-instances">Satellite NiFi Instances</h1>
+
+<p>One of the use-cases of NiFi is to install a NiFi instance on each “satellite system” which is a <em>source</em> of data, and one core instance (or a cluster of instances) in a central data-center. The satellite instances may be configured to <em>push</em> data to the central NiFi instance(s) periodically. Alternatively, satellite systems may be configured to hold data until the central system polls for it - though in that case the central system needs to know the address of each satellite system, and to have network access to initiate outbound connections to that system, which seems far more complex to manage.</p>
+
+<p>When transferring data from one NiFi instance to another (via the “remote process group” mechanism), the flowfile state (ie metadata about the content) is also transferred.</p>
+
+<p>Each NiFi instance includes a full webserver with support for REST endpoints, graphical dashboards, and much more. There is currently a project named <em>MiNiFi</em> to produce a slimmed-down NiFi version for deployment to satellite locations.</p>
+
+<h1 id="graphical-data-flow-definition-in-nifi">Graphical Data Flow Definition in NiFi</h1>
+
+<p>Each NiFi instance includes an embedded webserver that can serve up static javascript resources which form a rich client application. This rich client application can be used to view existing <em>data flow</em> definitions, and (if the user has appropriate rights) modify those flows. The flow definitions are stored as a single zipfile in the local filesystem named “<code>flow.xml.gz</code>”.</p>
+
+<p>When operating a cluster of NiFi instances, it is not usual to place a load-balancer in front of it. It is certainly inadvisable to access the NiFi UI for any instance of a cluster through a load-balancer; they must be addressed directly as they are very stateful (distributing requests for the UI via load-balancing will not be successful). Of course such “direct access” patterns have negative implications for high availability (requests to a failed instance cannot be automatically redirected to an active one).</p>
+
+<h1 id="about-graphical-programming">About Graphical Programming</h1>
+
+<p>One of the things heavily promoted about NiFi is its graphical drag-and-click environment for specifying how data flows through the system. In effect, users can define 1970s-style <em>flow charts</em> of logic using (predominantly) a mouse.</p>
+
+<p>Many “event aggregation” alternatives to NiFi provide graphical interfaces to view system state (including throughput), configuration properties, and list processing steps; however in most cases the actual definition of flows is not done graphically (see the Flume UI, the Logstash UI, Confluent Control Center for Kafka Connect, etc). With “data integration” products (particularly commercial ones), graphical UIs for defining data flows are more common.</p>
+
+<p>Graphical programming does have its place; it allows business experts to solve their own problems rather than wait for software experts to do it (aka “self service”). However there are a number of drawbacks to such systems, including:</p>
+
+<ul>
+  <li>Drag-and-drop can be slower than text-based programming in the hands of an experienced developer</li>
+  <li>Search-and-replace and similar text-processing tools are not available</li>
+  <li>Defining common code just once is difficult/impossible</li>
+  <li>Code comments are often not supported at all - ie no explanations about what is being attempted and why</li>
+  <li>Standard exception-handling is often not available</li>
+  <li>Refactoring support not available</li>
+  <li>Logging messages for auditing/debugging is often not possible</li>
+  <li>Version-control is often not present</li>
+  <li>Code reviews are often not possible</li>
+  <li>Roll-out from development to testing to production is often not considered</li>
+  <li>Debugging features are often lacking (NiFi users can inspect inputs and outputs of each node in a flow, but AFAICT other options are limited - in particular, when a processing node is a script..)</li>
+  <li>Putting power into the hands of non-specialists can lead to errors which specialists would not make (particularly regarding security, performance and error-handling)</li>
+</ul>
+
+<p>The NiFi graphical development environment appears to suffer almost all of the above problems. There is limited potential to put common code into <em>templates</em>. It is also possible to define “process groups” (vaguely similar to functions) and to define a comment on the process-group.  Templates can also be used to implement a primitive kind of rollout of code from a test environment to a production one. However none of these “solutions” are particularly elegant, and other issues remain completely unaddressed. The NiFi wiki <em>proposed features</em> section includes a number of entries addressing the <em>development procedure</em> issues listed above.</p>
+
+<p>Apparently some users design flows in a development NiFi instance then <a href="https://lists.apache.org/thread.html/f29d5128206ece50508a3e5f03c761db12df33c27b57d5de71c12f6c@%3Cusers.nifi.apache.org%3E">check in the resulting flow.xml.gz</a>. However diffs don’t really work in this approach, and there are issues - in particular, some settings will be different between dev and prod environments. NiFi does provide some limited “variable substitution” in workflows, ie workflows can reference variables which are different in different environments, though rolling these out (and ensuring they are reloaded when needed) must be complex. Apparently NiFi somehow <a href="https://issues.apache.org/jira/browse/NIFI-986">tracks changes to dataflows</a> for reporting purposes, but there does not appear to be any UI for this at the current time and it is not clear how this works in a clustered environment.</p>
+
+<p>One video example available online which demonstrates how to define flows graphically shows the issues with non-specialists and complex flows; the self-confessed non-developer configures an “encrypt data” processing node in his flow in a way that should make any person knowledgable in the area of encryption wince. They then view the output data and comment “it looks encrypted to me”. Software specialists really do have certain skills and knowledge that business users do not. Related issues may arise when defining XPath expressions for extracting data from XML content, etc - different expressions which extract the same data may have orders-of-magnitude difference in performance.</p>
+
+<p>Self-service systems typically are loved by their end-users for a few months (the power!). And as long as there are only a few, simple, graphical “programs” all is well. If a system only needs a small number of “data flows” then perhaps the advantages outweigh the disadvantages even over the long term.  However more typically, such systems grow and grow - and descend into a mass of tangled and unmaintainable spaghetti.</p>
+
+<p>It has traditionally been considered useful to have graphical tools for <em>configuration</em> of software. Is a NiFi flow a program or simply configuration? That’s something of a grey area; a flow that simply reads from one location and writes to another could well be considered simply configuration. A flow with a single routing step could possibly still be considered configuration. A flow which does significant transformation of its content, and non-trivial routing should probably be considered a program rather than configuration. Unfortunately, it is likely that a NiFi installation which is originally intended to hold just configuration-like flows will, over time, grow to instead contain program-like flows. Note also that there has been in recent times a trend away from even graphical <em>configuration</em> towards textual configuration; system management tools like puppet and chef require a text representation of configuration, and version-controlling and reviewing configuration changes has also proved beneficial. The devops movement, where deployment and even new environment provisioning, is automated are not compatible with graphical configuration tools - except those which are simply “helpers” for generating a textual representation of that configuration. Systems that should be scaled-up/scaled-down “on demand” also require automated configuration which is not compatible with graphical configuration.</p>
+
+<p>From the NiFi email list, it is clear that many NiFi users have questions and problems with development practices (eg <a href="https://lists.apache.org/thread.html/12ef56f723bf521364fe548d8210d144bbe880ec9b68ad13977aa75c@%3Cusers.nifi.apache.org%3E">here</a>). Equally clearly, the NiFi development team have no answers at the current time.</p>
+
+<p>In short: if you are considering NiFi, I would recommend defining a <em>review process</em> associated with flow creation and modification, including documentation steps - and trying hard not to let the complexity of flows cross the line from “configuration” to “programming”.</p>
+
+<h1 id="provenance-events">Provenance Events</h1>
+
+<p>Provenance events track changes to metadata records (flowfiles) as they pass through a NiFi dataflow. Each time a flowfile is received/routed/etc, a ProvenanceEvent is created and inserted into Lucene for later analysis.</p>
+
+<p>Flowfiles must be <em>coarse-grained</em> objects, otherwise the volume of provenance records generated by a dataflow (particularly a deep pipeline) will be overwhelming. Presumably NiFi flowfiles should only represent infrequent messages, and large numbers of small messages must be (somehow) batched. Possibly flowfile=email would be acceptable. Flowfile=sensor-reading would probably not be a valid use-case for high volumes.</p>
+
+<p>According to <a href="https://lists.apache.org/thread.html/e745579eb06dcd461a56cd9b1d695b3b8f5c8a4c25432884529a96ea@%3Cusers.nifi.apache.org%3E">an email thread with NiFi developers</a> provenance events can be used for the following purposes:</p>
+
+<ul>
+  <li>debugging a flow</li>
+  <li>monitoring a flow</li>
+  <li>understanding a flow (particularly for NiFi users other than the flow author)</li>
+  <li>replaying a flow</li>
+  <li>as input to a data governance process</li>
+</ul>
+
+<p>The uses of provenance for debugging and monitoring features are obvious; see any video demonstration/tutorial on NiFi. For those who work regularly with the Kafka message broker, the idea of <em>replaying</em> events is very familiar but many other “data integration” tools (whether Flume/Logstash/etc, ETL tools, or hand-written scripts) lack this; being able to say “redo processing of all events since some point in time” can be very useful.</p>
+
+<p><a href="https://dzone.com/articles/why-are-we-treating-data-like-a-picasso">Data governance</a> allows system auditors and users to determine two things:</p>
+
+<ul>
+  <li>does the data delivered by some integration process comply with legal regulations, and</li>
+  <li>does this data come from a trustworthy source?</li>
+</ul>
+
+<p>Examples of legal compliance is verifying that “all credit card numbers are masked” or “no GPS lat/long information is present”. A trustworthiness example is being able to determine whether a feed of stockmarket-share-prices comes from <code>nasdaq.com</code> or from <code>dodgybrokers.example</code>.</p>
+
+<p>Unfortunately, while the email thread referenced above does contain a <em>statement</em> that provenance events can be used for data governance, no further information is provided on how exactly data-governance can be derived from provenance events and I have been unable to find any other source which describes how to implement data-governance with NiFi. Simply having a massive database tracking the metadata-history for every single unit of data which has flowed through a system does not itself provide data governance - in volume, data is not the same thing as information.</p>
+
+<p>There is one particular use-case in which a full history of provenance events is necessary: combing through a large-volume stream of data looking for rare “matches”. In this case, once a match is found then it can be important to look at the provenance history for that specific event to determine whether this is a “reliable match”, ie whether the sources of this data are trustworthy or not. When the matched data is important enough then the original sources can be contacted again to verify the original data which lead eventually (possibly via multiple data transformations) to the match. Given the origins of NiFi in the US government, the ability to detect rare “hits” and then to be able to determine the original source of that information for validation is obviously important: crime and terrorism detection done by monitoring large dataflows for unusual patterns should also include strong verification abilities. Unsubstantiated conclusions are not useful, and false ones can be very damaging.</p>
+
+<p>TODO: in some parts of the NiFi documentation, it is stated that a provenance event is emitted for each flowfile for each processor. However elsewhere it is stated that no provenance-event is generated for a flowfile sent to the <em>success</em> output of a processor - which is true? Reducing the number of provenance events would certainly increase system performance.</p>
+
+<h1 id="clustering-nifi">Clustering NiFi</h1>
+
+<p>A group of NiFi instances can be <a href="https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#clustering">clustered</a> together via a shared Zookeeper instance. This provides the following benefits:</p>
+
+<ul>
+  <li>
+    <p>When a dataflow is modified on one instance (via a browser), the changes are pushed to all other members of the cluster. There are some problems with the current implementation, but in general it seems to work ok since v1.0.</p>
+  </li>
+  <li>
+    <p>Exactly one instance is the <em>primary node</em> of a cluster, providing a place on which to execute processor logic that should only occur once-per-cluster. In particular, a processor which periodically pulls data from an external system should usually not run concurrently on multiple nodes. If the <em>primary node</em> should terminate, a new primary node will be “elected” from the remaining nodes.</p>
+  </li>
+  <li>
+    <p>When a NiFi satellite instance is pushing data to a NiFi cluster, then it can query any member of the cluster to find out the full list of cluster members and their current system-load, and then choose which instance to push data to. This provides a kind of “auto-configured load balancer” - though the pushing instance must have direct network connectivity to each cluster member. Members of a cluster in a data-center can use the same mechanism to push data to other members of the cluster; in particular a “data ingress” processor component running in <em>primary node only</em> mode can be explicitly configured to distribute load via this mechanism (though this results in a copy of the data).</p>
+  </li>
+</ul>
+
+<p>In a cluster, the dataflow definitions are identical on each node (they can be modified on any node, and are synced). The processors defined in the dataflows execute on all nodes - except for those marked as <em>primary node only</em>. This allows parallel processing of data - but each node processes only the data it holds locally; data is not shared between nodes. This means that one node may be idle while another has a queue of work to do; NiFi clustering does not address this.</p>
+
+<p>NiFi clustering does not address the following:</p>
+
+<ul>
+  <li>Workload sharing (except assisting with “distributed push” so that load is distributed on entry to the system)</li>
+  <li>Replication of data for reliability</li>
+  <li>Failover handling</li>
+  <li>Dynamic scalability</li>
+  <li>Cross-node monitoring and statistics (all stats shown on a NiFi node dashboard are for that node only)</li>
+  <li>Cross-node provenance info (all provenance info shown for a NiFi node is for that node only)</li>
+</ul>
+
+<p>NiFi instances are very stateful, due to their use of local filesystem storage. They are definitely not the sort of thing that can simply be dynamically scaled up by starting new instances when desired - capacity planning is very important. It is possible to run NiFi instances in cloud environments, but each instance must be carefully configured with access to appropriate persistent storage volumes - unless you are willing to discard all data managed by a node when that virtual instance is terminated.</p>
+
+<p>The general trend in big-data systems is to self-management and horizontal scalability. Tools such as Kafka, HBase, or Cassandra internally replicate data for resilience against storage problems; on node failure the load automatically is taken over by an existing node, and when a new server instance is added to a cluster the cluster rebalances itself (both storage and processing load) automatically. In contrast, NiFi’s approach to availability and scalability is very old-school:</p>
+
+<ul>
+  <li>Data is not replicated internally; resilience against storage problems must be done by using raid disks etc</li>
+  <li>Failover is not supported internally; resilience against server problems (eg powersupply problems, CPU problems, network card problems) can be done by having cold/warm standby servers, HA Proxy or similar, and using disk-level replication or using a SAN and remounting it on a new server.</li>
+  <li>Scalability is primarily vertical - use bigger servers. It is possible to have multiple NiFi instances, but distributing load across them requires careful configuration, they are stateful meaning each instance requires dedicated storage, and ensuring the new instances are resilient also requires careful consideration (see the first two points). So scaling horizontally is not a trivial process.</li>
+</ul>
+
+<p>NiFi can be deployed on a cloud platform (such as AWS). This does mostly solve the node-resiliance problem. However storage must be persistent, which means that all disk IO performed by NiFi is actually network traffic; a significant limitation for performance. It also makes the storage-resiliance problem an issue for the cloud platform. However NiFi does not currently support S3 or similar; the storage must be mounted as a native filesystem. Using a cloud does not really address the horizontal-scalability problem; provisioning new NiFi instances is non-trivial due to the need to configure dedicated persistent storage for each instance, and the complications in actually distributing load across NiFi instances.</p>
+
+<h2 id="outstanding-questions-regarding-nifi-clustering">Outstanding questions regarding NiFi clustering</h2>
+
+<ul>
+  <li>When designing a flow on one server, when is it copied to other servers (there is no <em>save</em> button as far as I can see..)</li>
+  <li>The stats shown on the “canvas” for each processor are per-host only. There is a “summary page” accessible from the “global menu” - is this cross-node?</li>
+  <li>When a workflow-node is “started” interactively, is it started on all worker-nodes in the cluster?</li>
+  <li>When defining an “ingress processor” which actively fetches data from an external system, is it standard practice to mark this processor as just running on the <em>primary node</em>, and then have the following step in the flow be a “remote process group” processor which distributes the data to all other nodes in the cluster?</li>
+  <li>When using <code>Listen*</code> or <code>Get*</code> processors, how is message ordering preserved? When all messages in the input, or subsets (partitions) must be delivered in the same order as they are received, how is this done?</li>
+</ul>
+
+<p>Note from the FAQ:</p>
+
+<blockquote>
+  <p>Typically, if you want to pull from HDFS and partition that data across the cluster, you would run ListHDFS on the Primary Node only, and then use site-to-site (remote process group) to distribute that listing to all nodes in the cluster. We do realize this is not ideal…</p>
+</blockquote>
+
+<p>The <em>feature proposals</em> wiki page has an entry for <a href="https://cwiki.apache.org/confluence/display/NIFI/Data+Replication">data replication</a>. See also <a href="http://apache-nifi-users-list.2361937.n4.nabble.com/Flow-file-replication-td237.html">this email</a>.</p>
+
+<h1 id="flow-development-process">Flow Development Process</h1>
+
+<p>To continue the discussion regarding Graphical programming, here are some questions:</p>
+
+<ul>
+  <li>Can a flow be exported as text, and imported into another NiFi instance?</li>
+  <li>How are flows version-controlled?</li>
+  <li>How are flows code-reviewed (eg diffs seen)?</li>
+  <li>How are flow changes audited (who, when)?</li>
+  <li>How can flows be tested outside of production?</li>
+  <li>How can flows be debugged interactively?</li>
+  <li>How can flows be migrated from dev to test to prod environments?</li>
+</ul>
+
+<p>Partial answer: the <a href="http://nifi.apache.org/registry.html">NiFi Repository project</a> is intended to provide a central store for flows. According to Git history, initial commit was 2017-03-16(!) There are currently no tags and branches, ie no releases - this is a brand new project.</p>
+
+<p>Partial answer for rollout: in the FAQ, <em>flow templates</em> are <a href="https://cwiki.apache.org/confluence/display/NIFI/FAQs">recommended for this purpose</a>. In summary, after a flow has been designed in a development environment, components can be selected and “create template” invoked. This generates an XML file. A template can be imported into another NiFi instance with the “upload template” option. The template must then be dragged to the system canvas to activate it. With some strict processes, it might be posssible to define a “development flow” based on these features - though rather clumsy.</p>
+
+<p>Question: The user guide “Output Port” section says that data can be sent to a remote NiFi instance if the output port is “on the root canvas”. Is that a requirement? Does that mean that a flow defined from a flow-template cannot send to a remote NiFi instance?</p>
+
+<p>Another user has also <a href="http://apache-nifi-users-list.2361937.n4.nabble.com/Data-flow-best-practise-td1612.html">enquired on the NiFi forums</a> about “development best practices” recently; no answer so far.</p>
+
+<p>The NiFi wiki has <a href="https://cwiki.apache.org/confluence/display/NIFI/Configuration+Management+of+Flows">configuration management in the “feature proposals” section</a>.</p>
+
+<h1 id="general-questions-on-nifi">General Questions on NiFi</h1>
+
+<p>General questions:</p>
+
+<ul>
+  <li>Is there really a provenance-event for every data-item x every processor through which it flows?  If so, then doesn’t this a limiting factor to the volume of records flowing through NiFi?</li>
+  <li>As documented in developer-guide, the “global processor state” is a single map object stored in Zookeeper, and any change to the state rewrites the entire map. Is this still the current implementation?</li>
+  <li>What does it mean for a processor to be “batched”?</li>
+</ul>
+
+<p>Note: “typically no Provenance event is created when a processor routes a flowfile to success”. So in a linear flow with Get, 5 transforms, then Put, does this mean that there will only be 2 provenance events (the get and the put)?</p>
+
+<p>Development:</p>
+
+<ul>
+  <li>Flowfiles are immutable entries in a “write ahead logfile” - rather like Kafka records.  However at http://nifi.apache.org/developer-guide.html they are described as having attributes “path” and “filename” (and the user guide says something similar at <a href="https://nifi.apache.org/docs/nifi-docs/html/user-guide.html#terminology">https://nifi.apache.org/docs/nifi-docs/html/user-guide.html#terminology</a>). What do path/filename attributes mean for a flowfile record?</li>
+</ul>
+
+<h1 id="error-handling-and-resumption">Error Handling and Resumption</h1>
+
+<p>On a single server, NiFi appears to have a reasonably good crash-resistance story. Content is immutable, and in logfile format. Flowfiles are immutable and in logfile format. Provenance events are immutable and in logfile format. The “input queues” stuff is apparaently crash-resistent. And “transactions” are supported. So on unclean app termination, resumption should work ok, restarting from the most recent complete flowfile for any processor.</p>
+
+<p>Because data is stored “locally” rather than distributed, there is no <em>replication factor</em> for data as with HDFS, Kafka, Cassandra, etc. If a disk is lost, all data on that disk is lost. Of course technologies such as RAID can be used to mitigate some dangers. And storage can be mapped to a SAN volume, which gives not only better replication management, but also the ability to mount that same volume from a different server for disaster recovery. However such things are significantly more complex to configure reliability for than modern “big data” systems - and recovery times on failover are significantly longer.</p>
+
+<h1 id="other">Other</h1>
+
+<p>NiFi supports “back pressure” which is something that Kafka/Kafka-Connect does not do so well; Kafka applications generally assume that the broker cluster can absorb all data that can be thrown at it. On the other hand, that is usually true…</p>
+
+<p>NiFi allows a priority to be associated with each data-packet, and an <em>expiry time</em> after which the data is no longer of use.  That could be useful in some cases.</p>
+
+<p>Normally, processors defined in a flow run concurrently on every node. However processors which communicate with external systems (eg making an SFTP request) should not run concurrently; these should be marked as <em>isolated</em> in which case they only run on the primary node. The data that such processors pull must then (somehow) be “load balanced” across other nodes in the cluster to get parallel processing.</p>
+
+<p>A processor can “store state” so that on resume it can “continue where it left off” - a bit like kafka offsets. However it is up to the individual processor to make calls. The caller can specify that state is “local” (in which case it is stored in the local filesystem) or “global” in which case it is stored in Zookeeper. Zookeeper is NOT designed for frequent updates, ie frequent global status saves will be a scalability problem.</p>
+
+<p>“Active” flowfiles are kept in memory, but every change is first appended to a write-ahead-transaction-log before being applied.  This allows the current state to be recreated on restart. Periodically, “snapshots” are created so the transaction log does not grow infinitely (the tx log is applied to the latest snapshot). Flowfiles do not hold a reference to the “processor whose queue they are on”; instead each processor has a queue pointing to the flowfiles waiting to be processed by that processor.</p>
+
+<p>TODO: how is the state of these queues managed/snapshotted/restored?</p>
+
+<p>A processor can <em>update</em> a data-item in the content-repository. This actually causes a copy-on-write in the filecontentrepository - the updated flowfile references the location of the new version of the content, while older versions of the same flowfile continue to reference the original content at its original location.</p>
+
+<p>The split between metadata (flowfile) and content is interesting. If the processing logic can mostly be applied to metadata (properties in the flowfile header) without needing to actually access the content, then this is a performance boost. Flow authors are encouraged to use Processors to grab specific data from the content and store it in the flowfile headers once, then use this data from other processors rather than access the content again. Can be a win for large content-blocks.</p>
+
+<p>Splitting of a single data-item into multiple can be efficient in some cases. In particular, a single flowfile pointing at a single content-item which is a sequence of LF-terminated strings can be transformed into a flowfile-per-line without needing to move the content-item; the new flowfile entries just point at the same file in the filecontentrepository with different offset/length values. This does make refcounting of the referenced data difficult - but NiFi doesn’t bother, instead relying on a simple fixed <em>retention time</em> (aka “aging out”) to reclaim disk space.</p>
+
+<p>When data is being “pushed” to NiFi, a flow is simply defined with a “listening” processor as the initial point. The flow is distributed across all nodes as usual, and so a “listening port” is opened on every node. An external load-balancer can then be configured to distribute connections across the entire set of NiFi nodes, and thus incoming connections will be distributed across all nodes.</p>
+
+<p>When data is being “pulled” from NiFi, then the “pulling” processor should be configured to run only on the primary node (it can be configured to run only on another node, but then will not run if that node is down). The data however will be stored only on that single node. The flow must then use a “remote process group” processor to push the data to a named “input port” on a specific other NiFi node, or to a named input-port on “all nodes”. The flowfiles in the “pulling flow” will then be transferred to other NiFi nodes, together with a copy of the content-item that they reference. Load is not simply distributed round-robin, but instead is “load-aware”; more flowfiles are sent to lightly-loaded target NiFi nodes than heavily-loaded ones. Note however that this is a “push load distribution model” rather than the Kafka “pull load distribution” approach; pulling is better for overall scalability.</p>
+
+<p>Data managed by NiFi must reside in the content repository - which is a concern when managing large units of content. The only viable approach appears to be to never import the content at all, but instead process a message whose content is simply the <em>address</em> of the relevant data. If handling of this message requires data from the (large) content then that should be extracted once, and embedded as properties in the initial flowfile record. While somewhat clumsy, alternatives to NiFi (eg Flume, Logstash, Kafka Connect) must handle this situation in a similar way.</p>
+
+<h1 id="conclusions">Conclusions</h1>
+
+<p>Jobs like moving files around (collect from remote FTP server every X hours, deliver to share filesystem) have often been done with hand-written scripts in languages like Python. NiFi is a strong candidate to replace such scripts - it provides a suite of prebuilt processors, decent handling of errors, performance monitoring, and similar features. Being able to configure the source and sink parameters (hosts, paths, time-intervals,etc) via a graphical UI will be considered a plus by some. And the graphs it generates are pretty.</p>
+
+<p>Handling tasks like collecting Twitter feeds (a common example in tutorials), providing a receiving endpoint for HTTP POST operations performed by other systems, etc can also probably be better handled through NiFi than other technologies - as long as the data volume is not too high.</p>
+
+<p>For very high-volume feeds (hundreds of messages per minute or more), I have significant doubts that NiFi will scale. For “log aggregation” type workloads, tools like Flume and Logstash would appear to scale better on a single system; <em>Kafka Connect</em> scales excellently both vertically and horizontally (clustered). NiFi’s clustering has significant limitations that need to be understood before selecting it.</p>
+
+<p>Providing a GUI for viewing existing configuration and system statistics is not controversial, and NiFi does this well (though all such reports are per-node, not per cluster). For “log aggregation” workloads, the ELK stack (elasticsearch/logstash/kibana) reporting is superior though. Providing a GUI for defining/editing dataflows is more problematic - the issues have been described above.</p>
+
+<p>In summary, NiFi is definitely useful for some purposes, but not all. However its glitzy UI performs best at the most important task: looking good in demos. I therefore predict a boom in NiFi installations over the next few years. Whether disappointment sets in later depends upon how fast the NiFi team can get to work on the issues already listed under <a href="https://cwiki.apache.org/confluence/display/NIFI/NiFi+Feature+Proposals">feature proposals</a> on their wiki.</p>
+
+<h1 id="references-and-resources">References and Resources</h1>
+
+<p>Data Integation Software and Principles:</p>
+
+<ul>
+  <li>
+<a href="http://cdn.information-management.com/media/pdfs/TalendRole.pdf">Third Nature/Madsen: Role of Open Source in Data Integration</a> - A good overview of Data Integration topics (though from 2009). Note that the report is “sponsored by Talend”, but there is no Talend-specific content within it and no obvious bias.</li>
+  <li>
+<a href="http://www.cloveretl.com/why-data-integration">CloverETL</a> – a partially-open-source project somewhat comparable to NiFi</li>
+  <li>
+<a href="http://www.pentaho.com/">Pentaho</a> - open-core big data analytics product (mostly driven by Hitachi)</li>
+</ul>
+
+<p>General NiFi Info:</p>
+
+<ul>
+  <li>
+<a href="https://www.youtube.com/watch?v=Q8SEFERMGOI">Video: NiFi Crash Course</a> - the first quarter is fairly boring, but it gets better later.</li>
+</ul>
+
+<p>Clustering Topics:</p>
+
+<ul>
+  <li><a href="https://community.hortonworks.com/articles/16461/nifi-understanding-how-to-use-process-groups-and-r.html">Hortonworks: load balancing with remote process groups</a></li>
+  <li><a href="https://community.hortonworks.com/articles/16120/how-do-i-distribute-data-across-a-nifi-cluster.html">Hortonworks: load balancing a NiFi cluster</a></li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/nifi/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

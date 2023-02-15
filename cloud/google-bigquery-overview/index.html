@@ -1,0 +1,430 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Google BigQuery Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Google BigQuery Overview</h1>
+    <aside>First published on: April 18, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a>, <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>This is a quick introduction to the <a href="https://cloud.google.com/bigquery/">Google BigQuery service</a>, part of the Google Cloud Platform (GCP).</p>
+
+<p>Here’s the 10-second summary:</p>
+
+<ul>
+  <li>
+<a href="/bigdata/hive/">rather similar to Hive</a> (from the Hadoop toolset)</li>
+  <li>stores data in tables with strict schemas (similar to relational)</li>
+  <li>can hold massive datasets</li>
+  <li>very SQL-like query syntax</li>
+  <li>highly parallel query execution</li>
+  <li>stores its data as files</li>
+  <li>charges for data (file) storage at the same (cheap) rate as regular GCP cloud storage, plus CPU charges <em>only</em> when executing queries</li>
+  <li>uses column-oriented storage (efficient for queries where just a few fields are referenced in select-clause or where-clause)</li>
+  <li>no primary keys (ie not good for selecting exactly one record by its unique key)</li>
+  <li>no foreign key constraints (ie keeping referential consistency is the responsibility of the code inserting data)</li>
+  <li>no indexes (though various internal query optimisations mitigate this limitation)</li>
+  <li>supports table partitioning - but only by date (either implicit insert-date or a date-typed column)</li>
+  <li>supports table sharding - if partitioning by something other than date is desired (see “wildcard queries”)</li>
+  <li>a time-to-live can be set on partitions to automatically delete old records</li>
+  <li>column types very limited: boolean, int64, float64, string, dates (multiple types), bytearray, record, array. 
+Note in particular: no fixed-precision numeric types.</li>
+  <li>updates and deletes require “rewriting” of tables ie are expensive and slow</li>
+  <li>batch-load-jobs are asynchronous but cheap (max 1000 per day per table)</li>
+  <li>streaming inserts are fast but moderately expensive</li>
+</ul>
+
+<p>The update/delete limitations mean that it is clearly a <a href="https://en.wikipedia.org/wiki/Business_intelligence">business intelligence</a> (OLAP-like) service rather than an <a href="https://en.wikipedia.org/wiki/Online_transaction_processing">OLTP</a> service.</p>
+
+<h1 id="use-cases-for-bigquery">Use Cases for BigQuery</h1>
+
+<p>BigQuery can store massive amounts of data - and does so very cheaply. It is particularly cost-effective when storing data that is rarely queried; you pay only for file-storage (and not for a running database server, as is the case for other database types).</p>
+
+<p>It is good at running queries which read a significant percentage of the records in a table; this processing is done in parallel using many VMs concurrently. This is the common access-pattern for OLAP (analysis) tasks, report-generation, etc.</p>
+
+<p>It is good at appending new records to tables - and can do so far faster than traditional relational databases (adding a record to a table is just a single append to a file on disk).</p>
+
+<p>It is very bad at selecting single records by key (or indexed fields) - it effectively does a <em>table scan</em> (with some optimisations), which is not only slow but also expensive. Databases such as Bigtable, Datastore or relational systems are a better fit for fetch-by-key.</p>
+
+<p>BigQuery does support update and delete in its SQL language, but these operations effectively <em>copy</em> the table, replacing records (update) and dropping records (delete). When the table is partitioned, and the update or delete statement includes the partition-key in its where-clause then only those partitions are copied, but in general this is still a poorly-performing operation. Updates and deletes are therefore best for “batch corrections” of the stored data, not for regularly modifying single records.</p>
+
+<p>In summary:</p>
+
+<ul>
+  <li>good for OLAP-style analysis tasks</li>
+  <li>good as a data-source for machine-learning algorithms</li>
+  <li>reasonable for archival data storage (when plain files in google-cloud-storage are not sufficient)</li>
+  <li>very bad for OLTP-style workloads where individual (or small related sets of records) are read and written</li>
+</ul>
+
+<h1 id="data-storage-in-bigquery">Data Storage in BigQuery</h1>
+
+<p>Note: If you are familiar with the architecture of <a href="https://hive.apache.org/">Apache Hive</a>, then you’ve got a good start on understanding BigQuery.  Think Hive with ORC-like storage and compulsory “managed tables”.</p>
+
+<p>A GCP project can hold multiple BigQuery <em>datasets</em>, and each <em>dataset</em> holds zero or more tables. These tables are roughly like tables in a relational database; the differences are discussed later.</p>
+
+<p>Each table is internally stored as a set of files in cloud storage - and cloud storage is well known to be capable of holding vast amounts of data. These files are not directly accessible; the only access to the data in them is via BigQuery commands. Nevertheless, keeping the cloud-storage-based nature of data-storage in mind is useful for understanding some of the behaviour of BigQuery.</p>
+
+<p>Tables can be partitioned by date, in which case the underlying cloud-storage has a separate “folder” per day, holding the files in that date-partition.  When a query specifies the desired partitions in its where-clause then only the files in the relevant folders need to be read, with obvious performance benefits. In addition, deleting all data in a partition is efficient (see time-to-live later). The date on which partitioning is done can be a column from the table schema, or can be the date at which the row was inserted.</p>
+
+<p>Tables can also be “sharded”. In effect, a set of tables with a common name-prefix are created, and “wildcard queries” can be used to apply the same SQL command to all matching tables. As with partitioning-by-date, each “shard” stores data in its own cloud-storage folder making queries that only affect some shards more efficient, and allowing easy deletion of specific shards. Sharded tables do not need to have exactly the same schema, but widely differing schemas will make it hard to write SQL operations that can be applied over multiple shards.</p>
+
+<p>Appending a batch of new records to a table (eg via a <em>load job</em>) simply creates a new file. A background thread may merge small files into larger ones for storage efficiency. When streaming records into BigQuery, the records are simply appended to a file which “rolls over” based on time or maximum size; this file is called the <em>streaming buffer</em>. BigQuery does validate that the new records comply with the table schema (which is a fairly easy and fast test). Because BigQuery does not support primary keys or foreign-key-constraints, there are no performance-sapping tests that need to be done to verify consistency on insert. Similarly, because BigQuery does not support indexes, there are no additional files to update and no associated disk seeks need to be done. Appending data to a BigQuery table is therefore very fast - or in other words, the rate at which data can be written to BigQuery is very high.</p>
+
+<p>Records are stored within files in <a href="https://cloud.google.com/blog/big-data/2016/04/inside-capacitor-bigquerys-next-generation-columnar-storage-format">Capacitor</a> format, which is <em>column oriented</em> (and similar to ORC or Parquet formats used by Hadoop and Spark). This format makes it very efficient to execute queries against the table which only test a small subset of fields in the where-clause or only fetch a small subset of fields in the select-clause. Storing nulls is also very space-efficient. In fact, data storage in such formats (Capacitor, ORC, Parquet) is far more space-efficient than with traditional relational DBs.</p>
+
+<h1 id="bigquery-vs-relational">BigQuery vs Relational</h1>
+
+<p>Comparing BigQuery features to relational databases:</p>
+
+<ul>
+  <li>tables have a fixed schema like relational</li>
+  <li>no primary keys</li>
+  <li>no indexes</li>
+  <li>the set of datatypes is quite limited: string, bytes (bytearray), bool, int64, float64, and several date-types. No <code>Numeric(x,y)</code>.</li>
+  <li>additional datatypes <code>record</code> and <code>array</code> available, with SQL syntax extensions to access data in such fields</li>
+</ul>
+
+<p>The lack of primary keys is the most striking difference. If duplicate records should not exist in the dataset, then the applications which write data are responsible for avoiding that. However BigQuery is best used as an <em>append-only</em> database, in which case the lack of keys is less relevant.</p>
+
+<p>The “append-mostly” nature of BigQuery means that data models are typically slightly different. Rather than overwriting records, consider appending new “change event” records to the table. The database thus becomes a historical record of events that have occurred, rather than a snapshot of the current state. Where such a “current state snapshot” is needed, it is worth considering <em>computing</em> this from the historical information, and then either storing that as a new table in BigQuery, or writing that state to a mutable database such as BigTable or a SQL database. This is sometimes called <em>event sourcing</em>; see also the <a href="https://en.wikipedia.org/wiki/Lambda_architecture">lambda architecture</a> and <a href="http://milinda.pathirage.org/kappa-architecture.com/">kappa architecture</a>.</p>
+
+<p>The lack of indexes means that queries are based on <em>table scans</em> (with some optimisations to skip over irrelevant blocks of data). This is actually quite efficient for the kinds of workloads that BigQuery is intended for - running queries that compute sum/min/max and other mathematical properties over large datasets, or joins of large sets of records. In short, table-scans are not bad for OLAP-style workloads. As noted earlier, the lack of indexes means that inserts into BigQuery are very fast. The use of table-scans as a base principle also makes it easier to parallelise operations - eg run a query on hundreds of nodes in parallel, each dealing with a subset of the table.</p>
+
+<h1 id="processing-locations">Processing Locations</h1>
+
+<p>GCP has three different levels of geographic distribution:</p>
+
+<ul>
+  <li>zone - a specific datacenter, eg “europe-west1-b”</li>
+  <li>region - a set of datacenters, eg “europe-west1”</li>
+  <li>multi-region (aka location) - a set of regions, eg “EU”</li>
+</ul>
+
+<p>The BigQuery service is available only at the multi-region level. Each BigQuery dataset has an associated <em>multi-region</em> which controls where the data in the associated tables are stored. A BigQuery query is also executed in a <em>multi-region</em>; normally it is not necessary to specify this as the location will be determined from the location of the queried datasets.</p>
+
+<p>It is not possible to specify that data is stored in a specific region, nor that BigQuery execution occurs in a specific region.</p>
+
+<p>Open question: is a query that joins tables across multi-regions allowed? probably not..</p>
+
+<h1 id="load-jobs">Load Jobs</h1>
+
+<p>The easiest way to get data into a BigQuery table is to write it to a file in Google cloud storage, and then to schedule a BigQuery <em>load job</em>. This will be executed as soon as there are some idle BigQuery worker nodes - which of course depends on how busy the Google datacenters are. In practice, a load-job starts executing within a minute or so. And load-jobs are <em>free</em>, regardless of how much data is loaded! Of course, you pay for storage once the data is in BigQuery, and you pay to query it.</p>
+
+<p>There is a <a href="https://cloud.google.com/bigquery/quotas">quota</a> of 1000 load jobs per day per table, and 50,000 per project per day - quite generous.</p>
+
+<p>There are quite strict constraints on the format of the data to be loaded. Formats CSV, JSON, and AVRO are supported.</p>
+
+<p>For CSV:</p>
+
+<ul>
+  <li>the file may have a header</li>
+  <li>the field-separator is configurable, but must be a single character</li>
+  <li>date and timestamp columns must have exactly the expected format</li>
+</ul>
+
+<p>For JSON:</p>
+
+<ul>
+  <li>the file must contain one JSON object per line (no array-start or array-end chars are expected or allowed)</li>
+  <li>date and timestamp columns must have exactly the expected format</li>
+</ul>
+
+<p>If the data to be loaded does not comply with the above formats, then either the data must be modified before load, or a GCP dataflow program should be written to read lines from the file and write to BigQuery. A dataflow application can still submit the data as a <em>load job</em>.</p>
+
+<p>Load jobs are <em>atomic</em>; either all of the data is loaded into the target table, or none of it.</p>
+
+<h1 id="streaming-inserts">Streaming Inserts</h1>
+
+<p>As alternative to <em>load jobs</em>, data can be written to BigQuery in “real time” (<a href="https://cloud.google.com/bigquery/streaming-data-into-bigquery">streaming</a>). As noted earlier, BigQuery can save data at a high rate. Data streamed into a table is appended to a set of temporary files called the <em>streaming buffer</em>; the records are later moved to their “proper” location.</p>
+
+<p>Unlike <em>load jobs</em>, streaming writes are charged per megabyte - and the costs are significant.</p>
+
+<p>When querying a date-partitioned table into which data is being streamed, data in the <em>streaming buffers</em> is only included in the query for dates 30 days in the past or 5 days in the future!</p>
+
+<p>When executing a “batch” <em>load job</em>, the loading of data is atomic - either all data is inserted (and exactly once), or the job fails and no data is inserted. When inserting data via streaming, things are not so clear. Inserts are fairly reliable, but when there are network problems between client app and BigQuery, or server problems within the BigQuery system then the client (using BigQuery client libs) may auto-retry; because there are no <em>primary keys</em> in BigQuery this can cause the same records to be inserted twice. The client application sending records to BigQuery can reduce the probability of this by tagging each record with a unique “streaming id”; this value is saved into the <em>streaming buffers</em> within BigQuery but later discarded when the data is moved from the temporary streaming buffers to the real table partitions. BigQuery silently drops records if a record already exists within the streaming buffer with the same id; this means that retries which cause the same records to be inserted multiple times within a short time period do not cause duplicates - where the “short period” is however frequently BigQuery moves data out of the streaming buffers.</p>
+
+<p>If the records being inserted have a “natural primary key” then <a href="https://cloud.google.com/bigquery/streaming-data-into-bigquery">the following query from the BigQuery documentation</a> can remove duplicates - by copying the table and excluding the undesired records. This can only be done when streaming is not currently inserting into the table, and is inefficient - ie should be done infrequently or only when needed.  Of course you need to replace <code>ID_COLUMN</code> with the “logical key” of your table (criteria for which no duplicates should exist).</p>
+
+<pre><code>#standardSQL
+SELECT
+  * EXCEPT(row_number)
+FROM (
+  SELECT
+    *,
+    ROW_NUMBER()
+          OVER (PARTITION BY ID_COLUMN) row_number
+  FROM
+    `TABLE_NAME`)
+WHERE
+  row_number = 1
+</code></pre>
+
+<h1 id="accessing-external-data-sources">Accessing External Data Sources</h1>
+
+<p>BigQuery has some basic (primitive) support for querying data that has not been <em>loaded</em> into a BigQuery-managed table. However its support is not as extensive as <em>Hive</em>, where external data is a first-class citizen; the number of queries of external data per day is limited by a quota, and performance is poorer.</p>
+
+<p>External data can be read from:</p>
+
+<ul>
+  <li>cloud storage</li>
+  <li>google drive spreadsheets</li>
+  <li>bigtable</li>
+</ul>
+
+<p>When reading from cloud storage, the requirements for the source file are the same as for a load-job: CSV, JSON or AVRO, with the constraints documented in the section above on <em>load jobs</em>, eg timestamps must be in exactly the right format. The data is not actually loaded into BigQuery, but each query counts towards the quota for load-jobs. Such a solution is therefore only appropriate for data which is accessed rarely, or just once before being transformed and stored natively in BigQuery.</p>
+
+<p>One interesting additional file-format supported is a <em>Google Datastore backup file</em>. This is the only Bigquery/Datastore integration available.</p>
+
+<p>The cloud-storage bucket in which external data is stored <em>must</em> be of type <em>multi-regional</em>, with a multi-region that matches the region in which the query is being executed; see the dropdown named “processing location” in the “show options” pane of the query window in the BigQuery web UI.</p>
+
+<p>Querying Bigtable from BigQuery seems to require a rather odd syntax (I haven’t tried it myself).</p>
+
+<p>One of the primary use-cases for external data sources is to read them once, and insert the data into a “proper” BigQuery table, ie to use the external data definition as part of an ETL process.</p>
+
+<p>There is no way to query external relational databases from BigQuery.</p>
+
+<h1 id="sharding-and-partitioning">Sharding and Partitioning</h1>
+
+<p>As noted earlier, tables can be partitioned by day - either based on a column in the schema, or on the date that a record was inserted.</p>
+
+<p>Queries which use the partition-date in the where-clause are then far more efficient. Partitions can also be efficiently deleted.</p>
+
+<p>BigQuery also offers a basic kind of partitioning based on non-date columns; this is better named “sharding”. In effect, each such shard is its own table, but the tables have a common name-prefix. A “template table” can be defined, allowing new “shards” to be automatically created when data is inserted.</p>
+
+<p>There is a limit on the number of partitions in a table; this effectively limits a date-partitioned table to around 7 years of data.</p>
+
+<h1 id="partition-based-time-to-live">Partition-based Time To Live</h1>
+
+<p>When a table is partitioned by date, then the table can have an associated “partition lifetime” setting. When a partition’s associated date is older than the lifetime then the entire partition is deleted automatically. For some kinds of datasets this can be very convenient.</p>
+
+<h1 id="standard-and-legacy-sql">Standard and Legacy SQL</h1>
+
+<p>The original query language for BigQuery was a significantly modified variant of SQL; this is called “legacy SQL”. Later, BigQuery was updated to support nearly standards-compliant SQL (“standard SQL”).</p>
+
+<p>Unfortunately, in the BigQuery web UI the “legacy SQL” syntax is still the default - meaning queries in the new (standard) syntax are rejected by default. The expected syntax can be changed by opening the “options” pane in the query screen of the UI, and unticking “legacy SQL”, but it soon gets annoying doing this repeatedly. It is easier to simply add <code>#standardSQL</code> in the query-editor pane before the query itself. Example:</p>
+
+<pre><code>#standardSQL
+select ....
+</code></pre>
+
+<h1 id="pricing">Pricing</h1>
+
+<p>BigQuery pricing is simple; only three factors are relevant:</p>
+
+<ul>
+  <li>the amount of data stored in BigQuery tables</li>
+  <li>the amount of data streamed into BigQuery tables</li>
+  <li>the amount of bytes read/written by executed queries</li>
+  <li>the amount of inter-region network traffic</li>
+</ul>
+
+<p>Data in BigQuery tables is actually stored as (hidden) files in Cloud Storage, and this storage is charged at exactly the same price as regular Cloud Storage usage. In addition, the file-format used by BigQuery is extremely compact/compressed. Data storage is therefore very good value.</p>
+
+<p>Writing data into BigQuery using background “load jobs” is free (limited to 1000 jobs per table per day). Streaming (real-time) writes are charged per gigabyte and can be significant.</p>
+
+<p>Each query is charged according to the number of bytes that the query needed to read from disk. Pricing is reasonable - see the documentation.</p>
+
+<p>When queries are issued from within the same GCP region, then network traffic is free. For queries issued from outside the same GCP region, network traffic is charged at the usual rates.</p>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<ul>
+  <li><a href="https://cloud.google.com/bigquery/">Google: BigQuery Home Site</a></li>
+  <li><a href="https://cloud.google.com/blog/big-data/2016/01/bigquery-under-the-hood">Google: BigQuery under the hood</a></li>
+  <li><a href="https://cloud.google.com/solutions/teradata-to-gcp">Google: Transitioning from Data Warehousing to BigQuery</a></li>
+  <li><a href="https://cloud.google.com/solutions/bigquery-data-warehouse">Google: BigQuery for Data Warehouse Practitioners</a></li>
+  <li><a href="https://cloud.google.com/bigquery/streaming-data-into-bigquery">Google: Streaming Data into BigQuery</a></li>
+  <li>
+<a href="https://www.dremio.com/what-is-a-data-warehouse/">Dremio: What is a Data Warehouse</a> - good summary of what a Data Warehouse is and does.</li>
+  <li>
+<a href="https://www.toptal.com/database/google-bigquery-tutorial">Toptal: When Does it Make Sense to Use Google BigQuery</a> - a nice real-world example of getting a business benefit by offloading analytic tasks from a local relational DB into the Google cloud with BigQuery.</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/google-bigquery-overview/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

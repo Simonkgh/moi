@@ -1,0 +1,358 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Setting Up a Personal Mailserver</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Setting Up a Personal Mailserver</h1>
+    <aside>First published on: January 5, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>This article describes how to set up a personal email server on a hosted virtual private server (vps), suitable for handling email for a small number of people eg a family. It assumes moderate competence in Linux administration - eg being comfortable editing config-files, restarting services, adding system users.</p>
+
+<p>The resulting system uses Postfix + Dovecot + Spamassassin, with user-accounts defined via config-files (not a database). There are dozens, if not hundreds of tutorials/guides on this topic on the internet, and many are more elegantly presented than this one. What is different here is the amount of background information on <em>how the components work</em>, and <em>why specific config options have been chosen</em>. This isn’t a “quick read” - but setting up an email server is <em>not</em> a quick task :-).</p>
+
+<p>I’m no expert in this area - the information below are effectively notes of research that I made while figuring out how to set up a personal email system the way I needed it. I dislike simply following steps 1..N in a guide without understanding the underlying system; that makes it difficult to adapt instructions to slightly different requirements, to handle differences between distributions and software versions, etc. The background information presented here will hopefully make this article useful event if your requirements are slightly different from mine.</p>
+
+<p>This is actually the first page of 4; the others are linked to at the appropriate places below:</p>
+
+<ul>
+  <li>overview (this page)</li>
+  <li><a href="/linux/email-theory">email theory</a></li>
+  <li><a href="/linux/email-postfix-theory">postfix theory</a></li>
+  <li><a href="/linux/email-postfix-config">postfix configuration</a></li>
+  <li>(update) <a href="/linux/email-roundcube-config">roundcube configuration</a>
+</li>
+  <li>(update) <a href="/linux/email-validation">email validation - SPF, DKIM and DMARC</a>
+</li>
+</ul>
+
+<p>And a warning: setting up an email-server is not trivial. As with many projects, looking back at the final results everything looks fairly simple. However even though I am a moderately experienced linux admin, setting up email took me many late evenings with a number of frustrating detours and bugs before everything worked. Hopefully this article will save you some of that effort, and the end result is very satisfying, but it is still not something to take lightly. Before you start, you should read <a href="https://www.digitalocean.com/community/tutorials/why-you-may-not-want-to-run-your-own-mail-server">Why you may NOT want to run an email server</a>.</p>
+
+<h1 id="the-goal">The Goal</h1>
+
+<p>What I (and probably many others) want from email is:</p>
+
+<ul>
+  <li>to send email from a desktop client (eg Thunderbird)</li>
+  <li>to read email from a desktop client via POP3 or IMAP</li>
+  <li>to be able to also read/write email via a web interface (when on holiday or similar)</li>
+</ul>
+
+<p>The necessary infrastructure should be:</p>
+
+<ul>
+  <li>fairly cheap (ie low resource requirements)</li>
+  <li>fairly reliable</li>
+  <li>fairly private</li>
+  <li>open-source software running on a Linux operating system</li>
+</ul>
+
+<p>I already rent a virtual private server to host this website, and that (linux-based) server is already online 24 hours per day. It seems pointless to pay additional money to a hosting company just to handle my email when the same server could host my mail directly. I expect there are quite a few people with the same goals.</p>
+
+<p>What I do NOT require is a pretty admin interface to add/remove email-accounts, change passwords, etc. This email system is intended for just a small number of people (two in my case), so performing administration via the command-line is adequate for me. The setup I describe below (postfix + dovecot) can be extended with additional packages to provide pretty admin interfaces if needed. However if you have so many users that you need such features, then perhaps the larger “email suites” might be a better fit (see Zimbra, Kolab, etc in section “Choosing an SMTP Server” below).</p>
+
+<h1 id="email-theory">Email Theory</h1>
+
+<p>I recommend that you first read this description of <a href="/linux/email-theory">the basic theory of email servers</a>, which explains some of the terminology used, and the paths data takes through an email system.</p>
+
+<p>Note that much of the documentation that comes directly from mail-related projects (ie is written by the people who have implemented these projects) assumes that email is being delivered to real user accounts on the mailserver - ie the original way email was used in the 1970s. However I believe that it is now far more likely that the mailserver is just an email-storage-location for users who are running email client applications on desktop, laptop, or mobile devices. It therefore pays to be wary of advice direct from developers - they may not be describing a solution that is applicable for you.</p>
+
+<h1 id="assumptions">Assumptions</h1>
+
+<ul>
+  <li>That you already have a personal domain-name.</li>
+  <li>That you already have a virtual private server running Linux. This guide assumes Ubuntu 16.04 LTS, though it should apply with few changes to other linux-based operating systems of the same age or newer.</li>
+  <li>That you know how to obtain an SSL certificate for your mailserver, eg <a href="/linux/letsencrypt">via letsencrypt</a>.</li>
+</ul>
+
+<h1 id="why-not-hosted-email">Why Not Hosted Email?</h1>
+
+<p>This is the first time I have configured an email server; until now email has always been handled by my ISP or an external hosting provider. So why not stay with such a setup?</p>
+
+<p>I have a personal domain (vonos.net), and have an email-address at that domain; ISPs and free email providers generally do not support custom email addresses.</p>
+
+<ul>
+  <li>Google gmail previously provided free hosting for custom email-domains, but as of 2016 that is no longer the case - you need to pay for a commercial google account (gsuite aka google-apps).</li>
+  <li>Zoho (a multinational company based primarily in Japan, Hong Kong, and India) currently provide free hosting of custom email domains, but who knows how long that will last.</li>
+</ul>
+
+<p>I’m not aware of any other free hosting providers. And given that I already pay for a server, it seems pointless to also pay for email. And hosting it personally gives some extra privacy, or at least the feeling that private communication is not being stored on systems not belonging to me, and (in the case of google) is not being scanned for advertising purposes.</p>
+
+<h1 id="choosing-software">Choosing Software</h1>
+
+<h2 id="choosing-an-smtp-server">Choosing an SMTP server</h2>
+
+<p>Wikipedia has an excellent page listing all the <a href="https://en.wikipedia.org/wiki/Comparison_of_mail_servers">major email implementations</a>.</p>
+
+<p>However many of these are not open-source, or not linux-based. After filtering for these criteria, the remaining options are:</p>
+
+<ul>
+  <li>Citadel, Kolab, Zimbra</li>
+  <li>Haraka (node.js-based)</li>
+  <li>Courier</li>
+  <li>Postfix</li>
+  <li>Exim</li>
+  <li>sendmail</li>
+  <li>OpenSMTPD</li>
+  <li>qmail</li>
+</ul>
+
+<p>Citadel, Kolab and Zimbra are all “full suites” that provide a range of email and calendaring tools, and nice web-based admin tools to manage them, along with an embedded SMTP server. However these all assume they are being installed on a dedicated server, and set up webservers, databases, and many other components for internal purposes. This article is about installing a light-weight set of tools on a server that is also being used for other purposes, eg serving websites.</p>
+
+<p>Haraka looks interesting, but it is somewhat obscure and it appears there is little “community support”. Running a “service” based on node.js is also a little too adventurous for this project.</p>
+
+<p>Courier is interesting, as it not only provides an SMTP server but also an IMAP server and web-based email client. I chose not to follow this path because more documentation was available online on other options, but it is definitely worth considering. As with the “full suites”, it would be a more resource-intensive solution than the one chosen.</p>
+
+<p>Postfix, Exim, qmail, sendmail and OpenSMTPD are all fairly similar; they provide an SMTP server only and IMAP/web-access must be provided by separate software. All are available from the standard Ubuntu package repository. After some research (eg <a href="http://shearer.org/MTA_Comparison">here</a>), this seems to be a fair summary:</p>
+
+<ul>
+  <li>Postfix is considered to be secure, and scalable up to very large installations. However it has a reputation for being non-trivial to configure. It also has fewer features than Exim.</li>
+  <li>Exim is considered less secure than Postfix, but with more features. It is also non-trivial to configure, but not too bad. Sadly Debian maintainers for this package have added a “configuration wizard” onto it which frankly makes it far <em>more</em> difficult to configure than it originally was. And this wizard is mandatory AFAICT.</li>
+  <li>Sendmail is a very old program, and is considered to have one of the most unpleasant configuration file formats ever. It is generally obsolete now - don’t use. However newer programs often offer sendmail-compliant interfaces, including even installing an application under name “sendmail” for backwards-compatibility.</li>
+  <li>OpenSMTPD is reasonably new, certainly postdating postfix and exim. It is originally a BSD project, though it is available as a standard package for Ubuntu. It has few features, but mostly sufficient for this usecase. Its configuration format is nice, but its bsd-like flavour makes it somewhat odd in a linux environment. It also appears to implement many features as “external daemons” rather than internally, which means running multiple processes and some not-quite-elegant config. Most critically, OpenSMTPD has no builtin support for RBLs.</li>
+  <li>qmail was a significant option in the early 2000s, but is now effectively “abandonware”. Its emphasis on security also implies many many independent servers, and complex configuration.</li>
+</ul>
+
+<p>There are also a couple of projects that provide a <em>container image</em> with all software preconfigured, which can be started within a virtual machine on some host; see mailinabox and flockport. I am not sure how “low config” these are, considering that there are many site-specific options such as the email-domain, ssl-certificates, and users which need to be defined. Nor am I sure that these will be “low resource” solutions, so I didn’t try either out. If you do have some experience with these, please let me know how it turned out!</p>
+
+<p>In the end, I chose Postfix due to its reputation for reasonable configuration (at least better than some), widespread usage, and the significant amount of online documentation and community support available (eg articles on stackoverflow).</p>
+
+<h2 id="choosing-an-imap-server">Choosing an IMAP server</h2>
+
+<p>Given that I have chosen Postfix as an SMTP server, it is necessary to also pick a separate tool for IMAP access.</p>
+
+<p>This choice is simpler than an SMTP server: there are just two credible candidates, Cyrus-imap and <a href="http://wiki.dovecot.org/">Dovecot</a>. I chose Dovecot, mainly because I found two good online articles describing postfix+dovecot setup.</p>
+
+<h2 id="choosing-a-web-email-client">Choosing a Web Email Client</h2>
+
+<p>At some future time, I intend to add a web-based interface to mail, for access when on holiday etc. This article doesn’t cover webmail but the Roundcube project seems to be the standard solution for a standalone web-email-client, and is often used together with Dovecot/Postfix.</p>
+
+<h2 id="other-software">Other Software</h2>
+
+<p>The iredmail project comes up in searches for email-software; it includes many open-source components but is not itself open-source and is not included in the standard Ubuntu/Debian archives.</p>
+
+<p>Vimbadmin is just an admin front-end for postfix/dovecot that avoids the need to log in to the server via SSH in order to add/modify users. For a small-scale personal setup this doesn’t seem necessary.</p>
+
+<h1 id="postfix-theory">Postfix Theory</h1>
+
+<p>Now that Postfix+Dovecot+RoundCube have been chosen as tools, I recommend reading <a href="/linux/email-postfix-theory">the basic theory behind postfix</a>.</p>
+
+<h1 id="configuring-email">Configuring Email</h1>
+
+<p>And finally the actual setup steps are described <a href="/linux/email-postfix-config">here</a>.</p>
+
+<h1 id="notes-on-choosing-a-virtual-private-server-provider">Notes on Choosing a Virtual Private Server Provider</h1>
+
+<p>If you do not yet have a suitable linux-based server which has a static IP address and is on 24 hours per day, then I recommend signing up for a “virtual private server” from one of the large hosting companies. A basic server costs around 9 Euros (10 USD) per month, and can be used for web-hosting, email-hosting, and anything else you need.</p>
+
+<p>I currently use a VPS from Digital Ocean (digitalocean.com), and I can recommend them. Digital Ocean is based in the USA, but with datacenters in several places around the world - and you choose the desired location for each virtual server you configure. Setting up an account, and configuring a server was <em>really easy</em> - far smoother than I had expected. The website for administrating an account and associated servers is well thought-out and there is a good amount of help/explanation available when needed. In short, Digital Ocean really is set up for the “small user” wanting a single server - as long as that user is ready to do their work from an SSH console (not much “point-and-click” style configuration available for the servers themselves, other than being able to choose an initial OS image with some packages pre-installed and pre-configured).</p>
+
+<p>Digital Ocean don’t bombard with advertising, or do anything else undesirable (so far). I have received a couple of emails suggesting some additional products I could use, and encouraging me to join their forums, but they were actually relevant.</p>
+
+<p>Each Virtual Server is allocated a static public IPv4 address, and optionally an IPv6 address (not enabled by default, but just a click away).</p>
+
+<p>Digital Ocean provide DNS-related configuration pages which support several very important steps when setting up email:</p>
+
+<ul>
+  <li>defining a PTR-record that maps ip-address to domain-name; this is used by other webservers to filter out spammers so it is important that such a record exists.</li>
+  <li>defining an A-record to map domain-name to host (fairly standard)</li>
+  <li>defining a CNAME-record to define aliases for a host (eg mail.vonos.net -&gt; vonos.net)</li>
+  <li>defining an MX-record that maps an email-domain-name to a host-name.</li>
+  <li>defining TXT records for SPF, DKIM and DMARC declarations</li>
+</ul>
+
+<p>Digital Ocean are not a domain-name-registrar. The domain-name used for email needs to be registered with someone else, and that registrar also needs to configure NS-records to point to digitalocean DNS servers; most registrars provide a web-page where NS records can be modified by the domain-name owner themselves.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://www.digitalocean.com/community/tutorials/how-to-set-up-a-postfix-e-mail-server-with-dovecot">Tutorial: How to set up a Postfix Email Server with Dovecot</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/email-overview/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

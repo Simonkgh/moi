@@ -1,0 +1,898 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Monads for Object Oriented Developers</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Monads for Object Oriented Developers</h1>
+    <aside>First published on: June 10, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 class="no_toc" id="introduction">Introduction</h1>
+
+<p>I have plenty of experience in procedural and object-oriented programming, but little in functional styles (just one project in Scala). Just for fun, I decided to learn a little Haskell programming, and found it interesting and challenging but not mind-bending - except for monads. For some reason, the way monads are described in all the standard documentation just made my head spin.</p>
+
+<p>After much pondering, I think I’ve got it figured out - and it isn’t so hard after all. Below is an explanation aimed at object-oriented programmers in general. It’s a practical explanation, not a mathematical one; I’m really interested in <em>what this concept can do for me as a developer</em> rather than the technical details of how it is defined.</p>
+
+<p>Note that the monad pattern doesn’t occur only in Haskell - it comes up in many functional languages, and can also be useful in object-oriented programming.</p>
+
+<p>This has turned out to be quite a long article, so you might want to read the summary at the end first, to decide whether you really want to bother with the rest. At the least, it’s a counter-balance to the many short articles on monads I read which stopped just when things were getting interesting; here all the details are spelled out at (possibly excessive) length. This article could be considered an extension of <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">the wikipedia article on monads in functional languages</a>; if you can understand that page then you don’t need this article!</p>
+
+<h1 class="no_toc" id="contents">Contents</h1>
+
+<ul id="markdown-toc">
+  <li><a href="#monad-as-a-design-pattern" id="markdown-toc-monad-as-a-design-pattern">Monad as a Design Pattern</a></li>
+  <li>
+<a href="#monad-pattern-benefits" id="markdown-toc-monad-pattern-benefits">Monad Pattern Benefits</a>    <ul>
+      <li><a href="#monads-as-function-composers" id="markdown-toc-monads-as-function-composers">Monads as Function Composers</a></li>
+      <li><a href="#monads-as-hidden-state-managers" id="markdown-toc-monads-as-hidden-state-managers">Monads as Hidden State Managers</a></li>
+      <li><a href="#monads-as-pipelines" id="markdown-toc-monads-as-pipelines">Monads as Pipelines</a></li>
+      <li><a href="#monads-as-containers" id="markdown-toc-monads-as-containers">Monads as Containers</a></li>
+      <li><a href="#monads-as-control-flow-managers" id="markdown-toc-monads-as-control-flow-managers">Monads as Control Flow Managers</a></li>
+    </ul>
+  </li>
+  <li><a href="#monads-in-code" id="markdown-toc-monads-in-code">Monads in Code</a></li>
+  <li>
+<a href="#some-concrete-examples" id="markdown-toc-some-concrete-examples">Some Concrete Examples</a>    <ul>
+      <li><a href="#the-list-pattern" id="markdown-toc-the-list-pattern">The List Pattern</a></li>
+      <li><a href="#the-optional-value-pattern" id="markdown-toc-the-optional-value-pattern">The Optional Value Pattern</a></li>
+      <li><a href="#the-error-collector-pattern" id="markdown-toc-the-error-collector-pattern">The Error Collector Pattern</a></li>
+      <li><a href="#delayed-execution" id="markdown-toc-delayed-execution">Delayed Execution</a></li>
+    </ul>
+  </li>
+  <li><a href="#a-quick-look-at-the-monad-laws" id="markdown-toc-a-quick-look-at-the-monad-laws">A Quick Look at the Monad Laws</a></li>
+  <li><a href="#conclusion" id="markdown-toc-conclusion">Conclusion</a></li>
+  <li><a href="#summary" id="markdown-toc-summary">Summary</a></li>
+  <li><a href="#appendix-1-the-state-pattern" id="markdown-toc-appendix-1-the-state-pattern">Appendix 1: The State Pattern</a></li>
+  <li><a href="#appendix-2-haskells-io-monad-datatype" id="markdown-toc-appendix-2-haskells-io-monad-datatype">Appendix 2: Haskell’s IO Monad Datatype</a></li>
+  <li><a href="#references" id="markdown-toc-references">References</a></li>
+</ul>
+
+<h1 id="monad-as-a-design-pattern">Monad as a Design Pattern</h1>
+
+<p>The official definition of a monad is a set of constraints; anything that matches these constraints is a monad. But to a developer, a monad is a <a href="http://en.wikipedia.org/wiki/Design_pattern_(computer_science)">design pattern</a>.</p>
+
+<p>The definition doesn’t really define <em>names</em> for the parts of the pattern; it says things like “there must be an operation such that ..”. Different languages/communities then have different conventions for what to call these operations. In addition, there are several equivalent <em>formulations</em> of the pattern. In the same way that a mathematical equation can be written in multiple equivalent forms, the monad laws can also be written in various ways, eg using map+join or the “Kleisli composition operator” (which Haskell calls the “fish operator” as it is written <code>&gt;=&gt;</code>). However the most common definition of a monad is based around an operation typically called “bind” (or compose or flatmap).</p>
+
+<p>Because it is a pattern, it can be implemented in just about any language, without support from the language or its standard library - as long as the language supports generics and higher-ordered-functions, ie functions as parameters to other functions. However there are libraries for various languages that provide specific base types that monadic types can be derived from, and a few languages provide useful “sugar syntax” for working with types that derive from specific types in their standard libraries. Haskell’s standard monad type and “do” keyword are an example, and I believe F# also has custom features for this.</p>
+
+<p>The things that the monad pattern can provide are described in general terms below, then this article takes a closer look at how a monad definition might look to an object-oriented programmer. Next there are some examples of specific monad implementations to get an idea of how this works in practice. Finally the official monad definition is looked at again in general terms, particularly how it corresponds to the examples.</p>
+
+<p>There are occasional code examples here; these are given in pseudo-code that are based on Kotlin - a language less verbose than Java, but still in the same family.</p>
+
+<p>Some useful terminology: monad is the name of the general pattern (and sometimes of a standard base class); a monadic type is a specific implementation.</p>
+
+<p>Interestingly, the word monad originally <a href="https://en.wikipedia.org/wiki/Monad_(philosophy)">comes from greek philosophy</a> and then was <a href="https://en.wikipedia.org/wiki/Monad_(category_theory)">used in category theory</a> (a branch of mathematics). The <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">relevance of these theoretical concepts to functional programming</a> was really only revealed by Eugenio Moggi in 1989 (quite late for a core software concept) and the full current understanding (including functors and monoids) was only formulated around 2010 (see history section of previous link).</p>
+
+<h1 id="monad-pattern-benefits">Monad Pattern Benefits</h1>
+
+<p>There are a few things that monadic types can do which makes them worthwhile looking at. They can:</p>
+
+<ul>
+  <li>compose functions</li>
+  <li>manage hidden state</li>
+  <li>represent pipelines of transformations</li>
+  <li>act as containers of multiple values</li>
+  <li>perform “control flow” over a sequence of operations</li>
+</ul>
+
+<p>The next few sections looks at these aspects in turn, although they are actually related, ie are different “views” of the same behaviour with different emphasis.</p>
+
+<h2 id="monads-as-function-composers">Monads as Function Composers</h2>
+
+<p>One of the principles of functional programming is <em>function composition</em>: the idea of producing one function from multiple others. Among other uses this is a building block of abstraction.</p>
+
+<p>Consider a couple of function definitions (using functional-language-style syntax here):</p>
+
+<pre><code>inc = i -&gt; i + 1
+intToString = i -&gt; tostring(i)
+</code></pre>
+
+<p>It is possible to create a new function which combines these:</p>
+
+<pre><code>incThenString = i -&gt; intToString(inc(i))
+</code></pre>
+
+<p>This is <em>function composition</em>. And in fact it is possible to define a function that <em>creates such functions for you</em> (example in Kotlin):</p>
+
+<pre><code>fun&lt;T1,T2,T3&gt; compose(f1: (T1)-&gt;T2, f2: (T2)-&gt;T3) : (T1)-&gt;T3 = { t -&gt; f2(f1(t)) } 
+
+val inc : (Int) -&gt; Int = { x -&gt; x + 1 }
+val intToString : (Int) -&gt; String = { x -&gt; x.toString() + "!" }
+val incThenString = compose(inc, intToString)
+
+println(incThenString(12)) // "13!"
+</code></pre>
+
+<p>This function <code>compose</code> takes any two functions and returns a new function that applies them one after the other - providing the parameter type of each function matches the return type of the preceding one. This is often implemented as an infix operator, ie <code>f1 compose f2</code>, and sometimes written <code>&gt;.&gt;</code> ie <code>f1 &gt;.&gt; f2</code>. Data can be considered to “flow” through the functions in the order listed (and as shown later, this is how monads compose functions).</p>
+
+<p>Actually, “dot” composition is probably the more common function composition operator outside of monads, and combines the functions in the other order: <code>f . g</code> means <code>f(g(x))</code>, ie data is processed first by g and then by f. Data “flows” from right to left - which sometimes matches “normal english usage” better: <code>sqrt . sum . squareall</code> produces a combined function which calculates “the square root of the sum of the squares of all input values”.</p>
+
+<p>There is, however, a limitation on simple function composition: the composed functions cannot influence each other except via the output of one being the input of the other. Monadic composition instead requires input functions with signatures <code>(T1)-&gt;SomeMonad&lt;T2&gt;</code> and <code>(T2)-&gt;SomeMonad&lt;T3&gt;</code> and produces a combined function with signature <code>(T1)-&gt;SomeMonad&lt;T3&gt;</code>, ie the functions to be composed need to <em>wrap their results</em>. In return for this extra complexity, this supports a “hidden side channel” between the functions that allows the resulting (composed) function to take into account things other than just the input and output parameters of each function.</p>
+
+<p>The way that the side-channel is used depends upon the type SomeMonad, ie there isn’t just a single composition implementation; each monadic type defines its own implementation. And note that normal function composition doesn’t work for two functions <code>(T1)-&gt;SomeMonad&lt;T2&gt;</code> and <code>(T2)-&gt;SomeMonad&lt;T3&gt;</code> because the output type of the first function is not equal to the input type of the second; instead <em>monadic composition</em> is required. This ability to support a “side channel” is why the monad’s version of function composition is sometimes called <a href="https://consileon.pl/blog/monads-function-composition-steroids/">function composition on steroids</a>.</p>
+
+<p>As noted earlier, there are various ways of expressing the core monad pattern. One way is using the “Kleisli composition operator” aka “fish operator” (written <code>&gt;=&gt;</code> which looks like a fish); this truly takes two functions with the appropriate (monad-returning) signatures and returns a new function. Another way is using the “bind operator” (written <code>&gt;&gt;=</code>) in which a <em>value</em> of <em>a monadic type</em> internally wraps/hides one function and a single new function is then “bound to” or “composed with” the internal one. Yet another also embeds a function “inside the monadic value” and then builds the necessary composition logic from two operations: <code>map</code> and <code>join</code> (aka <code>flatten</code>). All these are equivalent but provide different “apis” to the monad pattern; the “bind” approach is generally the most useful for programmers (leads to the shortest code). The “bind” operation is called <code>flatmap</code> in some contexts.</p>
+
+<p>Of course in most cases we want to eventually get the result of the execution of composed functions - something not directly available as the composed functions accept an input but return a wrapper (<code>SomeMonad&lt;T&gt;</code>) rather than a directly useful value. Monadic types therefore generally provide additional functions to “unwrap” a value of that type, ie “extract” the wrapped value. That isn’t part of the monadic pattern though - and in fact Haskell’s IO monad does <em>not</em> provide any unwrap operation; its whole goal is to compose functions which have <em>side effects</em>.</p>
+
+<p>This ability to compose functions is really the basis for the other benefits such as state-management, pipelines, and collections.</p>
+
+<h2 id="monads-as-hidden-state-managers">Monads as Hidden State Managers</h2>
+
+<p>In object-oriented languages, the concept of objects with private fields is, well, a core thing. And in an object-oriented language we have things like the builder-pattern. In the purest form of the builder pattern, the builder type provides a set of methods where each call returns a <em>copy</em> of the builder object it was invoked on, with one or more fields updated. Eventually we ask the builder to create some final object. During the sequence of calls to builder methods, there is effectively some “hidden state” that is being propagated at each call from the old to new object.</p>
+
+<p>In functional languages, implementing something like a builder is more complex. Functions can have hidden state, ie values that can affect their outputs but are not visible in their parameter-lists; see <em>closures</em> or <em>partial application</em>. However there is no obvious mechanism for passing this along a sequence of function calls. Monadic function composition provides a way to pass this state from one “function evaluation” to another. Many functional languages use this to implement things like the object-oriented “builder” pattern or state-machines.</p>
+
+<p>For object-oriented programmers, this might actually feel pretty obvious. A monad is an object with state which has a method which takes some parameter and produces another object with state - that’s pretty much what any (immutable) object does. However it’s important to note a couple of things..</p>
+
+<p>First, state management isn’t perhaps so obvious to mathematicians or functional programmers - and their different view of state does tend to affect the terminology which they use when talking about these things.</p>
+
+<p>And second, while there are obvious ways to do similar things in object-oriented languages, what the monad pattern does provide is a <em>simple and consistent API</em> to things doing state-management. Each monadic “object” wraps some value that is “the thing being processed” and provides a way to apply a transformation to that value; code which operates on this value needs to know nothing else about it. This provides strong decoupling between code that “transforms values of type X” and the code that decides how hidden state might be used to pre-process the value before the transformation or post-process the result.</p>
+
+<h2 id="monads-as-pipelines">Monads as Pipelines</h2>
+
+<p>When you have a chain of different operations that you want to apply to some starting type T then the monad pattern allows you compose them together, ending up with a single function (convenient). Once you’ve built this combined function, you invoke it and you get back the final result of all the functions - though due to the way the pattern is defined, there are some complications about providing the initial value and extracting the final result; that’s discussed later.</p>
+
+<p>This is the “pipeline” or “lazy” view of the monad pattern; focusing on the “bind” operation leads us to think of it as effectively “building a program to execute later”. This is a very useful concept - eg when processing a <em>stream</em> of input values.</p>
+
+<p>Of course regular imperative programming languages support declaring functions consisting of a sequence of statements, ie if you want to just execute a sequence of transforms, you could do this instead:</p>
+
+<pre><code>fun myFunction(a : SomeType) {
+  val b = f1(a);
+  val c = f2(b);
+  val d = f3(c);
+  return f4(d);
+}
+</code></pre>
+
+<p>However the monad pattern provides an elegant “chained function call” syntax to express such sequences. And (far) more importantly, the monadic type <em>can implement custom control flow</em> ie can decide which of the functions in a pipeline are executed when (based on hidden state). This is discussed further in the section “Monads as a Programmable Semicolon”.</p>
+
+<p>The monad pattern doesn’t require that the functions it composes together are pure functions; they can potentially have side-effects. In fact, a function can even have no return-value (return type void or unit in many languages). A monad therefore represents “a sequence of operations” rather than “a pipeline of transformations”. When <code>bind</code> is called with a function that returns no value (Kotlin <code>Unit</code>, Java <code>void</code>) then the resulting monad’s type is <code>M&lt;Unit&gt;</code> or similar. The next operation bound to this monad obviously won’t take a parameter, so sometimes a variant of the bind method (often written <code>&gt;&gt;</code>) is defined whose parameter is not a function but simply an instance of a monad; see later.</p>
+
+<p>A pipeline does need some way to <em>trigger its execution</em>. The previous section on hidden state mentioned that a monadic type typically has at least one additional operation to extract/unwrap the value within the monad; that is typically the trigger for evaluation of a pipeline ie “pulling” a value from the end of the pipeline causes all steps to be executed.</p>
+
+<h2 id="monads-as-containers">Monads as Containers</h2>
+
+<p>The monad laws say that each monadic type needs to have a <em>constructor</em> or <em>factory method</em> which creates an “instance” of it, given some input value. This isn’t quite what it seems, but let’s assume the obvious interpretation for now. What this implies is that a monadic type is a <em>container</em> for a value of some type. And this suggests the possibility that each call to the type’s “bind” function doesn’t have to <em>build a compound function</em> aka pipeline, but can instead be executed immediately, producing a new container of the transformed type.</p>
+
+<p>Depending on the purpose of the monadic type, simply executing functions immediately as they are passed to <code>bind</code> can be a more obvious and efficient solution than building up a “pipeline”.</p>
+
+<p>While a monadic type has just one <em>generic type parameter</em>, there is no constraint on the <em>number of instances</em> of that type it manages. In particular, collections such as lists can fulfil the constraints for being a monad - or looking at it the other way around, a monadic type can provide the expected behaviour of such a collection while also providing the benefits of the monad pattern. In recent years many object-oriented languages have extended the API of their existing collection types to provide monad-compatible methods (<code>map</code> and <code>bind/flatmap</code>).</p>
+
+<p>In a pipeline-centric monadic type, the values that flow from the pipeline might be sourced from somewhere external, eg a file or the results of a DB query. Executing operations immediately (container) vs executing them on-demand (pipeline) might have quite different performance and memory-usage behaviour.</p>
+
+<p>While a monadic type can be a container, not every container is a monadic type; it must also have associated <em>operations</em> which fulfil the monad laws.</p>
+
+<h2 id="monads-as-control-flow-managers">Monads as Control Flow Managers</h2>
+
+<p>Wikipedia has <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">this to say</a>:</p>
+
+<blockquote>
+  <p>a monad is a structure that combines program fragments (functions) and wraps their return values in a type with additional computation. In addition to defining a wrapping monadic type, monads define two operators: one to wrap a value in the monad type, and another to compose together functions that output values of the monad type (these are known as monadic functions). General-purpose languages use monads to reduce boilerplate code needed for common operations (such as dealing with undefined values or fallible functions, or encapsulating bookkeeping code). Functional languages use monads to turn complicated sequences of functions into succinct pipelines that abstract away control flow, and side-effects.</p>
+</blockquote>
+
+<p>This is equivalent to the above sections: a monad is a container of values and can compose functions together in ways that the <em>monadic type</em> controls. This allows separation of the “steps to be applied” (user of the monadic type) and “how to apply the steps” (the monadic type itself).</p>
+
+<p>The monad pattern has similarities with the <em>strategy</em> design pattern often applied in object-oriented programming; some “controller” is passed an object which it calls back into at the appropriate time. The <em>listener/observer</em> pattern is also similar.</p>
+
+<p>There is an analogy that is apparently common in the Haskell community (sorry, couldn’t find the original source):</p>
+
+<blockquote>
+  <p>[…] monads have been described as “programmable semicolons”; a semicolon is the operator used to chain together individual statements in many imperative programming languages, thus the expression implies that extra code will be executed between the statements in the pipeline.</p>
+</blockquote>
+
+<p>This nicely captures the concept of monads. When code is just a sequence of statements, then a compiler will always do the same thing: execute those statements in order. By changing that code to a sequence of calls to a monadic type, that monadic type can apply all sorts of interesting “control flow” across those statements.</p>
+
+<p>In Java, C, C++, etc. we are used to having a hard-wired set of control structures: if/then/else, for, while/do, try/catch etc. But these aren’t always sufficient. It would often be nice to be able to build a list of statements to execute, and then pass that list to some “executor module” that figures out which ones to execute, based on whatever rules it likes. The simplest rule would be: execute each one in order, and return the output of the last function. Another interesting rule would be: execute each one in order but if an exception is thrown then execute a special “handler” function and return its output.</p>
+
+<p>This kind of thing <em>is</em> possible to do in object-oriented languages. It is even possible in C by using function-pointers.  Executing functions in this way can be thought of as some variant of the “Strategy” pattern. But it is so inconvenient that it is rarely worth-while.</p>
+
+<p>The monad design pattern has an API which makes implementing new flow-control patterns possible.</p>
+
+<p>Things that custom control-flow can enable are:</p>
+
+<ul>
+  <li>hidden state management</li>
+  <li>optional execution of operations (apply a statement only under some conditions)</li>
+  <li>building pipelines of operations to be executed later</li>
+  <li>applying an operation to a collection of values rather than just one.</li>
+</ul>
+
+<p>These are all things that can be done without monads, but monads provide a clean and consistent concept that unifies them.</p>
+
+<p>And importantly, a function which defines a pipeline of operations can be <em>passed an initial monad as a parameter</em>, and then bind various operations to it. This allows the caller to produce quite different effects by passing different monads to the same function; the monad can:</p>
+
+<ul>
+  <li>apply operations immediately to one value</li>
+  <li>apply operations in an “on demand” manner to multiple values read from some external source (eg a database)</li>
+  <li>apply operations to multiple values in parallel using multiple threads</li>
+  <li>log operations before and after invoking them</li>
+  <li>and many other possibilities</li>
+</ul>
+
+<p>This is sometimes described as “being polymorphic over the monad type” - the function accepts any monad which is a subtype of some specified base type, with the actual implementation being exchangeable.</p>
+
+<p>The initial monad has this kind of control over behaviour because the “bind” operation is a “map-and-join” operation where the result of the map step is not under the control of the original monad, but the result of the join step is. This does rely on the composed functions returning a monad object which is <em>compatible</em> with the original monad - eg the original might be “some kind of list” and the composed functions must also return “some kind of list”. However that’s still pretty flexible. The exact limitations are described later.</p>
+
+<h1 id="monads-in-code">Monads in Code</h1>
+
+<p>For an object-oriented developer, one way to think about the monad pattern is as an interface which:</p>
+
+<ul>
+  <li>is a generic interface with exactly one type-parameter T, ie is of form <code>SomeMonadicType&lt;T&gt;</code>
+</li>
+  <li>has at least one concrete implementation (variant)</li>
+  <li>has a factory-method for creating an instance</li>
+  <li>has a “map-and-join” method that takes a function as parameter (usually named “bind” or “flatmap” or “<code>&gt;&gt;=</code>”)</li>
+  <li>optionally has a “map” method (can be built on top of map-and-join, but often has a dedicated implementation for performance)</li>
+  <li>has one or more additional methods to somehow extract useful data out of the monad (except in the case of Haskell’s IO monad!)</li>
+</ul>
+
+<p>I have used the term “map-and-join” because I think this describes the operations better than the standard terminology. In particular, the word “bind” suggests building a pipeline when <em>immediate application</em> is often the actual implementation which is rather confusing.</p>
+
+<p>As noted earlier, there are other ways to define the monad pattern which would lead to a slightly different “api” (eg one with two mandatory methods <code>map</code> and <code>join</code>). However the version using “bind” (map-and-join) is by far the most common.</p>
+
+<p>In Kotlin-ish pseudo-code, a monadic type definition might look like:</p>
+
+<pre><code>interface SomeMonadicType&lt;T1&gt; {
+   fun&lt;T2&gt; bind(fn : (T1) -&gt; SomeMonadicType&lt;T2&gt;) : SomeMonadicType&lt;T2&gt; 
+   fun&lt;T2&gt; map(fn : (T1) -&gt; T2)                   : SomeMonadicType&lt;T2&gt; // optional
+   ....
+}
+
+// Factory method to construct some implementation of the above interface
+fun&lt;T&gt; someMonadicTypeOf(T initialValue) : SomeMonadicType&lt;T&gt; {...}
+</code></pre>
+
+<p>The method-names “bind” and “map” can be called something more appropriate for any particular type; for example a type focused on building pipelines might call a method “andThen”. An interface might even offer multiple methods that follow the bind/map law. However this article will assume <code>bind</code> and <code>map</code>..</p>
+
+<p>We’ll have a look at a more formal definition of the monad laws towards the end of the article, and see how they correspond to this more informal description. However this will do in order to understand some examples.</p>
+
+<p>Method <code>map</code> takes as parameter a <em>function</em> which accepts a value of type T1 and returns a value of type T2, ie is capable of transforming the value(s) that the monadic type provides. The <code>map</code> method itself returns a value of the same monadic type as the value it was invoked on - but which can provide zero or more instances of type T2 instead.</p>
+
+<p>Method <code>bind</code> (map-and-join) is similar in principle to the map method, but more general-purpose - and in fact <code>map</code> can be implemented in terms of <code>bind</code>, ie is a special case of it. Here the function passed in also accepts a value of type T1, but instead of returning a T2 it returns a “wrapped” T2 value with the same monadic type as the value it was invoked on. The “join” part is where the magic discussed earlier is applied - the “peeking at hidden state” or “programmable semicolon” behaviour. Sounds complicated, but it’s not really; the examples below will hopefully make this clearer.</p>
+
+<p>Map and bind are effectively “factory methods” which create a new monadic value from an existing one (though in some types and circumstances the returned instance is just the original one on which the method was invoked, ie the method is a no-op). And because they return a monadic value which also has map and bind methods, it is possible to elegantly <em>chain</em> calls.</p>
+
+<p>The functions passed to <code>map</code> and <code>bind</code> are a kind of <em>strategy</em> or <em>callback</em> function; map and bind can then do whatever it wants with that function. The power of the monad pattern is that different monadic types do different kinds of things with that function - and this is hidden from the caller. A function can be given a monadic value, call map, and know what it will get back: another monadic value. What exactly has happened to the data, though, depends on the monadic type - and isn’t actually revealed until something <em>extracts</em> data from the monadic value.</p>
+
+<p>The expression “can provide” has been carefully chosen here, but for many monads the word “wraps” could be used instead, and I’ll use it below when it feels appropriate.</p>
+
+<p>We’ll look at several different kinds of monads below to get a feel for what kinds of things a monad can do. We’ll look at:</p>
+
+<ul>
+  <li>lists</li>
+  <li>optional values</li>
+  <li>error collectors</li>
+  <li>streams/generators and other forms of delayed execution</li>
+  <li>state-encapsulating monads</li>
+</ul>
+
+<p>I’ll describe these in pseudo-code-like manner, as they are really themselves <em>patterns</em> that can be implemented in any language that supports basic functional features.</p>
+
+<p>As these will show, this simple pattern of “give me a function and I’ll call you” allows the decisions about <em>what to do to the data</em> to be separated from concerns like <em>when to do it</em>, <em>under what conditions to do it</em>, and <em>how to get the input value</em> - or in other words allows new <em>flow control</em> patterns to be implemented. This brings benefits like cleaning up code (centralizing those decisions into the monad rather than the calling code) and hiding state.</p>
+
+<p>The magic is of course in:</p>
+
+<ul>
+  <li>what <em>private members</em> the implementations have (their internal hidden state)</li>
+  <li>how the concrete types implement map and bind</li>
+  <li>what other methods the interface has for extracting data from the monadic type…</li>
+</ul>
+
+<p>These benefits get stronger the more calls to map and bind occur in sequence; the more calls that are made, the greater the benefits of having the associated “flow control” code centralized and deduplicated.</p>
+
+<p>Note also that although object-oriented terms like “class” and “method” are being used here, many functional languages have no classes and the same pattern is implemented using algebraic data types and functions instead.</p>
+
+<h1 id="some-concrete-examples">Some Concrete Examples</h1>
+
+<p>Now that some general background has been covered, let’s look at some specific monadic types that can be useful in programming.</p>
+
+<p>Many of these examples could be implemented in an object-oriented language without the monad pattern. However using this pattern provides great abstractions; it allows methods to focus on the steps to be performed separately from the mechanism which applies them (which is encoded in the monadic type).</p>
+
+<h2 id="the-list-pattern">The List Pattern</h2>
+
+<p>We all know the List type. But as noted above, a monad can act as a <em>container</em>, ie a monad can act as a list - or expressed otherwise, a list can can fulfil the requirements for a monad. All we require is:</p>
+
+<ul>
+  <li>a way of building an initial list (a constructor)</li>
+  <li>(optionally) a map method which takes a single value from the list and returns a new single value (possibly of a different type)</li>
+  <li>a bind method which takes a single value from the list and returns a list of values (possibly of a different type)</li>
+</ul>
+
+<p>Method <em>map</em> iterates over each element, transforming it to a new value and the results are collected into a new list which is always the same size as the original list - but might be “of” a different type. The simple signature of the passed function, <code>(T1)-&gt;T2</code>, doesn’t allow this method to do the <em>state propagation</em> that we talked about earlier. This signature also means that <code>map</code> is also unable to change the <em>shape</em> of its container; the <code>bind</code> method is needed for that.</p>
+
+<p>Method <em>bind</em> requires a slightly more complicated callback function - one that converts each input value to a <em>list</em> of values. However the implementation of <code>List.bind</code> <em>concatenates</em> these lists together, resulting in a single list which has zero or more elements for each input element. To filter out a value from the input list, the callback function returns an empty list, while obviously one element can also be turned into multiple. To produce the same 1:1 behaviour as <code>map</code>, the callback function needs to transform each input element to a list of size 1 wrapping the transformed value; this makes it clear why a dedicated implementation of map can be more efficient! Due to this “flattening” step from <code>List&lt;List&lt;T&gt;&gt;</code> to <code>List&lt;T&gt;</code> the <code>bind</code> operation is often called <code>flatmap</code>.</p>
+
+<p>Neither <code>map</code> nor <code>bind</code> can change the <em>monadic type</em>, eg change a List to a Set. If that is needed, it has to happen as additional non-monadic methods on the type.</p>
+
+<p>It was mentioned earlier that a monadic type can choose to have its <code>bind</code> and <code>map</code> methods invoke the provided function immediately, or save it for later. If the “immediate” approach is applied, then the bind method simply <em>iterates</em> over the wrapped list, applying the provided function to each element in turn. If the “delayed” approach is applied, then bind creates a new function-object which iterates over a list, calling the original function, and flattening the results - and then returns a new List value which wraps this new function.</p>
+
+<p>The use of monads to provide “control flow” was discussed earlier; the way that a caller provides a single function to a List monad and that function is applied repeatedly to each element (iteration) can be considered an application of this.</p>
+
+<p>Here’s a possible (though ugly) implementation in Kotlin, using the “immediate function application” approach. Note that a few type-casts (<code>someval as SomeType</code>) are used in this code to work around some Kotlin limitations related to the JVM’s “type erasure” - particularly with arrays of generic types. For-loops are also used rather than things like <code>fold</code> because, well, this is trying to demonstrate monadic concepts to developers who are perhaps not familiar with functional programming.</p>
+
+<pre><code>class MyList&lt;T1&gt;(val data: Array&lt;T1&gt;) {
+    // An optimised map function
+    fun &lt;T2&gt; map(fn: (T1) -&gt; T2): MyList&lt;T2&gt; {
+        val results = arrayOfNulls&lt;Any&gt;(data.size) as Array&lt;T2&gt;
+        for(i in 0 .. data.size - 1) {
+            results[i] = fn(data[i])
+        }
+        return MyList(results)
+    }
+
+    // A monadic bind method which concatenates all the results together..ie "flatmap"
+    fun &lt;T2&gt; bind(fn: (T1) -&gt; MyList&lt;T2&gt;): MyList&lt;T2&gt; {
+        // Apply fn to each original element and store the results as a collection of MyList&lt;T2&gt;
+        val results = arrayOfNulls&lt;MyList&lt;Any&gt;&gt;(data.size) as Array&lt;MyList&lt;T2&gt;&gt;
+        for(i in 0 .. data.size - 1) {
+            results[i] = fn(data[i])
+        }
+
+        // Flatten an array of MyList&lt;T2&gt; to a single MyList&lt;T2&gt; holding the combined set of values.
+        // Creating an intermediate MyList below isn't necessary, ie results could have been passed directly, but
+        // the intermediate form corresponds better to the official specification of bind/flatten
+        return flatten(MyList(results))
+    }
+
+    // Here, flatten means to produce a new MyList whose data is the concatenation of all data in the nested MyLists
+    private fun&lt;T&gt; flatten(src: MyList&lt;MyList&lt;T&gt;&gt;) : MyList&lt;T&gt; {
+        var result = arrayOf&lt;Any&gt;() as Array&lt;T&gt;
+        for(item in src.data) {
+            result = result + item.data // append each item's nested array&lt;T&gt; to result
+        }
+        return MyList(result)
+    }
+
+    // Alternative (but less efficient) implementation of map on top of bind.
+    fun&lt;T2&gt; map2(fn : (T1) -&gt; T2) : MyList&lt;T2&gt;  = bind { item -&gt; MyList(singletonArrayOf(fn(item))) }
+
+    // Ugly workaround for Kotlin issues with arrays of generic types
+    fun&lt;T&gt; singletonArrayOf(element: T) : Array&lt;T&gt; {
+        val result = arrayOfNulls&lt;Any&gt;(1) as Array&lt;T&gt;
+        result[0] = element
+        return result
+    }
+
+    fun foreach(fn: (T1) -&gt; Unit): MyList&lt;T1&gt; {
+        data.forEach(fn)
+        return this
+    }
+}
+
+fun main(args: Array&lt;String&gt;) {
+    println("Hello World!")
+
+    // demonstrate transformation without changing list size
+    println("== Multiply elements of list by 2 using map")
+    MyList(arrayOf(1, 2, 3))
+        .map { it -&gt; it * 2}
+        .foreach(::println) //  { it -&gt; println(it) }
+
+    // demonstrate transformation which increases list size
+    println("== Duplicate elements using bind")
+    MyList(arrayOf(1, 2, 3))
+        .bind { it -&gt; MyList(arrayOf(it, it)) }
+        .foreach(::println) //  { it -&gt; println(it) }
+
+    // demonstrate transformation which decreases list size
+    println("== Filter odd elements using bind")
+    MyList(arrayOf(1, 2, 3))
+        .bind { it -&gt; if (it % 2 == 0) MyList(arrayOf()) else MyList(arrayOf(it)) }
+        .foreach(::println) //  { it -&gt; println(it) }
+}
+</code></pre>
+
+<p>Note that <code>map2</code> is implemented by changing the original function into one which maps each item into a single-element list. Method <code>bind</code> (aka <code>flatmap</code>) applies this function then merges each of these single-element lists together, producing again a simple list with the same number of elements as the original.</p>
+
+<p>For any “container” monad, the order in which <code>map</code> and <code>flatmap</code> apply the provided transform to the contained values is type-specific. For an ordered collection such as List it is expected that the type must produce a result in the same order as the original, ie the result of applying the function to element 0 of the input list must come before the result of applying the function to element 1 of the input list. However the computation on each element is independent; therefore the computation on each element of the list can potentially be executed in parallel. Any such behaviour would be part of the monadic type’s implementation and nicely encapsulated from the caller.</p>
+
+<p>The power of having type <code>List</code> define monad-style <code>map</code> and <code>bind</code> methods is that a function can accept a list and use those methods to define transformation on the values - but exactly how and when those transformations are applied will depend upon how the concrete type of the List value implements those methods. Imperative-style code which sees a list as a “dumb container for data” and simply uses a for-loop to get the elements from the list and operate on them is far less flexible. The monad-style code (map/bind instead of foreach) is also more elegant as the looping logic is centralized (in the map/bind methods) rather than duplicated in each place that processes the values.</p>
+
+<h2 id="the-optional-value-pattern">The Optional Value Pattern</h2>
+
+<p>Many object-oriented languages already have a type in their standard libraries that is a very simple monad: it’s typically called <code>Optional</code> or <code>Maybe</code>. This effectively wraps zero or one instances of the generic type parameter.</p>
+
+<p>This pattern takes advantage of the “flow control” part of the monad design pattern.</p>
+
+<p>An optional/maybe monadic type has two distinct states: wrapping a value or not wrapping anything. The overall pattern can be implemented using a separate variant of the type for each state, or a single variant with an internal flag of some sort to indicate which state it represents; the multiple variant approach is more common but Java’s Optional is (currently) implemented as a single class.</p>
+
+<p>For the multi-variant approach, these variants might be called <code>Some&lt;T&gt;/None</code> or <code>Just&lt;T&gt;/Nothing</code> or similar. For the single-class approach, there are typically factory-methods for the different states (eg <code>Optional.of(x)</code> and <code>Optional.empty()</code>).</p>
+
+<p>Invoking the <code>map</code> function when the state is “value present” invokes the provided function passing the wrapped value, then returns a new instance which wraps the result of the function.</p>
+
+<p>Invoking the <code>map</code> function when the state is “value missing” ignores the provided function - ie the call is a no-op. It can’t actually do anything else, as the provided function expects an input value but there isn’t one. In effect this state is “frozen”; if this state is ever reached then all later map operations have no effect. It’s a one-way trap door in the optional value processing flow.</p>
+
+<p>I’m sure all readers are familiar with this; it leads to code like this (ignoring Kotlin’s built-in nullable types):</p>
+
+<pre><code>    val case1 = Optional.of(2)
+        .map { i -&gt; i + 2 }
+        .map { i -&gt; i * 3 }
+        .map { i -&gt; i.toString() + "!" }
+        .orElse("None")
+    println(case1) // shows "12!"
+
+    val case2 = Optional.empty&lt;Int&gt;()
+        .map { i -&gt; i + 2 }
+        .map { i -&gt; i * 3 }
+        .map { i -&gt; i.toString() + "!" }
+        .orElse("Empty") // shows "Empty"
+    println(case2)
+</code></pre>
+
+<p>The benefits are hopefully clear; the code can apply a sequence of transformations without needing to care whether data is missing or present. Eventually of course the result will be needed, but the check can be done once at the end rather than before each step. Or rather: the check before each step has been <em>pushed down</em> into the Optional monadic type where it can be defined just once (reuseably) rather than repeatedly in the caller (see “programmable semicolon”). This ability to push control logic down into monads is one of their cool features, driven by this “I’ll call you” approach.</p>
+
+<p>However there is a problem here: what if we want to apply a transformation which might return Empty rather than a value?</p>
+
+<p>The map function cannot handle that; it always takes exactly one value in and returns exactly one value - but Empty is not a value. Now in this case the map-method <em>could</em> be defined to look for a null result and return Empty, but that wouldn’t work in other cases - or in languages which don’t support nulls.</p>
+
+<p>The bind method can, however save the day here. The signature of the function passed to bind allows it to return any result which the enclosing/applying monadic type can support; in particular it allows the function to “switch the monad state” from Present to Empty. For this type, the “combine values” feature of bind is basically a no-op but the fact that a monad is returned rather than a value is important.</p>
+
+<p>Neither <code>bind</code> nor <code>map</code> can change the <em>monadic type</em>, eg change an Optional into a List. Bind can change the <em>variant</em> of its monadic type (eg value-present to value-missing), while map cannot do even that. Both methods can change the <em>type of the wrapped value</em>, ie <code>&lt;T1&gt;</code> to <code>&lt;T2&gt;</code>. This is true for all monadic types.</p>
+
+<p>Using bind may look something like this (Java’s Optional type uses method-name <code>flatMap</code> instead of <code>bind</code>):</p>
+
+<pre><code>    val case1 = Optional.of(1)
+        .map { i -&gt; i + 1 }
+        .flatMap { i -&gt; if ( i%2 == 0) Optional.of(i/2) else Optional.empty() }
+        .map { i -&gt; i.toString() + "!" }
+        .orElse("None")
+    println(case1) // shows "1!"
+
+    val case2 = Optional.of(2)
+        .map { i -&gt; i + 1 }
+        .flatMap { i -&gt; if ( i%2 == 0) Optional.of(i/2) else Optional.empty() }
+        .map { i -&gt; i.toString() + "!" }
+        .orElse("None")
+    println(case2) // shows "None"
+</code></pre>
+
+<p>Note that the function passed to flatmap is more complex: it needs to return <code>Optional&lt;T&gt;</code> rather than just T - but in exchange gets the power to switch from “value present” to “value missing”.</p>
+
+<p>As with any monadic type, the map/bind methods can be <em>immediate</em> or can build an internal pipeline and execute the functions only when data is eventually “pulled” from the monadic value.</p>
+
+<p>An immediate-mode implementation might look something like this:</p>
+
+<pre><code>interface MyOptional&lt;T1&gt; {
+  fun&lt;T2&gt; map(fn: (T1)-&gt;T2) : MyOptional&lt;T2&gt;
+  fun&lt;T2&gt; bind(fn: (T1)-&gt;MyOptional&lt;T2&gt;) : MyOptional&lt;T2&gt;
+  fun orElse(onEmpty: T1) : T1
+
+  companion object {
+      private val EMPTY = MyOptionalEmpty&lt;Any&gt;()
+      fun&lt;T&gt; empty() = EMPTY as MyOptional&lt;T&gt;
+      fun&lt;T&gt; of(value : T) = MyOptionalOf(value)
+  }
+}
+
+class MyOptionalOf&lt;T1&gt;(val value : T1) : MyOptional&lt;T1&gt; {
+    override fun &lt;T2&gt; map(fn: (T1) -&gt; T2): MyOptional&lt;T2&gt; = MyOptionalOf(fn(value))
+    override fun &lt;T2&gt; bind(fn: (T1) -&gt; MyOptional&lt;T2&gt;): MyOptional&lt;T2&gt; = fn(value)
+    override fun orElse(onEmpty: T1) : T1 = value
+
+    // A map implementation built on top of bind - though rather pointless as
+    // MyOptionalOf.bind is a no-op ie just passes the result through (no state to manage).
+    // This code is therefore nearly identical to "map".
+    fun&lt;T2&gt; map2(fn: (T1) -&gt; T2) : MyOptional&lt;T2&gt; = bind { v -&gt; MyOptional.of(fn(v)) }
+}
+
+class MyOptionalEmpty&lt;T1&gt;() : MyOptional&lt;T1&gt; {
+    override fun &lt;T2&gt; map(fn: (T1) -&gt; T2): MyOptional&lt;T2&gt; = this as MyOptionalEmpty&lt;T2&gt;
+    override fun &lt;T2&gt; bind(fn: (T1) -&gt; MyOptional&lt;T2&gt;): MyOptional&lt;T2&gt; = this as MyOptionalEmpty&lt;T2&gt;
+    override fun orElse(onEmpty: T1) : T1 = onEmpty
+}
+
+fun main(args: Array&lt;String&gt;) {
+    val case1 = MyOptional.of(1)
+        .map { i -&gt; i + 1 }
+        .bind { i -&gt; if ( i%2 == 0) MyOptional.of(i/2) else MyOptional.empty() }
+        .map { i -&gt; i.toString() + "!" }
+        .orElse("None")
+    println(case1) // shows "1!"
+
+    val case2 = MyOptional.of(2)
+        .map { i -&gt; i + 1 }
+        .bind { i -&gt; if ( i%2 == 0) MyOptional.of(i/2) else MyOptional.empty() }
+        .map { i -&gt; i.toString() + "!" }
+        .orElse("None")
+    println(case2) // shows "None"
+</code></pre>
+
+<p>For those not familiar with Kotlin: the “companion object” bit is equivalent to a Java static method and <code>somevalue as SomeType</code> is a type-cast. And yes, this would normally be implemented in Kotlin using a <em>sealed class</em>.</p>
+
+<p>This approach uses an interface and multiple implementations - ie is effectively a functional <a href="https://en.wikipedia.org/wiki/Algebraic_data_type">sum type</a>. Java’s implementation of Optional instead uses a single class (similar to MyOptionalOf) and uses <em>null</em> for the value to indicate that “this object is in state empty”. I find this “sum type” approach more elegant.</p>
+
+<p>It’s quite cool how the “empty” variant of this pattern is effectively “frozen”; all transformation operations are no-ops and just return “this” (which in this case is the singleton EMPTY instance).</p>
+
+<p>What’s cooler is again this “programmable semicolon” behaviour; the code <em>using</em> the monad just makes a sequence of calls map and bind, and the monad gets the opportunity to “insert code” between these operations - in this case to use the “current state” (data present or missing) to treat the provided function appropriately (invoke it or ignore it). Adding all those checks manually would look rather ugly:</p>
+
+<pre><code>    var case1a : Int? = 1
+    var case1b = if (case1a != null) case1a + 1 else null
+    var case1c = if (case1b != null) case1b/2 else null
+    var case1d = if (case1c != null) case1c.toString() + "!" else null
+    var case1e = if (case1d != null) case1d else "None"
+</code></pre>
+
+<p>And if “null” cannot be used as a “missing value” indicator, then this gets even uglier. Delegating this control-flow-decision-making to another object is well worth the cost of having to wrap the operations being applied in lambdas passed as parameters.</p>
+
+<p>This whole pattern’s idea of “postpone missing data checks until the end” has a little bit in common with the concept of (fine-grained) exception-handling, where the original idea was that the “happy path” in a function could be embedded in a try-clause and all the error-handling pushed to the catch-clause. Unlike exception-handling, this optional approach is based on a general-purpose pattern.</p>
+
+<p>You might also want to look at the section discussing the Maybe type in <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">the wikipedia page on monads in functional programming</a>.</p>
+
+<h2 id="the-error-collector-pattern">The Error Collector Pattern</h2>
+
+<p>This is very similar to the Optional/Maybe pattern, except that instead of representing two states valid-data and missing-data the monad represents two states has-error and has-result.</p>
+
+<p>When the optional-value pattern reaches variant None (missing data) then it effectively stops changing state and ignores all later invocations of map/bind. The error-collector pattern does the same; as long as there is no error, provided functions are executed against the “current value” and a new monad is created to wrap the new state but once an error object has been obtained, all further map/bind operations are ignored and the existing monadic value is returned unchanged.</p>
+
+<p>Like the optional-value pattern, this allows a sequence of transformations to be applied, with any checks for error state postponed until the very end of the sequence of operations. At that point, the “first error encountered” is then available from the current version of the monad.</p>
+
+<p>And as with the optional-value pattern, this “postpone error checks until the end” has a little bit in common with Java’s concept of (fine-grained) exception-handling, where the original idea was that the “happy path” in a function could be embedded in a try-clause and all the error-handling pushed to the catch-clause.</p>
+
+<p>This monad pattern is often called <code>Either</code>, with it having two variants <code>Left</code> and <code>Right</code>; the <code>Left</code> variant is the “frozen” one (ignores map operations and just returns itself) and the <code>Right</code> variant is the “evolving” one (applies the function to its wrapped value and returns a new instance of type Either). Yes, these names (Either, Left, Right) are very poor … a recurring problem with functional programming concepts. Note that Either is mostly limited to error-handling; this “left is frozen” behaviour means it doesn’t have much use in other contexts.</p>
+
+<p>As with the optional-value case, method <code>map</code> cannot switch monad variants; only <code>bind</code> can - ie invoking a function which always succeeds should be done via <code>map</code> and invoking one which might fail should be done via <code>bind</code>. And again the “join” part of bind (state-sharing) isn’t really relevant here as in this pattern each monad variant is only wrapping one value.</p>
+
+<p>It was mentioned earlier that a monad has only <em>one</em> generic type parameter. This pattern seems to have two: one for the “error type” and one for the “result type”. However the error type never changes; the function passed to bind always takes only the <em>result type</em> as an input parameter and can return a result <em>of a different type</em> but the error type is always the same. The error value is really a “side channel” or “hidden state”.</p>
+
+<p>Note that the pattern of “data validation” is quite different. In that case, multiple independent checks are applied to the same data, and often <em>all</em> detected errors should be gathered in one pass. The error-collection pattern is different: a <em>sequence</em> of transforms are being applied to data, and once the first error occurs then processing must stop as there is no input to pass to the next transform.</p>
+
+<p>No code example is needed here; an “immediate mode” implementation of this pattern is just a trivial extension of the code for the Optional pattern above.</p>
+
+<h2 id="delayed-execution">Delayed Execution</h2>
+
+<p>As noted, a monad’s bind method can choose to execute the provided function immediately, or can just add it to a list, ie build a pipeline of things to execute at some future time.</p>
+
+<p>A pipeline of transforms can be used to support “pull-based” processing. Imagine some monadic type <code>M&lt;T&gt;</code> which gets its values for T from a file, or a database query, or even a large collection. The “execute immediately” approach will cause the first call to bind to load the entire set of source values, apply the function to them, and then store those results in memory waiting for the next call to bind, or a call to obtain the results. It may be better for the type to instead offer a method to get just one value - and then to read just one value from the upstream source, pass it through the pipeline, and return it - ie process data “on demand”.</p>
+
+<p>A pipeline can also be used to implement asynchronous processing. A monad can be built (set of commands) and then passed to a threadpool for execution. The monad schedules each step of the pipeline for execution in turn, ie schedules each pipeline step only after the previous one has completed.</p>
+
+<p><a href="https://spark.apache.org/">Apache Spark</a> is a distributed data processing system whose client libraries for Scala use this pattern: the Spark classes provide APIs which accept functions as parameters, and internally build up a pipeline of transforms to be applied to data. This pipeline is then executed in parallel on multiple servers against different partitions of the dataset.</p>
+
+<p>Haskell uses monads extensively, and in fact a Haskell program can be seen as code that first builds a single top-level monadic value which is a (delayed) pipeline which contains nested pipelines which contains nested pipelines, etc. These pipelines <em>are the whole program</em> - and then a single “go” command triggers this pipeline, performing execution of the application.</p>
+
+<h1 id="a-quick-look-at-the-monad-laws">A Quick Look at the Monad Laws</h1>
+
+<p>So far, all discussion has been rather informal. Now that the <em>purpose</em> of monads has been described, let’s look at <a href="https://wiki.haskell.org/Monad_laws">the official laws for monads</a> and see how they correspond to the informal description.</p>
+
+<p>There are three different (but equivalent) ways of defining a monad:</p>
+
+<ol>
+  <li>return/bind (with map being optionally built on top)</li>
+  <li>return/map/join (with bind being optionally built on top) - also called the <a href="http://logicaltypes.blogspot.com/2011/09/monads-in-java.html">(T, η, μ) triple</a>.</li>
+  <li>return/kleisli (with bind and map optionally built on top)</li>
+</ol>
+
+<p>The first option is the one most often found in functional programming languages - and the one most found in tutorials and discussions of the monad pattern. And sadly, monad laws written in this form are actually the hardest of the three to make sense of. This section of the article is only going to look at the laws in general terms though (mostly because I don’t deeply understand it myself) so it makes sense to look at the most common form.</p>
+
+<p>Here are the laws (in return/bind formulation) in Haskell syntax (and note that in Haskell, the word “class” is not the same as in an object-oriented language; it’s closer to declaring a <em>namespace</em> for a set of function prototypes):</p>
+
+<pre><code>Left identity: (return a) &gt;&gt;= h ≡ h a
+Right identity:	m &gt;&gt;= return ≡ m
+Associativity: (m &gt;&gt;= g) &gt;&gt;= h ≡ m &gt;&gt;= (\x -&gt; g x &gt;&gt;= h)
+</code></pre>
+
+<p>The word “return” above means <em>a factory method for creating an instance of the monadic type</em>. And yes this name is confusing for programmers. To add to the confusion, this operation is sometimes called “unit” or “pure”.</p>
+
+<p>Lets rewrite this in pseudo-kotlin:</p>
+
+<pre><code>given:
+  interface M&lt;A&gt; {
+    fun bind(fn : (A) -&gt; M&lt;X&gt;) : M&lt;X&gt;
+
+    companion object {
+      fun&lt;A&gt; return_(a : A) : M&lt;A&gt; { .. }
+    }
+  }
+
+left identity:  M.return_(a).bind(h) == h(a)
+right identity: m.bind(M::return_) == m
+Associativity:  m.bind(g).bind(h) == m.bind { a -&gt; g(a).bind(h) }
+</code></pre>
+
+<p>The “left identity” law just says that the factory function (“return”) for the type produces a monadic value which effectively encodes the value and an “identity function”, ie one that has a value and a function which does not modify that value (passes it through). Binding another function to it therefore produces a monadic value which is equivalent to passing the original value through the new function alone. The factory function cannot embed any “hidden state” into the created object - eg the current time-stamp or the current state of a variable in the environment.</p>
+
+<p>The “right identity” law says that starting with a monad in any state, asking it to invoke the “factory function” produces a new value that encodes exactly the same value and hidden state as the value it was invoked on.</p>
+
+<p>As far as I can see, these laws exist to make monads “repeatable”. I think both of these laws actually come pretty naturally, and a programmer would have to try pretty hard to create a monadic type that did not follow these laws.</p>
+
+<p>The associativity law says that given an existing monad, and two transformations we want to append to it (to form a pipeline), it shouldn’t matter whether we:</p>
+
+<ul>
+  <li>create a monad then apply G then H, or</li>
+  <li>create a monad then pass in a function which is a composition of G and H</li>
+</ul>
+
+<p>While I don’t fully understand the consequences of associativity law, I suspect that it (and the identity laws) ensure that doing “obvious refactorings” of code which look like they should be equivalent don’t introduce unexpected behaviour changes.</p>
+
+<p>When a language has a way of knowing which functions are “pure” (without side-effects), then a compiler for that language can perform some optimisations such as <a href="https://en.wikipedia.org/wiki/Memoization">memoization</a> (when the function is called multiple times with the same value) or simply removing it when the function’s return-value is never used. When a type that follows the monad laws is invoked only with pure functions, then there is <a href="https://en.wikipedia.org/wiki/Referential_transparency">an additional set of optimisations that can be applied</a>:</p>
+
+<blockquote>
+  <p>The importance of referential transparency is that it allows the programmer and the compiler to reason about program behavior as a rewrite system.
+This can help in proving correctness, simplifying an algorithm, assisting in modifying code without breaking it, or optimizing code by means of 
+memoization, common subexpression elimination, lazy evaluation, or parallelization.</p>
+</blockquote>
+
+<p>However these benefits do not apply to languages without “guaranteed pure functions” - which is the vast majority of both object-oriented <em>and</em> functional languages.</p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>Hopefully now it is clear that “bind” enables several behaviours:</p>
+
+<ul>
+  <li>it is there to “flatten” nested values of the same monadic type - and this is how state is propagated.</li>
+  <li>it allows the “variant” of the monadic type to change (which is also about changing from one hidden state to another)</li>
+  <li>it composes functions, allowing pipelines to be built</li>
+  <li>it allows “control flow” to be inserted between steps in a pipeline (including one where the steps are executed immediately)</li>
+</ul>
+
+<p>This works in cooperation with the functions passed to bind (as they return appropriate instances of the same monadic type).</p>
+
+<p>Hopefully it is clear why method-name <code>flatmap</code> is sometimes used instead of bind: it <em>maps</em> then <em>flattens</em> the results. In fact, an alternative way to express the monad pattern is to put this “flattening” at the center, by providing two functions: a <code>map</code> operation as above, and a separate <code>join</code> operation which takes no parameters and does purely the “flattening” part, ie converts a type <code>M&lt;M&lt;T&gt;&gt;</code> to an <code>M&lt;T&gt;</code>. Method bind is then simply <code>join(map(f))</code>, ie is built on top of simpler map and join methods. This approach is in some ways easier to understand, but requires two mandatory methods (map and join) with bind derived from them, rather than one mandatory method (bind) with map derived from that (and join being unnecessary).</p>
+
+<p>While function-composition <em>can</em> be at the core of any monadic pattern, for many use-cases it is valid for bind to do “immediate execution” of the functions provided to it. For such implementations, the results are actually equivalent - except for memory, performance, and code complexity. Patterns that truly rely on pipelines (eg asynchronous processing) can’t do immediate execution; function composition (or equivalently, building up a list of callbacks) is truly needed there.</p>
+
+<p>Object-oriented languages have adopted many patterns inspired by this - eg Java’s “stream” concept which provides a syntax which can build a “list of callbacks” or can execute each operation immediately. This in turn allows the same syntax to process data that is already in memory or being loaded on-demand, with the “flow control strategy” being decided by the stream rather than the code calling it.</p>
+
+<p>Monads don’t necessarily rely on pure functions. The monadic functions themselves (bind, map, etc) are expected to be pure - they always return a new value of the same monadic type. However the functions passed as parameters to these don’t need to be pure; they can have side-effects if needed. The Haskell IO monad in fact relies on this.</p>
+
+<p>And by the way, a different variant of “bind” is sometimes defined (written <code>&gt;&gt;</code> in haskell) which simply takes <code>M&lt;T2&gt;</code> rather than <code>(T1)-&gt;M&lt;T2&gt;</code>. This is equivalent to invoking the standard <code>bind</code> passing a function <code>(ignored)-&gt;M&lt;T2&gt;</code>. This form is used when composing a pipeline and an operation does not need the result of the previous operation - usually because the previous operation has no return value, ie is a <em>side-effect-causing statement</em> rather than a function. Don’t be fooled by the fact that the function used as a parameter returns the same type as the the bind function does; bind doesn’t necessarily just “pass through” the value that the bound function returns.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>The monad pattern is relatively simple but allows a rich set of useful behaviours to be built on top of it.</p>
+
+<p>It doesn’t provide anything which cannot be done in an object-oriented language using normal classes (to hold hidden state) together with the “strategy” pattern (callbacks). However its elegance and simplicity can make it an appealing alternative to creating different solutions for each of these problems.</p>
+
+<p>And of course non-object-oriented languages need some mechanism for handling state, defining pipelines, etc. The monad pattern provides this.</p>
+
+<h1 id="appendix-1-the-state-pattern">Appendix 1: The State Pattern</h1>
+
+<p>As an OO programmer, we are used to having objects whose primary purpose is to accumulate some result over multiple steps then return it, but where some additional state needs to be tracked in addition to the “primary” value and which may affect how the primary value is computed.</p>
+
+<p>It is possible to model this in pure functional programming, simply by having every function that modifies the state return an updated copy of that state, and pass the <em>updated</em> value into the next function. However this can get rather ugly.</p>
+
+<p>In fact, this is exactly what the <em>state</em> monad pattern does. However it hides the state data-structure from most of the code, making it a field of the monad itself so the individual expressions can mostly ignore it. When the expressions do want to access the state, they can call the “get” and “put” functions. The get function is obviously still functional. The “put” function is also functional; it creates a new copy of the state with the specified change in it. And the “return” function creates a new monad which has a copy of the current enclosing monad’s state, so that when the “returned” monad is later invoked, it can continue where it last left off.</p>
+
+<p>The bind operator can be thought of as “propagating state” at the same time as executing the new expression against the “primary contained value”.</p>
+
+<p>The result is that there is just one thing for the calling code to handle: the fact that the “stateful” object is now of type “State a” rather than just “a”. Otherwise, the details of the state are now irrelevant to the caller.</p>
+
+<p>Note that although this datatype is called “State”, it is still fully immutable, ie does not involve modifying data “in place” at any time. It simply automates the process of creating a slightly-altered copy of the earlier state when needed, and setting it as the “default state” variable used for all subsequent function calls.</p>
+
+<p>Parser implementations for various datafiles (whether languages, config files, etc) are implemented like the State monad, so that the caller doesn’t need to care about the internal state variables.</p>
+
+<p>This pattern is described here in an appendix rather than in the patterns section earlier as it probably isn’t particularly useful in hybrid object-functional languages; object-oriented programming has its own mechanism for handling objects with state.</p>
+
+<h1 id="appendix-2-haskells-io-monad-datatype">Appendix 2: Haskell’s IO Monad Datatype</h1>
+
+<p>Just for the curious, this section looks briefly at the famous Haskell IO monad.</p>
+
+<p>It was noted earlier that monads provide a method for transforming data (bind and maybe map), but aren’t required to provide any method for actually extracting the results afterwards. Of course most of them do, because the functions passed to bind/map are usually “pure functions” and there isn’t any point in executing a pure function and ignoring its result!</p>
+
+<p>However it is possible to pass <em>functions with side-effects</em> into a monad if desired.</p>
+
+<p>Haskell leverages this to ensure the difference between “pure functions” and ones with <em>side-effects</em> are represented in its <em>type system</em> and therefore that any code which tries to mix them together inappropriately will simple <em>fail to compile</em>. Some other languages prevent such mixing with keywords or annotations to mark specific functions as <em>pure</em>, but Haskell does this just with the same compile-time-type-checking that validates other rules such as Int and String not being compatible.</p>
+
+<p>Haskell defines an IO monad type in its standard library; this type has map/bind methods as usual - but has <em>no methods</em> for extracting data from the monad afterwards; therefore the only useful way to use a value of this type is by passing a function that has <em>side-effects</em>. And every function in the Haskell standard library which is non-pure (has a side-effect), ie interacts with the external world, either takes an IO monad as a parameter, or produces an IO monad as its return-type. The result is that this IO type effectively “taints” everything it touches. Pure code can call pure code, and impure code can call pure code, but any code that tries to call impure code itself becomes impure.</p>
+
+<p>A haskell program therefore always ends up structured as an IO monad at the top level which is a composition of pure and impure functions.  The impure parts can call pure parts, but once a pure operation is invoke, you can be guaranteed that no side-effects will happen within it.</p>
+
+<p>Note that the name “IO” for this monad is perhaps a little misleading; it is simply a monad class that executes its nested statements in order, and keeps the results from escaping. However input and output are always impure (non-repeatable interactions with the outside world) and the standard-library functions which do this all rely on IO types (as do other impure standard library functions).</p>
+
+<p>The form <code>&gt;&gt;</code> is used when a statement does not need the result of the previous statement - usually because the previous statement returns unit (void), eg a function to print to the screen.</p>
+
+<p>Using the binding operator multiple times is rather clumsy; therefore there is a convenient syntactic sugar called a “do expression” which has exactly the same effect. A “do expression” returns a value, like any haskell function. The value it returns must be a Monad (proxy), eg “IO String” (meaning <code>IO&lt;String&gt;</code>) or similar, and not a plain (non-monadic) value. If the last statement in the block doesn’t already produce a monad then one must be created - and as noted in the section titled “Monad Laws”, “factory methods” for monadic types (aka constructors) are typically named “return”. Yes, this is confusing - this has <em>nothing</em> to do with the <code>return</code> keyword common in other languages. Which of the many overloaded functions called <code>return</code> is used depends upon the parameters and the <em>return type expected from the do-expression</em> (Haskell can use type-deduction based on return types). For example:</p>
+
+<pre><code>   -- normal function returning a string
+   getstr :: String
+   getstr = "hello"
+
+   -- normal function returning a value of type IO (which is a monad) wrapping a string.
+   getstrio :: IO String
+   getstrio = do return "hello"
+</code></pre>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">Wikipedia: Monad (functional programming)</a></li>
+  <li><a href="https://www.youtube.com/watch?v=Nq-q2USYetQ">[video] An Intuitive Introduction to Monads in Under 10 Minutes</a></li>
+  <li><a href="https://www.youtube.com/watch?v=t1e8gqXLbsU">[video] Computerphile: What is a Monad?</a></li>
+  <li><a href="https://www.youtube.com/watch?v=C2w45qRc3aU">[video] Studying With Alex: Intro to Monads for Software Engineers</a></li>
+  <li><a href="http://logicaltypes.blogspot.com/2011/09/monads-in-java.html">Typed Logic: Monads in Java</a></li>
+  <li>
+<a href="https://dzone.com/articles/functor-and-monad-examples-in-plain-java">Tomasz Nurkiewicz: Functional Programming in Pure Java: Functor and Monad Examples</a> - Reactive programming libraries are often based on monadic principles, and this covers enough to understand the RxJava library.</li>
+  <li>
+<a href="https://www.youtube.com/watch?v=yAi3XWCBkDo">[video] Oliver Lugg: A Sensible Introduction to Category Theory</a> - a quick look at the general concept of category theory helps to explain a lot of the terminology related to monads</li>
+  <li>
+<a href="https://bartoszmilewski.com/2017/02/09/monoids-on-steroids/">Milewski: Monoids on Steroids</a> - the full truth about monoids and monads; wonderfully written but still brain-scrambling.</li>
+  <li><a href="https://medium.com/@dmitri145/to-functor-or-not-to-functor-43c46c72145c">Dmitri Zaitsev: To Functor or not to Functor</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/monads/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

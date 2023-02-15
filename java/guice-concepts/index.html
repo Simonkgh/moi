@@ -1,0 +1,417 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Guice Concepts</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Guice Concepts</h1>
+    <aside>First published on: September 28, 2012</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      <h1 id="intro">Intro</h1>
+
+<p>Guice is a Java library for performing Dependency Injection. Guice is really
+pretty simple to understand; here you will find the basic concepts that I
+wish somebody had told me when I first started working with Guice..</p>
+
+<p>The important things to grasp are:</p>
+
+<ul>
+  <li>How an Injector works</li>
+  <li>How a Provider works</li>
+  <li>That class implies scope (mostly)</li>
+  <li>That objects are created in trees (mostly)</li>
+</ul>
+
+<h1 id="a-recap-on-dependency-injection">A Recap on Dependency Injection</h1>
+
+<p>In short, Dependency Injection is a technique that allows your regular application
+logic to avoid:</p>
+
+<ul>
+  <li>creating objects of specific types using “new” calls (which binds your code to
+concrete implementations of that type)</li>
+  <li>using lookup functions (whether JNDI or hand-rolled) to find shared objects</li>
+  <li>using factories that return an abstract type</li>
+</ul>
+
+<p>The major benefits are:</p>
+
+<ul>
+  <li>mocking of objects for unit tests becomes easier</li>
+  <li>refactoring of code becomes easier</li>
+  <li>configuration of factories is compile-time checked</li>
+  <li>application logic is not swamped by lots of “new” operators or lookup calls</li>
+  <li>the objects a method depends on are explicit in the method prototypes, not buried in
+the method implementation.</li>
+</ul>
+
+<h1 id="a-recap-on-object-scopes">A Recap on Object Scopes</h1>
+
+<p>The scope of an object describes when it is created, and when it is garbage-collected
+(aka its “lifecycle”).</p>
+
+<p>Common scopes are:</p>
+
+<ul>
+  <li>No scope (or in Spring terms, “prototype” scope)</li>
+  <li>Singleton Scope</li>
+  <li>Session Scope (HTTP only)</li>
+  <li>Request Scope (Java Servlets only)</li>
+  <li>Page Scope (JSP only)</li>
+</ul>
+
+<p>Objects with “no scope” may live for the duration of a single method call (ie
+are created as a local variable, and are no longer referenced by anything after
+the method returns). Alternatively, they are attached to some “owning” object,
+and die when the owning object dies (or when the owning object explicitly 
+discards them).</p>
+
+<p>Singleton scope means there is only one instance of that type; it is either created
+when first referenced, or simply when the application starts. These objects are
+generally not discarded until the application ends.</p>
+
+<p>Session-scope objects die when the current user “logs out”, and are shared between
+objects belonging to a single user, but not between users.</p>
+
+<p>You can guess the others. Custom scopes can also be defined as needed.</p>
+
+<h1 id="how-an-injector-works">How an Injector works</h1>
+
+<p>Conceptually, a Guice Injector instance holds a table of (Class -&gt; Provider
+for that class).</p>
+
+<p>User code can then ask the injector to return an instance of any specified
+class; the injector simply finds and executes the associated Provider object.</p>
+
+<p>Normally, an application has a single Injector which is configured at application
+startup via a list of Module objects. The Module objects just call their inherited
+‘bind’ method to register appropriate providers.</p>
+
+<p>There is a different type of Provider for each of the possible scopes:</p>
+
+<ul>
+  <li>a “no scope” provider simply calls the constructor for the class.</li>
+  <li>a “singleton” provider simply returns a cached instance of the class
+(or creates it on first call if none already exists).</li>
+  <li>a “session” provider looks for an instance cached in the http session,
+and returns that if present - else creates one and caches it.</li>
+  <li>etc</li>
+</ul>
+
+<p>Actually, the key into the map held by the injector is a (Class, Annotation) pair,
+allowing multiple providers to be defined for a class. The caller can then say
+“return me the output of the provider for variant X of this class”, and the
+matching provider is used. The ‘default’ provider for a class has annotation=null.</p>
+
+<p>By default, Guice assumes that an object has “no scope”; this is correct
+in 95% of cases. If a Guice Injector is asked to produce an instance of a
+concrete class that it does not yet know about, then it simply creates a
+suitable no-scope Provider object and registers it automatically. This
+assumption massively cuts down on the number of bindings needed to
+configure Guice in the Modules - the only bindings a programmer needs
+to explicitly declare are those for classes with scopes other than no-scope,
+and to map <em>abstract classes</em> or <em>interfaces</em> to the appropriate concrete
+classes.</p>
+
+<h1 id="how-a-provider-works">How a Provider Works</h1>
+
+<p>Suppose class N has a constructor of form</p>
+
+<pre><code> public N(P param1, Q param2);
+</code></pre>
+
+<p>Binding this class with no scope will create a Provider that works
+as if it were implemented like this:</p>
+
+<pre><code>public class Provider&lt;N&gt; {
+  public N get() {
+    P p = injector.get(P);
+    Q q = injector.get(Q);
+    return new N(p, q);
+  }
+}
+</code></pre>
+
+<p>What instances of P and Q are used depends simply upon how they are bound
+in the injector map. They might themselves be no-scope, or might be 
+singletons, etc. If P and Q are concrete types which have no scope then,
+as noted earlier, the Guice injector will automatically create the
+appropriate provider for them; otherwise you will also need to declare
+a binding for them.</p>
+
+<p>A singleton-scoped provider simply acts as if it were implemented like this
+(with appropriate locking added of course):</p>
+
+<pre><code>public class Provider&lt;N&gt; {
+  private N instance;
+
+  public N get() {
+    if (instance == null) {
+      P p = injector.get(P);
+      Q q = injector.get(Q);
+      instance = new N(p, q);
+    }
+    return instance;
+  }
+}
+</code></pre>
+
+<p>Where the standard providers are not appropriate for some reason, you always
+have the option of writing your own <code>Provider&lt;N&gt;</code> implementation instead.</p>
+
+<p>It is possible for a module to declare bindings for P and Q <em>just for the purposes
+of instantiating class N</em>. These are known as “private bindings”. This is really
+useful when P and Q are internal implementation details that other code shouldn’t
+be using anyway.</p>
+
+<h1 id="critical-observation-1-class-implies-scope-mostly">Critical Observation #1: Class implies Scope (mostly)</h1>
+
+<p><em>In the vast majority of cases, all instances of a class have the same scope</em>.</p>
+
+<p>The singleton case is trivial : there is only one instance.</p>
+
+<p>If an object of class N is used as a locally private “helper object” in one
+location (ie has “no scope”), then it is unlikely that elsewhere in the
+application a common instance of N is shared by two different objects.</p>
+
+<p>If an object of class P is stored in a user’s HTTP session by one part of
+an application (ie has session scope), then it is unlikely that elsewhere in 
+the application there will be an instance of P which is <em>not</em> associated with
+an HTTP session.</p>
+
+<p>This means that the “scope” for a type can be declared once - or in other
+words, that the Injector map really can just have a single Class-&gt;Provider
+entry for the vast majority of classes. This keeps the amount of code
+needed for modules to declare all bindings to a very reasonable size.</p>
+
+<p>Of course there is an “escape hatch” for the cases where this is not true -
+by having a Module explicitly define the variants needed, and then by
+annotating those places where the non-default variant should be supplied.</p>
+
+<h1 id="critical-observation-2-objects-are-generally-created-as-trees">Critical Observation #2: Objects are generally created as ‘trees’</h1>
+
+<p>In most cases, calls to “new” are from the constructors of other objects
+(or their initialisation methods which are invoked from the constructor).</p>
+
+<p>So in effect, there are a very few places in an application where the
+root of an object tree is created - which can then trigger creation
+of a number of other objects.</p>
+
+<p>These few critical points need to explicitly use a Guice Injector or
+Provider. However there are really very few of them in a normal app,
+so the “intrusiveness” of Guice (or any other Dependency Injection
+framework) is not high.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>Dependency injection has many useful properties (listed in the intro).</p>
+
+<p>A drawback of DI is that somewhere in the application there needs to be
+a call to the DI framework to do this injection. The fact that objects
+are naturally created as “trees” makes this burden reasonable.</p>
+
+<p>A drawback of DI is that the “wiring rules” must be declared by the programmer
+somewhere. The fact that class implies scope and the fact that most objects
+have “no scope” makes this burden reasonable.</p>
+
+<p>The result is that Guice configuration modules are usually quite small, and
+only contain code that would generally have existed in the application in
+some form anyway (via lookups or similar).</p>
+
+<p>So: little overhead, great benefits. And really quite easy to understand
+once you get the idea of the Injector and Provider.</p>
+
+<p>Guice is a great little library.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+<a href="https://github.com/google/guice/wiki">The Guice Wiki on Github</a> : note that development</li>
+  <li><a href="http://misko.hevery.com/2008/10/21/dependency-injection-myth-reference-passing/">DI Myth</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/guice-concepts/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

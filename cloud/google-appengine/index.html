@@ -1,0 +1,356 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Google AppEngine</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Google AppEngine</h1>
+    <aside>First published on: April 11, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a></p>
+      
+<p><a href="/cloud/google-cloud-overview">A previous article on this site</a> gave an overview of the Google Cloud Platform (GCP); this article looks more closely at the AppEngine service.</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>Google Cloud Platform (GCP) provides several options for executing custom code on the platform. From low-level (concrete) to high-level (abstract), they are:</p>
+
+<ul>
+  <li>Compute Engine</li>
+  <li>Kubernetes Container Engine</li>
+  <li>App Engine Flexible</li>
+  <li>App Engine Standard</li>
+  <li>Cloud Functions</li>
+</ul>
+
+<p>Compute Engine provides traditional virtual machines (VMs). Each VM acts like a physical server - you must boot an operating system image on it (which must match the hardware architecture of the VM - currently all x86-64). You are then responsible for applying kernel patches (and rebooting if necessary), installing and configuring software, configuring networking, etc. If you wish to provide highly-available or horizontally-scaled software over multiple VMs then you are responsible for configuring load balancers appropriately, etc. In short, nearly full control but also full responsibility. VM images are reasonably portable; the base OS is typically a google-provided OS image, but all the software installed on top is under your control and can be “rebased” onto a different OS image for use with a different cloud (or in-house datacenter) with little effort.</p>
+
+<p>With Kubernetes Container Engine, software to be executed must be packaged as <em>linux container images</em>, and a configuration file then defines groups of images which should be deployed together to form a service (a “pod”), together with required network configuration, storage requirements, and other settings. Because each container is a complete operating-system user-space, a single container image can contain applications of almost any type. The resulting system can be <em>horizontally scaled</em> by simply specifying that multiple instances of a “pod” be started. Kubernetes takes care of configuring load-balancers so that incoming load is distributed across the available instances, and handles crashes of running images by restarting them. Kernel-level security patches are handled automatically by the cloud platform, but applying fixes to user-space operating system components are the responsibility of the application owner (rebuilding container images). It is because containers are “abstracted” from the real hardware somewhat that Google can provide the helpful features (kernel patching, scaling, load-balancing), but the abstractions also limit the options of the developer somewhat.</p>
+
+<p>App Engine Flexible is a container-based version of App Engine Standard; it has some properties of both the Container Engine and App Engine options. App Engine Flexible is discussed later in more detail.</p>
+
+<p>With App Engine Standard, software to be executed must be packaged in one of a small number of supported formats, including:</p>
+
+<ul>
+  <li>Java web archive (“<code>.war</code>”) files</li>
+  <li>PHP standard applications</li>
+  <li>Python and Ruby applications</li>
+  <li>Node.js applications</li>
+  <li>C# and Go applications</li>
+</ul>
+
+<p>An App Engine Standard application is a single application in a single language; no operating-system components may be deployed with them, and no “native code”. In return, Google can scale such applications horizontally very fast (ie start and stop instances), and handles load-balancing automatically. The rest of this article discusses App Engine advantages and limitations in more detail.</p>
+
+<p>Cloud Functions are even more fine-grained than App Engine; each “deployable unit” is a single code function. There are many things that simply cannot be implemented with such an extremely decoupled system - but it scales extremely rapidly.</p>
+
+<p>In addition, the cost-per-unit-of-useful-work generally decreases as the platform becomes more abstract; more abstract systems are “more transparent” to Google, allowing Google to optimise their execution better. This in turn allows Google to deliver more useful work on the same hardware, wasting fewer CPU cycles and memory, which implies that Google can offer the service at a lower cost. Executing a basic webapp on AppEngine is <em>far</em> cheaper than delivering the same functionality on a dedicated VM - particularly when the total load varies over time.</p>
+
+<h1 id="app-engine-standard-deployment">App Engine Standard Deployment</h1>
+
+<p>To deploy an application into the App Engine runtime environment, a developer builds an application locally (or via an automated build-system). The application is then sent to the google AppEngine build-servers which post-processes the application then builds a “package” and stores it in a google repository.</p>
+
+<p>When an instance of that application needs to be deployed, Google allocates a container, deploys the package into the container, and updates load-balancer settings. As an example, a java application is uploaded as a “.war” file, which is packaged and cached by google. To run the app, Google starts a container with Java and a ServletEngine environment, and then deploys the war-file to that server.</p>
+
+<p>When load on existing (running) instances of an AppEngine application becomes too high, Google simply starts more instances. When load drops, those unneeded instances are stopped. When load is particularly low, the number of instances can be scaled down to zero - particularly useful for apps that are only accessed during business hours, as there are no charges when it is not being used! When a request is received and no instances are running, one is started - within a handful of seconds.</p>
+
+<h1 id="app-engine-standard-limitations">App Engine Standard Limitations</h1>
+
+<p>In order to provide cheap and quickly-scalable applications, Google puts quite a lot of limitations on AppEngine Standard applications. The most critical are:</p>
+
+<ul>
+  <li>a maximum of 1GB ram per instance (and the app runtime, eg JVM, is at least partially included in that)</li>
+  <li>no threads (“background processing” is possible but requires using a special API)</li>
+  <li>each http request has max limits on data uploaded in the request, downloaded in the response, and the total duration of the request.</li>
+</ul>
+
+<p>And due to the fact that the developer provides “only the app”, no os-level external tools can be bundled with the app.</p>
+
+<h1 id="app-engine-flexible-as-container">App Engine Flexible as Container</h1>
+
+<p>With AppEngine Standard apps, the developer provides just the application code (eg PHP’-package or java-war-file). With AppEngine Flexible, there are several options:</p>
+
+<ul>
+  <li>the developer can provide an “executable app” (eg an executable java jarfile) and specify an appropriate AppEngine base container image to wrap it in;</li>
+  <li>or the developer can provide a complete container image.</li>
+</ul>
+
+<p>The AppEngine Standard limitations on threads, ram, http-request upload/download sizes, and http-request duration do not apply to the Flexible environment. However flexible-environment apps will never be auto-scaled down to zero instances, and it takes longer to start new instances (1-2 minutes vs 5-10 seconds for AppEngine Standard).</p>
+
+<p>When providing a complete app, it should open TCP port 80 for incoming HTTP traffic after starting. Whatever else the app wants to do is up to it.</p>
+
+<p>The AppEngine-provided containers are generally preferable to rolling your own - there is quite a lot of useful stuff in the standard containers, eg nginx and a log-forwarding agent that sends STDOUT from your app to StackDriver.</p>
+
+<h1 id="network-routing">Network Routing</h1>
+
+<p>All AppEngine instances sit behind a common load-balancer. This load-balancer is not directly configurable.</p>
+
+<p>The project gets a base domain-name, <code>.appspot.com</code> and each application gets a subdomain.</p>
+
+<p>Only one AppEngine instance in a project is the “default app”.</p>
+
+<p>Multiple versions can be running at the same time, with load distributed across them, eg 10% new, 90% old. However only basic control possible - kubernetes or VMs give far more control.</p>
+
+<p>Scaling is integrated with networking - distribution assumes stateless back end AFAIK.</p>
+
+<h1 id="scaling-and-startup">Scaling and Startup</h1>
+
+<p>AppEngine Standard instances start very fast. It is possible to set scaling to zero, and let GCP start an instance when the first request arrives.</p>
+
+<p>AppEngine Flexible instances need a minute or so to start; they have a minimum of one active instance.</p>
+
+<p>Scaling controls are done with appengine-specific settings in the “app.yaml” file.</p>
+
+<h1 id="appengine-flexible-vs-google-container-engine-ie-kubernetes">AppEngine Flexible vs Google Container Engine (ie Kubernetes)</h1>
+
+<p>Flexible environment is like Google Container Engine except:</p>
+
+<ul>
+  <li>automatic load-balancing, versioning, load-splitting, rolling upgrades</li>
+  <li>autoscaling is simpler to configure</li>
+  <li>google provides tools to build the container image based on a yaml file as with java standard environment</li>
+  <li>other appengine google services are available via the google appengine libraries rather than exclusively via REST (because the container runs within the appengine cluster)</li>
+  <li>AppEngine SDK can be used to run the app during development, eg emulates DataStore, email and login…</li>
+  <li>background tasks available</li>
+</ul>
+
+<h1 id="security">Security</h1>
+
+<p>Usually, AppEngine applications which access other GCP services (eg reading from a database as a result of receiving an incoming http request) run as a project-specific “service account”; the IAM system can then be used to define what that application can and cannot access.</p>
+
+<p>Google provides two main tools for securing an app against incoming HTTP requests:</p>
+
+<ul>
+  <li>Cloud Endpoints</li>
+  <li>IAP</li>
+</ul>
+
+<p>Cloud Endpoints is a framework intended for securing REST servers (not ones serving HTML). In short, the developer defines a configuration-file that defines the REST endpoints of the app, and whether they should be secured or not. When using Cloud Endpoints with AppEngine Flexible, the AppEngine container used to host the application includes an NGINX instance which validates all incoming requests before forwarding them to the actual application. When using Cloud Endpoints with AppEngine Standard, the application itself must include the Cloud Endpoints library in its code-base instead. When using Cloud Endpoints with Kubernetes, an extra container must be added to each “pod”. In general, Cloud Endpoints appears to be aimed at securing the “back end” part of an app which implements its user-facing UI as a mobile-app or using a javascript-rich-client.</p>
+
+<p>Because Cloud Endpoints is aware of the full set of entry-points to the app (via the Swagger-based declarations needed), it can (and does) generate good statistics on the usage of the various endpoints it is protecting.</p>
+
+<p>IAP (Identity-aware Proxy) is instead functionality that is built in to the AppEngine network-load-balancer infrastructure. When IAP is enabled for a project, then no HTTP request is allowed through the load-balancers unless the request includes a suitable OAuth ticket issued by the Google auth-servers - ie the requesting user must have “logged on” as some account registered with Google. The identity of the user is then provided as an HTTP header; the application itself is responsible for determining whether that user is allowed to access a specific url or not. Unfortunately, IAP:</p>
+
+<ul>
+  <li>is a per-project switch, ie is enabled for all AppEngine apps or none,</li>
+  <li>can only authenticate Google accounts, and</li>
+  <li>does not really provide <em>authorization</em> - just a choice of allowing:
+    <ul>
+      <li>all requests</li>
+      <li>all users logged-in to Google</li>
+      <li>all users logged-in to a specific domain</li>
+      <li>all users in a specific group</li>
+    </ul>
+  </li>
+</ul>
+
+<p>On the positive side, IAP is probably very robust (as it is part of the load-balancer infrastructure).</p>
+
+<h1 id="configuration">Configuration</h1>
+
+<p>The GCP metadata-service provides a way to manage central settings for deployed AppEngine instances. However the application must include code to look up such configuration explicitly. In general, apps are deployed with their config built-in rather than being externally configurable (ie to change config, redeploy).</p>
+
+<h1 id="deployment-and-rollback">Deployment and Rollback</h1>
+
+<p>Deployment of a new version is done in an atomic way - first N instances of the new version are started, and then the “loadbalancer” is reconfigured to point to the new version, and the old containers are stopped. AppEngine keeps the most recent N deployed versions of an application, and a web ui can be used to “roll back” to a previous version if desired.</p>
+
+<h1 id="references-and-useful-links">References and Useful Links</h1>
+
+<ul>
+  <li><a href="https://blog.stephanbehnke.com/3-years-on-google-app-engine-an-epic-review">Stephan Behnke: 3 Years on Google App Engine</a></li>
+  <li><a href="https://github.com/Shilendra/objectify-appengine-spring">Objectify</a></li>
+  <li><a href="https://cloud.google.com/appengine/docs/standard/#instance_classes">https://cloud.google.com/appengine/docs/standard/#instance_classes</a></li>
+  <li><a href="https://cloud.google.com/appengine/docs/standard/java/an-overview-of-app-engine">https://cloud.google.com/appengine/docs/standard/java/an-overview-of-app-engine</a></li>
+  <li><a href="https://stackoverflow.com/questions/25318989/how-to-properly-upload-image-file-to-google-cloud-storage-using-java-app-engine">https://stackoverflow.com/questions/25318989/how-to-properly-upload-image-file-to-google-cloud-storage-using-java-app-engine</a></li>
+  <li><a href="https://cloud.google.com/appengine/docs/java/#Java_Quotas_and_limits">https://cloud.google.com/appengine/docs/java/#Java_Quotas_and_limits</a></li>
+  <li>
+<a href="https://www.youtube.com/watch?v=g0dN8Hkh5H8">https://www.youtube.com/watch?v=g0dN8Hkh5H8</a>  – where shall I run my code</li>
+  <li><a href="https://cloudplatform.googleblog.com/2017/02/Google-Cloud-Endpoints-now-GA-a-fast-scalable-API-gateway.html">https://cloudplatform.googleblog.com/2017/02/Google-Cloud-Endpoints-now-GA-a-fast-scalable-API-gateway.html</a></li>
+  <li><a href="https://stackoverflow.com/questions/43118879/google-cloud-app-engine-app-yaml-for-multiple-environments">https://stackoverflow.com/questions/43118879/google-cloud-app-engine-app-yaml-for-multiple-environments</a></li>
+  <li><a href="https://www.youtube.com/watch?v=Dc4PHFxo-sA&amp;feature=youtu.be">https://www.youtube.com/watch?v=Dc4PHFxo-sA&amp;feature=youtu.be</a></li>
+  <li><a href="https://cloudplatform.googleblog.com/2017/02/Google-Cloud-Endpoints-now-GA-a-fast-scalable-API-gateway.html">https://cloudplatform.googleblog.com/2017/02/Google-Cloud-Endpoints-now-GA-a-fast-scalable-API-gateway.html</a></li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/google-appengine/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

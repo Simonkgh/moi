@@ -1,0 +1,694 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Introduction to Dimensional Modelling for Data Warehousing</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Introduction to Dimensional Modelling for Data Warehousing</h1>
+    <aside>First published on: November 27, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>This article gives an overview of <em>dimensional modelling</em> as used in data warehousing. This approach to storing data within a relational database is optimised for reporting purposes, and is recommended by many well-known data-warehousing methodologies including the Kimball group and Data Vault.</p>
+
+<p>This article is an extension to my <a href="/programming/dwh-intro">introduction to data warehousing</a>.</p>
+
+<p>This article assumes you (the reader) are familiar with relational databases, entity-relationship modelling, sql, reporting tools, computer networks, and client/server architectures.</p>
+
+<p>The topics of ETL, data warehouses vs data marts, conformed dimensions, and similar issues are covered in the introductory article referenced above; this article presents only the basics of dimensional modelling within a single database.</p>
+
+<h1 id="information-sources">Information Sources</h1>
+
+<p>Without doubt, the best source of information on dimensional modelling is the book <em>The Data Warehouse Toolkit 3rd Ed.</em> by Ralph Kimball et. al, Wiley 2013. This book describles the complete Kimball Group approach to building a data warehouse, but has multiple chapters on dimensional modelling. Kimball did not invent dimensional modelling, but has been a leading expert on the subject for decades.</p>
+
+<p>This article is basically the primary concepts from that book compressed down into a single page. Obviously, a lot of detail has been lost - I highly recommend reading Kimball’s book if you are going to be doing complex dimensional modelling.</p>
+
+<p>A few other useful sources of information are linked to at the end of <a href="/programming/dwh-intro">introduction to data warehousing</a>.</p>
+
+<h1 id="why-is-dimensional-modelling-used">Why is Dimensional Modelling Used?</h1>
+
+<p>The primary point of a data warehouse is to be able to build reports. And generally, such reports are built by business experts with some IT skills, rather than database experts. This means that the data must:</p>
+
+<ul>
+  <li>be understandable to business users</li>
+  <li>be automatable (tools should be able to provide graphical report designers)</li>
+  <li>be fast to report on</li>
+</ul>
+
+<p>A standard third-normal-form relational database model does not have these properties - the normal forms are great for programs to manipulate, but poor for humans.</p>
+
+<p>Dimensional modelling is an alternative way of storing data in a relational database to make life easier for the data warehouse users. Given that the upstream sources of data that is imported into the data warehouse are operational systems that use other modelling approaches (usually <a href="/programming/normalform">normal forms</a>), mapping this to the dimensional equivalent is extra work at the ETL phase - but is worth it to give the end users the reporting infrastructure they need.</p>
+
+<h1 id="operational-vs-analytic-systems">Operational vs Analytic Systems</h1>
+
+<p>Databases are widely used for “operational” purposes, ie to read and write small groups of records as part of specific business processes. It is common for relational databases to be used for this purpose, and to structure tables in 3rd or 4th normal form. These normal forms (table schemas):</p>
+
+<ul>
+  <li>minimise redundant data</li>
+  <li>maximise validatable foreign key references</li>
+  <li>maximise null-constraint checks (ie tables do not have columns that are mandatory for some purposes but optional for others)</li>
+</ul>
+
+<p>The above features are excellent for the persistence layer of an application - when data is being updated regularly, then redundant data (duplication) is evil; it can lead to data being modified in one place but not in another resulting in inconsistent data. Having a layer that validates inter-record references is also very helpful; it prevents “orphan records” (records no longer referenced from anywhere) and “dangling references” (references to data that no longer exists). And good null-checks make code that later processes data much easier to write; data that <em>should</em> be there can be assumed to be there.</p>
+
+<p>However there is a price for 3rd/4th normal forms: lots of joins are needed at runtime. When retrieving just a few records, that slows each business process a little which is often acceptable. When doing processing over large batches of records, it can lead to 100x slowdowns which are not acceptable.</p>
+
+<p>Operational databases also seldom care about historical data. They might create an “audit trail”, but standard business processes almost always use the most recent data so structuring tables for easy access to historical data is not required.</p>
+
+<p>There is, however, a different set of use-cases for databases - “decision support”/”business intelligence”/reporting/data-mining - called “analytics” in general. All these refer to the ability to scan large amounts of data and extract some conclusions that allow the company to make more money or reduce costs. The pattern of data access is somewhat different: data is read in bulk (which operational systems do not do) and is not updated by any of the above use-cases.</p>
+
+<p>Operational systems are sometimes called OLTP (Online Transaction Processing). Note however that OLAP (Online Analytics Processing) is a specific approach to performing analytics (see later) - it is not just “the opposite of OLTP”. The terms “operational” and “analytical” are therefore used in this article.</p>
+
+<p>It is possible to do basic analytics on the same databases used for operational purposes, but:</p>
+
+<ul>
+  <li>the schemas are not optimised for analytics purposes (particularly historical data)</li>
+  <li>the database implementation itself is not optimised for analytics purposes (see “column-oriented” later)</li>
+  <li>operational databases often have limited storage capacity (eg only a few terabytes), leading to them retaining only limited history (eg last 3 months).</li>
+  <li>the performance impact of analytics tasks often interferes with operational performance</li>
+  <li>operational data is continually changing, making analytics tricky</li>
+  <li>cross-database queries are very difficult and have very poor performance</li>
+</ul>
+
+<p>It is therefore common for a separate database to be set up for analytics, and for data from operational systems to be regularly imported into it - either via batch updates (usual) or real-time-streaming (rare). This second database is called a “data warehouse” (DWH); when it contains data from multiple independent upstream databases then it is sometimes called an “enterprise data warehouse” (EDWH).</p>
+
+<p>The data warehouse can use database technologies optimised for analytics - eg databases that provide higher scaleability for performance and storage (distributed systems) but drop support for ACID transactions and foreign-key constraints. These unsupported features (transactions, constraints) have a high value in a read/write operational database, but are far less important in a mostly-read-only (batch updated) analytics system. Analytics databases also often use column-oriented storage; something that speeds up operations common in analytics while slowing down operations common in operational DBs.</p>
+
+<p>And the data warehouse can use a different schema than the operational one. In particular:</p>
+
+<ul>
+  <li>it can represent historical data in a way that is appropriate for querying</li>
+  <li>it can denormalize data for performance</li>
+</ul>
+
+<p>Denormalized data (ie duplicating data and thereby breaking the 3rd and 4th normal form rules) is usually a bad idea in operational systems. However given that analytical systems are read-only except for replication from upstream systems, it is not so critical. And it can make queries much easier to write, and much faster to execute.</p>
+
+<p>There are three well-known “methodologies” for building data warehouses:</p>
+
+<ul>
+  <li>Inmon-style</li>
+  <li>Kimball-style</li>
+  <li>DataVault-style</li>
+</ul>
+
+<p>All three of these methodologies recommend using dimensional models to present the data to the end users (the business experts designing reports against the data warehouse). The differences between the approaches are related to other issues such as getting the data into databases using dimensional representation, dealing with invalid data, and dealing with data related to the same entities coming from multiple sources.</p>
+
+<p>Dimensional models are still relational (tables and columns, joins and projections). However the way data is represented in tables and columns (the “shape” of the data) differ.</p>
+
+<p>Many standard analytics/reporting tools have inbuilt support for dimensional models - the concept has been around since the 70s.</p>
+
+<p>In addition to presenting data to users (report writers) via a traditional relational databases, data warehouses may present data as “multidimensional OLAP cubes” aka “rollups”. This representation is derived from the “core” data in the data-warehouse with precomputed groups and subtotals. The concepts of OLAP cubes is covered in the primary data warehousing article; what is relevant here is that they are based on the concepts of dimensional modelling - ie you need to understand dimensional modelling in order to build an OLAP cube.</p>
+
+<h1 id="core-principles-of-dimensional-modelling">Core Principles of Dimensional Modelling</h1>
+
+<p>The most important concept in dimensional modelling is the recognition that data can be divided into two categories:</p>
+
+<ul>
+  <li>bounded data sets (“reference data”) - aka dimensions</li>
+  <li>unbounded data sets (“events”) - aka facts</li>
+</ul>
+
+<p>Dimensions represent sets of stable entities such as customers, products, locations. A dimension usually falls into one of the following categories: who, what, where, when, why, or how. Some dimension tables (eg location of all company offices) can be very simple - just a handful of rows. Other dimension tables (customer, product) might hold a few hundred thousand records - but that is still relatively small when dealing with corporate databases. The primary point is that such tables are “reference data” - something that you use to look up information. Each record in the table has a strong <em>identity</em>, and the concept of <em>updating an entity</em> makes sense (whether you keep history or not). Dimensions are also relatively stable - rows are not typically added on a daily basis.  A dimension is often something associated with a data governance or data-stewardship process; Customer, Product, Employee, Account - often things whose quality and lifecycle are the responsibility of an assigned person or group.</p>
+
+<p>Facts represent events occuring within the business - sales, shipments, payments. Such tables are rapidly appended to, but existing records are never modified - after all, an event can not “unhappen” or change after it has happened (short of time-travel). Fact records are generated by transaction processing systems, and are sometimes called <em>measurements</em> (in the scientific sense of recording a value at a point in time). The Kimball approach defines three different kinds of fact tables:</p>
+
+<ul>
+  <li>transaction (event) based (rows immutable)</li>
+  <li>periodic snapshot (rows immutable)</li>
+  <li>accumulating snapshot (rows mutable while process in progress)</li>
+</ul>
+
+<p>and there is something that is sort of a fourth fact table type, though it is not so important:</p>
+
+<ul>
+  <li>“factless” fact tables</li>
+</ul>
+
+<p>Transaction-based fact tables are by far the most common. Each “measurement event” generates a fact record. Fact records are <em>only</em> generated as the result of measurement events. A fact (record in a fact table) consists of columns which are either:</p>
+
+<ul>
+  <li>a reference to an entity (dimension) associated with the fact (eg customer C, cashier Q), or</li>
+  <li>a (quantity, dimension) pair (eg 53 units of product X)</li>
+  <li>(sometimes) a “degenerate dimension key” identifying a “thing” that has no properties (and therefore no actual dimension table exists), eg a receipt-id.</li>
+</ul>
+
+<p>In other words, one transaction fact record represents one business event by pointing to relevant reference data (records in dimension tables) - possibly with an associated numeric value (eg quantity). Records in this format are compact (good as fact tables can have large numbers of rows).</p>
+
+<p>Periodic snapshot fact tables represent “state at a point in time”; see the Kimball book for more information on these. The “event” that causes a snapshot to be generated is effectively expiry of a system-internal timer. The result of the timer expiry is creation of one fact record per object whose state is being tracked. Any snapshot can theoretically be computed from a base state plus the set of transactions since that base state, but this approach requires reimplementing external business logic within the DWH - snapshots are a far more stable solution.</p>
+
+<p>Accumulating snapshot fact tables represent the state of an object with respect to a business process; there is one fact record per object which is passing through, or has passed through, that process. Accumulating snapshots are only used where a process has an enumerable (fixed) sequence of steps. Unlike other fact table types, the fact records are mutable while the associated business process is active; the columns are updated as the process steps are applied to the object.</p>
+
+<p>There are a few cases where you need to capture “internal system state” rather than user-driven events. An example is capturing the time-period for which a specific product was “on sale” at a discount. Such tables are called a “factless fact table” because there is no “measured event”. Such tables are often used as “<code>select .. from some_fact_table where some_value in (select from some_factless_fact_table ..)</code>”.</p>
+
+<p>Note that according to the “event sourcing” design pattern, the transactions are the critical events - and that is fine. However for reporting purposes, snapshots need to be materialized in the DWH; whether they are simply imported directly from some other system or whether they are derived from the transactional events is not important for the end user.</p>
+
+<h1 id="dimension-and-fact-grains">Dimension and Fact Grains</h1>
+
+<p>One of the important concepts in dimensional modelling is identifying the “grain” (resolution) of a dimension. For a date dimension, this means choosing day, week, month, quarter or year as the resolution to store. For a location dimension, this means choosing house-address, town, country, continent as the level at which data is captured. Don’t try to aggregate data before importing into the DWH - it saves space, but limits the ability of users to query things.</p>
+
+<p>The concept of “grain” also refers to correctly identifying the event to be captured as a fact; in complex business processes with multiple steps it can require some effort to determine the sequence of events that needs to be recorded (with each event being a different fact table associated with that process). Note: this definition is somewhat based on the concept that the DWH team can determine what events are captured; when a new DWH is created to hold existing data then this is not the case - and these facts/events must be <em>derived</em> from whatever data is provided by the upstream source. Facts should be captured at the <em>lowest possible grain</em>, ie data should not be aggregated/summarized before importing into a fact table. This preserves the maximum flexibility for use of this data. Later, temporary “rollups” can be computed if desired, in order to simplify and accelerate queries interested in data at a “higher grain”.</p>
+
+<p>Adding “rollup” or derived information into a fact record can sometimes be tempting (we know we’ll need this info later for a query) - but wrong. If data can be derived, then it should be derived later (and possibly cached in a temporary table for performance) rather than permanently embedded in a fact record.</p>
+
+<h1 id="query-patterns">Query Patterns</h1>
+
+<p>In queries, where-clauses usually reference dimensions while aggregation operators (sum, avg, etc) reference fact columns. SQL “group by” clauses also often reference dimensions, in which case the dimension is part of the table “row headers”. Other row-headers may reference values from fact tables.</p>
+
+<p>A fact table should never be joined to another fact table. Where a “hierarchy of facts” exists (different grain), then duplicate relevant parent dimension keys (but not the quantity/dimension pairs) onto the child so that group-by operations can be applied directly on the “child” fact table.</p>
+
+<p>A fact table can be automatically recognised: no other table has a foreign key pointing to it. Any table that is the target of a foreign-key reference is a dimension table. Theoretically, a dimension table that is “not yet used” would also have no foreign references to it, but that is an unusual case.</p>
+
+<p>Repeated numeric measurements whose values are not fully predictable are facts. Dimensions instead have a limited set of values; they are similar to “enumerated types”. Note however that this includes things like customer and product; the number of instances can change over time but they are still enumerable. It is this “enumerable” property that makes dimensions suitable for use in “group by” expressions.</p>
+
+<h1 id="denormalization-of-dimensions-star-vs-snowflake">Denormalization of Dimensions (Star vs Snowflake)</h1>
+
+<p>Anyone familiar with normal forms in relational modelling instinctively recoils from the concept of denormalized data - having the same piece of data stored in multiple places in a database. However it does have its place.</p>
+
+<p>Once dimension tables have been identified, it is possible to store them in a traditional normal form - ie a single logical “dimension” (set of reference data for one logical entity) is actually a set of tables with foreign-key relations between them. The fact records then hold the key of the relevant “leaf” reference record and that points to other relevant records (in particular, logical “parents”). This is called a snowflake model.</p>
+
+<p>However Kimball makes very strong arguments for using the alternate “star” approach: for each logical dimension, have just one physical table with data duplicated as needed. That means each “leaf” record is extended with columns that would logically belong on “parent” records - and each set of leafs that would have the same parent in a snowflake model instead have an identical copy of the data from the parent. Sounds crazy, right? Well, look at the primary goals of a data warehouse from earlier:</p>
+
+<ul>
+  <li>be understandable to business users</li>
+  <li>be automatable (tools should be able to provide graphical report designers)</li>
+  <li>be fast to report on</li>
+</ul>
+
+<p>The business users writing reports really do not like making complex outer/left/right/whatever joins across multiple tables. And the tools they are using cannot easily offer drag-and-drop report builders for such schemas. And the databases themselves do not like having to execute such joins at runtime.</p>
+
+<p>Yes, duplicated data can lead to inconsistencies - but a data warehouse is not updated in the same way as an operational database is; the update process is far simpler.</p>
+
+<p>And yes, duplicated data also consumes more disk-space. However we are talking here specifically about <em>dimension tables</em> which are of bounded size. Star schemas do not denormalize fact tables, only dimension tables. And in any data warehouse, the fact tables (being unbounded) are magnitudes of size larger than the dimension tables. This means that <em>as a percentage of the database size</em>, the snowflake-schema and star-schema approaches require approximately the same amount of disk-space because the storage required is dominated by the fact tables anyway.</p>
+
+<p>It is possible to store a dimension in “snowflake form” and then use a relational database view to present it in flat star format. This solves the useability issue - but not the performance one. For small tables, the performance difference between a star-as-view and a “materialized” star representation may not be significant; however the performance impact grows with dimension table size.</p>
+
+<h1 id="use-of-surrogate-keys">Use of Surrogate Keys</h1>
+
+<p>Dimension tables usually use a surrogate key as the primary key for the table. Using a <em>business key</em> has the following problems:</p>
+
+<ul>
+  <li>fact records reference dimension records by key; when the business key is a compound key (consists of multiple columns) then this is inefficient and clumsy</li>
+  <li>dimension records can be updated (see “slowly changing dimensions” later) - but fact records should be immutable. This limits the ways in which dimension history can be tracked.</li>
+  <li>changes in business processes can sometimes result in changes to the structure of the “business key” for a record. The impact of such changes is smaller when the dimension tables
+use only surrogate keys</li>
+  <li>joins on simple types (eg integer) are faster than joins on compound keys with complicated types (eg a three-column key with types string, timestamp, and int).</li>
+</ul>
+
+<p>The size of the business key is probably the most important point here - fact tables can be very large. Reducing the key that needs to be stored in the fact table to a single integer has great advantages. Being able to store the key of a dimension table in a single column within the fact table also makes the fact tables much more readable/comprehensible.</p>
+
+<p>Fact tables generally do not need surrogate keys. Actually, fact tables generally do not have a primary key at all - they represent <em>events</em>, each of which is naturally unique, rather than <em>entities with identity</em>.</p>
+
+<p>One dimension table which usually does not have an arbitrary surrogate key is the <em>date dimension</em>; here the key is usually a string-form of the related date (eg “2018-04-30”). The keys here are extremely stable, and the data is not versioned making the above problems with business keys less significant.</p>
+
+<h1 id="benefits-of-dimensional-modelling">Benefits of Dimensional Modelling</h1>
+
+<p>Dimensional modelling literature often talks about “drilling down” in a report; basically this means using “group by X” or “where X = n”, in order to get results per X rather than summed.</p>
+
+<p>Dimensions provide a nice interface to users of the data warehouse - dimensions are effectively the “things” that can be queried - customers, products, date-ranges. Because “star” schemas have only flattened dimensions, there are far fewer tables to choose from and the columns on those tables immediately present the relevant data. This is why “dimension-schema-aware” business intelligence tools are useful - they know that</p>
+
+<ul>
+  <li>dimension tables are useful for browsing, grouping and filtering;</li>
+  <li>fact table columns are not used for grouping and filtering - but are candidates for aggregate operations such as sum, avg, min/max.</li>
+</ul>
+
+<p>A traditional normal-form data representation does not have these nice properties - flattened dimensions, clear line between dimensions (group/filter) and fact(aggregate). A traditional ERM diagram  is much more intimidating to non-technical users than two simple lists: dimension-tables and fact-tables.</p>
+
+<p>Dimensional-aware tools may also be able to take advantage of precomputed “aggregate tables” provided by the database; there is a standard format for these. The business user designing a query does not see the aggregate tables; the tool detects them and uses them transparently when appropriate. This can accelerate queries significantly. Of course such aggregate tables need to be recomputed when the underlying data changes. A DWH in normal form cannot provide such aggregate tables. Such aggregates can also be provided as OLAP cubes - which are visible to users.</p>
+
+<p>Dimension tables are usually much smaller than fact tables; a business system contains many “events” which refer repeatedly to a set of far few “things”. When multiple “data marts” exist, then dimension tables (ie reference data) are typically <em>replicated</em> into each data-mart (acceptable as they are small relative to the fact tables); see “conformed dimensions” in the introductory article.</p>
+
+<p>Ralph Kimball puts it this way:</p>
+
+<blockquote>
+  <p>Dimensional modeling addresses two requirements:</p>
+
+  <ul>
+    <li>Deliver data that’s understandable to the business users</li>
+    <li>Deliver fast query performance</li>
+  </ul>
+</blockquote>
+
+<p>Identifying the “reference data” in the system (dimensions) helps with the first. Using a flattened star-schema helps with both. Having denormalized (duplicated) data in the dimension tables is a small price to pay.</p>
+
+<p>It is not really intended that queries be executed over dimension tables directly. The vast majority of queries are executed over a fact table, with attributes from dimension tables used to filter and group results. However queries on dimension-tables is not completely forbidden; a common case is queries against customer or product tables, eg “count customers grouped by city”.</p>
+
+<h1 id="slowly-changing-dimensions">Slowly Changing Dimensions</h1>
+
+<p>Dimension tables (reference data) are mostly static, but can evolve slowly over time. This process is often called Slowly Changing Dimensions or SCD.</p>
+
+<p>There are 3 traditional ways to update a dimension table:</p>
+
+<ul>
+  <li>1: overwrite dimension record
+    <ul>
+      <li>modify column contents, replacing old value with new value (using same key)</li>
+    </ul>
+  </li>
+  <li>2: create new dimension record
+    <ul>
+      <li>insert a new record with a new surrogate key and an empty “valid-to date” (or date far in the future)</li>
+      <li>update old record in DB to set “valid-to date” to now (ie marked as expired)</li>
+    </ul>
+  </li>
+  <li>3: store history in additional columns of the existing dimension record
+    <ul>
+      <li>move contents of current-value column to previous-value column</li>
+      <li>store new value in current-value column</li>
+      <li>(optionally, set a “<code>last_modified</code>” column on record)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The approaches to SCD are not primarily intended for “change history tracking” but instead for associating the historically correct value of a dimension with a specific fact. In other words, it allows writing reports over fact tables that pull in the correct reference data (where “correct” depends on what the business actually wants). It is not optimised for writing reports showing how a specific reference data entity has changed over time - that is possibly of interest to auditors, but not to regular business users. If “change history tracking” is really of importance, then possibly this can be achieved via a factless fact table - or a fact-table for the “dimension X update” business process.</p>
+
+<p>For a given dimension table, one of the above SCD approaches might be used for all changes to a dimension. Alternatively, one approach might be used for “logical changes” (a real business process such as “user changes address”) while type-1 might always be used for “fixups” (“user address was entered incorrectly”).</p>
+
+<p>Further SCD approaches were later invented; however the naming/numbering for these is not entirely consistent. Wikipedia <a href="https://en.wikipedia.org/wiki/Slowly_changing_dimension">defines type4 and type6</a> in addition to the above while an article from the Kimball group <a href="https://www.kimballgroup.com/2013/02/design-tip-152-slowly-changing-dimension-types-0-4-5-6-7/">defines types 4-7 and differs from the Wikipedia descriptions</a>.</p>
+
+<p>Remember that fact records contain keys of specific dimension records; when a dimension is updated it is important to consider which dimension-record existing and new facts should reference (ie which key the fact records should hold). Existing fact records are never changed. In other words, the link between dimension and fact table is important for queries - if you want to ask “which facts are associated with the dimension record that previously had value X” then that controls which of the history types should be used.</p>
+
+<p>All of the approaches to SCD described here (types 1 through 7) assume that dimension records are updateable. When the DWH is stored in a database type whose records are immutable (eg BigQuery or Hive) then slowly-changing dimensions are more complex. There are ways to store updates such that SQL queries can pick out the newest record (eg by timestamp) without modifying any old records, but none of the possible queries are efficient. The most effective solution for SCD in such databases is therefore to rewrite the dimension table in batches (eg once per day), using one of the standard approaches. This minimises churn within the database (at most one rewrite of the table per day) while maximising performance (no nasty SQL). Where near-real-time updates are truly needed, there is a more complex solution: use the once-per-day-updates approach, but when querying also take into account any “pending updates” which are waiting in another table. This makes all queries more complex (or at least those which need near-real-time data). Remember that dimension tables are small, relative to the fact tables in a DWH, and therefore such updates (while annoying) are not likely to be the biggest performance issue.</p>
+
+<p>In a system where the data warehouse is a “federation of data marts”, or where the dimension table is actually “master data”, then changes to a dimension need to be replicated out to all copies of the dimension table. The recommended practice is to keep a “version number” for each dimension table, so that systems with different dimension-table-versions do not try to compare data.</p>
+
+<p>Sometimes a fact record may arrive which references a dimension (eg a product or customer) which is not yet defined in the dimension table. The usual solution is to create the dimension record, with its unique surrogate key, populated with as much context as can be determined from the fact record. When the full information is later obtained, that record is overwritten with the full set of info (a “type 1 update”). The surrogate key remains valid, so the fact(s) referencing it do not need to be changed.</p>
+
+<h2 id="scd-strategy-effects">SCD Strategy Effects</h2>
+
+<p>The different SCD strategies have different effects on reports.</p>
+
+<p>In all cases, existing fact records are unchanged - only the dimension tables are modified.</p>
+
+<h3 id="type-1">Type 1</h3>
+
+<p>With a type1 (overwrite) change, reports over a fact table always show the new dimension attributes. No change history is available.</p>
+
+<p>Type-1 updates are appropriate for any of the following:</p>
+
+<ul>
+  <li>when history is not relevant for this DWH</li>
+  <li>when fixing incorrect dimension values (sometimes)</li>
+  <li>when fixing late-arriving-dimensions (see later)</li>
+</ul>
+
+<h3 id="type-2">Type 2</h3>
+
+<p>With a type2 (validity-range) change, new fact records use the surrogate key of the newly-inserted record (the one whose valid-to date is in the future).</p>
+
+<p>Reports over a fact table show the dimension version associated with the value active at the time they were added - old facts show old dimension values while new facts show new dimension values.</p>
+
+<p>Change history is available.</p>
+
+<p>Sometimes changes to a dimension table use type2 change-tracking in general, but apply specific changes as type1 (eg a “fix” needs to be applied to all historical versions of the record). In this case, all type2 rows for the entity need to be updated.</p>
+
+<p>A disadvantage is that it is difficult to report over facts, linking them to <em>the current value of the dimension attributes</em>; the facts are pinned strongly to the <em>historical version of the dimension</em>. As example, a fact table references a specific “branch office” in a “branch office dimension”. Later, some attributes associated with that particular office are updated (eg phone-number, address, or manager-name). Reports over the facts will naturally report only the attributes valid <em>at the time the fact was recorded</em>. See type6 for an approach that allows reports showing either version of the associated dimension.</p>
+
+<h3 id="type-3">Type 3</h3>
+
+<p>Type3 is a variant of type1: each record has separate columns for prior and current values. When a dimension record changes, prior is set to current and current is updated.</p>
+
+<p>Another way of describing this is that each “version” is represented as a new column in the dimension record, rather than as a new record.</p>
+
+<p>Because each fact record points to a single dimension record that contains all the historical options for that entity (as separate columns), the user may easily report in either of two ways, at their choice:</p>
+
+<ul>
+  <li>group facts by the new value, ignoring history</li>
+  <li>or group facts by the previous value</li>
+</ul>
+
+<p>This is most useful when dealing with “cutover dates” in which (for example) a company reorg occurs, or a law-change occurs - something that only happens once in the retention-period of the DWH. The point is not really to represent change as to represent two different views of the world - as it would have been without the change, and as it is with the change. In such cases, change-history is not needed as it is “common knowledge” what prior/current refer to.</p>
+
+<p>Optionally, multiple “old value” columns could be added, eg “reorg2018, reorg2022” each with the value relevant to that significant change. Of course adding such columns requires an SQL “alter table” command over the dimension table, but if the historical events are truly significant then this is not infeasible. Reports would then be able to select “which view of history” facts should be labelled with.</p>
+
+<p>An alternative is to use the second column as an “original” value, and not copy the current value into it on change. The usage-pattern is quite different, but the implementation is the same.</p>
+
+<p>In either case, it is possible to see that at least one change has occurred, but not how many changes, when, or why.</p>
+
+<p>A disadvantage of type3 is that you need to decide in advance which properties are mutable (or at least, which are tracked with type-3 changes), as dedicated columns are required. Of course such columns can be added when needed via an alter-table command. Reports which need to reference the “non-default” copy of the column must be updated, but existing reports will simply use the default (usually current) value.</p>
+
+<h3 id="type-4">Type 4</h3>
+
+<p>With type4, the mutable attribute is moved to a separate dimension table (one row per possible value) called a “mini dimension” and then the fact table points to this row <em>as well as the original dimension</em>. In effect, the history information is present in the fact table rather than the dimension table; the value active at the time the fact was recorded is pointed to directly by the fact record.</p>
+
+<p>Where the variable attribute is continuously-valued rather than enumerated, the dimension table rows represent <em>ranges</em> (bands) - as fine as desired. Group by mini-dimension attribute is then still possible. When a dimension has multiple variable attributes, a single mini-dimension could be used to represent them all; given attributes Q,R,S the mini-dimension would need <code>NDISTINCT(Q) x NDISTINCT(R) x NDISTINCT(S)</code> rows. The fact record would only need one foreign key to reference the exact <code>(Q,R,S)</code> tuple applicable to that fact. However AFAICT grouping by Q, R or S alone is no longer possible.</p>
+
+<p>Although history is available at the grain of the fact table, the exact moment that an attribute associated with a dimension changed is not tracked, as the mutable attribute and its original entity are now decoupled. As noted earlier, SCD is not intended for “change reporting” but instead for associating the historically correct value of a dimension with a specific fact.</p>
+
+<p>Type4 can also be seen as handling dimension changes by inserting a new row - without “valid range” timestamps - and then referencing the new row from the fact table. However usually the set of (mutable) values are not a complete dimension in themselves, but a set of mutable values logically associated with a more static dimension - this is therefore called a “mini-dimension”.</p>
+
+<p>Note that to correctly assign the right mini-dimension to the fact, the ETL process needs access to the correct information - just knowing which original dimension record applies is not sufficient. This is particularly clear for “banded” values - some precise value needs to be mapped to the right band. Remember that the dimensional model is a <em>user-focused</em> representation of the upstream data; the ETL process is presumed to have the full current information. When not, then a “mini-dimension” cannot be used. The “type 5” approach is an alternative solution for this.</p>
+
+<p>A disadvantage of type4 is that you need to decide ahead-of-time which properties of the original dimension are “mutable” (should be moved to mini-dimension). If a property was previously not mutable, or was handled via type-1 overwrites, and you later need to track changes over time, that property can be migrated to the mini-dimension (removed from parent dimension, added to mini-dimension) - but this does require updates to all reports.</p>
+
+<p>Another disadvantage is the extra column on the fact table - too many “mini-dimensions” can cause the fact-table to grow inconveniently wide. And the concept is somewhat complex for users to understand; naming the “mini-dimension” carefully, using business concepts, helps here.</p>
+
+<p>A type4 does not directly (in the DWH) represent “the current mini-dimension”, but instead just “a set of attributes (the mini-dimension columns) associated with a specific fact record”. Whether this is a value that changes over time is just a logical interpretation (unlike type5 for example, where “current value” is introduced again).</p>
+
+<h3 id="types-5-7">Types 5-7</h3>
+
+<p>Types 5-7 are “hybrids” - combinations of the basic 4 options.</p>
+
+<h3 id="type-5">Type 5</h3>
+
+<p>Type5 = type4 (“mini-dimension”) + type-1 outrigger</p>
+
+<p>Mutable attributes of a dimension are moved to a separate table, referenced directly from the fact table - see “type 4”.</p>
+
+<p>In addition, the parent dimension has a column holding the key to the “current” mini-dimension value for that dimension (“outrigger”); when the fact is inserted it copies this value thus “pinning” the fact to a specific mini-dimension value. When the “current mini-dimension” changes, the parent dimension foreign key is overwritten (type-1 style) to point to the new current mini-dimension record.</p>
+
+<p>This is quite a useful pattern - it allows queries against the parent dimension together with the “current” mini-dimension values. For a dimension like “customer”, this allows querying at least the current attributes for a customer with just a simple join - in fact, a view can present this as a single table. It also allows reporting over facts with both the “current” and “as at insert” values, by following <code>fact-&gt;parentdim-&gt;current-mini</code> and <code>fact-&gt;original-mini</code>.</p>
+
+<p>And when doing ETL, it makes life easy: the fact table just inherits (“pins”) the current mini-dimension reference from the parent dimension at the time the fact record is inserted. Unlike pure type-4, there is no need to use data outside of the DWH to determine which mini-dimension to link to.</p>
+
+<h3 id="type-6">Type 6</h3>
+
+<p>Type6 is supposedly type1+type2+type3. It supports reporting where you might want to show the value active when the fact was recorded, or might want to show the current value even for an older fact. The discussion of type-3 mentioned the possibility of having separate columns for original and current; type6 works in a similar way. However type3 does not keep information on <em>when</em> the current value changed, or how often it has changed - only type2 supports that. However a pure type2 structure makes it difficult for a user to report against current values; the facts refer to the surrogate key of the dimension record active when they were recorded.</p>
+
+<p>The solution is simply to take the type-2 approach, but have separate columns for “original” and “current” values (ie type-3). Initially the two values are identical; when the value changes, then:</p>
+
+<ul>
+  <li>a new row is inserted, with original=current, and the (single) “previously current” record has its validity-range-end set to the current time (all standard for for type-2). This row is used for new facts.</li>
+  <li>all existing type2 rows for that dimension record (ie all those with the same logical key) then have their “current” value updated (type-1 style).</li>
+</ul>
+
+<p>A user can then follow the foreign-key from fact to dimension and there has access to either the original or truly-current values. The full history of changes is also available if needed.</p>
+
+<p>Unfortunately, type6 does not scale well to dimensions with many mutable attributes; each attribute needs separate “original” and “current” columns. This leads to type-7.</p>
+
+<h3 id="type-7">Type 7</h3>
+
+<p>This approach basically adds a new row each time a dimension changes. No additional columns are needed in the table, except:</p>
+
+<ul>
+  <li>a surrogate key as usual (primary key)</li>
+  <li>a “durable key” which is the same across all “versions” of the dimension (not unique)</li>
+  <li>an “<code>is_current</code>” boolean flag</li>
+  <li>optionally, valid-from, valid-to timestamps</li>
+</ul>
+
+<p>The fact record then links to both the “original” dimension record (ie the one current at the time the fact was recorded), and the “current” dimension record.</p>
+
+<p>Linking to the original is easy - just the surrogate key.</p>
+
+<p>Linking to the “current” is trickier - it doesn’t exist at the time the fact record is created. So instead, the fact record stores a “durable key” which is a foreign key onto a <em>view</em> of the dimension where <code>is_current=true</code> (in this view, the durable key will be unique).</p>
+
+<p>The durable-key may be a natural key of the dimension, or may be a surrogate key.</p>
+
+<p>Disadvantage is that the fact table needs two keys - and fact tables may be large. Lookups of “current” values are also less performant.</p>
+
+<p>Changing a dimension requires:</p>
+
+<ul>
+  <li>inserting a new row with new surrogate key, same durable key, and <code>is_current=true</code>
+</li>
+  <li>updating the existing “current” row to set <code>is_current=false</code>
+</li>
+</ul>
+
+<p>As alternative, a separate “current” table for the dimension could be kept, with data overwritten on update. However this would almost double storage needed for the dimension.</p>
+
+<p>Because each dimension record holds the “durable key”, the fact record does not absolutely need to hold two key references; the durable key can be used to define views to present history to the user in various ways via a single foreign key ref (at some performance cost).</p>
+
+<p>A view could be created which “extends” each of the dimension records with the fields of the “current” record having the same durable-key (a self-join). The view would then look something like a type-3 record, with “original” and “current” versions of each column - but this time the current columns are logical rather than physically stored. The fact table then only needs one key for the dimension, and is easy for users. However performance will be affected when grouping/filtering by “current” values.</p>
+
+<p>And of course, two views could be defined, resulting in:</p>
+
+<ul>
+  <li>join facts to real dimension table: historical info only</li>
+  <li>join facts to current-only view: current info only</li>
+  <li>join facts to merged-view: original and current values are available as separate columns in type-3 style</li>
+</ul>
+
+<p>Type7 representation does have one additional benefit: it allows reporting dimensional values “as of any point in time”. In other words, facts can be reported “using dimensions current at date xx.yy.zzzz” - though the queries needed are not trivial.</p>
+
+<h3 id="other-notes-on-scd-types">Other Notes on SCD Types</h3>
+
+<p>Type1,2,3,5,6 and 7 all require updating at least one <em>existing</em> dimension record when a dimension attribute changes - something that is relatively simple in relational DBs but not trivial in distributed databases such as Hive or Google BigQuery whose records are not directly updateable. Type 4 does not require updating existing dimension records - but does require “external info” to determine which of the mini-dimension records to link the fact to.</p>
+
+<p>None of the above approaches require updating fact records when a dimension changes.</p>
+
+<p>Type2 and type6 allow reporting on “when was the dimension changed”. As noted earlier, this is not usually a primary goal of a DWH - usually, reports are on <em>facts</em> rather than directly on dimensions.</p>
+
+<p>Tracking the relation between two dimension tables over time (eg customer-to-sales-rep) can be done with a “factless fact table”. But create one only if this info is truly needed - otherwise, an approach like type5 is simpler (fact table pins the relation at the time the fact was recorded).</p>
+
+<h1 id="the-date-dimension">The Date Dimension</h1>
+
+<p>It is usual to have a dimension table of dates, with one record per day. Each record can have useful attributes such as whether it is a working day in specific countries in which the company operates, which fiscal quarter the day is in. When using a “star” schema, many columns in the table will of course contain constants duplicated across many records (denormalized) - but dimension tables are small relative to fact tables, so the extra storage is not relevant.</p>
+
+<p>Having properties related to dates pre-computed and stored in a simple flat table removes a lot of complexity from queries that need to deal with dates.</p>
+
+<p>Times within a day are typically stored directly in fact tables; a timestamp in a fact table is typically a (time, date-dim-key) pair where time might just cover 24 hours, or might be a full timestamp-since-epoch (in which case the date key is redundant but still useful for queries). Optionally a “time period” dimension could be created with entries for night, morning, lunchtime, afternoon, and evening; that would allow efficient “group by time-period” operations later.</p>
+
+<p>Given the concept that dimensions are for “bounded reference data”, representing dates as a dimension feels a little odd at first. However in practice, how many different days are relevant for a company? Even 100 years requires only 36,500 rows - a fairly small table. Having dates as reference data, including attributes such as whether the specific day is a working day or not, is very useful.</p>
+
+<p>While most dimension tables have arbitrary surrogate keys (eg sequential integers), a date dimension table often has a readable key such as “yyyymmdd”. The stability of date dimension records means that the drawbacks of “meaningful keys” do not apply.</p>
+
+<h1 id="dimension-hierarchies">Dimension Hierarchies</h1>
+
+<p>It is common for dimension values to form a tree, eg day is part of week is part of month is part of year. Geographical dimensions also do this, as do company reporting trees (though these are not necessarily stable, and should be used with care in a long-lived data warehouse structure).</p>
+
+<p>Hierarchical structures are very difficult to deal with in normal SQL queries. To make a DWH friendly for business users, it is worth making some effort to structure such data in a reporting-friendly way.</p>
+
+<p>When the hierarchy is of fixed depth, and not excessively deep, then the recommended approach is to just flatten them - add columns to the leaf nodes to hold parent attributes (duplicated/denormalized). This approach can also work where the depth is not fixed, but is in a small range eg 1-4 - just create additional columns for the maximum possible depth and populate “missing” parents with appropriate (dummy) values.</p>
+
+<p>For more arbitrary (“ragged”) hierarchies:</p>
+
+<ul>
+  <li>sometimes embedding a “path string” as a column in leaf nodes is sufficient</li>
+  <li>sometimes child-id-ranges can be used</li>
+  <li>otherwise a “bridge table” can be used.</li>
+</ul>
+
+<p>The bridge-table approach works by putting all records (leaf and non-leaf) in the dimension table, and putting the “links” between nodes into a separate table (called a “bridge table”) with structure <code>(node_id, ancestor_node_id, depth, ancestor_is_root, is_leaf)</code>. Note that the table has not just “direct” parent pointers, but a separate row pointing to each ancestor (one row for each depth value). The column-names should be changed to match the actual dimension meaning. Each node should have an entry where ancestor=self and depth=0. With such a table, it is easy to find all rows which have a specific node as ancestor, without recursive queries or self-joins. This approach actually supports multi-root trees (multiple-inheritance-like structures) as well. Optionally the rows in the bridge table can have valid-from and valid-to timestamps. Modifying a bridge table (with or without timestamps) to represent a changed structure is not particularly complex - and much easier than when links are embedded into the dimension records themselves.</p>
+
+<p>The path-string and child-id-range approaches do not require an additional bridge-table, but are less stable with regards to changes in tree structure. See the Kimball book for details on these.</p>
+
+<h1 id="fact-hierarchies">Fact Hierarchies</h1>
+
+<p>Occasionally, rows in a fact table form a hierarchy of <em>same-typed nodes</em>. In this case, a fact record may have a surrogate key, and a “parent” column that holds the surrogate key of the parent record in the same table. In other words, foreign keys to other fact tables should not exist, but references back to the same table are allowed (though not entirely convenient for users).</p>
+
+<h1 id="some-further-notes-on-dimensional-modelling">Some Further Notes on Dimensional Modelling</h1>
+
+<p>A dimensional model is built in response to a measurement process in an upstream system. Tables are not “designed for a specific report”, but instead model the upstream business.</p>
+
+<p>Dimensional modelling goes back to the 1970s, and has been popular (in various degrees) since them, ie has never “fallen out of fashion” as a way of presenting data to users responsible for writing reports.</p>
+
+<p>Relational and dimensional models have the same expressibility; data can be mapped back and forth without data loss. Yes, denormalized “star” models take more space (due to data duplication), and mapping from star back to normal means somehow detecting/discarding the duplicated values, but the expressiveness is the same and non-technical users really are far happier with duplicated data than writing complex joins (including finding out which tables to join against).</p>
+
+<p>Dimensional “star” models are typically in 2nd normal form, while “snowflake” models and models for operational systems are usually in 3rd or 4th normal form.</p>
+
+<p>When flattening incoming reference data into a star representation, it is wise to retain the original keys of the “parent” records, in order to make reversing the process easier.</p>
+
+<p>Occasionally a fact-table needs to reference a dimension, but the dimension table would have just a surrogate key and one attribute. In this case, the attribute can be placed directly in the fact table; this is called a “degenerate dimension”.</p>
+
+<p>A fact record can refer to the same dimension multiple times, for different purposes. Each purpose is called a “dimension role”. Example: an “employee purchase in store” event will refer to an employee as the purchaser, and another employee as the cashier.</p>
+
+<p>Fact tables should not have boolean-typed columns; instead such columns should hold a reference to a table holding the positive and negative value. Example: instead of “male: Y or N”, have a column gender referencing a gender dimension.</p>
+
+<p>The Kimball concept of a data warehouse as a federation of data-marts (each being a “business subject area”) in some ways mirrors the concept of a micro-service architecture where each service holds it own persistent data related to a “business subject area”, some of which is a (read-only) replica from other systems.</p>
+
+<p>In the Kimball approach, each data-mart should be a “business process area” rather than a company department (though often the two are synonymous). Business processes are often aligned with the “key performance indicators” (PKIs) that reports are actually meant to output.</p>
+
+<p>One negative to the “federation of data marts” approach is that when the upstream systems do not keep history for long, and the data-mart does not yet exist, then history gets lost. Having a central master store that holds all data, regardless of whether a data-mart exists for it or not, means that a data-mart can be set up in the future and immediately populated with history data. Of course that does mean doing the work of importing and storing data from the upstream system without yet having an explicit use-case for the data - ie potentially unfunded work. In this case, the data could be stored in a much “rawer” form than usual to save work.</p>
+
+<p>BI tools that support dimensional modelling often also support “drill across” in which a query is executed against multiple “conformed” databases, and the results merged. When the user is particularly lucky, user credentials are also synchronized across all databases (or single-signon is implemented) to make configuration of the BI tool even easier.</p>
+
+<p>When two federated databases have the same core dimension, with some common fields but also extra fields, then that is ok - there is no need to make an “outrigger dimension”, just leave the mart-specific properties on the mart’s version of that dimension table. The “drill across” functionality will work fine as long as the dimension table has the same name, and the shared columns have the same names and meanings. If all data is in <em>one</em> DB, then it is a matter of taste whether to have one merged table, multiple copies of the table, or outriggers. One table, or outriggers, can save data - but dimension tables are NOT the critical point for data use.</p>
+
+<p>A fact table can be automatically recognised: no other table has a foreign key pointing to it. Any table that is the target of a foreign-key reference is a dimension table. Theoretically, a dimension table that is “not yet used” would also have no foreign references to it, but that is an unusual case.</p>
+
+<p>Although customer and product data needs “master data management” for consistency across the company, and the DWH team often end up running this MDM process, the dimensional model is not a suitable form for the master copy of this data - a normalized form is better. The customer and product <em>dimension tables</em> are then generated from the master version via denormalization.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+<a href="http://www.kimballgroup.com/wp-content/uploads/2013/08/2013.09-Kimball-Dimensional-Modeling-Techniques11.pdf">Kimball Group: Dimensional Modeling Techniques</a> - extract from the Kimball “Data Warehouse Toolkit” book related to modelling (PDF)</li>
+  <li><a href="https://docs.oracle.com/cd/B13789_01/olap.101/b10333/multimodel.htm">Oracle: Multidimensional Data Models</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/dwh-dimensional/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

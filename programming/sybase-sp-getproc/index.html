@@ -1,0 +1,332 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Sybase ASE Stored Procedure sp_jdbc_getprocedurecolumns and performance</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Sybase ASE Stored Procedure sp_jdbc_getprocedurecolumns and performance</h1>
+    <aside>First published on: December 28, 2020</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Infrastructure/'>Infrastructure</a>, <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="the-core-problem">The Core Problem</h1>
+
+<p>My employer has a large Java-based application which uses <a href="https://en.wikipedia.org/wiki/Adaptive_Server_Enterprise">Sybase ASE</a> as its data store, and frequently invokes database-side stored procedures. A mysterious stored procedure <code>sp_jdbc_getprocedurecolumns</code> (which we never call directly) is causing performance problems. It took quite a lot of work to track down why.</p>
+
+<p>This application handles a large amount of traffic, and the database is reaching its capacity limits. Instrumenting the application and database with <a href="/infrastructure/prometheus-ql">Prometheus</a> shows that built-in stored procedure <code>sp_jdbc_getprocedurecolumns</code> was using up to 15% of the database capacity - although the application never calls such a procedure.</p>
+
+<p>The problem procedure isn’t being called <em>all that often</em>, but the code is very complex and slow. This stored-procedure is bundled with the database, and consists of server-side logic to query a lot of internal tables and combine/restructure the info. The result is a table of the input/output params for a specified stored-procedure.</p>
+
+<p>It turns out that Sybase’s <code>jconnect</code> JDBC driver (we use version 7) calls this stored procedure from two different code-paths:</p>
+
+<ul>
+  <li>from method <code>com.sybase.jdbc4.jdbc.SybDatabaseMetaData.getProcedureColumns</code>, or</li>
+  <li>from method <code>com.sybase.jdbc4.jdbc.SybCallableStatement.getParameterMetaData</code>
+</li>
+</ul>
+
+<h1 id="the-sybdatabasemetadata-path">The SybDatabaseMetaData Path</h1>
+
+<p>Class <code>SybDatabaseMetaData</code> implements jdbc-standard interface <code>javax.jdbc.DatabaseMetaData</code>. Its implementation of standard method <code>getProcedureColumns</code> uses the problematic Sybase built-in stored procedure to fetch the necessary data that the jdbc specification requires it to return.</p>
+
+<p>Sadly, the stored procedure implementation on the Sybase server side (<code>sp_jdbc_getprocedurecolumns</code>) is very inefficient. Fortunately, this method is not something that any coder is likely to call very often - at least deliberately.</p>
+
+<p>But unfortunately Spring’s jdbc library <em>can</em> cause it to be executed frequently if a coder is not careful - and we had fallen into this trap. Each instance of Spring jdbc class <code>SimpleJdbcCall</code> wraps calls to a specific target stored procedure. By default each instance loads metadata for its target stored procedure when “compiled”, via calls to two different methods on class <code>DatabaseMetaData</code> (<code>getProcedures</code> and <code>getProcedureColumns</code>). Each of these methods triggers a call to a stored procedure within Sybase. Of course any round-trip to the database should be avoided if possible, but at least the stored-procedure backing method <code>getProcedures</code> is relatively efficient. The same cannot be said of the stored-procedure backing <code>getProcedureColumns</code> (<code>sp_jdbc_getprocedurecolumns</code>).</p>
+
+<p>The <code>SimpleJdbcCall</code> “compilation” step can be done explicitly; if not then it is executed the very first time a stored-procedure call is made via an instance of this type (lazy initialisation).</p>
+
+<p>Given that this compilation (metadata-lookup) only happens once for each <code>SimpleJdbcCall</code> instance, the impact isn’t <em>too bad</em> if the instance is reused for all invocations of that specific stored procedure. However if a programmer falls into the trap of creating a new <code>SimpleJdbcCall</code> instance for each call to a stored procedure, then the code works but performance is extremely poor; what looks like a single call to the database is in fact preceded by two stored procedure calls, the second of which is very CPU-intensive.</p>
+
+<p>The solution is simple:</p>
+
+<ul>
+  <li>for each stored-procedure, create only one <code>SimpleJdbcCall</code> instance and reuse it, or</li>
+  <li>disable the metadata-lookup for the <code>SimpleJdbcCall</code> instance, instead manually providing the necessary parameter metadata</li>
+</ul>
+
+<p>Of course it is possible to do both, ie manually provide parameter meta-data even on “singleton” instances. We chose to do that, which has the nice advantage that we can enable logging for the problem stored-proc within the database; <em>any</em> call to the stored-procedure indicates that we need to fix our code and the logged parameters provide the name of the stored-procedure whose meta-data is being fetched.</p>
+
+<p>Disabling meta-data lookup does have disadvantages:</p>
+
+<ul>
+  <li>it means more work for the programmer (explicitly providing parameter metadata), and</li>
+  <li>it means the code needs to be kept in sync with the database.</li>
+</ul>
+
+<p>The “keep in sync” step isn’t too much of a burden as the calling code and the called stored procedure generally need to be kept in sync anyway. However there are a few cases where the fetch-metadata-from-database-at-runtime approach can provide better error messages when inconsistencies exist.</p>
+
+<p>Here is an example of how we now configure <code>SimpleJdbcCall</code> instances:</p>
+
+<pre><code>public class SomeDao {
+  private final SimpleJdbcCall someStoredProc;
+
+  public SomeDao(DataSource dataSource) {
+    someStoredProc = new SimpleJdbcCall(dataSource)
+      .withProcedureName("someTargetStoredProcedureName")
+      .withoutProcedureColumnMetaDataAccess()
+      .declareParameters(
+        new SqlParameter("param1", Types.INTEGER),
+        new SqlParameter("param2", Types.BIGINT))
+      .returningResultSet(...);
+    someStoredProc.compile();
+  }
+}
+</code></pre>
+
+<p>The call to <code>withoutProcedureColumnMetaDataAccess</code> disables <em>both</em> of the stored-procedure calls that <code>SimpleJdbcCall</code> usually makes - and means <code>declareParameters</code> is mandatory.</p>
+
+<p>For the cases where the <code>SimpleJdbcCall</code> instance cannot be a final member on a “singleton” class, the same pattern is still followed; because metadata lookup is disabled, <code>SimpleJdbcCall</code> is relatively efficient even in this approach.</p>
+
+<p>The explicit call to <code>compile</code> above is optional, but means that validation of the declared parameters happens on class construction (and as DAOs are typically singletons that means it happens on application startup). This is IMO better than having this validation occur only on first actual use of the instance. If you are using <code>SimpleJdbcCall</code> <em>without</em> disabling metadata-access, then explicitly using <code>compile</code> is even more important as it ensures the (slow) metadata-fetch occurs on startup and not randomly during application execution.</p>
+
+<p>The names used when declaring parameters do not need to match param-names in the stored-procedure declaration; only the types (and order) are important. When using the variants of method <code>SimpleJdbcCall.execute</code> which take a <em>map</em> of parameters, then the param-names in the map need to match the names used in <code>declareParameters</code> (case insensitive).</p>
+
+<p>And as a last note: if the stored-procedure has OUT parameters, then these must be passed to method <code>declareParameters</code> <em>before</em> any input parameters and must use type <code>SqlOutParameter</code>.</p>
+
+<h1 id="the-sybcallablestatement-path">The SybCallableStatement Path</h1>
+
+<p>This (problematic) code-path is invoked when application code calls any of the following jdbc-standard methods:</p>
+
+<ul>
+  <li>
+<code>someCallableStatement.getParameterMetaData()</code> (ie a direct call to the problematic driver method), or</li>
+  <li>
+<code>someCallableStatement.setBigDecimal(...)</code> or</li>
+  <li>
+<code>someCallableStatement.setObject(index, anyObj, type)</code> with type being <code>javax.sql.Types.NUMERIC</code> or <code>javax.sql.Types.DECIMAL</code>, or</li>
+  <li><code>someCallableStatement.setObject(index, someBigDecimal)</code></li>
+</ul>
+
+<p>The jconnect implementation of method <code>setBigDecimal</code> triggers a call to <code>getParameterMetaData</code> (via class <code>SybPreparedStatement</code>). The <code>setObject</code> methods effectively follow the same path as <code>setBigDecimal</code> when the parameters specify that a decimal type is being processed.</p>
+
+<p>It isn’t 100% clear to me why <code>setBigDecimal</code> needs the parameter meta-data stuff, but it looks like it is trying to scale the BigDecimal to match the precision declared for the matching input parameter of the stored-procedure being invoked.</p>
+
+<p>The results of this stored-procedure are cached on the CallableStatement instance, ie multiple calls to <code>setBigDecimal</code> on the same instance will not re-execute it. However most persistence frameworks (including the one we use) do not reuse the same CallableStatement instance over multiple calls to the same procedure - and indeed this is very difficult to do when using a database connection pool. So in effect, each call to a stored procedure involving a Java BigDecimal parameter triggers a secondary call to <code>sp_jdbc_getprocedurecolumns</code>.</p>
+
+<p>This problem does not occur when calling <code>someCallableStatement.setFloat(..)</code>.</p>
+
+<p>To make this even more obscure, however, Spring’s JDBC Template library method <code>execute(params..)</code> will detect when a <em>float object</em> is being passed to a stored-procedure parameter of type <code>DECIMAL</code> or <code>NUMERIC</code> and automatically convert it into .. a BigDecimal. Note also that the Sybase non-standard type MONEY is effectively a NUMERIC type (with 4 decimal places).</p>
+
+<p>For historical reasons, our problem application’s persistence layer is using a mix of direct JDBC calls and Spring JDBC calls. We found that we weren’t actually using BigDecimal very often in direct calls; money amounts are usually passed as floats (that’s possibly a bad idea, but that’s a topic for another day). We therefore replaced BigDecimal values with floats where possible, otherwise replace them with strings and parse the string back into a numeric value within the stored procedure. For Spring calls with target parameters whose declared type was one of <code>(DECIMAL, NUMERIC, MONEY)</code> we resorted to the pass-numeric-params-as-strings approach; fortunately while many procedure had INTEGER params, few had params of the problem types.</p>
+
+<p>For DECIMAL and NUMERIC params, converting to a string in Java and back to a number in the stored-procedure is trivial.</p>
+
+<p>For MONEY values, it is slightly more complex on the caller side. The stored procedure looks like:</p>
+
+<pre><code>select
+  @Price = convert(money, @PriceAsStr),
+  ...
+</code></pre>
+
+<p>and the Java code to format a money amount looks like:</p>
+
+<pre><code>/**
+ * When formatting values for passing to the DB as "money" strings, use US
+ * symbols as that is what the DB expects ("12.34" not German "12,34" or other),
+ */
+private static final DecimalFormatSymbols MONEY_FORMAT_SYMBOLS = DecimalFormatSymbols.getInstance(Locale.US);
+
+/**
+ * Format a double representing a monetary amount into a string for the purpose of passing to the database.
+ * &lt;p&gt;
+ * Money amounts are represented by Sybase using 4 decimal digits, rounding when the provided value has more digits.
+ * Therefore here provide up to 5 decimal digits so rounding works correctly at the receiving end.
+ * See: http://infocenter.sybase.com/help/index.jsp?topic=/com.sybase.dc36271_1251/html/blocks/X34590.htm
+ * &lt;/p&gt;
+ */
+static String moneyToString(double money) {
+  // Note: DecimalFormat is not thread-safe so create a new instance each time
+  DecimalFormat df = new DecimalFormat("0.00###", MONEY_FORMAT_SYMBOLS);
+  df.setRoundingMode(RoundingMode.FLOOR);
+  return df.format(money);
+}
+</code></pre>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>Fixing our code to avoid calling <code>setBigDecimal</code> (directly or implicitly via Spring), and ensuring all Spring <code>SimpleJdbcCall</code> objects are configured with <code>withoutDatabaseMetaData</code> eliminated all calls to <code>sp_jdbc_getprocedurecolumns</code> and reduced the total load on our database by 15%.</p>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/sybase-sp-getproc/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

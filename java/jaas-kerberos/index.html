@@ -1,0 +1,260 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - JAAS and Kerberos: Failed to find any Kerberos tgt</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>JAAS and Kerberos: Failed to find any Kerberos tgt</h1>
+    <aside>First published on: September 19, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      
+<p>I recently wrote a simple Java app which used the Hive JDBC driver to connect to a <a href="/programming/kerberos">Kerberos</a>-protected Hive database. Running it gave:</p>
+
+<pre><code>  Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+</code></pre>
+
+<p>Solving this took me a significant amount of time. Here is the answer..</p>
+
+<p>When the JDBC driver sees the URL contains option “principal=xyz”, it knows that it needs to create a Kerberos service ticket from some Subject to the service specified by the principal option. However it is not the responsibility of the JDBC driver to <em>create</em> the subject - it just assumes that one is already bound to the thread’s security context.</p>
+
+<p>So how does a suitable Subject get bound? Well one option is to write code to do it; a good example can be found <a href="https://issues.apache.org/jira/secure/attachment/12633984/TestCase_HIVE-6486.java">in this Hive JIRA ticket</a>. The constructor-method <code>LoginContext(contextName, handler)</code> and method <code>login</code> expect that system property <code>java.security.auth.login.config</code> points to a file with one or more LoginContext entries in it, and one of those entries matches the specified contextName.</p>
+
+<p>Here is an example of setting the path to a jaas config file:</p>
+
+<pre><code> java -Djava.security.auth.login.config=./some_jaas_config.conf ...
+</code></pre>
+
+<p>and here is an example of a config entry for kerberos authentication:</p>
+
+<pre><code>  Client {
+   com.sun.security.auth.module.Krb5LoginModule required
+   useTicketCache=true
+   StoreKey=true
+   useKeyTab=true
+   keyTab="./some_user.keytab"
+   principal="some_user@SOME_DOMAIN";
+  };
+</code></pre>
+
+<p>One possible solution to building an app around the Hive JDBC driver is thus: add the code from the example linked above, and then pass a config-file with the appropriate LoginContext definition. More details can be found in <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/jgss/tutorials/AcnOnly.html">the jaas documentation</a>.</p>
+
+<p>The loginContext name “Client” is a common choice; many (but not all) applications use this name.</p>
+
+<p>However there is an <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/jgss/tutorials/BasicClientServer.html#useSub">easier way</a>, and one that works with existing apps that cannot be modified: JAAS has an option to define a fallback mechanism for obtaining credentials. And the default fallback is to look for a Kerberos ticket in the standard place (often “<code>/tmp/krb5cc_{uid}</code>”) which kerberos tools like <code>kinit</code> put it. So given</p>
+
+<pre><code>  -Djavax.security.auth.useSubjectCredsOnly=false
+</code></pre>
+
+<p>the JVM will pick up an existing Kerberos ticket, and the app will run - without needing a jaas config-file at all. In general, that’s all that is needed. No authentication-specific code needs to be added to the simple JDBC-based app. Really trivial!</p>
+
+<p>Of course this fails if there is no current Kerberos ticket. However flag <code>useSubjectCredsOnly=false</code> <em>also</em> enables a “fallback” section in the JAAS config file: if there is no section specifically for the required subject-name, then the section for subject-name “<code>com.sun.security.jgss.initiate</code>” will be used.</p>
+
+<p>Thus with the options and JAAS config below, the JDBC Hive driver successfully connects without requiring a pre-existing Kerberos ticket:</p>
+
+<pre><code>  -Djava.security.auth.login.config=./some_jaas_config.conf -Djavax.security.auth.useSubjectCredsOnly=false
+</code></pre>
+
+<p>where the config file has:</p>
+
+<pre><code>  com.sun.security.jgss.initiate {
+   com.sun.security.auth.module.Krb5LoginModule required
+   useTicketCache=true
+   StoreKey=true
+   useKeyTab=true
+   keyTab="./some_user.keytab"
+   principal="some_user@SOME_DOMAIN";
+  };
+</code></pre>
+
+<h1 id="further-references">Further References</h1>
+
+<ul>
+  <li><a href="https://cwiki.apache.org/confluence/display/Hive/HiveServer2+Clients#HiveServer2Clients-JDBC">Hive Wiki: HiveServer2 JDBC Client</a></li>
+  <li><a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/jgss/tutorials/AcnOnly.html">Java Docs: jgss tutorials</a></li>
+  <li><a href="https://www.gitbook.com/book/steveloughran/kerberos_and_hadoop/details">Steve Loghran: Hadoop and Kerberos</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/jaas-kerberos/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,243 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - SQL Nulls and Tristate Logic - Fooled Again</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='post'>
+    <h1>SQL Nulls and Tristate Logic - Fooled Again</h1>
+    <aside>Posted on: January 21, 2016</aside>
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a></p>
+      <p>I work only intermittently with SQL, and every once in a while I fall into the old SQL tristate logic trap - like yesterday. It’s just not natural..</p>
+
+<p>For those who don’t know, here’s a quick recap…</p>
+
+<!-- more -->
+
+<p>In most programming languages, boolean expressions have two possible outcomes: true or false.</p>
+
+<p>In SQL, they have three: true, false, or unknown. Unknown and <em>sql null</em> are the same thing.</p>
+
+<p>An SQL null can be considered to represent “missing data”; it is a placeholder indicating “this value is not known” - aka “unknown”. So for some integer column:</p>
+
+<ul>
+  <li>(null == 1)  –&gt; unknown  (the value might be 1 or not, we can’t say as we don’t have the data)</li>
+  <li>(null != 1)  –&gt; unknown  (also might or might not be the case, we don’t have the data)</li>
+</ul>
+
+<p>The usual boolean and/or operators also have interesting behaviour:</p>
+
+<ul>
+  <li>(true or null) –&gt; true (defininitely true even when the second part of the <em>or</em> is an “unknown”)</li>
+  <li>(true and null) –&gt; unknown</li>
+  <li>(false or null) –&gt; unknown</li>
+  <li>(false and null) –&gt; false (definitely false even when the second part of the <em>and</em> is an “unknown”)</li>
+</ul>
+
+<p>A SQL select statement’s WHERE clause is a boolean expression - and matches (selects) only records for which the where-clause returns <em>true</em>. Records for which the where-clause evaluates to <em>false</em> are ignored (not selected) - as are those records for which the boolean where-clause evaluates to “unknown”!</p>
+
+<p>So given a table with (id integer not null, domain varchar) and contents:</p>
+
+<ul>
+  <li>(id=1, domain=”vonos.net”)</li>
+  <li>(id=2, domain=”foo.example”)</li>
+  <li>(id=3, domain=null)</li>
+</ul>
+
+<p>the following occurs:</p>
+
+<ul>
+  <li>“<code>select id where domain='vonos.net'</code>” returns just (1) - expected by most programmers</li>
+  <li>“<code>select id where domain&lt;&gt;'vonos.net'</code>” returns just (2) - often not expected</li>
+</ul>
+
+<p>In the second case, “<code>null &lt;&gt; 'vonos.net'</code>” evaluates to <em>unknown</em>, which <em>is not true</em> so the select skips over it.</p>
+
+<p>Possibly the most unintuitive part is that a matched pair of two “equals” and “not-equals” selects still don’t return the full set of data (the trap I just fell into). To match <em>all</em> records, a third statement is needed:</p>
+
+<ul>
+  <li>“<code>select id where domain is null</code>”</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/posts/2016-01-22-sql-null-tristate/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

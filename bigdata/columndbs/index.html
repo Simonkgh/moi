@@ -1,0 +1,281 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Column Store Databases</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Column Store Databases</h1>
+    <aside>First published on: October 28, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>The terms “column store database”, “column oriented database” or “column oriented storage” are sometimes encountered when reading about “big data” databases - ie those intended for large volumes of data. This article is intended to give a brief description of what they mean (or can mean, depending on context).</p>
+
+<p>This information was originally part of the <a href="/bigdata/datastorage">Big Data Storage</a> article on this site. As it is apparently something many people are unclear about, I’ve extracted it here to a separate page in order to make it easier to find. See the original article for more background about alternate types of data storage technologies.</p>
+
+<h1 id="definitions">Definitions</h1>
+
+<p>What does it mean for a database to be a “column store” or be “column oriented”? Unfortunately, these expressions (and variants thereof) are used by various sites/documents/books to mean four quite different things:</p>
+
+<ul>
+  <li>A traditional relational database, where tables have columns;</li>
+  <li>A database where 1:N relations are modelled by dynamically adding columns to a row;</li>
+  <li>A disk format in which each column is stored in its own file; or</li>
+  <li>A disk format in which columns are grouped together in blocks within a file.</li>
+</ul>
+
+<p>The first one (tables have columns) is hopefully obvious; we are all familiar with the relational model.</p>
+
+<p>The other meanings are described below. By the way, I’ve defined my own names for these (the section titles), just to distinguish them for the purpose of this article.</p>
+
+<h1 id="wide-row-schemas">Wide Row Schemas</h1>
+
+<p>There are a number of NoSQL databases which encourage developers to dynamically add columns to rows in a table to store associated data. In particular, they encourage modelling 1:N relations as <em>N additional columns</em> on a row/record.</p>
+
+<p>The concept of storing data in “expandable” rows like this is sometimes called “column oriented”, regardless of the actual implementation.</p>
+
+<h1 id="file-per-column">File Per Column</h1>
+
+<p>When traditional relational databases write their data to disk, they generally write the content of all columns for the same row into a single block of data within a file. In other words, to read back the entire content of a row is a single read operation.</p>
+
+<p>A pure “column store” database instead has a directory per table, and within that directory there is a file for each column (at least conceptually). To append a new record, a single value would be appended to each file. To read the entire record back, a read-operation is needed for each file.</p>
+
+<p>This “column store” disk format has obvious disadvantages when inserting or reading individual records. When writing or reading large numbers of records at a time, the disadvantage is much smaller.</p>
+
+<p>Where the format really has benefits is when a query scans many rows, but only looks at a few columns - eg “<code>select min(age) from customers</code>” in which every record in the table is checked, but only one column is needed. In this case, only one of the files needs to be read, saving large amounts of disk IO. Operations like “<code>select sum(quantity) from orders where product_id = 123</code>” would also be a good candidate - the row might have 50 columns, but the query only needs to access two of them.</p>
+
+<p>This approach also has benefits for data compression; compression of values saves a little disk-space but more importantly it saves IO. In modern computers, it is often faster to read compressed data into memory then decompress it than it is to read the uncompressed form - CPUs and RAM are far, far faster than disks. The best compression algorithm to use often depends upon the data type; a sequence of integers, or dates, or strings can be best compressed with a type-specific algorithm. Grouping by column allows far better compression than the row-store format in which columns of different types are mixed together.</p>
+
+<h1 id="grouped-columns">Grouped Columns</h1>
+
+<p>It is possible to get many of the benefits of “column per file” layout while still having a single file per table, by grouping records together in “blocks” within the file.</p>
+
+<p>Given a sequence of 5000 records, each with 4 columns named C1..C4, these can be grouped into blocks of 1000 and stored in the file with layout:</p>
+
+<ul>
+  <li>value of C1 for the first 1000 records</li>
+  <li>value of C2 for the first 1000 records</li>
+  <li>value of C3 for the first 1000 records</li>
+  <li>value of C4 for the first 1000 records</li>
+  <li>value of C1 for the next 1000 records</li>
+  <li>value of C2 for the next 1000 records</li>
+  <li>… etc</li>
+</ul>
+
+<p>When reading data, this has similar performance properties to the “one file per column approach” described above. A query that needs only the values of C1 can do a single seek, then a large read to get 1000 values from that column at a time, without reading any unwanted data. Unlike the pure approach, a seek is then needed to “jump over” the unwanted columns to the next block of C1 values.</p>
+
+<p>The data compression advantages of grouping values of the same type are also available to this format.</p>
+
+<p>Obviously, appending a new row is not particularly easy in this format. It is therefore best used by systems which hold records in memory until a threshold is reached (eg 100k records), and then dump them out as a new file in this format. Many big-data batch-processing systems work in this way.</p>
+
+<p>An example of this is the ORCFile (Optimised Row Columnar) format commonly used with Apache Hive.</p>
+
+<p>Implementations of this kind of layout can perform additional tricks to optimise disk space usage and performance. In ORCFile format, a <em>bitmap</em> is present at the start of each column section to indicate which entries are actually nulls; this reduces the diskspace for storing a null “cell” from whatever its native size is (eg 64 bits for a long integer) to 1 bit. Each block of N columns also includes the min and max values for all values in the block, so that selects like “where C1 &gt; 100” can skip over entire blocks of values. Bloom-filters can also be used to optimise the question “is value X somewhere in this block of data?”.</p>
+
+<h1 id="bigtable-like-datastores">Bigtable-like Datastores</h1>
+
+<p>Some very clever software developers at Google came up with a radically new architecture which they called BigTable, which allowed Google to build its indexes of the internet. Google never released the implementation of their “bigtable” datastore, but did publish an academic paper. Several open-source datastores were implemented using the ideas described, and thus these datastores have similar features. They are often referred to as “bigtable datastores” or “bigtable-like databases”. The best known ones are Apache <a href="/bigdata/hbase">HBase</a> and Apache <a href="/bigdata/cassandra">Cassandra</a>.</p>
+
+<p>Bigtable databases fall into several categories: they are a hybrid of row-store and column-store database, and support dynamic columns (“wide schemas”).</p>
+
+<p>Like many (but not all) NoSQL databases, tables in HBase or Cassandra don’t have strict schemas, and different rows can have different numbers of “columns”. A single row may have many million “columns”, allowing quite large 1:N relations to be modelled in this way. They are thus clearly “wide” with regard to schema.</p>
+
+<p>HBase and early versions of Cassandra expose the “dynamic columns” approach explicitly. In <a href="http://docs.datastax.com/en/cassandra/3.0/cassandra/architecture/archIntro.html">later versions of Cassandra</a> (3.x), its high-level query language has instead switched to representing collections of values as lists/sets rather than “dynamic columns”. Under the hood the implementation is still the same; N extra individual columns or a single column with N values are logically equivalent - the difference is simply how it is presented to the user (programmer or query writer).</p>
+
+<p>Bigtable datastores support the concept of “column families” which are groups of columns. Each column-family is stored in its own file, but columns within the same family are stored together. Therefore, a table which has a single “column family” holding all columns is effectively “row-store”, while a table in which each column is in a separate column-family is in “column store” format. The software developer therefore can analyse the access patterns (which columns are accessed together) to optimise the storage layout. This approach does lose the ability to do type-specific compression - but BigTable databases typically don’t enforce type-constraints on columns (ie a column can contain any type) and so don’t have the necessary information to do type-specific compression anyway.</p>
+
+<p>As a side-note, Bigtable and early versions of Cassandra referred to tables as “column superfamilies”, ie a “table” is a set of column-families, each of which has a set of columns. This is true, but was unnecessarily confusing when the term “table” was already in wide use and the term “superfamilies” is now only found in older documentation.</p>
+
+<h1 id="oltp-vs-olap">OLTP vs OLAP</h1>
+
+<p>Applications used for day-to-day business (eg the customer-support apps in a call-center, or ecommerce sites) typically want to read (or insert) whole records at a time. They also read only a few records, but want responses within milliseconds (or at least seconds). These are called OLTP (online transaction processing) applications, and their access patterns generally work best with data held in row-store formats.</p>
+
+<p>Applications used for business analysis and reporting often want to summarize a few columns of data across many records, often running for hours. Here the overall throughput is important, but latency for small reads is less so. These are called OLAP (online analysis processing) applications, and their access patterns generally work best with data held in column-store format.</p>
+
+<p>The BigTable-like datastores, being a hybrid of row-store and column-store can potentially work well for both use-cases. Bigtable-like databases do, however, have a range of other unusual features which might make them a very good choice, or a very bad choice, depending upon the use-case.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/columndbs/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,242 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - New Advice - a wishlist for Java</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='post'>
+    <h1>New Advice - a wishlist for Java</h1>
+    <aside>Posted on: February 21, 2013</aside>
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      <p>For all its flaws, I would still recommend Java for any large-scale software development. Static typing, reasonably readable syntax, good libraries, no memory overflows, decent stack-traces when things go wrong. Portable as a bonus.</p>
+
+<p>With Java 8, I’m looking forward to <em>finally</em> having some form of closures. But two things are particularly on my wishlist for improvements which are not on any plan I’ve seen: an interceptable new operator, and decent AOP advice support</p>
+
+<!-- more -->
+
+<h1 id="the-new-operator">The New Operator</h1>
+
+<p>I hate the “new” operator. Deeply. Just today I wanted to make a minor customisation to a large library. The class that needed to be modified, however, is directly instantiated (ie via ‘new’) by another - which is instantiated by another, which is instantiated by another. So this supposedly wonderful Object Oriented feature - oh, to customise a class, just subclass it - means actually creating custom subclasses of <em>5</em> classes. And the “new” operator is often being used in the middle of large methods - so the entire method needs to be copy-and-pasted into the subclass. And then I see that the top-level class is for some @#$% reason - final!</p>
+
+<p>How about changing the “new” operator to simply be equivalent to <code>System.getObjectFactory().newInstance(Constructor c, Object[] args)</code>?</p>
+
+<p>The default implementation is then to just call the constructor passing the args. But applications can optionally do this:</p>
+
+<pre><code>public class MyObjectFactory extends ObjectFactory {
+  Object newInstance(Constructor c, Object[] args) {
+    if (c.getDeclaringClass() == example.Problem.class) {
+      return new ProblemSolved(args);
+    } else {
+      return super.newInstance(clazz, c, args);
+    }
+  }
+}
+
+System.setObjectFactory(new MyObjectFactory());
+</code></pre>
+
+<p>Yeah, the example above isn’t 100% right (maybe should be per-classloader rather than global, etc). However the principal seems possible, right?</p>
+
+<p>Or maybe just have the ability to override per-class:</p>
+
+<pre><code>System.addObjectFactory(Problem.class, new ObjectFactory() {
+  Problem newInstance(Constructor c, Object[] args) {
+    return new ProblemSolved(args);
+  }
+});
+</code></pre>
+
+<p>Hmm .. that approach starts to look a bit like <a href="/java/guice-concepts/">Guice</a>. Or like <a href="http://code.google.com/p/powermock/wiki/MockConstructor">powermock’s MockConstructor feature</a> but for regular runtime use. Aspectj also <a href="http://www.eclipse.org/aspectj/doc/next/progguide/language-joinPoints.html">appears to support pointcuts on the new operator</a> so technically it seems possible.</p>
+
+<h1 id="better-advice">Better Advice</h1>
+
+<p>Enhancing an existing class without subclassing it is often done via a Proxy. However proxy classes suck - seeing stacktraces of Spring-based applications can make the strongest stomach quiver. Bad debugger support, poor performance, ugly code, and worst of all is that the “this” pointer refers to an unproxied instance. Bytecode weaving produces a better result, but (a) isn’t always permitted, and (b) doesn’t work well with debuggers. Is it too much to ask for java classes to natively support before/after/around hooks allowing code (an advice) to be attached to methods (at class load or later) in an elegant way? CLOS has it, Perl/Ruby/Javascript all support it. Debuggers should be able to see exactly which methods have been hooked into each class, and properly step into them. Hmm .. and if it supported static methods too, then that might be another way to intercept the “new” operator..</p>
+
+<p>Yes, Aspectj can add AOP advices around arbitrary methods, but it isn’t well integrated into the standard class model. No java.lang.reflection api to see them at runtime, static code analysis tools can’t see them before runtime. Sigh.</p>
+
+<p>Can Father Christmas or his elves write code? A new version of Java with something like the above would be a very welcome present.</p>
+
+<p>Or maybe the <a href="kotlin.jetbrains.org">Kotlin</a> project can deliver?</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/posts/2013-02-21-new-advice/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

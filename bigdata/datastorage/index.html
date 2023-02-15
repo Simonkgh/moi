@@ -1,0 +1,668 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Big Data Storage</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Big Data Storage</h1>
+    <aside>First published on: October 28, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>This article is an overview of the different ways to store application data, and particularly ways to store <em>large</em> amounts of data. The focus is mostly on “why” and comparing alternative approaches than looking at specific tools or products; I hope to write followup articles looking at particular open-source tools for big-data storage.</p>
+
+<p>This article briefly mentions how applications typically <em>access</em> stored data, and what kinds of higher-level middleware can be built on them but addressing those topics fully is complex enough to require <a href="/bigdata/dataprocessing">a separate article</a>.</p>
+
+<p>This article assumes the reader is familiar with SQL databases such as Postgresql, MySQL, Oracle or Derby.</p>
+
+<h1 id="storage">Storage</h1>
+
+<p>There are basically three ways in which data is stored:</p>
+
+<ul>
+  <li>as files with very simple internal structure, meant to be read and written directly by programs</li>
+  <li>as files with moderately complex internal structure, meant to be read and written by programs with the help of sophisticated libraries</li>
+  <li>as files with very complex and undocumented internal structure, meant to be accessed only via a “query language” interpreted by the application that created the files.</li>
+</ul>
+
+<p>The latter category is where most <em>relational databases</em> fit, and given the dominance of these as a data-storage mechanism over the last few decades, it is sometimes easy to forget that the others exist. However “big data” stresses traditional relational databases to and beyond their limits, forcing us as developers to consider all possible options.</p>
+
+<p>Sometimes it really is better to simply treat data as a very long sequence of records, reading them in order (with a possible initial seek to a starting-point). Event-logs are often of this form.</p>
+
+<p>Sometimes we want more structure to be able to efficiently exclude parts of the dataset which are definitely not of interest; sorted data, BRIN (block range indexes), column-oriented storage formats and such techniques help - but for efficiency we still often need to do this from <em>programs</em> rather than just rely on query languages. Carefully-designed file-formats together with matching libraries can be very helpful - see ORC and Parquet for example.</p>
+
+<p>And sometimes a query language is ok - as long as it is not SQL, with its focus on <em>joins</em>, ACID compliance, strict schemas with validate-on-insert, reserving of space in written records in case of later update, and other OLTP features.</p>
+
+<p>All these topics are addressed below - but first we should talk about the one term repeated in every bullet point above - that data is stored in <em>files</em>.</p>
+
+<h1 id="filesystems">Filesystems</h1>
+
+<p>All applications which deal with anything other than “transient in-memory” data need some underlying persistent storage. Before talking about structured data and databases, it is therefore worth talking about filesystems.</p>
+
+<p>Simply using a “local filesystem” provided by the operating system has limitations, including:</p>
+
+<ul>
+  <li>limited storage capacity;</li>
+  <li>limited bandwidth;</li>
+  <li>limited reliability;</li>
+  <li>limited CPU power to <em>process</em> the data.</li>
+</ul>
+
+<p>when what we really want for a “big data” environment is:</p>
+
+<ul>
+  <li>files of any size up to the sum of all storage devices available</li>
+  <li>being able to read from many storage devices in parallel, ie maxing out the IO bandwidth of every device concurrently</li>
+  <li>being able to survive the failure of individual storage devices or the servers they are attached to (because with <em>many</em> devices involved, failures will be frequent)</li>
+  <li>being able to access the data from many “processing nodes” without causing network or local-io bottlenecks</li>
+</ul>
+
+<p>Technologies such as RAID or LVM can span a filesystem across multiple local disks for increased storage capacity, performance (striping), reliability against disk failure, or all three. However using only a single server with local disks soon runs into one of the limits above. Often “big data” deals in individual files with sizes of many terabytes, and/or overall storage measured in petabytes; other solutions are needed.</p>
+
+<p>Options for lifting these limits include NAS, SANs, Object Stores, and distributed filesystems.</p>
+
+<p>In <a href="https://en.wikipedia.org/wiki/Network-attached_storage">Network Attached Storage</a> (NAS), some device on the network offers <em>filesystem level</em> operations such as open-file/read-from-file/write-to-file/create-file/delete-file. All file data goes over the network from the device requesting the operation (client) to the (single) device providing the operation (file server). This provides <em>shared</em> storage that multiple clients can simultaneously use, but does not by itself solve the problems of capacity/bandwidth/reliability. In fact, due to the need to transfer all data between clients and the (single) server address, network bandwidth becomes a significant issue. NAS systems also offer the same access-guarantees as local filesystems - but this requires a NAS to apply locking/synchronization which can lead to bottlenecks in parallel processing. Common NAS network protocols include NFS and SMB.</p>
+
+<p>A Storage Area Network (SAN) is a dedicated high-speed network connecting computing devices with storage nodes; the storage nodes provide multiple “virtual block devices” (LUNs), ie effectively “remote raw disk-drives” (not remote filesystems). This <a href="/bigdata/sans">article on Storage Area Networks</a> (SANs) describes the benefits and limitations of a dedicated SAN. To summarize the points relevant to this article:</p>
+
+<ul>
+  <li>Simply moving the physical storage out of the server cases into network-accessable locations doesn’t bring much for big-data storage</li>
+  <li>Using LVM or RAID on top of blocks provided by a SAN (ie over multiple LUNs) does allow “virtual disks” to be defined which are larger than the set of disks that can be crammed into a single physical server. However RAID/LVM run into limits fairly quickly, and doesn’t allow <em>multiple servers</em> to concurrently access the same data (ie parallel <em>processing</em>).</li>
+  <li>Using a <em>shared disk filesystem</em> built on top of a SAN scales somewhat better, providing concurrent access to data - but is expensive, and metadata operations eventually become a bottleneck.</li>
+  <li>A <em>distributed filesystem</em> on top of a SAN allows a truly scalable system with concurrent access - but is expensive (primarily due to the fast SAN network hardware).</li>
+</ul>
+
+<p>There is further useful information on shared-disk and distributed filesystems in <a href="https://en.wikipedia.org/wiki/Clustered_file_system">this Wikipedia article</a>.</p>
+
+<p>It is possible to build SAN-like systems using a <em>normal</em> TCP network rather one specifically designed for storage-related data traffic, and storage nodes running conventional operating-systems on commodity hardware. There are significant cost savings with such an architecture, but of course a significant performance impact; the relevance of the performance impact depends on usage patterns.</p>
+
+<p>An <em>object store</em> is basically a key-value store accessable over the network which is tuned for storing large blobs of data. The “key” used for storing data is often a path that looks like a filesystem path, in which case an object store acts somewhat like a remote filesystem but without many of the standard Posix functions. A number of commercial storage products offer “object store” interfaces, as do some cloud-based storage systems (eg <a href="https://aws.amazon.com/s3/">Amazon S3</a>).</p>
+
+<p>A <em>distributed filesystem</em> is one in which multiple physical servers on the same network cooperate to provide clients with a single logical filesystem. Unlike a NAS, clients connect to individual members of the cluster directly rather than requiring a single central point of contact; this is obviously more scalable. The actual storage devices may be connected directly to the individual cluster members, with the overall storage capacity being the sum of all storage devices on all cluster members. Alternatively, the underlying physical storage can be a SAN, where the distributed filesystem cluster nodes simply manage the communication and administration tasks, including ensuring proper coordination when accessing blocks on the SAN.</p>
+
+<p>Storage devices typically have average lifetimes of around a year (within an order-of-magnitude anyway). Thus when stored data requires a few hundred devices, there will be on average a failure every day; restore-from-backup stops being a reasonable way to deal with the issue. When storage requires a few thousand devices, it becomes completely impossible. Even RAID can’t paper over that with checksums - a “self-healing” system which keeps multiple copies of data (and makes more when some disappear) is the only feasable solution.</p>
+
+<p>NFS is a traditional protocol for NAS-style data access. The <a href="http://www.pnfs.com/">pNFS</a> extension to the NFS protocol avoids some bottlenecks by replacing a single filesystem server with a single metadata-server node plus multiple “dataserver nodes”. However the new protocol alone does not address issues of filesystem capacity or reliability.</p>
+
+<p>Apache HDFS provides a userspace distributed filesystem on top of a bunch of commodity servers, with data-replication and “self-healing” for redundancy. Its disadvantages are high latency for small reads, and append-only files (no modification of already-written data allowed). Its architecture lies somewhere between a SAN-with-tcp-and-commodity-servers and a distributed-filesystem. Apache HDFS is widely used and is discussed further below.</p>
+
+<p>Note that some clustered datastores (database-like systems) do use the local filesystem for storage, but shard and replicate data between nodes of the system themselves; in effect the datastore implements a distributed filesystem with replication itself. Such products do not need a separate underlying distributed filesystem - though they of course need complex internal logic to handle the data storage themselves. Examples of such products are Postgresql (relational) and <a href="/bigdata/cassandra">Cassandra</a> (NoSQL).</p>
+
+<h1 id="seek-considered-harmful">Seek Considered Harmful</h1>
+
+<p>One of the core principles when processing data in large volumes is to avoid seeks. A program which waits for data to be read from rotating storage is going to be many <em>orders of magnitude</em> slower than one which reads data in order. Even non-rotating SSD storage doesn’t help a huge amount, if a program doesn’t know <em>which</em> data it needs ahead of time - particularly if it then needs to fetch it from an SSD <em>on a different host</em>.</p>
+
+<p>Thus avoiding seeks is one of the core principles of big data storage. It is also why traditional relational databases perform so poorly - a <em>join</em> is intrinsically a seek, where the first record’s foreign key is used to look up an index on the second table to find the offset of the “joined to” record(s), and then a seek is performed to read it/them. There are a few cases where joins can be acceptable; if the joined-to table is small enough to fit entirely in memory then no problem. Alternatively, if the primary table being processed is <em>sorted</em> in order of the join-field, and the joined-to table is also sorted in order of the join-field then both tables can be processed without ever seeking backwards. However in other cases, joins are performance killers. Big Data storage systems therefore commonly <em>denormalize</em> data, specifically to avoid this kind of seeking.</p>
+
+<p>Is denormalized data bad? Well, not if the data is read-only. It is common for data to be stored in a traditional relational database for OLTP purposes (On Line Transaction Processing), where records are randomly accessed and often updated, and periodically <em>exported</em> to an “analytical” system (OLAP) run on “big data” principles. Denormalization of data can be applied during the export step; there is no danger that multiple copies of data can become inconsistent (the biggest danger with denormalized data) when the data is read-only!</p>
+
+<p>There are also “NoSQL” databases which are intended for OLTP-style processing (ie are <em>not</em> readonly) but nevertheless don’t worry too much about denormalization. These rely on the fact that data is updated by a <em>program</em>, and keeping data consistent is the responsibility of that program, not the database. Originally (and sometimes still the case), SQL databases regularly had people poking around using raw SQL to manipulate data; a strict schema enforced by the database is a big help here. NoSQL databases instead tend to rely on the client apps knowing what they are doing - perhaps somewhat overoptimistic, but allowing (and encouraging) denormalization makes it possible to read whole “objects” or “documents” as a single read, rather than relational’s approach of <em>joining</em> multiple tables (with the related necessary seeks).</p>
+
+<p>Big data also relies heavily on data within files being <em>sorted</em> in ways relevant to the processing that will be applied. As an example, if a file contains a sequence of records ordered by some “date” field within the record, then processing all records within a specific date-range simply requires an initial seek to the start-point, and processing all records <em>in order</em> (ie no seeks) until a record is found which falls outside the range. Done. The Oracle relational database has introduced the concept of “index-organised tables” for obtaining similar reductions in seek-time within a relational environment. If a series of records have several different valid “sort orders”, then often the best thing to do is to generate multiple files each with the same data but stored in the expected order - not something sensible in an OLTP environment but quite reasonable in a read-only world. In effect, every “index” defined on a table in a relational database does something similar - an index can be considered as a separate table holding (index-columns, rowid) which is simply auto-updated when data in the primary table is modified. Replace rowid with the relevant data from the record and the result is the same.</p>
+
+<p>This section isn’t meant to cover all the ways to store records in “big data” environments, just to point out the problem of seeks (particularly in relational models) and some of the ways non-SQL systems avoid them - of course with limitations or costs of their own.</p>
+
+<h1 id="non-indexed-data">Non-indexed Data</h1>
+
+<p>Sometimes data (even big data) can be seen as a series of records which need no “random access”, indexes or other such metadata. In other words, sometimes a file is just a file.</p>
+
+<p>When that is the case, then there is little benefit in cramming it into database form. In the big data world, it is not unusual to create programs that work directly on <em>simple csv files</em> (fields separated with commas, records with newlines) or similar formats (see MapReduce, Spark, and Hive).</p>
+
+<h1 id="database-concepts">Database Concepts</h1>
+
+<p>Relational databases have been the king of data storage for many decades. In fact, it is sometimes hard to remember that there <em>are</em> other ways of storing data.  The general categories of database are:</p>
+
+<ul>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Hierarchical_database_model">hierarchical</a> databases : inter-record references form a <em>tree</em> (each record is referenced from at most one other, being its “parent”)</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Network_model">network</a> databases : inter-record references form a <em>directed graph</em> (with edges implicitly represented)</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Relational_database">relational</a> databases : directed graph of records, with relations implicitly defined via shared keys</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Key-value_database">key-value</a> stores : simple “lookup block of data by id” services (ie a Map datastructure). Some are persistent, some distributed; relations are not supported at all.</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Bigtable">bigtable-like</a> stores : have a featureset somewhere between key-value and relational databases, with tables and columns but no schemas</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Graph_database">graph</a> databases : directed graph of objects, where edges are explicitly represented as data-objects</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Document-oriented_database">document</a> databases :  somewhere between key-value and hierarchical databases.</li>
+</ul>
+
+<p>Hierarchical and Network databases are usually accessed from code or DML in a <a href="https://en.wikipedia.org/wiki/Navigational_database">navigational</a> style, where a “root” record is retrieved and then code/dml follows “pointers” from that record to other records of interest. Early databases were of these types; the concepts then fell out of favour for many decades (replaced by relational systems), but many newer NoSQL systems have approaches that resemble hierarchical/network databases.</p>
+
+<p>Relational databases are based on the work of E.F. Codd, particularly the concepts of different <em>tables</em> to hold different categories of data, with data stored in <em>rows</em> and <em>relations</em> between the tables defined via columns holding matching values (foreign keys). Relational SQL accesses data in a mathematical/declarative way, where set-style operations like unions/intersections are applied to tables. Table <em>joins</em> are used to build up complex datastructures. Relational databases are big on <em>validating</em> data, with updates failing if they violate the database consistency (unique indexes, not-null, etc).</p>
+
+<p>One significant difference between hierarchical/network and relational models is that hierarchical/network databases precompute relations and store them statically in the database, while relational databases compute them dynamically at query execution time. The former is efficient but less flexible; the latter is more complex to implement. Hierarchical and network databases resemble the way in which applications usually store and navigate data in memory; the relational model is significantly different from in-memory datastructure representations leading to complexity when mapping from memory to persistent storage (writing) or mapping from persistent storage to memory (reading).</p>
+
+<p>Key-value stores are simple, but sometimes exactly what is needed. They can also be used as the underlying layer for more complex data storage.</p>
+
+<p>Bigtable-like stores provide several advantages over basic key-value stores, including the ability to associate multiple “column values” with a single key, to efficiently update a single “column value” within an existing value, and to retrieve multiple records with adjacent keys. Together, these features make any bigtable-like datastore something resembling a relational database but with some advantages and disadvantages. One of the significant advantages is the ability to scale linearly to very large clusters of servers (with corresponding high data storage capacity and performance).</p>
+
+<p>A graph database works somewhat like a relational database where every relation (foreign key) is modelled as a join-table where “properties” can be associated with the relation. Alternatively, a “node” can be considered as an object, and relations as a special “object” that points to two nodes and carries data about the relation type (label) and associated attributes.</p>
+
+<p>Document databases are similar to key-value stores in that (a) a single record can be a complex datastructure, and (b) the database does not maintain inter-record references at all. However a document database is aware of the structure and fields of the stored data, allowing it to build indexes that can be used for searching. Records (documents) can then be retrieved via either their “primary key” (as with a key-value store) or via a predicate (which may be optimised via the indexes). A document database can accept input data in structured forms such as XML or JSON, and returns results in such formats.</p>
+
+<p>An example of a simple <em>hierarchical</em> database is the Windows registry. IBM's IMS database was hierarchical, with some extensions to allow accessing it via a semi-navigational API. The IDS and IDMS databases are examples of early network/navigational databases.</p>
+
+<p>The more modern graph and nosql databases usually provide programming interfaces that work more in the “navigational” style than the SQL “declarative” style. Data representations such as XML or a DOM are also usually accessed in a “navigational” style (eg XPath).</p>
+
+<p>As a short summary of the pros/cons of the various approaches:</p>
+
+<ul>
+  <li>if you are performing batch-analysis on large data volumes, then a file-based approach may be appropriate.</li>
+  <li>if you are more interested in <em>analysing relationships</em> between items of data than in reading/writing the items themselves, a graph database may be appropriate.</li>
+  <li>if your data is very structured, with fields within fields within fields, then a document datastore may be appropriate.</li>
+  <li>if your data is “flat” or only has shallow structure (a top-level persisted object doesn’t have deeply nested child objects), you need efficient updates, and and you need to scale to large volumes of data then a BigTable-like database may be appropriate.</li>
+  <li>if you need very rapid read/write, but always know exactly which data item you are retrieving (ie never “select” by anything but a full key) then a key-value store may be the right solution.</li>
+  <li>if you need strict consistency checks on stored data, fully transactional updates of multiple data items, and don’t have huge data volumes or transaction rates, then a relational database may be appropriate.</li>
+  <li>otherwise you may need a <em>mix</em> of technologies (as described below, “NoSQL” can mean “not only SQL”).</li>
+</ul>
+
+<h2 id="nosql-sql-constraints-and-schemas">NoSQL, SQL Constraints and Schemas</h2>
+
+<p>The term <a href="https://en.wikipedia.org/wiki/NoSQL">NoSQL</a> effectively refers to any database type other than the <em>relational model</em>, or alternatively to systems in which data storage is “not only sql” ie is a mix of relational and non-relational components. <a href="http://ianvarley.com/UT/MR/Varley_MastersReport_Full_2009-08-07.pdf">This document</a> provides a good overview of the pros/cons of NoSQL vs relational databases, and there is also <a href="/bigdata/nosql">an article about NoSQL on this site</a>.</p>
+
+<p>One of the important drivers of the relational design was the concept of data validation. However this is not such an important issue as it once was, and this realization allows other “NoSQL” storage models to become feasable.</p>
+
+<p>Modern “enterprise” applications are typically built using a three-tier architecture:</p>
+
+<ul>
+  <li>a data-storage layer (eg a relational database or NoSQL store) that exposes a read/write API (such as SQL)</li>
+  <li>a <em>business logic tier</em> which exposes an API based on business concepts (eg find-customer-info-by-id, add-new-customer) and makes calls to the data storage layer</li>
+  <li>a <em>presentation tier</em> which generates the user interface, accepts user input, and makes calls to the business logic tier API</li>
+</ul>
+
+<p>The presentation tier might be an application installed on a desktop machine, or an application installed on a mobile device, or a webserver generating HTML.</p>
+
+<p>However up until the 1990s (and in some places even after then), it was not unusual to see applications built on a two-tier architecture:</p>
+
+<ul>
+  <li>a relational database</li>
+  <li>a desktop application which combines business and presentation logic, and which connects directly to the relational database.</li>
+</ul>
+
+<p>In the two-tier architecture, the desktop app connects to the database with the username/credentials of the actual application user, ie each user of the application has a <em>database user account</em>.</p>
+
+<p>In the two-tier model, it is extremely important that the database have strongly-enforced data schemas:</p>
+
+<ul>
+  <li>it is hard to ensure that all users are running the same version of the client application;</li>
+  <li>as the user has a DB login account, other development teams might write additional applications to access the same tables;</li>
+  <li>and in fact there is nothing stopping a user from performing raw SQL directly against the database.</li>
+</ul>
+
+<p>In the three-tier model, these concerns are less significant. The business-tier servers are centralised and managed by IT operations, rather than running on user desktops. Users also no longer have direct database-level logins; instead authentication/authorization is done at the business-tier with all database operations being done as a single “business tier user”. The business tier is responsible for ensuring data is valid before passing it through to the data storage layer - and is capable of doing a better job, as this is custom code that can enforce far more sophisticated rules than the generic relational schema language ever can.</p>
+
+<p>In addition, automated testing techniques have become much more sophisticated in the last few decades, reducing the frequency with which “bad data” reaches the storage layer.</p>
+
+<p>One of the reasons why relational database have “flat” tables, with more complex structures represented by joining multiple tables together, is in order to enforce a strict data schema. The set of columns are fixed and their types are declared “up front” primarily in order to then be able to declare whether they are nullable or not, whether they are “foreign keys” or not, and other basic properties. However if it is accepted that the <em>business logic tier</em> of an application can be trusted to pass only valid data to the data storage layer, then this all becomes unnecessary. Records can have “hierarchical” structure that better maps to the kinds of representations used by programmers for in-memory structures, they can have arbitrary numbers of columns, and various other advantages. This makes the programmer’s life much easier - no need to go around changing database schemas each time the program version changes! Removing the concept of “joins” for structured data representation also improves performance; see “seeks considered harmful” above. Of course, there are advantages to the SQL model too (which Varley’s report referenced above document well).</p>
+
+<p>Note that some “NoSQL” databases still do support some kind of data validation on insert. For example, in MongoDB a <em>query</em> can be attached to a “table” and an insert or update will fail if the new record does not <em>match the query</em>. This is an extremely flexible kind of validation; not only can “not-null” constraints be defined this way, but also things like “end-date must be at least 2 days after start-date unless discount_type = 1”. What is usually not supported is validation of “foreign key constraints”, ie that referenced objects exist - and that the referenced object cannot be deleted while a reference to it remains.</p>
+
+<p>One useful feature of SQL schemas is that it is possible to build basic form-style interfaces for a set of database tables by inspecting the table schema; the column names, types, and constraints can be used to determine which input fields to display to the user, which types of data to accept, and which other validation (eg mandatory) to apply. However this never generates a <em>good</em> user interface, merely a <em>useable</em> one. A proper data model maintained in the business tier is far more flexible.</p>
+
+<h2 id="the-network-model-and-codasyl">The Network Model and CODASYL</h2>
+
+<p>CODASYL was one of the first database API standards. It defines a conceptual model and DML for Cobol programs to access a network-model database, in a navigational style, and many “network model” databases offer a CODASYL-compliant interface.  Such databases were popular in the years before relational databases were practical - and the approach is interesting in light of the current resurgent interest in non-sql database interfaces.</p>
+
+<ul>
+  <li>A CODASYL <em>record</em> is basically equivalent to a table-row.  A record can have a <code>*:1</code> relation to other records, which code (whether a “real” programming language, or a DML) can follow like a pointer.</li>
+  <li>A record marked as <em>CALC</em> has a single key (which may be a compound value), and can be retrieved by key; records which are not <em>CALC</em> can only be accessed by following a link from another record.</li>
+  <li>A <em>set</em> serves the same role as a “foreign key” relation; it associates a set of records with an <em>owning record</em> (many-to-one). It works roughly like a “join table” with rows containing owner, sort-order and member-key. Once the set is defined, code can <em>place</em> a record into the set (specifying the owner). Sets can also have <em>no</em> owner (aka “system owner”). Code can navigate from a record to a set it owns, and iterate over the set as if it were a linked-list attached to the record. When a set has “no owner”, code can iterate directly over all members of the set. Unlike a <em>hierarchical</em> system, a record can belong to multiple sets.</li>
+</ul>
+
+<p>The CODASYL term “owner” is what in other datastrutures is more commonly called “parent”.</p>
+
+<p>There is no concept of a “select clause”, other than (a) selecting a CALC record by its key, or (b) all members of a set, ie a group of records of the same type with the same owner.</p>
+
+<p>A set can be marked <em>automatic</em>, in which case adding a record of the member type to the system automatically adds it to the set too; if the owner is not ‘system’ then the key of an owner record must also be provided. A set can also be marked as <em>mandatory</em>, indicating that it <em>owns</em> the referenced records, in which case removing a record from the set deletes the referenced record.  Presumably, deleting the owner record of a set also deletes the set (and all members if the set is <em>mandatory</em>).</p>
+
+<p>Interestingly, a “query” in the CODASYL DML language generates its results (a series of rows with columns) by navigating to the desired record, then issuing “move {field} to OUT-REC” to add that field as an “output column”, and then eventually “WRITE OUT-REC” to mark that record as complete. The DML has loop-constructs to iterate over all members of a set, and therefore resembles an imperative programming-language much more than relational SQL does.</p>
+
+<p>CODASYL databases are quite efficient, as they can simply follow precomputed links (addresses in memory or disk) to navigate through data. However the kind of arbitrary filtering possible with where-clauses that SQL supports is not available, and changing the database structure requires updating all existing affected rows in the database to add/remove references. Relational databases need efficient “query optimisers” to build equivalent links at query-execution-time, but the result is more flexible.</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="http://quickbase.intuit.com/articles/timeline-of-database-history">http://quickbase.intuit.com/articles/timeline-of-database-history</a></li>
+  <li><a href="http://www.comphist.org/computing_history/new_page_9.htm">http://www.comphist.org/computing_history/new_page_9.htm</a></li>
+  <li><a href="http://coronet.iicm.edu/is/scripts/lesson03.pdf">http://coronet.iicm.edu/is/scripts/lesson03.pdf</a></li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/CODASYL">CODASYL</a> - directed acyclic graph with nodes and edges (CODASYL = Conference on Data Systems languages)</li>
+</ul>
+
+<h2 id="more-on-key-value-stores">More on Key-value Stores</h2>
+
+<p>Key-value stores simply store a block of arbitrary data under some (usually unique) key. The data can later be retrieved by providing the same key.</p>
+
+<p>Some implementations provide <em>transactions</em>, ie can allow multiple objects to be read in a <em>consistent</em> manner, as if all reads were simultaneous.</p>
+
+<p>Key-value stores do not (at least directly) support <em>indexes</em> on data, or queries other than by key.</p>
+
+<p>Significant key-value-store implementations:</p>
+
+<ul>
+  <li>
+<a href="http://fallabs.com/kyotocabinet/">Kyoto Cabinet</a> - library, simple, fast, not distributed</li>
+  <li>
+<a href="https://github.com/google/leveldb">LevelDB</a> - library, simple, fast, not distributed</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Berkeley_DB">Berkeley DB aka BDB</a> - an early key-value store implementation, and still widely used</li>
+  <li>
+<a href="https://github.com/boltdb/bolt">Bolt</a> - simple, fast, not distributed</li>
+  <li>
+<a href="http://symas.com/mdb/">LMDB aka Lightning Memory DB</a> - featureful, fast, not distributed</li>
+  <li>
+<a href="http://redis.io">Redis</a> - in-memory, sharding, async master/slave replication, slave-&gt;master promotion via Sentinel, consistency not 100%</li>
+  <li>
+<a href="http://www.memcached.org">memcached</a> - in-memory, sharding, fast. Commonly used as a kind of “distributed shared memory” rather than a long-term datastore.</li>
+</ul>
+
+<p>There is also a category of apps which do act as key-value-stores, but are really focused on passing <em>small</em> amounts of data around a cluster efficiently. These are used as “cluster coordination” or “configuration distribution” tools. Examples include:</p>
+
+<ul>
+  <li>zookeeper (in-memory, master/slave replication, master election, guaranteed consistency, slow updates)</li>
+  <li>etcd (eventual-consistency via the raft protocol)</li>
+</ul>
+
+<p>Calling Zookeeper/etcd “key-value stores” is possibly debatable. Items are actually keyed by a “path”, which on one hand could be considered as a simple “key”, but on the other hand does have some kind of internal structure which can also be used for purposes such as “watching children of a node”. Regardless, these tools fit better into <em>this</em> section of this article than any other.</p>
+
+<p>Some key-value stores support “partitioning” (aka sharding), where a cluster of servers can be run, and each server holds a unique subset of the overall data. This improves both read and write performance, but results in more network connections from clients to servers and complications related to <em>partial</em> system failures if one server goes down. Distribution of data over the cluster can most simply be achieved by computing <code>nodeNum = hash(key) modulo numNodes</code>, and then forwarding the request to the node with that nodeNum. This ensures that all clients reading or writing a value with a specific key agree on which node to use. Of course, more sophisticated distribution algorithms exist.</p>
+
+<p>Some implementations are “in-memory”, ie where the complete dataset is expected to fit into RAM. Most of these support <em>persisting</em> the data to disk on shutdown, but not guaranteeing data is kept up-to-date while the server is running. Sometimes (particularly memcached) the use-case is to act as “distributed memory” rather than an actual database.</p>
+
+<p>Some implementations support <em>master/slave replication</em> where a single server accepts “writes” and forwards changes to “slave nodes”; reads can be performed on any node. This improves read-performance but either slows writes (until cluster is synced) or can lead to temporary inconsistency (until all slaves are synced). A simple variant is for any node to accept write requests, but internally forward it to the current “master” node (as in Zookeeper for example). Some (eg Zookeeper) dynamically “elect” a master node to provide availability even when the master node fails.</p>
+
+<p>Some implementations support <em>true multi master replication</em> where a client can connect to any server in the cluster, and update data, and have that data be synchronized throughout the cluster “in the background”. This of course leads to problems when a conflicting change is made to the same data on another node. A “consensus algorithm” such as Paxos or Raft can be used to resolve these issues; etcd uses this approach. The core concept of <a href="https://en.wikipedia.org/wiki/Eventual_consistency">eventual consistency</a> is that when incompatible changes are made on two different nodes of a cluster, that eventually all nodes will adopt one of the changes but not the other, ie one of the changes will be discarded and the other consistently propagated through the system. There is a window in which different nodes may see different values; this is a critical problem for some use-cases but acceptable for others. Options for handling conflicts include always accepting “the last update” (by timestamp), or by invoking a registered “conflict-handler callback” which is responsible for choosing which to accept and which to discard. Eventual Consistency can also imply that a non-conflicting write may take some time to propagate through the system, ie is not instantaneous on all nodes.</p>
+
+<p>A key-value store can be used as the underlying technology for other databases. In particular, some graph databases are built on top of a key-value store. The Chrome browser’s support for the W3C “Indexed Database API” is currently implemented on top of LevelDB.</p>
+
+<h2 id="bigtable-and-sstable">BigTable and SSTable</h2>
+
+<p>Google obviously needs massive storage for its search engine indexes, and created the <a href="https://en.wikipedia.org/wiki/BigTable">BigTable</a> data storage system that has influenced other distributed-storage systems. The BigTable implementation is not open-source but academic papers have been published that describe the concepts behind it which other projects have then reimplemented.</p>
+
+<p>The most significant part of BigTable is the <a href="https://www.igvita.com/2012/02/06/sstable-and-log-structured-storage-leveldb/">SSTable</a> structure which is also at the core of software such as LevelDB and <a href="/bigdata/cassandra">Cassandra</a>. An SSTable is simply a file (or block of memory) containing a sequence of (key,value) pairs where the keys are strings and sorted in ascending order. Iterating over all (key,value) pairs for a <em>range</em> of keys is therefore an efficient sequential read from some start-point in the file to some end-point without any need to seek. Finding the start/end offsets can be done via a separate <em>index</em>.</p>
+
+<p>Of course, <em>inserts</em> are inefficient; this is dealt with via the “log structured merge tree” algorithm in which large datasets are stored as a <em>set</em> of SSTable files. Each SSTable file is internally sorted, but may not be <em>complete</em>, ie two files may contain keys in the same range; to find all entries within a key-range it is therefore necessary to check all SSTable files. Inserts are done by modifying an in-memory datastructure (a MemTable) which is periodically flushed to disk as a <em>new</em> SSTable file. As a background task, small SSTable files are <em>merged</em> into larger ones.</p>
+
+<p>SSTables are found in many big-data projects including BigTable, LevelDB, Cassandra and several Hadoop-related tools. The SSTables are stored as files in an underlying filesystem - which may be:</p>
+
+<ul>
+  <li>a distributed userspace filesystem such as GFS or HDFS;</li>
+  <li>a distributed native filesystem such as pNFS or Ceph;</li>
+  <li>a simple network filesystem such as NFS;</li>
+  <li>a filesystem on a local RAID array;</li>
+  <li>a filesystem on a single local storage device</li>
+</ul>
+
+<p>HBase is a well-known BigTable-like datastore, and <a href="/bigdata/hbase">this article on HBase</a> includes information on its underlying data format which applies to most/all bigtable-like systems.</p>
+
+<h2 id="more-on-graph-databases">More on Graph Databases</h2>
+
+<p>In a graph database, “nodes” can hold arbitrary “objects” and “edges” model relations with associated properties. This structure maps more easily to typical in-memory representations than the relational model. It can also be viewed as a “knowledge base” ie a set of factual assertions (“A is a person, B is an address, A lives-at B”). Because of the similarity to in-memory representations, a navigational style of accessing data works well, but the separation of relations from objects also allows data to be <em>queried declaratively</em> in a manner similar to relational SQL.</p>
+
+<p>The structure of a graph database also is well suited to <em>distributed storage</em>, where data is <em>sharded</em> (by node-type or by ranges of node-values) across multiple physical locations. This in turn makes the data suitable for <em>distributed processing</em> where the database itself applies a specified “task” to all matching nodes and runs the task <em>on the node holding the data</em> for efficiency, ie bringing the code to the data rather than the reverse. Some systems even support running the “task” on a GPU for extra parallel performance.</p>
+
+<p>A node (aka vertex) in a graph database can be an arbitrary (and complex) object, not limited to a simple flat tuple as in the relational model. A graph database is often implemented on top of an existing storage system, eg using an existing relational database such as MySQL or Postgresql, or a key-value-store such as LevelDB.</p>
+
+<p>These properties of graph databases make them very popular for “big data” - where large amounts of data of different forms needs to be “mined” to extract useful facts. The many different <em>forms</em> of data makes modelling it as relational data difficult, and the analysis process may need to build interesting new relations between data - something that relational databases don’t model well. Even when the amount of data can be handled by a relational system, applying <em>analysis logic</em> to each node scales better in graph databases.</p>
+
+<p>Some of the use-cases to which graph databases are commonly applied include:</p>
+
+<ul>
+  <li>RDF ontologies</li>
+  <li>Social Networks modelling and analysis</li>
+  <li>Structured data storage such as <a href="https://www.wikidata.org/wiki/Wikidata:Introduction">WikiData</a>
+</li>
+</ul>
+
+<p>Significant implementations include:</p>
+
+<ul>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Neo4j">Neo4j</a> (GPL3 core without clustering support, many hard-to-avoid proprietary extensions)</li>
+  <li>
+<a href="https://github.com/twitter/flockdb">flockdb</a> - open-source, scalable and robust but appears to support only limited functionality necessary for Twitter’s use-case, ie to store a set of assertions in form “X relationtype(properties) Y”.</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Oracle_Spatial_and_Graph">Oracle Spatial and Graph</a> - commercial</li>
+  <li>
+<a href="https://github.com/google/cayley">Cayley</a> - from Google, written in Go</li>
+  <li><a href="http://thinkaurelius.github.io/titan/">Titan</a></li>
+  <li><a href="http://www.dekorte.com/projects/opensource/vertexdb">VertexDB</a></li>
+</ul>
+
+<p>It appears that open-source graph databases are still somewhat immature at the current time. Many products are purely proprietary, many have open-source parts but nevertheless require commercial add-ons for serious use (eg Neo4J). Those that are pure open-source appear to either be driven by a single company (offering support), or appear to be research projects rather than production-strength products. Possibly the recent Google Cayley project will change this in the near future, and Titan also appears interesting.</p>
+
+<p>See <a href="http://www.predictiveanalyticstoday.com/top-graph-databases/">a list of the top 20 graph databases</a>.</p>
+
+<p>There are many different query-languages for graph databases (ie no standard yet). One example is <a href="https://en.wikipedia.org/wiki/Cypher_Query_Language">Cypher Query Language</a>. From the wikipedia examples:</p>
+
+<pre><code> MATCH (charlie:Person { name:'Charlie Sheen' })-[:ACTED_IN]-(movie:Movie)
+ RETURN movie
+</code></pre>
+
+<p>means find all nodes of type Person which have a name attribute of the specified value, and all nodes of type “Movie”, where there is a relation (edge) labelled “acted-in” between the Person and Movie. Ignore the matched Person nodes, and return the matched Movies.</p>
+
+<p>This other example:</p>
+
+<pre><code>MATCH (start:Content)-[:RELATED_CONTENT]-&gt;(content:Content)
+WHERE content.source = 'user'
+OPTIONAL MATCH (content)-[r]-()
+DELETE r, content
+</code></pre>
+
+<p>means to find all nodes of type Content which have a relation (edge) labelled RELATED_CONTENT to another node of type content, where the target node has property “source=user”. Also find all <em>relations</em> (edges) from such nodes to other nodes, regardless of labels or target node type. Then delete the matched relations and nodes.</p>
+
+<h2 id="more-on-document-databases">More on Document Databases</h2>
+
+<p>As noted earlier, document databases are key-value stores where the value is “structured” in a way such that the database engine can apply <em>predicates</em> to the value contents to support searching-by-criteria, and ideally to be able to precompute suitable indexes to optimise such searches. The database does <em>not</em> usually validate values (there is usually no schema), nor does it manage <em>relations</em> between values.</p>
+
+<p>Actually, despite the fancy terminology, a “document database” is not so different from a relational database, except that:</p>
+
+<ul>
+  <li>a table (sometimes known as a “document collection”) has no explicit schema (though most documents in the same table are expected to have <em>similar</em> structure, ie similar attributes)</li>
+  <li>columns can contain structured data (nested attributes, of any depth) rather than being limited to primitive values</li>
+  <li>foreign key references are not enforced</li>
+  <li>denormalized data is common</li>
+</ul>
+
+<p>The combination of structured data rather than joins and no foreign key references makes building distributed/clustered document databases easy. The database engine does not have to combine or verify the integrity of data across multiple nodes in the cluster; each document is independent.</p>
+
+<p>Often “document databases” import and export data in JSON format. However this doesn’t mean that they internally <em>store</em> data in JSON, only that JSON is adequate to represent the data that they do store. XML is another commonly supported input/output format.</p>
+
+<p>There are a number of popular open-source tools in this space, including:</p>
+
+<ul>
+  <li>
+<a href="https://en.wikipedia.org/wiki/CouchDB">CouchDB</a> – excellent clustering-support and high availability (sharding, replication), support for big-data analysis (MapReduce).</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/MongoDB">MongoDB</a> – sharding, replication, supports MapReduce for data processing</li>
+</ul>
+
+<p>A number of databases with roots in the relational world also have support for document-style storage including:</p>
+
+<ul>
+  <li>Postgresql</li>
+</ul>
+
+<p>Some document-oriented databases can support <em>transactions</em> where multiple updates can be performed atomically.</p>
+
+<p>When searching a document-oriented database, some implementations also allow the query to include <em>a javascript function</em> which is run against all nodes that match the basic query. This allows very customised filtering or “scoring”. MongoDB includes such a feature.</p>
+
+<p>Some implementations allow queries to select (return) parts of a matching document, rather than simply selecting the <em>whole</em> matching document.</p>
+
+<h1 id="column-oriented-databases">Column-Oriented Databases</h1>
+
+<p>What does it mean for a database to be “column oriented”? Unfortunately, this expression is used by various sites/documents/books to mean any of several quite different things:</p>
+
+<ul>
+  <li>A traditional relational database, where tables have columns;</li>
+  <li>A database where 1:N relations are modelled by dynamically adding columns to a row;</li>
+  <li>A minor tweak to the traditional way of storing tables on disk</li>
+</ul>
+
+<p>A full explanation can be found in <a href="/bigdata/columndbs">this article</a>, but in short:</p>
+
+<ul>
+  <li>the first one is simply the relational model we all know;</li>
+  <li>the second is when the tables of a database are schema-less, and the database encourages developers to dynamically add extra columns as needed. In particular, a 1:N relation can be modelled by adding N columns to the record on the “1” side. Apache HBase and Apache Cassandra are prime examples of this approach (though recent versions of Cassandra use terms like “collections” to describe this feature).</li>
+  <li>the third means writing data on disk so that scanning just a couple of columns over a very large set of rows doesn’t have to read too much unwanted data from disk. This is actually a quite common scenario (particularly in OLAP workloads), and is most often what is meant by “column oriented”.</li>
+</ul>
+
+<h1 id="document-search">Document Search</h1>
+
+<p>Some <em>document search tools</em> (eg Solr, ElasticSearch) act rather like document-oriented databases. Documents are <em>submitted to</em> the search engine, and it analyses the content to build indexes. Searches can be submitted, which return the set of matching documents (thus the original documents must be stored internally). In this case, the document content is not normally in a “structured format” such as JSON but instead in some <em>natural language</em>.</p>
+
+<p>Solr is an application which implements such search functionality; it uses the Lucene library for building the actual indexes. The indexes and original documents are stored by Solr in a standard filesystem - or HDFS. Solr supports clustering for handling large volumes of queries; the lucene indexes can be “sharded” across a set of nodes and searches are then performed on all nodes in parallel.</p>
+
+<p>ElasticSearch is <a href="http://solr-vs-elasticsearch.com/">very similar to Solr</a> in features and architecture.</p>
+
+<p>Apache Lucene is a tool (library?) that can be fed a collection of “documents” and will then create indexes that allow efficient natural-language search over the document collection.  Applications like Solr and ElasticSearch add a front-end to Lucene which chooses the documents to index, and provides an interface to initiate searches and present the results.</p>
+
+<h1 id="bloom-filters">Bloom Filters</h1>
+
+<p>Bloom filters are used to “short-circuit” processing, efficiently filtering out data that “definitely is irrelevant” before invoking time-consuming processing. The applications for databases are reasonably obvious, and bloom-filters are mentioned reasonably often in database architecture/design documents so it is worth looking at them briefly here.</p>
+
+<p>In particular, bloom filters are used in the Hive ORCFile format, so that a program can efficiently ask the question “does this block of records contain a record where column X has value Y?”. A bitmap is generated for each whole record-block when it is written. A query computes a bitmap corresponding to the values it is looking for, and for each block can then quickly see if the relevant bits are set; when not then there is <em>definitely</em> no relevant record in the block. When such a bit is present, there is <em>probably</em> at least one relevant record - not absolutely guaranteed, but a small false-positive rate is not a problem given the ability to be able to spring over definitely irrelevant blocks completely.</p>
+
+<p>Imagine a function <code>String pluralOf(String word)</code>, which looks up the word in a remote database and returns the “plural form”. There are two things that make this tricky to use efficiently from client code:</p>
+
+<ul>
+  <li>executing the function is slow;</li>
+  <li>the range of possible input parameters is huge</li>
+  <li>many input parameters return no value (are not in the set of valid keys)</li>
+</ul>
+
+<p>Loading the entire dataset into an in-memory hash-map is not possible, ie the function <em>does need to be called</em> for valid parameters (nouns in the dictionary). However it would be desirable to <em>not</em> call the function for other parameter-values.</p>
+
+<p>When the possible set of input parameters is small, then a (key-&gt;boolean) map can be built which indicates whether the input value is a valid key (known noun) or not; the map can first be consulted and only when the result is “true” is the function invoked. However in this case the range of valid input parameter is huge (all known nouns in a dictionary) so the hash-table either needs to have a huge modulo (high memory use) or will have very long duplicates-chains (slow <em>and</em> high memory use). In some use-cases, the <em>keys</em> are themselves large datastructures which makes these options inappropriate even when the number of keys is not large.</p>
+
+<p>As an alternative, a pass over the dictionary contents can be used to precompute parameters for a <em>bloom filter</em>. The program code can then use these parameters to quickly determine whether a word is <em>definitely not in the dictionary</em>, ie filter out a large set of invalid parameters thus avoiding calls to the slow function. It may occasionally have a false-positive, ie the function will be invoked for an unknown word. If a word is added to the dictionary, then the same word must also be used to update the bloom filter parameters. Removing a word requires regenerating the filter parameters (ie reprocessing the database).</p>
+
+<p>Note that the “definition” of bloom filters instead states the problem as “testing whether an object is a member of a set”. This is equivalent to the above problem - the set is “all valid words”.</p>
+
+<p>To compute a bloom filter, first create a bit-array of size M where M is large (many thousands of bits). Then implement a good <em>hash function</em> for the keys to be processed, ie a function that takes a key-value as parameter and returns an integer. Now iterate over the set of valid keys, computing the hash value H for each one and then setting the bit at location <code>H modulo M</code> within the bit-array. The resulting bit-array can now be used to test candidate keys: just hash it using the same function, and see if the corresponding bit is set. The possible outcomes are:</p>
+
+<ul>
+  <li>the bit is not set, ie no valid key hashed to that value and thus the candidate key is <em>definitely not</em> valid (ie not in the valid set)</li>
+  <li>the bit is set, ie one or more valid keys hashed to the same value as the candidate key (modulo M); thus the candidate key <em>may be valid</em> - but may also be a false positive.</li>
+</ul>
+
+<p>The effectiveness of the filter depends upon the quality of the hash-function: one that maps a large number of different keys to the same integer H will be less effective than one that produces an <em>even distribution</em> of output values. The worst-case is the (still technically valid) hash-function which returns a constant (eg 99) for all input values.</p>
+
+<p>The effectiveness of the filter also depends on the size of the bit-array. When M is small, then many different values of H will still map to the same bit (modulo M), increasing the false-positive rate.</p>
+
+<p>The effectiveness of a bloom filter can be increased by using <em>multiple</em> hash functions, ie functions that each take the same input key and return different integers H. When initially building the bit-array by iterating over all keys, the compute-hash-and-set-bit step is repeated for <em>each hash function</em>. When later testing a candidate key, the compute-hash-and-test-bit step is repeated for each hash-function, and the key is valid only if <em>every</em> hash function over the candidate key points to a bit which is set in the map, ie the candidate key is considered valid only if for every hash function there is <em>some</em> valid key which hashes to the same value. It would obviously be desirable to know if there is <em>just one</em> candidate key which produces the same hash-values as the candidate but the bloom-filter can’t indicate that - if key A hashes to (12,13), key B hashes to (22,23) and a candidate hashes to (12,22) then the bloom filter will return a “positive” - but that’s the price to pay for more compact representation. Obviously, coming up with good hash-functions is the most difficult part.</p>
+
+<p>The most effective bloom filters are those where there are several hash-functions, and the bit-array M is approximately 50% 1s. Too many bits set in the array will increase the false-positives (in worst-case, all bits set will lead to every candidate key being positive). Too many zeros indicates a waste of memory (M is too large).</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Bloom_filter">Wikipedia article on Bloom Filters</a> has more details.</p>
+
+<h1 id="xml-databases">XML Databases</h1>
+
+<p>Document databases generally use JSON to represent data as it enters or exits the database (regardless of which form it may actually store it internally), as JSON is a generic “object representation” format.</p>
+
+<p>There is also a family of databases known as “XML Databases” whose interfaces are based around representing stored data as XML. Technically, XML is a superset of JSON, as any node can not only have child elements, but also unnamed child text fragments (“mixed content”). In addition, while JSON fields have simple text names, XML child elements can also have an associated namespace, for additional precision. Therefore XML databases can be considered to belong to the same family as the JSON-oriented NoSQL document databases (eg CouchDB and MongoDB).</p>
+
+<p>There are a large number of technical specifications related to XML, and XML databases tend to rely on many of these. Typically, XML databases accept searches in XQuery format, and may support transformation of data with XSLT, etc.</p>
+
+<p>In general, XML databases are not scalable in the way that most NoSQL databases are, and fulfil a different niche: instead of being used to manage “records”, they are used to manage “xml forms” representing previously paper-based workflows. In particular, government departments and similar bureacracies are heavy users of XML databases in order to automate the flow of purchase-orders, visa applications, and such form-based data.</p>
+
+<p>Further Reading:</p>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/XRX_(web_application_architecture)">The XRX Architecture</a></li>
+</ul>
+
+<h1 id="general-references">General References</h1>
+
+<ul>
+  <li><a href="http://ianvarley.com/UT/MR/Varley_MastersReport_Full_2009-08-07.pdf">Varley: No Relation: The Mixed Blessings of Non-Relational Databases</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Database_model">Wikipedia: Database Model</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/datastorage/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

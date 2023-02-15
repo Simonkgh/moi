@@ -1,0 +1,428 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Apache HDFS Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Apache HDFS Overview</h1>
+    <aside>First published on: January 28, 2016</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      <p><a href="/bigdata/hadoop">back to overview</a></p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>This is a discussion of the HDFS (Hadoop Distributed Filesystem) component of the Apache Hadoop “big data” project (version 2.7).</p>
+
+<p>The goal of HDFS is to provide something that looks roughly like a Posix filesystem to users, but:</p>
+
+<ul>
+  <li>distributes data storage across multiple servers</li>
+  <li>stores individual files of any size (up to petabytes)</li>
+  <li>has large total storage capacity (up to petabytes)</li>
+  <li>can start small and be expanded without major administration overhead or downtime</li>
+  <li>elegantly handles failures of individual storage devices, servers, and network switches</li>
+  <li>allows different parts of the file to be read <em>in parallel</em> without IO bottlenecks (ie scalable reading of data)</li>
+  <li>is relatively cheap</li>
+</ul>
+
+<p>HDFS limitations:</p>
+
+<ul>
+  <li>does not provide complete Posix filesystem compliance</li>
+  <li>file modification is append-only (no overwriting of existing data allowed)</li>
+  <li>does not span datacenters</li>
+</ul>
+
+<h1 id="namenodes-and-datanodes">Namenodes and Datanodes</h1>
+
+<p>A typical HDFS cluster consists of a bunch of racks in a datacenter, with each rank having multiple servers. Each server has multiple large storage-devices (eg 4 x 1 Terabyte). The servers run a standard operating system (usually Linux), and the storage devices are formatted in a normal way (eg as Linux ext4).</p>
+
+<p>One server runs the HDFS namenode daemon. This is responsible for mapping filenames to (attributes, list-of-block-ids); roughly speaking it maintains the “inodes” for the distributed filesystem. It is possible to run “standby” namenode daemons for high availability, but only one namenode is considered “active” (except when using “federation”; see later).</p>
+
+<p>All other servers run a HDFS datanode daemon. These simply store and return “blocks” of data, ie chunks of file contents. Each datanode daemon scans its local storage directories on startup to find out which blocks it holds, and then connects to the namenode, reporting the blocks it has and its remaining available storage capacity.</p>
+
+<h1 id="data-blocks">Data Blocks</h1>
+
+<p>A file stored in HDFS is split up into even-sized chunks called blocks. It is important to note that “block” here is <em>similar to</em> but not the same concept as a “block” in a native filesystem. An HDFS block:</p>
+
+<ul>
+  <li>is stored as a <em>file</em> in some underlying native filesystem</li>
+  <li>is by default 128MB in size; this size can be configured per file but all blocks in a file (except the last one) are of the same size.</li>
+</ul>
+
+<p>The purpose of dividing files into blocks is:</p>
+
+<ul>
+  <li>to allow files larger than a single storage device</li>
+  <li>to allow a file to be stored even when no <em>single</em> storage device has sufficient free space to store the whole file</li>
+  <li>to allow blocks to be <em>replicated</em> in a reasonable timeframe (replicating an extremely large file as an atomic operation would take unbounded time)</li>
+  <li>to allow block <em>checksums</em> to be validated in a reasonable timeframe</li>
+  <li>to allow parallel reading of the blocks (a file distributed as N blocks across N storage devices can be read N times faster than the file stored on one device).</li>
+</ul>
+
+<h1 id="interacting-with-hdfs">Interacting with HDFS</h1>
+
+<p>A client application that wishes to save a file can use a HDFS client library to send a request to the HDFS namenode, with its “userid” and the file path. The namenode checks access-rights, and then sends back a kind of “transaction id” and the id of a datanode on which to save the first block of data. The client sends the txid and first block of data to the specified datanode directly, which stores it and then reports its existence back to the namenode. The namenode then associates the blockid with the original file (ie adds that blockid to the list of blockids associated with the file “inode”).  At some point, the namenode allocates a unique id for each block as it is saved; exactly when is not defined in the HDFS documentation, but probably during the exchange in which the datanode reports the existence of a new block to the namenode. In any case, blockids are unique cluster-wide.</p>
+
+<p>The HDFS install provides commandline tools for performing HDFS operations such as copying local files into HDFS, extracting them back out, renaming, etc. These tools are very simple wrappers over the HDFS client library described above.</p>
+
+<p>The HDFS namenode and datanode daemons provide a REST api, as well as the binary Thrift-based API used by the client libarary. The REST api (called WebHDFS) can be used to perform all filesystem operations including writing files, reading files, renaming, deleting - although some operations (particularly writing and reading) are significantly slower. The API is simple enough to be usable from tools such as <code>curl</code>, although there are some constraints - see later.</p>
+
+<p>The Hadoop project includes a <a href="https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsNfsGateway.html">NFS-to-HDFS gateway daemon</a> which can be installed. The HDFS filesystem can then be <em>mounted</em> in the same way as any more traditional remote NFS fileserver. Accessing files via this gateway is not as efficient as using the HDFS client library or command-line wrappers over that library, but is convenient.</p>
+
+<h1 id="namenode-details">Namenode Details</h1>
+
+<p>On startup, a namenode loads from disk its most recent “checkpoint”, which is a table of (filename -&gt; fileinfo). The filename includes a path, eg “/foo/bar/baz.txt”. The fileinfo includes:</p>
+
+<ul>
+  <li>file owner</li>
+  <li>file group</li>
+  <li>access rights (for owner, group, other)</li>
+  <li>optional Access Control List for further access-rights</li>
+  <li>file size</li>
+  <li>file <em>block size</em>
+</li>
+  <li>file <em>replication factor</em>
+</li>
+  <li>and a <em>list of block ids</em>
+</li>
+</ul>
+
+<p>Everything up to and including “file size” will look familiar to anyone who uses a Posix filesystem. The remaining items are HDFS-specific.</p>
+
+<p>The <em>block size</em> indicates how large the “chunks” are that the file is split into. It is actually the <em>client application</em> which first creates the file that defines what the blocksize should be for that file (though the namenode is configured with minimum and maximum limits which it enforces). The default is 128MB, and there isn’t any great reason to fiddle with the default.</p>
+
+<p>The <em>replication factor</em> specifies how many copies there should be for each block in this file; this is used when the file is first created, and when it is appended to. This is also used when a datanode reports that it has “lost” some data (due to disk corruption, failure) or when a complete datanode disappears; the namenode detects such problems and orders one of the datanodes holding a valid copy of the affected block to send a copy elsewhere. Again, the client application which first creates a file sets the replication factor; a value of 3 is suitable for most cases, providing a good tradeoff between reliability, performance (parallel IO), and space usage. Yes, this means that a HDFS filesystem typically can only hold file contents up to 1/3 of its raw capacity - but it doesn’t lose data and can use relatively cheap components.</p>
+
+<p>The list-of-block-ids is used as an index into the other major datastructure that the namenode maintains - the block map.</p>
+
+<p>A namenode holds the entire filesystem state (ie all the above information for all files in the filesystem) in memory. This is the primary limit on a HDFS filesystem size - that the namenode has enough RAM to hold the state.</p>
+
+<p>When a request requires a change to the filesystem state (eg creating a file, appending to a file, deleting a file, changing ownership) then a <em>changelog (aka editlog) entry</em> is first written to a “logfile” and flushed to disk before the change is applied to the in-memory datastructure. This is similar to the way a relational database handles transactions. On startup, after reading the most recent checkpoint into memory, the namenode <em>replays the logfile</em>, repeating any changes that were made before it previously shut down (whether deliberate or accidentally).</p>
+
+<p>Of course, this “changelog” should not be allowed to grow infinitely - but having the namenode periodically write out the “current state” to a new checkpoint file would require <em>freezing</em> the filesystem state for significant periods of time. The solution is therefore for the namenode to “roll over” to a new logfile from time to time (eg hourly, or based on file size) and for a separate server to periodically apply the older (no longer actively written) logfiles to the previous checkpoint to generate a new checkpoint file - without needing any involvement from the active namenode. This application is called the “secondary namenode”, or sometimes the “checkpoint node” If the namenode is restarted, it then sees a new checkpoint file.</p>
+
+<p>As mentioned, the namenode also maintains a “block map” structure (in memory). Unlike the primary filesystem information, this is never persisted. This structure is basically a large hashmap whose key is a <em>block id</em> and whose value is a list of the datanodes on which the block with that id is being held. On namenode startup this map is empty. As each datanode registers with the namenode it reports the list of blocks it has, and these are added to the map. If a datanode disappears from the cluster, its entries are removed from the map.</p>
+
+<p>When a client needs to read a specific range of bytes in a file, this is simply converted to block indexes by dividing by the file block size in the “inode”, and the inode also holds the list (array) of blockids. The block map entry for each required block-id is then sent to the client - ie the list of datanodes on which that range of bytes can be found. The client then seeks out the node closest to itself, and makes a request for the data direct to that node. This minimises the amount of data traffic passing through the single namenode instance. Note that clients don’t need to read whole blocks; a datanode will happily return any number of bytes the client asks for - once the client has determined (via the namenode) the block-ids in which the desired data is held, and which datanodes host them. The fact that a client is given a <em>choice</em> of datanodes is also important for <em>data processing</em> frameworks such as MapReduce/Spark; they can then run their code on or near the nodes hosting the data.</p>
+
+<p>The namenode also monitors the length of the “hosting datanodes” list for each block; when the length of the list drops below the “replication factor” for the corresponding file, then the namenode knows it is time to make extra copies. The length can reduce if a datanode reports data corruption for a block (checksum failure), range of blocks (whole disk failure) or if a whole datanode drops out of the cluster.</p>
+
+<p>On startup, the namenode must wait until enough datanodes have connected that it has at least one copy of each block of each file in the filesystem. At this point it can switch to a “partially up” mode (known as safe mode), but isn’t fully ready. A further timeout is then applied to allow any remaining datanodes to register - and then any under-replicated blocks (ones with too few copies) are fixed by triggering new copies.</p>
+
+<h1 id="federation">Federation</h1>
+
+<p>A cluster can support multiple “namespaces”, similarly to how a unix filesystem can have multiple mount-points.</p>
+
+<p>Actually, it is as simple as having multiple namenodes sharing the same pool of datanodes. Each datanode uses a separate “blockpool” for each namespace, keeping blocks on the same storage devices but separated into different base directories. On startup each datanode registers with multiple namenodes and reports the appropriate set of blocks (those in the blockpool associated with that namenode).</p>
+
+<p>A client can be configured with a single namenode; when two different clients have different namenodes mapped to the same path, they see different files - ie different namespaces.</p>
+
+<p>Alternatively, a client can be configured with a set of (basedir, namenode) pairs and will then select the appropriate namenode depending on the path it is trying to resolve. This works somewhat like a posix filesystem with multiple filesystems mounted at different paths.</p>
+
+<h1 id="location-awareness-and-replication">Location Awareness and Replication</h1>
+
+<p>Within a datacenter, servers are often mounted within <em>racks</em>, and a rack usually has a dedicated network switch. The result is that the network bandwidth between servers on the same rack is higher than between servers on different racks. It also means that the chances of all servers within a single rack suffering a failure at the same time is slightly higher - a physical problem could knock out a whole rack, as could a loss of the rack’s network switch or power-supply (though professional racks often have redundant powersupplies and switches to make this less likely).</p>
+
+<p>HDFS is aware of the concept of racks, and different datanodes can be grouped by rack. When replicating blocks for robustness and IO scalability, the datanode that receives the first block will try to “push” a copy to a datanode in the same rack, assuming one is available with free space (usually the case). That second server will then itself “push” a copy to a datanode on a different rack (assuming replication is set to at least 3). That datanode will then (if necessary) push a copy to another node on yet another rack, etc. This process continues until the desired replication factor has been reached.</p>
+
+<p>Distributing data in this way provides the best tradeoff between performance and robustness.</p>
+
+<p>In each case, the block keeps the same “id”. Each HDFS block is stored as a normal file on whatever filesystem the storage device on the node is formatted as. The filename is derived from the block-id.</p>
+
+<p>As each block is written to a local file, a separate file containing a <em>checksum</em> for the contents is also created at the same time. Each datanode runs a background process which reads local blocks, computes the checksum and compares it to the saved checksum. On failure, the block is marked as invalid and the datanode reports loss of the block to the namenode. This ensures that degradation of individual storage devices does not lead to dataloss.</p>
+
+<h1 id="security">Security</h1>
+
+<p>HDFS provides a posix-like access-control model. Files have an <em>owner</em>, and a single <em>group</em>, and a set of flags indicating read/write/execute access for owner, group, and other. As in posix, “execute” right for a directory means the ability to list the files within it. The “execute” flag for individual files is rather meaningless as applications are not “executed” from HDFS. Special flags such as suid/sticky are not supported. Access control is optional, and can be disabled if not needed.</p>
+
+<p>HDFS also optionally supports ACLs (Access Control Lists) attached to files, ie an arbitrary list of additional (user, permission) tuples. ACL support needs to be explicitly enabled in the HDFS configuration, and is off by default. See HDFS documentation for more details.</p>
+
+<p>In “big data” environments, users are often a small group of trusted individuals, and a security/access-control system is not needed. Alternatively, a “voluntary” system is sufficient to avoid accidents, but without the need to explicitly enforce.</p>
+
+<p>In its default setup, HDFS has basic access-control enabled (users, groups, access-flags, no ACLs) but basically trusts users to honestly declare their identity. HDFS requests (whether Thrift or REST) include the identity of the requesting user, and commandline tools set this to the local unix username. However this can be overridden with the HADOOP_USER environment variable, allowing a user to be whoever they wish.</p>
+
+<p>A “user” in HDFS is simply a string; there is no concept of “registered accounts”. Unix is different, in that <code>/etc/passwd</code> defines accounts, which have <em>numeric ids</em>, and a “user name” is simply the name-string associated with an account-id. In HDFS, a “user name” is really a string; any string will do and can be invented on-the-fly. With hadoop’s commandline tools, “hadoop fs -chown fubarbaz /tmp/somefile” will change the owner of that file to “fubarbaz”, with no need for any registration of such a name.</p>
+
+<p>Groups in HDFS are somewhat tricky. The HDFS client-&gt;server request contains only a username, and no group information. The HDFS namenode is therefore responsible for somehow determining group-info from the name. By default, it doesn’t bother and simply sets group to a value specified in the HDFS configfile (“supergroup” by default). It can also be configured to look in the local <code>/etc/passwd</code> file on the namenode host system for the username, and if a match is found then use the groups associated with that local unix account. A yet more sophisticated approach is to configure the HDFS namenode with the address of an LDAP server, and an LDAP query “template”; it inserts the username provided in the request into the template and sends this to the LDAP server to obtain group information. For performance reasons, responses are cached (there are various config params to control how caching is done, and for how long).</p>
+
+<p>All the above relies on an honest declaration of the user’s identity in the received request. If that isn’t sufficient then Kerberos authentication should be enabled for the namenode. Each request is then accompanied by a Kerberos ticket - a block of user information (including user name) signed by the private key of the Kerberos server. Determining the groups for the user is still done in the way described above.</p>
+
+<p>Security of course needs to be enforced on access to datanodes as well as namenodes; it wouldn’t be a secure system if any application could just request arbitrary blocks direct from datanodes. This is locked down by having namenodes return “access tokens” to clients (after a request has been approved) which the client must then provide to the datanode as part of those requests.</p>
+
+<p>There is also the matter of network snooping: if this is a concern, then there are options to ensure that client/namenode, client/datanode and namenode/datanode traffic is all encrypted. See the HDFS manuals.</p>
+
+<p>As a last note: don’t forget that “big data” environments are seldom public systems, and often security is not particularly important - especially if it impacts <em>performance</em>.</p>
+
+<h1 id="path-based-access-control-with-ranger">Path-based Access Control with Ranger</h1>
+
+<p>Sometimes the traditional Posix model of owners and permissions being associated directly with individual files/directories is inadequate. It is particularly difficult to ensure that applications <em>creating</em> new files assign rights to them that allow the correct set of other applications to access them.</p>
+
+<p>Linux has a few solutions in this area, including Smack and AppArmor.</p>
+
+<p>The Ranger system is the equivalent for HDFS, providing <em>path-based access control</em> configurable via a central <em>account-oriented</em> repository of rights rather than a <em>file-oriented</em> model.</p>
+
+<p>The HDFS namenode has an extremely flexible configuration system, and has a number of “hook-points” that can be used to modify its behaviour. The HDFS configuration file can be set up to define an InodeAttributeProvider class; the namenode will instantiate this class on startup and consult it each time file information is requested and each time file rights are checked. Ranger provides a suitable implementation of this hook. The result is that ranger can grant or deny access for a user to any file regardless of what the owner/group and associated permissions say. It is somewhat unfortunate that the regular filesystem-browsing tools then give a somewhat misleading impression of the system security - the Ranger policy must also be checked to see the whole truth.</p>
+
+<p>A ranger policy can then simply declare “user CounterSpy has read rights on <code>/user/bond/private/*</code>” or “user Dodgy has no read right for <code>/tmp</code>”. When no override is defined for a particular (user, path) then the standard Posix checks are applied.</p>
+
+<h1 id="hdfs-direct-data-access-for-performance">HDFS Direct Data Access for Performance</h1>
+
+<p>Often the physical servers which run datanode daemons also act as YARN “worker nodes”. When a MapReduce/Tez/Spark/etc “master” application executes it typically uses HDFS APIs to find out which physical servers host blocks of the file, and then requests YARN run instances of its managed tasks on the servers which host relevant parts of the file. The application instances then need to perform little or no network IO to read their input data.</p>
+
+<p>For even better performance, HDFS supports <a href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/ShortCircuitLocalReads.html">short-circuit reads</a> to allow applications on the same host as an HDFS datanode process to access data that is already stored in the local filesystem (ie where that node hosts one of the replicated copies of the requested file block). This <a href="http://blog.cloudera.com/blog/2013/08/how-improved-short-circuit-local-reads-bring-better-performance-and-security-to-hadoop/">works as follows</a>:</p>
+
+<ul>
+  <li>on startup the HDFS datanode opens not only a TCP/IP network port, but also a local <a href="https://en.wikipedia.org/wiki/Unix_domain_socket">unix domain socket</a>.</li>
+  <li>when an app uses the HDFS client library to make a request to a datanode, the library checks whether the target IP address is the local host; if so then the client library opens the local unix domain socket (via a path in the local filesystem) rather than opening a TCP connection.</li>
+  <li>when the HDFS datanode receives a request over the local socket, it performs its usual security-checks etc, then opens a new file-descriptor (in read-only mode) for the relevant block-file and passes this <em>file descriptor</em> back over the socket.</li>
+  <li>the client application (via the HDFS library) reads directly from the received file-descriptor.</li>
+</ul>
+
+<p>Unfortunately, while Java supports unix domain sockets, it does not support passing filedescriptors. The necessary support code is therefore within the optional “libhadoop” native code library which must be loaded by clients in order to support direct data access (short-circuit reads).</p>
+
+<p>There is an older (legacy) implementation of “short-circuit reads” in which the datanode provides the client with a filename, and the client opens the file itself. This is insecure (required special “privileged users” be configured) and should no longer be used.</p>
+
+<h1 id="replication-and-scalable-processing">Replication and Scalable Processing</h1>
+
+<p>The ability of HDFS to replicate blocks of data to multiple hosts does not only provide robustness against failure (whether of storage devices, network connections, storage nodes, or whole racks) - it also increases throughput of applications which process that data. When there are N copies of a specific file block, and some cluster-aware application needs to execute a child task which read that block of data, then it can schedule the task on or near any of the N copies and know it will get good performance (minimal network traffic).</p>
+
+<p>When running applications which are primarily IO-bound (and many “big data” processing steps are), this replication of data can speed up overall data processing by multiple orders of magnitude. As an example, given a file of length 10 blocks stored on a single server with no replication, running 10 instances of a processing program each reading a single block of the file will soon cause an IO bottleneck on the relevant datanode. Storing the same data with replication factor 3 in a large cluster allows each instance of the processing application to be run on a different server while still accessing data off a local storage device.</p>
+
+<h1 id="using-centralized-storage">Using Centralized Storage</h1>
+
+<p>The standard way to set up an HDFS cluster is to use <em>direct attached storage</em> (DAS), ie disk-drives attached directly to the physical servers which run the HDFS datanode software.</p>
+
+<p>It is possible to instead use a centralized block-based storage system to host the raw data (ie where the central storage looks roughly like a local diskdrive). In this mode, a set of raw blocks are reserved on the central storage. A datanode then configures a “network block storage device” pointing at this remote storage. The block device is then formatted as a standard filesystem (eg ext4) and the filesystem is used by the HDFS datanode daemon as the hosting filesystem for HDFS file “blocks”. Performance of such an approach is not quite as good as direct-attached-storage, due to the need to read and write blocks across the network. However this design does still manage to offload significant work onto the datanode host:</p>
+
+<ul>
+  <li>the work (CPU cycles) of actually managing the filesystem (ie the filesystem driver code) is done on the datanode host</li>
+  <li>OS-level caching of filesystem content is done on the datanode host, ie its RAM is used rather than the central storage (and thus is scalable)</li>
+</ul>
+
+<p>Note that the underlying filesystem (the formatted raw blocks) is <em>not</em> itself clusterable, ie can only be mounted by one server at a time; only HDFS-level access (ie via the datanode) is multi-client.</p>
+
+<p>It is possible to use a centralized file-server (eg an NFS server) to provide the underlying filesystem in which a datanode server stores its data, with each datanode being given its own private filesystem. Performance is worse than either the DAS or remote-block-storage approaches due to the work of managing the filesystem being done on a central server rather than being linearly scalable by adding new datanodes. This approach also has poor file caching (such caching occurs only in the central server, which is remote and not scalable). However this approach is transparent to HDFS client applications, making it useful as a temporary measure or for testing environments.</p>
+
+<p>It is also possible to use a centralized filesystem (eg an NFS server), where different datanodes are simply given different base directories in which to store their data (the “blocks” of HDFS files). This has the least performance of all, due to the central server also needing to handle locking as different datanode servers concurrently read files from their own directories (something that can be ignored with one-fs-per-datanode). As above, this mode is nevertheless transparent to HDFS client applications and so can be useful for testing environments.</p>
+
+<p>One advantage of using remote storage (particularly the remote-block-based approach) rather than direct-attached-storage is that it is possible to deploy datanode instances within a cluster via normal tools as they are no longer bound to specific physical locations. The tradeoff is less performance due to increased network IO - although, as noted above, filesystem-related work and RAM for caching still scale appropriately.</p>
+
+<p>Some kinds of computing “cloud” really do have direct-attached storage; leasing a virtual computer with specific CPU and storage space reserves part (or all) of a specific machine and failure of the storage device on that node means permanent data loss. In other kinds of cloud, a virtual computer <em>really</em> is virtual, with all data stored centrally on network storage; on each reboot the system image is started on the first available physical server (as a VM). The performance of HDFS will clearly vary in these cases. It is extremely rare in any “cloud” environment that the customer has control over disk partitioning, although this is a very important factor in HDFS datanode performance (where reads and writes should be distributed across available physical devices to maximise IO bandwidth).</p>
+
+<p>Further reading on this topic:</p>
+
+<ul>
+  <li><a href="http://searchstorage.techtarget.com/opinion/External-storage-might-make-sense-for-Hadoop">Matchett: External Storage for Hadoop</a></li>
+</ul>
+
+<h1 id="more-on-webhdfs">More on WebHDFS</h1>
+
+<p>As described earlier, HDFS namenode and datanode daemons provide a REST interface. However when reading or writing a file, the role of a namenode is to <em>refer</em> the client application to the appropriate datanode; with WebHDFS it does this via redirect-responses. This causes some issues when using <code>curl</code>; when curl does a POST it:</p>
+
+<ul>
+  <li>sends standard headers</li>
+  <li>sends a “Expect: 100-continue” header</li>
+  <li>waits for a “100 Continue” response</li>
+  <li>sends the POST body</li>
+</ul>
+
+<p>By default, curl will not follow redirect responses, and thus reads/writes fail. The “–location” (aka -L) option tells curl to retry on redirect - but not include user/password data. Option “–location-trusted” will send authentication credentials to the target redirected-to site.</p>
+
+<p>See <a href="http://pivotalhd.docs.pivotal.io/docs/using-webhdfs-rest-api.html">here</a> for more information on using WebHDFS.</p>
+
+<h1 id="other-issues">Other Issues</h1>
+
+<p>Amazon S3 provides a kind of centralized storage which is neither “block-based” nor “filesystem” based, but something in-between - somewhat like to a key/value store designed for large volumes of data. HDFS client libraries support reading and writing data in S3, but this only for the purpose of importing and exporting data; it is not suitable for use as the “underlying filesystem” for HDFS file blocks.</p>
+
+<h1 id="useful-links">Useful Links</h1>
+
+<ul>
+  <li><a href="http://hortonworks.com/blog/understanding-namenode-startup-operations-in-hdfs/">Hortonworks: Understanding Namenode Startup</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Amazon_Elastic_Compute_Cloud">Amazon EC2</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/hdfs/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

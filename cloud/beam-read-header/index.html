@@ -1,0 +1,425 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Apache Beam - Reading the First Line of a File</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Apache Beam - Reading the First Line of a File</h1>
+    <aside>First published on: April 12, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a>, <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="processing-csv-files-with-beam">Processing CSV Files with Beam</h1>
+
+<p>Apache Beam can be used to process data in batch (“bounded”) or streaming (“unbounded”) form. When processing bounded data from a file, it is usual for those files to be large - if they fit on a single machine, then you should possibly use a simpler way of processing them. So it is not too surprising that writing Beam code to read a single line from a file is tricky. Sadly, this is useful - in particular, I needed to process large CSV-format files which have a “header” as the first line of the file which affects how the other lines will be processed.</p>
+
+<p>Here is the code I eventually came up with to solve this (using Beam 2.4.0); thanks go to Luka Obradovic who put up <a href="https://github.com/obradovicluka/dataflow-playground">code on GitHub</a> which formed the basis of this solution.</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="comment">/**
+ * The MIT License (MIT)
+ *
+ * Copyright (C) 2016 Luka Obradovic.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */</span>
+<span class="keyword">package</span> <span class="namespace">net.vonos.beam.transforms</span>;
+
+<span class="keyword">import</span> <span class="include">org.apache.beam.sdk.coders.Coder</span>;
+<span class="keyword">import</span> <span class="include">org.apache.beam.sdk.coders.CoderException</span>;
+<span class="keyword">import</span> <span class="include">org.apache.beam.sdk.coders.StringUtf8Coder</span>;
+<span class="keyword">import</span> <span class="include">org.apache.beam.sdk.io.CompressedSource</span>;
+<span class="keyword">import</span> <span class="include">org.apache.beam.sdk.io.Compression</span>;
+<span class="keyword">import</span> <span class="include">org.apache.beam.sdk.io.FileBasedSource</span>;
+<span class="keyword">import</span> <span class="include">org.apache.beam.sdk.io.fs.EmptyMatchTreatment</span>;
+<span class="keyword">import</span> <span class="include">org.apache.beam.sdk.io.fs.MatchResult</span>;
+<span class="keyword">import</span> <span class="include">org.apache.beam.sdk.options.PipelineOptions</span>;
+<span class="keyword">import</span> <span class="include">org.apache.beam.sdk.options.ValueProvider</span>;
+<span class="keyword">import</span> <span class="include">org.apache.beam.sdk.util.CoderUtils</span>;
+
+<span class="keyword">import</span> <span class="include">java.io.ByteArrayOutputStream</span>;
+<span class="keyword">import</span> <span class="include">java.io.IOException</span>;
+<span class="keyword">import</span> <span class="include">java.nio.ByteBuffer</span>;
+<span class="keyword">import</span> <span class="include">java.nio.channels.ReadableByteChannel</span>;
+<span class="keyword">import</span> <span class="include">java.util.NoSuchElementException</span>;
+
+<span class="comment">/**
+ * Returns the first text line from any file (without reading the whole file).
+ * &lt;p&gt;
+ * The input file is marked as "not splittable", thus all reading from the file occurs on a single node rather than in parallel.
+ * &lt;/p&gt;
+ * &lt;pre&gt;
+ * Usage:
+ *  PCollection&lt;String&gt; = pipeline.apply(Read.from(HeaderSource.from(options.getInput(), EmptyMatchTreatment.DISALLOW)));
+ *
+ * Usually combined with .apply(View.asSingleton) to produce a PCollectionView which can then be used to pass the first line
+ * of the file as a side-input to other processing steps.
+ * &lt;/pre&gt;
+ *
+ * @author Luka Obradovic (obradovic.luka.83@gmail.com)
+ * @author Simon Kitching (update from Dataflow 1.x to Beam and simplify to only return the header line)
+ */</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">HeaderSource</span> <span class="directive">extends</span> FileBasedSource&lt;<span class="predefined-type">String</span>&gt; {
+    <span class="directive">private</span> <span class="directive">static</span> <span class="directive">final</span> <span class="type">int</span> DEFAULT_MIN_BUNDLE_SIZE = <span class="integer">8</span> * <span class="integer">1024</span>;
+
+    <span class="comment">/** Factory method for use from "user code" */</span>
+    <span class="directive">public</span> <span class="directive">static</span> HeaderSource from(ValueProvider&lt;<span class="predefined-type">String</span>&gt; fileOrPatternSpec, EmptyMatchTreatment emptyMatchTreatment) {
+        <span class="keyword">return</span> <span class="keyword">new</span> HeaderSource(
+                fileOrPatternSpec,
+                emptyMatchTreatment);
+    }
+
+    <span class="comment">/** Factory method for use from "user code" */</span>
+    <span class="directive">public</span> <span class="directive">static</span> FileBasedSource&lt;<span class="predefined-type">String</span>&gt; from(
+            ValueProvider&lt;<span class="predefined-type">String</span>&gt; fileOrPatternSpec,
+            EmptyMatchTreatment emptyMatchTreatment,
+            <span class="predefined-type">Compression</span> compression) {
+        HeaderSource hs = <span class="keyword">new</span> HeaderSource(
+                fileOrPatternSpec,
+                emptyMatchTreatment);
+        <span class="keyword">return</span> CompressedSource.from(hs).withCompression(compression);
+    }
+
+    <span class="comment">/** Constructor used by factory method. */</span>
+    <span class="directive">private</span> HeaderSource(
+            <span class="directive">final</span> ValueProvider&lt;<span class="predefined-type">String</span>&gt; fileOrPatternSpec,
+            EmptyMatchTreatment emptyMatchTreatment) {
+        <span class="local-variable">super</span>(fileOrPatternSpec, emptyMatchTreatment, DEFAULT_MIN_BUNDLE_SIZE);
+    }
+
+    <span class="comment">/** Constructor used after createForSubrangeOfFile is invoked. */</span>
+    <span class="directive">private</span> HeaderSource(
+            <span class="directive">final</span> <span class="predefined-type">MatchResult</span>.Metadata metadata,
+            <span class="type">long</span> minBundleSize,
+            <span class="type">long</span> start,
+            <span class="type">long</span> end) {
+        <span class="local-variable">super</span>(metadata, minBundleSize, start, end);
+    }
+
+    <span class="comment">/** No need for this source to be splittable; it only reads one line. */</span>
+    <span class="directive">protected</span> <span class="type">boolean</span> isSplittable() <span class="directive">throws</span> <span class="exception">Exception</span> {
+        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="directive">protected</span> FileBasedSource&lt;<span class="predefined-type">String</span>&gt; createForSubrangeOfFile(
+            <span class="directive">final</span> <span class="predefined-type">MatchResult</span>.Metadata metadata,
+            <span class="directive">final</span> <span class="type">long</span> start,
+            <span class="directive">final</span> <span class="type">long</span> end) {
+        <span class="keyword">return</span> <span class="keyword">new</span> HeaderSource(
+                metadata,
+                getMinBundleSize(),
+                start,
+                end);
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="directive">protected</span> FileBasedReader&lt;<span class="predefined-type">String</span>&gt; createSingleFileReader(PipelineOptions options) {
+        <span class="keyword">return</span> <span class="keyword">new</span> HeaderReader(<span class="local-variable">this</span>);
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="directive">public</span> Coder&lt;<span class="predefined-type">String</span>&gt; getOutputCoder() {
+        <span class="keyword">return</span> StringUtf8Coder.of();
+    }
+
+    <span class="comment">// ============================================================================================</span>
+
+    <span class="comment">/**
+     * Object responsible for reading a specific range of the input file.
+     * &lt;p&gt;
+     * As the parent class sets isSplittable=false, there will actually be only one of these..
+     * &lt;/p&gt;
+     */</span>
+    <span class="directive">private</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">HeaderReader</span> <span class="directive">extends</span> FileBasedReader&lt;<span class="predefined-type">String</span>&gt; {
+        <span class="directive">private</span> <span class="directive">final</span> <span class="predefined-type">ByteBuffer</span> buf;
+        <span class="directive">private</span> <span class="predefined-type">ReadableByteChannel</span> channel;
+        <span class="directive">private</span> <span class="type">long</span> currOffset;
+        <span class="directive">private</span> <span class="predefined-type">String</span> currentRecord;
+
+        HeaderReader(<span class="directive">final</span> HeaderSource source) {
+            <span class="local-variable">super</span>(source);
+            buf = <span class="predefined-type">ByteBuffer</span>.allocate(<span class="integer">4096</span>);
+            buf.flip();
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">void</span> close() <span class="directive">throws</span> <span class="exception">IOException</span> {
+            <span class="local-variable">super</span>.close();
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">protected</span> <span class="type">void</span> startReading(<span class="directive">final</span> <span class="predefined-type">ReadableByteChannel</span> channel) {
+            <span class="local-variable">this</span>.channel = channel;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">protected</span> <span class="type">boolean</span> readNextRecord() <span class="directive">throws</span> <span class="exception">IOException</span> {
+            <span class="keyword">if</span> (currentRecord != <span class="predefined-constant">null</span>) {
+                <span class="comment">// Have already read everything we need to read. Returning false here should cause the</span>
+                <span class="comment">// close method on this class to be invoked in the near future, which will then close</span>
+                <span class="comment">// the channel.</span>
+                <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+            }
+
+            <span class="predefined-type">ByteArrayOutputStream</span> out = <span class="keyword">new</span> <span class="predefined-type">ByteArrayOutputStream</span>();
+            currOffset += readLine(channel, buf, out);
+            currentRecord = bufToString(out);
+            <span class="keyword">return</span> <span class="predefined-constant">true</span>;
+        }
+
+        <span class="directive">private</span> <span class="directive">static</span> <span class="predefined-type">String</span> bufToString(<span class="predefined-type">ByteArrayOutputStream</span> buf) <span class="directive">throws</span> CoderException {
+            <span class="keyword">return</span> CoderUtils.decodeFromByteArray(StringUtf8Coder.of(), buf.toByteArray());
+        }
+
+        <span class="directive">private</span> <span class="directive">static</span> <span class="type">int</span> readLine(<span class="directive">final</span> <span class="predefined-type">ReadableByteChannel</span> channel, <span class="predefined-type">ByteBuffer</span> buf, <span class="predefined-type">ByteArrayOutputStream</span> out) <span class="directive">throws</span> <span class="exception">IOException</span> {
+            <span class="type">int</span> bytesRead = <span class="integer">0</span>;
+            <span class="keyword">while</span> (<span class="predefined-constant">true</span>) {
+                <span class="keyword">if</span> (!buf.hasRemaining()) {
+                    buf.clear();
+                    <span class="type">int</span> read = channel.read(buf);
+                    <span class="keyword">if</span> (read &lt; <span class="integer">0</span>) {
+                        <span class="keyword">break</span>;
+                    }
+                    buf.flip();
+                }
+
+                <span class="type">byte</span> b = buf.get();
+                ++bytesRead;
+
+                <span class="keyword">if</span> (b == <span class="string"><span class="delimiter">'</span><span class="content">\r</span><span class="delimiter">'</span></span>) {
+                    <span class="keyword">continue</span>;
+                }
+
+                <span class="keyword">if</span> (b == <span class="string"><span class="delimiter">'</span><span class="content">\n</span><span class="delimiter">'</span></span>) {
+                    <span class="keyword">break</span>;
+                }
+
+                out.write(b);
+            }
+            <span class="keyword">return</span> bytesRead;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">protected</span> <span class="type">boolean</span> isAtSplitPoint() {
+            <span class="comment">// Every record is at a split point.</span>
+            <span class="keyword">return</span> <span class="predefined-constant">true</span>;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">protected</span> <span class="type">long</span> getCurrentOffset() {
+            <span class="keyword">return</span> currOffset;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="predefined-type">String</span> getCurrent() <span class="directive">throws</span> <span class="exception">NoSuchElementException</span> {
+            <span class="keyword">return</span> currentRecord;
+        }
+    }
+}</code>
+</pre></div></div>
+
+<p>As noted in the javadoc for the class, it is only a few lines of Beam code to use this class to read the first line from a file, create a PCollectionView from that line, and then read the file in the usual Beam way with that header information as a “side input” to the code that processes each line. (Luka’s original code always prepended the header to each line, rather than using a side-input, and was for Beam’s predecessor Dataflow 1.x).</p>
+
+<p>The functionality in HeaderSource could possibly be implemented using the relatively new <a href="https://beam.apache.org/blog/2017/08/16/splittable-do-fn.html">splittable DoFn</a> API (which is just a couple of extra annotation-methods on a standard DoFn class). However the <a href="https://beam.apache.org/documentation/runners/capability-matrix/">Beam capability matrix</a> currently shows that only a couple of beam “back ends” support splittable DoFns at the current time.</p>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/beam-read-header/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

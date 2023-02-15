@@ -1,0 +1,278 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Storage Area Networks and Associated Filesystems</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Storage Area Networks and Associated Filesystems</h1>
+    <aside>First published on: January 12, 2016</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a>, <a href='/category/Infrastructure/'>Infrastructure</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>This is a quick view of <a href="https://en.wikipedia.org/wiki/Storage_area_network">Storage Area Networks</a> that maybe helpful for programmers/software-architects. This is not my specialist area - corrections welcome.</p>
+
+<p>The term “storage area network” is itself somewhat clumsy; somebody appears to have been over-cleverly trying to fit into the sequence LAN/MAN/WAN. However the actual products that are called SANs are interesting and practical, as are the concepts behind them - which can also be implemented in pure userspace software over a standard network.</p>
+
+<h1 id="the-network-level">The Network Level</h1>
+
+<p>A SAN in its pure form is a dedicated data network using a high-performance protocol which is specifically designed for moving <em>disk block sized</em> chunks of data around, together with a bunch of devices attached to that network which map read/write requests onto normal storage devices (rotating hard-drives or SSDs). Client systems (regular servers) then attach to this network to read/write datablocks.</p>
+
+<p>The storage devices attached to the network (whether custom devices, or regular servers with some appropriate software) have separate network addresses, and provide very simple low-level “read block” and “write block” operations. An adminstrator configures each device, defining labels called <a href="https://en.wikipedia.org/wiki/Logical_unit_number">LUNs</a> and associating ranges of available blocks with these labels. A client device then <em>uses</em> a LUN ID to save data - ie sends read/write operations specifying (network-address, LUN, offset-within-lun) which the addressed storage device maps to the corresponding physical block address.</p>
+
+<p>The SAN administrator can control which client devices can access which LUNs in a manner similar to firewall configuration on a traditional IP network, limiting by the equivalent of MAC address or IP address (physical or logical network address of the client on the SAN).</p>
+
+<p>From the “client” end, the blocks in a LUN appear pretty much as if they were on a <em>local</em> block device (disk); the blocks can be formatted to hold a filesystem in exactly the same way as the blocks on a local disk. To most kernel or userspace software, there is little difference between blocks available on a local device and blocks available from somewhat more remote devices - the kernel drivers just need to map the read/write operations to a slightly different protocol (network rather than local SCSI or similar).</p>
+
+<p>Advantages of a SAN include:</p>
+
+<ul>
+  <li>being able to access the data even if the “owning server” is not available - eg on failure of the host that normally uses a LUN, a different server can mount them instead (quick failover)</li>
+  <li>being able to do backups (at a block-level) external to the “owning server”</li>
+  <li>being able to “overprovision” storage, ie tell a set of N servers that they each have M blocks of storage, when there are actually less than <code>N*M</code> blocks available. As long as <em>most</em> servers use less than their allowed quota then this works out ok. Of course actual usage should be carefully monitored to predict if/when more real storage must be purchased and installed, before it is needed.</li>
+</ul>
+
+<p>The network used to connect client devices to SAN devices must be very high-performance and with IO-specific features such as priority levels; custom network protocols have been invented for exactly this purpose (eg FCP) which require custom network switches. It is also possible (at some performance cost) to transport SAN commands over a standard Ethernet network (FCoE) - but not using IP addressing.  And it is possible (at further performance cost) to transport SAN commands wrapped in IP packets. In all cases, however, it is usual to have completely separated networks for <em>filesystem IO</em> (the storage network) and other <em>generic network IO</em>.</p>
+
+<p>There are protocols for moving blocks of data to and from storage devices which predate SANs: ATA and SCSI. Of course both these protocols were originally designed to work over a local cable, so some tweaking is necessary. AoE (ATA over Ethernet) is a SAN protocol that uses standard ethernet cabling/switches and a tweaked version of the original ATA protocol. FCP (Fibre Channel Protocol) is a version of SCSI tweaked to work over a network of FibreChannel switches (connected via optical fiber of course).  FCP has 5 “layers”, somewhat analogous to the first 5 layers of the ISO network model; the FCoE (Fibre Channel over Ethernet) protocol replaces the bottom two layers of FCP with standard Ethernet instead, allowing cheaper cables and switches to be used.</p>
+
+<p>The iSCSI and iFCP protocols build on top of IP addresses, rather than Ethernet or FCP’s native lower layers. This allows the SAN to span networks (ie pass through routers) - though at a loss of performance.</p>
+
+<h1 id="performance-and-reliability">Performance and Reliability</h1>
+
+<p>A SAN by itself does not provide <em>reliability</em> (ie handle disk failures).</p>
+
+<p>Network bandwidth issues are somewhat improved in that there can be many different storage devices on the storage network, and clients talk directly to the relevant device when reading/writing blocks - thus avoiding any central bottleneck in the network.</p>
+
+<p>Performance and reliability of data storage can be done at the client or SAN level:</p>
+
+<ul>
+  <li>the SAN storage node can export a set of blocks to clients which are actually striped over multiple disks using RAID, or</li>
+  <li>the client can use software-raid to stripe data over the underlying blocks provided by the SAN.</li>
+</ul>
+
+<h1 id="the-filesystem-level">The Filesystem Level</h1>
+
+<p>Because <em>basic</em> SAN functionality works at the block level, it does not (by itself) provide storage that is <em>sharable</em> between multiple clients. If two clients try to use a standard filesystem such as Linux EXT4 concurrently on the same set of blocks (LUN) then data corruption is guaranteed.</p>
+
+<p>A <em>shared disk filesystem</em> uses a SAN to provide a filesystem that multiple clients can use concurrently, with minimal extra infrastructure. They typically rely on a <em>distributed lock manager</em> (DLM) server process accessable via an IP network to coordinate work between multiple clients, but otherwise all data (including filesystem metadata) is stored in the SAN itself - ie the lock manager doesn’t itself hold any persistent data. Examples are GFS2, OCFS2. Clients read and write the “raw blocks” directly, using the DLM only to ensure they don’t concurrently modify the same data.</p>
+
+<p>A <em>distributed filesystem</em> provides a shared filesystem over a SAN by implementing a middle-ground between the NAS (network-attached-storage, ie fileservers supporting NFS or SMB) and shared-disk-filesystem approaches. A <em>metadata server</em> manages file-level operations (as a NAS would), but to read/write file <em>contents</em> clients access the SAN blocks directly. Having clients access SAN blocks directly for file content provides better performance (no central bottleneck as in NAS). Whether the file data survives a disk failure (reliability) depends on the details of the filesystem used.</p>
+
+<p>The pNFS (parallel NFS) specification extends the well-known NFS protocol to make it a distributed filesystem; the “primary” server notifies the client where the actual data is, and the client then exchanges subsequent network requests with the relevant data server(s) to read/write the actual data (file contents). Lustre is another example of a distributed filesystem that works in this way.</p>
+
+<p>Examples of distributed filesystems:</p>
+
+<ul>
+  <li><a href="http://www.pnfs.com/">pNFS</a></li>
+  <li>Ceph</li>
+  <li>GlusterFS</li>
+  <li>Lustre</li>
+  <li>OpenAFS</li>
+  <li>Tahoe-LAFS</li>
+</ul>
+
+<p>See <a href="https://en.wikipedia.org/wiki/Comparison_of_distributed_file_systems">comparison of distributed filesystems</a> for more details.</p>
+
+<h1 id="distributed-filesystems-in-userspace">Distributed Filesystems in Userspace</h1>
+
+<p>It is also possible to implement SAN-like behaviour within a set of normal physical servers. Any server can run userspace code providing read-block/write-block functionality, and the requests can be carried over a normal data network rather than a dedicated one.  The performance of such a system is not as good as a real SAN, but the price is much lower.</p>
+
+<p>Google Filesystem (GFS) and the Hadoop Distributed Filesystem inspired by it (HDFS) work in a similar way to the SAN-based distributed filesystems, but with their own network protocols (over TCP/IP) rather than FCP/AoE, etc. Given a large number of commodity servers in a datacenter, a few can be used as “metadata servers” and the rest as “block storage nodes” to build a distributed filesystem which is cheap and almost infinitely scalable. Client software wanting to access files within this “filesystem” use corresponding client libraries to make network requests to the corresponding metadata or blockdata servers. Because access to file <em>content</em> is the primary bottleneck, and requests go directly to the many block-data servers directly, performance scales well. Nevertheless, the much higher overhead per request (compared to a real SAN) means that these filesystems are best suited to cases where very large files are being stored, and data is commonly accessed in streaming patterns (rather than random IO). GFS and HDFS store “blocks” within normal files on some native filesystem (eg EXT4).</p>
+
+<p>A HDFS filesystem can be “mounted” if desired; there are FUSE (userspace filesystem) drivers and there is a daemon which presents an HDFS filesystem as an NFS server. However in most cases, applications access content in an HDFS filesystem by using a <em>userspace library</em> rather than attempting to <em>mount</em> a filesystem at the kernel level.</p>
+
+<p>A benefit of having distributed filesystems in userspace is that information about the location of data may be exposed to applications in ways they can use to optimise its performance; standard operating-system filesystem interfaces for distributed filesystems will not provide access to this information. Another benefit of using standard servers as “blockstore nodes” rather than dedicated SAN devices is that applications can be run on the same servers; when processing large amounts of data it is often better to bring code to the (local) data, rather than bring remote data to the code.  Applications for processing “big data” can make effective use of both these properties.</p>
+
+<h1 id="further-information">Further Information</h1>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Clustered_file_system#Distributed_file_systems">Wikipedia: Distributed File Systems</a></li>
+  <li><a href="http://www.snia.org/education/storage_networking_primer/san/what_san">SNIA: What is a SAN</a></li>
+  <li>GFS (Google File System) - successor to Google BigFiles</li>
+  <li>Apache HDFS (Hadoop Distributed File System) - inspired by GFS/BigFiles</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/sans/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

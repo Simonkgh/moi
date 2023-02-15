@@ -1,0 +1,233 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Dell's Self-inflicted Windows Security Hole</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='post'>
+    <h1>Dell's Self-inflicted Windows Security Hole</h1>
+    <aside>Posted on: December 27, 2015</aside>
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Cryptography/'>Cryptography</a></p>
+      <p><a href="http://www.theregister.co.uk/2015/11/23/dude_youre_getting_pwned/">What were dell thinking</a>?</p>
+
+<p>Their pre-installed version of MS-Windows includes by default a <em>certificate</em> that causes that specific machine to trust any website, or software bundle <em>signed with that certificate</em> - and then includes the corresponding <em>private key</em> too!</p>
+
+<!-- more -->
+
+<p>Note: the following is my analysis/opinion based upon information in the articles published about this security issue. I found the primary sources not entirely clear; here is my recap of the situation. However I’m not a security expert (though I’ve written an <a href="/programming/certificates">intro to certificates</a> that may be useful background reading).</p>
+
+<p>The Dell-installed certificate is a <em>CA certificate</em> (allowed to <em>sign</em> other certificates) with no <em>constraints</em>. A certificate in itself is not dangerous - the question is: who has access to the corresponding private key?</p>
+
+<p>Theoretically, Dell could have access to that key. This by itself is not a major worry; if Dell is retaining the private key for each machine it would be able to do as much as (but not more than) any of the other Certificate Authorities whose root certificates are pre-installed in the operating-system (typically a few dozen). It is somewhat worrying that CAs generally go to great efforts to protect their private signing keys; Dell in general (and the responsible Dell department in particular) is not in the business of being a CA and therefore almost certainly wouldn’t protect the private key for this certificate with the same effort. However there are no indications that Dell are holding onto these keys. And frankly, as Dell install the original OS they could insert all sorts of interesting code at that point - ie could do far worse than mess with encryption certificates.</p>
+
+<p>However that is moot, as Dell have_also installed <em>the private key for this certificate</em> on the machine itself. A security hole allowing access to that private key therefore becomes a break-all-https-and-other-encryption security hole. Fortunately, access to the private key of a system is not quite as simple as just reading a file; extracting the key requires either physical access to the (unencrypted) machine (in which case the attacker could do other equally nasty things), or an extensive remote code-execution hole  (in which case the attacker can again do other pretty nasty things). Nevertheless, it seems bad: stealing the key does not require admin privileges (ie a trojan or similar does not need to “escalate privileges” to obtain the data). In addition, unlike using a “rootkit” or installing an evil root certificate manually on a machine, stealing the key leaves no traces behind - the bad certificate is <em>already there</em> and all that an attacker needs to do is <em>copy</em> the relevant data. Possibly the vulnerable data could even be extracted from a <em>backup</em> of the machine.</p>
+
+<p>Far worse is that (according to reports) the private key is <em>not unique</em> to each machine; it appears that not all machines have exactly the same key but unrelated machines with the same certificate <em>have been found</em>. That means obtaining the key for <em>one machine</em> allows redirecting https and decoding encrypted data for <em>all other machines with the same key</em>.</p>
+
+<p>Just to make matters worse still, if the certificate is removed by hand <a href="http://www.theregister.co.uk/2015/11/23/dell_security_nightmare_gets_worse/">it is reinstalled on next boot</a> by dell-provided software (installed by default).</p>
+
+<p>The Firefox web-browser isn’t vulnerable (has its own certificate store rather than using the Windows system certificates) - though Internet Explorer is (it uses the system certificates), and so are various parts of the Windows operating system that rely on the certificate store to decrypt data or verify signatures.</p>
+
+<p>Dell’s <a href="http://en.community.dell.com/dell-blogs/direct2dell/b/direct2dell/archive/2015/11/23/response-to-concerns-regarding-edellroot-certificate">response</a> effectively states it was a “simple screwup” and not a deliberate “feature” - unlike Lenovo’s <a href="http://www.cnet.com/news/superfish-torments-lenovo-owners-with-more-than-adware/">superfish</a> scandal, which was definitely deliberate (wanting to make money by changing the ads seen by users while browsing the web). It seems likely this is the truth, given how fast Dell are acting to clean up the situation. Nevertheless I think the screwup goes fairly deep through at least the responsible department - this is a <em>general-purpose root certificate</em>, not just a certificate for a single dell domain. And without any usage-constraints defined. That’s crazy stuff.</p>
+
+<p>Is this worse than superfish? That depends on how common it was for a key to be reused across machines, something that is not currently known - and may never be known.</p>
+
+<p>Why have Dell done this? According to <a href="https://www.duosecurity.com/static/pdf/Dude,_You_Got_Dell_d.pdf">Duosecurity</a> the primary user of this certificate is Dell software called Dell Foundation Services (preinstalled on Dell PCs), and according to Dell this “facilitates customer servicability, messaging and support”. Did they want their support software running on the customer PC to be able to intercept and monitor SSL connections between local apps and remote sites (eg from Internet Explorer to a bank)? That would explain the kind of certificate, and that the private key is local, but there doesn’t seem to be a usecase for that kind of monitoring. Or do they somehow pipe commands  All very odd - and never explained by Dell AFAICT. If I were a Windows user, I would want an answer to this question…</p>
+
+<p>I really don’t understand why companies are so obsessed with Windows, and so rarely use Linux. This kind of thing has never happened to a mainstream Linux distribution (though Debian did have some <a href="https://wiki.debian.org/SSLkeys">weak key generation</a> for a while). I’ve been seeking a new position as software developer recently, and none of the companies I’ve interviewed with (ie companies doing significant <em>software development</em>) use Linux on the desktop, even for developers. No, I just don’t get it.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://joenord.blogspot.co.at/2015/11/new-dell-computer-comes-with-edellroot.html">Joe Nord: New Dell Computer Comes With eDellRoot</a></li>
+  <li>
+<a href="http://www.theregister.co.uk/2015/11/23/dell_security_nightmare_gets_worse/">Duosecurity: Dude, You got Dell’d</a> (pdf)</li>
+  <li><a href="http://www.theregister.co.uk/2015/11/23/dude_youre_getting_pwned/">The Register: Superfish 2.0</a></li>
+  <li><a href="https://krebsonsecurity.com/tag/dell-root-certificate/">Krebs on Security: Dell Root Certificate</a></li>
+  <li><a href="http://arstechnica.com/security/2015/11/dell-does-superfish-ships-pcs-with-self-signed-root-certificates/">ArsTechnica: Dell does a Superfish</a></li>
+  <li><a href="http://www.theregister.co.uk/2015/11/23/dell_security_nightmare_gets_worse/">The Register: Dell’s unkillable zombie</a></li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/posts/2015-12-27-dell-cert/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,505 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Google Cloud Platform - Identities and Resource Management</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Google Cloud Platform - Identities and Resource Management</h1>
+    <aside>First published on: April 10, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>The Vonos article <a href="/cloud/google-cloud-overview">Google Cloud Platform Overview</a> provides the “big picture” of Google’s cloud platform. This article looks more closely at the following topics:</p>
+
+<ul>
+  <li>How Google represents identities (users)</li>
+  <li>How GCP accounts are created</li>
+  <li>What resources a GCP account manages</li>
+  <li>How permissions/policies are inherited</li>
+  <li>How billing is managed</li>
+  <li>How users can interact with a GCP account (web, rest, gcloud)</li>
+</ul>
+
+<p>Some of the above topics are also discussed in the overview article; here they are revisited in more detail. However this article is still an “overview” of the above topics; each topic is covered in detail by Google’s own documentation - but what Google fail to provide (IMO) is a general introduction, a gap which this article tries to fill.</p>
+
+<p>Note that I am not an expert in this area, and have no insider information about Google services; everything written below is the result of a moderate amount of experience using GCP, some experimentation, and logical deduction (which could possibly be wrong). Feedback is welcome!</p>
+
+<h1 id="the-google-identity-service">The Google Identity Service</h1>
+
+<p>Google’s identity service is a distributed database of (id, credentials, profile) information, and various APIs for interacting with this database.</p>
+
+<p>Entries in this database are of four different types:</p>
+
+<ul>
+  <li>A GMail identity directly with Google (personal identity)</li>
+  <li>An identity belonging to a <a href="https://support.google.com/a/answer/7319251">Cloud Identity</a> instance</li>
+  <li>An identity belonging to a GSuite account (similar to cloud-identity)</li>
+  <li>An application service identity (which represent programs rather than users)</li>
+</ul>
+
+<p>Each entry is an <em>identity</em> with a unique string-typed id; for the first three types of entries, the id is of form <code>name@domain</code>. It is common for this id to also be a valid email-address for the user associated with this identity - but the concept of identity-id and email-address are <em>logically separate</em>.</p>
+
+<p>Every identity also has some associated <em>credentials</em> that can be used to “log in” as that identity. Various types of credentials are supported; the simplest of course being a plain password. More complex options include two-factor authentication, public keys, etc.</p>
+
+<p>As well as implementing a global distributed database for identity information, Google provides an associated REST service for interacting with the Google identity service, in particular to submit credentials and get back an OAuth ticket that can then be used to authenticate to other Google services. Other REST endpoints allow update of the profile information for the identity. The identity service also provides an OpenID Connect page for web-based interactive login and single-signon support - which again results in an OAuth ticket being issued that can then be provided to other Google services.</p>
+
+<p>Note that the identity service is intended to track moderate numbers of users, eg the employees of a company. Similarly, Google’s IAM service is intended for managing rights for that moderate number of users. If you are building the next Twitter or Uber, with millions of users, then those identities are NOT managed via Google’s identity service or IAM; there are various mobile frameworks for that purpose (see <a href="https://firebase.google.com/">Firebase</a> for example) but those are not addressed in this article.</p>
+
+<p>In some documentation, the work <code>account</code> is used as a synonym for <code>identity</code>. However this can be confusing, as the term <code>account</code> is also used for the “resource holder” entity.</p>
+
+<h2 id="gmail-accounts">GMail Accounts</h2>
+
+<p>Any person can <a href="https://accounts.google.com/SignUp">create a GMail account</a> for free, in just a few minutes. This actually creates an <em>identity</em> in the global Google identity service together with a number of resources in GCP to support the following services:</p>
+
+<ul>
+  <li>Email</li>
+  <li>Calendar</li>
+  <li>Hangouts (video calls)</li>
+  <li>Docs (word processing, spreadsheet, presentation)</li>
+  <li>Drive (file storage)</li>
+  <li>Google Cloud Platform access in general</li>
+</ul>
+
+<p>In the case of email, “setup” includes:</p>
+
+<ul>
+  <li>Allocating storage space for email (“mailbox”) with a standard storage quota</li>
+  <li>Configuring Google permissions (IAM) to allow the user to access the email REST api, and to access the email web interface</li>
+  <li>Configuring the Google email servers to accept incoming emails of form <code>someuser@gmail.com</code> and forward them into the mailbox</li>
+  <li>Configuring the Google email servers to accept outgoing emails of form <code>someuser@gmail.com</code> (via REST api, POP or SMTP)</li>
+</ul>
+
+<p>Setup for other services will be similar, ie usually allocating a storage location and updating permissions associated with the identity.</p>
+
+<p>In general, each service that Google provides has a REST api. A web-based interface is then also provided which is implemented in terms of that API - ie whatever can be done interactively with a web browser can also be accessed programatically.</p>
+
+<p>As noted earlier, each Google identity has a unique <em>id</em>; the ids for “personal accounts” are strings of form “<code>someuser@gmail.com</code>” - which happens to be the same as the email address associated with that account.</p>
+
+<p>With a free GMail account, the user can visit the Google Cloud Platform admin page at <a href="https://console.cloud.google.com">https://console.cloud.google.com</a> and immediately start using GCP resources (eg creating virtual machines running custom code). See later for more details.</p>
+
+<p>When registering a GMail account, it is also possible to use an existing email-address as the identity. In this case, no Google-hosted mailbox is created. Note that it is not possible to change the email address associated with a GMail account; using an external address is therefore only advisable if that address is <em>very stable</em>, ie will outlast the GMail account lifetime.</p>
+
+<p>A GMail account can be deleted, but the id used remains reserved (at least for a time-period).</p>
+
+<h2 id="cloud-identity">Cloud Identity</h2>
+
+<p>GMail “personal” accounts have ids of form “<code>someuser@gmail.com</code>”, unless you already had a stable external email address and decided to use that as your GMail account id. Such personal accounts can be administered only by the account owner.</p>
+
+<p>It is also possible to enable “Cloud Identity” for a GCP account and associate it with a custom domain-name you own. It is then possible to</p>
+
+<ul>
+  <li>Create users with ids of form <code>someuser@customdomain</code>;</li>
+  <li>Make some users “administrators” who can manage other user accounts (including locking, resetting, deleting); and</li>
+  <li>Sync <em>Cloud Identity</em> with an existing LDAP server (so that user data does not need to be entered twice)</li>
+</ul>
+
+<p>To enable Cloud Identity a GCP account is required. This discussion therefore needs to refer to some GCP-related topics that are presented fully later - but as the concept of identity is central to GCP it is best to describe Cloud Identity at least briefly first.</p>
+
+<p>Enabling Cloud Identity with a custom domain requires first creating a personal account, then creating a GCP account, linking a custom domain-name to that GCP account and then enabling <em>Cloud Identity</em> for the GCP account. A Rest API and web interface is then available to allocate identities with custom ids.</p>
+
+<p>Like Google personal identities, each identity specifies (id, credentials, profile) and is stored in the global distributed database.  In short, <em>Cloud Identity</em> is simply an entry-point into the Google identity service which allows ids other than “<code>someuser@gmail.com</code>”.</p>
+
+<p>Users associated with the same domain do have some special interaction, including sharing an address-book.</p>
+
+<p>To enable <em>Cloud Identity</em> you need:</p>
+
+<ul>
+  <li>A GCP account</li>
+  <li>A billing account</li>
+  <li>Your own domain name</li>
+</ul>
+
+<p>Then in GCP console, go to any project, menu option <code>IAM &gt; Identity</code> and choose <a href="https://support.google.com/a/answer/7389973?hl=en&amp;ref_topic=7386475">sign up</a>. Note that although <em>Cloud Identity</em> is configured via a project, it is actually a global setting associated with the Google Cloud Platform (GCP) account. As part of configuring <em>Cloud Identity</em>, an <a href="https://cloud.google.com/resource-manager/docs/creating-managing-organization">Organization resource</a> is created and associated with the Google Cloud Platform account (see later).</p>
+
+<p>Cloud Identity is currently not very well documented; I suspect it was originally part of GSuite and has only recently been “factored out” as a standalone service.</p>
+
+<p>Note that although a GCP account with an associated billing account is needed (ie you do need a credit card), there is no charge for Cloud Identity.</p>
+
+<p>Accounts created through <em>Cloud Identity</em> have ids of form <code>someuser@yourdomain</code> rather than <code>someuser@gmail.com</code>.</p>
+
+<p>As far as I know (ie not confirmed), users created through <em>Cloud Identity</em> do still get a Google-hosted mailbox. However Google does not publish DNS MX records for the custom domain, so mail for those users will not be directed to Google’s infrastructure by default. If you wish to provide your own email hosting infrastructure for those email addresses, then the Google mailboxes can just be ignored. If you wish to use Google’s hosting then you just need to publish the appropriate MX records for your custom domain; publishing SPF and DKIM records is optional but recommended.</p>
+
+<p>When a user with an identity created via <em>Cloud Identity</em> visits the GCP admin page at <code>console.cloud.google.com</code>, they see the GCP account through which their identity was defined - or at least those parts of it for which they have been granted rights to see.</p>
+
+<h2 id="gsuite">GSuite</h2>
+
+<p>GSuite is a combination of a GCP account with <em>Cloud Identity</em> enabled (ie requires a custom domain name), and a license for extended versions of the Google Docs application suite. This allows a company which has a domain-name to manage its own users, but those users are automatically configured with permissions to access all Google services enabled for the associated GCP account. Things like address-books are also shared with other users in the same Cloud Identity domain.</p>
+
+<p>Because GSuite implicitly sets up <em>Cloud Identity</em>, the associated GCP account always has an Organization resource associated with it.</p>
+
+<p>The intended audience for GSuite is companies who need email, word-processing, spreadsheets, and shared storage for these documents, but do not wish to manage their own physical infrastructure or track software licences. With a GSuite account, a Cloud Identity “admin” user can create and manage accounts for company employees - or LDAP synchronization from an external LDAP server can be configured.</p>
+
+<p>Google is also a domain name registrar; it is common for small companies to purchase a suitable domain-name from Google at the same time they sign up for GSuite. When Google is the domain name registrar then it can publish DNS records (MX for mail, A for websites, etc) automatically, eg making email address <code>user@customdomain</code> direct to the Google-hosted email infrastructure automatically.</p>
+
+<p>A two-week trial license for GSuite is available for free. With this licence you can create and administer user accounts (as with non-gsuite cloud identity), use the extended features of the Google online services, and generally get a feel for how GSuite works.</p>
+
+<h2 id="service-identities">Service Identities</h2>
+
+<p>A service identity is an entry in the global GCP database of identities - but is “bound” to a specific GCP project; deleting the project deletes the identity. Creating a service identity is easy, and can be done by any user with appropriate rights on that project. While other identity types (intended for interactive users) can have various kinds of credentials, the credentials for a service identity are always a public/private key pair; the REST call that creates a service identity automatically generates this keypair. The public key for a service identity can be retrieved at any time; the private key is returned by the “create identity” operation and must be saved - it cannot be fetched later for security reasons.</p>
+
+<p>The service identity can be assigned IAM rights (roles on resources) in exactly the same way as other identity types.</p>
+
+<p>Any application which wishes to perform operations in GCP as a service identity just needs access to the corresponding private key. All GCP’s language-specific frameworks that provide access to GCP (eg Java or Python client libraries) have APIs that can load the necessary credential from a file or an environment-variable.</p>
+
+<p>Some GCP resource types (eg VMs, containers, and serverless functions) can have the credentials of a specific service identity “injected” into the environment; GCP itself ensures that the necessary credentials are provided in the runtime environment in a way that the standard GCP client libraries can automatically detect and use. The result is that code that performs operations such as reading from GCP Cloud Storage, or writing to a GCP-based database, will by default use the credentials/rights of whatever service identity is “injected” into the environment. Of course, a developer could alternatively embed specific service identity credentials into the environment themselves if desired.</p>
+
+<h1 id="permission-and-policy-management-iam">Permission and Policy Management (IAM)</h1>
+
+<p>The Google IAM service provides <em>authorization</em> throughout the Google services, ie maps users to roles and roles to permissions. Various Google services then (indirectly) test whether the user invoking a service (usually via a rest call) is permitted to perform that operation by checking the IAM permissions for that user.</p>
+
+<p>Examples of the things IAM controls is whether a specific user:</p>
+
+<ul>
+  <li>Is permitted to change the budget associated with a billing account</li>
+  <li>Is permitted to create a new project within an GCP account</li>
+  <li>Is permitted to create a new virtual machine instance within a GCP account project</li>
+  <li>May deploy a new version of an AppEngine application</li>
+  <li>Has read/write/create/delete rights on a specific cloud storage bucket (object storage “filesystem”)</li>
+</ul>
+
+<p>Google groups can be used to define groups of multiple users, and IAM permissions can then be granted to the entire group. IAM permissions can also be attached to entire <em>domains</em>, eg all users in a specific <em>Cloud Identity</em> domain.</p>
+
+<p>IAM is not a general-purpose authorization platform; it is hard-wired in many ways to support specifically the set of services that Google offers. Note in particular that if you are writing a custom application that will run on GCP resources such as VMs or containers, then IAM will do <em>very little</em> to help you manage users of that application. If your application users are all registered in the Google identity service (eg if this is a company-internal app) then IAM may allow you to control who can access the application <em>at all</em> (ie who can reach a specific host/port), but will not provide any finer-grained control. Of course <em>your app</em> will need appropriate IAM permissions on its <em>application service account</em> identity in order to access cloud-storage-buckets, databases, etc.</p>
+
+<p>If you are developing an application for use from mobile phones (eg the next Twitter or Uber), then Google provides a set of frameworks that help authenticate and authorize users. This article is primarily aimed at developers creating company-internal software systems, and does not address mobile platform development.</p>
+
+<h2 id="scopes-and-authorization-tokens">Scopes and Authorization Tokens</h2>
+
+<p>To make a REST call to a GCP resource, the caller needs to include an HTTP header “<code>Authorization: Bearer $TOKEN</code>” where TOKEN is a base64-encoded blob of data. Tokens are always issued by Google’s identity service.</p>
+
+<p>When requesting a token, the caller provides (identity, credentials, scope) where scope describes the resource that the user wishes to access. The service validates the identity/credentials pair and then returns a data-structure that lists all rights that identity has on the resource specified by the scope. The data-structure is signed by the private key of the identity service.</p>
+
+<p>The service that receives the REST call then must:</p>
+
+<ul>
+  <li>validate the signature (reasonably easy as the identity service has only a small set of public keys which are easily available)</li>
+  <li>check that the token is not expired (the expiry date is embedded in the token and cannot be changed without breaking the signature)</li>
+  <li>check that the resource being accessed is indeed the one specified in the original scope parameter</li>
+  <li>check that the operation being performed is in the list of rights that the token includes.</li>
+</ul>
+
+<p>None of these checks requires making external calls to the GCP identity service or IAM; all necessary info is in the signed token provided by the caller.</p>
+
+<p>Tokens have a relatively short expiry time - longer times reduce the number of calls a client must make to obtain/refresh tokens, but changing an identities’ rights in IAM does not invalidate existing tokens.</p>
+
+<h1 id="accounts-and-projects">Accounts and Projects</h1>
+
+<p>The <a href="https://cloud.google.com/">Google Cloud Platform</a>, or GCP for short, is the set of services Google offer for storing and processing data, and running custom applications, within Google’s datacenters.</p>
+
+<p>A GCP account is always <em>owned</em> by a single Google personal account, and the owner can never be changed. It is therefore good practice for a company to create a Google personal account with an id like “<code>companyname@gmail.com</code>”, set up email-forwarding for the corresponding email account to the company IT department, and store the login credentials for that GMail identity in the company safe. Further accounts can then be created with access-rights to the GCP account for daily administration.</p>
+
+<p>A GCP account contains:</p>
+
+<ul>
+  <li>Zero or one Organisation resources (which describes the company or other entity associated with the GCP account)</li>
+  <li>Zero or more billing accounts (each with associated credit-card)</li>
+  <li>One or more projects (which hold resources; see below)</li>
+  <li>Zero or more folders (which define a logical tree view of the GCP account projects)</li>
+  <li>Global permissions (actually associated with the folders)</li>
+</ul>
+
+<p>As noted earlier, an Organization resource is created when <em>Cloud Identity</em> is enabled for a GCP project - or created during GSuite setup. A simple GCP account without Cloud Identity enabled will not have an Organization resource. A GCP account can be configured to grant access to any identities registered with Google, not just those allocated with Cloud Identity. See later for more info on Organization entities.</p>
+
+<p>A GCP project is always a direct child of a GCP account - projects are never nested. A project holds multiple resources such as:</p>
+
+<ul>
+  <li>An optional reference to a “billing account”</li>
+  <li>Cloud Storage buckets</li>
+  <li>Virtual network definitions (with associated firewall rules)</li>
+  <li>Virtual machines</li>
+  <li>Access permission rules</li>
+  <li>Licences for third-party APIs (free or paid)</li>
+  <li>and various other things</li>
+</ul>
+
+<h1 id="registering-a-gcp-account-and-a-first-project">Registering a GCP Account and a First Project.</h1>
+
+<p>Just create a GMail account and then visit the standard GCP administration page at <code>console.cloud.google.com</code>. Click on “create an empty project”.</p>
+
+<p>A free GCP account (one without an associated billing account) may have a maximum of 12 projects associated with it.</p>
+
+<p>One of the nice things about GCP is that so much is available without having to create a billing account (ie register a credit card). This implies that there is <em>no way</em> that you can incur any expenses associated with that account, as there is no way for Google to charge you; the worst case is that services stop working when the free limit is reached. This is different from Microsoft Azure where some services are also free, but a credit-card <em>must</em> be registered before even the free services are available; here a false step can result in charges.</p>
+
+<p>Note that (at least currently) there is a button on the admin page labeled “Sign up for a free trial”. However it is not necessary to “sign up” in order to use free services. The offer applies to a <em>billing account</em>, ie when you wish to use services that are normally chargeable, the “free trial” gives a new billing account an initial $300 credit allowing normally chargeable services to be tried out.</p>
+
+<p>There are some features that cannot be used without a billing account, including the Compute Engine (VMs) feature. However even when you have registered a billing-account wiht credit card, Google still provides quite a generous “free quota” for these “billing account required” services - ie the fact that a credit-card is required does not necessarily mean that you will be charged anything.</p>
+
+<p>The list of things that can be added to a project has already (partly) been described above. Further articles (planned) will look at these in more detail; this article is just looking at the general GCP structure.</p>
+
+<p>In any project, visiting menu option <code>IAM | Identity</code> allows Cloud Identity to be configured. This does require a billing account.</p>
+
+<h1 id="the-organization-resource">The Organization Resource</h1>
+
+<p>A GCP account has zero or one Organization resources. As well as providing admin information about the company or other organization associated with the GCP account, permissions (an IAM policy) can be associated with the Organization. This policy applies to (is inherited by) all other resources in the project. When a GCP account does not have an Organization resource then there is no global policy that applies to all resources; each project and other resources (eg billing accounts) have independent policies.</p>
+
+<h1 id="the-resource-hierarchy-aka-folders">The Resource Hierarchy (aka Folders)</h1>
+
+<p>Projects themselves are direct children of a GCP account. Each project has its own permissions-settings (IAM policy) which controls who can access what - though the project does inherit policy settings defined on the Organization resource (if one exists).</p>
+
+<p>A GCP project also has an optional tree of “folder” resources; each “folder” can have an IAM policy attached to it, and can have projects and other folders as children. Policy settings (ie permissions) are inherited through the folder structure. Folders are typically used to model the department or reporting hierarchy of a company or organisation, ie the projects being run by a specific department are attached to a folder representing that department, and admin users from that department are granted permission to alter the policy attached to their folder and projects - but not parent folders.</p>
+
+<p>One of the effects of inherited policies is that the Organization administrator (who can set policies on the Organization resource) can override policies set lower down in the hierarchy, eg granting access rights on projects in situations where none of the original admin-users associated with that project are available.</p>
+
+<p>Folders can also have <em>labels</em> attached to them, allowing specific folders across the hierarchy to be grouped together.</p>
+
+<h1 id="billing">Billing</h1>
+
+<p>A GCP account has a set of billing accounts. A billing account has a credit-card number through which payment is charged, and a bill (cost report) is available per-billing-account.</p>
+
+<p>Each billing account has budget controls, after which no further charges will be incurred (but of course paid-for services will no longer be available).</p>
+
+<p>Each project is associated with zero or one billing accounts from the parent GCP account; if no billing account is linked then the project cannot use any paid features and transaction/storage volumes are limited to the free quota allowed by Google.</p>
+
+<h1 id="the-gcloud-tool">The GCloud Tool</h1>
+
+<p>This article has pointed out that all Google services are accessible via a REST API in addition to a web interface (AIUI, the web interface is actually implemented via the REST API).</p>
+
+<p>The Google Cloud SDK is a commandline toolset (implemented in Python) that can be installed on developer/administrator systems in order to administer/configure GCP resources; it simply makes calls to the GCP REST APIs using the current Python GCP client libraries, ie anything that can be done via raw REST or via a web interface can also be done via the commandline tool <code>gcloud</code>.</p>
+
+<p>The Google Cloud SDK is actually split into modules; the initial install provides the gcloud tool which also acts as a kind of ‘package manager’ through which additional modules can be installed. Useful modules include things such as an emulator for the GCP Datastore NoSQL database, so that code interacting with Datastore can be tested on developer laptops, etc.</p>
+
+<p>I can highly recommend the gcloud commandline tools; it is often far easier to discover and use functionality via this tool than via the web interface.</p>
+
+<h1 id="the-google-resource-manager">The Google Resource Manager</h1>
+
+<p>The <a href="https://cloud.google.com/resource-manager/">Resource Manager</a> is a REST service which provides access to information about a GCP account, eg</p>
+
+<ul>
+  <li>Data associated with the Organization resource can be read and updated</li>
+  <li>Projects can be listed, created, deleted</li>
+  <li>Billing accounts can be listed and updated</li>
+  <li>Folders can be listed, created and deleted</li>
+  <li>Temporary access limitations (modifications to the IAM policy), aka Lien, can be defined eg making a resource temporarily undeletable until some other process is complete</li>
+</ul>
+
+<p>This API does not manage the <em>internal resources</em> of projects, ie the resource manager API can create and delete projects, but does not provide methods to add or remove computing resources (eg VMs or firewall rules) associated with a project; that is provided by separate APIs.</p>
+
+<h1 id="project-resources">Project Resources</h1>
+
+<p>After visiting the GCP admin page (<code>console.cloud.google.com</code>) and selecting a project from the dropdown list, a menu of options is displayed on the left. The list can be split into two categories:</p>
+
+<ul>
+  <li>administration menu items</li>
+  <li>specific resources</li>
+</ul>
+
+<p>Administrative items include:</p>
+
+<ul>
+  <li>
+    <p>Billing – manages the association between GCP projects and credit-cards, and manages quotas for projects (see above)</p>
+  </li>
+  <li>
+    <p>APIs &amp; services – configures IAM permissions to allow code within the GCP project to invoke specific APIs (some from Google, some third-party). Some services require payment, in which case a billing account is required. Enabling an API often includes a “setup” phase in which data is entered. The selected service might also perform some initialisation for the “new client project” when enabled, eg creating GCP resources such as allocating storage.</p>
+  </li>
+  <li>
+    <p>IAM &amp; admin – configuring access permissions for users and applications; configure Cloud Identity; manage encryption keys.</p>
+  </li>
+</ul>
+
+<p>The following items are addressed in a separate <a href="/cloud/google-cloud-overview">Vonos GCP Overview article</a>:</p>
+
+<ul>
+  <li>Compute – configure ways to run custom code, from low-level (pure VMs) to high-level (cloud functions).</li>
+  <li>Storage – persisting data in various ways</li>
+  <li>Networking – setting up virtual networks, firewalls, loadbalancers, etc</li>
+  <li>Stackdriver – tools for monitoring and debugging code running in the compute environments</li>
+  <li>Tools – services useful for developers, architects and cloud sysadmins</li>
+  <li>Bigdata – services for storing and transforming large amounts of data</li>
+  <li>Cloud Launcher  – installing complete “packages” of software including config of all required GCP resources. Things like a LAMP stack (Linux/Apache/MySQL/PHP) can be installed from Cloud Launcher with just a few clicks.</li>
+</ul>
+
+<p>See this official <a href="https://cloud.google.com/products/">list of GCP products</a> for more details.</p>
+
+<h1 id="further-reading">Further Reading</h1>
+
+<ul>
+  <li><a href="/cloud/what-is-a-cloud">Vonos: What is a Cloud</a></li>
+  <li><a href="https://support.google.com/a/answer/7319251">Google: What is Cloud Identity</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/google-resources/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

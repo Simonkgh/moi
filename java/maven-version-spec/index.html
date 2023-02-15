@@ -1,0 +1,300 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Version Specifiers in Maven 3.x</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Version Specifiers in Maven 3.x</h1>
+    <aside>First published on: November 28, 2016</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>Each maven artifact has a version-specifier. Sadly, the actual format of this version-specifier is not properly described in any of the official Maven documentation. There aren’t any reliable sources on the internet either. And worst of all, the supported format and its meaning (particularly how versions compare/sort) differs between Maven releases.</p>
+
+<p>Hopefully the description below clarifies the behaviour of version-specifiers in Maven 3.x. The information is primarily derived from <a href="https://git-wip-us.apache.org/repos/asf?p=maven.git;a=tree;f=maven-artifact/src/main/java/org/apache/maven/artifact/versioning">reading the source code</a>, although this <a href="https://issues.apache.org/jira/browse/MNG-3010">jira issue</a> has some useful links. The <a href="http://books.sonatype.com/mvnref-book/reference/pom-relationships-sect-pom-syntax.html">official documentation</a> is rather vague on the topic - and in one place actually describes the <em>old 2.x</em> comparison behaviour.</p>
+
+<p>In particular, the available information is very vague about which version-specifiers sort before (are “older than”) others.</p>
+
+<h1 id="versioning">Versioning</h1>
+
+<p>A version-specifier has the following form:</p>
+
+<pre><code>  component(-component)*
+</code></pre>
+
+<p>where a component is one of:</p>
+
+<ul>
+  <li>semantic-version</li>
+  <li>string</li>
+</ul>
+
+<p>A semantic-version component is of form <code>major(.minor(.patch))</code>, eg <code>1.2.3</code> or <code>4.0</code>. A single digit is also a semantic-version, eg “4” is equivalent to <code>4.0.0</code>.</p>
+
+<p>A string component is any sequence of characters excluding whitespace and dash.</p>
+
+<p>Here are some simple and more complex examples:</p>
+
+<ul>
+  <li>1.2-alpha1</li>
+  <li>1.2.3-beta-2-rc</li>
+  <li>1.2.1-alpha-3.2-SNAPSHOT</li>
+  <li>4.0-SNAPSHOT-rc2</li>
+  <li>5.0-GA</li>
+</ul>
+
+<p>Note that SNAPSHOT is simply a string component, and is not limited to occurring at the end of the version-specifier.</p>
+
+<h1 id="comparing-versions">Comparing Versions</h1>
+
+<p>Comparison of two version-specifiers simply compares components pairwise from left to right, until two components are found which are not equal.</p>
+
+<p>When a version-specifier is compared to one that is shorter in length (has fewer components), then the shorter is effectively “padded with nulls”, eg comparing “1.2-alpha-1-rc-snapshot” (5 components) to “1.3-alpha2” (2 components) is equivalent to comparing it against “1.3-alpha2-null-null-null”.</p>
+
+<p>Comparisons of semantic-version components works in the obvious manner; if the major-values are identical, then the minor-values are compared, and if needed the patch-values. A missing value (null) is equivalent to zero, eg “3” is equal to “3.0.0”.</p>
+
+<p>Semantic versions always come “before” strings, eg “9” comes before (is older than) “alpha” or “5a”.</p>
+
+<p>Comparisons of string components is not quite so simple. Comparison is case-insensitive, and strings are sorted in the following order from “lowest version” (oldest) to “highest version” (newest):</p>
+
+<ul>
+  <li>snapshot</li>
+  <li>alpha</li>
+  <li>beta</li>
+  <li>milestone</li>
+  <li>rc (abbreviation for release-candidate) and cr (abbreviation for candidate-release)</li>
+  <li>(empty-string or null), “final”, “ga” (abbreviation for general-availability)</li>
+  <li>sp   (abbreviation for service-pack)</li>
+  <li>(other-string, ie  any other value)</li>
+</ul>
+
+<p>Thus <code>1.0-SNAPSHOT</code> &lt; <code>1.0-beta-4-SNAPSHOT</code> &lt; <code>1.0-RC-2</code> &lt; <code>1.0</code> &lt; <code>1.0-sp-6</code> &lt; <code>1.0-FizzBuzz-3</code>.</p>
+
+<p>Comparing two strings which are not any of the above special values (ie which are in category other-string) is done alphabetically, eg “aaa” comes before (is older than) “aab”.</p>
+
+<p>An implication of this sorting-criteria is that custom strings can never sort <em>before</em> the official release (as alpha/beta/etc do). Something like “1.0-pre1” is not a “pre-release” version; it is <em>newer</em> than “1.0” because “pre1” is an “other string” which sorts after empty-string/null.</p>
+
+<p>In addition:</p>
+
+<ul>
+  <li>any string of form “a{N}” is equivalent to “alpha-{N}”</li>
+  <li>any string of form “b{N}” is equivalent to “beta-{N}”</li>
+  <li>any string of form “m{N}” is equivalent to “milestone-{N}”</li>
+</ul>
+
+<h1 id="tricky-cases">Tricky Cases</h1>
+
+<p>If a component in the version-specifier does not match the requirements for a “semantic version”, then it is treated as a string. In particular, “1.2.3.4” is simply a string; it has too many numerical components. It will therefore sort after (is considered newer-than) “1.10.3.4”. It is also newer than “2.0”, because “2.0” is really a semantic-version which sorts before (is older than) any string. Similarly, “1.2.3.RELEASE” is just a single string component, and will be compared to other version-specifiers of the same form using the string-component-comparison rules.</p>
+
+<p>The version-specifiers “1.0-foo1” and “1.0-foo-1” are quite different; the first has two components (semantic-version, string) while the second has threee components (semantic-version, string, semantic-version).</p>
+
+<h1 id="string-sorting-examples">String Sorting Examples</h1>
+
+<ul>
+  <li>“1.0-alpha” is older than “1.0-foo” because “alpha” comes before other-string</li>
+  <li>“1.0-alpha” is older than “1.0” because “alpha” comes before empty-string/null</li>
+  <li>“1.0-SNAPSHOT” is older than “1.0” because “snapshot” comes before empty-string/null</li>
+  <li>
+    <p>“1.0” is older than “1.0-foo” because empty-string/null comes before other-string.</p>
+  </li>
+  <li>“1.0-alpha-2” is older than “1.0-alpha-15” because semantic-version (numeric) 2 comes before semantic-version (numeric) 15</li>
+  <li>“1.0-foo15” is older than “1.0-foo2” because string “foo15” comes before string “foo2”</li>
+  <li>“1.0-snapshot” is older than “1.0-beta-snapshot”, because “snapshot” comes before “beta”.</li>
+  <li>
+    <p>“1.0” comes before “1.0-1” because null/zero-integer comes before integer 1</p>
+  </li>
+  <li>“1.0-m1” is older than “1.0-c1” because “milestone” comes before other-string (“c1”).</li>
+  <li>“1.0-m2” is older than “1.0-m15” because “m2” is equivalent to “milestone-2” and (numeric) 2 comes before (numeric) 15.</li>
+</ul>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>Internally, a semantic-version is treated as a list of 1..3 integer components. The code that <em>stores and compares</em> versions doesn’t actually have a datastructure for “semantic version”, just integer, string, and list-of-component. However the code that <em>parses</em> the original version-specifier does recognise things like “1.2.3” and represents it as a “list-typed” component holding a list of integers. This parsing logic matches a maximum of 3 numeric fields; anything more is a string.</p>
+
+<p>When the maven “deploy” operation is performed, any component named “snapshot” is replaced by the current timestamp.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/maven-version-spec/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

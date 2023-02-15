@@ -1,0 +1,642 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Kafka Connect</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Kafka Connect</h1>
+    <aside>First published on: March 27, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>I’ve already written about <a href="/bigdata/kafka">the Apache Kafka Message Broker</a>. It is a fine tool, and very widely used.</p>
+
+<p>Kafka Connect is another component of the Apache Kafka project; it is dedicated to importing data from external systems into Kafka topics, and exporting data from Kafka topics into external systems. Kafka Connect is included as part of the standard Kafka download but enabling Kafka Connect requires explicitly starting a Kafka Connect daemon on one or more servers. The daemons form their own “cluster”, separate from the cluster of Kafka message-broker nodes, in which the configured “connectors” are run to import/export data.</p>
+
+<p>The Kafka Connect documentation available <a href="http://kafka.apache.org/documentation/#connect">from the Apache Project</a> is reasonable but fails to address a number of important topics. The documentation <a href="http://docs.confluent.io/3.2.0/connect/intro.html">from the company Confluent</a> is more extensive, but unfortunately does not make clear the lines between open-source and commercial features. So here is a brief overview…</p>
+
+<p>This article is based on Kafka 0.10.1.0 and the Confluent Open Source release 3.2.0 (current version at March 2017).</p>
+
+<h1 id="kafka-kafka-connect-and-confluent">Kafka, Kafka Connect and Confluent</h1>
+
+<p>The Apache Kafka project is the home for development of the Kafka message broker and Kafka Connect, and all code it hosts is open-source. The Kafka project does not itself develop any actual connectors (sources or sinks) for Kafka Connect except for a trivial “file” connector. A list of connectors for various technologies is hosted at the <a href="https://www.confluent.io/product/connectors/">Kafka Connect Hub</a> - which is run by the company Confluent. Note however that this list is a combination of open-source and proprietary connectors, with no clear indication of which is which - you must follow the link for each connector and read the associated information to determine its state.</p>
+
+<p><a href="https://confluent.io">Confluent</a> was founded by one of the inventors of Kafka, and its staff contribute significantly to the Apache Kafka project. As well as hosting the Kafka Connect Hub, they provide consulting and support services, and additional Kafka-related tools.</p>
+
+<p>The open-source components available from Confluent are:</p>
+
+<ul>
+  <li>Kafka serializer and deserializer for AVRO format (with optional Schema Registry support)</li>
+  <li>The Kafka Connect Schema Registry</li>
+  <li>Kafka Connect connectors for JDBC, HDFS, S3, and Elasticsearch</li>
+  <li>Kafka client libraries for non-Java languages (the Apache project only provides Java and Scala client libraries).</li>
+  <li>The Kafka REST Proxy (allows Kafka Broker publish, subscribe, monitor and administrate from any language or tool)</li>
+</ul>
+
+<p>The “Confluent Platform Open Source Edition” available from the Confluent website is simply a repackaging of the standard Kafka download to include the open-source components listed above; you could install them all yourself, but confluent nicely provide them all together.</p>
+
+<p>Confluent also provides proprietary add-ons and tools for Kafka and Kafka Connect:</p>
+
+<ul>
+  <li>Confluent Control Center provides monitoring/statistics of Kafka topics in general, and provides a nice way to configure Kafka Connect</li>
+  <li>Data balancing between Kafka nodes (this is a generic Kafka management feature, and not specific to Kafka Connect)</li>
+  <li>Replication between separate Kafka clusters (via a proprietary Kafka Connect connector)</li>
+  <li>Cloud integration</li>
+</ul>
+
+<p>The “Confluent Platform Enterprise Edition” includes all the above components - but requires a license.</p>
+
+<p>The sourcecode for open-source components from Confluent (ie those bundled in the Confluent Platform Open Source Edition) is available via the <a href="https://github.com/confluentinc">Confluent Github account</a>. The binary artifacts themselves are not registered in the standard maven repositories; if you wish to references them from buildfiles then they must be manually uploaded into a local repository or repository-manager.</p>
+
+<h1 id="why-kafka-connect">Why Kafka Connect?</h1>
+
+<p>There are a number of existing tools designed for data import and export which are also capable of writing to Kafka or reading from Kafka, such as Flume. The primary advantages of Kafka Connect are:</p>
+
+<ul>
+  <li>autorecovery after failure; a “source” connector can attach arbitrary “source location” information to each record it passes to Kafka Connect and on failure Kafka Connect will automatically provide this information back to the connector so it can resume where it failed. Autorecovery for “sink” connectors is even easier.</li>
+  <li>autofailover; the Kafka Connect nodes build a cluster and when one node fails the work it is doing is redistributed to other nodes.</li>
+  <li>simple parallelism; a connector can define data import or export <em>tasks</em> which are to be executed in parallel.</li>
+</ul>
+
+<p>Tools such as Flume, Logstash or Heka provide a wider variety of standard connectors, and sophisticated data-transformation pipelines into which custom logic can be hooked. However their error-recovery, failover and scalability features leave a lot to be desired; they all are really designed to be run as a single daemon on a single server and often have very clumsy “reliable buffering” options which rely on local disk storage.</p>
+
+<p>Unlike Flume, Logstash, etc., Kafka Connect assumes that each connector either writes to a Kafka topic (a source) or reads from a Kafka topic (a sink). Other data import tools typically have an internal buffering layer of some sort; Kafka Connect just makes this explicit and assumes this buffer is the Kafka message broker. Given that the Kafka message broker is more reliable than any self-built-and-maintained buffer implementation is likely to be, this provides Kafka Connect with a reliability/stability advantage over alternatives.</p>
+
+<p>More detailed comparisons against alternate tools are presented later in this article.</p>
+
+<h1 id="why-not-kafka-connect">Why Not Kafka Connect?</h1>
+
+<p>The primary disadvantages of Kafka Connect are:</p>
+
+<ul>
+  <li>the very limited selection of connectors at the current time</li>
+  <li>the poor separation of commercial and open-source features; the tool is useable with pure open-source, but the documentation and available websites (primarily those from Confluent) are very unclear on which features require licensing.</li>
+  <li>the lack of configuration tools</li>
+  <li>poor/primitive approach to deploying custom connectors (plugins) - they are simply jars on the framework classpath</li>
+  <li>very Java/Scala centric</li>
+</ul>
+
+<p>Kafka Connect currently feels more like a “bag of tools” than a packaged solution at the current time - at least without purchasing commercial tools.</p>
+
+<h1 id="kafka-connect-concepts">Kafka Connect Concepts</h1>
+
+<p>As described <a href="http://docs.confluent.io/3.2.0/connect/concepts.html#connect-workers">here</a>,</p>
+
+<ul>
+  <li>A <em>worker</em> is an operating-system process (Java-based) which executes <em>connectors</em> and their associated <em>tasks</em> in child threads.</li>
+  <li>A <em>connector</em> is an object which defines parameters for one or more tasks which should actually do the work of importing or exporting data.</li>
+  <li>A <em>source</em> connector generates tasks which read from some arbitrary input and write to Kafka.</li>
+  <li>A <em>sink</em> connector generates tasks which read from Kafka and write to some arbitrary output.</li>
+</ul>
+
+<p>Kafka Connect is not intended for significant data transformation; nevertheless the most recent versions of Kafka Connect allow the configuration-parameters for a connector to define basic data transformations. For “source” connectors, this functionality assumes that the tasks transform their input into AVRO or JSON format; the transformation is applied just before writing the record to a Kafka topic. For “sink” connectors, this functionality assumes that data on the input Kafka topic is already in AVRO or JSON format, and the transformation is applied before each record is passed to a task object.</p>
+
+<p>While custom connectors can be implemented (and can thus contain logic), the framework recommends performing custom data transformations in a dedicated stream-processing framework such as spark-streaming or Kafka Streams. This allows transformation logic to be implemented in any framework which supports Kafka topics as input, and tested using standard testing tools for that framework.</p>
+
+<p>Kafka Connect is implemented in Java and Scala; any custom connectors must also be implemented in one of these languages.</p>
+
+<h1 id="dependencies">Dependencies</h1>
+
+<p>Whether run in stand-alone or distributed mode (see later), Kafka Connect nodes require a connection to a Kafka message-broker cluster - ie direct network access to every node in the Kafka message-broker cluster.</p>
+
+<p>For distributed mode, there are no other dependencies. Kafka Connect nodes are completely stateless; even the connector configuration settings are stored in a Kafka message topic. This makes Kafka Connect nodes very suitable for running via technologies such as Docker - provided the inputs and outputs for the specific <em>connectors</em> configured in Kafka Connect are accessible (eg when a connector must read from a local filesystem, then that filesystem will need to be available).</p>
+
+<p>for standalone mode a small amount of local disk storage is required to store the “current location” and the connector configuration.</p>
+
+<h1 id="distributed-mode">Distributed Mode</h1>
+
+<p>A Kafka Connect worker instance (ie a java process) is started with a Kafka Broker address, the names of several Kafka topics for “internal use” and a “group id” parameter. Each worker instance coordinates with other worker instances belonging to the same group-id via the “internal use” Kafka topics. No other external coordination mechanism is needed (no Zookeeper, etc) - everything is done via the Kafka message broker. These internal topics can be automatically defined but it is better for the sysadmin to explicitly define them with appropriate settings.</p>
+
+<p>The workers negotiate between themselves (via the topics) on how best to distribute the set of connectors and tasks across the available set of workers. If a worker process dies, the cluster is <em>rebalanced</em> to distribute the work fairly over the remaining workers. If a new worker is started, a <em>rebalance</em> ensures it takes over some work from the existing workers.</p>
+
+<p>There is no central server in a Kafka Connect installation, just the worker instances. The (commercial) Confluent Control Center is an administration tool with a nice UI for administering Kafka and Kafka Connect, but it is optional.</p>
+
+<p>A connector is generally run just once when it is defined (uploaded via REST) - and again if its configuration is changed. The connector generates one or more <em>tasks</em> which are responsible for actually reading data (source) or writing data (sink); the tasks are then automatically distributed across the cluster (via the internal Kafka topics). The “max tasks” setting for each connector controls how finely work is divided. As an example, a JDBC source connector configured to replicate all tables from a source database may inspect the database on startup and generate one task per table; if <code>tasks.max</code> is less than the number of tables then it must configure some of the tasks to handle multiple tables. Tasks are long-running and single-threaded. The set of tasks for a component are usually computed only at connector initialisation. It is possible for a connector to periodically recompute its set of tasks, triggering a “rebalance” if the number of tasks or their config has changed, but it is non-trivial to implement and not many connectors actually do so.</p>
+
+<p>A Kafka Connect worker instance can run multiple tasks concurrently as internal threads. For example, 10 tasks can be executed by 2 worker processes simply by starting 5 threads in each worker process.</p>
+
+<p>Kafka Connect is not responsible for launching worker instances, or restarting them on failure. Worker processes can be launched in any desired manner, eg manually, via systemd or sysv-init, Docker, Mesos, Yarn, etc. Any restart-after-failure or process-migration is similarly done externally to Kafka Connect; Kafka Connect simply takes care of new processes joining and existing processes leaving a federation by distributing work appropriately.</p>
+
+<p>Individual worker instances are stateless, ie no state is cached on local disk. State is instead stored in the “internal” Kafka topics. State includes the read-offset for sources and sinks so that migration of workload from one worker to another happens without (excessive) data duplication.</p>
+
+<h1 id="standalone-mode">Standalone Mode</h1>
+
+<p>Standalone mode is simply distributed-mode where a worker instance uses no internal topics within the Kafka message broker (and thus cannot collaborate with peers). The process runs all specified connectors, and their generated tasks, itself (as threads).</p>
+
+<p>Because standalone mode uses no Kafka Connect “internal topics” for storage, it instead stores current <em>source</em> offsets in a local file (for use on restart). In standalone mode, information about the connectors to execute is provided as a commandline option (in distributed mode such config is registered via REST and stored in a Kafka topic).</p>
+
+<p>Running a connector in “standalone mode” can be valid for production systems; it is the way most ETL-style workloads have traditionally been executed in the past. In this approach, managing failover must be done in the traditional way - eg by scripts starting an alternate instance.</p>
+
+<p>Standalone mode may be appropriate for deploying on systems generating events, allowing events to be pushed directly from such systems into a Kafka message broker cluster. Note however that Kafka client applications (including Kafka Connect daemons) require direct network access to all nodes of their Kafka cluster; data is partitioned at the client and pushed directly to whichever Kafka broker nodes are hosting those partitions.</p>
+
+<h1 id="launching-a-worker">Launching a Worker</h1>
+
+<p>A worker instance is simply a Java process, and is usually launched via a provided shell-script. The worker instance then loads (from its CLASSPATH) whichever custom connectors are specified by the connector configuration. The configuration is provided on the commandline for standalone mode, and read from a Kafka topic for distributed mode.</p>
+
+<p>There is also a standard Docker container image for launching a Kafka Connect worker; any number of instances of this image can be launched and will automatically federate together as long as they are configured with the same Kafka message broker cluster and group-id.</p>
+
+<h1 id="rest-api">REST API</h1>
+
+<p>Each worker instance starts an embedded webserver through which it exposes a REST api for status-queries and configuration. For workers in distributed mode, configuration uploaded via this REST API is saved in internal Kafka message broker topics. For workers in standalone mode, the configuration REST apis are not relevant.</p>
+
+<p>The Confluent Control Center provides much of its kafka-connect-management UI by wrapping the worker REST api.</p>
+
+<p>Monitoring of Kafka Connect daemons could potentially be done by Nagios or similar via REST calls to periodically obtain system status.</p>
+
+<h1 id="connector-types">Connector Types</h1>
+
+<p>A connector can be created by implementing a specific Java interface. There are many existing connectors, and writing custom ones is also possible - of course the code must then be available when the worker is launched.</p>
+
+<p>A Kafka Connect worker simply expects the implementation for any connector and task classes it executes to be present in its classpath. This code is loaded directly into the application without the benefit of child classloaders, an OSGi framework, or similar. Care must therefore be taken when implementing custom connectors not to depend on any libraries which conflict with Kafka Connect’s own dependencies.</p>
+
+<p>The following connectors are included in the “Confluent Open Source Edition” download package:</p>
+
+<ul>
+  <li>JDBC</li>
+  <li>HDFS</li>
+  <li>S3</li>
+  <li>Elasticsearch</li>
+</ul>
+
+<p>Currently there appears to be no way to download these connectors individually, but as they are open-source I presume they can be extracted from the Confluent Open Source download and copied into a standard Kafka installation if that is preferred.</p>
+
+<p>Documentation for the “replicator” connector is presented on the Confluent documentation site mixed in with the above, but it is not included in the “open source” download bundle. In other words, the documentation fails to mention that it is actually a commercial connector which requires licencing the Enterprise version.</p>
+
+<p>The “file source” and “file sink” connectors described in the documentation are part of the standard Apache Kafka download bundle. However they are simply example connectors meant as starting-points for custom connectors rather than being particularly useful as-is. The Connect Hub lists connector <code>kafka-connect-spooldir</code> as a “community” provided file-source connector; unfortunately at the current time it is not particularly advanced, performant or featureful. Among other things, it reads each input file completely into memory and is thus not useful for large inputs. In general, importing of files is a tricky thing to write a generic source connector for; the directory-structures and ways in which flag-files etc are presented by the writing application make it often necessary to implement a custom connector for file reading.</p>
+
+<p>The selection of connectors, and the way in which Confluent’s “Hub” presents them, is definitely the weakest part of Kafka Connect at the current time. The “installation process” for adding custom connectors to a Kafka Connect intstallation is also rather primitive; it rather leaves the impression that Confluent are pushing users of Kafka Connect hard to install their prebuilt bundles (at least the open source version). Nevertheless, it is possible to use just the Apache Kafka standard bundle with a little effort. Hopefully this will improve over time.</p>
+
+<h1 id="configuring-kafka-connect">Configuring Kafka Connect</h1>
+
+<p>Each worker instance is started with a commandline option pointing to a config-file containing options for the worker instance (eg Kafka message broker details, group-id).</p>
+
+<p>In standalone mode, a worker is also given a commandline option pointing to a config-file defining the connectors to be executed. In distributed mode, each worker instead retrieves connector/task configuration from a Kafka topic (specified in the worker config file). Configuration for distributed mode is updated by making a call to a REST api on any worker instance; the provided data is persisted by the worker to the Kafka topic.</p>
+
+<p>Even in standalone mode, a worker process provides a REST api for status-checks etc.</p>
+
+<p>The REST api can be used to pause and resume connectors (in both standalone and distributed mode).</p>
+
+<p>NOTE: Configuration options “key.converter” and “value.converter” options are worker-specific, not connector-specific, ie are in the per-worker configuration file. Therefore every Kafka topic accessed by every connector for a worker cluster must use the same serialization format for data in the topic - seems odd. Not usually a problem, but it seems like this should be a per-converter option to me.</p>
+
+<h1 id="connections-from-kafka-connect-workers-to-kafka-brokers">Connections from Kafka Connect Workers to Kafka Brokers</h1>
+
+<p>When in distributed mode, each worker establishes a connection to the Kafka message broker cluster for administrative purposes. These settings are defined in the worker configuration file as “top level” settings.</p>
+
+<p>For each connector, a separate connection (set of sockets) to the Kafka message broker cluster is established. Many of the settings are inherited from the “top level” Kafka settings, but they can be overridden with config prefix “consumer.” (used by sinks) or “producer.” (used by sources) in order to use different Kafka message broker network settings for connections carrying production data vs connections carrying admin messages. However these settings apply to <em>all</em> sinks (consumers) or sources (producers) - it cannot be configured per-connector.</p>
+
+<p>Note that the Kafka connections are established by the core Kafka Connect code, and passed as parameters to the connector implementations. Thus it is possible to pass Kafka sessions with “limited rights” into not-completely-trusted connector code, preventing it from easily writing to unwanted topics. Of course as Java runs in a single process, and its security model is not very reliable, this is not a 100% safe way to sandbox untrusted custom connectors, but better than nothing.</p>
+
+<h1 id="the-standard-jdbc-source-connector">The Standard JDBC Source Connector</h1>
+
+<p>The connector hub site lists a JDBC source connector, and this connector is part of the Confluent Open Source download. It does not seem possible to download this separately; for users who have installed the “pure” Kafka bundle from Apache rather than the Confluent bundle, then it is presumably necessary to extract this connector from the Confluent bundle and copy it over.</p>
+
+<p>It has the following configuration options:</p>
+
+<ul>
+  <li>a database to scan, specified as a JDBC url</li>
+  <li>a poll interval</li>
+  <li>a regular expression specifying which tables to watch; a separate Kafka topic is written to for each table</li>
+  <li>an SQL column which has an “incrementing id”, in which case the connector can detect new records (select where id &gt; last-known-id).</li>
+  <li>an SQL column with an updated-timestamp in which case the connector can detected new/modifiedrecords (select where timestamp &gt; last-known-timestamp)</li>
+</ul>
+
+<p>Strangely, although the connector is apparently designed with the ability to copy multiple tables, the “incrementing id” and “timestamp” column-names are global - ie when multiple tables are being copied then they must all follow the same naming convention for these columns.</p>
+
+<p>Different tables are processed in parallel; each single table is processed in single-threaded style.</p>
+
+<h1 id="scalability-limitations-of-kafka-connect">Scalability Limitations of Kafka Connect</h1>
+
+<p>Note: the following information is based purely on logical deduction; I can find no external documentation or articles which address these issues, and have not read the Kafka source-code (yet). Corrections are welcome!</p>
+
+<p>A connector runs in a single thread. The connector generates configuration for long-running <em>tasks</em>, each with their own source of data to be moved into Kafka (source) or target to move Kafka data to (sink). Tasks are executed in parallel over all connect worker instances. The maximum number of tasks which a connector generates at initialisation is set in configuration (<code>tasks.max</code>).</p>
+
+<p>How effectively data can be processed in parallel depends upon the source-type, and upon the ordering constraints required for the copied data.</p>
+
+<ul>
+  <li>
+    <p>When the source is Kafka (ie for all sinks), then the maximum parallelism for reads (sources) is one task per partition of the topic being read. Given that Kafka guarantees ordering via partitions, and each partition is processed only by a single thread, any ordering present in the input topic is preserved in the outputs.</p>
+  </li>
+  <li>
+    <p>When the standard JDBC-source is used, then unfortunately the Kafka Connect documentation is rather unclear on how/whether parallelism is supported. However I presume the connector generates one task per table (unless <code>tasks.max</code> would be exceeded, in which case some tasks are responsible for multiple tables). This implies that processing of a single table is simply single-threaded. The <a href="http://sqoop.apache.org/">SQOOP</a> tool does implement parallelism within a single table, and has a number of tricky config-options to support this which Kafka Connect’s “standard” JDBC source connector implementation appears to be missing - and which would be hard to implement anyway, given Kafka Connect’s “static tasks” approach. The JDBC-source config is also weird in that it supports multiple tables but defines “mode”, “incrementing.column.name” etc as connector-wide settings, rather than per-table. There does not appear to be any direct way to control <em>message key</em> associated with records written to Kafka. This means that the records imported are by default distributed randomly over all partitions of the target Kafka topic and will thus be processed in effectively random order when consumed from the topic (unless the target topic has just one partition). The relatively new “transforms” feature for Kafka Connect does seem to provide ways of setting the Kafka message-key to fields extracted from the current record (I haven’t personally tried this).</p>
+  </li>
+  <li>
+    <p>When a File source of some kind is used then the number of Task objects is still fixed at startup - new ones cannot be dynamically spawned when directory-scanning finds new files to process. I suppose a task can internally implement its own thread-pool, but Kafka Connect does not help with that - and would not distribute such a pool across the cluster. Even if parallel-processing is implemented somehow, the amount of parallelism possible depends upon the desired data-ordering. If it is irrelevant in which order records from the input files are processed, then multiple (filename, offset, length) blocks could potentially be processed in parallel. However the ordering of records seen by a consumer of the Kafka topic would effectively be random. At the other extreme, if the input files are ordered (eg via timestamp) and the records within each file are ordered by timestamp, and such ordering must be preserved for the Kafka topic consumer, then the files must be read one-by-one as a single thread, and written to a Kafka topic with a single topic. In other words, only a single Task may be generated at a time by the connector implementation.</p>
+  </li>
+</ul>
+
+<p>A partition is a subset of an overall event-stream which can be read independently of other subsets. Processing a partition in single-threaded form allows preservation of order in that partition. Kafka provides partitions, and offers only single-threaded sequential reads of partitions.</p>
+
+<p>Parallelism in Kafka Connect sinks works well. The input (a Kafka topic) is inherently <em>statically partitioned</em>, allowing parallelism up to the number of partitions. Performance is optimal when the output is also partitioned in the same way, eg when writing an HDFS file per Kafka topic (possibly registering the files as Hive tables later).</p>
+
+<p>Parallelism in Kafka Connect sources in general only works well when the input is “statically partitioned” in some way. This is sadly seldom the case for sources other than Kafka topics. Reading from database tables with JDBC might be”partitionable” if each row in the database happened to contain an “enum-like” field with a small number of values which are reasonably evenly distributed across the dataset; a separate SQL select could then be run for each enum-value, resulting in N approximately even result-sets. However that is a pretty unlikely scenario - so unlikely that the standard JDBC source doesn’t offer support for it. Similarly, if a system logged not to one output-file but to N output files in round-robin sequence, then those output files could be processed in parallel (assuming preservation of order is not important). This is also an unlikely scenario.</p>
+
+<p>The partitioning must be “static”, ie fixed over long time-periods. Making a “<code>select count(*)</code>” then using “<code>select .. from .. max ..</code>” to divide the resultset into N queries is not “static partitioning”, and is not supported by Kafka Connect; that approach would require generating a new set of tasks after each “<code>select count</code>”, but tasks are static - defined only on startup.</p>
+
+<p>Thus the common scenarios of reading from a single table, or reading from a single file, are not scalable in Kafka Connect - the work is done in a single thread. And bulk-imports of large numbers of files is also not well supported - the number of tasks is not dynamic and there is no built-in mechanism for the tasks to agree on who does what (no “shared work queue”); tasks are really completely independent once they have been launched with their connector-generated config-params statically specifying the inputs they are to work on.</p>
+
+<p>Note that out-of-order processing of records from the source is actually often acceptable. In particular, if each record contains a timestamp-field and the records are simply going to land in HBase eventually, then the fact that they are out-of-order in the Kafka topic is not very important - HBase can reorder them efficiently on insert.</p>
+
+<h1 id="the-confluent-schema-registry">The Confluent Schema Registry</h1>
+
+<p>In the Kafka message broker itself, each message consists simply of a (key, value) pair where both key and value are plain byte-arrays. Some Kafka command-line tools (eg script <code>kafka-console-consumer.sh</code>) are smart enough to recognise when a key or value byte-array is actually a UTF8 string, and to render it appropriately on the console. However that’s as far as the Kafka message broker goes in “interpreting” key or value contents.</p>
+
+<p>When someone needs to know what each topic holds (the purpose of the data, and its actual format) then they can potentially ask the development team for the applications which read and write those topics - or read the code. That’s fairly clumsy, but probably works for small projects. When the Kafka Broker cluster has scaled to hold dozens or hundreds of topics, read and written by dozens or hundreds of applications, then that just doesn’t scale - it is clear to outsiders at that point that a lot of very useful data is flowing through the system, but exactly what it is and how it is formatted will be very hard to determine. It is also possible for buggy producers to write non-compliant data to topics. In effect, it is like having a relational database without a schema - hard to introspect.</p>
+
+<p>I have written a separate article on Kafka <a href="/bigdata/kafka-serialize">serialization and schema management</a> to discuss these issues further.</p>
+
+<h1 id="performance-statistics">Performance Statistics</h1>
+
+<p>It is useful to be able to gather statistics on system performance for any Kafka producer or consumer application - including Kafka Connect.</p>
+
+<p>The Kafka client library exposes statistics via JMX (provided JMX is enabled for the JVM).</p>
+
+<p>The <a href="https://github.com/linkedin/Burrow">Burrow</a> tool takes the alternative approach of monitoring the “head” and “tail” offsets of each topic partition.</p>
+
+<p>The standard Kafka client libraries used by Java applications include an “interceptor hook” that can be used to invoke arbitrary classes (configurable at startup) for each message. This can be used for all sorts of purposes; the Confluent Control Center includes a “metric interceptor” library which gathers statistics and periodically writes them to a dedicated Kafka topic from which it then populates dashboards and graphs. Unfortunately the Control Center UI is proprietary - and the metric-interceptor appears to be so too.</p>
+
+<p>See the Monitoring section in the <a href="/bigdata/kafka">main kafka article</a> for more information.</p>
+
+<h1 id="kafka-connect-transforms">Kafka Connect Transforms</h1>
+
+<p>Kafka Connect version 0.10.2.0 introduced the ability to configure basic <a href="https://cwiki.apache.org/confluence/display/KAFKA/Connect+Transforms+-+Proposed+Design">transforms</a> of data before a source writes it to a Kafka topic or before a sink receives it from a Kafka topic. The feature is so new that there is very little documentation on it yet; the wiki page linked to above appears to be the best source of information at the moment.</p>
+
+<p>The <a href="https://issues.apache.org/jira/browse/KAFKA-3209">issue ticket</a> has some more details, including a link to <a href="https://issues.apache.org/jira/browse/KAFKA-4714">another ticket</a> to add some transforms which did not make the cutoff for version 0.10.2.0.</p>
+
+<p>Particularly interesting is the ValueToKey transform which allows the message-key to be set from fields in the message-value (assuming the message-value is a structured type). This allows the partitioning of messages generated by a source-connector to be (at least partially) controlled via configuration.</p>
+
+<p>Only the base Transformation class is defined within the Kafka Connect core library (and thus the javadocs); the individual transforms are distributed as artifact <code>org.apache.kafka:connect-transforms</code>.</p>
+
+<h1 id="security">Security</h1>
+
+<p>Kafka Connect (v0.10.1.0) works fine with Kerberos-secured Kafka message brokers, and also works fine with SSL-encrypted connections to these brokers.</p>
+
+<p>Unfortunately, the REST API which Kafka Connect nodes expose cannot currently be protected via either Kerberos or SSL; there is a feature-request for this. When configuring a secure cluster, it is therefore necessary to configure an external proxy (eg Apache HTTP) to act as a secure gateway to the REST services.</p>
+
+<h1 id="comparisons-with-similar-tools">Comparisons with Similar Tools</h1>
+
+<p>The Kafka docs include a list of alternative tools for loghandling and ETL, and describes where they believe Kafka Connect is superior; some research into the referenced tools can be found below.</p>
+
+<p>The main arguments made are:</p>
+
+<ul>
+  <li>For reliability and scalability, any ETL tool needs to provide a persistent buffer to store data read-but-not-yet transformed, in case of failure somewhere in the processing chain. Most of the referenced tools have some internal message buffering implementation of their own which is inferior to Kafka in terms of scalability and reliability (and I would have to agree). Many of the referenced tools can be configured to use Kafka as a buffer - but then why not use a tool which is built in that way already? Kafka Connect is similar to such ETL tools except that its “internal message buffering mechanism” is always Kafka.</li>
+  <li>Transformation logic should not be done within the loghandling framework; that just limits developers in selection of tools and languages. Instead, data should land in Kafka and from there anystreaming technlogy can be used to transform the data.</li>
+  <li>The existing tools do not handle failure cases well (and I would also agree there). Using Kafka as the storage mechanism, and a tool which properly saves Kafka message-offsets etc, is much more reliable. The use of Kafka topics as cluster-wide state storage (rather than storing state in local filesystems as all other tools do) also improves failover scenarios (again, I would agree).</li>
+  <li>Kafka Connect clustering makes data-processing more scalable. I would agree for some usecases (those where the input can be considered as statically-partitioned).</li>
+  <li>That “big picture” solutions (NiFi in particular) don’t match the way that large corporations work (nobody can truly manage complex pipelines from a central point as various components are managed by different groups). Maybe true, depends on use-case.</li>
+</ul>
+
+<p>Some useful terminology:</p>
+
+<ul>
+  <li>log forwarder –&gt; installed on multiple nodes to push local events to a central point</li>
+  <li>log aggregator –&gt; a central service which accepts events from multiple log-forwarders, combines events, and distributes to multiple sinks.</li>
+</ul>
+
+<h2 id="flume">Flume</h2>
+
+<p>Flume instances are independant - unlike Kafka Connect, flume instances do not build a “cluster” or communicate with each other in any way. A single flume instance can have multiple sources and multiple sinks, ie a single Flume process can support multiple “pipelines” of data concurrently.</p>
+
+<p>The Kafka flume source relies on Kafka to track its “current offset” for restart purposes. Other Kafka sources typically track their “current offset” in a local file; for example the file-source keeps a local file with (filename, offset) pairs in it.</p>
+
+<p>Flume:</p>
+
+<ul>
+  <li>is not clustered; two flume instances pulling from the same source are <em>independent</em>.</li>
+  <li>supports Kafka source, Hive sink, etc.</li>
+  <li>is not limited to having Kafka as either source or sink (as Connect is)</li>
+  <li>is moderately robust. Events are removed from the source and placed in a buffer; the buffer may be in-memory or persistent. Events are removed from the buffer only after persisting at the sink, allowing reasonable recovery. However as persistent buffering is <em>local</em> it does not protect against node-failure.</li>
+</ul>
+
+<p>So in comparison to Connect:</p>
+
+<ul>
+  <li>Connect is slightly more scaleable (can distribute load across all members of the cluster) while flume is single-thread-per-source. However see comments on Kafka Connect scalability above.</li>
+  <li>Connect is more available (can handle failure of a node). Flume stores state locally, so failure of a node cannot be simply recovered from by starting the same process on a different node.</li>
+  <li>Connect is less flexible (covers fewer use-cases)</li>
+  <li>Connect requires one of (source,sink) to be Kafka - and requires direct network access to all Kafka nodes.</li>
+  <li>Connect has fewer off-the-shelf sources/sinks than Flume</li>
+</ul>
+
+<p>Other notes:</p>
+
+<ul>
+  <li>Flume supports “fan-out” configuration to distribute data to multiple receivers. Connect offers the same functionality indirectly via Kafka.</li>
+</ul>
+
+<p>One of the primary use-cases for Flume is to combine logfiles from many different servers into a single central location; flume is installed on each “source” server for this usecase. Connect is not designed to handle this use-case, instead being more appropriate for “pulling” source data from remote systems. Or in other words, Flume can act as both “log forwarder” or “log aggregator” depending on how it is configured.</p>
+
+<p>The Kafka sources and sinks for Flume were written by Cloudera, who also published an article on the <a href="https://blog.cloudera.com/blog/2014/11/flafka-apache-flume-meets-apache-kafka-for-event-processing/">use of Flume with Kafka</a> (which the article calls flafka).</p>
+
+<h2 id="logstash">Logstash</h2>
+
+<p>Logstash works similar to Flume; a single logstash process supports multiple “pipelines” for processing java. Each logstash process is independent, ie no “clustering”. The state of each pipeline is typically stored in a local file, making restarts work correctly - but only on the same node. Failover to another node is not built-in, and is complicated due to the locally stored state.</p>
+
+<p>Logstash is part of the Elasticsearch project, but can be used independently. It is implemented in JRuby, ie ruby code running on the JVM, and with access to java libraries. All “plugins” for reading, writing and transforming data are written in Ruby.</p>
+
+<p>The standard file input class supports only one input file, doing a kind of “tail”. Current offset is persisted to a local file, for restarts. It does handle “rollover” of such a file, ensuring it reads the remainder of the old file before resuming reading of the new one.</p>
+
+<p>Unlike Flume, the collect-logfiles-from-many-hosts use-case is normally solved with logstash by running logstash at the “server”, and running <a href="https://www.elastic.co/products/beats/filebeat">filebeat</a> at each client (host generating the logfiles).</p>
+
+<p>By convention, each “pipeline” is defined in a file under “/etc/logstash/conf.d”. Logstash loads them all on startup. There is also a single config-file for the overall application. Config files are <em>local</em>. Status information is also stored <em>locally</em>.</p>
+
+<p>Within a pipeline, Logstash can process input in parallel: the “input stage” reads batches of data from the source and hands them off to a pool of threads for processing (in particular, filtering of data). The “batch size” is a global config-option which applies to all pipelines, and is measured as <em>number of events</em> to read. The pool of “workers” is shared across all defined pipelines. I’m not sure at the moment how record <em>order</em> is preserved when using pools of workers (possibly it is not; webserver logfiles are not order-sensitive and they are the primary usecase for logstash)..</p>
+
+<p>The internal event-buffers are by default in-memory-only. Logstash shutdown normally waits for the event-buffers to empty. If logstash is forcibly shut down, or the whole server goes down, then data is lost. There is BETA functionality to persist these internal buffers to local disk.</p>
+
+<p>Logstash can act as log-forwarder or log-aggregator, but in general “filebeat” is used as the log-forwarder and logstash as the log-aggregator only.</p>
+
+<h2 id="fluentd">Fluentd</h2>
+
+<p>Despite its name, <a href="http://www.fluentd.org">fluentd</a> has nothing to do with Confluence (wiki/bugtracker) or Confluent (the Kafka specialist company). It is an ETL tool which:</p>
+
+<ul>
+  <li>is opensource (Apache2 license)</li>
+  <li>is implemented in a combination of Ruby and C</li>
+  <li>uses very little memory</li>
+  <li>is based in Japan</li>
+  <li>is supposedly “similar to flume but easier to install and maintain, and with better documentation” (I found the documentation pretty but shallow)</li>
+  <li>has, like Kafka Connect, open-source and enterprise editions.</li>
+</ul>
+
+<p>The enterprise version:</p>
+
+<ul>
+  <li>includes RPM/DEB packages; open-source download must be installed via ruby-gems.</li>
+  <li>includes Chef recipes for installation.</li>
+  <li>has extra QA + support</li>
+</ul>
+
+<p>The plugin for reading files is called “<code>in_tail</code>”. It handles “file-rollover” (by tracking the inode-number), but does not process multiple files.</p>
+
+<p>Because code is Ruby, database access is either db-specific or via the “DBI” wrapper.</p>
+
+<p>There is no information on the overall architecture of fluentd, but as it is described as “like flume”, I presume it is also single-process-with-multiple-pipelines and no clustering.</p>
+
+<p>Failover-handling is described <a href="http://docs.fluentd.org/v0.12/articles/high-availability">here</a>. Fluentd supports failover at the forwarder-side by having a list of aggregators to send to; the first available one is used. When neither is available, events are cached at the forwarder until they can be sent. But any events received by a “dead” aggregator which are not yet sent remain on disk until the original aggregator is resumed.</p>
+
+<h2 id="facebook-scribe">Facebook Scribe</h2>
+
+<p>A few articles mentioned <a href="https://en.wikipedia.org/wiki/Scribe_(log_server)">Facebook Scribe</a> as also being a tool in this space. However it appears to be a <a href="https://github.com/facebookarchive/scribe">dead project</a>. No indication if it is being maintained elsewhere (I searched reasonably hard, found no active fork).</p>
+
+<p>It would appear that Facebook now use fluentd instead.</p>
+
+<h2 id="heka">Heka</h2>
+
+<p><a href="http://hekad.readthedocs.io/en/v0.10.0/">Heka</a> is written in Go (and custom plugins must also be written in Go - or in Lua)</p>
+
+<p>The architecture of Heka appears to be similar to Flume/Logstash/fluentd, ie a single process supporting multiple concurrent pipelines, with no clustering.</p>
+
+<p>The Heka daemon includes an embedded webserver which provides a “dashboard” interface. However configuration generally is done over config-files as with flume/logstash/fluentd.</p>
+
+<p>Unlike other tools, Heka also provides the ability to do <em>statistical analysis</em> on the events passing through (or even terminating at!) Heka; the results can be viewed in the dashboard.</p>
+
+<h2 id="apache-nifi">Apache NiFi</h2>
+
+<p>All of the ETL tools looked at so far are command-line-driven, and require significant investment from operations and developers to install and configure. Kafka Connect is possibly the most labor-intensive of all (though more reliable and scalable once set up).</p>
+
+<p><a href="http://nifi.apache.org">Apache NiFi</a> is an attempt to provide a more user-friendly way of designing data import and export workflows. It provides a web-based interactive user interface to “drag and drop” widgets in order to define data processing pipelines. These definitions then (somehow) drive back-end processing engines.</p>
+
+<p>NiFi also has a strong focus on “data governance”, ie building databases and reports showing which outputs are related to which inputs (no matter how indirectly).</p>
+
+<p>The project is, however, very young at the current time. Many significant features (eg Kerberos support) were only added in 2016.</p>
+
+<p>The documentation seems to match the target audience of the project - good at the high-level pretty-pictures part, but definitely lacking in details regarding scalability and error-handling. From a day’s worth of reading of documentation, I personally have major concerns about throughput and about behaviour when a node in the system fails. It would be advisable to spend a significant amount of time testing scalability and failure scenarios before committing to using NiFi in any production environment.</p>
+
+<p>I have written more about NiFi <a href="/bigdata/nifi">here</a>.</p>
+
+<h2 id="other-technologies-of-interest-not-yet-researched">Other technologies of interest (not yet researched)</h2>
+
+<ul>
+  <li>
+    <p>Gobblin (<a href="https://github.com/linkedin/gobblin">https://github.com/linkedin/gobblin</a>)</p>
+  </li>
+  <li>
+    <p>Chukwa(<a href="http://chukwa.apache.org">http://chukwa.apache.org</a>)</p>
+  </li>
+  <li>
+    <p>Suro (<a href="http://techblog.netflix.com/2013/12/announcing-suro-backbone-of-netflixs.html">http://techblog.netflix.com/2013/12/announcing-suro-backbone-of-netflixs.html</a>)</p>
+  </li>
+  <li>
+    <p>Morphlines (<a href="http://cloudera.github.io/cdk/docs/current/cdk-morphlines/index.html">http://cloudera.github.io/cdk/docs/current/cdk-morphlines/index.html</a>)</p>
+  </li>
+  <li>
+    <p>HiHo (<a href="https://github.com/sonalgoyal/hiho">https://github.com/sonalgoyal/hiho</a>)</p>
+  </li>
+</ul>
+
+<h1 id="developing-a-custom-connector">Developing a Custom Connector</h1>
+
+<p>When developing a custom connector, it is useful to be able to start Kafka Connect from within an IDE. There are probably clever solutions involving starting Kafka Connect with some kind of “hotswap agent” and the debugger-agent enabled, then deploying class-files directly into the Kafka Connect <code>$CLASSPATH</code> and connecting to the external process via the debug-port.</p>
+
+<p>However a simpler solution is to add the following dependencies to your code:</p>
+
+<pre><code>        &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
+            &lt;artifactId&gt;connect-runtime&lt;/artifactId&gt;
+            &lt;version&gt;${kafka.version}&lt;/version&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+</code></pre>
+
+<p>and then define a class in the unit-test project code which is based on standard Kafka class <code>org.apache.kafka.connect.cli.ConnectStandalone</code>. This class can then be started in debug-mode from the IDE, and the connector is running within 10 seconds. Not perfect, but better than nothing.</p>
+
+<p>Example code can be found <a href="/downloads/code/kafka-connect/ConnectorRunner.java">here</a>.</p>
+
+<h1 id="references">References</h1>
+
+<p>Some other links of interest:</p>
+
+<ul>
+  <li><a href="http://docs.confluent.io/3.2.0/connect/concepts.html">Kafka Connect Concepts</a></li>
+  <li><a href="http://docs.confluent.io/3.0.0/connect/devguide.html">Confluent Kafka Connect Developer Guide</a></li>
+  <li><a href="https://cpardalis.wordpress.com/2016/03/22/how-to-get-started-with-kafka-connect-a-guide-for-a-mixpanel-connector/">Kostas Pardalis: Get Started with Kafka Connect</a></li>
+  <li>
+<a href="https://vimeo.com/168998241">Confluent Partner Tech Briefing: Developing Connectors</a> - video tutorial</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/kafka-connect/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

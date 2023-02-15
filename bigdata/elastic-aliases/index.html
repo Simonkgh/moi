@@ -1,0 +1,371 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Elasticsearch Aliases</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Elasticsearch Aliases</h1>
+    <aside>First published on: January 30, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="about-this-article">About This Article</h1>
+
+<p><a href="http://elastic.co">Elasticsearch</a> is a kind of document database with extended search features. This site has an <a href="/bigdata/elasticsearch">overview of Elasticsearch</a> which briefly mentions Elasticsearch aliases and what can be done with them. There are some interesting aspects of aliases which are not well covered in the official <a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/index.html">Elasticsearch guide</a>; this article expands on that topic.</p>
+
+<p>In particular, this describes a way to handle mapping updates over time, similar to how tools such as Flyway or Liquibase apply SQL schema changes to relational databases.</p>
+
+<h1 id="aliases">Aliases</h1>
+
+<p>An alias is a name which refers to one or more indices. The alias-name can be treated like an index-name in many ways:</p>
+
+<ul>
+  <li>queries can be executed against the alias, just like against a table</li>
+  <li>inserts can be executed against an alias - but only when the alias refers to exactly one index.</li>
+</ul>
+
+<p>An alias can be seen in two ways:</p>
+
+<ul>
+  <li>as a property of an index (ie an index has zero or more aliases) which gives it an alternate name (which may be shared with other indices); or</li>
+  <li>as an independent entity (an alias points to one or more indices)</li>
+</ul>
+
+<p>The first definition is more accurate. In particular, when an index is deleted, the alias no longer refers to that index (automatic) - and if there is no other index with the same alias, then the alias no longer exists. When querying ES to determine which “aliases exist”, the results are also returned as “list of tables with that alias”, also being consistent with the first representation. However the API for adding/removing aliases does seem to imply the second model.</p>
+
+<h1 id="querying-an-alias">Querying an Alias</h1>
+
+<p>Document ids are not unique across indices - or even between doctypes in the same index! Query results are always represented as a “list of hits” where each hit specifies <code>(index, doctype, id)</code> - so duplicated ids are no problem as long as the system is not storing ids as “the key”, ie treating them like relational database keys.</p>
+
+<p>When document ids are being stored externally, care needs to be taken to ensure those ids are appropriate for the query being made. In particular, when using an alias which points to multiple indices, ids may not be unique.</p>
+
+<h1 id="inserting-into-an-alias">Inserting into an Alias</h1>
+
+<p>If an alias points to more than one index, an error message is returned when performing an insert/update:</p>
+
+<blockquote>
+  <p><code>Alias [aliasA] has more than one indices associated with it [[index2, index1]], can't execute a single index op</code></p>
+</blockquote>
+
+<h1 id="reindexing">Reindexing</h1>
+
+<p>Elasticsearch offers a REST API for “reindexing” an index - effectively a copy of all data from one index to another by <em>reinserting</em> the <em>source</em> of each document. This is very useful when it is necessary to modify the mappings of an existing index in a non-backwards-compatible way. It is also useful when upgrading between versions of Elasticsearch, to ensure all current data is “resaved” in the latest disk format.</p>
+
+<p>Reindexing does preserve the <code>_id</code> property of documents, ie if an application has stored id values elsewhere, they are still valid after reindexing.</p>
+
+<p>Interestingly, updating an existing mapping from <code>integer</code> to a string-type is not permitted. However reindexing a document where the origin index defines a field as integer and the target index defines the field as string-typed does work - because by default Elasticsearch “coerces” integers to strings and vice-versa.</p>
+
+<p>Reindexing is currently implemented as a “standard extension module”, rather than being in the ES core code. This unfortunately means that the logic accessible via a REST API is not accessible via the Java transport-client API. As the project I was working on was using the transport-client API for performance reasons, I (re)implemented <em>reindex</em> in Java in about 50 lines of code; <a href="/downloads/code/elasticsearch/ESUtils.java">here</a> is a Java utils-class with that implementation (see method <code>copyIndex</code>), and <a href="/downloads/code/elasticsearch/ESUtilsITest.java">here</a> is the corresponding junit test. The test relies on a helpful <a href="/java/junit-rule-es">custom junit rule for interacting with an embedded Elasticsearch instance</a>.</p>
+
+<h1 id="partitioning-data">Partitioning Data</h1>
+
+<p>A common pattern in many “big data” databases is to have data stored in multiple partitions (files) so that unwanted data can be efficiently removed from the system by just “deregistering” that partition, and then deleting the associated datafiles.</p>
+
+<p>ES aliases can be used in the same way - but with some limitations. Because an alias can point to multiple indices, data for various geographical zones or time-periods can be stored in different indices, and an alias can refer to the full set of indices. A query applied to the alias then is applied to each index. Deleting an entire index is efficient, and alias automatically no longer references it. As long as one index with that alias remains, applications performing queries will continue working as expected.</p>
+
+<p>However because writes through an alias are only supported for aliases pointing to one index, applications which <em>write</em> data need to address the underlying index directly - or use an alias which points to just “the current” index into which data should be inserted. This asymmetry between reading and writing can be awkward.</p>
+
+<p>More importantly, care needs to be taken when <em>updating</em> a document. The query will return results from multiple indices; an update must be written back to the <em>same index</em> otherwise a <em>new copy</em> of the document will be created instead of updating the old one, and a later query can return both versions.</p>
+
+<p>In addition, the <code>_id</code> property assigned to a document is only unique within a specific (index, doctype). It is very unlikely that the same id will be auto-allocated for two different documents in different indices, but not impossible. Inserting the same document into two different indices <em>will</em> succeed as two inserts - and a query for that <code>_id</code> will return two hits: <code>(index1, doctype1, id)</code> and <code>(index2, doctype2, id)</code>.</p>
+
+<h1 id="updating-mappings">Updating Mappings</h1>
+
+<p>Over a business application’s lifetime, the format of data it stores evolves. With relational databases there are lots of tools and strategies associated with updating database schemas to match new releases of software. NoSQL databases which are “schemaless” or “schema-on-read” have fewer problems in this area, but Elasticsearch is not of this type - its indices/mappings are strictly-typed like relational systems. Elasticsearch does have the ability to define a mapping based on the first document inserted into the mapping, but the resulting mapping is still <em>strictly typed</em>. An application storing data in Elasticsearch therefore also needs a strategy for evolving mappings together with new releases of the application.</p>
+
+<p>Here is the strategy I use for maintaining indices, mappings and aliases over application version releases. It’s an Elasticsearch equivalent of Flyway/Liquibase/etc for relational databases.</p>
+
+<p>The application includes json files defining indices and mappings as resources in the classpath (in sourcecode, under <code>src/main/resources/...</code>). The application has a command-line option to start in “elasticsearch initialisation mode”, and the sysadmins are expected to use this when installing each new release. Combining the actual application<sup id="fnref:app" role="doc-noteref"><a href="#fn:app" class="footnote" rel="footnote">1</a></sup> and the database-setup (rather than delivering a separate init-tool or scripts) simplifies things during installation and makes it difficult to use the wrong version for initialisation.</p>
+
+<p>The commandline options may also include a list of “indices to reindex” (which can be “all”).</p>
+
+<p>The list of managed-index-definitions is dynamically determined via classpath inspection; each index is represented by a json file with name matching the alias that the code refers to that index through. For each such file, the following is done..</p>
+
+<p>If filename is in “indices to be reindexed” (as specified on the commandline):</p>
+
+<ul>
+  <li>If there is no alias matching the current name, report an error.</li>
+  <li>If the alias points to more than one index, report an error.</li>
+  <li>Parse the name of the index the alias points to; it should be of form <code>name-v{N}</code> and the N needs to be extracted</li>
+  <li>Create a new index of name <code>name-v{N+1}</code>, and apply all mappings from the json file to that index</li>
+  <li>Copy (reindex) all data from the old index to the new one</li>
+  <li>Change the alias to point to the new index</li>
+  <li>Delete the old index</li>
+</ul>
+
+<p>Otherwise install or upgrade-in-place:</p>
+
+<ul>
+  <li>
+    <p>If there is no alias matching the filename then create a new index with name <code>{filename}-v1</code>, apply all the mappings from the file, and then define an alias <code>{filename}-&gt;{filename}-v1</code>.</p>
+  </li>
+  <li>
+    <p>Else determine which index the alias points to (error if more than one) then apply (PUT) the mappings contained in the file to that existing index. If Elasticsearch rejects the mapping (due to incompatible changes) then report this as an error, with the recommendation that the upgrade be reapplied with this index specified in the “reindex” list.</p>
+  </li>
+</ul>
+
+<p>The result is that when mappings do not change for an index, then the upgrade-process is a “no-op” - it PUTs the identical mappings onto the existing index, which works fine without side-effects. The process can therefore be applied multiple times without problems. When the mappings do change, but are backwards-compatible with the old mappings then the index is just updated-in-place. When the mappings are incompatible, then reindex must be applied, incrementing the version suffix of the index-name. The alias used by application code always points to the appropriate index.</p>
+
+<p>This also elegantly handles Elasticsearch version upgrades; simply specifying “reindex=all” ensures that all existing data is copied from the old storage format to the new storage format. Elasticsearch guarantees that it can always read data from the previous major release.</p>
+
+<p>This process is not intended to be applied to a running system; in my case a traditional outage-window for upgrades is possible. It may be possible to use the same approach (or a modified version) for online (rolling) upgrades, but I have not spent any time considering the implications.</p>
+
+<p>When designing this strategy, I did initially consider using aliases referencing multiple indices, but that turned out to not be feasible. In particular, writes against such indices are not allowed by Elasticsearch, and updates (read/write) of existing documents have related problems. However if you are storing purely time-series data (write-once) then aliases with multiple indices may be worth considering.</p>
+
+<h1 id="useful-rest-queries">Useful REST Queries</h1>
+
+<p>Here are some HTTP requests that may be useful when testing alias-related behaviour of Elasticsearch for yourself..</p>
+
+<pre><code># Show the current fields of mapping 'mapping1' in index 'index1'
+GET localhost:9200/index1/mapping1/_mapping?pretty
+
+# List all indices with aliases of 'aliasA'
+GET localhost:9200/aliasA/_aliases?pretty
+
+# Add a document of type 'mapping1' to index 'index1'
+POST localhost:9200/index1/mapping1
+{
+  "name":"name2",
+  "intval": 98
+}
+
+# ??
+GET localhost:9200/index2/mapping1?pretty
+
+# List all documents in all indices referenced by 'aliasA'
+POST localhost:9200/aliasA/_search?pretty
+{
+  "query":{
+    "match_all":{}
+  }
+}
+
+# Define a mapping with no fields
+PUT localhost:9200/index2/_mapping/mapping1
+{
+  "properties":{}
+}
+
+# Copy all data from 'index1' to 'index2'
+# Sadly, this functionality is not available via the Java transport-client API
+POST localhost:9200/_reindex
+{
+  "source": {
+    "index": "index1"
+  },
+  "dest": {
+    "index": "index2"
+  }
+}
+
+# Modify index alias
+POST localhost:9200/_aliases
+
+{
+    "actions" : [
+        { "remove" : { "index" : "index2", "alias" : "aliasA" } }
+    ]
+}
+</code></pre>
+
+<h1 id="references-and-useful-links">References and Useful Links</h1>
+
+<ul>
+  <li><a href="https://qbox.io/blog/qbox-elasticsearch-tutorial-1">QBox: ES Tutorials and Articles</a></li>
+  <li>
+<a href="http://blog.mikemccandless.com">Mike McCandless</a>  – blog from a Lucene expert</li>
+</ul>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:app" role="doc-endnote">
+      <p>Actually, the application uses a microservices-architecture, and so is a group of applications. Each application contains the same init-functionality and holds resources which define the indices it is responsible for. <a href="#fnref:app" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/elastic-aliases/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

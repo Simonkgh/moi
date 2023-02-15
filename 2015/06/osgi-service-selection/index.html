@@ -1,0 +1,275 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - OSGi Service Selection</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='post'>
+    <h1>OSGi Service Selection</h1>
+    <aside>Posted on: June 19, 2015</aside>
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/OSGi/'>OSGi</a></p>
+      <p>Just some thoughts on how connecting service-impl to service-consumer can be made <em>configurable</em> in OSGi…</p>
+
+<!-- more -->
+
+<h1 id="introduction">Introduction</h1>
+
+<p>Normally, an OSGi service consumer locates the appropriate producer simply by specifying an interface type (via BundleContext.getServiceReference directly, or via a ServiceTracker or some dependency-injection system). However what if a container has multiple bundles that provide different implementations of the same service interface?</p>
+
+<p>Sometimes the consumer should see them <em>all</em>; that’s easy to achieve with both consumer-lookup and whiteboard approaches.</p>
+
+<p>When a consumer should only see <em>one</em> producer, then this can be done via service-properties. However using a service-property requires the producer and consumer to be <em>coded</em> in the desired way, ie  (a) for the code that invokes registerService to specify some magic property, and the code that finds the service to hard-code the right filter criteria, or (b) for the consumer to register itself with a specific property and the producer to filter (whiteboard pattern).</p>
+
+<p>Sometimes you want the decision on which producer gets linked to which consumer to be a <em>deployment</em> decision. What are the options?</p>
+
+<h1 id="service-priority">Service Priority</h1>
+
+<p>The OSGi standard defines a “service priority” property which gives some primitive control; this property is used by default when one service instance is requested but multiple match: the one with the highest priority is returned. The service consumer does not need to be aware or this, or take any particular action: they get the highest-priority match automaticaly. However (a) this still needs to be set in code by the publisher of the service, and (b) it affects <em>all</em> consumers of that service type (cannot be limited to just one bundle).</p>
+
+<h1 id="adapter-services">Adapter Services</h1>
+
+<p>The Felix Dependency Manager (DM) library makes it easy to configure a “trigger” which waits until a service of a specified type arrives, and then instantiates/registers an instance of some other type that “wraps” the original in some way. If a bundle is written to consume the <em>wrapper</em> type, then an external bundle can be implemented to wrap (adapt) whichever service is appropriate. However this (a) requires the bundle to be configured to use the “adapter” type rather than the original type, and (b) for a bundle to exist which contains the appropriate DM configuration.</p>
+
+<p>The same effect can of course be achieved manually, ie with code that directly calls the OSGi APIs rather than using Felix DM.</p>
+
+<h1 id="the-service-hook-api">The Service Hook API</h1>
+
+<p>The OSGi core defines a set of “hooks” that can be used to modify the behaviour of <code>BundleContext.getServiceReference(...)</code>, and to modify the events seen by listeners registered via <code>BundleContext.addServiceListener</code>. All <em>hook</em> APIs need to be treated with care; they are powerful but delicate. From the documentation, the intended use-cases include:</p>
+
+<ul>
+  <li>“Control visibility - Provide a mechanism to hide the visibility of a service to one or more bundles.”</li>
+  <li>“Intercept finds - Provide a mechanism to detect the searches of a bundle in the service registry and restrict the set of found service references.”</li>
+</ul>
+
+<p>A bundle can publish an EventListenerHook to hide events about a particular service from other bundles. Similarly, it can publish a FindHook to modify the results returned from method getServiceReference.</p>
+
+<p>I <em>haven’t tried this myself</em>, but I imagine that it would be possible to build a bundle that could be <em>configured</em> to only allow some bundle X to see services of type Y which are published by bundle Z. Such a generic helper bundle could then be used by an OSGi container <em>administrator</em> to <em>override</em> any binding of services between bundles. Of course such configuration should be persistent - and such a bundle should be loaded early in the container startup sequence. This would seem to be a very useful facility.</p>
+
+<h1 id="notes-on-wire-admin">Notes on Wire Admin</h1>
+
+<p>When I encountered the OSGi WireAdmin specification in the OSGi “compendium” document, I at first thought this service was intended to address the above use-case. The initial description seemed to imply it:</p>
+
+<ul>
+  <li>“used to control a wiring topology in the OSGi Framework”</li>
+  <li>“The purpose of wiring services together is to allow configurable cooperation of bundles in an OSGi Framework..”</li>
+</ul>
+
+<p>However WireAdmin is (IMO) an odd beast; it is a kind of osgi-specific event-broker, where the linking of event producers and consumers can potentially be controlled by an external administrator.</p>
+
+<p>A service producer explicitly registers a service of type Producer, and the service consumer explicitly registers a service of type Consumer. The WireAdmin bundle then detects these and adds the objects to its list of “managed” producers and consumers. It then checks its wiring <em>configuration</em> and uses the methods on the Producer and Consumer interfaces to notify both ends of the relevant objects. However the WireAdmin API must be used extensively at both ends; OSGI-defined types <em>Producer, Consumer, Wire, WireAdminEvent</em> and others must be used explicitly in the code.</p>
+
+<p>There appear to also be elements of copy-paste style data-transfer in here, where the ends negotiate an appropriate format for the transferred data.</p>
+
+<p>WireAdmin uses some unusual terminology:</p>
+
+<ul>
+  <li>update ==&gt; used by publisher to post a message</li>
+  <li>updated ==&gt; callback on subscriber notifying it of a message (ie asynchronous callback of registered message-consumer)</li>
+  <li>poll ==&gt; used by subscriber to synchronously get the next message (if one is present)</li>
+  <li>polled ==&gt; callback on publisher notifying it that a subscriber is trying to get the next message (ie callback on registered message-provider)</li>
+</ul>
+
+<h1 id="notes-on-the-osgi-compendium-and-enterprise-specifications">Notes on the OSGi Compendium and Enterprise Specifications</h1>
+
+<p>This isn’t really related to selecting services, but while I was reading up on WireAdmin, I also took a look at the other specs defined in the “compendium” document.</p>
+
+<p>In R4.3, specs were split into “core” and “compendium”. The R5 specs introduces an additional “enterprise” spec which is a subset of the R5 compendium (ie contains a copy of about 50% of the chapters from the R5 compendium). It appears that the “enterprise” spec contains the most-useful stuff; what is in compendium but not enterprise is a set of odd items.</p>
+
+<ul>
+  <li>Preferences Service ==&gt; meant to store per-user settings; I cannot imagine a use-case that this simple service would satisfy.</li>
+  <li>Wire Admin Service ==&gt; odd variant on an event-broker; surely event-admin would be more useful..</li>
+  <li>IO Connector Service ==&gt; depends on javax.microedition. Replaced by URL service?</li>
+  <li>UPnP Device Service ==&gt; not widely needed</li>
+  <li>Deployment Admin ==&gt; probably made obsolete by OBR</li>
+  <li>Auto Configuration ==&gt; a way to create ConfigAdmin entries for bundles installed via Deployment Admin</li>
+  <li>Application Admin ==&gt; probably not widely used (using an OSGi container like an operating system, with many separate “processes”)</li>
+  <li>Dmt Admin ==&gt; Device Management Tree integration - not widely needed</li>
+  <li>Monitor Admin ==&gt; JMX-like behaviour for bundles. I can’t imagine this is widely used..</li>
+  <li>Foreign Application Access</li>
+  <li>Position Specification</li>
+  <li>Measurement and State Specification</li>
+  <li>Execution Environment Specification</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/posts/2015-06-19-osgi-service-selection/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

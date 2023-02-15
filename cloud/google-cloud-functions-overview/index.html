@@ -1,0 +1,372 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Google Cloud Functions Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Google Cloud Functions Overview</h1>
+    <aside>First published on: April 17, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a>, <a href='/category/BigData/'>BigData</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>This is a quick introduction to the Google Cloud Functions service, part of the Google Cloud Platform (GCP).</p>
+
+<p>Cloud functions are a kind of application which accepts either http-requests or pubsub messages as input, and are limited to providing a single function as the entry-point to the application. Thus:</p>
+
+<ul>
+  <li>a cloud function which accepts HTTP requests can only be bound to one URL (endpoint).</li>
+  <li>a cloud function which accepts Pubsub messages can only be bound to one subscription.</li>
+</ul>
+
+<p>Note that the cloud function does not “register a listener” for http or pubsub; instead external configuration (in the cloud-function deployment step) determines under what conditions the function will be executed and what data it will be passed.</p>
+
+<p>In addition:</p>
+
+<ul>
+  <li>a cloud function has a limit to how long it may run to handle a single request (default: 1 minute; max configurable:  9 minutes). If any request lasts longer than the configured maximum time then the container in which the cloud function is runing will be killed.</li>
+</ul>
+
+<p>A cloud function is assumed to be non-threadsafe; multiple requests are never sent concurrently to the same container instance. An instance is reused serially, ie once it has finished executing a request it may be sent another one. This means that caching data between requests in “local memory” can increase performance. However requests are distributed evenly across all instances, so storing client-specific state between requests is not possible (except via an external database or key-value-store).</p>
+
+<h1 id="languages">Languages</h1>
+
+<p>A cloud function must be written in Javascript using the node.js framework.</p>
+
+<h1 id="execution-environment">Execution Environment</h1>
+
+<p>Each “instance” of the cloud function that Google starts is actually a <em>docker container</em> running Linux, node.js, and the cloud function code. The container image used is even specified: <code>gcr.io/google-appengine/nodejs</code>. You can download this yourself with docker commands, and investigate what is available inside it.</p>
+
+<p>Google builds the container for you, but you submit a list of the files to include - and these are not limited to javascript files.</p>
+
+<p>You can specify the desired amount of RAM and disk for the container environment - cloud functions are currently rather flexible here.</p>
+
+<p>Warning: when a cloud function “completes” (by returning from the invoked function, or by executing the top-level callback object) and there are no pending requests that the cloud-functions infrastructure can allocate to that container instance, then the container is effectively “frozen” (by setting its CPU-share to zero). This means that any “uncompleted callbacks” in node.js will also be “frozen” until the next request is allocated to that container - or until the container is killed. Node.js code must be very careful to complete all asynchronous work before completing the original request.</p>
+
+<h1 id="scaling">Scaling</h1>
+
+<p>One of the nice things about cloud-functions is that they scale down to zero instances if there is no work to do - very useful for applications which are only used during business hours, and for apps still “under development” which are only used intermittently. Having an AppEngine or ComputeEngine instance running 24 hours per day, 365 days per year, is rather costly (around US$1200 per year taking into account the available discounts); for intermittently-used systems, automatic scale-to-zero is financially highly desirable.</p>
+
+<p>Getting ComputeEngine instances to scale down to zero when no Pubsub messages are waiting is possible but moderately complex (I am planning to write an article on this soon). Getting AppEngine Standard instances to scale down to zero when no http-requests are pending is easy, but as far as I know it is not possible to scale-to-zero while still being availale to handle Pubsub messages (except possibly by using a push-subscription, but that has significant disadvantages). AppEngine Flexible cannot scale-to-zero at all.</p>
+
+<p>Google can start up new containers running the cloud function in a matter of seconds - and will scale up to many thousands of containers running the same image in parallel if the workload (number of pending http-requests or number of pending pubsub-messages) requires that.</p>
+
+<h1 id="running-binary-applications-in-cloud-function-environments">Running binary applications in cloud function environments</h1>
+
+<p>Because a cloud function runs in a docker container that contains Linux (currently Debian), and because you can include any desired files in the container, it is possible to bundle applications with the cloud-function, and for the cloud-function to execute those applications with “spawn”. I have tried bundling a complete Java JVM and a Java application with a cloud function, and executing the Java application works.</p>
+
+<p>Note however that a request has a maximum lifetime of 9 minutes, so this has only limited use. It isn’t generally possible to use Cloud Functions to perform complex machine-learning tasks for example!</p>
+
+<p>And due to the way a container is “frozen” on completion of a request (see above), executing external processes is probably best done via <code>require('child_process').spawnSync</code> rather than just <code>.spawn</code>.</p>
+
+<h1 id="an-example-cloud-function">An Example Cloud Function</h1>
+
+<p>The following <code>node.js</code>-based cloud function program receives Pubsub events which are triggered when a file is uploaded to a bucket, and starts a dataflow (ie Apache Beam) program to process that file:</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-javascript">const google = require(<span class="string"><span class="delimiter">'</span><span class="content">googleapis</span><span class="delimiter">'</span></span>);
+
+const dfltProjectId = <span class="string"><span class="delimiter">'</span><span class="content">....</span><span class="delimiter">'</span></span>;
+const jobNameBase = <span class="string"><span class="delimiter">'</span><span class="content">dataflow-from-cloud-fn</span><span class="delimiter">'</span></span>;
+const dataflowPath = <span class="string"><span class="delimiter">'</span><span class="content">gs://.../path/to/template</span><span class="delimiter">'</span></span>;
+
+<span class="comment">/**
+ * Obtain a google authentication token and then send an http request to the dataflow service to run
+ * a specific dataflow with the input filenames.
+ */</span>
+<span class="keyword">function</span> <span class="function">startDataflow</span>(file, eventId, callback) {
+    google.auth.getApplicationDefault(<span class="keyword">function</span> (err, authClient, projectId) {
+        <span class="keyword">if</span> (err) {
+            console.error(<span class="string"><span class="delimiter">'</span><span class="content">Authentication with default failed</span><span class="delimiter">'</span></span>);
+            callback(err, <span class="string"><span class="delimiter">"</span><span class="content">Unable to authenticate</span><span class="delimiter">"</span></span>);
+        }
+        console.info(<span class="string"><span class="delimiter">'</span><span class="content">Authentication with default successful</span><span class="delimiter">'</span></span>);
+
+        const dataflow = google.dataflow({
+            <span class="key">version</span>: <span class="string"><span class="delimiter">'</span><span class="content">v1b3</span><span class="delimiter">'</span></span>,
+            <span class="key">auth</span>: authClient
+        });
+
+        const inputPath = <span class="error">`</span>gs:<span class="comment">//${file.bucket}/${file.name}`;</span>
+
+        <span class="comment">// Oddly, param projectId is sometimes set and sometimes undefined. Better to hard-wire it..</span>
+        <span class="keyword">if</span> (<span class="keyword">typeof</span> projectId === <span class="string"><span class="delimiter">'</span><span class="content">undefined</span><span class="delimiter">'</span></span>) {
+            console.info(<span class="string"><span class="delimiter">'</span><span class="content">Using default projectId</span><span class="delimiter">'</span></span>);
+            projectId = dfltProjectId;
+        }
+
+        <span class="comment">// two concurrent jobs with the same name are not allowed, so add the file-change eventId (which is unique)</span>
+        const jobName = <span class="error">`</span><span class="predefined">$</span>{jobNameBase}-<span class="predefined">$</span>{eventId}<span class="error">`</span>;
+
+        console.info(<span class="string"><span class="delimiter">'</span><span class="content">Instantiating dataflow template with properties: </span><span class="delimiter">'</span></span> +
+            <span class="error">`</span>jobName=<span class="predefined">$</span>{jobName}; projectId=<span class="predefined">$</span>{projectId}; input=<span class="predefined">$</span>{inputPath}<span class="error">`</span>);
+
+        dataflow.projects.templates.create({
+            <span class="key">projectId</span>: projectId,
+            <span class="key">resource</span>: {
+                <span class="key">parameters</span>: {
+                    <span class="key">input</span>: inputPath,
+                },
+                <span class="key">jobName</span>: jobName,
+                <span class="key">gcsPath</span>: dataflowPath
+            }
+        }, <span class="keyword">function</span> (err, response) {
+            <span class="keyword">if</span> (err) {
+                <span class="comment">// object err is of type Error</span>
+                console.error(<span class="string"><span class="delimiter">"</span><span class="content">problem running dataflow template, error was: </span><span class="delimiter">"</span></span> + err);
+                console.error(err);
+                callback(err, <span class="string"><span class="delimiter">"</span><span class="content">problem running dataflow template</span><span class="delimiter">"</span></span>);
+            } <span class="keyword">else</span> {
+                console.info(<span class="string"><span class="delimiter">"</span><span class="content">Dataflow template response: </span><span class="delimiter">"</span></span>, response);
+                callback(<span class="predefined-constant">null</span>);
+            }
+        });
+    });
+}
+
+<span class="comment">/**
+ * Process a file uploaded to google-storage by starting a dataflow.
+ */</span>
+<span class="keyword">function</span> <span class="function">runFlowFor</span>(file, context, callback) {
+    <span class="keyword">if</span> (file.resourceState === <span class="string"><span class="delimiter">'</span><span class="content">not_exists</span><span class="delimiter">'</span></span>) {
+        console.info(<span class="error">`</span>File <span class="predefined">$</span>{file.name} deleted.<span class="error">`</span>);
+        callback();
+    } <span class="keyword">else</span> <span class="keyword">if</span> (file.metageneration === <span class="string"><span class="delimiter">'</span><span class="content">1</span><span class="delimiter">'</span></span>) {
+        <span class="comment">// metageneration attribute is updated on metadata changes; on create value is 1</span>
+        console.info(<span class="error">`</span>File <span class="predefined">$</span>{file.name} uploaded.<span class="error">`</span>);
+        startDataflow(file, context.eventId, callback)
+    } <span class="keyword">else</span> {
+        console.info(<span class="error">`</span>File <span class="predefined">$</span>{file.name} metadata updated.<span class="error">`</span>);
+        callback();
+    }
+}
+
+<span class="comment">/**
+ * Background Cloud Function to be triggered by Cloud Storage.
+ *
+ * Warning: if a file is uploaded, then overwritten before this cloud-function receives the event, then
+ * this code will process the later version of the file twice. This is not expected to be a problem in
+ * real-world systems.
+ */</span>
+exports.processFile = (event, callback) =&gt; {
+    const file = event.data;
+    const context = event.context;
+
+    console.info(<span class="error">`</span>  Event Type: <span class="predefined">$</span>{context.eventType}<span class="error">`</span>);
+    console.info(<span class="error">`</span>  Bucket: <span class="predefined">$</span>{file.bucket}<span class="error">`</span>);
+    console.info(<span class="error">`</span>  File: <span class="predefined">$</span>{file.name}<span class="error">`</span>);
+    console.info(<span class="error">`</span>  Metageneration: <span class="predefined">$</span>{file.metageneration}<span class="error">`</span>);
+
+    <span class="keyword">if</span> (file.name.startsWith(<span class="string"><span class="delimiter">'</span><span class="content">some/path/</span><span class="delimiter">'</span></span>)) {
+        console.info(<span class="error">`</span>File <span class="predefined">$</span>{file.name} being processed.<span class="error">`</span>);
+        runFlowFor(file, context, callback)
+    } <span class="keyword">else</span> {
+        console.info(<span class="error">`</span>File <span class="predefined">$</span>{file.name} not relevant.<span class="error">`</span>);
+        callback();
+    }
+}</code>
+</pre></div></div>
+
+<p>A <code>package.json</code> file is also needed. When your cloud fn code needs extra <code>node.js</code> packages, then run <code>npm install --save {packagename}</code> to update the package.json file. The installed libraries themselves do not need to be included in the file you upload to cloud storage (they will be reinstalled as specified in <code>package.json</code>).</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-json">{
+  <span class="key"><span class="delimiter">"</span><span class="content">name</span><span class="delimiter">"</span></span>: <span class="string"><span class="delimiter">"</span><span class="content">sample-cloud-storage</span><span class="delimiter">"</span></span>,
+  <span class="key"><span class="delimiter">"</span><span class="content">version</span><span class="delimiter">"</span></span>: <span class="string"><span class="delimiter">"</span><span class="content">0.0.1</span><span class="delimiter">"</span></span>,
+  <span class="key"><span class="delimiter">"</span><span class="content">dependencies</span><span class="delimiter">"</span></span>: {
+    <span class="key"><span class="delimiter">"</span><span class="content">googleapis</span><span class="delimiter">"</span></span>: <span class="string"><span class="delimiter">"</span><span class="content">22.2.0</span><span class="delimiter">"</span></span>
+  }
+}</code>
+</pre></div></div>
+
+<p>The resulting <code>index.js</code> and <code>package.json</code> then just need to be uploaded to some folder in cloud storage. Via the GCP web UI, or the gcloud SDK commandline, a cloud-function is then defined that references those uploaded files and specifies how the function should be “triggered” (eg via http, or pubsub).</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://cloud.google.com/functions/">Google Official Docs</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/google-cloud-functions-overview/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

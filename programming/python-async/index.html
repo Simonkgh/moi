@@ -1,0 +1,535 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Python - Asynchronous Programming with Coroutines</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Python - Asynchronous Programming with Coroutines</h1>
+    <aside>First published on: December 27, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>The goal of asynchronous programming is not to run Python code in multiple threads, but instead to make the best possible use of a single thread to run a set of semi-independent data processing tasks.</p>
+
+<p>This article gives an overview of how asynchronous programming is done in Python, and is an extension to another <a href="/programming/python">more general article on Python</a>.</p>
+
+<p>This article concentrates more on the “how” (ie underlying principles) and “why” (what are the tradeoffs compared to other parallel-programming techniques) than on the “what” (how to write asynchronous programs). I find that understanding the underlying principles makes using something far easier.</p>
+
+<p>Dave Peticolas’ <a href="http://krondo.com/an-introduction-to-asynchronous-programming-and-twisted/">article on asynchronous programming with Twisted</a> starts with an excellent introduction to asynchronous programming in general - highly recommended.</p>
+
+<p>The <a href="https://docs.python.org/3.7/library/asyncio.html">official documentation on the standard asyncio module</a> provides great detail, but not much context and covers both older (obsolete) and newer approaches - ie is IMO somewhat confusuing.</p>
+
+<p>WARNING: I am an experienced developer, but new to Python. There may therefore be errors/misunderstandings in this article - if so, feedback is very welcome!</p>
+
+<p>DOUBLE WARNING: I have only theoretical knowledge of asynchronous programming in Python, ie have read various sources and considered the implications - but have not actually implemented anything except trivial test-cases.</p>
+
+<h1 id="why-asynchronous-programming">Why Asynchronous Programming</h1>
+
+<p>The goal of asynchronous programming is not to run Python code in multiple threads, but instead to make the best possible use of a single thread. Because multiple os-level threads are not involved, the CPython GIL is not a limiting factor when using asynchronous programming.</p>
+
+<p>Async programming is quite useful for a number of common problems, including:</p>
+
+<ul>
+  <li>implementing an http server which needs to handle multiple concurrent http requests</li>
+  <li>implementing a message-broker server which needs to handle multiple concurrent client requests</li>
+  <li>handling incoming requests which trigger calls to a remote database</li>
+</ul>
+
+<p>As noted previously, asynchronous code is still limited to 1 CPU - it just makes better use of that CPU than blocking-style programming.</p>
+
+<p>Asynchronous programming is particularly effective for programs that concurrently perform many tasks that are IO-bound. When concurrent tasks spend 99% of their time waiting for IO and 1% of their time actually executing on the CPU, then 100 such tasks fit on a single CPU…</p>
+
+<p>Alternatively, when a system has N cpus, then spawning N instances of the Python app and using asynchronous programming within each instance is an effective way to get good performance.</p>
+
+<p>From PEP-342 (generator-based coroutines), the motivation was to:</p>
+
+<blockquote>
+  <p>… be able to support performing asynchronous operations without needing to write the entire application as a series of callbacks, and without requiring the use of resource-intensive threads for programs that need hundreds or even thousands of co-operatively multitasking pseudothreads</p>
+</blockquote>
+
+<p>Threads are sometimes not the optimal solution for such problems, due to:</p>
+
+<ul>
+  <li>needing a preallocated stack for each thread (ie significant memory-usage overhead)</li>
+  <li>requiring os-level context-switches (ie significant cpu-usage overhead)</li>
+  <li>having significant setup time</li>
+  <li>requiring care (synchronization) when sharing data between threads, and</li>
+  <li>competing for the CPython GIL (global interpreter lock)</li>
+</ul>
+
+<p>Asynchronous programming (all kinds) have none of the above problems.</p>
+
+<h1 id="different-kinds-of-asynchronous-programming">Different Kinds of Asynchronous Programming</h1>
+
+<p>Asynchronous programming requires code be broken up into chunks of non-blocking user code, joined together with operations that either block or need to be repeatedly retried until they succeed (eg non-blocking IO operations). A <code>scheduler</code> (aka <code>event-loop</code> or <code>reactor</code>) then runs each chunk; blocking operations are handled by delegating to a pool of background threads. the thread running the scheduler also runs the user code chunks, repeatly selecting chunks which are “rnnable” (not waiting for input from a different chunk). When a chunk completes (produces a value), other chunks that are waiting for that value become available for the scheduler to run.</p>
+
+<p>Support for <em>asynchronous programming</em> in Python has gone through four major revisions:</p>
+
+<ul>
+  <li>using callback functions (not coroutines)</li>
+  <li>using coroutines based on generators with <code>generator.send</code>
+</li>
+  <li>improved coroutines based on generators with <code>yield from</code>
+</li>
+  <li>new implementation of coroutines based on new keywords async/await (since Python 3.5)</li>
+</ul>
+
+<p>These approaches are all used in various third-party libraries. Eventually, a new module <code>asyncio</code> was added to the Python standard libraries, based on experiences from external libraries. The first version of asyncio (Python 3.4) was based on generator-based coroutines with yield-from; since version 3.5 there is also support for async-based coroutines.</p>
+
+<p>Hopefully the most recent approach based on keyword <code>async</code> (<a href="https://www.python.org/dev/peps/pep-0492/">PEP 492</a>) will be a long-term solution; the chances are good as the <code>async</code> approach has been copied from other languages where it has been successful (eg <a href="http://thecodebarbarian.com/80-20-guide-to-async-await-in-node.js.html">in node.js</a>).</p>
+
+<p>Some Python-based external frameworks that use asynchronous programming techniques are:</p>
+
+<ul>
+  <li><a href="https://twistedmatrix.com/trac/">Twisted</a></li>
+  <li><a href="http://www.tornadoweb.org/en/stable/">Tornado</a></li>
+  <li><a href="https://sanic.readthedocs.io/en/latest/">Sanic</a></li>
+  <li><a href="https://github.com/timofurrer/awesome-asyncio">and more..</a></li>
+</ul>
+
+<p>Asynchronous programming techniques are of course also used in languages other than Python; eg:</p>
+
+<ul>
+  <li>
+<a href="http://www.aosabook.org/en/nginx.html">nginx webserver</a> (implemented in C) - a “worker” is effectively an async event-loop</li>
+  <li>
+<a href="https://nodejs.org/en/">node.js</a> (Javascript)</li>
+  <li>
+<a href="https://www.tutorialspoint.com/erlang/erlang_processes.htm">Erlang processes</a> (Erlang)</li>
+  <li>
+<a href="https://ktor.io/">Ktor</a> (Kotlin) - asynchronous programming with coroutines on the Java Virual Machine</li>
+</ul>
+
+<p>Asynchronous programming is similar to <em>reactive programming</em> (because of the scheduler aka event-loop).</p>
+
+<h1 id="asynchronous-programming-with-callbacks">Asynchronous Programming with Callbacks</h1>
+
+<p>Python frameworks (eg Twisted) have supported asynchronous programming without coroutines for a long time. Frameworks in other languages (eg node.js) also have successfully done this without coroutines.</p>
+
+<p>However it does require adopting a somewhat odd programming style based on callbacks. Because code can never invoke a blocking operation in the middle of a function, it is necessary to break larger functions up into pieces that contain no blocking function-calls, and then pass references to these chunks of code (callbacks) around.</p>
+
+<p>This article won’t address callback-based asynchronous programming any further - there are lots of examples on the internet if you are interested.</p>
+
+<h1 id="module-asyncio">Module asyncio</h1>
+
+<p>The module “asyncio” has been in the Python standard library since version 3.4. It supports asynchronous programming based on multiple approaches:</p>
+
+<ul>
+  <li>callbacks</li>
+  <li>coroutines based on Generators with <code>yield from</code>
+</li>
+  <li>coroutines based on ‘async’ (which did not become part of Python until v3.5..)</li>
+</ul>
+
+<p>The last approach is highly recommended for new code.</p>
+
+<p>AIUI, supporting all these different solutions in one library is done by representing them as instances of <code>asyncio.Future</code>, ie this Future type is the “unifying concept” that isolates the underlying implementations. Note that class <code>concurrent.futures.Future</code> has a similar concept, but the types are not related.</p>
+
+<p>Note that many of the concepts of asyncio were first developed in third-party libraries before being standardised as part of the Python library.</p>
+
+<p><a href="https://www.python.org/dev/peps/pep-3156/">The original PEP for asyncio</a> is interesting, and describes how all of the above is supported. <a href="https://www.python.org/dev/peps/pep-0492/">PEP 492</a> describes the changes to asyncio for async-based coroutines.</p>
+
+<p>Module asyncio is strongly influenced by the <em>Twisted</em> framework, adding not only an event-loop but also protocol and transport types which are basically equivalent to those from Twisted.</p>
+
+<p>Some example code for module <code>asyncio</code> starts processing with method <code>asyncio.run(..)</code> - a function added in Python 3.7. This is indeed the most elegant way to start a main event loop, but is only a thin wrapper around the event-loop functions that existed in earlier versions of Python - ie there is no need to wait for Python 3.7 to implement asynchronous programming with async-based coroutines.</p>
+
+<h1 id="coroutine-common-principles">Coroutine Common Principles</h1>
+
+<p>Asyncio’s support for both types of coroutine has a lot of similarity at the conceptual level, even when some of the APIs are different.</p>
+
+<p>In both cases, the primary thread of the Python interpreter runs an event-loop. The event-loop has:</p>
+
+<ul>
+  <li>a set of runnable tasks</li>
+  <li>a set of tasks that are suspended, waiting for other tasks to complete</li>
+  <li>a pool of tasks to run in a threadpool</li>
+  <li>a pool of background threads for running “blocking” operations such as file IO or network IO</li>
+</ul>
+
+<p>The loop basically picks a runnable task, and executes it using the event-loop thread. When that tasks waits for output from some other task, control is returned to the event-loop which moves that task to the “suspended set”. When a task produces a value, then it is suspended and any task that is waiting for its output gets moved from the suspended set to the runnable set.</p>
+
+<p>Code is forbidden from directly calling any blocking function; that would block the main application thread.  Instead, a function should “queue a task” to perform the needed operation, and suspend itself until the output of that task is available - with the <em>event loop</em> (ie task scheduler) receiving control in order to decide what to execute next. This ability to “suspend” a function, and resume it later when its needed input is available, is what a <em>coroutine</em> provides.</p>
+
+<p>Generator-based coroutines do this “suspend, and resume later” by calling “yield” or “yield from”. The async-based coroutines do this by calling “await”. In either case, the asyncio module (or other framework) provides a nice selection of functions for creating “tasks” that actually do blocking-like operations such as file or network IO.</p>
+
+<p>This ability to “suspend and give control back” means that a single thread can run both the event-loop (scheduler) and the user code (coroutines). Blocking-like operations might be implemented as components that need to be called multiple times (eg code that uses operating-system-level nonblocking IO apis), or might be implemented by handing the operation off to a small pool of real threads which actually do block - while the scheduler thread continues to run. Any code executed via a thread-pool. Code scheduled to run in the thread-pool should not have much/any Python code in it, as that causes competition for the GIL - instead, such tasks should just perform native IO or run other native code that does not need the GIL.</p>
+
+<p>The asyncio module provides a bunch of wrapper methods for common blocking operations such as fileIO, networkIO, sleep, etc.</p>
+
+<p>Actually, the component that runs blocking code is defined in module <code>asyncio</code> using an Executor abstraction; a threadpool is one possibility (but the usual one).</p>
+
+<h1 id="asynchronous-programming-with-coroutines-based-on-generators-pre-35">Asynchronous programming with Coroutines based on Generators (pre-3.5)</h1>
+
+<p>The “yield from” approach works by having logic implemented as generators that use the “yield” operator to return values, and “yield from” to wait for other generator-based coroutines.</p>
+
+<p>A task that can be run from the “main event loop” is always a generator whose code basically looks like:</p>
+
+<ul>
+  <li>do some processing</li>
+  <li>suspend until data is available from coroutine A (via yield-from)</li>
+  <li>do some processing</li>
+  <li>suspend until data is available from coroutine B (via yield-from)</li>
+  <li>etc</li>
+  <li>produce a value (by returning from the end of the function)</li>
+</ul>
+
+<p>The “suspend until” steps are implemented by invoking “yield from {other coroutine}”. This in fact suspends the current generator and returns {other coroutine} to the caller - which is the event loop. The event loop then marks the coroutine that it just invoked as “suspended, depending on {othe coroutine}” and adds {other coroutine} to its set of runnable tasks. At some time, that task will be chosen by the scheduler and executed; it may in turn use <code>yield from</code> itself, thus suspending for a while. However eventually that {other coroutine} will return a value (in the normal way) and terminate. Control returns to the event loop, which sees that a real value has been emitted, and then marks the generator that was “suspended depending on ..” as runnable, with dependent-value being whatever that {other coroutine} returned. And then at some time the event-loop will select that original task for execution; the “send” function will be used to pass the dependent-value in to that generator and it will resume. In effect, that “get data from coroutine A” resumes with the desired data element.</p>
+
+<p>Here is the official documentation for using “older” asyncio eventloops: <a href="https://docs.python.org/3.6/library/asyncio-dev.html#asyncio-dev">https://docs.python.org/3.6/library/asyncio-dev.html#asyncio-dev</a></p>
+
+<p>For more information on generators, and <code>yield from</code>, see <a href="/programming/python">my main article on Python</a>.</p>
+
+<h1 id="asynchronous-programming-with-coroutines-based-on-async-and-await">Asynchronous Programming with Coroutines based on Async and Await</h1>
+
+<p>The technical details are specified in <a href="https://www.python.org/dev/peps/pep-0492/">PEP 492 - Coroutines with async and await</a>.</p>
+
+<p>Here’s an example of a trivial async-based program:</p>
+
+<pre><code>import asyncio
+
+async def returnit(value):
+    print(f"returning {value}")
+
+    # complete this coroutine with a return value
+    return value
+
+coro_a1 = returnit("a1-val")
+coro_a2 = returnit("a2-val")
+
+async def waitforit():
+    print("running waitforit..")
+
+    print("awaiting nested1..")
+    # add the object returned by returnit to set of runnable tasks, and suspend this coroutine until it has completed
+    await returnit("nested1")
+
+    print("awaiting nested2..")
+    # add the object returned by returnit to set of runnable tasks, and suspend this coroutine until it has completed
+    await returnit("nested2")
+
+    # and complete this coroutine with no return value
+
+async def runit():
+    print("running..")
+
+    print("awaiting a1..")
+    # add coro_a1 to set of runnable tasks, and suspend this coroutine until coro_a1 has completed
+    v1 = await coro_a1  
+
+    print("awaiting a2..")
+    # add coro_a1 to set of runnable tasks, and suspend this coroutine until coro_a2 has completed
+    v2 = await coro_a2
+
+    print("awaiting waitforit..")
+    # add the object returned by waitforit to set of runnable tasks, and suspend this coroutine until it has completed
+    v4 = await waitforit()
+
+    print("done")
+    # and complete this coroutine with no return value
+
+print("starting")
+coro_main = runit()
+asyncio.run(coro_main)  # python 3.7 or later (though similar functionality is available on python 3.5+)
+print("stopping")
+</code></pre>
+
+<p>And here is the output:</p>
+
+<pre><code>starting
+running..
+awaiting a1..
+returning a1-val
+awaiting a2..
+returning a2-val
+awaiting waitforit..
+running waitforit..
+awaiting nested1..
+returning nested1
+awaiting nested2..
+returning nested2
+done
+stopping
+</code></pre>
+
+<p>The call to <code>asyncio.run</code> starts the (new-style) event-loop, with one asynchronous object in the “runnable set”. The event-loop selects that single runnable, and invokes it. This results in execution of function <code>runit</code> until the line <code>await coro_a1</code> at which point the coroutine is suspended (its local-variables and its current-bytecode-offset are saved in the async wrapper object) and control returns to the event-loop. The event-loop sees that <code>coro_a1</code> is being waited on, so adds it to the set of runnables. The event-loop then chooses an element from the runnables set (there is only one) and executes it - resulting in a call to function returnit with local-variables containing value=”a1-val”. When that function returns, control returns to the event-loop which moves <code>coro_main</code> into the runnable set again. The event-loop then chooses a runnable from the set (just one is available), and calls it, etc.</p>
+
+<p>Replacing the first few lines of runit with the following will ensure that multiple elements are added to the runnable set:</p>
+
+<pre><code>async def runit():
+  async for coro in [coro_a1, coro_a2]:
+	val = await coro
+        print(val)
+  print("done")
+</code></pre>
+
+<p>or</p>
+
+<pre><code>async def runit():
+  t1 = asyncio.create_task(coro_a1) # add to the set of runnable tasks
+  t2 = asyncio.create_task(coro_a2) # add to the set of runnable tasks
+
+  await t1 # suspend until 
+  print("done")
+</code></pre>
+
+<p>Explicitly creating a “task” also causes it to be added to the runnable set; the await later returns immediately if the object has already completed.</p>
+
+<p>Async/await keywords are available since Python 3.5; expressions <code>async for</code> and <code>async with</code> are newer.</p>
+
+<h1 id="the-event-loop-in-more-detail">The event-loop in more detail</h1>
+
+<p>An event loop maintains:</p>
+
+<ul>
+  <li>a set of tasks (callable objects) that are in runnable state</li>
+  <li>a set of tasks (callable objects) that are waiting for other tasks to complete first</li>
+  <li>a pool of background threads for performing blocking operations</li>
+</ul>
+
+<p>When a task completes (returns a value) then any tasks that are waiting for it to complete are moved from the waiting set to the runnable set.</p>
+
+<p>On each pass through the event-loop, one task is taken from the runnable set and invoked. It either completes, or suspends itself with a dependency on another task.</p>
+
+<h1 id="other-related-frameworks">Other Related Frameworks</h1>
+
+<h2 id="module-asyncore">Module asyncore</h2>
+
+<p>Python’s standard library includes module <code>asyncore</code> which has primitive asynchronous-programming support. However it really is basic; sockets can be registered with it and callbacks to invoke when data is available on the socket. An event-loop then uses operating-system-level “asynchronous IO” apis to detect when data is available on any of the sockets, and call the associated callbacks one after another.</p>
+
+<p>If an invoked callback needs to perform a blocking operation - well, there is no support offered for that. Module <code>asyncore</code> therefore really does not qualify as an asynchronous programming framework.</p>
+
+<h2 id="zope">Zope</h2>
+
+<p>The well-known <a href="http://www.zope.org/en/latest/">Zope</a> CMS (content management system) <a href="https://zope.readthedocs.io/en/latest/zdgbook/TestingAndDebugging.html">uses threads</a> rather than async programming.</p>
+
+<h2 id="twisted">Twisted</h2>
+
+<p>The well-known <em>Twisted</em> framework is based on an <em>event loop</em> that it calls <em>a reactor</em>.</p>
+
+<p>There is an <a href="http://krondo.com/an-introduction-to-asynchronous-programming-and-twisted/">excellent tutorial on Twisted</a> (from 2010) that walks through the Twisted framework in great detail. Eventually, it explains that Twisted was originally callback-based, but also supports generator-based coroutines.</p>
+
+<p>As mentioned in the Twisted tutorial at <a href="http://krondo.com/deferred-poetry/">part 8</a>:</p>
+
+<blockquote>
+  <p>Deferreds are a solution (a particular one invented by the Twisted developers) to the problem of managing callbacks. They are neither a way of avoiding callbacks nor a way to turn blocking callbacks into non-blocking callbacks.</p>
+</blockquote>
+
+<p>Data <a href="http://krondo.com/your-poetry-is-served/">can be sent</a> via a call to <code>self.transport.write(data)</code>. This would seem to be a potentially blocking call - but actually, this just adds a standard Twisted operation (send from a buffer) to a list of things to be done. Twisted can later execute that send-operation piece-by-piece using non-blocking-io (from the main event loop). Similarly, the call to close the connection is simply a standard Twisted operation that is dependent on the previous operation completing - ie is also something that can be added to a list of tasks to be done by the reactor. In other words, this particular code example is a special case (even if a common one): a series of operations are being done which do not include any user code (send, and close) and none of the operations require any data from a previous step.</p>
+
+<p>Dealing with invocation of operations that might block, and where you also need the result in order to continue processing, is addressed in <a href="http://krondo.com/deferred-all-the-way-down/">part 13</a> of the tutorial. And there, it is explained that Twisted takes the usual approach here: the developer must separate the code that runs before the blocking operation, and the code that runs after the blocking operation, into separate callback objects. This is doable, but ugly. Using coroutines makes such code look much more readable.</p>
+
+<p>And then in part 17, it explains that generator-based coroutines are also supported. In fact, newer versions of Twisted (since the tutorial was written) support async-based coroutines too.</p>
+
+<blockquote>
+  <p>We can think of … the generator as a series of callbacks separated by yield statements, with the interesting fact that all the callbacks share the same local variable namespace, and the namespace persists from one callback to the next.</p>
+</blockquote>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>Async-for and Async-with are <a href="https://docs.python.org/3/reference/compound_stmts.html#async-for">described here</a>.</p>
+
+<p>If an app creates an async-based coroutine object, but its destructor is called without it ever having been “awaited on”, then a warning is logged - there is presumably a bug somewhere.</p>
+
+<p>An async-based coroutine object can never be awaited-on twice.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+<a href="https://docs.python.org/3/reference">The Python Language Reference</a> – the official language specification</li>
+  <li><a href="https://www.python.org/dev/peps/pep-0492/">PEP 492 - Coroutines with async/await</a></li>
+  <li>
+<a href="https://www.python.org/dev/peps/pep-0342/">PEP 342 - Coroutines via enhanced generators</a> - the now-obsolete specification for generator-based coroutines</li>
+  <li><a href="https://docs.python.org/3/library/asyncio-task.html">Python standard library: module asyncio</a></li>
+  <li><a href="https://docs.python.org/3/library/asyncio-eventloop.html">Python standard library - asyncio event-loop</a></li>
+  <li><a href="https://stackabuse.com/python-async-await-tutorial/">Async-await Tutorial</a></li>
+  <li><a href="https://www.ibm.com/developerworks/library/ba-on-demand-data-python-3/index.html">IBM: On Demand Data in Python: coroutines and asyncio</a></li>
+  <li>
+<a href="http://www.dabeaz.com/coroutines/Coroutines.pdf">Dave Beazley: A Curious Course on Coroutines and Concurrency</a> - excellent intro to generators and coroutines</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/python-async/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

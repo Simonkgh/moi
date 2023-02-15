@@ -1,0 +1,395 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Remapping DNS lookups in a JRE</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Remapping DNS lookups in a JRE</h1>
+    <aside>First published on: December 6, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/Cloud/'>Cloud</a></p>
+      <h1 id="overview">Overview</h1>
+
+<p>When running a set of docker containers, with some services being “clustered” services, the hostnames exported by the clustered services can be “unresolvable” from the host point-of-view. Below is some simple code to fix this for Java-based client apps.</p>
+
+<h1 id="the-problem-details">The Problem Details</h1>
+
+<p>Normally, when opening a socket the JRE deals with resolving the specified hostname to an IP address; it first looks in <code>/etc/hosts</code> and then consults a DNS server. However I recently had a situation where a library was doing the calls to open a socket, and I knew the right host-to-ip mapping, but it wasn’t in the usual places.</p>
+
+<p>To be specific, I am working on a Java application which uses Kafka and the Confluent Schema Registry. In order to conveniently develop locally, I start all the services the app needs via a docker-compose file (Zookeeper, Kafka, Schema Registry). In addition, I have developed integration-tests which use docker-compose to run all necessary dependencies; it’s a quite elegant way to ensure application code really does communicate with its runtime infrastructure correctly, and I hope to have time to write an article about it soon.</p>
+
+<p>Docker-compose has some nice networking features. By default it creates a network entry within the host environment with name <code>${project}_default</code> where project is by default the name of the directory in which the <code>docker-compose.yaml</code> file exists. Each container (“service”) defined in the docker-compose file is given an IP address on this network, and docker sets up dns-like domain-name resolution so that code within one container can address other containers using hostname=service-name. In addition, specific ports on specific services can be exported into the host network.</p>
+
+<p>Unfortunately, this nice DNS-resolution works only for container-to-container communication; code running within the host environment can reach services within containers via <code>ip-address:port</code> or via <code>localhost:exported-port</code> but not <code>servicename:port</code> as code within containers can.</p>
+
+<p>Normally, this is no big deal; code in the host just uses the localhost address and the exported port. However it is a real problem for some <em>clusterable</em> applications running in containers, eg a Kafka message broker. A Kafka client first connects to any node in the bootstrapServers list, and asks it for the full list of all broker nodes. The first step is fine - for code in the host, the bootstrapServers list can contain <code>localhost:port</code> while for code in a container the bootstrapServers list can be <code>servicename:port</code>. However the returned list of addresses are the <code>ADVERTISED_LISTENERS</code> addresses, ie addresses that Kafka thinks clients should address it at. If the advertised addresses are set to “localhost” then (a) multiple broker nodes are not possible, and (b) client code in other containers will not be able to see the broker nodes, as the docker “exported ports” are only exported to the host, not other containers. If the advertised addresses are set to the service-name, then (a) and (b) are solved - but code in the host environment cannot connect, because those service-names are not valid in the host environment; they are not in <code>/etc/hosts</code> nor in a DNS server that the host looks at.</p>
+
+<p>There are a couple of tools which effectively modify the host <code>/etc/hosts</code> file when a docker container is created:</p>
+
+<ul>
+  <li><a href="https://github.com/mageddo/dns-proxy-server">dns-proxy-server</a></li>
+  <li><a href="https://github.com/larsks/dnsthing/">dnsthing</a></li>
+  <li><a href="https://github.com/gliderlabs/resolvable">resolvable</a></li>
+</ul>
+
+<p>However this can lead to name conflicts, eg on CI servers when multiple builds are running concurrently. It is also an additional application that must be run. And as far as I can see it also works only on Linux machines - while I am on MacOS.</p>
+
+<h1 id="a-solution-for-java-client-apps">A Solution for Java Client Apps</h1>
+
+<p>I don’t need to solve this problem in general, eg allow access “by name” to containers from a commandline; I just need my Java Spring application which uses the Kafka client libraries to be able to handle the fact that the “node addresses” returned by the initial Kafka query are of form “some-docker-servicename:port”. In particular, in my case I have only one Kafka node, and its port is already exported into the host network, so I simply need to remap lookups of a specific servicename into “localhost”. Note that changing the <code>ADVERTISED_LISTENER</code> setting for the Kafka node to <code>localhost</code> breaks other containers that need to talk to Kafka, and in particular the Confluent Schema Registry service.</p>
+
+<p>So, finally, here is a class that allows adding custom mappings into the standard JRE hostname resolution process:</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="comment">// Copyright Simon Kitching 2017. Available under the Apache License 2.0</span>
+<span class="keyword">package</span> <span class="namespace">net.vonos.network.util</span>;
+
+<span class="keyword">import</span> <span class="include">sun.net.spi.nameservice.NameService</span>;
+
+<span class="keyword">import</span> <span class="include">java.lang.reflect.Field</span>;
+<span class="keyword">import</span> <span class="include">java.net.InetAddress</span>;
+<span class="keyword">import</span> <span class="include">java.net.UnknownHostException</span>;
+<span class="keyword">import</span> <span class="include">java.util</span>.*;
+<span class="keyword">import</span> <span class="include">java.util.stream.Collectors</span>;
+
+<span class="comment">/**
+ * Test/Development utility which intercepts the JRE logic which maps domain-names to addresses, allowing programmer-provided mappings.
+ * &lt;p&gt;
+ * Mappings looked-up by the JRE before this class is initialised are already cached in the JDK, ie customised mappings made too late will have no effect.
+ * &lt;/p&gt;
+ * &lt;p&gt;
+ * Example Usage:
+ * &lt;pre&gt;
+ *   NetworkNameMapper.install(NetworkNameMapper.mappingsFromSystemProperties());
+ * &lt;/pre&gt;
+ * &lt;/p&gt;
+ */</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">NetworkNameMapper</span> {
+    <span class="comment">// Disable constructor</span>
+    <span class="directive">private</span> NetworkNameMapper() {
+    }
+
+    <span class="comment">/**
+     * Build a mapping suitable for passing to method NetworkNameMapper.install.
+     * &lt;p&gt;
+     * System properties of form "dns.map.somename=alias" will cause lookups of "somename" to return the alias.
+     * The alias may be an IP-address or a name; names will be looked up using the mappings existing at the time this method is called.
+     * &lt;/p&gt;
+     */</span>
+    <span class="directive">public</span> <span class="directive">static</span> <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">InetAddress</span>&gt; mappingsFromSystemProperties() {
+        <span class="keyword">try</span> {
+            <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">InetAddress</span>&gt; mappings = <span class="keyword">new</span> <span class="predefined-type">HashMap</span>&lt;&gt;();
+            <span class="keyword">for</span> (<span class="predefined-type">Map</span>.Entry&lt;?, ?&gt; e : <span class="predefined-type">System</span>.getProperties().entrySet()) {
+                <span class="predefined-type">String</span> pname = e.getKey().toString();
+                <span class="keyword">if</span> (pname.startsWith(<span class="string"><span class="delimiter">"</span><span class="content">dns.map.</span><span class="delimiter">"</span></span>) &amp;&amp; pname.length() &gt; <span class="integer">8</span>) {
+                    <span class="predefined-type">String</span> name = pname.substring(<span class="integer">8</span>);
+                    <span class="predefined-type">String</span> value = e.getValue().toString();
+                    <span class="predefined-type">InetAddress</span> addr = <span class="predefined-type">InetAddress</span>.getByName(value);
+                    mappings.put(name, addr);
+                }
+            }
+            <span class="keyword">return</span> mappings;
+        } <span class="keyword">catch</span>(<span class="exception">UnknownHostException</span> e) {
+            <span class="comment">// This NetworkNameMapper class is intended primarily for development/testing purposes, so it seems better</span>
+            <span class="comment">// to not clutter calling code with exception-handling.</span>
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="exception">IllegalArgumentException</span>(<span class="string"><span class="delimiter">"</span><span class="content">Unable to install network mappings</span><span class="delimiter">"</span></span>, e);
+        }
+    }
+
+    <span class="comment">/**
+     * Implement the redirects specified in the mapping.
+     * &lt;p&gt;
+     * The specified mappings are copied, ie mutating them after this install method has been called has no effect.
+     * &lt;/p&gt;
+     */</span>
+    <span class="directive">public</span> <span class="directive">static</span> <span class="type">void</span> install(<span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">InetAddress</span>&gt; mappings) {
+        <span class="keyword">if</span> (mappings.isEmpty()) {
+            <span class="keyword">return</span>;
+        }
+
+        <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">InetAddress</span><span class="type">[]</span>&gt; internalMappings = mappings.entrySet().stream().collect(
+            Collectors.toMap(e -&gt; e.getKey(), e -&gt; <span class="keyword">new</span> <span class="predefined-type">InetAddress</span><span class="type">[]</span>{e.getValue()}));
+
+        <span class="comment">// Avoid race-conditions with other instances of this type. Unfortunately, there is no way to guarantee no</span>
+        <span class="comment">// race-conditions with other code that is also manipulating the internal InetAddress fields, but that is</span>
+        <span class="comment">// rather unlikely. Class INetAddress itself initializes field nameServices _very_ early, and never modifies it,</span>
+        <span class="comment">// so there are no races with INetAddress itself.</span>
+        <span class="directive">synchronized</span>(NetworkNameMapper.class) {
+            <span class="keyword">try</span> {
+                installInternal(internalMappings);
+            } <span class="keyword">catch</span>(<span class="exception">NoSuchFieldException</span>|<span class="exception">IllegalAccessException</span> e) {
+                <span class="comment">// Can happen only if a later JRE implementation changes the INetAddress class, or if a</span>
+                <span class="comment">// SecurityManager class forbids private-field-access.</span>
+                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="exception">RuntimeException</span>(<span class="string"><span class="delimiter">"</span><span class="content">Internal error</span><span class="delimiter">"</span></span>, e);
+            }
+        }
+    }
+
+    <span class="comment">/**
+     * Use reflection to add a custom NameService instance to the global list of NameServices used by INetAddress.
+     */</span>
+    <span class="directive">private</span> <span class="directive">static</span> <span class="type">void</span> installInternal(<span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">InetAddress</span><span class="type">[]</span>&gt; mappings) <span class="directive">throws</span> <span class="exception">NoSuchFieldException</span>, <span class="exception">IllegalAccessException</span> {
+        <span class="comment">// Use reflection to get access to the list of NameService objects deep within the JRE implementation.</span>
+        <span class="predefined-type">Class</span>&lt;<span class="predefined-type">InetAddress</span>&gt; ic = <span class="predefined-type">InetAddress</span>.class;
+        <span class="predefined-type">Field</span> f = ic.getDeclaredField(<span class="string"><span class="delimiter">"</span><span class="content">nameServices</span><span class="delimiter">"</span></span>);
+        f.setAccessible(<span class="predefined-constant">true</span>);
+        <span class="predefined-type">Object</span> currentList = f.get(<span class="predefined-constant">null</span>);
+        <span class="annotation">@SuppressWarnings</span>(<span class="string"><span class="delimiter">"</span><span class="content">unchecked</span><span class="delimiter">"</span></span>)
+        <span class="predefined-type">List</span>&lt;NameService&gt; origNS = (<span class="predefined-type">List</span>&lt;NameService&gt;) currentList;
+
+        <span class="comment">// Create a new list of NameService objects containing our custom MyNS class followed by all existing NameService objects</span>
+        NameService myNs = <span class="keyword">new</span> MyNS(mappings);
+        <span class="predefined-type">List</span>&lt;NameService&gt; newNS = <span class="keyword">new</span> <span class="predefined-type">ArrayList</span>&lt;&gt;(origNS.size() + <span class="integer">1</span>);
+        newNS.add(myNs);
+        newNS.addAll(origNS);
+
+        <span class="comment">// Replace the static field with our new class. Updating a reference is atomic, ie INetAddress will never be corrupted.</span>
+        <span class="comment">// Races with other instances of this type are prevented by method initIntenal. Races with other code that is also</span>
+        <span class="comment">// manipulating this same field is not prevented, but very unlikely.</span>
+        f.set(<span class="predefined-constant">null</span>, newNS);
+    }
+
+    <span class="comment">// ====================================================================================================</span>
+
+    <span class="comment">/** Simple implementation of the standard NameService interface. */</span>
+    <span class="directive">private</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">MyNS</span> <span class="directive">implements</span> NameService {
+        <span class="directive">private</span> <span class="directive">final</span> <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">InetAddress</span><span class="type">[]</span>&gt; mappings;
+
+        <span class="directive">private</span> MyNS(<span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">InetAddress</span><span class="type">[]</span>&gt; mappings) {
+            <span class="local-variable">this</span>.mappings = mappings;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="predefined-type">InetAddress</span><span class="type">[]</span> lookupAllHostAddr(<span class="predefined-type">String</span> s) <span class="directive">throws</span> <span class="exception">UnknownHostException</span> {
+            <span class="predefined-type">InetAddress</span><span class="type">[]</span> result = mappings.get(s);
+            <span class="keyword">if</span> (result != <span class="predefined-constant">null</span>) {
+                <span class="keyword">return</span> result;
+            }
+
+            <span class="comment">// cause INetAddress.getAllByName to try the next NameService</span>
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="exception">UnknownHostException</span>();
+        }
+
+        <span class="comment">// Reverse lookups not supported for now..</span>
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="predefined-type">String</span> getHostByAddr(<span class="type">byte</span><span class="type">[]</span> bytes) <span class="directive">throws</span> <span class="exception">UnknownHostException</span> {
+            <span class="comment">// cause INetAddress.getAllByName to try the next NameService</span>
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="exception">UnknownHostException</span>();
+        }
+    }
+}</code>
+</pre></div></div>
+
+<p>In the application main-method, I then just call:</p>
+
+<pre><code>NetworkNameMapper.install(NetworkNameMapper.fromSystemProperties());
+</code></pre>
+
+<p>which allows me to start my Java app in development environments with arguments like “<code>-Ddns.map.kafkaservice=localhost</code>”.</p>
+
+<p>For integration-tests, I just add:</p>
+
+<pre><code>@BeforeClass
+public static void initDNS() throws Exception {
+  NetworkNameMapper.install(Collections.singletonMap("kafkaservice", "localhost"));
+}
+</code></pre>
+
+<p>Yes, this NetworkNameMapper class is using reflection to poke around in parts of the JRE. But it works!</p>
+
+<h1 id="further-reading">Further Reading</h1>
+
+<ul>
+  <li>
+<a href="http://rkuzmik.blogspot.co.at/2006/08/local-managed-dns-java_11.html">locally managed dns</a> - a similar approach to mine, but somewhat more complicated.</li>
+  <li>
+<a href="https://stackoverflow.com/questions/36151981/local-hostnames-for-docker-containers">stackoverflow: local hostnames for docker containers</a> - one of many similar questions on this topic</li>
+  <li>
+<a href="https://github.com/moby/moby/issues/2335">github: add container hostnames</a> - another similar question</li>
+  <li>
+<a href="https://github.com/docker/machine/issues/3402">github: use ip addresses and DNS names for docker containers</a> - yet another</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/network-name-mapper/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

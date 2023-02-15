@@ -1,0 +1,273 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Dual-booting with EFI</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Dual-booting with EFI</h1>
+    <aside>First published on: November 11, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>I recently installed Fedora-23 on my machine - twice, on two different partitions. That gives me one to work with, and one to experiment with - and hopefully gives me an available environment to boot into if one of my experiments goes badly wrong.</p>
+
+<p>Sadly, something immediately went badly wrong :-). Fedora, EFI and dual-booting is <em>not</em> a good combination. However setting things up correctly isn’t too hard - see below.</p>
+
+<h1 id="motivation">Motivation</h1>
+
+<p>I’ve been using dual-booting for years on non-EFI systems - two (or sometimes three) Linux distributions installed concurrently on different partitions, with a shared partition for “/home”. This approach relied on each installation having its own grub binary and grub config-file. This is most easily achieved by <em>not</em> creating a separate boot partition, but instead leaving /boot as a normal directory in each installation’s root filesystem (yes, that does slightly increase the chance of damaging the grub setup itself).</p>
+
+<p>The disk MBR then points to exactly one of these grub installations, ie that is the “master” grub install. The grub-mkconfig tool that generates the grub.cfg files does a good job of “probing” for kernels on other partitions, ie it is usually possible to boot into any install without problems.</p>
+
+<p>When a new installation is done, that overwrites the MBR and becomes the “master”; running grub2-install or update-grub can manually select a “master” install. When performing OS updates that download a new kernel or similar, the grub.cfg for <em>that installation</em> is updated - ie does not mess with the grub.cfg for other installations.</p>
+
+<p>There is a minor drawback that the “master” grub menus don’t boot into new kernels in other installations until something like “grub2-mkconfig” or “update-grub” is run in the master environment, but that’s acceptable for me.</p>
+
+<h1 id="efi-dual-booting">EFI Dual-Booting</h1>
+
+<p>In the new EFI world, things work a little differently. There is one EFI partition to hold the grub binary and config-file - ie having a different “/boot” directory for each install no longer separates the grub config-files. On install, Fedora creates directory “/boot/efi/EFI/fedora” (ie “/EFI/fedora” on the EFI partition) and puts shim, grub, and grub.cfg there. It then creates a symlink to the grub.cfg from “/etc/grub2-efi.cfg”. Installing Fedora on a different partition repeats the process, and creates its own symlink to the same location.</p>
+
+<p>Finally, this new boot possibility is stored in the EFI firmware tables.</p>
+
+<p>The symlink <code>/etc/grub2-efi.cfg</code> is used by fedora-specific tool “grubby” when <em>system updates</em> require updating of grub’s config - eg when a new kernel arrives. The results are ugly - both installations are trying to use the same grub.cfg file. And unlike “grub2-mkconfig”, “grubby” doesn’t regenerate a new/clean grub.cfg file but instead parses and modifies the existing one. When that existing one was generated by the <em>other install</em> then things are not likely to end well.</p>
+
+<p>The solution is to instead create two <em>separate EFI boot environments</em>, which will act more like the non-EFI approach I described above. The necessary steps are:</p>
+
+<pre><code># become root
+su -
+
+# copy the default boot environment
+cd /boot/efi/EFI
+cp -a fedora myinstall1
+
+# set up link for grubby
+rm /etc/grub2-efi.cfg
+ln -s /boot/efi/EFI/myinstall1/grub.cfg /etc/grub2-efi.cfg
+
+# regenerate a clean grub config-file for the current environment
+# (writes via the symlink to /boot/efi/EFI/myinstall1/grub.cfg)
+grub2-mkconfig -o /etc/grub2-efi.cfg
+
+# register the new boot-dir with EFI (and as side-effect make it the default)
+efibootmgr --create --label myinstall1 --loader \\EFI\\myinstall1\\shim.efi
+</code></pre>
+
+<p>On reboot, the machine will now by default execute \EFI\myinstall1\shim.efi which runs grub from the same dir which uses the grub.cfg from the same dir.</p>
+
+<p>There is some key-sequence that can be pressed immediately after boot (enter within 2 seconds on my machine), which will lead to a menu which then allows “alternate boot options” to be selected. The new entry (label=myinstall1) will be one of them.</p>
+
+<p>Note that when booting into one environment, the grub menu will offer options to boot into kernels found on other partitions. However that information may not be up-to-date if the other install has downloaded a new kernel or similar. Personally, I think it would be nice if the “probing” option auto-detected other grub installs rather than just other kernels, and “chain-loaded” the target grub environment; that would ensure booting into the <em>latest</em> config for other partitions. However multibooting between multiple grub-enabled environments appears to be a low-priority use-case - multibooting into windows is probably the major one.</p>
+
+<h1 id="broken-grub-os-probing-in-efi">Broken grub os-probing in EFI</h1>
+
+<p>Sadly it appears that Grub generates broken grub.cfg files for multi-boot setups under EFI. When running in an EFI environment, menu-entries in the grub.cfg file need to use “linuxefi” to specify a kernel to execute, and “initrdefi” to specify an initrd/initramfs to load. This works for kernels in the host install, but the “os-probing” part that builds menu-entries for kernels on other disk partitions instead generates the traditional “linux” and “initrd” lines instead, and the menu-entry then generates error “unsupported command” when selected at boot-time.</p>
+
+<p>This is being tracked via <a href="https://bugzilla.redhat.com/show_bug.cgi?id=1173772">this fedora bugreport</a>.</p>
+
+<h1 id="other-information">Other Information</h1>
+
+<p>When EFI is enabled, the role previously performed by the code in the MBR is instead performed by firmware. Data stored in (permanent but editable) flash-memory defines the paths to all “bootable executables”, which must be stored on an EFI-formatted partition (basically, msdos-format) which the EFI firmware can read directly rather than the ugly disk-blocklists approach used by MBR code.</p>
+
+<p>On a Linux install booted via EFI, directory <code>/sys/firmware/efi/efivars</code> has a file per “EFI variable”. The ones named “Boot*” define the boot values.</p>
+
+<p>The EFI partition does not <em>have to be</em> to be mounted in the booted operating-system. However if not mounted, then of course any tools that want to update the grub binary or configuration-file won’t be able to do so. The EFI partition is therefore normally mounted at <code>/boot/efi</code>.</p>
+
+<p>The operating system kernel and associated files normally goes into <code>/boot</code> - which might be on the OS root partition, or might be elsewhere. In pre-EFI days, it was common to have “/boot” be a separate partition but with EFI there is less reason to do so.</p>
+
+<p>For technical reasons the “EFI boot options” don’t point direct to grub but instead to a <em>shim</em> program. EFI supports a “secure mode” in which it only boots programs if they have been <em>signed</em> by a key built in to the EFI firmware. Many manufacturers enable this by default, and ship only a few inbuilt keys - such as the one belonging to Microsoft. The workaround is to have a <em>signed shim</em> which then boots grub.</p>
+
+<p>Unfortunately, the “efibootmgr” application only works <em>after</em> the machine has been booted with EFI, which obviously can be tricky. The workaround is that EFI always supports a boot-option of “fallback.efi” which executes file “/EFI/BOOT/fallback.efi” and that in turn looks for files called BOOT.CSV and adds each entry to the list of boot-options. The standard grub-efi install process updates this BOOT.CSV file to add entries for the new grub-efi binary (note: file is in UTF-16 encoding). The “live install media” boots in EFI mode, so normally this work-around isn’t needed.</p>
+
+<h1 id="useful-references">Useful references</h1>
+
+<ul>
+  <li><a href="https://fedoraproject.org/wiki/GRUB_2">Fedora page on GRUB2</a></li>
+  <li>
+<a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/Multiboot_Guide/index.html">Fedora Multiboot Guide</a> – Strangely, this page doesn’t actually describe how to set up multiboot. However it does have good background information on how EFI booting works.</li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/efi-dualboot/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

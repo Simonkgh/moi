@@ -1,0 +1,488 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - The Linux Sound Stack</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>The Linux Sound Stack</h1>
+    <aside>First published on: August 6, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>This article is about how sound gets output on a Linux system. It covers:</p>
+
+<ul>
+  <li>OSS</li>
+  <li>ALSA</li>
+  <li>PulseAudio</li>
+</ul>
+
+<p>OSS (Open Sound System) basically defines a standard interface offered by sound-card-specific kernel drivers. Apps can then open any compatible sound-card node in <code>/dev</code>, and use the same API to interact with it. The API is of course based on read/write/ioctl systemcalls. The same API is implemented in BSD and other unix-like kernels.</p>
+
+<p>Following problems between Linux maintainers and the maintainers of OSS, the ALSA project was started as a replacement. ALSA similarly provides a set of kernel drivers with a standard API; this API was intended to improve on the original OSS API, though that is debated. ALSA drivers also provide an OSS-compatible interface for backwards compatibility. The ALSA project also provides a userspace <em>library</em> which provides significant functionality in userspace. However because ALSA drivers only support one “operation” at a time (eg play only one input stream) and the userspace part is a <em>library</em> (not a daemon process), effectively only one application can produce sound at a time.</p>
+
+<p>PulseAudio provides a <em>daemon process</em> that multiple clients can connect to concurrently, and can therefore mix streams from multiple processes before forwarding to an ALSA sound driver. Client apps can talk to the pulseaudio daemon directly (via various libraries), or can use the original ALSA library with the result being forwarded to the pulseaudio daemon (rather than being sent directly to hardware).</p>
+
+<h1 id="sound-hardware">Sound Hardware</h1>
+
+<p>This hardly needs mentioning, but:</p>
+
+<ul>
+  <li>sound hardware is almost always on a PCI bus (regardless of whether it is actually a plugin-in board, or soldered to the motherboard). Even on Intel integrated GPUs, the sound system is PCI-addressable.</li>
+  <li>GPU cards usually also include a sound hardware component - and when the GPU can output HDMI, then sound data is also be embedded in the HDMI stream.</li>
+  <li>sound hardware often combines multiple outputs (eg 2 speakers for stereo, 3 for systems with dedicated base-speaker, or even 5 for “surround sound”) and potentially multiple inputs (microphones).</li>
+  <li>different sound hardware (both inputs and outputs) support different <em>sampling rates</em>
+</li>
+</ul>
+
+<p>Sound components can be divided into the following categories:</p>
+
+<ul>
+  <li>playback from pcm-format data</li>
+  <li>capture into pcm-format data</li>
+  <li>control aka mixer (setting volume-levels, switching between multiple possible inputs/outputs)</li>
+  <li>sequencer (MIDI interface)</li>
+  <li>timer (not sure what this does…)</li>
+</ul>
+
+<h1 id="pcm">PCM</h1>
+
+<p>Sound is usually stored in digital form (ie as a sequence of bytes) using “pulse code modulation” (PCM) representation.</p>
+
+<p>In general, you can think of PCM as being a stream of bytes representing the <em>absolute displacement of the speaker membrane</em> measured at regular time intervals. Play sound into a microphone, and sample the displacement of the speaker from its central point at regular intervals - eg 8khz. Scale the samples to be in range 128+-128 (ie 0..255), and this is what a “pcm” audio node will return when read. When the input sound is a “pure tone”, plotting the bytes read on a graph will produce a sine-wave (approximately); more complex sounds produce more erratic-looking sample values. Playing sound is just the reverse - take a sinewave, sample at 8khz, map the values into range 0..255 and send to the output device to play a “pure tone” - or send less-regular patterns for more complex sounds.</p>
+
+<p>There are minor variants, including 16-bit sampling (0..65535) and mu-law scaling. And a data-stream can potentially contain <em>multiple channels</em> of data, interleaved in various possible ways.</p>
+
+<p>The primary alternative to this kind of digital sound is MIDI, in which a process selects an <em>instrument</em> then sends a sequence of <em>notes</em>; some device (whether a sound-card or an external device such as an attached electronic keyboard) then converts that into speaker displacements.</p>
+
+<h1 id="oss">OSS</h1>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Open_Sound_System">Open Sound System</a> (OSS) is the original sound architecture for Linux and many other unix-like systems. It defines a standard API for kernel devices that perform playback/capture/control/etc.</p>
+
+<p>Under the original OSSv3, only one thread at a time may use a device (opening an already-open audio device returns EBUSY), and there are many other limitations.</p>
+
+<p>After releasing OSSv3, the primary developer of OSS, the primary developer started releasing code under proprietary licences. While some unix-like distributions simply forked OSSv3 and continued development, under Linux it was instead replaced by ALSA. Eventually the same developer released code for an OSSv4 under an open licence; OSSv4 resolves many issues with OSSv3 but Linux had long moved to ALSA instead.</p>
+
+<p>According to the wikipedia article, some of the BSD family of operating systems have stayed with OSS as a general architecture, and significantly enhanced it.</p>
+
+<p>OSS defines its API in C header-file <code>soundcard.h</code>. However there is no <em>oss library</em>; this header just provides suitable constants for passing directly to read/write/ioctl calls against the kernel devices.</p>
+
+<p>According to the <a href="http://www.opensound.com/pguide/oss.pdf">OSS programming manual</a>, OSS provides the following /dev nodes:</p>
+
+<ul>
+  <li>
+<code>/dev/mixer</code> – select sources, set volumn levels</li>
+  <li>
+<code>/dev/sndstat</code> – diagnostic info only</li>
+  <li>
+<code>/dev/dsp*</code>, <code>/dev/audio*</code> – reading these files records sound (in PCM format), writing to these files (in PCM format) produces sound; sometimes referred to as <em>codecs</em>
+</li>
+  <li>
+<code>/dev/sequencer*</code> – access to “synthesiser” features on card (not used much any longer AFAIK), and to connect to MIDI devices (eg external electronic keyboards).</li>
+  <li>
+<code>/dev/midi*</code> – lower-level access to MIDI devices</li>
+</ul>
+
+<p>The linux kernel has several generic kernel drivers 
+ALSA-based systems have <em>optional</em> device drivers which emulate the OSS devices (they can be found under <code>/dev/snd</code>).</p>
+
+<p>In short, OSS provides very direct access to kernel drivers. It (at least in v3) does not provide good multi-process support; it can therefore be useful for professional sound processing but is not a good fit for general desktop use.</p>
+
+<p>The programming manual linked to above is actually a good resource for learning about sound devices, as the software interface so closely maps to real capabilities.</p>
+
+<p>In the kernel source, directory <code>/sound/oss</code> contains many OSS-specific drivers. File <code>/sound/core/sound_oss.c</code> provides a way for other sound-drivers which have OSS-emulation support to register that; this in turn makes it possible for userspace to use <code>mknod</code> to expose that functionality as files under <code>/dev</code>. It appears however that most modern linux distros don’t bother to enable OSS-emulation; apparently there are not enough applications left that depend on it.</p>
+
+<h1 id="alsa">ALSA</h1>
+
+<p>ALSA provides a set of Linux kernel audio device drivers, replacing the original OSS ones. These drivers provide an ALSA-specific API to userspace.</p>
+
+<p>The <a href="https://help.ubuntu.com/community/alsa-oss">alsa-oss</a> (aka aoss) components provide backwards compatibility with OSS; there are two approaches:</p>
+
+<ul>
+  <li>additional kernel drivers that emulate the old OSS kernel modules (ie can be used to back the expected nodes in /dev);</li>
+  <li>a library which can intercept OSS operations and redirect to appropriate ALSA equivalents.</li>
+</ul>
+
+<p>The library approach is interesting, as there is no OSS userspace “library”; applications written for OSS perform direct read/write/ioctl operations against the OSS devices in <code>/dev</code>. The aoss library is loader via <code>$LD_PRELOAD</code>, ie force-loads the library into the oss-based application. Presumably this library wraps the glibc <code>open</code> call to check whether the path is to an OSS file, and if so insert custom handling somehow.</p>
+
+<p>Unlike OSS, ALSA provides a user-space library <code>libasound</code> (also known as “alsa-lib”) that applications are supposed to use instead of interacting directly with device files. Note that this is a <em>library</em>, not a daemon. The library is written to support multiple threads (fixing one problem with OSSv3), but as with OSS the kernel device drivers can still only be used by one process at a time.</p>
+
+<p>It appears that ALSA provides a generic “sound processing pipeline” architecture. There are many different “plugins” available which transform or process sound data. An application (or config file) can then link these together into a pipline like a shell (or gstreamer).  The data flowing through a pipeline can be <em>multichannel data</em>.</p>
+
+<p>The most important plugins are:</p>
+
+<ul>
+  <li>The <code>hw</code> plugin which actually communicates with real physical hardware</li>
+  <li>The <code>plug</code> plugin which can resample (ie convert between different sampling rates)</li>
+  <li>The <code>file</code> plugin which writes data to a file as well as passing it on to the next stage</li>
+  <li>The <code>route</code> plugin which allows multiple input channels to be “mixed” and then passed on to different output devices.</li>
+</ul>
+
+<p>Some plugins will try to delegate their work to the hardware, ie query whether the physical device supports such functionality in hardware, and emulate it in software if necessary.</p>
+
+<p>ALSA also uses the term “device” for a <em>templated wrapper of a plugin</em>. Usually a “device” is given a name derived from the name of the plugin it uses, but not always. The following ALSA “devices” are built on the above plugins:</p>
+
+<ul>
+  <li>The <code>hw</code> device directly maps to the hw plugin: it takes as parameter the physical (card,device) address to write data to. Obviously, this is always the last item in a pipeline.</li>
+  <li>The <code>plug</code> device wraps the <code>plug</code> plugin; it takes just one parameter: the next ALSA-device in the pipeline (presumably it “resamples” to match the properties supported by the next device).</li>
+  <li>The <code>plughw</code> device wraps both the <code>plug</code> and <code>plughw</code> plugins; it takes one parameter: the (card,device) address needed by the <code>hw</code> plugin.</li>
+  <li>The <code>file</code> device wraps the <code>file</code> plugin, and is obviously the last item in a pipeline. It takes 2 parameters, being the filename and the format in which data should be written to the file.</li>
+  <li>The <code>tee</code> device wraps the <code>file</code> plugin, taking 3 parameters: the next ALSA-device in the pipeline and then the 2 parameters needed by the <code>file</code> plugin. As well as writing to the file, it also passes the data on.</li>
+</ul>
+
+<p>When building a pipline, each ALSA <code>device</code> is passed the name of the next ALSA-<code>device</code> in the pipeline as its first “parameter”.</p>
+
+<p>Actual hardware modules are addressed as “card:device:subdevice”, where device is an electric component (ie feature) on the card.</p>
+
+<p>The libasound library reads a set of <em>config files</em> each time an application uses libasound to open an ALSA “device”.  The files are:</p>
+
+<ul>
+  <li><code>/etc/asound.conf</code></li>
+  <li><code>/usr/share/alsa/alsa.conf</code></li>
+  <li><code>/usr/share/alsa/alsa.conf.d/*</code></li>
+  <li><code>$HOME/.asoundrc</code></li>
+</ul>
+
+<p>Entries in these files are usually <em>merged</em> together, although a config-file can use the exclamation-point to overwrite (ie discard existing settings for that item). In the config-files, each entry defines a “device”. The “type” attribute specifies the plugin. The “slave” attribute indicates the name of the next device in the pipeline. The result is that a user can manipulate the way that an application outputs (or inputs) sound by modifying the ALSA configuration files.  When an application outputs sound to an app-specific ALSA “device”, then the user even has per-app control over sound processing for that app. However usually applications write sound to the “pcm.default” ALSA device.</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="http://www.alsa-project.org/main/index.php/Main_Page">ALSA Project Homepage</a></li>
+  <li><a href="http://thewelltemperedcomputer.com/Linux/AudioArchitecture.htm">ALSA Architecture</a></li>
+  <li><a href="http://www.volkerschatz.com/noise/alsa.html">ALSA Concepts</a></li>
+  <li><a href="http://www.alsa-project.org/alsa-doc/alsa-lib/pcm_plugins.html">ALSA plugins and their parameters</a></li>
+</ul>
+
+<h2 id="alsa-kernel-drivers">ALSA Kernel Drivers</h2>
+
+<p>The “soundcore” kernel module creates file <code>/proc/asound</code> which provides info about all other sound-related hardware (ALSA drivers register themselves with “soundcore”). The call to <code>proc_mkdir</code> which creates <code>/proc/asound</code> can be found in “/sound/core/info.c” (yes, the sound stuff is directly under the Linux root, not under /drivers).</p>
+
+<p>The device-nodes for ALSA drivers are traditionally found under <code>/dev/snd</code>:</p>
+
+<ul>
+  <li>
+<code>control*</code> nodes are used to switch input/output paths for devices</li>
+  <li>
+<code>pcm*</code> nodes are used to output and input audio (read/write operations); ioctl operations can be used to query/set the data format, etc.</li>
+  <li>
+<code>seq</code> is ??. Presumably used to interact with MIDI devices, but why no card/device info?</li>
+  <li>
+<code>timer</code> is ??</li>
+</ul>
+
+<p>The “Cn” part of each device name indicates the “card”, and the “Dn” part indicates the device on that card.</p>
+
+<p>The device-nodes are usually owned by root, and belong to the “audio” group. In simple systems, user accounts can manually be added to the “audio” group to grant them rights to access audio-related hardware. In more sophisticated systems, device rights are assigned to a single “active user” at a time by either (a) changing the group on these files, or (b) changing the membership of the audio group.</p>
+
+<h1 id="pulseaudio">PulseAudio</h1>
+
+<h2 id="introduction-1">Introduction</h2>
+
+<p><code>pulseaudio</code> is a sound-system based around a daemon process that runs as some “active user” (unlike Xorg which typically runs as root). Other apps that generate sound talk to the current pulseaudio daemon (usually via a unix-domain socket). Pulseaudio then forwards sound to the <code>/dev/snd/*</code> devices using the same device-level API as ALSA. This central-daemon approach introduces some complexity but the daemon can merge sound from multiple applications before forwarding to the hardware, thus resolving one major limitation of ALSA.</p>
+
+<p>The pulseaudio daemon is implemented as a small core of functionality plus a large set of extension <em>modules</em> that the user can add to the core to configure the desired behaviour (somewhat similar to the ALSA “plugins” approach). One example is that client/server communications protocols are implemented as modules.</p>
+
+<p>Applications can integrate directly with pulseaudio via <code>libpulse0</code>. Alternately, they can use <code>libcanberra</code> which is a generic sound-api that supports multiple backends - and of course there is a libcanberra-pulse back-end. Both these libraries support several ways of communicating with a pulseaudio daemon; the two primary ways are via a local unix-domain socket (ie a file), and via a TCP connection (ie a host:port address). Which approach is used can be defined via a configuration-file or environment variable.</p>
+
+<h2 id="integration-with-alsa">Integration with ALSA</h2>
+
+<p>There are a large number of applications that still use <code>libasound</code> (ie ALSA) - and for sophisticated programs, libasound is actually still a good option.  As described above, ALSA applications read/write sound via named “pipelines”, and libasound builds these pipelines by reading configuration. This makes it possible to change the ALSA configuration files so that the final “sink” for a pipeline is the pulseaudio daemon itself - or the initial “source” when reading sound. The pulseaudio package usually installs extra config files under <code>/usr/share/alsa/alsa.conf.d</code> to rewire the default ALSA pipelines to use the “pulseaudio-alsa plugin” which reads/writes data via a unix-domain socket, just like standard pulseaudio clients do. ALSA’s config hooks are so flexible that the pipeline can even be rewired <em>only when a process named pulseaudio is running</em>. Running the “alsamixer” application will show the current pipeline; when pulseaudio integration is active then it will show “pulseaudio” as the “sound card”.</p>
+
+<p>As noted above, ALSA kernel sound drivers are not designed to be used by multiple processes. AFAIK, the pulseaudio daemon generally opens <em>all</em> of them when it starts - or maybe only when actually playing sound. In either case, having pulseaudio and ALSA directly accessing the same drivers at the same time is not likely to end well.  Theoretically, an app can open <code>/dev/snd/*</code> directly; if pulseaudio has already started then that open will fail otherwise the app <em>can</em> play sounds, and pulseaudio will fail (at least for that device). Alternately, an app can use libasound and <em>bypass</em> the pulseaudio plugin, in which case libasound can also try to directly open specific <code>/dev/snd/*</code> devices - again failing if pulseaudio already has that device open else blocking pulseaudio from using that device.</p>
+
+<p>in ALSA config files (esp. <code>/etc/asound.conf</code>), a block is of form <code>group.item {...}</code>. Normally, blocks are <em>merged</em>; an exclamation-mark before the item name forces an <em>override</em> (ie only this block is used).</p>
+
+<p>The ALSA library docs say that the “open” function can take a mode: block or nonblock, and that various functions in the library will then either <em>block when the resource is not available</em>, or <em>return an error when the resource is not available</em>. I’m not sure if this also applies to multiple apps opening the same device or whether that’s just for multiple threads in the same library..</p>
+
+<p>There is also a direct oss/pulseaudio integration tool: <code>padsp</code>.</p>
+
+<h2 id="pulseaudio-configuration-files">PulseAudio Configuration Files</h2>
+
+<p><code>pulseaudio</code> looks for configuration files within the following directories:</p>
+
+<ul>
+  <li>
+<code>~/.config/pulse</code>  (formerly <code>~/.pulse</code>).</li>
+  <li><code>/etc/pulse</code></li>
+</ul>
+
+<p>Within these directories:</p>
+
+<ul>
+  <li>
+<code>client.conf</code> is for the  libraries that connect to pulseaudio, eg libpulse0, libcanberra-pulse, or alsa-pulseaudio-plugin</li>
+  <li>
+<code>daemon.conf</code> is used to configure the background sound-daemon that runs as “the current active user”</li>
+  <li>
+<code>default.pa</code> is also used by the background daemon; this file contains module-configuration stuff.</li>
+</ul>
+
+<h2 id="pulseaudio-helper-programs">PulseAudio Helper Programs</h2>
+
+<p>The “pactl” and “pacmd” programs talk to the pulseaudio daemon, and effectively do what could have been done via the pulseaudio config files at startup - ie add/remove modules. Changes made via pactl/pacmd are not persisted.</p>
+
+<h2 id="clientserver-communication">Client/Server communication</h2>
+
+<h3 id="server-setup">Server Setup</h3>
+
+<p>When the pulseaudio daemon starts up, it allocates a random “authentication cookie” and writes it into <code>$HOME/.config/pulse/cookie</code>. The daemon then initialises each module which defines a communications protocol.</p>
+
+<p>The standard module “module-native-protocol-unix” allocates a unix-domain socket and listens on it for client connections. By default, the socket it creates is named <code>$XDG_RUNTIME_DIR/pulse/native</code>. The value of <code>$XDG_RUNTIME_DIR</code> is usually <code>/run/user/{userid}</code> (and <code>/var/run</code> is usually a symlink to <code>/run</code>).</p>
+
+<p>Alternate modules exist, such as one that opens and listens on a TCP port - which allows applications on remote systems to play sound via this daemon.</p>
+
+<p>By default, communications modules require the client to present a copy of the <em>authentication cookie</em> allocated by the daemon on startup; some communications modules support option “auth-anonymous=1” to bypass this requirement.</p>
+
+<p>An x11-integration module exists which simply stores an (address, cookie) pair as a property associated with the root window of an X server; when a client is using the same X server then it can easily retrieve this information. Note however that this doesn’t help if the socket is a unix-domain socket, and the X client is remote!</p>
+
+<p>Additional client/server sockets can be set up interactively via “pactl load-module module_native_protocol_unix socket=/path/to/new/socket”, ie adding another communications module to the existing set. A few other params are also available for this module; most useful is “auth-anonymous=1” (avoids needing the cookie available, but obviously not so secure!).</p>
+
+<h3 id="client-init">Client Init</h3>
+
+<p>By default, pulseaudio clients (presumably including the alsa-plugin) assume module-native-protocol-unix is available, and try to talk to the server via socket <code>$XDG_RUNTIME_DIR/pulse/native</code>. An alternate server can be specified via environment variable <code>$PULSE_SERVER</code>. The client always reads the “client.conf” config files as described in the section on configuration above.</p>
+
+<p>When a client app has <code>$DISPLAY</code> available, then it connects to that X server and looks for a special property on the root window which contains an (address, cookie) pair placed there by a pulseaudio server; when present it connects to that server.</p>
+
+<p>When the client config specifies “autospawn=yes” and the client cannot connect to any pulseaudio instance, then the client automatically starts the pulseaudio daemon. In systemd-based systems, systemd-init is instead configured to start pulseaudio as soon as anything opens the standard <code>pulse/native</code> socket; the autospawn setting should therefore be set to no.</p>
+
+<p>As noted in the server section, the client needs to provide an “authentication cookie” unless the server created that communication channel with “auth-anonymous=1”.</p>
+
+<p>See <a href="http://www.freedesktop.org/wiki/Software/PulseAudio/FAQ/">the pulseaudio FAQ</a> for the full list of ways a client tries to connect to a server.</p>
+
+<h2 id="other-pulseaudio-related-commands">Other PulseAudio-related Commands</h2>
+
+<p>The command <code>pactl list</code> shows a lot of interesting information about the current pulseaudio daemon configuration.</p>
+
+<p><code>paprefs</code> allows setting of common preferences.</p>
+
+<p><code>pavucontrol</code> allows per-application volume control.</p>
+
+<p>See also: oss/osspd/padev</p>
+
+<p>TODO: Are there ways to synchronize graphics and sound? Maybe not necessary, as sound doesn’t need to be keyed perfectly to 60fps graphics..</p>
+
+<h1 id="other-sound-related-libraries">Other Sound-Related Libraries</h1>
+
+<p>SDL (libsdl) provides a sound API.</p>
+
+<p>FMOD (libfmod) appears to also provide sound support.</p>
+
+<p>gstreamer - not sure quite how this fits into the above picture. Presumably a layer <em>on top of</em> pulseaudio.</p>
+
+<p>phonon - Qt sound API; really just a platform-independent wrapper around an underlying sound architecture</p>
+
+<h1 id="generating-sound-from-a-container">Generating Sound from a Container</h1>
+
+<p>When running an application (or distribution) within a Linux container, it is quite easy to get sound working:</p>
+
+<ul>
+  <li>use “pactl load-module …” to create a new unix-domain socket for pulseaudio (in a suitable directory). You will also need to use “auth_anonymous=1” - or to copy the current user’s <code>~/.config/pulse</code> directory to the container so the cookie is available.</li>
+  <li>bind-mound the directory containing the pulse-audio socket into the container’s filesystem</li>
+  <li>in the container, set environment variable <code>PULSE_SERVER</code> to point to that socket</li>
+  <li>to support alsa-based apps within the container it is necessary to install the pulseaudio-alsa integration package (to get the pulseaudio-alsa-plugin), and might be necessary to manually edit one of the ALSA config files to enable the plugin (the auto-detect might not work as the pulseaudio daemon is not in the container).</li>
+</ul>
+
+<p>Note that it is not necessary to run a pulseaudio daemon process in the container, nor is it necessary to bind-mount <code>/dev/snd</code>; the client process within the container just needs to write to the pulseaudio socket.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://www.alsa-project.org/main/index.php/Main_Page">The PulseAudio project homepage</a></li>
+  <li><a href="http://www.alsa-project.org/main/index.php/Tutorials_and_Presentations">PulseAudio Tutorials and Presentations</a></li>
+  <li><a href="http://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/PerfectSetup/">PulseAudio Perfect Setup</a></li>
+  <li><a href="http://jan.newmarch.name/LinuxSound/Sampled/Architecture/">Linux Sound Architecture</a></li>
+  <li><a href="http://www.freedesktop.org/wiki/Software/PulseAudio/FAQ/">PulseAudio FAQ</a></li>
+  <li><a href="https://wiki.archlinux.org/index.php/PulseAudio">ArchLinux: PulseAudio</a></li>
+  <li><a href="https://wiki.archlinux.org/index.php/PulseAudio/Examples">ArchLinux: PulseAudio Examples</a></li>
+  <li><a href="https://wiki.archlinux.org/index.php/PulseAudio#Troubleshooting">ArchLinux: PulseAudio Troubleshooting</a></li>
+  <li><a href="https://wiki.archlinux.org/index.php/PulseAudio/Configuration">ArchLinux: PulseAudio Configuration</a></li>
+  <li><a href="http://abouttech.bplaced.net/2010/06/18/pulseaudio-und-alsa/">http://abouttech.bplaced.net/2010/06/18/pulseaudio-und-alsa/</a></li>
+  <li><a href="http://www.alsa-project.org/alsa-doc/alsa-lib/index.html">http://www.alsa-project.org/alsa-doc/alsa-lib/index.html</a></li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/sound-stack/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

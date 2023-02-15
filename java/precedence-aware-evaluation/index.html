@@ -1,0 +1,231 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Precedence Aware Evaluation</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Precedence Aware Evaluation</h1>
+    <aside>First published on: March 16, 2014</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/Programming/'>Programming</a></p>
+      <p>Here you can find an algorithm for taking a sequence of tokens of form “term OP term OP term OP …” and evaluating it in memory, where some operators (OP) bind more tightly (have higher precedence) than others. While the solution isn’t terribly complicated, I didn’t find it trivial to build an efficient solution either, so I’m documenting it here in case I run up against this myself in a few years time - and maybe you’ll find it useful or interesting too.</p>
+
+<p>The actual problem I needed to deal with was evaluating an SQL where-clause in memory, but the solution is fairly generic. In my case, the “term” objects were either simple tests of form “id = 1” or “name like foo%” or “length is not null”, or a nested term eg “(id=1 or id=2)”. The OP items were simply <em>AND</em> and <em>OR</em>.</p>
+
+<p>In SQL, <em>AND</em> binds more tightly than <em>OR</em>, so “a or b and c” must be evaluated as “a or (b and c)”. As an additional twist, boolean operators have “short circuit” behaviour; “true or X” is always true and “false and X” is always false without having to evaluate X.</p>
+
+<p>I suspect this approach also works for evaluating things like arithmetic expressions such as “1 + 4 / 2 - (5 + 3)”.</p>
+
+<p>The solution was developed in Java, but the same approach could be used in many languages.</p>
+
+<p>Note that if the input datastructure is a tree whose structure already models the precedence of the operators (ie a standard syntax tree), then this kind of processing isn’t needed; walking the tree is sufficient. And if the input is a list in postfix (reverse polish) format, then evaluation is also trivial. The code described here is for the case where the input is a simple ‘infix’ format that does not directly reflect the precedence of the operators it contains.</p>
+
+<h1 id="a-general-description">A general description</h1>
+
+<p>A stack keeps track of the terms found so far. A separate stack keeps track of “unreduced” operators encountered.</p>
+
+<p>When a new operator is processed, the top operator on the stack is evaluated for as long as its precedence is higher than or equal to the new operator. The two top terms on the term-stack are popped and used as the LHS and RHS of the operator popped from the stack, and the result is pushed back onto the stack. The new operator is then also pushed onto the stack.</p>
+
+<p>Encountering end-of-input is equivalent to reading an operator with the lowest possible priority - which ensures that all operators remaining on the stack are evaluated, and the “term stack” ends up being reduced to holding a single item - which is the final output.</p>
+
+<p>With this approach, the maximum depth of the operator stack is equal to the number of different operator precedence levels - just two in the case where OP is limited to <em>AND</em> and <em>OR</em>. The term stack max depth is limited to twice this value (in the case where all operators are binary, eg <em>AND</em> and <em>OR</em>).</p>
+
+<h1 id="performing-short-circuit-evaluation">Performing Short-Circuit evaluation</h1>
+
+<p>In my particular use-case, the “term” parts were already represented as nodes in a linked list. Therefore a reference to the node could simply be pushed onto the term stack - without actually evaluating the term at that time. When an <em>AND</em> operator is applied, it is necessary to actually evaluate the LHS term. However if the result of the LHS term is FALSE then a trivial term-node representing the literal FALSE value pushed back onto the term stack as the “result” - without bothering to evaluate the RHS term at all. Similarly, when the operator is <em>OR</em> and the LHS evaluates to TRUE then a literal TRUE can be pushed onto the term stack without needing to evaluate the RHS.</p>
+
+<p>Avoiding evaluating the RHS term of an operator can be a significant saving; it may be a “compound term” such as (id=1 or name like a% or …), and the whole thing can simply be skipped over.</p>
+
+<h1 id="the-code">The Code</h1>
+
+<p>You can find a complete class implementing this here:</p>
+
+<ul>
+  <li>
+<a href="/downloads/code/precedence/PrecedenceAwareEvaluator.java">The primary class which implements the evaluation</a>.</li>
+  <li><a href="/downloads/code/precedence/precedence-example.zip">A zipfile containing the evaluator class, supporting types, and a Main class to demonstrate it</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/precedence-aware-evaluation/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

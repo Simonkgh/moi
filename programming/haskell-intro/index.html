@@ -1,0 +1,891 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Haskell for Object Oriented Programmers</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Haskell for Object Oriented Programmers</h1>
+    <aside>First published on: March 15, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a></p>
+      <h1 id="an-introduction-to-haskell-for-object-oriented-programmers">An Introduction to Haskell For Object Oriented Programmers</h1>
+
+<p>This article gives an overview of the main features of the Haskell programming language, in terms familiar to developers who work with object-oriented languages. It also has some thoughts on an aspect of the language not presented in beginner tutorials: how suitable it is for large-scale development projects.</p>
+
+<p>Warning: this article is being written by an experienced developer but a Haskell beginner! It’s really notes-to-myself as I (experienced C/C++/Java/Javascript/Perl developer) learn the basics of Haskell. Maybe they are useful to you, maybe not. They certainly are not 100% correct. However guides written by Haskell experts are often unhelpful as the author has already forgotten how confusing some concepts were when they were learning…</p>
+
+<p>There are several very good Haskell tutorials online, and this article will <em>not</em> attempt to compete with them. What you’ll find here is here is a set of notes on the similarities/differences between Haskell and languages I (and presumably you) already know, such as Java, Javascript and C++. I would suggest skimming this article to see if Haskell might be for you. If yes, then skim again to see what this article has to say about similarities and differences between Haskell and other languages - but don’t get hung up on details. Then go find a good Haskell tutorial (see below) and work through it. When you find a concept confusing, look back here to see if there is anything here that can help.</p>
+
+<p>Again: this is NOT a full tutorial on Haskell; only enough syntax is explained here to help explain the big-picture concepts of Haskell as I see them.</p>
+
+<p>And by the way, there are some notes on Haskell tools and development environments at the end of this article.</p>
+
+<h1 id="why-learn-haskell">Why Learn Haskell?</h1>
+
+<p>Well frankly at the moment, the best reason appears to be “because it’s interesting”. Haskell is used fairly often in Academia, but apparently rarely in commercial settings (so far). The links below show the relative popularity of different programming languages, and Haskell does appear on the list somewhere about the level of Lisp/Scheme/Erlang but far far below C/C++/C#/Java and other mainstream imperative/object-oriented languages.</p>
+
+<p>The main Haskell website does have a list of some large Haskell users - including a number of financial trading institutions. Unfortunately the number of available jobs is very low:</p>
+
+<ul>
+  <li>monster.com “Haskell” in the UK: 10 matches and none of them wanted Haskell as the <em>primary</em> skill. Search for <em>Java</em>: 1000+ matches</li>
+  <li>jobsite.co.uk reported 6 Haskell jobs, 1594 for <em>Java</em>.</li>
+  <li>dice.com: 14 jobs us-wide, 13400 for Java</li>
+</ul>
+
+<p>Nevertheless, I feel there is a good chance that use of Haskell will grow significantly over the next few years. The list of “cool things about Haskell” below has some important items in it - and particularly how good Haskell is at writing code that can run in parallel on multiple processors. The trend is to computers with many cores in them, so this can only be of benefit to Haskell.</p>
+
+<p>The F# programming language for Microsoft’s CLI has many similarities with Haskell, and is currently ranked at place 14 in the Tiobe language popularity ratings. Learning Haskell would certainly make it much easier to learn F# later if desired.</p>
+
+<p>Haskell has until recently had little influence on the development of other mainstream languages (except F#). However this seems to be changing; the next wave of upcoming languages seem to borrow more often from functional programming and Haskell in particular. Perl6, Go, and Rust all show a number of features that Haskell has had for a long time. Rust is of particular interest: this language has not yet even reached “1.0” state at the current time, but there are very good chances that it will become one of the most important development languages ever. It appears to offer many of the features of C and C++ (two of the most popular languages ever) while avoiding many of their disadvantages. And the developers of Rust are clearly Haskell fans who have borrowed many ideas - ie learning Haskell will help you learn Rust. Possibly Scala could also be considered ‘mainstream’, and there are some common features between Scala and Haskell.</p>
+
+<p>For current Haskell popularity/usage, see:</p>
+
+<ul>
+  <li>
+<a href="http://langpop.com/">http://langpop.com/</a>  - particularly the Ohloh graph (“# of people committing code in language X to any open-source project”)</li>
+  <li><a href="http://www.tiobe.com/index.php/content/paperinfo/tpci/index.html">http://www.tiobe.com/index.php/content/paperinfo/tpci/index.html</a></li>
+  <li><a href="https://www.haskell.org/haskellwiki/Haskell_in_industry">https://www.haskell.org/haskellwiki/Haskell_in_industry</a></li>
+</ul>
+
+<p>For a list of good Haskell tutorials, see:</p>
+
+<ul>
+  <li><a href="https://www.haskell.org/haskellwiki/Tutorials">https://www.haskell.org/haskellwiki/Tutorials</a></li>
+</ul>
+
+<p>I would particularly recommend “Learn You a Haskell” (at least, up to the part about monads and functors which I found too theoretical). See also:</p>
+
+<ul>
+  <li><a href="http://howistart.org/posts/haskell/1">http://howistart.org/posts/haskell/1</a></li>
+</ul>
+
+<h1 id="whats-interesting-about-haskell">What’s Interesting About Haskell</h1>
+
+<p>The following is very cool:</p>
+
+<ul>
+  <li>higher-order functions, ie functions are objects (typical of many functional programming languages, and some others too, particularly Javascript)</li>
+  <li>immutable variables and data-structures (no modification-in-place, ever)</li>
+  <li>pure functions (functions without side-effects)</li>
+  <li>clean separation of pure and impure code (IO actions)</li>
+  <li>excellent static type system: strict compile-time types and nice user-defined types</li>
+  <li>abstract interface definitions for types (typeclasses) - somewhat similar in effect to object-oriented interfaces</li>
+  <li>terse (ie lots of functionality can be implemented with little boilerplate code)</li>
+  <li>good module system for large-scale programming</li>
+  <li>good standard build tool (Cabal for Haskell is similar to Maven for Java)</li>
+  <li>good package-manager for obtaining addon libraries (Cabal is the equivalent of Maven or CPAN)</li>
+  <li>useful for a wide range of purposes including server-side data processing, and modern interactive graphical programs</li>
+  <li>has both a compiler and an interpreter</li>
+  <li>several very good tutorials on the language</li>
+  <li>active and open community (wiki, etc)</li>
+  <li>compiler supported on a wide range of platforms (LLVM back end): x86 32/64bit, ARM, PowerPC, …</li>
+  <li>standard compiler, interpreter, and standard libraries are all open-source</li>
+</ul>
+
+<p>The following is not so cool:</p>
+
+<ul>
+  <li>ugly syntax (bearable, but takes some getting used to)</li>
+  <li>not widely used in industry/commerce (mostly academic/research usage at the current time)</li>
+  <li>little IDE support so far (most developers use emacs or vim)</li>
+  <li>lazy evaluation makes estimating memory usage difficult and interactive-debugging hard</li>
+  <li>flaky tools that <em>almost</em> work, but then report some incomprehensible error</li>
+  <li>rather unhelpful compiler errors (I’m looking at you, GHC).</li>
+  <li>rather academic/theoretical approach in FAQs and postings on stackoverflow.com</li>
+  <li>unstable binary API, ie libraries are usually distributed in source form and recompiled by each developer</li>
+  <li>parallel programming APIs are not yet fully matured, ie people are still experimenting with threading models and inter-thread communications</li>
+</ul>
+
+<p>The “immutability/purity” is particularly interesting. Haskell apparently takes this further than even most functional languages.</p>
+
+<p>Given my experiences working on many very large software projects, I have developed a pretty good feel for what will and will not work in a serious commercial software development environment. As far as I can see, Haskell has all the necessary features for quality large-scale software development: proper types and modules, good compilers, good unit-test frameworks, good build-systems, and a reasonable selection of libraries. However there are a few significant issues: IDE and debugging support, unstable binary APIs, and the general lack of available skilled developers. These are at least fixable problems. And for smaller or personal development projects these are less important, and Haskell could be a lot of fun to work with.</p>
+
+<p>Competitors:</p>
+
+<p>The following are functional or partly-functional languages with some similarities to Haskell:</p>
+
+<ul>
+  <li>F#</li>
+  <li>Rust</li>
+  <li>Clojure</li>
+  <li>ML (strictly typed)</li>
+  <li>Miranda (lazy by default)</li>
+  <li>Erlang: immutable variables</li>
+  <li>Lisp (non-typed, “multi-paradigm”)</li>
+  <li>Scheme (non-typed, partly-functional)</li>
+  <li>Scala</li>
+  <li>Dylan</li>
+  <li>Racket</li>
+  <li>OCaml</li>
+</ul>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Functional_programming">https://en.wikipedia.org/wiki/Functional_programming</a></li>
+</ul>
+
+<h1 id="why-compare-haskell-to-java">Why Compare Haskell to Java?</h1>
+
+<p>Everybody learns something new by comparing it to something already known. This article provides an introduction to Haskell by comparing it to Java, JavaScript and C++. However beware of thinking two things are <em>identical</em> when they are actually just <em>similar</em>, or <em>have a common purpose</em>. Below, various features of Haskell are described in terms of their nearest equivalent in Java, but this is never 100% accurate - it is just intended to provide some context. The only way to really understand Haskell is to write programs in it, and learn to “think in Haskell” (something I’m still working on).</p>
+
+<p>Learning a human language is similar: we start by mapping foreign nouns and verbs 1:1 to equivalents in our native language. Then we learn some words that have no exact equivalent. And eventually we stop translating mentally and actually <em>think</em> in the new language. This article is really at stage 1: helping to map Haskell back to the nearest similar concepts in other more familiar languages.</p>
+
+<h1 id="history">History</h1>
+
+<p>The late 80s was a boom time for functional languages in academia, but with so many options none of them achieved decent momentum and maturity. A committee formed to take the best ideas from existing languages and form something more stable/long-term for teaching and research. Being academics, however, the new language immediately sprouted a bunch of new features found in none of the other existing languages - ie itself became a ‘research’ project rather than just stabilising existing ideas. Fortunately the new ideas worked well and Haskell became one of the most popular functional languages. Haskell itself mostly stabilised around 1998 (“Haskell 98”). A new Haskell standard was issued in 2010, but the changes were minor. As with any language, people are still researching extensions/improvements - something also familiar to Java users!</p>
+
+<p>Haskell has a strong open-source and open-community focus. The primary compiler (GHC) is fully open-source, as are the standard libraries.</p>
+
+<p>Haskell is not a ‘minimalist’ language; where there are several equally good ways to express something, the Haskell language pragmatically offers redundant syntax to allow the user to chose their preferred mode of expression. It isn’t a <em>huge</em> language, but does lack the simplicity of the Lisp derivatives.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://en.wikipedia.org/wiki/Haskell_%28programming_language%29">Haskell on Wikipedia</a></li>
+  <li><a href="https://ghc.haskell.org/trac/haskell-prime/wiki">The Haskell Standards Group</a></li>
+</ul>
+
+<h1 id="compilation-and-interpretation">Compilation and Interpretation</h1>
+
+<p>Haskell can be compiled into a native executable application for linux, windows, etc. The user of that application then has no idea which language the app was originally implemented in. Haskell code can be compiled for quite a wide range of operating systems and architectures.</p>
+
+<p>There is also an interpreter which allows code to be manipulated interactively for experimenting and debugging. As typing expressions requiring multiple lines of text into the interpreter is awkward, this is best done by writing code in a text editor then loading it into the interpreter for interactive experiments.</p>
+
+<p>There are a number of projects working on Haskell-to-Javascript compilation. At the current date (early 2015), several projects are ‘nearly working’; maybe 2015 will be the breakthrough year. In any case, there do not appear to be any major technical problems preventing (some day) running Haskell code in browsers!</p>
+
+<p>There <a href="https://wiki.haskell.org/GHC:FAQ#Why_isn.27t_GHC_available_for_.NET_or_on_the_JVM.3F">isn’t currently</a> a way to run Haskell on the Java or .NET virtual machines. However the <a href="https://github.com/Frege/frege/wiki/Differences-between-Frege-and-Haskell">Frege language</a> does run on the JVM, and is a partial implementation of Haskell.</p>
+
+<h1 id="immutability">Immutability</h1>
+
+<p>In Haskell, all data is immutable. That is, it behaves as if every memory location in computer RAM can only be written to once; to make any change to a datastructure it is necessary to create a <em>new</em> datastructure which is similar to the original. Of course that would require infinite RAM; in practice a garbage-collector detects when memory is not accessable and makes it available for reuse.</p>
+
+<p>There are not many popular languages in which data is fully immutable, but many new languages at least provide the option to easily define immutable datastructures, and use them extensively in the standard libraries.</p>
+
+<p>Immutable data has great benefits in multi-threaded code. Any datastructure can be read by multiple threads concurrently without locks because it is impossible for any of the threads to modify it. This is particularly useful in Haskell, as this feature together with <em>lazy evaluation</em> allows some interesting approaches to writing parallel code; see later.</p>
+
+<p>In some cases, immutability allows code to be faster and use less ram than with mutable data. Consider a tree structure A, and code that then modifies A to create tree B, and modifies A to create tree C. When the tree structure is mutable, then for safety the code will need to deep-copy A at least once, otherwise it will end up with a <em>single</em> tree that has the changes from both B and C. With immutable data, tree B can safely contain references to any nodes from A which it did not change - and tree C can do the same.</p>
+
+<h1 id="pure-functionality">Pure Functionality</h1>
+
+<p>A function whose return value depends <em>only</em> on the input parameters is called a “pure” function. These are good for program readability; the behaviour can be considered a “black box”. They are also very nice to write tests for. And most importantly, given two “pure” functions <code>foo(p)</code> and <code>bar(q)</code> then as long as input parameter q is not related to the return value of function foo, or p to the return-value of function bar, then it doesn’t matter which order the two functions are invoked in. The compiler can invoke bar before foo, or delay the computation of one until the return value is actually used. It could even theoretically evaluate them <em>at the same time in different threads</em>, although currently Haskell doesn’t do this unless some special operators are used. If the compiler sees that the return value of a “pure” function is not used, it can also completely ignore the function, as it knows that the function-call has no “side effects” - ie the compiler can automatically remove ‘dead code’.</p>
+
+<p>Unfortunately a function is not pure if it reads data from any external source, eg disk, network or keyboard. It is also not <em>pure</em> if it reads the system clock, invokes a hardware random-number-generator, etc. Fortunately, Haskell has a very clever way of detecting whether a function is <em>pure</em> or not at compile-time.  All functions in the standard Haskell library which are <em>impure</em> (eg functions reading disk, network, keyboard) return an object of type <code>IO&lt;T&gt;</code> - and using a clever design pattern (monads), any function which manipulates that IO object is itself forced to have a return-type of <code>IO&lt;?&gt;</code>. Therefore, any function which is known to return type IO is <em>impure</em>, and any function which does not return type IO is clearly <em>pure</em>. The way the IO type works can thus be considered a kind of “tainting” system, where any code that is ‘tainted’ (impure) also causes any other code that comes in contact with it to also become tainted (impure). A real-world Haskell program is always made up of some “high-level” impure code which invokes lower-level functions which may be pure or impure. The trick of good design is to structure the program so that as much of it as possible remains ‘pure’.</p>
+
+<p>Standard-library functions which generate output (write to disk, to the console, etc) don’t usually return a value, ie could be in some ways considered pure. However <em>error codes</em> can be considered non-pure: non-repeatable behaviour that can’t be deduced just from the input parameters. Therefore such code is also forced to return type <code>IO&lt;T&gt;</code> (as with input) so that such code is also clearly separated from the ‘truly pure’ code.</p>
+
+<p>In a multi-threaded environment, a function can obviously only be ‘pure’ if its input-parameter is immutable. Without this, invoking the function with a parameter p and then having a separate thread change that parameter at a random time will cause the function to return different values depending on the behaviour of the external thread. So Haskell’s <em>purity</em> feature relies on its <em>immutability</em> feature.</p>
+
+<p>There is one other aspect to performing input and output, apart from unpredictable values: the operations must be performed <em>in the correct order</em>. The Haskell compiler can (and does) do a lot of optimising of pure code, including reordering calls and discarding functions whose return value is not used. This kind of thing must be suppressed for input/output operations, and this is achieved by having the IO type implement the <em>monad</em> design pattern; see later.</p>
+
+<p>The way that IO types cleanly interact with pure functions is a major improvement over many other functional languages. Languages like Erlang claim to be “functional” because a function can take an immutable parameter - ie references to <em>memory</em> are pure. However there is nothing to stop their ‘pure’ functions from doing input or output, or doing other things that have ‘side effects’. They are therefore “functional as long as the programmer does the right thing” while Haskell <em>knows</em> whether the programmer has done it right.</p>
+
+<h1 id="static-compile-time-typing">Static (compile-time) Typing</h1>
+
+<p>When first looking at Haskell source-code, you can be forgiven for thinking it looks like a dynamically-typed language such as Javascript, Python or Ruby. However this is not the case: Haskell has strict compile-time typing for all variables - stricter than Java in fact. The compiler simply <em>figures out</em> the type for most variables from clues in the source-code such as the operations that are applied to the variables.</p>
+
+<p>It is possible to write Haskell with explicit types everywhere if you want; for example “<code>someexpr::Integer</code>” explicitly specifies that the expression always produces an integer value. It is generally regarded as “best practice” in Haskell for the programmer to explicitly define types for:</p>
+
+<ul>
+  <li>the input parameters and return type of all functions <code>exported</code> from a module</li>
+  <li>the input parameters and return type of all “important” internal functions within a module</li>
+</ul>
+
+<p>However usually programmers leave out the explicit type declarations for local variables and small functions, on the principle that they are obvious by context.</p>
+
+<p>This “type deduction” approach is becoming more and more common in new programming languages; for example Ceylon, Kotlin and Rust all provide this.</p>
+
+<p>Functions can be ‘overloaded’ as in C++ or Java, ie multiple functions with the same name but different parameter types can be defined and, when code is written which invokes that function, the appropriate one will be selected based on the types of the parameters at the calling site. Unlike in Java, a Haskell function can also be overloaded based on its <em>return type</em>, eg two functions with the same parameters but different return-type can be defined, and which one will be invoked depends on the type that the call-site requires the returned value to be. This is quite common; for example to parse a String as an integer value (equivalent of Integer.parse(String) in Java) is written “<code>i = read "1234" :: Integer</code>” (invoke the read function taking a string and returning an Integer).</p>
+
+<h1 id="function-signatures">Function Signatures</h1>
+
+<p>While this article is <em>not</em> a Haskell tutorial, later examples will need to show some function definitions, and their “signatures”. So as a brief intro:</p>
+
+<p>Haskell functions don’t need explicit declarations of parameter and return types. The functions <em>are</em> still very strictly typed (more than Java) but the compiler figures out the types itself. Nevertheless it is possible to explicitly declare the types in the source-code and this is considered good style for all but trivial functions. Because the declarations are optional, it is separate from the function itself - though by convention on the previous line.</p>
+
+<p>Function prototype “<code>myfunc :: MyType -&gt; String</code>” is roughly equivalent to Java declaration “<code>String myfunc(MyType p0)</code>”.</p>
+
+<p>Function prototype “<code>myfunc :: String -&gt; String -&gt; MyType</code>” corresponds to “<code>MyType myfunc(String, String)</code>”. Note that in the sequence of “arrows”, the last item is the return-type and the others are the input parameters. Although initially weird-looking, there <em>is</em> a good (well, at least reasonable) reason for this syntax and after a while it becomes bearable. However this is one of the cases where Haskell’s slightly annoying academic roots show through (the syntax corresponds to partial function application).</p>
+
+<p>While talking about functions, it is also worth describing Haskell’s syntax for <em>invoking</em> functions. Haskell function-call syntax doesn’t use parameters; “<code>doit "foo" 17</code>” is equivalent to “<code>doit("foo", 17)</code>” in C-like languages. It feels rather weird at first, but there are good reasons for this syntax and you get used to it after a while.</p>
+
+<p>And (because this comes up later) function-names don’t have to be alphanumeric! The symbol “+” is a function-name, as is “<code>&gt;&gt;=</code>”. You can even define your own functions using any sequence of characters as the name. By default, a non-alphanumeric function-name is considered to be an “infix” operator, ie is expected to have two parameters and is invoked via “param1 functionname param2”. However special instructions can be used to control whether use of a function-name is prefix or infix, and even what the parsing precedence should be.</p>
+
+<h1 id="declaring-new-data-types">Declaring New Data Types</h1>
+
+<p>Haskell has an elegant and powerful system for declaring types. I expect that this works very well in large-scale programming, ie where the source-code is so large that the available types and APIs, their documentation, and the checks that the compiler automatically applies, are important for learning how existing code works and is meant to be used. I would also expect that the type information available to the compiler would also allow powerful refactoring, IDE assistance, and code analysis tools to be built - though it appears that not much work has yet been done in this area.</p>
+
+<ul>
+  <li>The only truly builtin types are lists and tuples; the standard libraries also provide arrays, maps, trees and similar structures - all <em>immutable</em>, ie a change produces a new datastructure.</li>
+  <li>Keyword <code>type</code> allows <em>type aliases</em> to be defined - ie create shorter names for existing types which are still compatible with the originals.</li>
+  <li>Keyword <code>newtype</code> allows the creation of an alias for another type which is <em>not</em> compatible (eg “Height” being a standard Integer, but not automatically converted to/from it).</li>
+  <li>Keyword <code>data</code> allows declaring data-structures roughly equivalent to C structs and unions (though without control over the actual memory layout).</li>
+  <li>Keyword <code>class</code> allows definition of “interface types” (aka traits in some languages) and keyword <code>instance</code> then allows a developer to specify how that interface is implemented for some <em>datatype</em>. This is somewhat different from interface/class definitions in Java or C++, but provides similar powers to develop code based on abstract APIs.</li>
+</ul>
+
+<p>Generic types (aka “templates” in C++) are consistently and powerfully integrated into the Haskell type system (much better than Java or C++), making it possible to write code that can be applied to a range of datatypes. This should make programs shorter and improve code reuse.</p>
+
+<p>In the examples below, datatype declarations are usually shown on a single line. However it is also possible to split them across multiple lines, and to comment them nicely. You may be breaking with Haskell tradition (which appears to include <em>very</em> terse comments, and one-character variable names), but it can be done.</p>
+
+<h1 id="structured-data-types">Structured Data Types</h1>
+
+<p>Structured types (ie types that have members like C structs or Java classes) can be declared as follows:</p>
+
+<div class="CodeRay"><div class="code"><pre><code class="language-haskell">data MyType = Variant1 String Integer | Variant2 String Bool [Integer]</code></pre></div></div>
+
+<p>There is no direct equivalent for this in C, C++ or Java. The name on the left (MyType) declares a new type that can be used in places like function parameter declarations, or members of other types. However the “storage” required for this type is not defined there; instead on the right-hand-side is a <em>list</em> of ways to create a value of this type, separated by pipe characters.</p>
+
+<p>One way to think of this is that each of the “variants” on the right-hand-side is a class declaration (class Variant1 has two members, class Variant2 has three) and that the type on the left is a common interface for the two variants. However unlike interface/implementation, it is not possible to declare additional variants of MyType later.</p>
+
+<p>An equally valid way to think of this is that each of the “variants” on the right-hand-side is a function-prototype equivalent to a constructor-method, ie MyType is a final class with two constructors: Variant1 which takes a String and an Integer, and Variant2 which takes a String, a Boolean, and a list-of-Integer. Each function then returns a tuple, eg “<code>Variant1 "foo" 17</code>” is a function-call which returns a tuple “<code>(Variant1, "foo", 17)</code>” which considered by the compiler to be of type MyType. The Haskell terminology for things like Variant1/Variant2 is actually <em>a value constructor</em>, ie a function that constructs a value. So perhaps this view of the world is more Haskellish. As further support, try “:t Variant1” at an interactive Haskell prompt; this will display the auto-deduced “type” of Variant1. The result is “<code>Variant1 :: String -&gt; Integer -&gt; MyType</code>”, ie Variant1 is a function taking a String and an Integer and returning a MyType. By the way, the ‘tuple’ description above is just an analogy - Haskell behaves as if this were true; I have no idea how the actual implementation is done.</p>
+
+<p>The set of available variants is fixed; once a datatype is defined, no new variants can be added to it. Each datastructure remembers which variant it is (as with a C “tagged union”); this is important, as functions that take a datatype as a parameter often contain code to handle each different variant appropriately - and uses the ‘tag’ to tell them apart (a little bit like ‘instanceof’). Because the set of variants is fixed, the compiler can report an error in such code if a case has been missed, similar to code in Java which uses ‘switch’ on an enum.</p>
+
+<p>It is quite common for a datatype to have just one variant, in which case the variant name (value constructor function name) is usually the same as the datatype name: “<code>data MyIntegerPair = MyIntegerPair Integer Integer</code>”.</p>
+
+<p>Note that a datatype declaration defines no <em>functions</em> (methods) to operate on values of that type; it simply defines how to create instances of that type (ie what members can be stored). Associating behaviour (an API) with a datatype is done separately when desired; see later.</p>
+
+<p>There is another style of datatype-declaration that you will often see/use:</p>
+
+<div class="CodeRay"><div class="code"><pre><code class="language-haskell">data PrimaryColor = Red | Green | Blue</code></pre></div></div>
+
+<p>This is equivalent to a simple Java enum: “<code>enum PrimaryColor {Red, Green, Blue}</code>”.</p>
+
+<p>Because a variable of type <code>MyType</code> can hold either a Variant1 or a Variant2, it is also called a <a href="http://en.wikipedia.org/wiki/Tagged_union">union type</a> or “sum type”. And both “tuples” and “union/sum types” can be called <a href="http://en.wikipedia.org/wiki/Algebraic_data_type">algebraic data types</a> or ADTs for short; basically “things usable with pattern matching” (see below) are an ADT.</p>
+
+<h1 id="deconstructing-values-with-pattern-matching">Deconstructing Values with Pattern Matching</h1>
+
+<p>Datastructures created with a “value constructor” as described above can be passed around as an opaque reference for a while, but eventually something will need to access the data within the value.</p>
+
+<p>When object-oriented code defines an interface and then multiple implementations of that interface, each ‘value’ contains a pointer to its type which contains a table of functions which are appropriate for that value. Those functions then have the ability to directly read (and write) ‘members of the class’ safely, as the function is specific for the value type. Haskell can do something similar with ‘type classes’ (see later). However for “sum types” created with the ‘data’ keyword, Haskell uses the approach shared by almost all functional programming languages: deconstruction by pattern-matching.</p>
+
+<p>When the ‘data’ keyword is used to define a type with one or more variants, the set is <em>fixed</em> - unlike an OO interface with an open set of implementations. It is therefore possible for the programmer to provide a function which accepts a value of that type and then process each variant appropriately. The end effect is like defining an interface + implementations, but with a static method that does a big switch-statement over the possible concrete types rather than using virtual methods. As modern CPUs don’t like invoking methods through a table-of-function-pointers (it isn’t good for their caches or branch-prediction), the switch-statement holds a minor performance benefit.</p>
+
+<p>There is a nice syntax for performing this “switch statement over variants”: pattern-matching. This process first verifies that the value was constructed using the expected value-constructor, and then binds each “member” (each argument originally passed to that value-constructor) to a new variable-name. The variable names to use are specified in the pattern, or “_” if that member is not actually needed.</p>
+
+<div class="CodeRay"><div class="code"><pre><code class="language-haskell">import Data.Char as DC
+
+data MyType = -- example structured type
+    Variant1
+       String   -- name
+       Integer  -- category
+    | Variant2 String Bool -- name, eligible
+       [Integer] -- categories
+
+uppername :: MyType -&gt; String -- function 'uppername' takes a MyType and returns a string
+uppername o = case o of
+    -- when o is created via function Variant1 then bind localvar "name" to the
+    -- original first param and then return the uppercase version of that value
+    (Variant1 name _ )  -&gt; map DC.toUpper name
+    (Variant2 name _ _) -&gt; map DC.toUpper name  -- as above for Variant2
+
+lowername :: MyType -&gt; String -- function 'lowername' takes a MyType and returns a string
+lowername (Variant1 name _) = map DC.toLower name
+lowername (Variant2 name _ _) = map DC.toLower name</code></pre></div></div>
+
+<p>Here, we have defined two different functions (uppername and lowername) that both extract the ‘name’ from a MyType object: it can be found in the first member of a Variant1, or the first member of a Variant2. Note that in each case, we have provided an implementation for all possible variants of the parameter-type (MyType). Both implementation styles are valid, and it is a matter of taste which is used. And the declarations have been laid out on multiple lines, with comments, just to show it is possible.</p>
+
+<p>This works because every value “remembers” which <em>value constructor</em> it was created with.</p>
+
+<p>I must admit that after so many years of Object Oriented development, this feels like a step back to the old days of C. However this approach has been proven to work, ie large systems have been built without virtual methods. And Haskell <em>does</em> have a different way of dispatching on type (see later) when needed.</p>
+
+<p>Note also that there is no concept of “type hierarchies” with structured data types - no supertype/subtype relations except between a type and its fixed set of variants. Many of the problems solved with type-hierarchies in OO are instead solved with generics in Haskell or by passing closures (higher order functions) around.</p>
+
+<h1 id="records">Records</h1>
+
+<p>When a value-constructor takes just a couple of values (as in the example above) then naming them isn’t always important. However for types with more fields, it is possible to write something that looks more like a C struct declaration - ie a list of (name, type) pairs. This is actually just a wrapper for the tuple-like behaviour shown above, but does allow you to extract a field from a value “by name” rather than using pattern-matching. See any good Haskell tutorial for examples.</p>
+
+<h1 id="private-data">Private Data</h1>
+
+<p>Haskell has a module system; a module contains a set of type and function declarations, and each module declares which functions, types, and value-constructors are exported. In particular, it is perfectly valid to export a type but not its value-constructors. In the section above on <em>destructuring</em>, we have seen that the value-constructors are necessary in order to perform matching on a value and extract the internal members. So simply refusing to export value-constructors for a type makes its data ‘private’. Code inside the same module can of course always see those constructors, ie Haskell has the equivalent of ‘public access’ (export the value-constructor) or ‘package-scope’ access (don’t export it) but not ‘private scope’. That doesn’t really matter; module-scope (package-scope) protection is still sufficient to keep code manageable.</p>
+
+<h1 id="objects-and-functions">Objects and Functions</h1>
+
+<p>A quick interlude here: this article is trying to use analogies between a function-based language and an object-oriented one. However you need to keep in mind that when an example says “invoke method <code>doit</code> on object Foo”, what I really mean is that Haskell has a function like:</p>
+
+<pre><code>doit :: Foo -&gt; Integer -&gt; Foo
+</code></pre>
+
+<p>ie there is a function named <code>doit</code> which takes a Foo datastructure as a parameter (and possibly some other parameters)  - and returns something (maybe another Foo similar to the original, or maybe something else). Think perhaps of Python and its explicit ‘self’ parameter.</p>
+
+<h1 id="type-declarations-and-generics">Type Declarations and Generics</h1>
+
+<p>Java types can be generic, eg</p>
+
+<div class="CodeRay"><div class="code"><pre><code class="language-java">  <span class="type">class</span> <span class="class">HolderOf</span>&lt;T,Q&gt; {
+    <span class="directive">final</span> T value;
+    <span class="directive">final</span> <span class="predefined-type">List</span>&lt;Q&gt; values;
+    HolderOf(T value, <span class="predefined-type">List</span>&lt;Q&gt; values) {
+      <span class="local-variable">this</span>.value = value;
+      <span class="local-variable">this</span>.values = values;
+    }
+  }</code></pre></div></div>
+
+<p>In Haskell, this is expressed quite similarly (but more concisely):</p>
+
+<div class="CodeRay"><div class="code"><pre><code class="language-haskell">data Holder t q = Holder t [q]</code></pre></div></div>
+
+<p>Because Haskell is very strictly-typed, generic types are used more extensively than Java. Fortunately, Haskell’s generics are better-designed than those of Java and are much easier to understand.</p>
+
+<p>There are also ways to express “constraints” on the generic types, similar to (but better than) Java’s “<code>&lt;? extends Widget&gt;</code>” and such code.</p>
+
+<p>In Haskell tutorials you will sometimes come across the term <a href="http://en.wikipedia.org/wiki/Type_constructor">Type Constructor</a>. Consider generic type definition <code>Holder</code> above as a Java function “<code>Type Holder(Type t, Type q) {...}</code>”, ie a function which takes two types as parameters, and returns a new type. Then writing “<code>Holder Integer String</code>” is not just a generic-type-declaration equivalent to “<code>Holder&lt;Integer,String&gt;</code>” but instead a compile-time invocation of a function that returns a type. Hence the term <em>Type Constructor</em>. It’s an interesting way of thinking about generic types. However I must admit, I found this concept rather weird and headache-inducing at first - and it isn’t really necessary; Haskell generics can also be considered to be roughly Java generic classes or C++ templates with a different syntax.</p>
+
+<p>Note that in Haskell documentation, the word ‘polymorphic’ refers to a type which has another type as a parameter (ie a “generic type”). This is entirely different from the meaning in OO development, where <a href="http://en.wikipedia.org/wiki/Polymorphism_%28computer_science%29">polymorphism</a> refers to an interface type with multiple implementations. This can be confusing!</p>
+
+<h1 id="type-classes-traits-interfaces-and-implementations">Type Classes (Traits, Interfaces and Implementations)</h1>
+
+<p>The word <code>class</code> means “category” or “group”; a Haskell typeclass is a group of types with common behaviour. A type can be made a member of the group by defining how to implement that common behaviour for the type. Object-oriented development is heavily focused on defining abstract interfaces and then providing multiple implementations of that interface; Haskell “type classes” provide somewhat similar functionality. However be careful not to draw <em>too</em> many analogies!</p>
+
+<p>While Haskell is a <em>functional programming language</em>, and shares many common features with other functional languages, not many others have anything like Haskell’s <em>type classes</em>. The feature has, however, inspired functionality in Go and Rust.</p>
+
+<p>An ‘interface’ named Widget can be defined as follows:</p>
+
+<div class="CodeRay"><div class="code"><pre><code class="language-haskell">  class Widget thisType where
+     function1 :: thisType -&gt; Param2Type -&gt; SomeReturnType
+     function2 :: thisType -&gt; OtherReturnType
+     ...</code></pre></div></div>
+
+<p>Despite the keyword <code>class</code>, this is defining the equivalent of an OO interface, ie a set of behaviours. However the next step is very <em>unlike</em> Java or C++ (but used in Go); given some <em>existing</em> type MyType, we can then provide “an implementation of the behaviours required by Widget over MyType” via:</p>
+
+<div class="CodeRay"><div class="code"><pre><code class="language-haskell">  instance Widget MyType where
+     function1 = ....implementation....
+     function2 = ....implementation....
+     ...</code></pre></div></div>
+
+<p>After this point, we can use a MyType wherever a Widget is needed. This is very nice; we can add behaviour to any existing type, including one from an external library. And this behaviour is <em>lexically scoped</em>, ie MyType can be used as a Widget by code that can see the above ‘instance’ declaration, but other code will not see it. And a type can have an unlimited number of such ‘implementations’ declared for it.</p>
+
+<p>Of course you cannot use ‘instanceof’ on a function parameter of type Widget; a Haskell value doesn’t have an internal pointer to “its class” which holds information about the static set of interfaces it implements (because Haskell is <em>not</em> an object-oriented language). But if a Widget value doesn’t hold a pointer to the virtual function table, then how are method-calls dispatched? Simple: any function which takes a parameter that is a “type class” gets a separate invisible parameter added automatically by the compiler, and this parameter is a table-of-function-pointers which the called function then uses to invoke ‘virtual methods’. So for:</p>
+
+<div class="CodeRay"><div class="code"><pre><code class="language-haskell">myfunc :: Widget -&gt; String   -- function `myfunc` takes a Widget (typeclass aka interface) and returns a string
+myfunc widget = ....         -- some implementation
+
+caller :: MyType -&gt; String    -- function `caller` takes a MyType (sum type aka concrete type) and returns a string
+caller myTypeVal = myfunc myTypeVal  -- just pass the MyType parameter as a Widget</code></pre></div></div>
+
+<p>The function <code>myfunc</code> gets an implicit parameter which is a table-of-function-pointers with an entry for each function in typeclass <code>Widget</code>. The function <code>caller</code> then passes the table defined in the <code>instance Widget MyType</code> definition, ie the table that maps the operations of abstract typeclass <code>widget</code> onto the actual widget parameter passed (a MyType value).</p>
+
+<p>Such tables-of-function-pointers are called “Dictionaries”, and this kind of virtual-method-dispatch is called “dictionary passing”. The nearest equivalent in OO programming is perhaps the “adapter” design pattern, where a helper object is created to implement one interface and forward to another object - but that is only a rough approximation. Note that the name ‘dictionary’ doesn’t imply function-lookup-by-name (as in Javascript); functions can be found at fixed offsets within the table.</p>
+
+<p>While this description has used a lot of object-oriented terminology such as “method”, Haskell of course does <em>not</em> have methods. The ‘class’ declaration is actually saying “a value of type T can be passed as a parameter where a Widget is required if the compiler has seen (at the calling point) an instance declaration for type T”. The instance declaration produces a suitable “table of pointers” (one for each prototype in the class declaration) which point to the corresponding function that implements that function for type T. In most (but not all) cases, the functions in a class declaration will take a value of that type as the first function parameter - like Python’s <code>self</code> parameter. There is no “implicit this reference” functionality, and no oo-style “value.method” invocation syntax.</p>
+
+<p>Invoking a function with the first parameter being a variable whose type is an <em>instance of a typeclass</em> will invoke the corresponding “virtual” function.</p>
+
+<p>The existence of typeclasses is another example of Haskell’s pragmatic approach. Applications can be built without them (other functional languages work, and don’t have typeclasses), but Haskell could perhaps borrow Perl’s motto: “there’s more than one way to do it”. Typeclasses allow expressivity, and expressivity is good (within limits).</p>
+
+<h1 id="type-hierarchies-not">Type Hierarchies (not)</h1>
+
+<p>Even with typeclasses, there is no direct concept of supertype/subtype. However there is something that has a similar effect; a <code>class</code> declaration can require the type parameter to first be of some other typeclass (or typeclasses). An ‘instance’ declaration will then produce a compile-error if applied to a type that does not fulfil the requirement.</p>
+
+<p>For example, we could require that our Widget typeclass (interface) can only be defined (implemented) for types which already implement the standard Ord typeclass (equivalent to java.lang.Comparable). Any method that takes a MyType parameter can therefore be certain that the parameter also implements the Ord typeclass (interface) - and the “dictionary” passed will contain entries for both Widget and Ord functions.</p>
+
+<h1 id="closures-and-laziness">Closures and Laziness</h1>
+
+<p>Haskell is defined as a “lazy functional language”. This means that each expression written by the programmer is actually evaluated only when needed. In effect, each expression is a ‘closure’ that is evaluated only on-demand. Yes, <strong>every expression</strong>. Laziness is everywhere in Haskell, and you need to understand it. Nevertheless, it isn’t the most important thing about Haskell; other functional languages work fine without laziness.</p>
+
+<p>To explain it, a short detour into “partial function application” is useful. Given a function with N parameters, it is possible to “bind” one of the parameters to a value thus producing a new function that takes only N-1 parameters. And if you do this repeatedly, you eventually get a function that takes no parameters. This isn’t easy to express in Java so here’s a Javascript example instead:</p>
+
+<pre><code>var f2 = function(i,j) {...}  // define function with two params
+var f1 = function(j) { return f2("hello", j); }
+var f0 = function() { return f1("world"); }
+</code></pre>
+
+<p>Partially-applied functions are commonly used in Haskell; the standard example is “inc = + 1” (or more readably, “inc x = x + 1”), which defines inc to be a function which adds one to its parameter. This is “partially applying” the binary <code>+</code> function.</p>
+
+<p>Note that other languages use the term “closure” when a function is defined which “captures” values; a partially-applied function is effectively the same thing as a closure, though as far as I can tell the term “closure” is not used in Haskell documentation or tutorials. Haskell functions never refer to external data except their parameters, which simplifies things somewhat.</p>
+
+<p>Laziness is in <em>my view</em> just the above principle applied until there are no parameters at all. The result is a reference to a function like f0 above which can produce a value when necessary, but hasn’t computed it yet. At runtime, <em>every</em> expression in a Haskell program produces one of these “functions with no arguments”, rather than evaluating the expression immediately. Because Haskell functions are <em>pure</em>, there is a nice optimisation that Haskell can provide too: evaluating a pure function multiple times with the same parameters is pointless as it will always return the same value - so once a function with zero parameters has been evaluated once, it simply can be replaced with its value. These “lazy expressions” are therefore sometimes referred to as “thunks” which are either a function (not yet evaluated) or a value.</p>
+
+<p>In the GHCi interactive environment, try this:</p>
+
+<pre><code>let x = [(1+2),(3+4)]
+:sprint x
+</code></pre>
+
+<p>The output is “<code>x = [_,_]</code>”; the :sprint command shows unevaluated expressions as an underscore. So at the moment, x is a list of functions without params which return integers but which haven’t been executed yet - and only will be executed if some operation requires them to be evaluated.</p>
+
+<p>One of the amusing effects is that expressions that might throw an exception will not cause a failure if they are not used.</p>
+
+<p>Laziness is particularly useful in function parameters. The Haskell function-call “<code>foo longComputation1(params) longComputation2(params)</code>” is equivalent to “<code>foo(longComputation1(params), longComputation2(params))</code>” in other languages - but will only execute longComputation1 or longComputation2 if the invoked method actually needs that value.</p>
+
+<p>Consider Java expression “<code>bool x = cond1() || cond2()</code>”. When cond1 is true then cond2 is never evaluated. However it is impossible to write a function “<code>bool myOr(BoolExpr cond1, BoolExpr cond2);</code>” which works similarly because in Java all parameters passed to a method are evaluated eagerly before the method is invoked. You can write this in Haskell without problems.</p>
+
+<p>At this point you may be thinking ‘but I don’t declare variables or pass parameters that aren’t used’! Well, in Java it is not common - we avoid doing it because it is wasted time - but that avoidance is sometimes complex to implement. In Haskell you can quite happily initialise variables a, b and c to the result of complicated expressions and then pass them all to a function f that chooses which one to use; they are lazy (closures) so only the computations that are needed are performed. In Java we would probably apply the strategy pattern, ie declare a helper class that can compute a, b or c and then pass an instance of that class to function f so that it can call just the method it needs - a fair amount of boilerplate code that is unneeded in Haskell.</p>
+
+<p>Laziness also allows (and in fact, defaults to) a programming style that builds “pipelines” where data is produced at the head of the pipeline only when the last element in the pipeline “pulls” the next value. Python programmers who use ‘generators’ and the ‘yield’ keyword will be familiar with this. This style is good for memory usage (better than first generating all input data into a buffer, then passing the buffer to the next step). It also makes very elegant-looking programs: something that looks like “read all lines of file -&gt; stop if line empty -&gt; output line” actually only processes the file one line at a time - and stops reading the file on the first empty line. This isn’t too hard to do in one loop in an imperative language, but try to do this when the different steps are different functions!</p>
+
+<p>Sadly, many tutorials on Haskell describe “laziness” by immediately giving the example of a function that processes an infinite list. Yes, this is possible (and fun) but far less useful than the fact that laziness (a) allows “pull-based processing pipelines”, and (b) delays evaluation until needed.</p>
+
+<p>Warning: the fact that laziness tends to produce programs with this “pull style” of dataflow can make algorithms work “in reverse” to the intuitive feel of an experienced imperative developer. For example, the standard library function “foldl” is defined as processing a list from the start to the end, while “foldr” is described as processing from the end back to the start. However ‘foldl’ cannot be applied to “infinite length lists” while ‘foldr’ can, which at first sounds the wrong way around. The reason is laziness and the resulting “pull style” of dataflow.</p>
+
+<p>One commonly-cited problem with laziness is that it makes it difficult to estimate program run-time and memory-usage; it sometimes isn’t obvious <em>when</em> (or even if) a piece of code will be invoked. I’m also concerned about another potential effect: debugging. Adding breakpoints into code that is run “lazily” must be interesting, though I haven’t tried it yet myself. The GHCi environment does support breakpoints and “single-stepping” though. Sadly, no graphical debuggers are available AFAIK.</p>
+
+<p>Ref:</p>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Lazy_evaluation">https://en.wikipedia.org/wiki/Lazy_evaluation</a></li>
+  <li><a href="https://hackhands.com/guide-lazy-evaluation-haskell/">https://hackhands.com/guide-lazy-evaluation-haskell/</a></li>
+</ul>
+
+<h1 id="error-handling">Error Handling</h1>
+
+<p>Haskell code can throw and catch exceptions, but this ability has some restrictions and is used much less commonly than in C++/Java. Instead, errors are generally handled by returning an error-code to the caller as done in C. Now if you’ve programmed in C you will know that writing really reliable programs is hard because it is so easy to forget to check the return-code. Haskell does a lot better here; functions can return types like Maybe or Either, and the caller is forced to use “destructuring” to extract the desired result - at which point it is natural to also properly handle the error-case.</p>
+
+<p>Exceptions in all languages also tend to happen mostly in relation to input or output, which in Haskell means when using an IO action. While any code <em>can</em> throw an exception, it is generally only thrown from within the IO libraries. And catching exceptions can <em>only</em> be done from within an IO action. The standard libraries provide a function named <code>catch</code> which takes two parameters: an IO action to perform, and an exception-handler function; the function executes the provided action and if-and-only-if an exception occurs then the handler is invoked. Both the “normal case” and the exception-handler must return a value of type IO, which is what the catch function returns. Because exceptions can only be handled within an IO action, they are normally caught at a fairly “high level” within an application.</p>
+
+<p>Haskell does not have type hierarchies, and so the exception value which is thrown cannot be selected by type. The standard libraries do provide a number of functions to analyse the exception which was thrown (and which is passed to the handler-function), eg <code>isEOFError</code> and <code>ioeGetFileName</code>.</p>
+
+<p>I am a little concerned about the potentially “cascading” effect of adding a new error-condition to a function that previously did not have an error case, ie the danger that a change in return-type forces all calling functions to be updated, and the functions that call them, etc. In Java, having an existing method throw a new RuntimeException requires no changes in its callers - except at the appropriate place where error-recovery can sensibly be performed. Feedback from people who have used Haskell in large, robust Haskell apps with long maintenance histories is welcome!</p>
+
+<h1 id="resource-handling">Resource Handling</h1>
+
+<p>Sometimes code needs to <em>obtain a resource</em>, do some work, then <em>release the resource</em>. In C++, this is often done with constructors/destructors (RAII, Resource Acquisition Is Initialisation). In Java, it is often done in try/finally.</p>
+
+<p>In Haskell, such problems generally don’t occur in “pure” code; such resources are inherently non-pure (non-functional) and are therefore only in IO-related code. There is no built-in syntax for performing such operations, but the standard library has a function which takes three other functions as parameters, representing “open”, “exec” and “close” steps and executes them in the appropriate order.</p>
+
+<h1 id="monads">Monads</h1>
+
+<p>If you’ve read anything about Haskell elsewhere, you will have probably read about the dreaded ‘monad’ and how hard it is to understand them. It’s actually not that bad.</p>
+
+<p>Warning: There are a number of web articles which claim that all “beginner” tutorials on monads are pointless, and should be avoided - see <a href="http://two-wrongs.com/the-what-are-monads-fallacy">The Monads Fallacy</a> for example! There is some point to this; while the foundation of mathematics is Number Theory and Set Theory, it is not recommended to start preschoolers there. The usual process is first to learn counting, then integer addition/subtraction, then fractions, and working up to algebra. Number Theory only gets introduced at university level - if at all. Similarly, it is not necessary to truly understand what a monad is, as long as you can use one - and after learning how they are <em>applied</em> in Haskell, <a href="http://en.wikipedia.org/wiki/Grok">grokking</a> the theory becomes easier.</p>
+
+<p>In summary, you don’t really need to “understand monads” any more than you need to “understand set theory” to use class java.lang.Set. There are half-a-dozen <em>kinds</em> of monads in Haskell, and you can learn <em>how to use these in practice</em> from examples. Once you’ve seen enough examples (and written such code yourself), the nature of “monads in general” will eventually become intuitive (or so others say).</p>
+
+<p>Nevertheless, I am going to try to at least outline the general idea here (as I currently understand it). Feel free to ignore this section if you wish.</p>
+
+<p>A monad is a design-pattern. The general concept is that some datatype FooManager is also a monad if it is a “manager” of zero or more values of some type Foo, and can be asked to <em>apply</em> an arbitrary function to <em>each of</em> the values it manages and return a new instance of FooManager which wraps the new values.</p>
+
+<p>The most obvious case is a collection-type, eg a list or set or tree. And in fact, in Haskell a list can be used as a monad: it manages zero or more values of a type, and provides a function which takes some callback function as a parameter and then invokes the callback once for each element in the list and returns a new list of the results. Note that Haskell <em>first</em> defines a list datatype, and a bunch of functions that manipulate lists, and then separately also defines the functions necessary to allow a list to be used as a monad. It is fine for a type to provide zero or more functions that manipulate it <em>as well as</em> the functions required to be a monad.</p>
+
+<p>However there are other kinds of “manager” that can be monads without being a traditional collection. The “Maybe” type supports being used as a monad; it wraps (manages) zero or one values of some other type - ie represents an “optional” value. Asking it to apply a callback function to “each value” will execute the callback zero or one times.</p>
+
+<p>The callback function must have a very specific signature. It must take one parameter of the “managed” type, for obvious reasons. And it must return a new value which is the same type as the manager it is passed to - for example, the callback function passed to a list must also return a list. The reason for this is that the manager, being of the same type, can “understand” the set of return values produced by the multiple invocations of the callback function and post-process them in whichever way it wants before returning an overall (merged) “result” to the caller. Typically, a “collection” type acting as a monad will apply the callback to each element in the collection, and then merge all of the values returned from the callbacks into a new collection of the same type which then gets returned. Other kinds of monad will post-process the results of callbacks in different ways.</p>
+
+<p>As it happens, the Haskell standard library defines a <code>typeclass</code> (ie interface) called Monad, which requires four functions:</p>
+
+<ul>
+  <li>return : a kind of “constructor”</li>
+  <li>
+<code>&gt;&gt;=</code>  : (pronounced “bind”) which invokes a specified callback</li>
+  <li>
+<code>&gt;&gt;</code>   : (optional, and not relevant here)</li>
+  <li>fail   : only for handling errors (not really relevant here)</li>
+</ul>
+
+<p>or in Haskell syntax:</p>
+
+<div class="CodeRay"><div class="code"><pre><code class="language-haskell">  return :: T -&gt; MonadOfT  -- when invoked in a context that expects MonadOfT as a return value, and given a T parameter, create a new MonadOfT
+  (&gt;&gt;=) :: (T -&gt; MonadOfT) -&gt; MonadOfT  -- takes a callback function and returns a MonadOfT. The function must have signature "T-&gt;MonadOfT".</code></pre></div></div>
+
+<p>Once an “<code>instance Foo Monad</code>” clause has been defined for a type Foo, Foo is then compatible with the standard Monad typeclass and can be used with any library function that expects a Monad parameter, and with the Haskell “do” syntax.</p>
+
+<p>The function named <code>return</code> is a kind of constructor: it takes one value of the “managed” type and returns a manager wrapping that value. The single value passed is allowed to be the <em>unit</em> value, similar to a null in Java, in which case the manager is effectively managing “zero” values of the managed type. The name <code>return</code> is unfortunate; it is nothing whatsoever to do with the <code>return</code> keyword in C/C++/Java.</p>
+
+<p>The “<code>&gt;&gt;=</code>” function (aka “bind”) takes a value of the manager (monad) type and a callback function, and returns a different value which is of the same manager type. As described above, the callback function takes a single parameter: a single value of the “managed type” and also returns a manager of the calling type. The implementation depends on what the specific monad is trying to achieve, but typically the callback is applied over the values in the monad in a kind of “foreach”, and the results merged before being returned.</p>
+
+<p>In Java the closest equivalent to a type that supports the monad pattern is a class something like the following:</p>
+
+<pre><code>// Define a "callback" similar to standard classes Callable or Runnable.
+interface MyApplicable&lt;X&gt; {
+    MyMonad&lt;X&gt; eval(X value); // take instance of unwrapped type and return a new wrapper over some new value
+}
+
+class MyMonad&lt;X&gt; {
+   private X wrappedValue; // the wrapped value (just one here, not a collection)
+   private int numApplies; // hidden sideband data
+
+   private MyMonad(X value, int numApplies) {
+     this.wrappedValue = value;
+     this.numApplies = numApplies;
+   }
+
+   public static MyMonad create(X value) { // aka "return", but that's a keyword in Java!
+     return new MyMonad(value, 0);
+   }
+
+   public MyMonad&lt;X&gt; bind(MyApplicable a) { // aka "&gt;&gt;=" aka "apply"
+      MyMonad&lt;X&gt; tmp = a.eval(this.value);
+      MyMonad&lt;X&gt; merged = new MyMonad(tmp.getValue(), ++numApplies); // ignore tmp.numApplies, will always be zero
+      return merged;
+   }
+}
+</code></pre>
+
+<p>Note that here we have a monad which only wraps one value, but maintains some “hidden state” which gets propagated to the new object returned from the bind method without the caller being aware of it. Haskell has a “state-machine” type in its standard libraries which is implemented in a very similar way.</p>
+
+<p>To be a little more formal: given a type “M t” which is a monad over some type t (ie some manager of zero or more values of type t), the callback function has signature “t -&gt; M q”, ie returns a value which is the same kind of manager, but possibly wrapping a different type. The manager (ie type M) then can invoke this callback for each of its values (of type t), and then merge/post-process all of the return values of type “M q” into a new value of type “M q” and return this to the caller.</p>
+
+<p>The fact that the callback function returns not type q but “M q” is what allows the manager (type M) to do the post-processing on the values the callback returns. And the fact that the <code>&gt;&gt;=</code> (“bind”) method also returns “M q” allows the monad to optionally implement a kind of “one way trap-door” for data, where code can ask the monad to apply functions to the data but nothing can ever actually <em>get at</em> the results because they are always returned in another wrapper.</p>
+
+<p>This always-return-a-wrapper behaviour is the secret to the “IO” monad - the IO library provides no functions to extract the data within a value of type IO, and the bind function which takes an IO parameter always returns another IO wrapper. So the impure data is isolated, yet pure functions can still be applied to it by <em>asking</em> the wrapper to do it. This then works to (a) separate pure functions from impure inputs, due to the “I’ll call you” behaviour, and (b) provides a kind of “tainting” system where the results of applying a pure function to impure inputs can never be seen by pure code.</p>
+
+<p>The first behaviour is very useful in a language with ‘pure’ functions. The callback passed to the <code>apply</code> method above can be a pure function (ie one that has no side-effects). The value might have been read from a file or the keyboard or the network, and thus be ‘impure’; the monad pattern allows a pure function to be applied to an impure input parameter while keeping them cleanly separated. And because the return value from the <code>apply</code> method is always another monad, the caller cannot get at the private value - which is important in the context of <code>IO Monads</code> (see below). And one more thing: the type of any expression “<code>monad.bind(x)</code>” is of type monad - ie via the Haskell type system any function which calls a function which calls a monad must have a return-type of Monad; inspecting a function’s return type tells you if any subfunction uses a monad - ie a kind of ‘tainting’ system.</p>
+
+<p>As always in functional style, invoking the <code>bind</code> function does not modify the monad object - instead a new object is returned with the appropriate internal state.</p>
+
+<p>Note that monads are not themselves “impure”; only the IO monad is - and only because at the lowest levels of the Haskell libraries the calls into the native operating system which are inherently impure (read/write/etc) all return their results wrapped in an IO monad. The monad pattern together with the lack of other accessors for the wrapped data provides a way to keep such data <em>separated</em> from the pure parts of the application.</p>
+
+<p>A related concept are the various “lift” functions provided by Haskell. Lifting is the general concept of “decorating” a function, and the liftM/liftM2 functions are specifically for use with monads. Given a function that takes one parameter of type T and returns a value of type Q, liftM will convert it into a function that takes one parameter of type <em>SomeMonad T</em> (ie some manager type holding zero or more instances of T) and returns a value of type “SomeMonad Q”. The liftM2 will convert a function that takes <em>two parameters of type T1 and T2</em> and returns a Q, and convert it into a function that takes two parameters of type <em>SomeMonad T1</em> and <em>SomeMonad T2</em> and returns a value of type <em>SomeMonad Q</em>. The classical example is (in ghci):</p>
+
+<pre><code>:module + Control.Monad  -- make liftM2 available
+(+) 1 2  -- returns 3 (demonstrating basic plus-function)
+let plusM2 = liftM2 (+) -- creates new function plusM2
+plusM2 [1,2,3] [4,5,6]   -- returns [5,6,7,6,7,8,7,8,9]
+plusM2 (Just 3) (Just 4) -- returns Just 7
+plusM2 (Just 3) Nothing  -- returns Nothing
+</code></pre>
+
+<p>Here the plus function originally takes a T and another T and returns a T. Function plusM2 instead takes (in Javaish syntax) <code>SomeMonad&lt;T&gt;</code> and <code>SomeMonad&lt;T&gt;</code> and returns <code>SomeMonad&lt;T&gt;</code>. This function is then executed with:</p>
+
+<ul>
+  <li>SomeMonad being <code>[Integer]</code> (a list of integers), or</li>
+  <li>SomeMonad being “<code>Maybe Integer</code>” (ie perhaps an integer, or perhaps Nothing (null))</li>
+</ul>
+
+<p>In the case of a list, the “bind” method on the monad type does a cross-product while in the case of Maybe the “bind” method immediately returns Nothing if one of the the values is Nothing.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://cs.coloradocollege.edu/~bylvisaker/MonadMotivation/">Monad Motivation (what and why)</a></li>
+  <li><a href="http://stackoverflow.com/questions/28139259/why-do-we-need-monads/28139260#28139260">Why do we need monads</a></li>
+</ul>
+
+<h1 id="haskell-do-syntax">Haskell “do” Syntax</h1>
+
+<p>As shown above, the monad design pattern:</p>
+
+<ul>
+  <li>provides a nice uniform syntax over collection types; “bind” means “foreach”.</li>
+  <li>also provides a way to associate hidden “sideband” data with zero or more wrapped values without the caller needing to be aware of this data.</li>
+  <li>also optionally allows a type to hide its internal values data while still allowing pure functions to be applied to them (see IO monad), and simultaneously “taints” the return-type of functions that are applied.</li>
+</ul>
+
+<p>However there is still one more problem to be solved regarding input and output. When dealing with pure functions, a compiler can freely reorder calls, discard duplicate calls to the same method with the same parameters, and perform various other optimisations. Doing this to code that reads from disk, keyboard or network, writes to disk or network, or performs operating-system-calls in general would be bad.</p>
+
+<p>The solution is to structure code so that instead of being represented as a set of steps “at the same level”, they are nested calls. The following Java code is nonsense, but hopefully gives an idea of what I mean:</p>
+
+<pre><code>// a functional-language compiler could rearrange this in many ways!
+void foo() {
+   step1();
+   step2();
+   step3();
+}
+
+// these will always be invoked in the expected order
+MyMonad foo() {
+   MyMonad m7 = step7();
+   MyMonad m8 = m7.apply(step8);
+   MyMonad m9 = m8.apply(step9);
+   return m9;
+}
+</code></pre>
+
+<p>Hmm .. a function that takes another function as a parameter? Looks rather like the “bind” function! And in fact, that is how Haskell recommends programmers implement a sequence of steps that must be performed in order: start with some kind of monad, and then pass the next step as the “callback” to the result of the first step, etc. Finding a monad to “start with” is usually pretty easy - in most cases where you need to do sequential steps, you are already dealing with IO, ie the first step is usually a call to some function in the Haskell IO library whose return value is an IO monad!</p>
+
+<p>You can write this serial-monad-invocation manually if you like. However as it’s a common thing to do, Haskell has some convenient notation. This:</p>
+
+<pre><code>  do
+     step1;
+     step2;
+     step3
+</code></pre>
+
+<p>is automatically transformed into the sequenced form above, or something similar.</p>
+
+<p>You might recognise a slight similarity here to the “builder pattern” in Java, where a method on an object returns some builder object so that the methods can be chained. Remember that because of Haskell’s consistent ‘laziness’, what is actually generated by the whole ‘do’ statement is <em>not</em> a monad, but instead a <em>closure</em> that will do all of the above when necessary.</p>
+
+<p>WARNING: Don’t take any of the above too literally. It’s like an attempt to translate a poem from Chinese into German; the general theme might be understandable but full fidelity cannot be obtained when some necessary concepts aren’t shared. And in this example, I’m a very poor speaker of Chinese :-)</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Monad_%28functional_programming%29">Wikipedia: Monads</a></li>
+  <li><a href="http://en.wikibooks.org/wiki/Yet_Another_Haskell_Tutorial">Wikibooks: YAHT</a></li>
+  <li><a href="http://www.codecommit.com/blog/ruby/monads-are-not-metaphors">CodeCommit: Monads are not metaphors</a></li>
+  <li><a href="https://www.haskell.org/haskellwiki/All_About_Monads">Haskell.org: All About Monads</a></li>
+  <li><a href="http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html">sigfpe: You could have invented Monads</a></li>
+</ul>
+
+<h1 id="null-pointers">Null Pointers</h1>
+
+<p>Unlike Java, there is no danger of a ‘null pointer’ in Haskell. Every variable must be initialised when it is created - or in Haskell terms, every name must be ‘bound’. To represent the concept of “either an object or nothing”, a type like the following is used:</p>
+
+<div class="CodeRay"><div class="code"><pre><code class="language-haskell">  type Maybe a = Just a | Nothing</code></pre></div></div>
+
+<p>When a function returns such an object, the caller then needs to use a <code>match</code> clause to effectively perform</p>
+
+<div class="CodeRay"><div class="code"><pre><code class="language-java"><span class="keyword">if</span> (returnValue <span class="keyword">instanceof</span> Nothing) { <span class="predefined-constant">null</span>-pointer-<span class="keyword">case</span>-code} <span class="keyword">else</span> { use returnValue.a }</code></pre></div></div>
+
+<h1 id="macros">Macros</h1>
+
+<p>Many functional languages have a “macro” system that allows the source-code input to be transformed during the compilation process, like the c-pre-processor on steroids. Haskell does <em>not</em> have such a system by default; the <a href="https://wiki.haskell.org/Template_Haskell">Template Haskell</a> project provides this, and the GHC compiler has support for this if the right compiler flags are set. It isn’t widely used though, AFAICT.</p>
+
+<h1 id="let-clauses">Let-clauses</h1>
+
+<p>Haskell’s “let .. in ..” syntax puzzled me for a while. Just to clarify:</p>
+
+<pre><code>let x = 7, y = 3 in x + y
+</code></pre>
+
+<p>is simply equivalent to “evaluate x+y when x=7 and y=3”. This syntax can be used to sort of define an “anonymous nested function” within another function definition.</p>
+
+<h1 id="bottom-and-unit-values-and-types">Bottom and Unit Values and Types</h1>
+
+<p>The value called “bottom” is a special marker meaning “this value is unusable”; any attempt to use the value will throw an exception. It can be written using non-ascii character ‘⊥’, the ascii char sequence <code>_|_</code> or the keyword <code>undefined</code>, eg ‘let x = undefined’. Unlike Java’s <code>null</code> and Javascript’s <code>undefined</code>, a Haskell <code>bottom</code> value blows up as soon as it is used.</p>
+
+<p>There is also a “bottom type” - a type for which there are no valid runtime values. It is therefore impossible (or at least nonsensical) to declare a variable of that type. A function can never return a value of type “bottom type” at runtime as that value cannot be represented; a function with <code>bottom</code> as its return-type therefore can never return. In C or Java, functions with return-type <em>void</em> can return as they can be called for their side-effects alone. In a functional programming language where every line of code is an <em>expression</em> that evaluates to something, and side-effects are not supported (except for IO types from the core libraries) a function that successfully completes but has no return-value makes no sense.</p>
+
+<p>Type <code>unit</code> (written as <code>()</code>) is different from the bottom type. It represents a “singleton type” that has only one value - confusingly also written as <code>()</code>. This type is not often used, but:</p>
+
+<ul>
+  <li>is used as the return-type of some IO monad functions which <em>are</em> called for their side-effects - like <code>void</code> in Java/C.</li>
+  <li>can be used as a type-param in a generic structure declaration when you don’t actually care about that particular type-param (aren’t planning to use it)</li>
+</ul>
+
+<h1 id="parallel-programming">Parallel Programming</h1>
+
+<p>While Haskell programs cannot be <em>automatically</em> run in parallel (multiple CPUs), its functional features do help somewhat. There are a number of techniques used for executing code in parallel; links can be found below:</p>
+
+<ul>
+  <li><a href="https://downloads.haskell.org/~ghc/7.0.2/docs/html/users_guide/lang-parallel.html">The GHC Manual Page on Concurrent and Parallel Code</a></li>
+  <li><a href="http://chimera.labs.oreilly.com/books/1230000000929/index.html">Concurrent and Parallel Programming in Haskell (book, free online) - Simon Marlow, 2013</a></li>
+</ul>
+
+<h1 id="tools-and-development-environments">Tools and Development Environments</h1>
+
+<p>The standard compiler is GHC, and the standard interactive (REPL) environment is GHCi.</p>
+
+<p>Apparently, most Haskell developers use emacs or vim to actually write code, rather than an IDE.</p>
+
+<p>Leksah is a native IDE implemented in Haskell - but it is apparently rather tricky to use. Intellij IDEA has a basic Haskell plugin, but I couldn’t get it to work properly. Supposedly there is a basic Eclipse plugin too, but that does not have good reviews. The “Atom” editor has a Haskell mode.</p>
+
+<p>The <code>cabal</code> application is Haskell’s equivalent of <code>maven</code> for Java: it compiles sourcecode and downloads libraries on-demand.</p>
+
+<p>The <code>haskell-platform</code> project is a bundle of all the most important tools for Haskell development. It is available as packages for various linux-based distributions, and as an installable file for MS-Windows.</p>
+
+<p>To define functions interactively in GHCi, you need to use “let” (because interactive-mode by default evaluates each expression and prints its value). In non-interactive code you don’t.</p>
+
+<p>If using GHCi, then it is important to first <a href="https://downloads.haskell.org/~ghc/7.0.3/docs/html/users_guide/interactive-evaluation.html">read its manual</a>.</p>
+
+<h1 id="problems-with-haskell-in-commercial-environments">Problems with Haskell in Commercial Environments</h1>
+
+<p>The following issues are things I noted while reading docs and related articles, which may well cause significant problems when using Haskell professionally…</p>
+
+<p>When a function is properly tail-recursive, it uses very little stack space. When not, it can be inefficient and use lots of memory. But the difference between the two in code can be very small, and AFAICT there are no tools to help detect the problem. It therefore appears <em>very</em> easy for a non-expert to create horribly inefficient code. For this reason, I would not be confident in recommending Haskell for a typical commercial environment in which (to be kind) talent tends to follow a bell-curve distribution..</p>
+
+<p>In general, it is quite difficult to see how much memory a Haskell function will require. Java is much clearer in this regard, and naturally c/c++ even better.</p>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<ul>
+  <li>
+    <p>yay: <a href="http://www.haskellforall.com/2015/01/use-haskell-for-shell-scripting.html">shellscripts in Haskell</a></p>
+  </li>
+  <li>
+    <p>yecch: <a href="http://nikita-volkov.github.io/record/">Haskell record syntax</a></p>
+  </li>
+  <li>
+    <p>And in general, <a href="http://contemplatecode.blogspot.co.at/2015/02/haskell-weekly-news-issue-316.html">Haskell Weekly News</a></p>
+  </li>
+</ul>
+
+<p>Interestingly, it appears that Haskell has recently gained an alternate syntax for do-blocks. They can be written in either of the following ways:</p>
+
+<pre><code>-- indentation is important
+foo = do
+   expr1
+   expr2
+   expr3
+
+-- indentation not important
+foo2 = do {
+  expr1; expr2;
+  expr3 
+}
+</code></pre>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/haskell-intro/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

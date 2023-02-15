@@ -1,0 +1,380 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Email with Roundcube</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Email with Roundcube</h1>
+    <aside>First published on: January 12, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      
+<p>(Back to the <a href="/linux/email-overview">main article</a>)</p>
+
+<p>(Updated 2024 to Ubuntu 22.04)</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p><a href="https://roundcube.net/">Roundcube</a> is an open-source web-based application (ie runs within a webserver) which provides a GUI for interacting with IMAP and SMTP servers, ie for reading and composing email.</p>
+
+<p>This article provides a brief introduction to installing it, particularly on webservers other than Apache and with the SQLlite database rather than MySQL. This information specifically applies to Ubuntu 22.04.1, PHP 8.1, and Roundcube 1.6.6.</p>
+
+<h1 id="roundcube">Roundcube</h1>
+
+<p>If you have IMAP/SMTP through some provider but they don’t provide a web-interface, or you don’t like their web-interface then you can install Roundcube on any suitable server, and read/send mail through the Roundcube site.</p>
+
+<p>And when you have installed <em>your own</em> IMAP/SMTP infrastructure, you can also install Roundcube (on same host or a different one) to provide a web-based interface to mail, as an alternative to a traditional email client app.</p>
+
+<p>Roundcube is a PHP application, ie requires some webserver + the PHP runtime. It allows each user to configure their environment, so also needs a (small) database in which to store per-user settings.  And it requires the address of an IMAP and SMTP server. That’s it - fairly simple.</p>
+
+<p>If you are using, or willing to install, the traditional LAMP stack (Linux, Apache, MySQL, PHP) then installing Roundcube on Debian or Ubuntu is a snap - just <code>apt install</code> the relevant packages. There are many articles that describe how to install Roundcube in this way.</p>
+
+<p>It appears that I am just destined to take the harder path - I currently use a webserver other than Apache (nginx), and don’t wish to have a database running permanently in the background just for a few dozen config-records, so installation was a little more complex. Nevertheless, a Roundcube system was up and running within a couple of hours, and it is very nice to use.</p>
+
+<h1 id="authentication">Authentication</h1>
+
+<p>It is of course necessary to “log in” to the Roundcube interface. However Roundcube simply passes the credentials on to the appropriate IMAP server, and if login there succeeds then that is considered sufficient. This means that there are no separate “roundcube credentials” to manage.</p>
+
+<h1 id="using-a-non-apache-webserver">Using a Non-Apache Webserver</h1>
+
+<p>Ubuntu provides a “roundcube” package, but that has a required dependency on the Apache httpd server. Unfortunate, as Roundcube explicitly lists 4 different webservers that it supports in its INSTALL file. Therefore while the major dependencies can be installed via apt, Roundcube itself needs to be downloaded and installed manually. As Roundcube is just a set of PHP files, that is no big deal. Updates will of course not be automatically fetched, but it isn’t a particularly security-sensitive component (https is handled by the webserver, and authentication by the IMAP server).</p>
+
+<p>Roundcube does state that they require support for Apache htaccess files, and the nginx server does not support these (for performance reasons) but in practice I have found that Roundcube is running fine under nginx.</p>
+
+<h1 id="installing-the-requirements">Installing the Requirements</h1>
+
+<p>Roundcube has the following requirements</p>
+
+<ul>
+  <li>a php-enabled webserver</li>
+  <li>PHP7 or greater</li>
+  <li>postgresl, mysql or sqlite</li>
+</ul>
+
+<p>I assume you have already installed a webserver, created a virtual host for mail (<code>mail.example.com</code> or similar) and obtained an SSL certificate for that hostname (eg via letsencrypt).</p>
+
+<p>Installing the remaining requirements is simply:</p>
+
+<ul>
+  <li>
+<code>apt install sqlite3 php php-fpm php-sqlite3 php-xml php-mbstring</code>   # mandatory</li>
+  <li>
+<code>apt install php-zip php-intl</code> # optional but recommended by the roundcube-installer</li>
+</ul>
+
+<h1 id="setting-up-a-virtual-host-webserver-with-nginx">Setting up a “virtual host” webserver with NGINX</h1>
+
+<p>When using nginx, create <code>/etc/nginx/sites-available/mail.example.com</code> and:</p>
+
+<ul>
+  <li>ensure only SSL access is enabled, with the appropriate SSL certificate</li>
+  <li>copy the “location ~.php” from sites-available/default</li>
+  <li>uncomment “location ~.php” – just the “.sock” line, not the host:port one.</li>
+  <li>uncomment the “.htaccess” section</li>
+  <li>add index.php to the  “index” property</li>
+  <li>run <code>service nginx reload</code>
+</li>
+</ul>
+
+<p>For other webservers, do the equivalent to define a virtual host with SSL-only access and PHP.</p>
+
+<p>Here is the relevant nginx file:</p>
+
+<pre><code># mail.example.com
+
+# definition for http
+server {
+    listen 80;
+    listen [::]:80;
+    server_name mail.example.com;
+
+    # force redirect to https
+    return 301 https://mail.example.com$request_uri;
+}
+
+# definition for https
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    ssl_certificate /etc/letsencrypt/live/mail.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/mail.example.com/privkey.pem;
+
+    root /var/www/mail;
+
+    index index.html index.php;
+
+    server_name mail.example.com;
+
+    location / {
+        # First attempt to serve request as file, then
+        # as directory, then fall back to displaying a 404.
+        try_files $uri $uri/ =404;
+    }
+
+    # pass the PHP scripts to FastCGI server listening on local pipe
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+    }
+}
+</code></pre>
+
+<h1 id="installing-roundcube-manually">Installing Roundcube Manually</h1>
+
+<p>Download Roundcube by visiting the site, downloading the latest “complete” release to your desktop then copying it to the server. Or use curl:</p>
+
+<pre><code>VERSION=1.2.3
+curl -L -o roundcube-$VERSION.tar.gz  https://github.com/roundcube/roundcubemail/releases/download/$VERSION/roundcubemail-$VERSION-complete.tar.gz
+</code></pre>
+
+<p>Unpack the file, and follow the (simple) instructions in the INSTALL file. To be more explicit, these are the steps I took:</p>
+
+<ul>
+  <li>unpack file</li>
+  <li>move entire tree of files to mail-web-root (<code>/var/www/mail</code> in my case)</li>
+  <li>set appropriate file-ownership with <code>chown -R root:root /var/www/mail</code> (thus readable by all, but not writable by anyone)</li>
+  <li>make some writable locations for the app:
+    <ul>
+      <li><code>mkdir /var/roundcube</code></li>
+      <li><code>mkdir /var/roundcube/temp</code></li>
+      <li><code>mkdir /var/roundcube/logs</code></li>
+      <li>
+<code>chown -R www-data /var/roundcube</code> where www-data is the user the webserver runs as.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Roundcube should now be accessible - at least page “/installer” (see later for info on the installer).</p>
+
+<h1 id="the-database">The Database</h1>
+
+<p>As mentioned, Roundcube needs a database to store per-user information (not emails themselves, and no passwords). If you don’t have a database already permanently running, then SQLite is a good option - a simple single file without any daemon process.</p>
+
+<h1 id="setting-up-roundcube-configuration">Setting up Roundcube Configuration</h1>
+
+<p>The Roundcube PHP files include an “installer webapp”. This is accessible without a password, which seems a little worrying at first. However all the app does is prompt for inputs then generate a suitable configuration-file that can be copy-and-pasted onto the server. It does <em>not</em> write any data to the server - and in fact if you’ve followed the above installation instructions, then nothing in the Roundcube directory is writable by the webserver-user (www-data). Nevertheless, as recommended by the Roundcube INSTALL file, the entire installer directory should be deleted after it has been used to generate the needed config.</p>
+
+<p>The installer app is useful, and I recommend using it. However it is also possible to just manually create the file under <code>/var/www/mail/config</code> (ie Roundcube config dir) by hand using the documentation on the Roundcube site and the base file in dir “config” of the unpacked tarfile.</p>
+
+<p>The installer wizard is accessible at <code>https://mail.example.com/installer</code>, without password.</p>
+
+<p>The installer has a helpful first page where it checks for its requirements and needed settings, and reports any problems. If it complains about “date.timezone not set” then:</p>
+
+<ul>
+  <li><code>vi /etc/php/8.1/fpm/php.ini</code></li>
+  <li>edit entry “date.timezone”; for options see http://php.net/manual/en/timezones.php</li>
+  <li><code>service php8.1-fpm restart</code></li>
+</ul>
+
+<p>Once all prerequisites are ok:</p>
+
+<ul>
+  <li>choose sqlite as database, and set location to <code>/var/roundcube/db.sqlite</code>.</li>
+  <li>if your SMTP server (eg Postfix) is set up to require TLS on the submission port, then define smtp-host as “tls://name.of.host”.</li>
+  <li>set the “temp dir” to <code>/var/roundcube/temp</code>
+</li>
+  <li>set the “logs dir” to <code>/var/roundcube/logs</code>
+</li>
+</ul>
+
+<p>Alternatively, temp and logs can be stored within the roundcube file-tree, ie under the mail-web-root, by simply running <code>chgrp www-data temp; chmod g+w temp</code> etc. However I find it more elegant to have the mail-web-root tree be entirely read-only, with temp and logs elsewhere.</p>
+
+<p>And when the installer has generated its output, store this as <code>config/config.ini.php</code> in the mail-web-root - and enjoy the new Roundcube system.</p>
+
+<p>Note that when using smtp over tls, the hostname must be the external name, not “localhost”, as Roundcube validates the cname of SSL certificate it receives against the hostname.</p>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>By default, roundcube logs to <em>syslog</em> such that error-messages end up in <code>/var/log/syslog</code> (not <code>var/log/mail.log</code> as might be expected).</p>
+
+<p>It is probably a good idea to install <code>fail2ban</code> and to enable filtering for <code>dovecot</code> ie add dovecot to <code>/etc/fail2ban/jail.d/local.conf</code>.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://github.com/roundcube/roundcubemail/wiki/Configuration">Roundcube Configuration Wiki Page</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/email-roundcube-config/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

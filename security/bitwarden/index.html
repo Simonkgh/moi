@@ -1,0 +1,666 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - The Bitwarden/VaultWarden Password Manager - Host Your Own Server</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>The Bitwarden/VaultWarden Password Manager - Host Your Own Server</h1>
+    <aside>First published on: November 25, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Security/'>Security</a>, <a href='/category/Linux/'>Linux</a></p>
+      
+<p>Updated: 2024-04-16</p>
+
+<h1 id="overview">Overview</h1>
+
+<p>This article looks at the <a href="https://bitwarden.com/">Bitwarden</a> online password manager - why it is useful, and how to run it on your own server infrastructure as an alternative to using a hosted service.</p>
+
+<p>The self-hosting part of this article talks primarily about using bitwarden (or the vaultwarden open-source reimplementation) for a single person or small group. If using it for a larger company, then the hosted service is strongly recommended; my employer uses it and we’ve had good experiences. In fact, as the hosted service is free for single-person use, and extremely cheap for even families, the primary reason to host it yourself is pure stubborn-ness and the open-source principle.</p>
+
+<h1 id="the-problem">The Problem</h1>
+
+<p>We all need to log on to multiple sites around the internet.</p>
+
+<p>For a few people, “single sign on” with a well-known organisation works; eg once you have a google login, many other sites offer “log in via google” option. However that provides a lot of undesirable information to your central credential provider. And not all sites support such integration.</p>
+
+<p>The alternative is to manage multiple passwords, as reusing the same password in multiple places is a bad idea. However those passwords soon get difficult to keep track of - the best solution is to have some central database of passwords somewhere.</p>
+
+<p>Most web browsers offer a password database, and provide nice integration with websites - autofilling login fields, saving passwords when we create new accounts somewhere, and updating the password database entries when we change passwords via HTML forms. However that only works when using that same browser on that same machine - and needs to be backed up. Browsers have started to offer “password sync” so that the same passwords are both backed up and available from the same browser on other machines - but:</p>
+
+<ul>
+  <li>you are required to <em>sign up</em> for the sync service</li>
+  <li>using a remote service <em>might</em> provide undesirable info to the provider of that service, depending on the implementation (Mozilla’s “firefox sync” is currently ok, not sure about others)</li>
+  <li>it is not portable across browsers</li>
+  <li>doesn’t help with credentials for things other than web-sites</li>
+  <li>and raises the risk of all your passwords being stolen at once (again, dependent on implementation)</li>
+</ul>
+
+<p>Browser-based password storage is also vulnerable to security bugs - browsers are complex applications with a poor history of security holes.</p>
+
+<p>An alternative to letting the browser store passwords is to install a password manager application locally on your machine. This makes credentials available for more than websites, but:</p>
+
+<ul>
+  <li>is less convenient to use (need to regularly copy-and-paste between browser and password manager app)</li>
+  <li>is not cross-machine</li>
+  <li>and needs to be backed up</li>
+</ul>
+
+<p>At least these dedicated apps are more secure than browsers, being much simpler and less exposed to the internet.</p>
+
+<p>Various “hosted password repos” exist (lastpass etc) which allow credentials to be stored “in the cloud”. They get backed up, are available on any machine and not just from browsers. Typically these providers also provide browser-plugins to make saving/updating credentials easy. However this puts a lot of trust in the repo provider. These services are also subscription-based.</p>
+
+<p>Bitwarden is one of these “hosted password repos”, but one with several advantages that are discussed in the next section.</p>
+
+<h1 id="about-bitwarden">About Bitwarden</h1>
+
+<p>Bitwarden is a service for hosting credentials, similar to the “hosted password repos” described above, but with a difference:</p>
+
+<ul>
+  <li>it is completely open-source (both client and server side)</li>
+  <li>the protocol is documented (at least indirectly; people have read the code and written documentation for it)</li>
+  <li>the protocol ensures the server never sees unencrypted credentials (client code does encryption/decryption)</li>
+</ul>
+
+<p>The Bitwarden site is very professional, as are the (wide) selection of available client software. The company backing it may be small, but their work seems very good.</p>
+
+<p>The Bitwarden code can be divided into two parts:</p>
+
+<ul>
+  <li>server-side</li>
+  <li>client-side</li>
+</ul>
+
+<p>The server-side code consists of a single application, providing a REST api for reading/writing credentials.</p>
+
+<p>The client-side code can be divided into:</p>
+
+<ul>
+  <li>native graphical and commandline desktop apps for various OSes (linux, mac, windows)</li>
+  <li>cross-platform commandline app</li>
+  <li>web-based desktop app (known as “vault”)</li>
+  <li>mobile apps</li>
+  <li>browser plugins</li>
+</ul>
+
+<p>The desktop apps allow users to configure their “account”, save/search/view credentials, and various other options. These apps make REST calls to the server component to actually read/write credentials. These apps are available in both graphical and commandline versions - and nicely, all apps support configuring the server address, making it easy to use an alternative back-end.</p>
+
+<p>The cross-platform commandline app is a nodejs-based tool that provides the same functionality as the native desktop apps, but does not offer a GUI. As with all other desktop apps, it performs encryption/decryption locally and makes calls to the central REST server to persist data.</p>
+
+<p>The web-based desktop app is a pure javascript “single page app” that provides the same functionality as the native GUI desktop apps, and also makes REST calls to the server component in the same way. The javascript, html, etc. is served by the server-side component (acting as a simple HTTP server of static files). Note that there is no <em>logic</em> on the web-server-side; the server simply provides the javascript files which are then executed client-side within the user’s browser.</p>
+
+<p>Browser plugins provide “auto-fill” and “auto-save” integration by calling the REST api of the Bitwarden server (whichever address and port is configured). The Firefox browser plugin is cross-platform; not sure about plugins for other browsers.</p>
+
+<p>The official (open-source) server-side component from <code>bitwarden.com</code> is implemented in C# and relies on Microsoft-SQLServer as a database. The Bitwarden developers have (somehow) created docker containers which wrap these and can be executed on Linux. However these containers are very resource-intensive. The original developers probably do not care about resources - they use these containers to run their <code>bitwarden.com</code> hosting operation for over 100,000 customers - and thus requiring a large database is not a significant problem. They kindly offer the containers for others to use - but don’t care that this approach is not convenient for people wanting to host an instance for a small number of users (possibly one).</p>
+
+<p>Fortunately, various people have implemented alternative less-resource-intensive versions of the server-side rest component: <a href="https://directory.fsf.org/wiki/Bitwarden-ruby">rubywarden</a>, <a href="https://github.com/VictorNine/bitwarden-go">bitwarden-go</a> and <a href="https://github.com/dani-garcia/vaultwarden">vaultwarden</a> (formerly called <code>bitwarden_rs</code>). The <code>vaultwarden</code> (Rust-based) implementation seems to be the most active and the least resource-intensive. The remainder of this article looks at how to install this on Linux.</p>
+
+<p>Note: the “team” and “enterprise” accounts offered for the official hosted service have a few extra features (groups, audit-logs, etc) which are not available in their free version. Whether these are available in different self-hosted variants depends on how complete the “back end” implementation is. The <code>vaultwarden</code> implementation (discussed later) appears to implement all of the commercial features.</p>
+
+<h1 id="using-the-hosted-service">Using the Hosted Service</h1>
+
+<p>Before looking at installing a Vaultwarden server, it is worth looking at the hosted offering available from <code>bitwarden.com</code>. They offer truly free accounts for single users - with all necessary features. And what is special about Bitwarden is that all data is encrypted before being sent to the hosted service - and thus you do not need to worry about hacks of the central service, or even dishonest sysadmins, as long as:</p>
+
+<ul>
+  <li>you use a reasonable master password</li>
+  <li>and the client app you are using has not been modified</li>
+</ul>
+
+<p>Paid plans are available for “family” and “business” use. The most important feature of these plans is the ability to share a password across multiple accounts - updating it from one account will update it in all accounts, even though the central service does not know the master passwords of any account.</p>
+
+<p>The prices are extremely reasonable. Currently:</p>
+
+<ul>
+  <li>personal account, including sharing with 1 other user: free</li>
+  <li>premium personal account: $10/year</li>
+  <li>family account, with up to 5 users: US$3.33/month ($40 per year)</li>
+  <li>team account: US$3/user/month</li>
+  <li>enterprise account: US$6/user/month.</li>
+</ul>
+
+<p>Despite the good security design of Bitwarden, I still like the idea of hosting my passwords myself - so on to the rest of the article. To repeat the warning from the introduction section: the “organisations” feature needed to share passwords between users (family or team) is not available in the open-source code from company Bitwarden. The open-source code communicates with <code>bitwarden.com</code> for this feature and requires a license.</p>
+
+<h1 id="about-the-vaultwarden-alternative-implementation">About the VaultWarden alternative implementation</h1>
+
+<p>As noted above, the standard back-end (rest server) implementation uses c# and sqlserver, and is distributed as a set of docker containers that have relatively high resource requirements. This is not very friendly for self-hosting, at least for small-scale use.</p>
+
+<p>The <a href="https://github.com/dani-garcia/vaultwarden">vaultwarden</a> project reimplements the back-end in a simpler manner.  <code>vaultwarden</code> can use an SQLite embedded database, ie no separate “database server” process is needed and data is stored in a single file on the server local filesystem. <code>vaultwarden</code> is a single process that listens for HTTP requests on a single port, responding to REST api URLs. It can also act as a simple static HTTP web server in order to serve the static files that make up the “vault” web-based client application, if configured to do so.</p>
+
+<p>According to its author, <code>vaultwarden</code> requires only 10MB of ram.</p>
+
+<h1 id="requirements">Requirements</h1>
+
+<p>The vaultwarden server should be accessible only over https; this is particularly important when serving the “vault” web client app, as any attacker who can modify that code effectively has access to passwords.</p>
+
+<p><code>vaultwarden</code> may be configured directly with appropriate HTTPS certificates, or it may be configured to listen on a local port with a reverse-proxy-server on the same machine terminating https requests and forwarding them as http to <code>vaultwarden</code>. I personally use nginx already, and so use it as a front-end to vaultwarden.</p>
+
+<p>When using https, a certificate is required. One can be obtained for free via “letsencrypt”. HTTPS also requires that the host has a suitable DNS name.</p>
+
+<p><code>vaultwarden</code> should of course be started via systemd, and run using a dedicated user account.</p>
+
+<h1 id="installing-vaultwarden-via-docker">Installing Vaultwarden via Docker</h1>
+
+<p>There is a <a href="https://help.bitwarden.com/article/install-on-premise/">Docker image for the official Bitwarden version</a> (ie not the alternative rust-based server). However this image is very heavy on resources; among other things it starts an instance of Microsoft SQLServer internally (!). That’s not an option for me, due to resource usage.</p>
+
+<p>When I wrote the first version of this article, <code>vaultwarden</code> (then <code>bitwarden_rs</code>) was only available in source form. The github project now <a href="https://github.com/dani-garcia/vaultwarden/wiki/Which-container-image-to-use">provides prebuilt Docker images</a> which presumably make installation quite easy. See the <a href="https://github.com/dani-garcia/vaultwarden/wiki">vaultwarden install page</a> for details - a page that did not exist when this article was first written, and which actually does a very good job of documenting the install process.</p>
+
+<p>I’m running a very low-resource (cheap) VPS for my personal use (this website, email, and a few other things). While a container is not <em>too</em> heavy, installing locally is even lighter and this is what is described in the next section.</p>
+
+<h1 id="installing-vaultwarden-without-docker">Installing Vaultwarden without Docker</h1>
+
+<p>The code is not available as a prebuilt download; it is necessary to build from source. However that is not too hard.</p>
+
+<p>The following build-steps can be performed as any standard user on the host system. Sudo rights will be needed to actually install the results.</p>
+
+<h2 id="install-prerequisites">Install prerequisites</h2>
+
+<pre><code>apt install git
+apt install libssl-dev
+apt install pkg-config 
+apt install gcc
+</code></pre>
+
+<h2 id="build-the-vault-web-client-optional">Build the Vault Web Client (optional)</h2>
+
+<p>As noted earlier, the Vault web client is optional; if all users are content to install native desktop clients or browser-plugins to interact with the REST back-end, then there is no need to build the <em>Vault</em> webserver component. Vault is simply a set of static files that are served up to a user’s browser which then interact with the server via rest calls just like the standard browser-native-plugin interfaces do; Vault has no “back end” components of its own.</p>
+
+<p>Vault is implemented using Microsoft Typescript, and various other technologies which require the “source code” to be processed to generate javascript/html/css/etc. The resulting javascript is also compressed (minimised) in the usual way. There is therefore a “build” process necessary, even though the result is a set of static files which the rest-server simply provides to the user on request. Once loaded into the user’s browser, the code acts just like any other Bitwarden desktop client application.</p>
+
+<p>Although the build process uses npm and nodejs, they are not needed at runtime.</p>
+
+<p>Clone git repository for the “web vault” (which is a very lightly modified fork of the Bitwarden web client):</p>
+
+<ul>
+  <li><code>git clone https://github.com/dani-garcia/bw_web_builds.git</code></li>
+  <li><code>cd web</code></li>
+  <li><code>git tag</code></li>
+  <li>`git checkout … # most recent tag</li>
+</ul>
+
+<p>Set up build-time tool nodejs (as a normal user, not system-wide):</p>
+
+<ul>
+  <li><code>curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash</code></li>
+  <li>logout/login to activate the software installed above</li>
+  <li><code>nvm install --lts</code></li>
+</ul>
+
+<p>Build:</p>
+
+<ul>
+  <li><code>npm run sub:init</code></li>
+  <li><code>npm install</code></li>
+  <li><code>npm run dist</code></li>
+</ul>
+
+<h2 id="build-the-vaultwarden-alternative-server">Build the Vaultwarden Alternative Server</h2>
+
+<p>Install rustc/cargo if you don’t already have it (as a normal user, not system-wide):</p>
+
+<ul>
+  <li><code>curl https://sh.rustup.rs -sSf | sh</code></li>
+  <li>logout/login to activate the software installed above</li>
+</ul>
+
+<p>Clone git repository <code>vaultwarden</code> (choose latest tag):</p>
+
+<ul>
+  <li><code>git clone https://github.com/dani-garcia/vaultwarden.git</code></li>
+  <li><code>cd vaultwarden</code></li>
+  <li><code>git tag</code></li>
+  <li><code>git checkout ... # most recent tag</code></li>
+</ul>
+
+<p>Build:</p>
+
+<ul>
+  <li><code>cargo build --release --features sqlite</code></li>
+</ul>
+
+<p>Note that although vaultwarden needs few resources to run, the build requires a reasonable amount of RAM: certainly &gt; 4GB.</p>
+
+<h2 id="install-server-and-vault">Install Server and Vault</h2>
+
+<p>Rather than run it from where it was built, it seems best to put it somewhere “official”. And in fact, given it requires few resources to run but quite a lot to build, it makes sense to build on one system and just copy the binary to the system (typically a VM) that will run it.</p>
+
+<pre><code># choose user and install-dir
+USER=vaultwarden
+DEST=/var/lib/vaultwarden
+
+# create user for vaultwarden to run as
+adduser --system --no-create-home --disabled-login $USER 
+
+# move required files to $DEST
+mkdir $DEST
+cp -r target/release/vaultwarden $DEST
+cp .env.template $DEST/.env
+mkdir $DEST/data
+cp -r ../web/build $DEST/web-vault   # -- only if you have built the web-client, and have enabled it in the .env file
+chown -R $USER $DEST
+</code></pre>
+
+<h2 id="configure-the-server">Configure the Server</h2>
+
+<p>Configuration of the server can be done in two different ways:</p>
+
+<ul>
+  <li>via environment variables</li>
+  <li>via data in the database, configured via a commandline tool or the admin web interface</li>
+</ul>
+
+<p>File “<code>.env</code>” in the installation dir created above (copied from <code>env.template</code> in the  checkout of <code>vaultwarden</code>) defines all the available config options (env-vars). Paths are relative.</p>
+
+<p>See the <a href="https://github.com/dani-garcia/vaultwarden">vaultwarden</a> README.md for more information on config options.</p>
+
+<p>Notes:</p>
+
+<ul>
+  <li>defaults to running on localhost:8000, ie not accessible over internet</li>
+  <li>the server can be configured to listen on an external interface and serve requests directly but the best option is probably to use a reverse proxy to forward to the local daemon, eg nginx.</li>
+</ul>
+
+<p>Edit <code>$DEST/.env</code> and set:</p>
+
+<ul>
+  <li>update ROCKET (rust http library) settings:
+    <ul>
+      <li>when using a reverse-proxy, set <code>ROCKET_ADDRESS=localhost</code> so the server only listens on the internal network interface</li>
+      <li>optionally, update <code>ROCKET_PORT</code> to change the default port on which the server runs</li>
+    </ul>
+  </li>
+  <li>set DOMAIN to <code>https://{yourdomain}</code>
+</li>
+</ul>
+
+<p>Config item <code>ROCKET_TLS</code> is needed only if you are exposing <code>vaultwarden</code> directly to the internet; when using a reverse-proxy (eg nginx) the certificate configuration is in the reverse-proxy and not in <code>vaultwarden</code>.</p>
+
+<p><code>vaultwarden</code> provides optional support for web-socket connections from clients to servers. Web socket connections can run in two ways: on a dedicated port, or tunnelled over HTTP. The <code>vaultwarden</code> server supports only the dedicated port approach, but a reverse-proxy can be used to tunnel the connections - ie accept a connection on the standard https port then forward to the websocket port on <code>vaultwarden</code>. Config options <code>WEBSOCKET_ENABLED</code>, <code>WEBSOCKET_ADDRESS</code> and <code>WEBSOCKET_PORT</code> should be appropriately set in <code>.env</code> and then the reverse-proxy configured to match; see <a href="https://www.nginx.com/blog/websocket-nginx/">here for nginx config</a>.</p>
+
+<p>By default config-item <code>SIGNUPS_ALLOWED</code> is enabled, allowing anyone on the internet who can reach the vault site (or the appropriate REST endpoint) to create an account.  When this is disabled, users can only create an account when “invited” (sadly the UI is somewhat confusing when account-creation is disabled; everything works until the last step, then fails).  If you are willing to purchase a license from <code>bitwarden.com</code> for a Family or Commercial organisation, then you can (as a normal user) create an organisation within a project and any member of that organisation can then invite other users even when <code>SIGNUPS_ALLOWED</code> is disabled. Otherwise, users can be invited by logging into the Vault admin interface (/admin) - assuming bitwarden has been configured with a valid outbound email account. See config items <code>SMTP_*</code> for email configuration.</p>
+
+<h2 id="configure-nginx-reverse-proxy">Configure nginx reverse proxy</h2>
+
+<p>This assumes you have used letsencrypt to generate a certificate (eg into /etc/letsencrypt/live/{domain}/fullchain.pem)</p>
+
+<pre><code>cat &gt; /etc/nginx/sites-available/bitwarden.your.domain &lt;&lt;EOF
+server {
+  # SSL configuration
+  listen 8443 ssl http2;
+  listen [::]:8443 ssl http2;
+  ssl_certificate /etc/letsencrypt/live/your.domain/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/your.domain/privkey.pem;
+#	ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+#	ssl_ciphers HIGH:!aNULL:!MD5;
+
+  server_name your.domain;
+
+  location / {
+    proxy_pass http://localhost:8000/;
+  }
+
+  # websockets support
+  location /notifications/hub {
+    proxy_pass http://localhost:3012;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
+  
+  location /notifications/hub/negotiate {
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_pass http://localhost:8000;
+  }
+}
+EOF
+</code></pre>
+
+<p>Running on localhost using http theoretically allows local attackers to make requests to the server, but in practice that seems a very small vulnerability as Bitwarden does not store any unencrypted data - it never has any master keys itself. If you have a different opinion, please let me know in the comments.</p>
+
+<p>For configuration examples for other reverse-proxies, see file PROXY.md in the <code>vaultwarden</code> git repo.</p>
+
+<p>As noted in <code>vaultwarden</code> documentation, the use of a separate port for websockets is due to current limitations in the Rocket library; this will not be necessary in some future version.</p>
+
+<p>The <code>proxy_set_header</code> commands are primarily to ensure that when <code>vaultwarden</code> logs authentication failures, then the IP address it logs is the real external one, and not <code>localhost</code>. This allows <code>fail2ban</code> to be used (see later).</p>
+
+<h2 id="set-up-systemd">Set up Systemd</h2>
+
+<p>Ensure the vaultwarden daemon starts on server boot.</p>
+
+<pre><code>mkdir /etc/vaultwarden
+cat &gt; /etc/vaultwarden/vaultwarden.conf &lt;&lt;EOF
+SERVER_ADMIN_EMAIL=vwadmin@your.domain
+EOF
+
+cat &gt; /etc/systemd/system/vaultwarden.service &lt;&lt;EOF
+# See https://www.freedesktop.org/software/systemd/man/systemd.unit.html for details
+[Unit]
+Description=vaultwarden server
+After=network.target auditd.service
+
+[Service]
+User=vaultwarden
+Group=nogroup
+
+# todo: use RootDirectory to jail the app
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/vaultwarden/data
+PrivateTmp=true
+
+EnvironmentFile=/etc/vaultwarden/vaultwarden.conf
+WorkingDirectory=/var/lib/vaultwarden 
+ExecStart=/var/lib/vaultwarden/vaultwarden
+Restart=on-failure
+RestartPreventExitStatus=255
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable vaultwarden.service --now
+journalctl --unit=vaultwarden.service
+</code></pre>
+
+<p>The <code>SERVER_ADMIN_EMAIL</code> variable defines an address which you can use with “create account” even when configuration has disabled account-creation. That means you should use some Bitwarden client app to create this account (set initial password) immediately after starting the server. This account-id should only be used for administration purposes - and to invite new users when account-creation has been disabled.</p>
+
+<p>If <code>vaultwarden</code> logging config (in <code>.env</code>) is still using the defaults (log to STDOUT) then any log output is visible using <code>journalctl --unit vaultwarden</code>.</p>
+
+<h1 id="the-admin-portal">The Admin Portal</h1>
+
+<p>In configuration file <code>.env</code>, option <code>ADMIN_TOKEN</code> must be explicitly set to a suitable value to enable the admin interface. After this is set (and vaultwarden restarted if needed), URI “/admin” can be used to log in using the TOKEN value specified in the config-file.</p>
+
+<p>The admin-portal can be used to set configuration items, but these are also mostly (all?) settable directly in file <code>.env</code> anyway. More useful is the user-administration tab, and in particular the ability to send invites to users.</p>
+
+<h1 id="using-fail2ban">Using Fail2Ban</h1>
+
+<p>The <a href="/linux/fail2ban/">fail2ban monitoring app</a> can be used to prevent attackers from making guessing attacks on the Vault login page (or <code>vaultwarden</code> rest-service login endpoint); login failures are written to a logfile and fail2ban can be set up to scan this logfile, detect the failures, and update the local firewall to (temporarily) block the source IP address from which the login failures came. The temporary point is important in case you accidentally make a few incorrect login attempts yourself!</p>
+
+<p>Fail2ban must be set up to scan whatever file <code>vaultwarden</code> has been configured to write to, eg <code>/var/log/syslog</code> or some dedicated file. It can also scan the systemd journal. The exact pattern to be matched depends somewhat on how logging is configured. The current version of fail2ban (included in Ubuntu LTS 20.04) includes a filter-file for bitwarden - but unfortunately it doesn’t match what <code>vaultwarden</code> generates. Here’s an alternative file that works for syslog (at the moment anyway).</p>
+
+<pre><code>cat &gt;&gt;/etc/fail2ban/filter.d/vaultwarden.conf &lt;&lt;EOF
+# Fail2Ban filter for vaultwarden
+# Detecting unauthorized access
+# Typically logged in /var/log/messages syslog
+# Message format to match: 
+#   somedate somehost vaultwarden[somepid]: [somedate][error][ERROR] Username or password is incorrect. Try again. IP: 1.2.3.4. Username: no@body.
+
+[INCLUDES]
+# Read syslog common prefixes
+before = common.conf
+
+[DEFAULT]
+vwdate = \[.{23}\]
+
+[Definition]
+_daemon = vaultwarden
+failregex = ^%(__prefix_line)s%(vwdate)s\[error\]\[ERROR\] Username or password is incorrect. Try again. IP: &lt;HOST&gt;\. Username: \S+.\s*$
+ignoreregex =
+EOF
+
+cat &gt;&gt;/etc/fail2ban/jail.d/local.conf &lt;&lt;EOF
+[vaultwarden]
+enabled = true
+logpath = /var/log/syslog
+EOF
+
+systemctl restart fail2ban
+tail -f /var/log/fail2ban.log # and now do some incorrect logins...
+</code></pre>
+
+<p>Unfortunately, syslog by default converts multiple identical messages occurring within a short time-period into the following form:</p>
+
+<ul>
+  <li><code>{prefix}: message repeated 5 times: [ ERROR: Username or password is incorrect. Try again. IP: 1.2.3.4. Username: no@body.]</code></li>
+</ul>
+
+<p>The only current solution for working with fail2ban is to disable this syslog option:</p>
+
+<ul>
+  <li><code>sed -i 's/RepeatedMsgReduction\ on/RepeatedMsgReduction\ off/' /etc/rsyslog.conf</code></li>
+  <li>systemctl restart rsyslog</li>
+</ul>
+
+<h1 id="the-clientserver-protocol">The Client/Server Protocol</h1>
+
+<p>TODO: write some info on how Bitwarden saves passwords and interacts with clients.</p>
+
+<h1 id="the-browser-plugin">The Browser Plugin</h1>
+
+<p>Plugins are available for Firefox, Chrome and Safari. These integrate with the browser to auto-save and auto-fill passwords. When installed, a Bitwarden icon appears next to the nav-bar in the browser; clicking on this gives access to the same features available in the bitwarden desktop client apps. As in the desktop apps, the “gear” icon gives access to the config settings - including setting the path to the bitwarden server.</p>
+
+<p>The built-in password manager in many browsers uses pop-up windows to ask whether to save a new password, etc. - bitwarden instead modifies the HTML to add a prompt at the top of the page. While elegant, I have had problems with one site where the login page keeps refreshing (multiple times per second) until this bar is “dismissed” - I suspect that javascript in this page acts badly when bitwarden changes the page dom.</p>
+
+<p>Reminder: because vaultwarden offers the same server API as bitwarden’s own server implementation, the same clients can be used - including the browser plugin.</p>
+
+<h1 id="notes">Notes</h1>
+
+<p>When you “log in” to vault (or any other client), you are prompted to provide your “master password”. However this password never leaves your browser; the login page uses complex javascript to compute a hash of the master password which verifies your identity but is not sufficient to decrypt any secrets you have stored in bitwarden. This is in effect “log in with password” where the login-pwd can be derived from the master-pwd but not the other way around.</p>
+
+<p>Bitwarden supports both passwords and TOTP codes. In fact, any entry consists of <code>(user-email, encrypted-url) =&gt; (set of encrypted properties)</code>, where the properties can be anything you need.</p>
+
+<p>There is no need to take particular care when backing up the credentials DB - that is fully encrypted with keys that only the client apps have.</p>
+
+<p>The user interface includes a number of options like “number of iterations for PBKDF”, etc. These options are stored in the central repository so they are available to each client, but are implemented within the client itself.</p>
+
+<p>The Vault web interface is nicely implemented, and elegant to use.</p>
+
+<p>All entries in the repository can be exported if desired, ie there is no “lock in”. Import is supported for the main password manager formats. There is also a “password generator” available.</p>
+
+<p>Sharing of passwords between multiple users is done by defining an “organisation” and then linking multiple users to the same organisation. Each “organisation” effectively has its own vault, and its own copy of the relevant data. Each user who is a “member” of the organisation effectively has access to the “master password” of that organisation. There is a complex structure of rights that an “organisation admin” can configure for users.</p>
+
+<p>The Vault interface for creating organisations lists various free/paid plans. However the <code>vaultwarden</code> implementation supports all enterprise features for all organisation types - so when using <code>vaultwarden</code> as server, just choose the “free” tier. Fixing this UI quirk would mean forking the Vault code, which is not worth the effort.</p>
+
+<p>There is a <a href="https://help.bitwarden.com/article/cli/">command-line tool</a> for interacting with the Bitwarden server; this is implemented in javascript and can be installed with the nodejs package-manager “npm”.</p>
+
+<p>Each item stored has:</p>
+
+<ul>
+  <li>a “name” (descriptive name for showing in the interface)</li>
+  <li>a “url” (can be searched for)</li>
+  <li>the username for the service to be logged into</li>
+  <li>the password itself, and/or a TOTP code</li>
+  <li>a free-text notes field</li>
+  <li>zero or more “custom fields” associated with the entry</li>
+  <li>a “folder” for organising (grouping) entries</li>
+</ul>
+
+<p>Searches for entries is done client-side, not server-side: the entire repo is “synced” to the local machine and then a search is done locally. Modifications to data include a synchronous update of the central data.</p>
+
+<p>Bitwarden code manages master passwords responsibly; when you provide such a password to any bitwarden app, it immediately derives some other more temporary/limited token from that password and then erases the original master password from memory. In particular, communication with the REST service is done via a “session key” which has a limited time duration; after this has expired the account is considered “locked” and a new session key must be created (by a client app, using the master password). Login is a somewhat different process from a session key - it authenticates against the bitwarden server.</p>
+
+<p>The fact that the rest-server does not actually have access to any credentials means that the fact that <code>vaultwarden</code> is not from a well-known source is not a major concern. Only clients can leak decrypted information.</p>
+
+<p>A Bitwarden server uses WebSockets to notify client applications of changes. The <code>vaultwarden</code> server itself provides WebSocket support on a different port than its REST services (3012 by default) - though this different port is not visible if using a <code>reverse_proxy</code> in front (eg the nginx config shown above). This means that client apps connect to bitwarden rest server on the relevant port and stay connected for long periods of time. This functionality is not critical, eg the CLI client does not do this.</p>
+
+<p>Bitwarden’s standard server can interact with LetsEncrypt to allocate certificates automatically; however this requires that it runs on ports 80/443 on its host. Certificate renewal occurs only each time the server is started, ie it is necessary to restart the server at least every 90 days (duration of a letsencrypt certificate). It isn’t clear whether the <code>vaultwarden</code> implementation also supports this.</p>
+
+<h1 id="see-also">See Also</h1>
+
+<ul>
+  <li><a href="https://pieterhollander.nl/post/bitwarden/">Hollander: Bitwarden: How to Set Up…</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/security/bitwarden/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

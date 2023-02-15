@@ -1,0 +1,514 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Beginner's Guide to Installing from Source</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Beginner's Guide to Installing from Source</h1>
+    <aside>First published on: August 28, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <!--
+SYNOPSIS:		Background Information on Downloading and Installing Software from Sourcecode on Open-source Operating Systems
+PREREQUISITES:		None
+-->
+
+<h1 id="introduction">Introduction</h1>
+
+<p>This document is intended for users of open-source operating systems who wish to install software direct from the original authors, rather than relying solely on the software (and versions) provided by their operating system. It is written for those who are not familiar with the concept of downloading software in source-code form, providing background information about relevant commands and the process in general.</p>
+
+<h1 id="concepts-discussed">Concepts Discussed</h1>
+
+<ul>
+  <li>Development and distribution: independent software developers, multi-os support, releases (archives), version-control</li>
+  <li>Distributions: binary packages and package-managers</li>
+  <li>Downloading: http, ftp, wget, checksums and signatures</li>
+  <li>Archive files: tar, zip, gzip</li>
+  <li>Common files: README and INSTALL; required dependencies</li>
+  <li>Patching with sed/awk/patch</li>
+  <li>Building and Installing: configure, make, cmake, perl and python</li>
+  <li>Building and Installing Documentation</li>
+  <li>Compiler settings and stripping; handing errors</li>
+  <li>Post-installation</li>
+</ul>
+
+<h1 id="development-and-distribution">Development and Distribution</h1>
+
+<p>A typical operating system consists of hundreds of different applications. In a proprietary operating system, the producer/seller of that operating system typically owns and manages the development of all that software. However open-source systems are usually created by obtaining and integrating applications invented and maintained by many independent groups - or even single independent developers. In addition, an open-source software project is often used in a variety of different operating systems - eg Linux-based, BSD-based, Hurd, and sometimes even integrated into proprietary operating systems such as Solaris, Mac, even Windows (if the licence allows).</p>
+
+<p>The original software developers are sometimes referred to by distribution maintainers and end-users as the <em>upstream source</em> or simply <em>upstream</em>. Similarly, the developers often refer to the distributions that use their code, or the end-users as <em>downstream</em>.</p>
+
+<p>Most open-source projects store their source code in a version-control system which is accessible over the internet (read-only for anonymous users). For such projects it is possible to download the very latest “in-progress” files, or to download the set of files “tagged” with some release-id (version number). However it is often not very efficient to do this; projects usually make regular <em>releases</em> by creating an <em>archive file</em> containing all the relevant files and make it available for download. For projects that do not have a public version-control system, such periodically released <em>archive files</em> are the only way to obtain the sourcecode directly.</p>
+
+<h1 id="distributions-binary-packages-and-compiling-from-source">Distributions, Binary Packages, and Compiling From Source</h1>
+
+<p>There are many <em>operating system distributions</em> which do the work of finding, downloading and tweaking all the most-commonly used software packages. Several also compile it, and make the binary-form results available. There are many benefits, including quicker installation, one location to <em>find</em> relevant software, and particularly a supply of relevant <em>security patches</em>: the distribution maintainers watch for security updates and make it easy for end users to notice and install them.</p>
+
+<p>However such distributions often don’t include the very latest version of software; if you need a newer version than the one provided by your distribution then it may be necessary to build it yourself.  Software is also often very customisable at install-time, particularly with the ability to omit features that are not needed. Because a distribution needs to keep a wide range of users happy, they tend to include <em>every</em> feature in the compiled applications they distribute; you as the end-user may be able to tune an application better by compiling it yourself.</p>
+
+<p>Distributions generally include a <em>package manager</em> that keeps a database of which software is installed. It isn’t a good idea to go changing the software on a machine “behind the back” of the package manager; all sorts of odd behaviour could occur later. If your distribution has a package manager, then please read this document for background information - but then consult the documentation for your distribution to find out how to install software without confusing your package manager. Usually this involves writing a <em>package specification</em> that describes the software and then using the local package manager to compile and install the software. This applies to all distributions with package-managers, regardless of whether applications are distributed in binary (pre-compiled) or source-code form.</p>
+
+<h1 id="downloading-and-security">Downloading and Security</h1>
+
+<p>The usual way to download an archive file is by using a web-browser and clicking on a “download” button, clicking a link, or right-clicking a link and selecting “save as”. This downloads the file using the “http” protocol. Some sites instead make files available via the older “ftp” protocol. Many web-browsers support this too, ie clicking a link can also work here. Alternately, there are ftp client applications.</p>
+
+<p>The “wget” or “curl” command-line application can also be used under unix-like operating systems to fetch a file via http or ftp when the correct URL is known.</p>
+
+<p>Sites which publish software that is very frequently downloaded often have “mirror” sites set up, ie helpful people keep <em>copies</em> of the files in various places around the world. The original site usually has a list of the available <em>mirrors</em>, and you should choose one that is near to you. This helps reduce the cost of network bandwidth on the original publisher, and usually also lets you download faster.</p>
+
+<p>Both the “http” and “ftp” network protocols can be intercepted by criminals or other undesirable parties who can then modify data as it downloads. Data can also potentially be corrupted by accident while underway (though this is not common). And when using a mirror-site, it is possible that someone has modified the files there (ie that the files on the mirror are not the same as those from the original publisher).  It is therefore a good idea to <em>verify</em> that what you downloaded is what the original publisher intended.</p>
+
+<p>Many sites provide an <em>md5sum</em> file for each archive file, which holds a <em>checksum</em> of the contents of the file; sometimes a single <em>md5sums</em> file holds checksums for a number of other files. You should always obtain an md5sums file from the <em>original site</em>, never a mirror. And you should download it via the secure <em>https</em> protocol if possible. The unix <code>md5sum</code> commandline tool can then be used to compute the checksum of the big archive file, and compare it to the expected values to ensure the contents are as expected.</p>
+
+<p>To compute the sum of a single file:</p>
+
+<pre><code>   md5sum file-to-check
+</code></pre>
+
+<p>and “by hand” verify the output of this application against the expected value. If the value is in a webpage, you can open the “find” dialog on that page and copy-and-paste the value output by the md5sum program. The “find” will match only if the values are the same.</p>
+
+<p>If the software provider provides an md5sums file which has a list of (filename, checksum) pairs, then you can run:</p>
+
+<pre><code>   md5sum -c md5sums-file
+</code></pre>
+
+<p>which will look in your local system for every file listed in the md5sums-file, compute its checksum, and report an error if it is not the expected value.</p>
+
+<p>Some software providers <em>sign</em> archive files instead of (or as well as) providing an md5 checksum. In this case you should:</p>
+
+<ul>
+  <li>download the provider’s <em>public key</em> from their website (using https where possible)</li>
+  <li>download the “signature file” for the archive-file; this will be a small file which has the same base name as the downloaded file, with suffix “.sig” or “.asc”</li>
+  <li>perform the following steps</li>
+</ul>
+
+<pre><code># needed only once for each key, ie each "publisher"
+gpg --import {public-key}
+
+gpg --verify {signature-file-name}
+</code></pre>
+
+<p>The verify step decrypts the signature-file, revealing a checksum; it then runs a checksum algorithm over the real file and checks that they are the same. Obviously, the “gpg” application needs to be installed locally.</p>
+
+<h1 id="archive-files">Archive Files</h1>
+
+<p>An <em>archive</em> is a single file that contains within it a number of other files. There are several different tools for creating such files but in all cases the process is effectively to append all the individual files together, and then add an “index” which contains the offset, length, name and other properties of the original files so that they can be extracted again.</p>
+
+<p>Note: the word “archive” in English can imply something “old”, no longer used, or a “backup” copy. While archive files can be used to store backups or rarely used data, they are also convenient for passing data around a network.</p>
+
+<p>The  “tar” application packs multiple files into a single “tar-format” archive file, which is the most commonly-used format in open-source. Tar originally meant “tape archive”, but the format works well on disks too. Tar archives remember not only the original names of files, but also their original Unix “owner id” and file-permissions. The ownerid is seldom useful (unless the tar archive was created on the same machine it is being unpacked on), but the file-permissions are. By convention, tar-format files are usually given names ending in “.tar”. Tar-format files containing sourcecode are sometimes referred to as “tarballs”.</p>
+
+<p>The tar application doesn’t compress the file contents. However source-code files do compress very well and network bandwidth is always too slow and too expensive, so tar files are usually <em>compressed</em> after creation, using a generic compression application. The most commonly used compression type is “gzip”, and the resulting file is usually given the suffix “.tar.gz” or “.tgz”. Compression with bzip2 is also common, and such files are usually given the suffix “.tar.bz2”. Occasionally “xz” compression will be used; files are usually given the suffix “.tar.xz”.</p>
+
+<p>The original version of the tar application was created a long time ago, and it has been reimplemented a number of times. Sadly this means that the commandline options available vary considerably depending on which version of the application you are using. The functionality also varies depending on version; in particular some versions can auto-detect when compression has been used, and decompress automatically while others require the correct commandline parameters to be passed in order to handle compressed files, and yet others require the file to be decompressed first. Here are some example commands to extract files from a tar archive:</p>
+
+<pre><code>   # Modern GNU tar options. This works for files compressed
+   # with gzip and bzip too
+   tar --extract --file filename
+
+   # Same as above
+   tar -xf filename
+
+   # Same as above. Leading "-" is optional
+   tar xf filename
+
+   # explicitly decompress gzip2-compressed file then
+   # pass uncompressed result directly into tar
+   gzip -cd filename.tgz | tar xf -
+
+   # same as above, but for bzip2-compressed files
+   bunzip2 -cd filename.tar.bz2 | tar xf -
+</code></pre>
+
+<p>Note that if the “f” is omitted, tar just appears to hang (waits for user input).</p>
+
+<p>Warning: unpacking a tar file can overwrite local files. By default, files are unpacked into a subdirectory of the current directory, which should be safe as long as your current directory is something appropriate. However <em>do not trust any instructions that use the following options</em>; they may be trying to trick you into modifying important local files:</p>
+
+<pre><code>  -C or --directory
+  -P or --absolute-names
+  --transform or --xform
+</code></pre>
+
+<p>Most tar-files are created such that unpacking them creates a <em>single subdirectory</em> within the current directory, and all other files are placed into that directory; eg unpacking a file named “foo-1.2.tar.gz” would create a subdirectory named “foo-1.2” with files inside that directory. Sadly not everybody that packages source-code for download follows this convention; sometimes the tarfile expands its contents directly into the current directory - which can create a big mess if that directory already has files in it. It is therefore best to check the contents of the tarfile before unpacking, using the following command:</p>
+
+<pre><code>   # Modern GNU tar
+   tar --list --file filename
+
+   # Same as above
+   tar -tf filename
+
+   # Same as above. Leading "-" is optional
+   tar tf filename
+
+   gzip -cd filename | tar tf -
+   bunzip -cd filename | tar tf -
+</code></pre>
+
+<p>Occasionally, archive files are distributed in “zip format”. Zip-archives are most common in the DOS and Windows world, or in relation to Java, but are occasionally encountered elsewhere. The Zip format works like a combination of tar and gzip (it uses the same compression as gzip but its own kind of internal “indexing”). Zipfiles do not preserve the original unix ownerid or file-permissions. The contents of such a file can be extracted with the <code>unzip</code> command (assuming it is installed locally).</p>
+
+<p>Where possible, archive files should be unpacked when logged in as a normal user, not the “root” user. This is an extra safety-measure to prevent any unintended file overwrites. However the file-owner settings recorded in the tar-file are only preserved when the user unpacking the archive is the root user. If these are important (which is not common) then the archive must be unpacked “as root”.</p>
+
+<h1 id="common-files">Common Files</h1>
+
+<p>Unpacked source-code archives usually contain a file named README or INSTALL (or both) in the top-level directory. You should always read these documents first, as they give important information about how to compile, install and configure the rest of the source-code in the downloaded archive.</p>
+
+<p>One important piece of information usually found in the README or INSTALL is a list of other software that must be installed <em>first</em>. Any program you download will require some local header-files, library-files and/or helper tools to build or to run.  If you don’t get the prerequisites right, then the application may not compile, or may compile but not run, or may get built without certain optional features that you want.</p>
+
+<p>Another important piece of information is the set of parameters that can be passed to the build-process; see later.</p>
+
+<h1 id="patching">Patching</h1>
+
+<p>Sometimes the downloaded software is known not to work in your environment, and somebody has already figured out how to tweak it to resolve the problem. The person who solved the problem may publish their “tweak” in the form of a <code>sed</code> or <code>awk</code> command, a shell-script containing multiple sed/awk commands, or a <em>patch file</em>. Obviously, you need to be cautious about such changes, applying them only if you trust the source or have the ability to double-check the changes.</p>
+
+<p>The <code>sed</code> tool applies a regular-expression to each line in a textfile, and replaces matching text with something else. It’s a fairly limited tool, but easy to use and widely available.</p>
+
+<p><code>awk</code> does something similar, but is capable of performing more complex transformations of textfiles.</p>
+
+<p>A patchfile is created by using the “diff” tool to compare two versions of the same file and output the differences. The <code>patch</code> tool can take the output of “diff” and apply it to one of the files to “convert it” to the other version. The nice thing about patchfiles (ie the output of diff) is that it is quite human-readable, ie it is reasonably easy to see what changes will be made.</p>
+
+<h1 id="build-systems-configure-make-cmake-etc">Build Systems: configure, make, cmake, etc</h1>
+
+<p>The software developers who created the software you just downloaded obviously need some way of compiling and installing that software on their own machines. Whatever config files are necessary for the tools they use are almost always included in the archive file. As open-source developers <em>want</em> as many people as possible to use their software, they also go to some effort to make it easy to build and install the software on a range of different systems. However they cannot support every possible configuration in the world.</p>
+
+<p>In the end, the point of the installation process is to convert the original source-code into a form that the local computer can execute, and then to place all the necessary files into directories that are listed in the <code>$PATH</code> variable for all users (so they can execute those files). Installing modules for interpreted languages is slightly different; those files get installed where the interpreter (eg python or perl) can find them, rather than in $PATH directly.</p>
+
+<h2 id="configure-and-make">Configure and Make</h2>
+
+<p>The most widely-spread tool used to manage the compilation and installation of source-code is <code>make</code>. Make is an application which takes a configuration-file (called a <code>makefile</code>) that contains a list of rules, most of the form:</p>
+
+<ul>
+  <li>when TARGET-FILE is older than SOURCE-FILE then SOME-ACTION</li>
+</ul>
+
+<p>The target-file is the end product, or some intermediate stage. The source-file is the hand-written source-code, or some intermediate artifact. The action is usually the invocation of a compiler, a linker, or similar which recreates the target-file. This document is far too short to go into the details of the very complex and powerful <code>make</code> command; fortunately it is usually not necessary to understand makefiles to compile software - unless something goes wrong. A brief explanation of makefile syntax and behavior can be found in Appendix A.</p>
+
+<p>Unfortunately, although makefile syntax is very powerful it still isn’t enough to be able to handle all the possible ways that computers can be configured, and all the possible ways that the person installing the software may wish to compile the application. Many software packages therefore come with a shell-script named “configure” and a template makefile named “Makefile.in”. The configure script takes a list of configuration options on the commandline, and converts the template makefile into a real makefile customised for the local computer and the installer’s wishes. The installation sequence therefore usually goes like:</p>
+
+<pre><code># unpack and read documentation
+tar xf filename
+cd {directory created by above step}
+less README
+less INSTALL
+
+# generate customised makefile
+./configure {some options ...}
+
+# compile everything in the local directory
+make
+
+# update global directories
+sudo make install
+</code></pre>
+
+<p>By the way: the “configure” script is auto-generated by software called <a href="https://en.wikipedia.org/wiki/GNU_build_system">autotools</a>, but that doesn’t matter to the person using it.</p>
+
+<p>Configure is usually invoked as “./configure” to avoid two possible problems:</p>
+
+<ul>
+  <li>Some users don’t have “.” in their <code>$PATH</code> variable. In particular, the root user doesn’t have this for security reasons</li>
+  <li>Some users don’t have “.” as the <em>first</em> entry in their <code>$PATH</code>, meaning that the <em>wrong</em> configuration script might get run</li>
+</ul>
+
+<p>In general, it is best to perform all steps except “make install” as a normal system user, not root. This avoids mistakes and possibly some attacks (though as the install step is done as root that isn’t much protection). However installing software into the global <code>/bin</code> or <code>/usr</code> directories usually requires administration privileges (unless you’re using a “user-based package manager” or similar rare setup).</p>
+
+<p>Some projects provide a makefile but no “configure” script; in this case the “configure” step above can be omitted. Either the application is simple enough that it doesn’t need it, or the software developers have built more logic into the hand-written makefile.</p>
+
+<p>Not all systems are set up with “sudo” enabled. In this case, use the following instead:</p>
+
+<pre><code>su  # must then enter root password
+make install
+exit
+</code></pre>
+
+<p>For most software, the configure and make commands can be run in the same directory as the source-code, as shown above. The result is that new files generated during compilation get mixed together with the originals, which is somewhat messy, but the “make clean” command can be used to tidy that up later. However for some software it is necessary to create a temporary directory, change the current-working-directory to that directory and then perform the build-steps there; the project documentation should indicate if this is necessary. Some people consider it better to <em>always</em> build from a temporary directory. An example of building using a separate directory next to the original source-code, which is a common convention:</p>
+
+<pre><code># unpack into a directory {packagename}
+tar xf filename
+
+# create separate build directory
+mkdir {packagename}-build
+
+# compile everything in the separate build directory
+cd {packagename}-build
+../{packagename}/configure {some options}
+make
+
+# update global directories
+sudo make install
+</code></pre>
+
+<h2 id="other-build-tools">Other Build Tools</h2>
+
+<p>Some projects use <code>cmake</code> as their build-tool. <code>cmake</code> works somewhat like <code>configure</code> (see above); it <em>generates</em> a makefile whose content depends on the options passed to the cmake command, and on features of the local system. The steps require to build a cmake-based package are identical to the “configure/make” examples above except that the configure step is replaced by:</p>
+
+<pre><code>cmake . -DCMAKE_BUILD_TYPE=Release {some options ...}
+</code></pre>
+
+<p>As always, check the project’s documentation for instructions on how to build.</p>
+
+<p>Some projects use build-tools based on python or perl rather than <code>make</code>. The principles are still fairly similar.</p>
+
+<p>Software which does not need to be compiled usually has a fairly simple and quick installation process. In particular, applications written in the Perl or Python interpreted languages can be installed just by copying the files into the relevant location. These projects nevertheless include a program or script in the archive-file which performs this task, rather that requiring the installer to do this manually.</p>
+
+<h2 id="environment-variables">Environment Variables</h2>
+
+<p>Options to configure the compilation and installation of an application are usually passed as command-line parameters to the “configure” script or the make program. However sometimes configuration options are passed via <code>environment variables</code> instead. These can be specified by placing the definitions on the start of the command, eg</p>
+
+<pre><code>NAME=tom ENABLE_FOO=no ./configure
+</code></pre>
+
+<p>Environment variables can also be defined <em>before</em> running the command:</p>
+
+<pre><code>export NAME=tom
+export ENABLE_FOO=no
+./configure
+</code></pre>
+
+<p>Which options are available is normally described in the archive’s README or INSTALL files, or on the project website. Sometimes the available options can be seen by running <code>./configure --help</code>.</p>
+
+<h2 id="building-and-installing-documentation">Building and Installing Documentation</h2>
+
+<p>Some projects provide documentation which can be “installed” so it is accessible via normal system documentation viewers such as “man” or “info”. Some provide documentation in HTML form, which usually gets installed under <code>/usr/share/doc</code>.  Sometimes this documentation is included in the “standard” archive file, and sometimes it is a separate (optional) download. Sometimes the documentation is installed as part of the standard <code>make install</code> command, and sometimes a separate command must be used if you wish to install it.  And sometimes the documentation is delivered in a “ready-to-use” form, but sometimes it is delivered in a kind of “raw form” that must be processed before being installed - rather like source-code needs to be compiled.</p>
+
+<p>As should be clear by now, the variety of approaches to delivering documentation is so wide that no really useful advice can be given here. See the README and INSTALL files in the downloaded archive, and the project website for guidance.</p>
+
+<h2 id="other-build-targets">Other Build Targets</h2>
+
+<p>As well as commands to compile everything (“make”) and to install the previously-compiled programs (“make install”) or documentation, there are a few other common possibilities.</p>
+
+<p><code>make clean</code> usually removes all generated files, ie leaves the directory as it was after the files were unpacked from the archive.</p>
+
+<h2 id="invoking-a-compiler">Invoking a Compiler</h2>
+
+<p>As noted above, the most common step performed by “make” or “cmake” is to invoke a compiler. The local system must have the appropriate compilers installed.</p>
+
+<p>This is also the step that is most likely to fail (along with linking).</p>
+
+<p>If the compilation step fails with an error-message about not being able to find a header-file, or not being able to find a library-file then you have probably not installed all of the pre-requisites - reread the README and INSTALL files. In some cases, the missing prerequisite is optional, in which case there will be a parameter that can be passed to configure or an environment variable which can be set to allow the software to be installed without that prerequisite. Double-check the parameters you specified, and if they seem correct then the project documentation is the best resource for resolving such issues.</p>
+
+<p>Compilers have a range of options that can potentially improve performance. However you should only mess with these if you have plenty of experience. If you need this document, then just leave compiler options at their defaults!</p>
+
+<p>The output of compiling and linking (the “executables” that you actually wanted) usually have significant amounts of data in them which are useful for debugging the programs, but not useful for “normal end users”. This information can be removed from the executable files by running <code>strip {filename}</code> on them. Smaller programs will save disk-space and also load slightly faster. Unless you are intending to debug the program, using <code>strip</code> is a good idea.</p>
+
+<h1 id="post-installation-configuration">Post-Installation Configuration</h1>
+
+<p>Some applications can have their behaviour customised via <em>configuration files</em> read on application startup. Often applications install <em>default versions</em> of the configuration files somewhere under <code>/usr</code> or in the <code>/etc</code> directory. Inspect the output of the <code>make install</code> command to see which config files have been installed. Configuration options should also be documented in the program’s README or INSTALL, or on their website.</p>
+
+<h1 id="appendix-a-an-example-makefile">Appendix A: An example Makefile</h1>
+
+<p>Unfortunately, when building packages from source-code, it is not unusual for compilation errors to occur. It is sometimes possible to diagnose and fix the problem by inspecting the makefile, ie a basic understanding of makefile syntax can be helpful. Here is a very brief example of the basic syntax and functionality; for further details see the <code>make</code> documentation or one of the many tutorials available online.</p>
+
+<p>A sample makefile to build an executable called ‘prog’ which has one ‘c’ sourcefile, one headerfile and uses one library (which it also builds from a single ‘c’ sourcefile) could look like the following:</p>
+
+<pre><code>prog: prog.c prog.h libmylib.a
+  gcc -o prog prog.c -L. -lmylib
+
+libmylib.a: libmylib.o
+  ar -rcs libmylib.a libmylib.o
+
+libmylib.o: libmylib.c libmylib.h
+  gcc -c -o libmylib.o libmylib.c
+</code></pre>
+
+<p>The form of the entries (rules) are:</p>
+
+<pre><code>target: dependency1 [dependency-n ...]
+&lt;tab&gt; command to execute
+...
+</code></pre>
+
+<p>For each “rule”, if the target is missing or older than any of the dependencies (based on file timestamps), then the command(s) are run to (re)create the target. However each dependency is first tested to see if there is a rule that has <em>it</em> as a target.  If so, that target is recursively evaluated, ie (re-)built if it is missing or older than its dependencies.</p>
+
+<p>Thus in the above set of rules, a change in libmylib.c will cause libmylib.o to be rebuilt. Then libmylib.a is regenerated and finally prog is rebuilt.</p>
+
+<p>Makefiles can get very complicated and many are automatically generated, but the above principles always apply.</p>
+
+<h1 id="acknowledgements">Acknowledgements</h1>
+
+<p>This document was inspired by the <a href="http://tldp.org/">TLDP</a> document <a href="http://www.tldp.org/HOWTO/Software-Building-HOWTO.html">Software Building HOWTO</a> which sadly is not actively maintained.</p>
+
+<p>Thanks to the following people who gave feedback on this document: Bruce Dubbs, Daniel Schepler.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/beginners-installing-from-source/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

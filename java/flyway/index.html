@@ -1,0 +1,245 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Managing Database Schemas with Flyway</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Managing Database Schemas with Flyway</h1>
+    <aside>First published on: October 31, 2019</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>When implementing an application which persists its data in a relational database, a necessary step is to execute <a href="https://en.wikipedia.org/wiki/Data_definition_language">DDL</a> statements against the database to define the necessary tables, sequences, constraints, etc. Various base records (reference data) might also need to be inserted. This needs to be performed for each “installation” of the application.</p>
+
+<p>And as the application evolves over time, upgrades of the application will require matching upgrades of the schema in the database.</p>
+
+<p>This article looks at the <a href="https://flywaydb.org/">Flyway</a> project that provides a solution for managing database schemas. Flyway does have a few proprietary features for which a license is required, but the open-source features are sufficient for most use-cases.</p>
+
+<p>This article is very brief because the Flyway site has good documentation of its own, and the product is very nicely focused on a small (but useful) set of features. See the official documentation for more details.</p>
+
+<h1 id="basic-concepts">Basic Concepts</h1>
+
+<p>For version 1 of any application, it is easy enough to write SQL scripts to define the necessary tables and records. However when version 2 is released:</p>
+
+<ul>
+  <li>some installations of version 2 will be new, ie the matching database schema needs to be created</li>
+  <li>but some installations will be upgrades where a database matching version 1 already exists</li>
+</ul>
+
+<p>Flyway’s solution is simple: there should be a sequence of SQL scripts for the application, typically one for each released version. A new installation executes all scripts in order, while an upgrade only executes scripts that are “new” ie have not yet been run against this particular database.</p>
+
+<p>In order to know which scripts have already been run, Flyway creates a single table in the target database for its own “metadata”; it records in this table which scripts have been run (ie which “version” the database is currently at). This implies that a script must never be <em>changed</em> retrospectively after having been included in a release.</p>
+
+<p>Scripts are simply files with a naming scheme where each filename is of form “<code>{version}__{description}</code>”, eg “<code>V1__initial</code>” or “<code>V1_1__newstuff</code>”.</p>
+
+<p>For special cases, a “version update” can be associated with an arbitrary Java class rather than an SQL file, in order to update a database schema or (more likely) modify records in a way that SQL cannot express.</p>
+
+<h1 id="usage">Usage</h1>
+
+<p>Flyway is implemented in Java, and:</p>
+
+<ul>
+  <li>can be used as a standalone application (executable jarfile), and given a directory of SQL scripts to run.</li>
+  <li>can be built into a standalone application (executable jarfile) where the SQL scripts are within the jar</li>
+  <li>can be used by your code as a library, eg your main application can have a commandline-option to run flyway internally</li>
+</ul>
+
+<p>Flyway uses standard JDBC to connect to the target database in order to run SQL scripts.</p>
+
+<p>See the <a href="https://flywaydb.org/documentation">Flyway official documentation</a> for the details.</p>
+
+<p>Spring-boot has support for Flyway; just add Flyway to your application’s classpath and on startup Flyway will be executed to upgrade the database if needed. When no upgrade is needed, the extra time required at startup is minimal, ie not relevant for most use-cases.</p>
+
+<h1 id="alternatives">Alternatives</h1>
+
+<p><a href="https://www.liquibase.org/">Liquibase</a> has very similar features. The primary difference is that Flyway SQL scripts are “native SQL”, ie may contain database-specific commands. Liquibase has invented their own “portable DDL” language which is then mapped to the actual commands for the target database at runtime.</p>
+
+<p>The Flyway approach is superior if you support only one (or maybe two) different relational database types; because the scripts are native they can be read and verified by anyone competent in SQL.</p>
+
+<p>Liquibase is superior if you need to support a large number of different relational database types; writing and reviewing such scripts is harder as it requires knowledge of Liquibase syntax but the scripts only need to be written and tested once.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/flyway/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

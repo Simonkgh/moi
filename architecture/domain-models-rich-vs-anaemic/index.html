@@ -1,0 +1,810 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Domain Models - Rich vs Anaemic</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Domain Models - Rich vs Anaemic</h1>
+    <aside>First published on: March 14, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a>, <a href='/category/Java/'>Java</a>, <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 class="no_toc" id="introduction">Introduction</h1>
+
+<p>A number of important contributors to the theory of software development recommend <em>rich domain models</em>, and warn against the opposite: <em>anaemic</em> domain models (eg <a href="http://www.martinfowler.com/bliki/AnemicDomainModel.html">here</a>).</p>
+
+<p>This article looks at what the complaints are about, and what it means for the implementation. I am an experienced architect and software developer but not an acknowledged expert on this topic so please take the thoughts below as input for your own conclusions.</p>
+
+<p>This article applies primarily to code-bases which are following <em>domain driven design</em> (DDD), whether completely (formal domain model docs, etc) or informally.</p>
+
+<p>There seem to be four parts to the concerns about anaemic domain models:</p>
+
+<ol>
+  <li>Whether all business logic is present in the domain model;</li>
+  <li>whether the <em>invariants</em> for stateful model types are properly protected;</li>
+  <li>whether business operations are defined on <em>domain services</em> or <em>stateful model types</em> (entities/value-objects); and</li>
+  <li>whether the model types are helpful concepts for understanding the business requirements.</li>
+</ol>
+
+<p>And by the way: anemic = US English, anaemic = British English.</p>
+
+<p>This article often refers to two well-known books on domain-driven design by <a href="https://www.pearson.com/en-us/subject-catalog/p/domain-driven-design-tackling-complexity-in-the-heart-of-software/P200000009375/9780321125217">Evans</a> (Domain-Driven Design) and <a href="https://www.pearson.com/en-us/subject-catalog/p/implementing-domain-driven-design/P200000009616">Vernon</a> (Implementing Domain-Driven Design).</p>
+
+<h1 class="no_toc" id="context">Context</h1>
+
+<p>In this article, I’m considering programs with non-trivial business logic. Applications which don’t have much in the way of business logic (eg basic wrappers around a database) obviously don’t have to worry about rich vs anaemic domain models. Applications which are primarily about presentation (front end stuff) may have a domain model, but don’t have a lot of logic to place on those types and so have different trade-offs which this article doesn’t consider.</p>
+
+<p>I’m also assuming the application offers an API (ReST, gRPC, etc) to access that functionality; this isn’t critical (ie an app with an embedded html-rendering layer does face the same issues) but assuming an API makes the discussion clearer.</p>
+
+<p>In the case of a microservice architecture, the point above about significant business logic still applies; a service which has significant business logic needs to consider the points made here while a service that is so micro that the business logic is trivial probably does not.</p>
+
+<h1 class="no_toc" id="contents">Contents</h1>
+
+<ul id="markdown-toc">
+  <li>
+<a href="#a-quick-look-at-the-primary-points" id="markdown-toc-a-quick-look-at-the-primary-points">A Quick Look at the Primary Points</a>    <ul>
+      <li><a href="#all-business-logic-should-be-in-the-domain-model" id="markdown-toc-all-business-logic-should-be-in-the-domain-model">1. All Business Logic Should be in the Domain Model</a></li>
+      <li><a href="#properly-protected-invariants" id="markdown-toc-properly-protected-invariants">2. Properly Protected Invariants</a></li>
+      <li><a href="#operations-on-stateless-services-vs-stateful-objects" id="markdown-toc-operations-on-stateless-services-vs-stateful-objects">3. Operations on Stateless Services vs Stateful Objects</a></li>
+      <li><a href="#a-model-as-aid-to-understanding-the-requirements" id="markdown-toc-a-model-as-aid-to-understanding-the-requirements">4. A Model as Aid to Understanding the Requirements</a></li>
+      <li><a href="#summary" id="markdown-toc-summary">Summary</a></li>
+    </ul>
+  </li>
+  <li><a href="#the-easy-bits" id="markdown-toc-the-easy-bits">The Easy Bits</a></li>
+  <li><a href="#accessing-resources-from-stateful-model-types" id="markdown-toc-accessing-resources-from-stateful-model-types">Accessing Resources From Stateful Model Types</a></li>
+  <li><a href="#hexagonal-architecture-and-an-isolated-domain-model" id="markdown-toc-hexagonal-architecture-and-an-isolated-domain-model">Hexagonal Architecture and an Isolated Domain Model</a></li>
+  <li>
+<a href="#domain-models-and-persistence" id="markdown-toc-domain-models-and-persistence">Domain Models and Persistence</a>    <ul>
+      <li><a href="#reference-complexity-and-aggregates" id="markdown-toc-reference-complexity-and-aggregates">Reference Complexity and Aggregates</a></li>
+      <li><a href="#internal-or-external-persistence" id="markdown-toc-internal-or-external-persistence">Internal or External Persistence</a></li>
+      <li><a href="#lazy-loading" id="markdown-toc-lazy-loading">Lazy Loading</a></li>
+      <li><a href="#a-note-on-repositories" id="markdown-toc-a-note-on-repositories">A Note on Repositories</a></li>
+    </ul>
+  </li>
+  <li><a href="#accessing-services" id="markdown-toc-accessing-services">Accessing Services</a></li>
+  <li><a href="#polymorphism-related-clutter" id="markdown-toc-polymorphism-related-clutter">Polymorphism-related Clutter</a></li>
+  <li><a href="#dealing-with-distributed-systems" id="markdown-toc-dealing-with-distributed-systems">Dealing with Distributed Systems</a></li>
+  <li><a href="#non-object-oriented-programming-styles" id="markdown-toc-non-object-oriented-programming-styles">Non-Object-Oriented Programming Styles</a></li>
+  <li><a href="#my-personal-preferences" id="markdown-toc-my-personal-preferences">My Personal Preferences</a></li>
+  <li><a href="#further-reading" id="markdown-toc-further-reading">Further Reading</a></li>
+  <li><a href="#footnotes" id="markdown-toc-footnotes">Footnotes</a></li>
+</ul>
+
+<h1 id="a-quick-look-at-the-primary-points">A Quick Look at the Primary Points</h1>
+
+<p>The following sections briefly address points 1-4 above. Later sections drill down into details and address related topics.</p>
+
+<h2 id="all-business-logic-should-be-in-the-domain-model">1. All Business Logic Should be in the Domain Model</h2>
+
+<p>The code in an application can be grouped into two categories: stuff that makes sense to business people and other stuff which is necessary but only relevant for the developers. In a finance application, the concepts of accounts and balances is something the business experts care deeply about. In a medical application, the concepts of symptoms and diagnoses are important to the experts. In an insurance application, the business cares about policies and claims. None of these experts care about http query parameters, or thread-pools, or metrics-gathering, or liveness-checks - even though the business services they care about could not be delivered without them.</p>
+
+<p>This distinction between business and technical/supporting code has been acknowledged for decades. And in general I think it’s fair to say that it is acknowledged <em>best practice</em> to separate these two categories of code. This separated business logic is sometimes called “the business tier”. Domain driven design calls it a “domain layer” or (the implementation of) a domain model.</p>
+
+<p>Domain-driven design is centered around the concept of a <em>model</em> which acts as the common ground between domain experts and software developers. A problem domain can be described via multiple models, and the art of DDD is to choose a model which works both for the domain experts and the developers, ie is useful for representing important business concepts and also maps pretty directly to code. Requirements from the experts can now be understood by developers, and structural changes the developers wish to make to the code can be discussed with the domain experts.</p>
+
+<p>Sadly, there are many applications in which (despite best practice) the two types of code are not clearly separated. When this happens, there is important stuff happening with regards to the business which:</p>
+
+<ul>
+  <li>was specified by experts, but then mixed in with non-business code, or</li>
+  <li>was never specified by the domain experts (was made up by the developers directly, based on their understanding of the business).</li>
+</ul>
+
+<p>In either case, the program behaviour is now likely to start diverging from the expectations of the business experts. In addition, with everything mixed together, it’s hard to have productive discussions of the system behaviour involving both developers and business people.</p>
+
+<p>If there is a “domain model” documented separately from the code, then the code will also start diverging from that documentation - it’s almost impossible to keep them in sync. This adds to the disconnect between what the business experts think they are getting from the system and how it actually behaves.</p>
+
+<p>Any application that isn’t a throwaway prototype will need to evolve over time. This requires ongoing discussion between the domain experts and the developers. Anything that makes this harder is a bad idea.</p>
+
+<p>Having a clean “business tier” aka domain model isn’t just about communication between business experts and developers. It’s also about making it easier for developers to understand what it is they are building. Any time a developer touches business logic they really need to understand the concepts they are changing - and that is easier to grasp when it isn’t mixed together with purely technical supporting code. It’s also about ensuring all developers have a <em>shared</em> understanding of what they are building.</p>
+
+<p>It is of course normal for an application to have a lot of code which is outside the domain model, including the entire presentation-tier (for a desktop or web application), the remote-endpoint layer (for a server application with API), the persistence layer, and a lot of general “infrastructure and framework” code. A properly designed application will ensure there is some kind of clear and obvious boundary between this code and the business logic ie domain implementation. However there is also usually a less-clearly-defined layer that connects the domain code to its callers (UI, remote-endpoints) and the things it calls (persistence and other infrastructure) and there is a danger of code leaking in both directions.</p>
+
+<p>I think it’s non-controversial to say that an application with non-trivial business logic should isolate that logic properly.</p>
+
+<h2 id="properly-protected-invariants">2. Properly Protected Invariants</h2>
+
+<p>Any set of data has specific rules that should always be true. It’s the responsibility of software to not change data in a way that breaks these rules.</p>
+
+<p>However if these rules are enforced via duplicated code in multiple places then sometime somebody is going to get this wrong. It’s therefore best to implement these constraints exactly once and ensure that all changes to data passes through this single implementation of the check.</p>
+
+<p>This maps very naturally to object-oriented programming; a class can hold the sensitive data fields internally and provide methods for manipulating this data which ensure the checks are applied. It is possible to achieve this goal of invariant enforcement in other programming styles too, and this is discussed further in later sections of this article.</p>
+
+<p>There are sadly many ways to screw this up. This is one of the primary complaints regarding anaemic domain models: code that uses classes to represent sets of data with constraints, but where those classes provide methods that allow those constraints to be completely bypassed. This pushes the responsibility for maintaining those constraints up onto every piece of code that interacts with this “anaemic” model type - which as noted above is likely to fail. In particular, classes that have <em>publicly accessible mutable fields</em> or <em>a setter method per field</em> are likely failing to preserve their invariants.</p>
+
+<h2 id="operations-on-stateless-services-vs-stateful-objects">3. Operations on Stateless Services vs Stateful Objects</h2>
+
+<p>Any system (problem domain) which is to be represented in software is a combination of things (nouns) and processes/workflows which operate on those things. Things have properties (state) while processes do not.</p>
+
+<p>Object oriented software represents things (nouns) as classes with fields/properties - aka “stateful domain model types” or, in domain-driven services terminology, <em>entities</em> and <em>value objects</em>.</p>
+
+<p>But what do we with the processes/workflows? The general advice from DDD experts is that logic should be defined on stateful types unless there are good reasons not to, ie services are the “fallback” rather than the “primary” solution; someone looking at a codebase which tends more towards processes/workflows being implemented in <em>domain services</em> rather than on stateful types might accuse the codebase of “being anemic”. However the expression “unless there are good reasons” is already indicating that this is a grey zone, and in fact this is a rather complicated topic.</p>
+
+<p>There are definitely advantages to pushing process logic into stateful domain-model types (rather than services). They include:</p>
+
+<ul>
+  <li>Readability - the types represent things in the real problem domain, and having all the logic related to that thing in one place is helpful for comprehending that type. Centralising logic for a type also helps developers locate existing relevant functionality (see point 4).</li>
+  <li>Invariants - when all the logic that manipulates a set of state is co-located, then it is easier to verify that the state is always self-consistent ie fulfils the “invariants” for that type (see point 2).</li>
+  <li>Data hiding - state which is useful for implementing behaviour but which is not relevant for <em>users</em> of the type can be hidden, thus simplifying the API of the type (and supporting invariant enforcement).</li>
+  <li>Polymorphism - related types which support a logical operation with different implementations can be elegantly implemented via virtual method dispatch.</li>
+</ul>
+
+<p>Unfortunately there are some issues with implementing logic as methods on a specific domain-model-type:</p>
+
+<ul>
+  <li>Persistence - should a domain type be responsible for loading/saving itself and other objects it interacts with?</li>
+  <li>Operations which require “supporting objects” to implement - how should a reference to these be obtained?</li>
+  <li>Code clutter - does it really improve the readability and testability of a model type to have (potentially multiple) complex workflow implementations defined directly on that type?</li>
+  <li>Distributed systems - when objects are being passed between processes then the external properties of the types become the dominant concept; does it then still make sense to talk about “rich” representations of this type in specific components of the distributed system?</li>
+</ul>
+
+<p>Later sections of this article discuss some of the points above in more detail.</p>
+
+<p>One issue that is sometimes suggested as a motivation for needing services is logic which manipulates multiple aggregates (sets of stateful model types) - and thus doesn’t belong on any aggregate. However this suggests there are other problems with the code. An aggregate is a transactional unit, and each API offered by an application therefore should only modify one aggregate at a time. An API which manipulates two aggregates can encounter the case where the first part succeeds (is committed) and the second fails (is rolled back) - in which case what response should that API return? Http codes in range 2xx represent success, and 5xx represents failure - but there are none to represent “partial success”. APIs therefore should align with aggregates - ie (at least update) operations generally can be allocated to a single aggregate root type.</p>
+
+<p>One other item that is important to clear up is some common confusion about the word “service”. Domain-driven design describes two types of service:</p>
+
+<ul>
+  <li>
+    <p>Domain services are part of the domain model, and deals with domain (business) concepts; they are stateless (unlike Entities and Value Objects) and correspond to “business workflows” that manipulate multiple stateful objects.</p>
+  </li>
+  <li>
+    <p><em>Application layer services</em> act as a bridge from the technical non-domain code (eg rest call handlers) to the domain model; these are expected (in the DDD approach) to be relatively simple and are <em>not part of the domain model</em>.</p>
+  </li>
+</ul>
+
+<p>It does take some care to avoid business logic leaking into these “application layer services” - see point (1) regarding separation of domain logic from other concerns.</p>
+
+<h2 id="a-model-as-aid-to-understanding-the-requirements">4. A Model as Aid to Understanding the Requirements</h2>
+
+<p>A program will only be successful if all developers working on it share an understanding of what is being built, and if that understanding also matches up with what the business experts expect. The whole point of DDD is to create a <em>model</em> of the business which brings everyone together.</p>
+
+<p>This works best when the model is separated from technical details (see point 1). However it also has to be <em>meaningful</em> to both the technical and business people involved. A relational database entity/relationship model does partially represent the requirements, but has some limitations:</p>
+
+<ul>
+  <li>it represents only “static data”, not how it came to be and how it can be transformed;</li>
+  <li>only some constraints and relationships can be expressed; and</li>
+  <li>it is overly technical.</li>
+</ul>
+
+<p>A database structure printout is not a good starting point for discussions between developers, or between developers and business experts.</p>
+
+<p>And a code-base which simply maps each table to a class and adds getters/setters for each field to each class is not an optimal form for building that shared understanding of business requirements either. This kind of code can fairly be accused of having an “anaemic domain model”.</p>
+
+<p>A code-base which really tries hard to define <em>types</em> that represent useful concepts from the business world, rather than the current on-disk representation of the stored form of that data, is a better aid for understanding the problem. The concepts include <em>operations</em>, ie transformations, as well as just fields. This is the core of a <em>rich domain model</em>.</p>
+
+<p>Also relevant for this discusson is the concept of “transaction scripts”, a term which comes from Martin Fowler’s book <a href="https://www.oreilly.com/library/view/patterns-of-enterprise/0321127420/">Patterns of Enterprise Architecture</a>. This is not intended to be an “anti-pattern”; it is valid in certain circumstances. A “transaction script” receives a request from some external system, and manipulates the data in some persistent store directly in order to achieve the necessary effect. This is fine in a simple system, but doesn’t scale when the variety of requests and the number of invariants (rules/constraints) on the data increases. That’s actually the point - there is a tipping point at which a complex business domain requires something more advanced than “transaction scripts”. Fowler’s criticism of <a href="http://www.martinfowler.com/bliki/AnemicDomainModel.html">anaemic domain models</a> (mentioned in the introduction to this article) points out that some code-bases are really transaction-scripts-in-disguise; each use-case-handling function loads data from the database into a “dumb” data-holder type, modifies it, then saves it. Simply using a data-holder type rather than directly issuing SQL update statements doesn’t suddenly make the code DDD-compliant. Only when there is a set of types which <em>are isolated from non-business code</em>, <em>centralize invariant enforcement</em>, and <em>represent the problem domain including valid transformations/operations as well as data</em>, is a proper domain model present.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>A domain model isn’t necessary for every code-base; simple or highly technical code (eg a database implementation) might not need one.</p>
+
+<p>However for applications with significant business logic which are going to be maintained over a long time period, a <em>rich domain model</em> is very helpful. This requires:</p>
+
+<ul>
+  <li>separating business and non-business code</li>
+  <li>creating types that make sense as a representation of the <em>business concepts</em> - including <em>operations</em> as well as <em>data</em>
+</li>
+  <li>using data-hiding and the above <em>operations</em> to ensure invariants are consistently enforced</li>
+</ul>
+
+<p>A code-base should <em>not</em>:</p>
+
+<ul>
+  <li>mix technical and business code</li>
+  <li>simply create data-holding types that mirror relational database storage structures (there may be similarities though)</li>
+  <li>create types based only on developer convenience, without thinking about what they mean in the business sense</li>
+  <li>expose attributes in a way which allows invariants to be broken (eg lots of attribute getters and setters)</li>
+</ul>
+
+<p>There are a few hard parts to developing a rich domain model though. Whether to place logic in <em>stateful domain types</em> vs <em>stateless domain services</em> is not always clear. How to handle persistence is also a complicated topic. Both of these issues are discussed in more detail below.</p>
+
+<p>Martin Fowler’s criticism of anaemic domain models ends with:</p>
+
+<blockquote>
+  <p>In general, the more behavior you find in the services, the more likely you are to be robbing yourself of the benefits of a domain model.
+If all your logic is in services, you’ve robbed yourself blind.</p>
+</blockquote>
+
+<p>Unfortunately, as noted earlier, the word “service” is ambiguous. Here I <em>believe</em> that he is referring partly to <em>application services</em> and partly to <em>domain services</em>. If much of your business logic is in the application layer (outside of the domain model), then you’re likely to have communication problems; the business purpose of the codebase isn’t clear (points 1 and 4). You’ll also likely need to expose lots of field getters/setters on any stateful types you have - and thus won’t be enforcing invariants properly (point 2). Therefore: don’t put business logic in application services. Any criticism of the use of <em>domain services</em> is a little more debatable; putting <em>all</em> significant logic into domain services is definitely not good, but domain services <em>are</em> a valid pattern too - and I’ve not seen a clear definition of how to make that choice.</p>
+
+<h1 id="the-easy-bits">The Easy Bits</h1>
+
+<p>Let’s first look at the parts of a “rich domain model” which seem to be obvious.</p>
+
+<p>One aspect of “rich” domain models is to ensure they really map to business concepts. That’s not trivial to do, but is not controversial.</p>
+
+<p>Another aspect is to avoid primitive types as much as possible. For example:</p>
+
+<ul>
+  <li>If a property represents one of a set of possible values, use an enum and not an integer.</li>
+  <li>If a property represents a money amount, then some type representing that should be used, and not a raw float.</li>
+  <li>If some property naturally has two parts, then create a type that represents that pair of objects rather than having two properties on the model type.</li>
+  <li>Avoid boolean-typed properties where possible; an enum is usually a better choice.</li>
+</ul>
+
+<p>And so forth. It’s a little more code, but the clarity and type-safety is very likely to be worth it in the long run.</p>
+
+<p>Each stateful type should have a set of invariants, ie rules which say which values its properties can hold, define any relations between those properties, and what value transitions are allowed. The operations that make changes to the properties of a type must ensure the invariants are preserved (and reject modifications otherwise); this is best done when the mutation operations (or for immutable types, the operations that creates a modified copy of the object) are methods on the model type. Examples are:</p>
+
+<ul>
+  <li>Email address must not be null or empty</li>
+  <li>When address1 is non-null then postcode must also be non-null</li>
+  <li>State may never be changed from CLOSED to OPEN</li>
+</ul>
+
+<p>Somewhat related to invariants is dealing with concurrency; if the domain model type is mutable then it should ensure that concurrent calls result in correct behaviour. Leaving those checks to code external to the type greatly increases the risks of inconsistent/insufficient locking.</p>
+
+<p>Where possible, plain property-setters should be avoided. In particular:</p>
+
+<blockquote>
+  <p>If you are calling two setters in a row, you are missing a concept (Oliver Gierke).</p>
+</blockquote>
+
+<p>However the pushing of logic down into stateful model types becomes more problematic when the logic needs references to objects other than the one on which the method is defined. Methods that manage “child objects” are generally not a problem, but accessing other objects which are not “simple children” of the model type can lead to issues. This is addressed in the following sections.</p>
+
+<h1 id="accessing-resources-from-stateful-model-types">Accessing Resources From Stateful Model Types</h1>
+
+<p>Instances of stateful model types are typically “loaded from a database” or created based on data received over a network connection.</p>
+
+<p>DDD suggests that we should place as much logic as possible onto stateful types, and as little as possible into services. However there are cases when such logic will need access to things other than just the type’s fields and its “child objects” (other objects in the same aggregate). So the question is: how can an object which was loaded from a database get hold of a reference to the things it needs?</p>
+
+<p>The options that I can see are:</p>
+
+<ol>
+  <li>Don’t do that, ie don’t ever add methods to a stateful type which require access to “external resources”. Instead such logic should go into <em>domain services</em>.</li>
+  <li>Pass the necessary resource references in to the method</li>
+  <li>Store references to resources in global static variables</li>
+  <li>Inject the necessary references into stateful objects as they are created</li>
+</ol>
+
+<p>Sadly, none of these are entirely satisfactory.</p>
+
+<p>Putting all logic that requires helper services into domain services leads to stateful types that can fairly be accused of being “anaemic”. It doesn’t mean completely abandoning a rich domain model, but does start leading in that direction.</p>
+
+<p>Passing references to resources as method parameters can be ugly when call-stacks are deep, ie the parameter may need to be added to multiple methods in a call-chain. It also potentially exposes irrelevant internal implementation details of a method via its method declarations.</p>
+
+<p>Having code deep within stateful model type methods relying on global variables is just plain ugly. It also makes testing tricky; the required references need to be set up although it isn’t clear from the signature of the methods being tested exactly which variables are required. And once access to a specific resource is available globally, it isn’t easy to limit who can use it. The best variant here is probably to provide a single global “service registry” through which other resources can be looked up, but that still has the same issues just described.</p>
+
+<p>Doing dependency-injection on stateful model types is hard. It requires modifying the persistence mechanism to do injection on every object created via a database load. It also requires code creating these stateful types via other paths (eg as a result of a network request) to do the necessary injection.</p>
+
+<p>On the other hand, doing dependency-injection in stateless model types (ie domain services) is not difficult; such services are singletons that are created once on application startup.</p>
+
+<p>This issue of resource accessibility is a common theme in many of the discussions below.</p>
+
+<h1 id="hexagonal-architecture-and-an-isolated-domain-model">Hexagonal Architecture and an Isolated Domain Model</h1>
+
+<p>One recommended goal is to isolate the domain logic. However at some point in time that logic will need to interact with the outside world; it may need to make synchronous calls to external systems, send asynchronous messages, etc.</p>
+
+<p>The traditional “layered architecture” typically has compile-time dependencies of: <code>(presentation/api tier -&gt; business tier -&gt; infrastructure tier)</code>. This has the unfortunate effect of coupling business logic to infrastructure more tightly than desired.</p>
+
+<p>The <a href="/architecture/hexagonal">hexagonal architecture</a> is a relatively simple concept that recommends the “business tier” (aka domain model) defines an interface for each case where it needs to initiate interaction with the external world, and the infrastructure tier then implements these interfaces. The compile-time dependencies then become <code>(presentation/api tier -&gt; infrastructure tier -&gt; business tier)</code>. This does require that a reference to the <em>implementation</em> of these interfaces be provided at runtime to the business-tier (domain model) somehow - another case of “accessing resources from model types”.</p>
+
+<p>Among the nice benefits of this compile-time dependency structure is that the domain code is no longer exposed to any of the transitive dependencies of the infrastructure layer. It also ensures that the business tier uses interfaces for interaction with the outside world, ensuring that unit testing can cleanly mock all such interactions.</p>
+
+<h1 id="domain-models-and-persistence">Domain Models and Persistence</h1>
+
+<p>One of the major items affecting the functionality of a domain model is persistence. There are two main aspects which affect the domain model code:</p>
+
+<ul>
+  <li>How deep/complex are the in-memory references between domain-model-types (ie how big is the graph of references for each type)</li>
+  <li>Are the domain model types persistence-aware or is that handled outside of the domain?</li>
+</ul>
+
+<h2 id="reference-complexity-and-aggregates">Reference Complexity and Aggregates</h2>
+
+<p>Regarding references between domain-model types, Martin Fowler says:</p>
+
+<blockquote>
+  <p>There are objects, many named after the nouns in the domain space, and these objects are connected with the rich relationships
+and structure that true domain models have.</p>
+</blockquote>
+
+<p>However this isn’t very clear on exactly how many relationships are considered appropriate. Evan’s DDD principles provide the very helpful concept of an aggregate - a set of domain model types which is atomically read or written. The top (and often only) domain model object in an aggregate is called the aggregate root. Vaughn Vernon (a major contributor to the concepts of DDD) has <a href="https://www.dddcommunity.org/library/vernon_2011/">an excellent and detailed guide</a> to defining the boundaries of <em>aggregates</em>, and this guide leans strongly towards very small graphs ie recommends against domain objects having complex (rich) references to other domain objects in memory.</p>
+
+<p>From <a href="https://www.dddcommunity.org/wp-content/uploads/files/pdf_articles/Vernon_2011_1.pdf">part 1</a> of Vaughn Vernon’s guide:</p>
+
+<blockquote>
+  <p>.. a high percentage of aggregates can be limited to a single entity, the root.</p>
+</blockquote>
+
+<p>And also:</p>
+
+<blockquote>
+  <p>aggregates are chiefly about consistency boundaries and not driven by a desire to design object graphs.</p>
+</blockquote>
+
+<p>It therefore seems that Martin Fowler’s recommendation “connected with .. rich relationships” appears to be meant as a logical concept rather than implying deep graphs of references between in-memory objects at runtime. Each <em>aggregate</em> (set of domain model types) is carefully chosen to match the transactional requirements of the application, and the types in that aggregate then hold only <em>ids</em> of logically related objects from different aggregates rather than real references to them.</p>
+
+<p>Or in short, your domain model doesn’t need to be loaded into memory as a complex graph in order to be “a rich domain model”.</p>
+
+<p>Vaughn Vernon is very explicit about this in <a href="https://www.dddcommunity.org/wp-content/uploads/files/pdf_articles/Vernon_2011_2.pdf">part2</a> of his guide to aggregates. On page 8 he states:</p>
+
+<blockquote>
+  <p>Prefer references to external aggregates only by their globally unique identity, not by holding a direct object reference</p>
+</blockquote>
+
+<p>ie a domain-model-type should have properties that hold only IDs of external entities, not direct references</p>
+
+<p>Then in “Model Navigation” (also page 8):</p>
+
+<blockquote>
+  <p>Some will use a repository from inside an aggregate for look up. This technique is called disconnected domain model, and it’s
+actually a form of lazy loading. There’s a different recommended approach, however: Use a repository or domain service to
+look up dependent objects ahead of invoking the aggregate behavior.</p>
+</blockquote>
+
+<p>An aggregate also typically has <em>invariants</em> for the aggregate as a whole; the methods on types in the aggregate enforce those invariants.</p>
+
+<p>Within an aggregate, the recommendation that methods never return references to objects outside the aggregate, but instead only IDs of such objects, protects developers against surprises with regards to persistent updates. If things like <code>someroot.getOther().setSomeField(...)</code> are possible, then developers can end up modifying data that <em>is not</em> part of the “atomic update unit” of the original root object.</p>
+
+<p>The emphasis on aggregates as <em>atomic units</em> means they should be small; the larger they are, the worse they perform and the more vulnerable they are to race conditions.</p>
+
+<h2 id="internal-or-external-persistence">Internal or External Persistence</h2>
+
+<p>Some code obviously needs to load the initial aggregate (top-level domain object and its immediate children) that any use-case interacts with, and then call the relevant method(s) on it. This code is typically part of the service/application layer ie is an <em>application layer service</em> (not part of the domain model).</p>
+
+<p>But how do we handle cases where business logic needs to interact with other entities that are not part of the same “aggregate”? Options are:</p>
+
+<ol>
+  <li>Methods on domain-model types use a persistence-context/repository/dao helper to load additional objects as needed.</li>
+  <li>Application-service code populates (injects) domain-model objects with references to all the things that the methods being invoked will need.</li>
+  <li>Application-service code provides references to those extra objects via parameters of domain-model methods.</li>
+  <li>Logic that interacts with objects outside of that initial set is implemented in an application-service and not in the domain model.</li>
+</ol>
+
+<p>Option 1 (“internal persistence” aka “disconnected domain model”) allows the maximum of code to be pushed down into domain model types. <a href="https://www.youtube.com/watch?v=UYmTUw5LXwQ">This presentation on domain models</a> happens to use this style (but see minute 36 where the issue of external services is addressed)<sup id="fnref:switch-elimination" role="doc-noteref"><a href="#fn:switch-elimination" class="footnote" rel="footnote">1</a></sup>. However there are some issues:</p>
+
+<ul>
+  <li>Each domain entity needs some way to get at the relevant “persistence context” (see section ‘Accessing Resources From Stateful Model Types’).</li>
+  <li>The performance implications of methods on the domain model type aren’t clear (persistence operations are hidden in the implementation).</li>
+  <li>Business logic is mixed with persistence operations, and potentially also error-handling.</li>
+</ul>
+
+<p>Option 2 requires the calling code to be very aware of which properties on the model types are mandatory for which operations - an undesirable coupling. The model type will also have properties which are only “valid for use” (set by the caller) in some cases - an inelegant situation. Or alternatively, some kind of dependency-injection framework is applied to each stateful model instance as it is created (possible but non-trivial).</p>
+
+<p>One potential issue for both option 1 and 2 is that persistence helpers depend on domain model types; those types are what they read and write. However both of these options also require a dependency from the domain types on the persistence layer. The “hexagonal architecture” combined with DDD’s concept of “repository interfaces” provides a solution for this. Persistence frameworks whose APIs use generics are also not affected, but approaches which don’t use hexagonal-architecture and have a persistence framework with strongly-typed APIs may be.</p>
+
+<p>In <a href="https://www.dddcommunity.org/wp-content/uploads/files/pdf_articles/Vernon_2011_2.pdf">part2</a> of his DDD-aggregates article, Vaughn Vernon describes options 1 and 3 (see Model Navigation on page 8), but recommends option 3, ie that when a domain-model-type needs to interact with types that are not part of the aggregate then:</p>
+
+<ul>
+  <li>the domain-model type should hold just the ID of those other types (aggregate roots);</li>
+  <li>domain-model methods which need other types should take them as parameters;</li>
+  <li>such methods should only <em>read</em> from those additional types, not mutate them; and</li>
+  <li>application-layer services should use those IDs to fetch required objects before invoking a method which needs them.</li>
+</ul>
+
+<p>Vernon (page 387) recommends option 3 over option 1 with these words:</p>
+
+<blockquote>
+  <p>Dependency injection of a Repository or Domain Service into an Aggregate should generally be viewed as harmful. [..] preferably dependent objects are
+looked up before an Aggregate command method is invoked, and passed to it. The use of Disconnected Domain Model is generally a less favorable approach.</p>
+</blockquote>
+
+<p>Option 3:</p>
+
+<ul>
+  <li>allows business logic that requires additional objects to still be part of stateful domain-model types;</li>
+  <li>leaves responsibility for persistence in the calling layer ie does not mix persistence and error-handling with business logic;</li>
+  <li>simplifies unit-testing of domain model types (no persistence to mock);</li>
+  <li>doesn’t require injecting additional references into domain model types (ie avoids problems with options 1 and 2);</li>
+  <li>makes dependencies clear (domain methods which require objects outside the aggregate have parameters which make that explicit);</li>
+  <li>but does make code that interacts with entities external to the aggregate a little odd/unnatural in that it requires those entities to be provided as parameters even though the type has the IDs of those entities as properties.</li>
+</ul>
+
+<p>Option 4 is effectively falling back to procedural/functional programming for more complicated business logic. While this works (at least in the short-term), a code-base which has domain logic in places outside of the “domain model” is likely to be hard to maintain.</p>
+
+<p>Lazy-loaded references are somewhere between option 1 and 2. The domain model type has a property which is “uninitialised” until read; some methods on the type reference that property while others ignore it. This allows a “natural” representation of child objects without having the performance impact of loading them if they are not needed. However it can lead to somewhat surprising performance behaviour; lazy loading is addressed in the next section. Note that it is probably best to use lazy references only for data which is still part of the same aggregate and <em>not</em> as a mechanism for referencing other aggregates.</p>
+
+<p>Option (4) solves the problem by simply placing such modification logic on the service/application layer where persistence operations can be immediately carried out.</p>
+
+<p>IMO none of the above are truly elegant:</p>
+
+<ol>
+  <li>Active-record/disconnected-domain-model/internal-persistence mixes persistence and business logic (including persistence-error-handling),  and requires injecting references to persistence support types into every domain type. With some implementations it can also mess with the inheritance structure and interfere with unit/integration testing.</li>
+  <li>Injecting additional aggregates as properties on the domain model types depending on use-case (invoked method) increases coupling.</li>
+  <li>Passing external entities as parameters is somewhat odd when the receiving type has their IDs already.</li>
+  <li>Moving business logic to the service layer reduces the “object-orientedness” of the application which can potentially lead to duplicated code or unenforced invariants, and hard-to-discuss code (dilution of the model).</li>
+</ol>
+
+<p>However on balance, option (3) seems a good compromise - at least with respect to invoking persistence services. The use of other services, and consistency issues, are discussed later.</p>
+
+<p>Whichever option is chosen, this affects the appearance of the domain model type APIs, and the way such types are instantiated. When option (4) is chosen, it also reduces the “richness” of the domain model types.</p>
+
+<p>Note that in options 1-3 it helps when the <em>aggregate</em> contains only a small number of domain model types (ideally one); this limits the places where references needs to be injected (options 1/2) and the depth of call-chains ( option 3).</p>
+
+<h2 id="lazy-loading">Lazy Loading</h2>
+
+<p>Some persistence frameworks support “lazy loading”. When a domain type is instantiated via “loading from a database” and has a collection of related entities, that collection can be initially “unloaded”. If (and only if) the collection is referenced, then the relevant database operation is executed in order to load that data.</p>
+
+<p>This allows the same domain type to be used in multiple use-cases: some where that child collection is used, and some not.</p>
+
+<p>An aggregate is the set of objects which must be atomically persisted together in order to fulfil system invariants. There are therefore two types of lazy loading:</p>
+
+<ul>
+  <li>When the reference is to an entity that is still part of the aggregate - in which case this is just an <em>optimisation</em> of the aggregate to avoid loading in unnecessary circumstances.</li>
+  <li>When the reference is to an entity outside of the aggregate - in which case logic <em>must not mutate that object</em> as that would effectively turn two aggregates into one ie break the model rules. The best way to avoid this is probably to just <em>not</em> provide reference-based navigation for entities outside the aggregate.</li>
+</ul>
+
+<p>This is one case where persistence annotations on domain model types might be helpful; when annotations are used then it is clear which properties can trigger lazy-loading. When externalised ORM mapping is used (eg JDO mapping APIs or XML mapping specs) then it may not be clear to the reader of code what the performance implications of accessing a specific property is - or indeed where the aggregate boundary lies.</p>
+
+<p>Lazy collections are either completely loaded or not at all. Code which iterates over such a collection, selecting just a subset of those items for processing, is much less efficient than if only that subset of items had been loaded from the database.</p>
+
+<p>Depending on the framework, inserting a new member into such a collection could also trigger loading of all existing items - even though they are not actually needed to perform an insertion of a new record into the database.</p>
+
+<p>IMO it is therefore a difficult decision whether to use lazy loading for “intra-aggregate” references or not. It could potentially be avoided by having a base domain type without the related entity collection, and a subclass with that property and the business methods that use that property. The service/application code which loads the type from the database instantiates the parent type when invoking methods that do not need the related entities, and the child type otherwise. This approach does, however, distribute the logic for one logical model type across parent and child class definitions. Using lazy loading for “inter-aggregate” references seems quite dangerous to me, tempting developers to modify objects that are not part of the aggregate; passing external aggregates as parameters makes this much clearer.</p>
+
+<h2 id="a-note-on-repositories">A Note on Repositories</h2>
+
+<p>While the DDD concept of a Repository isn’t core to this article’s subject of <em>rich domain models</em>, it is somewhat related and so it seems reasonable to give a brief discussion here.</p>
+
+<p>A Repository in DDD language is a way of locating “persistent objects”. It is (in OO representation) an interface which provides some kind of “add/put” method to start tracking an object, find-by-id and maybe find-by-criteria methods. A repository might have some bulk-update operations, but never has “update single object” operations; those are done by fetching the object and calling methods on it.</p>
+
+<p>Vernon (page 405) defines two “styles” of Repository: Collection-oriented and Persistence-oriented. The following quote is slightly rephrased:</p>
+
+<blockquote>
+  <p>Collection-oriented repositories mimic a Set collection, and do not hint in any way that there is an underlying persistence mechanism. Because this design approach requires some specific capabilities of the underlying persistence mechanism, it’s possible that it won’t work for you. Objects cannot be added twice. After retrieving objects from a repository, and modifying them, they don’t need to be “re-saved”; like objects in a collection any changes are present when fetching the object again.</p>
+</blockquote>
+
+<p>Clearly when there is a database of some kind backing the data then this requires a way of detecting when an object has been modified - and ideally which fields are affected.</p>
+
+<p>The collection-oriented Repository pattern maps very naturally to a document-store type database (Martin Fowler even refers to such databases as “aggregate stores”), but can be mapped to relational stores via tools such as Hibernate (JPA) or DataNucleus (JDO). The persistence-oriented Repository pattern is equivalent to the traditional DAO pattern. In DDD the term Repository generally refers to the collection-oriented approach unless specified otherwise.</p>
+
+<p>Vernon does note that the collection-oriented approach has some performance impact; in high-throughput environments the alternative “persistence-oriented” may be preferred.</p>
+
+<p>Vernon recommends placing a Repository interface definition in the same module as the aggregate that it manages.</p>
+
+<p>Collection-oriented repositories typically are expected to track changes in data themselves, ie domain code can <em>get</em> an object from the repository and modify it, and something else will eventually commit that change. This typically is done in the application-service layer; code starts a transaction, calls domain methods, tells the repository framework to “flush all changes”, then commits the transaction. The Repository interface implementations map to calls to the persistence framework which ensures changes to any data loaded from the database are tracked (eg by intercepting method calls). Domain code therefore at most needs to “put” new objects into the appropriate repository (as in a collection); otherwise domain code looks just like using a local collection.</p>
+
+<p>Persistence-oriented repositories instead typically have “save” methods, requiring domain logic to notify the repository when data has been changed. This is often needed when using a NoSQL datastore, a Data Fabric, etc. Relational datastores perform best when the minimal number of columns are changed, ie the work needed to track individual field changes via proxies is worth it. Document-stores and similar generally just replace an entire Aggregate with its new state; it would be possible to use proxies in the same way as Hibernate/JDO does to track when specific fields were changed, but the result is the same: is the whole aggregate “dirty” or not? And therefore it seems easier to just have a save method that re-persists the whole aggregate when the application knows that this needs to be done, and skip the complexity of tracking changes at all. Using this approach with a relational store would be too inefficient.</p>
+
+<p>A repository can optionally be extended with behaviour not in the standard “Set” collection. Returning counts of values is an example. It can also sometimes be useful to return collections of entities which are NOT roots of aggregates - eg in order to apply a filter condition to return only a subset of the relevant entities - though if you find multiple such methods are needed then maybe the aggregate design is wrong, or CQRS need to be applied.</p>
+
+<p>One reason for the rule “only change one Aggregate per transaction” is concern over conflicts, ie failure to commit due to concurrent updates. Different use-cases will modify different aggregates, and transactions which touch multiple aggregates can conflict with any other use-case which touches any of the aggregates it modifies.</p>
+
+<p>Application layer services are effectively usecase-centric facades over the domain model. This is usually the right layer at which to manage transactions.</p>
+
+<p>A repository which has methods to directly update individual fields on entity data within the database will clearly not be called from those Entities, but instead from domain services or application services. However doing that bypasses all of the invariants programmed into the Entity classes; doing this extensively means scattering code related to a logical model concept across the code-base - something that DDD is intended to prevent.</p>
+
+<h1 id="accessing-services">Accessing Services</h1>
+
+<p>A significant aspect of <em>rich</em> vs <em>anaemic</em> is the issue of code being allocated to <em>domain services</em> when it could be better associated with an <em>entity</em> or <em>value object</em> type (nouns, ie <em>things</em> in the business language).</p>
+
+<p>One concern about over-using services (as alternative to methods on a stateful type) is that it is difficult to get a view of all the major functionality of that stateful type. This is still possible when the services are near to the stateful type (eg in same package) but if code conventions place services somewhere different than entities (which is often the case) then understanding that link becomes very hard for both developers and domain experts (Evans page 112). In DDD, the code should mirror the model/business-concepts - but most domain experts would not be happy with a model that widely separates stateful model types and their intrinsic behaviour.</p>
+
+<p>On page 114, Evans states: “If the framework’s partitioning conventions pull apart the elements implementing the conceptual concepts, the code no longer reveals the model”.</p>
+
+<p>We have already looked at one reason why business logic might need to interact with system services: persistence. And it seems that while it is <em>possible</em> to inject references to persistence helpers into domain objecs so that such logic can be part of domain model types, it is also possible to do the persistence in the service/application layer while still having business logic on domain model types.</p>
+
+<p>However there are other cases where business logic needs to access services (complex non-business/non-stateful logic). Examples include:</p>
+
+<ul>
+  <li>Making ReST calls to external systems <sup id="fnref:rest-avoid" role="doc-noteref"><a href="#fn:rest-avoid" class="footnote" rel="footnote">2</a></sup>.</li>
+  <li>Sending emails (interacting with an SMTP server or similar).</li>
+  <li>Rendering to PDF format.</li>
+  <li>Validating a user password (rules may be complex or even configurable).</li>
+</ul>
+
+<p>Unfortunately accessing such services from within a method of a <em>stateful model type</em> can be difficult. As with persistence, there appears to be a limited set of options:</p>
+
+<ol>
+  <li>Use global variables to get the reference to the needed service</li>
+  <li>Inject a reference to the service into a property of the relevant stateful domain model type.</li>
+  <li>Pass a reference to the service into invoked methods which need it.</li>
+  <li>Implement logic which needs such services in a stateless domain service, not the stateful domain type.</li>
+</ol>
+
+<p>Option 1 is very ugly. It also complicates testing, and has other disadvantages too.</p>
+
+<p>As described in the section on persistence, option 2 complicates instantiation of stateful domain model types. In particular, if the persistence layer is instantiating the type as part of a “load” operation, then injection of references to additional services needs to be somehow hooked into that persistence layer (eg instantiation is done via a factory rather than a default constructor). Loading objects in other ways (eg based upon JSON received as part of a ReST request) also needs to inject the services appropriately.</p>
+
+<p>And as described in the section on persistence, option 3 is somewhat clumsy. It works, but exposes details in the API that ideally would be internal implementation details.</p>
+
+<p>Putting such logic in a stateless domain service (option 4) does make the stateful domain model types “less rich”, and somewhat obscure the true concepts of the model, but may be the best (or rather, “least bad”) option available. These stateless services are singletons instantiated on application startup and can easily be initialised with references to the services they need (eg via a dependency injection framework) - unlike stateful types which need such configuration for each instance created.</p>
+
+<p>Any other suggestions (or better: proven solutions) would be very welcome!</p>
+
+<h1 id="polymorphism-related-clutter">Polymorphism-related Clutter</h1>
+
+<p>Is there an upper limit to the amount of process-like business logic that should be added to a stateful domain model type? Is there a point at which it is clearer (and more testable) to represent a process as its own thing (a stateless domain service), rather than as a behaviour of a stateful domain model type? If there are N different complicated processes that apply to a particular type, is it reasonable to define all that logic on one type? And if additional processes for the same type may be defined later, will it really be more elegant to add that logic to the existing type or to create a new class (a service) for that new process?</p>
+
+<p>And what about logic that is applied to a set of similar types? While it is technically possible to add such logic to an “abstract base type” that relevant subtypes inherit from, I believe inheritance of implementation is falling out of favour. I certainly do not like it, and prefer either:</p>
+
+<ul>
+  <li>putting the logic in a stateless helper function which takes a domain-model-type as a parameter, and have concrete model classes call that as needed;</li>
+  <li>applying the <em>strategy</em> pattern, ie invoking a domain model method passing an object which the method then calls back into; or</li>
+  <li>putting the logic in a <em>domain service type</em> which simply calls into the stateful-domain-model-type.</li>
+</ul>
+
+<p>In all cases, the actual logic is external to the stateful domain model type.</p>
+
+<p>The first two options do increase the ability to do data-hiding, ie reduce the need for getters/setters on the domain model type, as the data passed to the logic is provided by the domain model type itself. Those options also do make it easier to find all logic that applies to that type - but at the cost of clutter, and of needing to modify the domain model type in order to add new processes.</p>
+
+<h1 id="dealing-with-distributed-systems">Dealing with Distributed Systems</h1>
+
+<p>When working in a distributed environment, and particularly in a multi-language environment, what does it mean to “transfer an object” between two processes? It can only mean transferring the properties; the code cannot be sent. And therefore there is immediately a hard “break” between the concept of a “rich domain model type” with complex functionality in one application, and the fact that all that is transferred is a set of properties. Any properties of a type which are there just to “provide references to helpers needed by rich-domain-type methods” must be ignored when building the representation which is transferred; the receiver may not need those helpers or have a different solution.</p>
+
+<p>Any architectural design document for the system will need to concentrate on the externally-visible properties of model types as a priority. Then each component that uses a type will have its own set of behaviours associated with that type - ie each component will have its own “domain language”. There may be similarity (and sometimes overlap) between the operations (methods) but the focus will be on the properties - just as with procedural design.</p>
+
+<p>This doesn’t make a rich domain model impossible in any specific component, but does move the emphasis from behaviour to plain data in many discussions of the types.</p>
+
+<h1 id="non-object-oriented-programming-styles">Non-Object-Oriented Programming Styles</h1>
+
+<p>Object-oriented design is of course not the only way to implement software systems.</p>
+
+<p>All reasonable programming languages have mechanisms for modularity. They also all have mechanisms for <em>data hiding</em>, ie dealing with blocks of memory whose internal structure is only accessible to functions in specific modules. Even “C”, one of the least object-oriented programming languages, has the ability to define <em>opaque types</em> eg <code>typedef struct FooData Foo</code> which creates a type <code>Foo</code> without (yet) defining <code>struct FooData</code>. Only code in the module that (privately) defines <code>struct FooData</code> can create instances of that type or access its members; all other modules are limited to <em>asking that module</em> to perform operations on Foo instances. This is sufficient to implement all of the core behaviours of a <em>rich domain model</em> which we described above: isolation of domain logic, invariant preservation, and representing the business concepts. Ensuring that <em>operations</em> associate with type Foo are clearly grouped together perhaps requires a little more discipline than native object-oriented programming, but it seems doable. Polymorphism is of course not supported, but that’s not a critical feature.</p>
+
+<p>Functional programming is similar to procedural in this aspect; even when <em>classes</em> are not available, there are typically modularity features available to support the necessary data-hiding. There may also be different ways to achieve similar goals to polymorphism, eg <a href="https://en.wikipedia.org/wiki/Dynamic_dispatch">dynamic dispatch</a> at runtime based on parameter type (see Rust’s <em>trait objects</em> or Groovy/Raku’s <a href="https://en.wikipedia.org/wiki/Multiple_dispatch">multiple dispatch</a> for example).</p>
+
+<p>The concept of “extension methods” as provided by C#, Kotlin, and various other languages also provides interesting options, particularly with respect to the issue of allocating logic to stateful types vs service types.</p>
+
+<p>Other interesting articles/comments can be found in section “Further Reading” at the end of this article.</p>
+
+<h1 id="my-personal-preferences">My Personal Preferences</h1>
+
+<p>Here’s what I personally feel is the best balance to all the issues discussed above.</p>
+
+<p>As noted in “The Easy Bits”, do define <em>stateful domain model types</em> that represent the “things” in the problem domain, together with their logical properties. Define the invariants for this type (valid set of values for each property, and rules that define valid combinations of properties), and avoid adding setter-methods which allow these invariants to be violated:</p>
+
+<ul>
+  <li>Where possible, add logical operations instead of setters, eg “clearHistory” which resets a set of properties at the same time rather than a setter for each.</li>
+  <li>Otherwise ensure that setters reject calls which would result in an invalid object state.</li>
+</ul>
+
+<p>Now add as much other business logic to the stateful domain model types as possible, as long as it doesn’t require:</p>
+
+<ul>
+  <li>Adding references to domain-model objects which are not part of the same aggregate (have disconnected lifetimes).</li>
+  <li>Adding references to “helper objects” which aren’t domain-model-types at all.</li>
+</ul>
+
+<p>Then for the remaining operations (often large, complicated “process-like” methods), consider whether they might be better as either helper objects that stateful domain model types call (strategy pattern), or methods on a “service type”.</p>
+
+<p>When logic is implemented in a stateless domain service rather than in a stateful domain model type, do pay careful attention to service naming, and grouping (eg by package), so that logic associated with a particular type is easy to find. The fact that a particular operation cannot be defined on a stateful type doesn’t mean that it should be placed somewhere unrelated to that type. Above all, avoid grouping domain services together ie grouping “by kind”: group by purpose instead.</p>
+
+<p>Or in short: do take advantage of OO design principles where they naturally apply; create that useful correlation between code and the language that the business experts use. And take advantage of OO to support the invariants for each type. However don’t be afraid of using stateless domain service types to implement the processes/workflows that glue them together - even if it makes the stateful domain model types themselves “less rich”.</p>
+
+<h1 id="further-reading">Further Reading</h1>
+
+<p>There are a number of writers who have addressed this in online articles. A few of the best articles were listed in section “Other Articles on this Topic”; here are a few more I discovered during research for this article.</p>
+
+<p>Generally interesting views:</p>
+
+<ul>
+  <li>
+<a href="http://www.martinfowler.com/bliki/AnemicDomainModel.html">Martin Fowler: Anemic Domain Model</a> - a short and often quoted critic of “Anemic” domain models</li>
+  <li>
+<a href="https://www.dddcommunity.org/library/vernon_2011/">Vaughn Vernon: Effective Aggregate Design</a> - an excellent guide from the perspective of Domain Driven Design</li>
+  <li>
+<a href="https://www.youtube.com/watch?v=UYmTUw5LXwQ">Jimmy Bogard: Wicked Domain Models</a> - a one-hour stage presentation (Youtube) on the basics of domain models</li>
+  <li><a href="https://blog.pragmatists.com/domain-driven-design-vs-anemic-model-how-do-they-differ-ffdee9371a86">Kamil Berdychowski: Domain-Driven Design vs Anemic Model</a></li>
+  <li>
+<a href="http://blog.sapiensworks.com/post/2014/03/26/Rich-Domain-Is-SOLID-Anaemic-Domain-Is-An-Anti-Pattern.aspx">Sapiens Works: Rich Domain is SOLID</a> - presents the view that DDD “use cases” are not part of the “domain model” itself, and are actually part of the DDD “application layer”.</li>
+  <li>
+<a href="https://paulovich.net/rich-domain-model-with-ddd-tdd-reviewed/">Ivan Paulovich: Rich Domain Model with DDD/TDD</a> - a good reminder of some important (anti-)patterns: Feature Envy, Primitive Obsession, Public Setters Abuse.</li>
+  <li>
+<a href="https://stackoverflow.com/questions/23314330/rich-vs-anemic-domain-model">StackOverflow: Rich vs Anemic</a> - a somewhat rambling StackOverflow thread, but with interesting contributions</li>
+  <li>
+<a href="https://softwareengineering.stackexchange.com/questions/218011/how-accurate-is-business-logic-should-be-in-a-service-not-in-a-model">StackExchange: The Different Kinds of Services</a> - the question isn’t particularly interesting, but the response from Aaronaught is very informative, clearing up ambiguity in uses of the word “service”.</li>
+</ul>
+
+<p>Articles related to data persistence and OO:</p>
+
+<ul>
+  <li>
+<a href="https://www.mehdi-khalili.com/orm-anti-patterns-part-1-active-record">Mehdi Khalili: ORM Antipatterns: Active Record</a> - actually the whole series of articles on ORM patterns is excellent</li>
+  <li><a href="https://blog.ttulka.com/object-oriented-design-vs-persistence/">Tulka: Object Oriented Design vs Persistence</a></li>
+  <li><a href="https://www.techtarget.com/searchapparchitecture/answer/What-is-the-best-pattern-to-use-for-data-persistence">Brad Irby: What is the best pattern to use for data persistence</a></li>
+  <li><a href="https://matthiasnoback.nl/2018/03/ormless-a-memento-like-pattern-for-object-persistence/">Matthias Noback: ORMLess</a></li>
+</ul>
+
+<p>Articles generally promoting rich domain models:</p>
+
+<ul>
+  <li><a href="https://www.ensonodigital.com/blog/anaemic-domain-model-vs-rich-domain-model">Ismael Mota: Anaemic Domain Model vs Rich Domain Model</a></li>
+  <li><a href="https://link-intersystems.com/blog/2011/10/01/anemic-vs-rich-domain-models/">Rene Link: Anemic vs Rich Domain Models</a></li>
+  <li><a href="https://www.tripled.io/25/08/2016/The-anemic-domain-model/">Giudo Deschamps: The Anemic Domain Model</a></li>
+</ul>
+
+<p>Other:</p>
+
+<ul>
+  <li>
+<a href="/architecture/anaemic-domain-models">Vonos.net: Anaemic Domain Models</a> - some earlier thoughts of mine on this topic, particularly with respect to OSGi and service lifecycles. Mostly superceded by this article.</li>
+</ul>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:switch-elimination" role="doc-endnote">
+      <p>The presentation also talks about creating abstract type ExpirationType and subclasses in order to avoid a switch which is IMO unnecessary; I don’t see it as more elegant than a switch, assuming a sane language. <a href="#fnref:switch-elimination" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:rest-avoid" role="doc-endnote">
+      <p>In the specific case of ReST calls to external systems, it is worth considering whether they can be removed. When the call is intended to <em>notify</em> an external system of an event, then perhaps sending a message via a message-broker could be a better solution - or at least writing an “event” record to the database and using a separate thread/process to send the actual event. When the call is intended to retrieve data from an external system, then perhaps it is possible to keep a local <em>read model</em> of relevant data from that remote system, so that accessing that data is just a read from a local database. Sending emails is also something that could potentially be handed off to some other thread/process, ie done asynchronously rather than as part of the request-handling thread, and thus removing need for error-handling or complex dependencies. <a href="#fnref:rest-avoid" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/domain-models-rich-vs-anaemic/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

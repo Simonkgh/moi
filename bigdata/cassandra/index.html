@@ -1,0 +1,345 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Apache Cassandra Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Apache Cassandra Overview</h1>
+    <aside>First published on: October 23, 2016</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p><a href="http://cassandra.apache.org">Cassandra</a> is a BigTable-like database, ie stores tabular data (very roughly relational-like). Unlike relational databases, it is “schema free”. This article provides an introduction to Cassandra, and compares it to the very similar <a href="/bigdata/hbase">HBase</a> and the somewhat similar <a href="/bigdata/hive">Hive</a>. It is assumed that the reader is familiar with HBase already (or has at least read the linked article).</p>
+
+<p>The primary differences between HBase and Cassandra are:</p>
+
+<ul>
+  <li>HBase has a single master server for each “region” of data, thus does not provide <em>high availability</em> but does automatically provide <em>consistency</em>. Cassandra is a multi-master system, thus failure of a single node does not cause an outage - but complicated mechanisms are needed to ensure data <em>consistency</em> when concurrent writes are applied to the same data via different servers.</li>
+  <li>Cassandra installation and administration is significantly different (mostly simpler).</li>
+  <li>Cassandra defines and supports its own query language (CQL). HBase provides only an API; query-langages are provided by external projects.</li>
+</ul>
+
+<h1 id="what-is-cassandra">What is Cassandra</h1>
+
+<p>Cassandra is an extremely scalable NoSQL database. Cassandra’s data-model roughly resembles a relational database in that data is modelled as <em>tables</em> with <em>rows</em>. However it doesn’t fully implement the relational model - no joins, subqueries, or transactions. In place of joins for modelling 1:N relations, it supports “collections”. It provides its own SQL-like query language “CQL”.</p>
+
+<p>Like HBase, Cassandra deals well with OLTP-style loads: good performance for random reads of individual records, reasonable performance for updates. It also deals reasonably well with OLAP-style loads: reads of very large numbers of records. Spark-based tools may be used to process data in-place. It was previously possible to use <a href="https://wiki.apache.org/cassandra/HadoopSupport">Hadoop MapReduce with Cassandra</a> but this community-maintained code has “bitrotted” and no longer works against current Cassandra releases.</p>
+
+<p>Cassandra clusters very well - all members of the clusters are peers (no master/slave stuff). Scales to very large amounts of data. The rows of a table are <em>partitioned</em> (sharded) across all members of the cluster using the value of the row’s primary key. As is usual with a “multi-master” cluster, there needs to be a mechanism to resolve <em>consistency</em> between nodes. Cassandra supports various options (“tunable consistency”). Cassandra does not use YARN or other cluster-management tools; Cassandra nodes are “long-running” processes (like HBase and unlike Hive).</p>
+
+<p>At the lowest storage levels, Cassandra uses the <a href="/bigdata/datastorage">SSTable algorithm</a> to store records (as HBase also does).</p>
+
+<p>Cassandra can be accessed from Java via JDBC, from Python via DBAPI2, etc. - the Cassandra “row/column” model is close enough to relational for these APIs to still be valid.</p>
+
+<p>In earlier versions of Cassandra, the name “column family” was used; newer versions (and newer documentation) uses the term “table” instead. A Cassandra “keyspace” is roughly equivalent to a relational “schema” (ie a namespace holding multiple tables).</p>
+
+<p>Warning: at the current time, the wikipedia article on Cassandra describes it as “column oriented”, and links to the Wikipedia page on “column oriented” datamodels. AFAIK, the Wikipedia articles are very misleading - see <a href="/bigdata/columndbs">this article on “column oriented” databases</a>.</p>
+
+<p>See Also:</p>
+
+<ul>
+  <li><a href="http://docs.datastax.com/en/cassandra/2.1/cassandra/gettingStartedCassandraIntro.html">Datastax: getting started</a></li>
+  <li><a href="https://academy.datastax.com/demos/brief-introduction-apache-cassandra">Datastax: brief intro</a></li>
+  <li><a href="http://www.ibm.com/developerworks/library/os-apache-cassandra/index.html">IBM developerworks: consider cassandra</a></li>
+</ul>
+
+<h1 id="sharding-vs-regions">Sharding vs Regions</h1>
+
+<p>HBase divides the contents of each table into a set of regions (key-ranges); each region is hosted on a different server. HBase maintains a table of (min-key, max-key, server) so that for any specific record, the responsible server can quickly be found. When a range grows too large (contains too many records), it can be split into two parts and one of the parts migrated to another node. Each node can manage multiple regions (multiple min/max ranges).</p>
+
+<p>Cassandra functions somewhat similarly, the major difference being that it</p>
+
+<ol>
+  <li>explicitly separates the record key into two parts - partitioningkey and clusteringkey, and</li>
+  <li>chooses a “shard id” (aka “token” in Cassandra documentation) for the record via <code>hash(partitioningkey) modulo numshards</code>.</li>
+</ol>
+
+<p>The number of shards (partitions) for a table is chosen when the table is defined. A “token” thus represents the set of records where <code>hash(partitioningkey) modulo N</code> maps to the same value. Cassandra maintains a table of (token, server) so that for any specific record the responsible server can quickly be found. A single server can manage multiple tokens (shards). As a cluster is expanded with new physical nodes, existing shards/partitions (the set of records associated with a specific token) can be migrated from their current host to a new host. However (unlike HBase) the contents of a shard cannot be split into new shards; the number of shards in a table is fixed. A table can therefore be distributed over one host (all shards on the same node) up to <code>numshards</code> different hosts (one shard per host).</p>
+
+<p>As Cassandra supports a <em>replication factor</em> for each table, there are actually N servers for each token (shard), each with a full copy of the data. Cassandra therefore actually maintains a (token, list-of-servers) table, rather than the simpler (range, server) mapping in HBase. This increases both the read-throughput (reads can be performed against any node) and the write-throughput (writes can also be performed against any node - though the consequence is the need for a complex conflict-resolution system).</p>
+
+<p>The Cassandra approach gives slightly more control to the database architect; the split between “partitioning key” and “clustering key” is explicit, and “scanning” over all records with the same clustering-key is efficient. In HBase, the same distinction exists but is implicit: the “partitioning key” is the record-id prefix and the “clustering key” is the record id suffix (because records are split by ranges).</p>
+
+<p>The Cassandra approach has higher read and write performance (multiple hosts per shard due to replication). The multi-master approach also makes the data “highly available” (outage of a small number of nodes in the cluster does not affect clients). A poorly-chosen partitioningkey can also lead to “hot spots” where a single server is overloaded while others sit idle; HBase has the same issue though Cassandra multi-master replicas at least reduce this load somewhat. However the Cassandra implementation is more complex than HBase, and is difficult to scale past the point where nservers = nshards.</p>
+
+<h1 id="consequences-of-multiple-masters-for-data-storage">Consequences of Multiple Masters for Data Storage.</h1>
+
+<p>HBase does not replicate the data that it stores - at least not at the database level, although data is stored replicated in HDFS. The HBase approach is simple to understand, and simple to implement - all reads and writes for a range of record-keys go to a server “dedicated” to handling that range (region). There are never any races or other unusual interactions between reads and writes, because they all pass through the same cluster instance. There are however two obvious drawbacks:</p>
+
+<ul>
+  <li>A single server for a range of record-ids can lead to “hot spots” (limiting scalability particularly on read), and</li>
+  <li>On failure of that node, failover to a “cold standby server” can take tens of seconds.</li>
+</ul>
+
+<p>Cassandra instead allows a “replication factor” to be defined for a table, and there are then that number of active servers serving <em>the same data</em>. There is of course a price: things get more complicated. As with HBase, the individual servers use SSTables for storage, and updates are first written to an edit-log then to an in-memory buffer, with the memory-buffer being flushed to disk as an SSTable only periodically (to avoid generating many small SSTable files). The existence of these in-memory buffers <em>plus</em> multiple processes serving the same region means that the processes need to <em>explicitly replicate</em> data between themselves in near-real-time. This leads to the first user-visible difference between HBase and Cassandra: Cassandra reads and writes need to specify a <em>consistency level</em>, eg ONE, QUOROM, or ALL. On write, this indicates how many of the “replicated instances” need to confirm the write has been accepted before the write is considered to have “succeeded” (and the writing process may continue).</p>
+
+<p>Writes with consistency level of ONE is of course fastest, but means that other nodes might return stale data for a while (the remaining replication is asynchronous). Writes with consistency-level of ALL guarantee that no other node will return stale data after the write has completed, but will <em>fail</em> (ie is not HA) if any of the “replicates” is on a nodes in the cluster which is down. QUORUM means that the write blocks until over 50% of the replicated copies of that row have received the data.</p>
+
+<p>Reads specify the same levels; a read with level ONE is fast - only one of the servers holding a replicate of the row needs to be queried. However it can return “stale data” if a write was recently made via a different instance. A read of ALL guarantees consistent data is read, even when the writer used level ONE, but is obviously slow and not HA-compliant.</p>
+
+<p>The QUORUM read level is used together with the QUORUM write level, ie writer and reader need to agree to use QUORUM otherwise it is no better than ONE. When both writes and reads use QUORUM, then both are reasonably performant and HA-compliant.</p>
+
+<p>When using write-levels other than ALL, there is a common problem: a process which writes a record then reads the same data back might see “stale” data due to reading from a server other than the one it wrote to. The Cassandra client libs generally work around this problem by tracking writes, and ensuring that reads from the same table within a specific time-period are directed to the same node on which the write was performed. This reduces performance very slightly, but ensures a “stale read of just written data” never happens. This of course does not prevent other processes from seeing the stale data.</p>
+
+<p>As with HBase, cells are versioned with timestamps which makes replication of data much simpler - there are no problems with ordering of conflicting writes performed via different nodes in the cluster (unless through bad luck exactly the same timestamp happened to be used, in which case it isn’t clear what happens).</p>
+
+<p>Cassandra’s decision to serve the same data from multiple servers caused a problem (multiple in-memory buffers) which had to be solved with real-time replication. While complicated, this replication mechanism has some other advantages - in particular, Cassandra no longer needs to store its SSTable and edit-log files in a distributed database. HBase relies on HDFS (or other DFS) to replicate data for reliability, but Cassandra’s direct node-to-node replication provides the same resistance against disk-failure and node-failure without needing a DFS at all, simplifying life for sysadmins. This does mean that MapReduce/Spark/etc cannot process Cassandra data by running directly over the underlying database storage files, but even with HBase that is not a normal way to bulk-process data.</p>
+
+<p>A second consequence of allowing multiple servers to hold the same rows is that regions can be more fine-grained. If a Cassandra table defines the “partitioning key” to be the whole primary-key for the record then records within the table are distributed evenly across all shards of the table, improving both write and read throughput. When the number of shards is greater than or equal to the number of nodes in the cluster, then the table is distributed evenly across the whole cluster. This is not advisable with HBase, as an outage of any single node in the cluster would then impact 100% of all tables.</p>
+
+<h1 id="cross-data-center-replication">Cross-data-center Replication</h1>
+
+<p>For disaster-recovery and performance it is often important to replicate data not just within a cluster, but between clusters running in different datacenters. The significantly higher latency over network links between data-centers makes this a different problem.</p>
+
+<p>HBase has a solution for this, involving transfering the “edit logs” (aka transaction logs) between clusters. Setup is non-trivial but also not particularly complex.</p>
+
+<p>Cassandra simply uses its standard replication mechanisms for intra-cluster replication to transfer data between clusters - very little setup needed.</p>
+
+<h1 id="configuration-for-high-availablility">Configuration for High Availablility</h1>
+
+<p>As noted above, Cassandra’s ability to serve the same data from multiple nodes concurrently (with associated near-real-time replication) makes it very high-availability. The fact that a Cassandra cluster consists solely of a set of identical Cassandra processes, with no external dependencies, means that there are no single-points-of-failure and that setup/administration is very easy.</p>
+
+<p>HBase is more complex, having several components:</p>
+
+<ul>
+  <li>HDFS namenode</li>
+  <li>HDFS datanodes</li>
+  <li>HBase master</li>
+  <li>HBase region-server</li>
+  <li>ZooKeeper</li>
+</ul>
+
+<p>All of the above can be set up in high-availability mode, ie a properly-configured HBase system has no single points of failure. However getting that configuration correct is far more complex than simply installing N Cassandra nodes. There are tools to help, eg Apache Ambari, but simpler is better than complex+help.</p>
+
+<p>And as noted above, on failure of an HBase region-server it can take tens of seconds for the regions it manages to be reallocated to other surviving region-server instances, as they need to replay the edit-logs from the failed server (which are in the DFS) before beginning to serve data.</p>
+
+<p>It is possible that in future HBase will have faster failover - it seems feasable to have “warm standby” servers for each region which continually apply edit-logs from the “current master” for the region in order to be “nearly ready” to take over.</p>
+
+<p>The multiple-servers-with-replication approach is inspired by the Amazon Dynamo key-value-store system. Cassandra’s datamodel is inspired by BigTable.</p>
+
+<h1 id="performing-reads-and-writes">Performing Reads and Writes</h1>
+
+<p>In HBase, a client first determines which region-server manages the data to be read or written, and then communicates directly with that node.</p>
+
+<p>In Cassandra, a client instead simply chooses a node at random. If the node does not itself have the relevant data, it forwards the request to a suitable node. This potentially doubles the amount of network traffic in comparison to HBase, and introduces latency due to the need to forward (copy) the data in both directions. However from the client side it does simplify things somewhat.</p>
+
+<h1 id="defining-and-querying-tables">Defining and Querying Tables</h1>
+
+<p>The HBase native API for storing and retrieving data is very “direct” and low-level: SCAN and PUT. These operations correspond directly to the way data is stored. HBase itself does not include any higher-level query language; even the “hbase shell” accepts just SCAN and PUT commands. Those wanting an SQL-like interface to HBase need to use Hive, Phoenix, Drill, etc.</p>
+
+<p>Despite having the same underlying storage mechanisms (SSTables, log-structured-merge-trees, etc), Cassandra does not expose SCAN and PUT operations. Instead it provides a very SQL-like interface, most similar to phoenix-on-hbase. There are however some significant limitations on the “where” clauses of queries:</p>
+
+<ul>
+  <li>the partition-value must always be explicitly provided (exact constant)</li>
+  <li>range-queries may be applied to the “clustering” part of the table key. When there are multiple “clustering” columns in the key, then exact constants should be provided for the part before the “range query” for efficiency.</li>
+  <li>all columns are untyped..</li>
+</ul>
+
+<p>HBase exposes the concept of a “rowkey” directly to users. Cassandra instead uses the standard SQL conventions: a table has a “primary key”, consisting of a set of not-nullable columns in order. In a slight extension to SQL, the user must indicate which of the components of a “compound key” are to be used for partitioning the data. Queries against the table must then always provide exact values for these “columns” (except in the case of a full table scan).</p>
+
+<h1 id="materialized-views">Materialized Views</h1>
+
+<p>Bigtable-like databases only index on the “rowkey”. If data must be looked up by some other criteria, then a second table must be maintained, ie data “denormalized”.</p>
+
+<p>Cassandra provides support for “materialized views”. A CQL (Cassandra SQL variant) statement defines how to derive the materialized view from a base table. Cassandra then creates a <em>real table</em> containing the results of applying this statement to each existing row in the base table. In addition, each time the base table is updated the derived table is updated appropriately. Updates are performed asynchronously, ie there can be a time-lag between updating of the base table and the corresponding change in the derived table. The derived table cannot be updated directly. There is of course a performance impact for this feature, as each update to the base table triggers a second update.</p>
+
+<p>HBase does not itself provide the same functionality, but Phoenix-over-HBase provides something almost identical. HBase also supports generic “coprocessor hooks” which can be used to implement this with only a few lines of code.</p>
+
+<h1 id="datastax-enterprise-dse">DataStax Enterprise (DSE)</h1>
+
+<p>DSE is a commercial variant of Cassandra. One primary feature is integration of Solr search into Cassandra. select-statements can include solr search terms in the where-clause, and DataStax Enterprise will optimise the query appropriately.</p>
+
+<p>DSE also provides better administration consoles for Cassandra.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://de.slideshare.net/RussellSpitzer/spark-cassandralocality">Cassandra and Spark: Optimising for Data Locality</a></li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/cassandra/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

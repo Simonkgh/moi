@@ -1,0 +1,367 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Creating SSL Certificates with Letsencrypt</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Creating SSL Certificates with Letsencrypt</h1>
+    <aside>First published on: January 15, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a>, <a href='/category/Security/'>Security</a>, <a href='/category/Infrastructure/'>Infrastructure</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>This article describes how to generate server SSL certificates for an Ubuntu server which are signed (for free) by the Letsencrypt Certificate Authority. Letsencrypt issues/renews a maximum of 5 certificates per week for a specific domain-name, so may not be appropriate for some large-scale certificate users, but otherwise places no restrictions on who may request certificate signatures, and what those certificates may be used for.</p>
+
+<p>Other types of certificates (client certificate used for PGP signed email etc) are not discussed here.</p>
+
+<p>It is assumed you know how to set up a website for a “virtual host”.</p>
+
+<p>This article provides a fair amount of “background information” about certificates and certificate-authorities. If you are familiar with these, just spring ahead to “Letsencrypt on Ubuntu”. On the other hand, if you want a <em>lot</em> of detail about the process, see <a href="/programming/certificates/">here</a> for more information about keys and certificates and <a href="https://letsencrypt.org/how-it-works/">the letsencrypt website</a> for more information about letsencrypt itself.</p>
+
+<h1 id="about-tls-and-certificate-authorities">About TLS and Certificate Authorities</h1>
+
+<p>TLS is the dominant way to set up an encrypted channel from any arbitrary client application and a server. As well as providing encryption, the TLS protcol requires the server to provide a <em>certificate</em> which the client can verify to ensure that the connection they opened has not been redirected to an alternate hostile server. TLS is commonly used for things like connection to an email-server, and the HTTPS protocol is simply HTTP over a TLS-protected connection. The term SSL is (roughly) a synonym for TLS.</p>
+
+<p>Optionally, a client application can provide a certificate to the server over TLS, thus providing the server with verifiable information about the client identity, ie bidirectional authentication. However this is not commonly used; instead TLS is typically used only for “single-sided” authentication of the server. Many services do not need to know the identity of the client, and when client identity is required then commonly the client provides normal (user,password) type credentials over the TLS encrypted channel to identify itself, rather than a client certificate.</p>
+
+<p>To provide the server-side part of TLS, the server must generate an unsigned SSL certificate and then get some organisation to <em>sign</em> that certificate with their own key. And this organisation must be one whose own public certificate is bundled with the major software products such as operating-systems, web-browsers, java runtimes, etc. (or an organisation which has a signing-certificate issued by such an organisation). Such organisations are called Certificate Authorities (CAs).</p>
+
+<p>There are about 80 organisations (CAs) world-wide whose public certificates are bundled with major software products in this way. A bundle of certificates is called a “trust store”; each software distributor who includes a “trust store” chooses which top-level certificates they regard as trustworthy, but in general they are very similar across all operating-systems, browsers, etc. Not every application includes its own trust-store; in fact very few do with most applications instead relying on the trust-store provided by some other component (the underlying OS, the underlying Java runtime, etc.). Some browsers rely on the OS-provided trust-store (eg Microsoft browsers) while other browsers do not trust the OS and explicitly provide their own trust-store (eg Firefox).</p>
+
+<p>Until recently, the only CAs which offered to sign certificates for others were <em>commercial</em> and demanded a fee - including each time the certificate is <em>renewed</em>. A few CAs offer free signing under certain circumstances, but there is always a hook - they are for-profit entities after all.</p>
+
+<p><em>Letsencrypt</em> is a project of the non-profit Internet Security Research Group whose single goal is to sign certificates free-of-charge. They provide an API for doing so, and there are various client applications that integrate with this API to generate keys and sign certificates. The <em>letsencrypt</em> public certificates are distributed with most modern operating-systems and browsers, and are also signed by an organisation whose public certificate has been available for a long time, so they work with older products too.</p>
+
+<h1 id="why-is-a-certificate-necessary">Why is a Certificate Necessary?</h1>
+
+<p>A TLS key consists of a (private-key, public-key) pair; this can be generated fairly easily using appropriate tools on any computer (eg openssl). A certificate is simply a (public-key, name, signature) structure, representing the assertion that the specific public-key belongs to the specified name. Anybody can generate a certificate for any arbitrary (key, name) pair - but not with a signature that will be “trusted” by other applications.</p>
+
+<p>In the case of a “server certificate” the <code>name</code> part is the DNS hostname of the server to which that certificate belongs.</p>
+
+<p>After generating an initial unsigned or “self-signed” certificate, this needs to be <em>signed</em> by a CA, as described above, in order for it to be trusted by applications which use the standard trust-stores (sets of preinstalled trusted certificates).</p>
+
+<p>The result is that when software really wants to communicate with a system with a specific name (eg <code>www.example.com</code>) then it can ask various sources (even untrustworthy ones) for “the certificate for <code>www.example.com</code> and by verifying the response it can tell if the data it was given is a “real certificate” (and thus the public-key is truly the correct one) or if the response is faked (the public-key is malicious). Knowing that the public-key is valid then allows data to be encrypted with that key in the certainty that only the owner of <code>www.example.com</code> can decode it (well, unless the corresponding private-key has been stolen, but that’s not a flaw in the system).</p>
+
+<p>An alternative to certificates would be to have a world-wide master database of (public-key, name) pairs, and for client applications to consult this database for each connection to a new server. However that is simply not scalable, and would require client applications to always have internet connectivity; the certificate system is scalable and does not require a network connection to some central service.</p>
+
+<p>See <a href="/programming/certificates/">this article</a> for more information on certificates.</p>
+
+<h1 id="proving-identity-to-the-ca">Proving Identity to the CA</h1>
+
+<p>The core concept on which the whole certificate infrastructure is built is that a CA will only sign certificates for some name (eg <code>www.example.com</code>) when the certificate was supplied by the <em>registered owner</em> of that name. Obviously, if these checks aren’t done properly then an “attacker” can obtain a certificate for someone else’s name and their own public key, which would then give them the ability to impersonate that server. There are therefore very strict rules for CA organisations, and regular checks to make sure they are following the rules; an organisation that doesn’t check carefully enough (or deliberately issues certificates wrongly) gets removed from the trust-stores of the relevant software products which almost certainly means irrelevance, and for commercial CAs a quick bankruptcy. This has happened a handful of times.</p>
+
+<p>Some certificate authorities verify name “ownership” with a face-to-face meeting, paper documentation, etc. Old-school, expensive, not easily scalable, but effective.</p>
+
+<p>Letsencrypt instead supports several online ways of proving ownership of a domain.</p>
+
+<h2 id="webroot-ownership">Webroot Ownership</h2>
+
+<p>The simplest method of proving domain ownership is “webroot” - this requires the certificate applicant to have a <em>website</em> on the hostname being signed. When certificate-signing is requested, letsencrypt generates a file that the applicant must put on that website; only the owner of the website (and thus the hostname) should be able to do that. If letsencrypt’s own servers can later download that file from the website, then the certificate applicant is really the owner of the name and so the certificate is signed and returned.</p>
+
+<p>If the server for which the certificate is being issued doesn’t normally run a webserver, then the letsencrypt-provided software can start a temporary webserver just for the purposes of verification. This can be useful for a mailserver which needs a certificate to encrypt IMAP/SMTP network traffic but otherwise has no website, and similar usecases.</p>
+
+<h2 id="dns-ownership">DNS Ownership</h2>
+
+<p>Letsencrypt also supports proving domain ownership by publishing a DNS record; only the owner of a domain can do this. This does require communicating with your DNS provider, and there is no standard interface for this; the letsencrypt <em>certbot</em> program provides “plugins” for various popular DNS providers including Google, AWS (Route53), CloudFlare, and DigitalOcean.</p>
+
+<p>I find the webroot approach slightly easier, so the DNS approach is not discussed further here; see the letsencrypt/certbot documentation for further information.</p>
+
+<h1 id="letsencrypt-on-ubuntu">Letsencrypt on Ubuntu</h1>
+
+<p>Ubuntu 16.04-LTS and later provide the letsencrypt/certbot client application which makes issuing of certificates reasonably easy.</p>
+
+<p>To install the letsencrypt client app, just run:</p>
+
+<ul>
+  <li><code>apt install letsencrypt</code></li>
+</ul>
+
+<p>The letsencrypt package is just a synonym for “certbot”, the standard letsencrypt client app.</p>
+
+<p>Assuming there is an existing website for the hostname you need a certificate for (eg <code>www.example.com</code>), just execute the following:</p>
+
+<pre><code>letsencrypt certonly 
+  --email my.email@somewhere.com
+  --agree-tos
+  --webroot
+  --webroot-path /var/www/html
+  --domain www.example.com
+</code></pre>
+
+<p>The above command:</p>
+
+<ul>
+  <li>generates a public/private key pair and saves them under <code>/etc/letsencrypt/live/{domain}</code>
+</li>
+  <li>generates a certificate-signing-request (csr) with the specified domain-name and the public-key</li>
+  <li>writes a temporary file into dir <code>{webroot-path}</code> which contains some kind of signature of the csr</li>
+  <li>(letsencrypt servers then fetches the signature from your server and verifies it matches the csr, proving that someone in control of your server did indeed submit the csr)</li>
+  <li>writes the returned (signed) certificate into <code>/etc/letsencrypt/live/{domain}/fullchain.pem</code>
+</li>
+  <li>removes the temporary file from <code>{webroot-path}</code>
+</li>
+  <li>creates a permanent config file <code>/etc/letsencrypt/renewal/{domain}.conf</code> which contains the commandline args for the <code>letsencrypt certonly</code> command, so that they can be reused on renewal</li>
+</ul>
+
+<p>The above can be repeated as many times as desired for different certificates (eg one per web “virtual host”, where each virtual-host has a matching DNS CNAME record).</p>
+
+<p>Because letsencrypt certificates are only valid for <a href="https://letsencrypt.org/2015/11/09/why-90-days.html">90 days</a>, they must be regularly renewed. In directory <code>/etc/cron.weekly</code>, add the following file (with executable flag set):</p>
+
+<pre><code>#!/bin/sh
+letsencrypt renew
+</code></pre>
+
+<p>This checks regularly if the cert needs to be renewed, and if so does it automatically.</p>
+
+<p>You should also edit <code>/etc/crontab</code> and modify the date/time at which weekly tasks are run, as it is set to ‘06:47’ on Sunday (day=7) on all Ubuntu installations.</p>
+
+<p>A single certificate covering multiple domains can be requested by repeating the “–webroot-path .. –domain …” options multiple times. Each domain must have a corresponding website.</p>
+
+<p>The webserver can then be set up to point to the letsencrypt-managed certificates, eg for NGINX:</p>
+
+<pre><code>server {
+	listen 80;
+	listen [::]:80;
+
+	server_name my.virtual.hostname;
+
+	root /my/website/root; # eg /var/www/html
+
+	location ^~ /.well-known/ {
+		# This directory must be available under http for letsencrypt cert renewal
+		try_files $uri $uri/ =404;
+	}
+
+	location / {
+        	# force all other requests to fail (http only allowed for /.well-known/*)
+		return 403;
+	}
+}
+
+
+server {
+        listen 443 ssl default_server;
+        listen [::]:443 ssl default_server;
+        ssl_certificate /etc/letsencrypt/live/www.example.com/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/www.example.com/privkey.pem;
+        ....
+}
+</code></pre>
+
+<h1 id="other-options-with-letsencrypt">Other Options with Letsencrypt</h1>
+
+<p>The certbot client for letsencrypt supports a number of alternatives to the simple “certonly” and “webroot” approach shown above. If neither of these approaches suits you, see the man-page for certbot.</p>
+
+<p>For certain webservers, the certbot application can not only generate the certificate, but also modify the webserver configuration automatically to enable SSL and point to the appropriate certificate. Personally, I find the idea of an application manipulating the config-files of my webserver not so appealing, and prefer the “–webroot” option rather than the server-specific option (though in the case of nginx, automatic config update isn’t yet supported anyway).</p>
+
+<p>Clients other than certbot are listed <a href="https://letsencrypt.org/docs/client-options/">here</a>.</p>
+
+<h1 id="web-based-clients">Web-based Clients</h1>
+
+<p>It appears that <a href="https://www.sslforfree.com">sslforfree</a> offers a javascript client app for generating certificates and signing them via letsencrypt. However given that letsencrypt certificates are valid only for a few months (ie need to be renewed regularly), this doesn’t seem to be a very useful thing except for test-certificates. For other cases you’ll need some automated renewal process running on a server - and interactive sites such as this one can’t help there.</p>
+
+<h1 id="other-free-certificate-issuers">Other Free Certificate Issuers</h1>
+
+<p><a href="http://www.cacert.org/">CACert</a> issues certificates for free. However their public certificate is not widely distributed, ie such certificates are fairly useless.</p>
+
+<p>StartCom (aka StartSSL) previously issued base-level certificates for free, for “non-commercial” uses. However their trustworthiness as a company has been <a href="https://en.wikipedia.org/wiki/StartCom">called into doubt</a> (related to their new owner WoSign) and multiple software distributors no longer trust new certificates issued by StartCom.</p>
+
+<h1 id="tls-and-webserver-virtual-hosts">TLS and Webserver Virtual Hosts</h1>
+
+<p>Just some useful information that is tangentially related to TLS certificates..</p>
+
+<p>It is common to use CNAME records to point multiple hostnames to the same physical server. However having multiple distinct certificates for a single network port can cause problems, as SSL is initialised (including sending a certificate to the client) before the HTTP request that specifies the target virtual server name. This works ok for clients which support “TLS Server Name Indication” (SNI) - which is all modern browsers. Such browsers send the virtual hostname as part of the TLS handshake so the server can return the matching certificate. However older browsers which do not support this will instead get just the first cert, and may then warn about ‘cert not matching address’; the only solution that also supports such setups is to use a single cert with aliases for all desired subhosts, or to have the webserver listen on multiple ports.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://laracasts.com/discuss/channels/general-discussion/installing-letsencrypt-certificate-and-auto-renewal">laracasts</a></li>
+  <li><a href="https://letsecure.me/secure-web-deployment-with-lets-encrypt-and-nginx/">letsecureme</a></li>
+  <li><a href="https://www.digitalocean.com/community/tutorials/how-to-secure-apache-with-let-s-encrypt-on-ubuntu-16-04">Secure Apache with Letsencrypt on Ubuntu 16.04</a></li>
+  <li><a href="https://certbot.eff.org/all-instructions/">certbot</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/letsencrypt/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

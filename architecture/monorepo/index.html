@@ -1,0 +1,970 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Monorepos and Polyrepos</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Monorepos and Polyrepos</h1>
+    <aside>First published on: December 12, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a>, <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>I recently stumbled across an article on <em>monorepos vs polyrepos</em> which led to more articles and videos on the concept - it appears this is a topic that a lot of people like discussing. I’ve watched many presentations, and read many articles, and summarize them below so you don’t have to. I’ve also decided to add my opinions to the mess :-).</p>
+
+<h1 class="no_toc" id="table-of-contents">Table of Contents</h1>
+
+<ul id="markdown-toc">
+  <li><a href="#introduction" id="markdown-toc-introduction">Introduction</a></li>
+  <li><a href="#what-is-a-monorepo" id="markdown-toc-what-is-a-monorepo">What is a Monorepo?</a></li>
+  <li><a href="#my-background" id="markdown-toc-my-background">My Background</a></li>
+  <li><a href="#the-standard-arguments-in-favour-of-monorepos" id="markdown-toc-the-standard-arguments-in-favour-of-monorepos">The Standard Arguments in Favour of Monorepos</a></li>
+  <li>
+<a href="#significant-influences" id="markdown-toc-significant-influences">Significant Influences</a>    <ul>
+      <li><a href="#system-size" id="markdown-toc-system-size">System Size</a></li>
+      <li><a href="#release-cycle" id="markdown-toc-release-cycle">Release Cycle</a></li>
+      <li><a href="#trunk-based-development" id="markdown-toc-trunk-based-development">Trunk-based Development</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#proposed-pros-of-monorepos" id="markdown-toc-proposed-pros-of-monorepos">Proposed Pros of Monorepos</a>    <ul>
+      <li>
+<a href="#code-sharing-and-dependency-management" id="markdown-toc-code-sharing-and-dependency-management">Code Sharing and Dependency Management</a>        <ul>
+          <li><a href="#the-alleged-problems-with-versioned-libraries" id="markdown-toc-the-alleged-problems-with-versioned-libraries">The Alleged Problems with Versioned Libraries</a></li>
+          <li><a href="#code-sharing-without-versions-via-monorepos" id="markdown-toc-code-sharing-without-versions-via-monorepos">Code Sharing Without Versions via Monorepos</a></li>
+          <li><a href="#source-based-builds-with-bazel" id="markdown-toc-source-based-builds-with-bazel">Source-Based Builds with Bazel</a></li>
+          <li><a href="#transitive-dependencies-and-the-diamond-dependency-issue" id="markdown-toc-transitive-dependencies-and-the-diamond-dependency-issue">Transitive Dependencies and the Diamond Dependency Issue</a></li>
+          <li><a href="#code-sharing-and-dependency-management-summary" id="markdown-toc-code-sharing-and-dependency-management-summary">Code Sharing and Dependency Management: Summary</a></li>
+        </ul>
+      </li>
+      <li><a href="#refactoring" id="markdown-toc-refactoring">Refactoring</a></li>
+      <li><a href="#discoveryvisibility" id="markdown-toc-discoveryvisibility">Discovery/Visibility</a></li>
+      <li><a href="#collaboration" id="markdown-toc-collaboration">Collaboration</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#possible-cons-of-monorepos" id="markdown-toc-possible-cons-of-monorepos">Possible Cons of Monorepos</a>    <ul>
+      <li><a href="#vcs-performance" id="markdown-toc-vcs-performance">VCS Performance</a></li>
+      <li><a href="#ide-performance" id="markdown-toc-ide-performance">IDE Performance</a></li>
+      <li><a href="#build-system-performance" id="markdown-toc-build-system-performance">Build System Performance</a></li>
+      <li><a href="#inter-team-conflict" id="markdown-toc-inter-team-conflict">Inter-Team Conflict</a></li>
+      <li><a href="#inter-module-coupling" id="markdown-toc-inter-module-coupling">Inter-module Coupling</a></li>
+      <li><a href="#poor-isolation-of-product-release-cycles" id="markdown-toc-poor-isolation-of-product-release-cycles">Poor Isolation of Product Release Cycles</a></li>
+      <li><a href="#poor-domain-separation" id="markdown-toc-poor-domain-separation">Poor Domain Separation</a></li>
+      <li><a href="#poor-change-notification" id="markdown-toc-poor-change-notification">Poor Change Notification</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#the-big-players" id="markdown-toc-the-big-players">The Big Players</a>    <ul>
+      <li><a href="#microsoft" id="markdown-toc-microsoft">Microsoft</a></li>
+      <li>
+<a href="#google" id="markdown-toc-google">Google</a>        <ul>
+          <li><a href="#quick-overview-of-googles-toolset" id="markdown-toc-quick-overview-of-googles-toolset">Quick Overview of Google’s Toolset</a></li>
+          <li>
+<a href="#proposed-benefits-of-an-organisation-wide-monorepo" id="markdown-toc-proposed-benefits-of-an-organisation-wide-monorepo">Proposed Benefits of an Organisation-wide Monorepo</a>            <ul>
+              <li><a href="#re-unified-versioning" id="markdown-toc-re-unified-versioning">Re Unified Versioning</a></li>
+              <li><a href="#re-simplified-dependency-management" id="markdown-toc-re-simplified-dependency-management">Re Simplified Dependency Management</a></li>
+              <li><a href="#re-atomic-changes" id="markdown-toc-re-atomic-changes">Re Atomic Changes</a></li>
+              <li><a href="#re-large-scale-refactoring" id="markdown-toc-re-large-scale-refactoring">Re Large Scale Refactoring</a></li>
+            </ul>
+          </li>
+          <li><a href="#acknowledged-cons-of-googles-monorepo" id="markdown-toc-acknowledged-cons-of-googles-monorepo">Acknowledged Cons of Google’s Monorepo</a></li>
+          <li><a href="#supporting-experiments" id="markdown-toc-supporting-experiments">Supporting Experiments</a></li>
+          <li><a href="#other-google-monorepo-facts" id="markdown-toc-other-google-monorepo-facts">Other Google Monorepo Facts</a></li>
+        </ul>
+      </li>
+      <li><a href="#uber" id="markdown-toc-uber">Uber</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#other-topics" id="markdown-toc-other-topics">Other Topics</a>    <ul>
+      <li><a href="#source-code-migration" id="markdown-toc-source-code-migration">Source Code Migration</a></li>
+      <li><a href="#build-pipelines" id="markdown-toc-build-pipelines">Build Pipelines</a></li>
+      <li><a href="#tool-support" id="markdown-toc-tool-support">Tool Support</a></li>
+      <li><a href="#the-concept-of-sharing-code" id="markdown-toc-the-concept-of-sharing-code">The Concept of Sharing Code</a></li>
+      <li><a href="#thoughts-on-sysvbsd-monorepos-vs-linux-polyrepos" id="markdown-toc-thoughts-on-sysvbsd-monorepos-vs-linux-polyrepos">Thoughts on SYSV/BSD Monorepos vs Linux Polyrepos</a></li>
+      <li><a href="#circleci" id="markdown-toc-circleci">CircleCI</a></li>
+    </ul>
+  </li>
+  <li><a href="#my-personal-view" id="markdown-toc-my-personal-view">My Personal View</a></li>
+  <li><a href="#references-and-further-reading" id="markdown-toc-references-and-further-reading">References and Further Reading</a></li>
+  <li><a href="#footnotes" id="markdown-toc-footnotes">Footnotes</a></li>
+</ul>
+
+<h1 id="what-is-a-monorepo">What is a Monorepo?</h1>
+
+<p>It seems that a lot of the heat and confusion in the discussion around this topic is that people are talking about multiple things; terms <em>monorepo</em> and <em>polyrepo</em> (aka <em>multirepo</em>) have no precise definitions (<a href="https://en.wikipedia.org/wiki/Monorepo">Wikipedia’s definition</a> isn’t bad but not precise enough). I’d like to clarify this - but first I need to define some terms.</p>
+
+<ol>
+  <li>
+    <p>A <em>product</em> is a set of source-code that is released as a single atomic unit. A release may consist of a single monolithic server-side application, a monolithic client application (desktop app/mobile app/web app), a single microservice, or a suite of separate executable components which are all released together and which expect to work only with other applications from the same release (a “componentised monolith”?). The important point is that regardless of how many modules the product consists of, they all share a common release cycle.</p>
+  </li>
+  <li>
+    <p>A <em>team</em> is a group of people who can reasonably hold a meeting in which everyone can speak their mind. That’s ideally less than 10, but certainly less than 30. A team also has stable membership; of course people will drift in and out over time but the team retains its identity and responsibilities.</p>
+  </li>
+</ol>
+
+<p>A repository can then hold source-code:</p>
+
+<ol>
+  <li>For multiple products maintained by multiple teams</li>
+  <li>For a single product maintained by multiple teams (modulith/componentised-monolith)</li>
+  <li>For multiple products maintained by a single team</li>
+  <li>For a single product maintained by a single team</li>
+  <li>For a <em>fragment of a single product</em> (in practice, always maintained by a single team)</li>
+</ol>
+
+<p>Type 1 is definitely a “pure monorepo” approach, in which an organisation places code for many distinct systems into the same repository - though its use appears to be rare. The most extreme form of this which I am aware of is Google’s approach - see later for details on that.</p>
+
+<p>Type 2 is what most articles and presentations on <em>monorepos</em> are in fact describing: a repo containing multiple <em>modules</em> of some kind which are tightly coupled together at release time (whether physically linked together or not). Sadly, they often don’t make this clear and leave the reader/watcher to guess what <em>monorepo</em> means for them. However it could also be argued that this is a <em>polyrepo</em> pattern because it means an organisation has a repo per product.</p>
+
+<p>Type 3 is something I’ve personally seen in use (and working well). However none of the sources I reviewed on this topic describe this approach. It could be argued that this is a <em>monorepo</em> pattern because of multiple products in a repo, or a <em>polyrepo</em> pattern because an organisation has a repo per team. This can be applied only when the <em>products</em> concerned are small enough to be maintained by a single team - eg microservices.</p>
+
+<p>Type 4 could fairly be called a <em>polyrepo</em>; a company with multiple products will have a separate repository for each one. However it could also be called a <em>monorepo</em> because the repo contains multiple modules, and isn’t type 5. This pattern might be useful for coarse-grained services (microservices large enough to consist of multiple modules).</p>
+
+<p>Type 5 is the “purest form” of the polyrepo pattern; each repository contains a single module and produces a single “build artifact” - typically a library. The central feature of this pattern is that although an artifact might have its own release cycle and version number, the artifact is not what is relevant to users - only the product’s version is, and in this pattern many repos don’t represent a complete releasable product. Whether a library shared across multiple projects is itself a <em>product</em> can be debated.</p>
+
+<p>In the case of a microservice architecture in which each service is released independently then a service is a product. However there are architectures which consist of multiple “services” at runtime which are all released simultaneously; I would consider this a single product (a “componentised monolith”). When such coupled services are in a single repository, this would be type 2 or type 4 (depending on team structures).  When, despite the release coupling, each service is in a dedicated repository, then this would be type 5.</p>
+
+<p>A design in which the final released product is a monolith (eg a mobile app), but is constructed from components stored in separate repositories, is also a case of the type 5 pattern.</p>
+
+<p>The type 5 pattern seems to be the motivation for a lot of the “polyrepo to monorepo” articles available on the internet; fragments of a product are scattered across multiple repositories and people then have difficulties choosing a consistent version for that artifact in the final product. They then claim that combining these fragments into a type 2 or type 4 repository is “moving to a monorepo”. I would argue that as the result is one product, “monorepo” isn’t really a fair term for this new layout. The type 5 pattern does have a few benefits, allowing the fragments to be developed, built, and debugged independently, but does also cause significant complications when it is time to integrate the final product.</p>
+
+<p>There is also the matter of inter-product coupling. If multiple products (deliverables with different release cycles) are stored in the same repository, but they are completely isolated from each other at the source-code level, then there’s little effect (other than VCS performance). It’s when products within a repo interact via the filesystem that <em>monorepos</em> (of any type) become interesting and complex (for good and bad).</p>
+
+<p>And in addition, an organisation could potentially mix the types, having some of each type of repository. The organisation could be said to be using the polyrepo pattern overall (multiple repos) while potentially applying a type 1 <em>monorepo</em> pattern to a subset of products and the type 2 pattern (whatever it’s called) to specific products.</p>
+
+<p>The repository types could have been defined as combinations of (product, module) rather than (product, team). However it is already very common for multiple code modules to be in a repository, and the real development conflicts occur when resolving conflicts between teams; sorting out problems across multiple modules within a single team is seldom a significant factor.</p>
+
+<p>Because of the ambiguity around the names monorepo and polyrepo with regards to type 2, type 3, and even type 4, this article simply uses the term <em>type 1 repo</em>, <em>type 2 repo</em>, etc.</p>
+
+<h1 id="my-background">My Background</h1>
+
+<p>Views on this topic often depend upon the person’s role so just to be clear: I am a “coding architect” and senior developer whose background and interests are generally around the area of back-end systems for moderately complex business environments such as online retail, insurance, banking, or telecoms. I care about structuring software to allow a pool of dozens or hundreds of developers to work effectively in parallel on different parts of a diverse software infrastructure. I also care about maintaining software over multiple decades. In recent times, that often means applying domain-driven-design and microservice concepts. I also work generally with Linux and <a href="https://en.wikipedia.org/wiki/Java_virtual_machine">JVM</a>-based software, and sometimes, but not always, cloud-based systems.</p>
+
+<p>I have worked for many companies on many projects, the majority of which were using types 2, 3, or 4.</p>
+
+<p>Most recently I’ve been working in an environment composed of about 30 services, each in its own Git repository, together with a monolithic (but modular) web front-end for all these services (its own repo) and monolithic (but modular) Android/iOS mobile apps (each also in its own repo). Where common code exists between artifacts, these were published as (internal) libraries - though this was seldom done as it introduces coupling between products. The services could be considered pretty close to a “type 4” (pure polyrepo) layout, while the modular front-ends were definitely a case of a “type 2” repository.</p>
+
+<p>I’ve never worked anywhere that applied the “type 1 repository” pattern at an organisational scale (one repo for the organisation).</p>
+
+<p>I’ve tried to fairly reflect and summarize the opinions from the source presentations and articles I’ve seen. Where I express an opinion, it is likely to be influenced from the above experiences.</p>
+
+<h1 id="the-standard-arguments-in-favour-of-monorepos">The Standard Arguments in Favour of Monorepos</h1>
+
+<p>The benefits of monorepos (of various types) as presented by various sources can be summarised as follows…</p>
+
+<ol>
+  <li>Simplified dependency management</li>
+  <li>Better refactoring (simplified cross-artifact or cross-product changes)</li>
+  <li>Discoverability/visibility</li>
+  <li>Better collaboration between code owners</li>
+  <li>Better inter-product consistency (avoiding silos)</li>
+</ol>
+
+<p>where “monorepo” could be any of the <em>type 1</em> through <em>type 3</em> patterns.</p>
+
+<p>Known issues with monorepos (of various types) include:</p>
+
+<ol>
+  <li>VCS performance and disk space</li>
+  <li>IDE performance</li>
+  <li>Build system performance</li>
+  <li>Inter-team conflict</li>
+  <li>Inter-module Coupling</li>
+  <li>Poor isolation of product release cycles</li>
+  <li>Poor domain separation</li>
+  <li>Poor change notification</li>
+</ol>
+
+<p>Each of these is addressed below in more detail.</p>
+
+<h1 id="significant-influences">Significant Influences</h1>
+
+<p>There are a few things to keep in mind when assessing the impact of the pros and cons of different repository pattern types.</p>
+
+<h2 id="system-size">System Size</h2>
+
+<p>A significant factor in any discussion is exactly how many “products” or “artifacts” are being talked about. In a medium-sized organisation whose infrastructure is based on coarse-grained services, this may be in the dozens. In comparable-sized orgs whose architecture is based around truly fine-grained microservices, there can be hundreds of deployable artifacts. In large organisations (eg banks, insurance companies, and the major players such as Google, Facebook, Netflix, etc) this may be in the thousands or tens of thousands.</p>
+
+<h2 id="release-cycle">Release Cycle</h2>
+
+<p>It makes a difference whether you work in an environment that continuously releases software (eg an internet-accessible service, or an organisation’s internal tools) or produce software for sale (eg on a yearly upgrade cycle). When the software in question has multiple parts but all parts are released as an “atomic whole” then putting all source-code into a single repository can make more sense. This has already been addressed in the definition of the term “product”, but is worth discussing again.</p>
+
+<p>An example of “atomic release” is the family of <a href="https://en.wikipedia.org/wiki/Berkeley_Software_Distribution">BSD Unix distributions</a>. These distributions commonly have a single source-code repository holding both the operating system kernel and standard user-space tools. This contrasts with Linux distributions, in which the kernel has a dedicated repository, and userspace components are also developed separately in their own repositories.</p>
+
+<p>Microsoft develop their Windows operating system via a type 2 repository (one product, multiple teams) - and interestingly, use a variant of Git enhanced to work better with huge sets of files. This is also a case of “atomic release”, as Windows and its user-space tools don’t have separate release cycles.</p>
+
+<p>Uber also use multiple type 2 repositories (eg <a href="https://www.youtube.com/watch?v=lV8-1S28ycM">for their mobile webapp</a> - which their presenter caller a “monorepo”) and some type 1 (multiple product) repositories (eg <a href="https://www.uber.com/en-AT/blog/go-monorepo-bazel/">for many of their go-based applications</a>).</p>
+
+<p>Having a coupled release-cycle for code doesn’t mean that there cannot be a “release branch” with a stream of “patches”.</p>
+
+<h2 id="trunk-based-development">Trunk-based Development</h2>
+
+<p>A monorepo (of any type) doesn’t necessarily imply trunk-based development style is applied within that repo, but these two patterns are often used together. Google is probably the most extreme example of both practices (see later).</p>
+
+<p>The more inter-woven (tightly coupled) codebases are, the more useful trunk-based development is. Within a single product in a dedicated repository, trunk-based development can be useful to keep the work of multiple developers from diverging. Within an organisation that uses shared code heavily, a monorepo with trunk-based development and direct source-code dependency (see later) can be useful to keep the producers and consumers of that shared code from diverging. Of course there is a price to these choices, and alternative solutions to these problems; which solution is the best will vary by organisation and product.</p>
+
+<h1 id="proposed-pros-of-monorepos">Proposed Pros of Monorepos</h1>
+
+<p>Below is some detail and discussion of the things which are regularly proposed as “pros” for the <em>monorepo</em> pattern (of any type). You may notice that I am sceptical of many of these claims, but the systems I work on, and the kind of work I do, may not match your environment - so please draw your own conclusion. Your feedback is also very welcome..</p>
+
+<h2 id="code-sharing-and-dependency-management">Code Sharing and Dependency Management</h2>
+
+<p>The traditional approach to allow one codebase to depend upon another is to use <em>semantically versioned libraries</em>. A library provider periodically tags their code, compiles it (if relevant), and uploads the resulting artifact to some artifact repository. Consumers of that library put a dependency declaration in their build specification (library id and version) and a build-tool downloads that pre-packaged artifact as needed.</p>
+
+<p>However there are some issues with this approach. Problems suggested by various sources include:</p>
+
+<ul>
+  <li>Work needed to publish code as a library</li>
+  <li>Lag between updates to the source of a library and publishing of a new version</li>
+  <li>For compiled languages, there can be many possible build-flags applied during a build - but it isn’t practical for the library provider to publish all possible variants</li>
+  <li>For debugging, a consumer needs easy access from their IDE to library source code</li>
+  <li>Transitive dependency problems (the “diamond dependency” issue)</li>
+  <li>A library producer cannot know the impact of changing their transitive dependencies</li>
+  <li>It can be difficult for a library producer to know who is using their code and how</li>
+  <li>It is argued that libraries make it hard for a producer to remove obsolete APIs</li>
+</ul>
+
+<p>Monorepo supporters suggest that many of these problems can be minimised or removed when the consuming and consumed code are both stored within the same repository. Before looking at the arguments in detail, it is important to note the two possible contexts:</p>
+
+<ul>
+  <li>When the consumed code is used in only one product</li>
+  <li>When the consumed code is used in multiple products (with independent release cycles)</li>
+</ul>
+
+<p>The following sections look at:</p>
+
+<ul>
+  <li>The alleged problems with versioned libraries</li>
+  <li>Code sharing without versions via Monorepos</li>
+  <li>Source based builds with Bazel</li>
+  <li>Transitive dependencies and the diamond dependency issue</li>
+  <li>Code sharing and dependency management summary</li>
+</ul>
+
+<h3 id="the-alleged-problems-with-versioned-libraries">The Alleged Problems with Versioned Libraries</h3>
+
+<p>The common points made earlier about versioned libraries are all at least partly true. However there are ways to address this without the “no versions” approach suggested by many monorepo supporters.</p>
+
+<p>It is true that publishing code as a library is hard work. In particular, ensuring that APIs are backwards-compatible where possible and version-numbers are incremented appropriately when not. When a library is part of a product and used only in that product, then the fact that the release lifecycles are the same can mean that the independence introduced by semantically-versioned-libraries has low value (see type 2 repos). However when products have different release cycles then the decoupling provided by versioning and backwards compatibility is extremely useful and a lack of this can have a very high cost (see type 1 and 3 repos). In particular, not using semantic versioning can lead to code breaking without warning when its dependencies are updated. These tradeoffs are discussed more below in Code Sharing without Versions.</p>
+
+<p>It is also true that there is often a lag between updating a library’s code and making a release. This doesn’t have to be the case; it’s now common for organisations to release products “to production” as soon as a feature is complete (and thus often multiple times per day) and there is no reason why organisation-internal libraries cannot be treated the same (release to the internal artifact repository after every significant change), but that does have implications for culture, storage, etc.</p>
+
+<p>Most languages have a way to provide access to the source-code for binary libraries; in JVM-based languages, for example, it is a simple matter of providing a “source jar” along with each “binary jar”.</p>
+
+<p>Within any multi-module repository, it is simple to define “common build definition files” to be used across artifacts, allowing shared definitions for constants that define the version of external artifacts that should be built into the resulting artifact. The disadvantage naturally are that updates to this common file can break products which use it. Many build-systems have support for importing shared definitions in a more controlled way, without needing a monorepo - eg Maven’s BOM files or parent POM files, both of which are <em>versioned</em>.</p>
+
+<p>Removal of obsolete APIs, or other non-backwards-compatible changes, can be done within a versioned library by incrementing the major version number. Existing users of that library will continue to run unchanged until they decide to upgrade - one of the benefits of versioning. This also removes some of the need to know exactly how existing consumers are using the library. There is, however, a danger of the “diamond dependency issue” if an application depends on two libraries which in turn depend on the (incompatible) old and new versions. The “diamond dependency” problem is described in more detail below. However it can sometimes be resolved by simply loading <em>both versions</em> concurrently; <em>library shading</em> can support this<sup id="fnref:shading" role="doc-noteref"><a href="#fn:shading" class="footnote" rel="footnote">1</a></sup> as can language-specific mechanisms (such as OSGi or JPMS for JVM-based languages).</p>
+
+<p>One issue with using libraries as a dependency mechanism is answering the question: who is using my library? With a single tree, it’s possible to grep for that. However I would argue that there are other solutions; when using Kubernetes for example, there are tools to:</p>
+
+<ol>
+  <li>Get a list of all container images in production, and</li>
+  <li>Scan container images to get a list of the libraries used by it</li>
+</ol>
+
+<p>From there it should be trivial to find the code owners and the corresponding codebase/repo.</p>
+
+<p>One thing that pro-monorepo articles and videos keep mentioning is triggering “whole repository rebuilds” when something changes - and they seem to suggest this is a positive. For type 2 or type 4 repos representing a single product (system that is released “as an atomic unit”) this might be useful. For repos containing decoupled products it seems unnecessary and undesirable. Microservices are typically developed by multiple teams in parallel, each releasing their work when it is ready - and ideally <em>not</em> being blocked from releasing due to work in any other team. In such environments, a “rebuild the world” event simply never happens and it is hard to understand why such a thing would be considered positive. Even in cases where a back-end component is paired with one or more front-end components, many (including myself) consider it a goal for each to be releasable independently - or at least a back-end release to be done without simultaneous front-end releases. Synchronized releases of multiple components are dangerous and stressful; it is almost always possible for back-ends to provide multiple APIs, or multiple variants of the same API, and thus to remove this need.</p>
+
+<h3 id="code-sharing-without-versions-via-monorepos">Code Sharing Without Versions via Monorepos</h3>
+
+<p>Monorepo supporters point out that when the consuming and providing code are in the same repository, then no “artifact repository” is needed between the consuming and consumed code and therefore explicit versioning is not needed: the consuming code can just depend directly on the consumed code <em>at a specific path and at the same commit version</em>. This has a number of advantages and a number of disadvantages.</p>
+
+<p>Direct dependency on a code-path within the same repository:</p>
+
+<ul>
+  <li>Removes the work needed to “publish a library”</li>
+  <li>Removes any lag between changes to a library and availability of those changes to consumers</li>
+  <li>Automatically packages the library code with the same “flags” as the consuming code</li>
+  <li>Makes the source of the library automatically available to the IDE in the consuming module’s project</li>
+  <li>Can resolve the “diamond dependency” issue (see following section)</li>
+</ul>
+
+<p>It may also:</p>
+
+<ul>
+  <li>Make it easier for a library author to know who is using their code (just “grep”)</li>
+  <li>Make it easier for a library author to remove obsolete APIs (create patches for all consumers)</li>
+</ul>
+
+<p>Code shared in this “direct” way can also potentially be published as a versioned library for consumers who are not within the same repo, ie simplifying dependencies using the source-level-dependency pattern doesn’t necessarily make the code inaccessible to other codebases in other repos.</p>
+
+<p>This approach, however:</p>
+
+<ul>
+  <li>Can encourage developers to depend on code whose owners aren’t really <em>thinking like library authors</em>
+</li>
+  <li>Can lead to adding too many dependencies to a project</li>
+  <li>Makes it difficult to introduce breaking changes (see later)</li>
+  <li>Can significantly slow builds - unless special build tools are used</li>
+  <li>Can significantly slow IDEs (with too much such referenced code) - unless special IDE patches are used</li>
+  <li>Can lead to two completely different dependency strategies: for code internal to the repo and code external to the repo</li>
+  <li>And, most importantly, changes to consumed code can <em>break consumers</em> or put developers on an “upgrade treadmill”</li>
+</ul>
+
+<p>Library authors need to take more care with their APIs than those writing code not intended for reuse. They also need to think about providing long-term support (and shouldn’t allow their code to be reused unless they are willing to do so). This is probably why Google introduced the concept of “public/private APIs” within their monorepo build tools, and made all functions private (outside the module) by default; anything can now be used as a library but exposes nothing that can be called unless the code author <em>intended</em> it to be a library API.</p>
+
+<p>In a large multi-project repository, the fact that code <em>can be reused</em> doesn’t necessarily mean that it <em>should be reused</em>. Code that is owned by someone else and happens to, at the moment, do what is desired doesn’t mean it always will; it’s necessary to think about what the code owner <em>intends that code to do</em>, which <em>business domain</em> it is associated with, and <em>what their future intentions are</em>. In my opinion, the act of publishing a library, and the act of adding a dependency on a library, tend to make this “contract” more explicit in comparison to simple referencing of a code-path.</p>
+
+<p>Both of the above issues are more important in large type 1 repositories, and less important in other types (multi-team repos dedicated to a single product, or multi-product repos owned by a single team). For smaller or dedicated repositories, removing the friction to sharing code may be very beneficial.</p>
+
+<p>When the number of dependencies for a module become large then, because these are <em>source level dependencies</em>, both build-tools and IDEs may struggle with the large number of files to process. A project which depends on some source-code and 50 binary libraries can be compiled and parsed far faster than one which depends on the <em>source code</em> for all those dependencies! There are some build tools designed specifically for monorepos and this “depend directly on source” pattern, and which can cache precompiled code for source-code subtrees - eg Bazel (see later for more details). Solving this problem for IDEs is trickier; Google for example have custom Eclipse plugins.</p>
+
+<p>This pattern of “non-versioned internal dependencies” can also be used with traditional build tools (and projects I worked on decades ago were doing this). As an example, a Maven/Java project may have a single repo containing a Maven multi-module project, and many modules may have a fixed version like <code>1.0-SNAPSHOT</code> or <code>${productVersion}-SNAPSHOT</code>. As described above, this removes the need to “publish libraries”, and resolves the “diamond dependency” problem. It is also performant; only changed modules need to be rebuilt and an IDE can rely on efficient binary libraries. However there are a few flaws. Maven places compiled modules into a local directory keyed by <code>(libraryid, version)</code> - and doesn’t automatically realise when the source-code that produced that library has changed. Therefore when a file in a specific module is updated via the IDE, or due to fetching VCS updates, or by switching VCS branch, those libraries no longer match the code being displayed in the IDE; developers using this pattern need to be careful to rebuild appropriate modules manually when using this approach. Most build-tools were designed to support versioned dependencies and will have similar issues. The Google-designed build tool <code>bazel</code> has a nice solution to this “inconsistent library artifact” issue (see later).</p>
+
+<p>A limitation of the “source-based dependency” strategy is that it doesn’t work with dependencies on any code not in the repo, whether third-party/open-source libraries, or internal code in other repos. In general, this means that a codebase now has two different dependency management strategies: a “no version” approach for internal dependencies, and a traditional semantic versioned strategy for external dependencies. This also means the “diamond dependency” issue is still unresolved for external dependencies. This can push an organisation towards larger and larger monorepos - though this makes the following issue more significant. Google have an interesting solution for this: they import the <em>source</em> for external dependencies (including open-source projects) into their huge type 1 repo(!); they also insist on <em>only one version of any third-party library</em> being available - across all code in their megamonorepo!</p>
+
+<p>Probably the biggest issue with the “source-level dependency” approach is potential code breakage - whether a compile issue, or something more subtle. When consumed code is published as a series of versioned libraries, then consuming code which depends on a specific library version remains functional regardless of what changes occur in the library; breakage can only occurs when the consumer updates to a newer version. However when depending directly on source, code a developer is responsible for can be broken at any time by someone they have perhaps never met - and Murphy’s law suggests it will occur at the worst possible moment. This is less of a concern when the library is exclusively used by a product with a slow release cycle; it’s annoying but tolerable. It’s also less of a problem when the repo belongs to a single team. Even in the worst case, a production issue, a hotfix can be pulled into a “release branch” and that branch will contain the old library code and so will build and work. However in an environment with rapid release cycles, eg a microservices environment in which “lead time” from ticket to production may be measured in hours, unexpected breakage of this type can be very frustrating. Organisations which use large type 1 monorepos typically invest heavily in extensive test suites and large build-farms so that such changes to shared code can be tested against the whole using codebase before it is committed, in order to limit the impact.</p>
+
+<p>When a product has many source-level internal dependencies which are continually changing, I imagine developers can feel like they are on an upgrade treadmill whose schedule, unlike versioned dependencies, is not under their control. Alternatively, a library author may be prevented from making changes to code they own until all users of that code have updated to new APIs - also not a great situation. One possible compensation is that having consuming and consumed code in the same repo makes it simpler for the owners of the <em>consumed code</em> to write and submit patches to the owners of code affected by API changes - as long as such changes are simple ones. Google’s developer documentation on using their type 1 repos has whole sections dedicated to the responsibilities of developers with regards to libraries, and to updating to new libraries, with rules about who MUST do what within which time-period.</p>
+
+<h3 id="source-based-builds-with-bazel">Source-Based Builds with Bazel</h3>
+
+<p>It has been mentioned above that build tools designed around the versioned-dependency model don’t work optimally with dependencies that are purely intra-repository.</p>
+
+<p>After they are built, versioned artifacts are stored in some central place keyed by <code>(libraryid, version)</code>; that central place may be a directory on the local filesystem or a remote server. These are “detached” from the source in the sense that changing the source does not update the published artifact - a desirable behaviour in some scenarios, but not in others.</p>
+
+<p>The Google-designed and open-source Bazel build-tool supports two dependency modes: “external dependencies” which are the traditional approach above, and “internal dependencies” which are a simple path to a directory in the local repository. When Bazel packages code referenced as an internal dependency, it also produces a “library” and stores it in a local repository (and optionally uploads it to a server) but the key is not <code>(libraryid, version)</code> but instead <code>(sourcecode-hash, buildflags)</code>. And before building any directory, it can obtain the hash and see whether a matching prebuilt version of that code is already available. The hash can usually be obtained from the version control system; for any commit, directory trees are immutable so the hash never changes.</p>
+
+<p>The advantage of this is that developers don’t need to manage version-numbers; they are not relevant - and that saves a lot of code churn! It also correctly handles cases when a developer fetches VCS updates, changes branch, or just modifies code in a directory; the sourcecode hash either points to exactly the right prepackaged artifact or indicates that the code needs to be packaged (built from source). It also means that “artifact repositories” which store such prepackaged artifacts are pure <em>caches</em>; their contents can be discarded at any time as they will simply be rebuilt from sourcecode when needed. It’s a very hard problem to know what can safely be discarded from a versioned artifact repository - precisely because rebuilding versioned artifacts on demand is not an automatable process.</p>
+
+<p>The disadvantage is that these “non-versioned” artifacts cannot be shared outside of the repository; their key is meaningful only within the repo. As noted earlier, if code really needs to be shared, it can <em>also</em> be published in parallel using semantic versioning (with the appropriate build configuration).</p>
+
+<p>The issues regarding code-breakage (discussed above) of course always apply when considering source-level dependencies.</p>
+
+<p>Common Bazel usage is to define “build files” at far finer granularity than typical with traditional tools such as <code>make</code> or <code>maven</code>. This allows the reuse of prepackaged code to be even more efficient. However it makes management of dependencies more difficult; each build-file still needs to declare the dependencies of the relevant source-files. Because maintaining these fine-grained dependencies is so much work, it is often automated - ie bazel build files are often generated by tools which scan the code. These fine-grained dependencies can often cause problems for Bazel-enabled IDEs; they may be designed to handle dozens of coarse-grained dependencies but not thousands of fine-grained ones..</p>
+
+<h3 id="transitive-dependencies-and-the-diamond-dependency-issue">Transitive Dependencies and the Diamond Dependency Issue</h3>
+
+<p>Transitive dependencies seem to be a problem that many larger companies are struggling with, and which some see the <em>monorepo</em> as a solution to. In particular, a library provider does not know, when they upgrade their transitive dependencies, which consumers will not be able to compile against their new version due to conflicts of those new dependencies with things a consumer is using directly - or worse, is using via a transitive dependency in a different library.</p>
+
+<p>The “diamond dependency problem” is that modules may have dependency chains of <code>A -&gt; B -&gt; D1</code> and <code>A -&gt; C -&gt; D1</code>. When D2 is released, B may update. A is now unable to update to the latest version of B as it would transitively require both D1 and D2. When all of these components are <em>source-level dependencies within the same repo</em> then the problem simply cannot occur; whatever branch is being built will have only one version of D which both B and C depend on. Updates to D can still break B or C, but it is direct breakage and not a transitive conflict. The price of course is that updates to D can break B or C immediately, interfering with their development cycle - something that is more important when D’s users are products with different teams and/or release lifecycles.</p>
+
+<p>Whether diamond-dependency issues or code-breakage is the greater evil will vary between organisation and product. Of course, the more complex the dependency web is, the more common both kind of problem will be - suggesting that one solution is to work to minimise shared code and complex webs of dependencies.</p>
+
+<p>The more of a product is within a single repository (ie the fewer external dependencies there are), the better the source-level-dependency pattern works. This can lead to products which have “shared code” being merged into the same repository - ie encourage the migration from type 2 repositories to type 1 repositories.</p>
+
+<p>In a monorepo, it is simple for modules to share repo-wide common constants, including standardized version-numbers for external dependencies - though commits to those files can potentially trigger widespread breakage. This can help resolve “diamond dependency” issues with regards to external libraries - though it won’t resolve them completely. As noted earlier, some build tools support this without a monorepo, eg Maven’s (versioned) bom-files or parent-poms.</p>
+
+<h3 id="code-sharing-and-dependency-management-summary">Code Sharing and Dependency Management: Summary</h3>
+
+<p>When the entire repo contents is one product (a unified release cycle), then coupling different “modules” of the product tightly together via source-level dependencies has implications for development, but far less than coupling of modules with completely independent release cycles. This is presumably why so many sources recommend type 2 (one product, multiple team) repositories for such projects (which they call a <em>monorepo</em>).</p>
+
+<p>When including multiple products (different release cycles) within a repository, then great care should be taken with source-level dependencies as the impact is far more significant than on just one product. In particular, if building a set of truly independently releasable microservices then any kind of coupling between them via dependencies can be a danger - and unversioned ones even more so.</p>
+
+<h2 id="refactoring">Refactoring</h2>
+
+<p>It is proposed that monorepos simplify:</p>
+
+<ul>
+  <li>Bulk code changes across multiple artifacts</li>
+  <li>Splitting code for an artifact into multiple artifacts, or combining the code for multiple artifacts into one</li>
+  <li>Moving code for a business function from one artifact to another</li>
+</ul>
+
+<p>Apparently, some organisations feel a need to perform mass updates across multiple projects. Some even feel the need to do this as “atomic commits”. Doing this is certainly hard (or impossible) when affected codebases are not in the same repository. I personally struggle to find valid usecases for such updates; I see each codebase as being the responsibility of the “owners” to update, rather than some central team. There are also options for bulk updates such as providing tools or scripts for code owners to use, rather than generating patches. However if you value such bulk changes, then combining relevant products into a single repo may have value.</p>
+
+<p>Google do state that cross-product changes were so common at one point that they were becoming a burden on teams, and a “pre-approval” process was introduced to make sure such patches were really needed. They clearly do find benefit in this feature..</p>
+
+<p>Extensive automated testing seems to be a pre-requisite for bulk updates; the person submitting a patch can only rely on automation to ensure updated products compile and pass relevant tests. Even with such support, it seems a big step to say that is sufficient to commit an update to a codebase.</p>
+
+<p>Bulk updates are also likely to undermine the feeling of “code ownership” by autonomous teams. Google does generally respect code ownership by having big cross-project patches split into per-module parts and then submitting each part for code review by the module owners - ie pretty much what you would do for a polyrepo anyway. What is perhaps different is somewhat simpler initial patch preparation, and better support for testing the change as a whole before submitting the patches. All Google’s tooling support for patch creation, testing, and splitting is proprietary as far as I am aware - ie if you are considering a type 1 monorepo, you’ll need to consider the cost of developing such tools to support bulk refactoring, as well as the cost of the extensive automated test suites.</p>
+
+<p>With regard to service-oriented/microservice architectures, there is a problem to consider: sometimes it is necessary to move responsibility for some behaviour to a different service. When the two services involved are in different repositories (belong to different teams in a type 3 repo, or any service using a type 4 repo) then things become a little complex. Git does support exporting a directory with change-history, and importing it into a different repo, but it’s not entirely trivial. Other version-control systems might not support it at all. Using a type 1 or type 2 repository resolves this issue because the two services concerned are already in the same repository and code can be moved without extra complications. However I don’t personally see this kind of refactoring as being a regular occurance.</p>
+
+<h2 id="discoveryvisibility">Discovery/Visibility</h2>
+
+<p>Discoverability/visibility suggests that when a developer is working on some products, it is easier for them to:</p>
+
+<ul>
+  <li>Find similar code developed elsewhere in the organisation</li>
+  <li>Find internal libraries that might be helpful for their current task</li>
+  <li>Find the source-code for library functions they are invoking</li>
+  <li>Find the source-code for internal network APIs a developer might be invoking</li>
+  <li>Track what work other teams are doing which might be relevant to them</li>
+  <li>And generally understand the environment in which the code they are writing will run</li>
+</ul>
+
+<p>No presentation I saw has gone into detail in any of these topics, and I personally find none of them particularly convincing.</p>
+
+<p>Given any reasonable-sized organisation, finding relevant code purely by browsing a file-system is not likely to be effective. What is more practical is a proper culture of communication with ways for people to post requests for information, and a habit of teams helping each other. Larger organisations should also have a proper software catalog in which each product has a description, information about its development status, list of maintainers, and link to the source-code. <a href="https://backstage.io/">Backstage</a> is one tool which can be used to build such a catalog.</p>
+
+<p>When working with source-code libraries, it is certainly useful to be able to “drill down” into the source-code for any API while staying within an IDE. However this is a solved problem for all major programming languages; for JVM-based systems for example, it is just a matter of publishing a “source code jarfile” along with each library (jarfile). Most external dependencies (eg open-source libraries) do this, and internal libraries can do this too. No “monorepo” is needed, and in fact will be less convenient.</p>
+
+<p>Browsing the implementation of network-APIs provided by internal systems can sometimes be useful - though it is often better to have proper API documentation and examples. When looking for such code, it is indeed useful to have that source-code on a local filesystem. A “type 1 monorepo” approach does ensure that the code is always available, while in other patterns it may be necessary to check out the relevant repository. However the developer still needs to figure out which product provides that API (non-trivial in large organisations) - something that a software catalog like Backstage can help with. This can be counted as a very minor win for the monorepo approach.</p>
+
+<p>The issue of a front-end developer having access to source-code for a back-end API which is currently under development, or a “full stack developer” having access to both concurrently, is addressed in the section on collaboration.</p>
+
+<p>It is also sometimes useful to be able to do an “organisation-wide” search over source-code for specific keywords. Having all code present on a local filesystem does make it possible to use system tools such as <code>grep</code>. However many repository-managers also support free-text search; I have personal experience of the cross-repository search abilities in <a href="https://about.gitlab.com/">Gitlab</a> and <a href="https://github.com/">Github</a> and they work well.</p>
+
+<p>Tracking the work done by other teams by watching commits in a monorepo seems a not-particularly-scalable approach; it’s certainly not going to work when an organisation is performing a hundred commits per day or more. Tracking commits to specific products or artifacts of interest might be useful - and here it seems that the polyrepo approach is actually <em>more beneficial</em> as the choice of repo(s) to observe automatically filters the relevant commits.</p>
+
+<p>In a smaller organisation it might be useful to have an overview of “all the code for an organisation” in one place (type 1 repo). However that’s not scalable; in any larger system, there’s no way to get a decent understanding of an IT infrastructure purely relying on the raw source-code. Type 2 or type 3 repos do limit the amount of code to comprehensible proportions while still providing some benefits over a type 4 or type 5 fine-grained approach. However I would suggest that proper system documentation would be a better approach, pointing out how components fit into an overall plan without needing to delve into implementation details. Where appropriate, tools can generate documentation from source-code (eg human-readable API descriptions, security roles used) and platforms (eg Backstage again) can be used to present this information in context.</p>
+
+<h2 id="collaboration">Collaboration</h2>
+
+<p>Better collaboration suggests that a monorepo makes it easier for:</p>
+
+<ul>
+  <li>A developer to submit fixes or improvements for code which is not their primary responsibility.</li>
+  <li>Multiple developers to work on client and server sides of an API concurrently</li>
+</ul>
+
+<p>I don’t personally see how a monorepo makes the first item any easier than a polyrepo. Preparing a patch for code “owned” by a different team is always a task that takes extra time; checking out the relevant repository first isn’t the bottleneck in my experience.</p>
+
+<p>I also fail to see how having a front-end and back-end in the same repo makes the second item any easier if their release cycles are decoupled. If the front-end and back-end are released and deployed as a single unit, then yes being able to do a single commit which creates an API and adds client code to call it could be somewhat helpful.</p>
+
+<h1 id="possible-cons-of-monorepos">Possible Cons of Monorepos</h1>
+
+<h2 id="vcs-performance">VCS Performance</h2>
+
+<p>One acknowledged issue with monorepos is the performance of the version control system. Monorepos are simply larger, meaning that all operations on that repository are slower and (depending on VCS) may need more disk space. Initial checkouts are slow. Fetches of changes are slow. Commits are slow. Viewing history (for a directory) is slow.</p>
+
+<p>Google has its own proprietary version control system <a href="https://cacm.acm.org/magazines/2016/7/204032-why-google-stores-billions-of-lines-of-code-in-a-single-repository/fulltext">Piper</a> and a custom Linux virtual file system to make the currently selected branch of a repository appear like a local filesystem.</p>
+
+<p>Microsoft have <a href="https://github.com/microsoft/git">modified Git</a> to scale to large repositories, including supporting “partial checkouts”. Much of their work has been upstreamed, but the configuration to get best performance for Git on very large repos is apparently so complex that they have a separate tool for that (scalar).</p>
+
+<p>Other users of large repositories appear to be working on scaling Mercurial.</p>
+
+<p>At least the Git and Mercurial work is open-source and available if you are interested in taking this path..</p>
+
+<h2 id="ide-performance">IDE Performance</h2>
+
+<p>In general, developers will use an IDE to open a single directory within a monorepo - which should be similar to opening the same project in a polyrepo. However if the “source-level dependency” pattern is used, then the IDE also needs to load and parse the source-code of every dependency rather than the library representation. This can make a significant difference in performance.</p>
+
+<p>Google have internal patches for Eclipse to resolve some of these issues. Uber <a href="https://www.youtube.com/watch?v=lV8-1S28ycM">switched from Eclipse to Intellij</a> to resolve performance problems with a moderate-sized repo (their Android front end). I’m not sure how other large repo users deal with the IDE issue.</p>
+
+<h2 id="build-system-performance">Build System Performance</h2>
+
+<p>If the “monorepo and depend-on-source” pattern is used, then automated builds need to compile all dependencies from source rather than simply reuse precompiled artifacts. If “pulling fresh” from the version control system, then significant extra network traffic and load on the VCS may also be generated.</p>
+
+<p>Google’s Bazel build tool does offer a solution for that; see earlier. Meta’s Buck2 presumably does something similar.</p>
+
+<p>There is also a potential issue regarding triggering of automated builds on commit. When many small repositories are being used, then it is often acceptable for a commit to a repository to trigger a complete rebuild of all code in the repository. However with larger repositories that can take too long; it is instead necessary to figure out <em>which products the commit touches</em> and rebuild only them. Extracting the set of directories affected by a commit isn’t too hard - but that then needs to be mapped to a (smaller) set of <em>base product directories</em> - ie for each affected directory, “walk up the dir tree” until a <em>base product directory</em> is found. There is an additional issue when using a repo with multiple products but traditional versioned dependencies: for a commit which does affect multiple products, in which order should they be rebuilt? Interestingly, source-level dependencies don’t have this ordering problem.</p>
+
+<h2 id="inter-team-conflict">Inter-Team Conflict</h2>
+
+<p>Ever been working to a deadline, and had some other team make a change that stops your code working? Frustrating, isn’t it?</p>
+
+<p>Well, sadly the problem is your fault - your product has an improperly isolated dependency on another team.</p>
+
+<p>However that doesn’t stop teams from blaming others for “breaking their code”, or demanding that other teams revert code. This then often leads to project managers introducing “change notification procedures” and associated coordination meetings, and things soon spiral out of control with bureaucracy and unhappy developers.</p>
+
+<p>The answer is described in the section below on “poor isolation”. And as noted, this is something that comes naturally in polyrepos - and thus automatically avoids this kind of inter-team conflict.</p>
+
+<h2 id="inter-module-coupling">Inter-module Coupling</h2>
+
+<p>One of the reasons given for monorepos is to deal with very complex inter-dependencies between internal software artifacts. One alternative way to resolve the issue is to minimise such dependencies. Of course how practical this is depends upon the software being built - but for service-based architectures, libraries are definitely considered something to avoid.</p>
+
+<p>Business logic should be implemented only once in any system; anything else risks inconsistencies. Each piece of data should have only one owner - and therefore any validation before update naturally occurs in only the one codebase which owns/manages that data. Therefore there should be no need for any shared libraries which encapsulate such code.</p>
+
+<p>Multiple services in a system may implement variants of the same business rule. Those variants might even happen to be the same - but that is still logic <em>from the viewpoint of a particular service</em>, and therefore it is <em>not the same logic</em> and should not be implemented in a shared library. It’s a perfectly valid pattern in services/microservices to <em>duplicate code</em> - though this will never be <em>validation before update</em>, as that is only ever done by the service which <em>owns</em> the data being updated.</p>
+
+<p>The only kinds of code which might need sharing are therefore:</p>
+
+<ul>
+  <li>Technical helper libraries - which could in essence be open-source artifacts as they aren’t encoding business rules. And in that case, I would suggest they should be versioned like open-source products, ie released as libraries with semantic versioning</li>
+  <li>Presentation tier libraries, allowing different systems which present data to users to do so in a visually consistent manner.</li>
+</ul>
+
+<p>Those presentation tier libs might be a reasonable justification for forcing “the head version” of each lib onto every module, particularly as most presentation tier applications are still monolithic in nature (mobile apps, web-apps). The (type 2) “monorepo for front-end” pattern does seem to be a popular approach, and this might be the cause. As someone who doesn’t do a lot of front-end coding, I can’t say from personal experience..</p>
+
+<p>One approach that I would definitely call an <em>antipattern</em> is the use of “client libraries” to provide access to <em>business endpoints</em>, ie a system that provides a network API also publishes a library through which other systems can invoke it. This has a number of issues:</p>
+
+<ul>
+  <li>It tempts systems to work around poor APIs by embedding logic in these client libs<sup id="fnref:msclient" role="doc-noteref"><a href="#fn:msclient" class="footnote" rel="footnote">2</a></sup>.</li>
+  <li>It tempts systems to work around backwards-compatibility issues in the client libs - but this only works when client applications upgrade to the latest lib</li>
+  <li>It limits the languages that clients can be implemented in</li>
+  <li>Transitive dependencies of client libs can conflict with the using app</li>
+</ul>
+
+<p>Instead, business-centric network APIs should be exposed via a specification (eg OpenAPI, gRPC declaration files, AVRO schemas). Clients can then, if they wish, <em>generate</em> a client lib using standard tools - but that of course (beneficially) never contains any logic defined by the API provider. Having official API specifications also help with aspects such as making backwards compatibility breakage more obvious, supporting security reviews, enabling tools that provide mock implementations of any APIs specification, etc.</p>
+
+<p>Client libraries which only encapsulate <em>technical behaviour</em> are somewhat different, eg libraries to access message-brokers or databases. However such libraries should still be carefully designed to avoid the issues listed above.</p>
+
+<h2 id="poor-isolation-of-product-release-cycles">Poor Isolation of Product Release Cycles</h2>
+
+<p>In any large organisation which produces software for its own use, there are many different development projects concurrent at any time. The principles of Agile development emphasises releasing software as soon as possible, shortening the feedback loop. This means that each of these concurrent projects should be releasing frequently and on its own schedule.</p>
+
+<p>Any coupling between products which interferes with the ability of a team to release the software they are working on is undesirable. Monorepos can potentially encourage such coupling. We’ve already noted above how the depend-on-source pattern can break code unexpectedly, throwing broken products into emergency work to restore their system to working condition. Dependencies on libraries with proper semantic versioning doesn’t have this effect - breakage can occur only when a product deliberately updates its dependencies.</p>
+
+<p>The ease with which one product in a monorepo can “depend on the source” of another product is also a danger. As noted earlier, shared code between microservices can do a lot of harm. Each service has its own view of the world, and its own needs. Copy-and-pasting code, then customising it for the needs of a specific service, is often a better pattern than relying on shared code. In particular, this ensures that a service doesn’t end up with transitive dependencies that it doesn’t need.</p>
+
+<p>See also the section on “inter-module coupling”.</p>
+
+<h2 id="poor-domain-separation">Poor Domain Separation</h2>
+
+<p>Domain-driven design states, at its core, that complex business concepts can (and should) be broken down into “modules” with high cohesion and low coupling. Teams should specialize in “domains”; the minimal coupling between domains results in minimal coordination needed between teams and thus improves productivity.</p>
+
+<p>A monorepo makes code from all domains available as a “big pool” of easily accessible code - and thus can tempt teams who are less experienced, or under time pressure, to fail to isolate domains correctly. This leads to poor productivity in the medium and long term. When each domain is represented by a different repository, such coupling is much harder to introduce.</p>
+
+<h2 id="poor-change-notification">Poor Change Notification</h2>
+
+<p>It’s common to want to know what has changed recently in a particular codebase. When that codebase has a matching repository (type 4), then that’s equivalent to asking which changes have occurred in the repository. However for other approaches, it can be difficult to know which of the many commits to a repository are associated with a particular codebase/artifact.</p>
+
+<h1 id="the-big-players">The Big Players</h1>
+
+<p>There are a few large corporations (Google, Meta, Netflix, etc) which are using or seriously investigating massive type 1 repositories.</p>
+
+<p>Google is all-in on the type 1 repo pattern and source-level dependencies. Netflix are taking a slightly different approach. They also want to reduce the “dependency hell” problem, but want to retain their respect for team autonomy. Uber are using several very large repos.</p>
+
+<p>Of course, most of us are not Google. The “pure polyrepo” approach does have advantages, as do some hybrid approaches. Details are below!</p>
+
+<h2 id="microsoft">Microsoft</h2>
+
+<p>Microsoft have gone so far as to <a href="https://devblogs.microsoft.com/bharry/the-largest-git-repo-on-the-planet/">build a virtual filesystem and extend Git</a> to store the source-code for their Microsoft Windows operating system product. This allowed them to move from 40+ repositories in the Source Depot version control system (a modified version of Perforce) into one Git repository. Note that this is a product which is released as an “atomic unit”, ie the opposite of “continuous deployment”. In this scenario, a monorepo can make sense. Note also that the article above is somewhat out-of-date; MS now use a <a href="https://github.com/microsoft/git">forked version of Git</a> which supports all features necessary for managing large repos.</p>
+
+<h2 id="google">Google</h2>
+
+<p>Google has a huge “type 1” repository which holds a vast amount of their internally developed software, including code for very different products written in very different languages.</p>
+
+<p>Within this repository, Google has effectively done away with all versions for internal libraries; if you (as a Google product stored within this repo) depend upon a Google library (stored within this repo) then you always depend on the latest version. And if that lib gets updated, you get force-upgraded and force-built (and perhaps also force-deployed where relevant?). If, as a lib provider, you want to upgrade something but that would trigger a force-rebuild of some other product and that fails its build or test step, then you cannot commit; you need to talk to the owners of that product. This obviously introduces some ugly cross-team dependencies but Google have apparently decided that is worth it in order to fix the “distributed dependency hell” that is the alternative. However it’s difficult to do a force-upgrade/force-build/force-deploy of products when they are in different repos - so just push everything into one repo. The “source-level dependency” pattern is described earlier in this article.</p>
+
+<p>Fortunately Google have presented a lot of detail about their practices <a href="https://cacm.acm.org/magazines/2016/7/204032-why-google-stores-billions-of-lines-of-code-in-a-single-repository/fulltext">in an article</a>. There is also a <a href="https://www.youtube.com/watch?v=VNqmHJtItCs">great presentation</a> from 2017 by a Netflix engineer which discusses why Google does this, and why Netflix is considering it.</p>
+
+<p>Google <em>does</em> have repos other than the “big one”. A comment in the article referenced above says that “Google’s Git-hosted Android codebase is divided into more than 800 separate repositories”. That also suggests the scale of the problem that Google would face without its “central” monorepo…</p>
+
+<h3 id="quick-overview-of-googles-toolset">Quick Overview of Google’s Toolset</h3>
+
+<p>VCS stats shown include num-source-code-files: 9 million, num-files: 1 billion. That’s a huge difference. The presenter states that the other files include documentation (ok), configuration files (questionable), and “generated source” (!). It also includes “deleted files” (???) and “files copied into release branches” (!). That last one is weird - explanations welcome!</p>
+
+<p>VCS stats also show 15k commits per day by humans, 30k commits by automated systems. Those automated commits are a very unusual way to use a VCS; it’s no longer a human-to-human communication tool, but now (dominantly) a machine-to-human communication tool. Google’s VCS does not count code in “ready for review” status as committed, so perhaps these are commits auto-generated when code reviews (aka pull requests) are approved?</p>
+
+<p>Google’s VCS is an internal tool called Piper. Linux users (the vast majority) use a custom virtual filesystem which makes the whole repository available as a directory tree without needing to actually download files until they are read. Only modified files are stored in a user’s “workspace” (which is typically itself in cloud storage). This supports access to any part of a huge directory tree without excessive per-user disk storage. It isn’t quite clear how users of other operating systems access Piper.</p>
+
+<p>Piper supports branches, and “release branches” are commonly used, but other branches are seldom due to the <em>trunk based development</em> pattern which Google encourages. Hotfixes to a release are done by committing a change to trunk then cherry-picking that to the release branch.</p>
+
+<p>Piper supports per-directory access rights (read/write) and this is used widely to require change approval to specific codebases by their “owners”.</p>
+
+<p>Google has complex pull-request-management tools which support code-review, run pre-merge tests, etc. Only after all tests and approvals have been successful is a pull-request merged to the trunk branch. There is a whole suite of other code-quality tools that get applied automatically.</p>
+
+<p>Google has developed (and open-sourced) a build-tool called Bazel which supports source-level-dependencies; this was described earlier in this article.</p>
+
+<p>Using a monorepo does not necessarily imply trunk-based-development. However google do also agressively apply that pattern.</p>
+
+<h3 id="proposed-benefits-of-an-organisation-wide-monorepo">Proposed Benefits of an Organisation-wide Monorepo</h3>
+
+<p>Benefits quoted in Google’s article on their monorepo-plus-trunk-development approach:</p>
+
+<ul>
+  <li>Unified versioning, one source of truth.</li>
+  <li>Code sharing and reuse</li>
+  <li>Simplified dependency management</li>
+  <li>Atomic changes</li>
+  <li>Large scale refactoring</li>
+  <li>Collaboration across teams</li>
+  <li>Flexible team boundaries and code ownership</li>
+  <li>Code visibility with tree structure showing code ownership</li>
+</ul>
+
+<p>You can find more details in their article.</p>
+
+<p>Many of these have already been included in the earlier list of “proposed pros of monorepos”. However a few are new, or I would like to comment specifically on Google’s view of these items.</p>
+
+<h4 id="re-unified-versioning">Re Unified Versioning</h4>
+
+<p>Google’s article referenced above suggests that one issue with polyrepos is that there can be multiple copies of code, and uncertainty about which is the “source of truth”.</p>
+
+<p>It isn’t clear to me when there would be multiple repos with the same code, and ambiguity about which is the real project. It is suggested that this can be due to “forking of shared libs”, but I don’t follow the reasoning for that. Code has an owner so changes must be submitted to that owner and either they accept them (in which case no fork is needed), or they don’t (in which case a fork is needed) - something that seems to be true regardless of monorepo or not.</p>
+
+<p>This reference could perhaps be to patterns in which a project creates a library <em>specialized for its usecases</em> which has similar behaviour to an existing library. Sometimes this is even done by forking existing code, or copy/paste. There is a balance to be made here, ie tradeoffs to examine. Duplicated code within an organisation of course has its cost; all versions need to be maintained. However specialized code also has its advantages: unneeded code can be trimmed away, maintenance burdens/security exposure/application size are all reduced, and coupling to some general-purpose shared library is removed. Producing shared code which needs to satisfy a large range of usecases, and maintaining reasonable backwards compatibility to avoid disrupting all those users, is complicated and therefore costly. Duplicated code will (and should) remain a valid pattern even in a monorepo and, as far as I can see, a monorepo simply moves this from multiple repositories to multiple directories within a repository - not a major difference.</p>
+
+<h4 id="re-simplified-dependency-management">Re Simplified Dependency Management</h4>
+
+<p>Google’s big repository heavily uses the “source-level dependency” approach described earlier. No internal code is ever (explicitly) published as a library, and nothing has a version-number - it’s all HEAD.</p>
+
+<p>Due to the source-level-dependency approach, changes to shared code can break users. Automated pre-commit tests detect most of it, but there are also tools that detect unexpected widespread breakage after a commit is merged, and auto-revert it.</p>
+
+<p>A consequence of Google’s heavy reliance on source-level dependencies is that any time a new version of a product is released, all of its dependencies have always been updated to the latest version. While there are some benefits to always being up-to-date, any release effectively needs a full test evaluation as all sorts of things could have changed. This approach is not going to be compatible with manual testing of any form! In my opinion, it’s also likely to reduce the stability and predictability of releases.</p>
+
+<p>In it’s naive form, source-level dependencies mean that builds will be far slower; the source for all dependencies must be compiled rather than simply linking pre-build libraries. However Google’s Bazel tool addresses this.</p>
+
+<p>Google has a rule that <a href="https://opensource.google/documentation/reference/thirdparty/oneversion">only one version</a> of each third-party library is allowed <em>globally across all company source code</em>. Updating third-party libraries is of course a significant cross-product task, made possible only by their massive build-farms and other tools. The positive side is that this ensures no dependency conflicts.</p>
+
+<h4 id="re-atomic-changes">Re Atomic Changes</h4>
+
+<p>It is interesting that Google’s article mentions this, as elsewhere in the same article they describe how large refactorings typically work: the Rosie tool splits them into multiple patches which are separately approved and applied by the owners of each codebase.</p>
+
+<p>In any monorepo, it is of course possible to create a single commit that affects wide parts of the codebase as an atomic action - assuming code-ownership is are ignored. However Google don’t provide any info on what the usecases for this might be, and I’m unable to think of any good ones.</p>
+
+<h4 id="re-large-scale-refactoring">Re Large Scale Refactoring</h4>
+
+<p>Google do appear to commonly do changes that affect multiple code-bases. In particular, there seems to be a central team that deals with “system-wide” issues and produces such changes.</p>
+
+<p>In general, these are <em>not</em> applied as atomic changes. A developer creates a cross-codebase patch that achieves the desired goal; a tool called “Rosie” then splits the single patch into per-codebase patches and submits them to the corresponding code-owners. In general, the first phase of any such refactoring is a “backwards compatible” change - ie one that can be applied to each codebase individually rather than needing to be atomic. The second phase then activates the new path and removes old code. Stats show about 7k such patches (commits) per month - but that is presumably the per-codebase patches; assuming each cross-codebase patch touches 100 codebases, that would be 70 cross-codebase refactorings per month. If patches touch more codebases on average, then the number of original patches could be less.</p>
+
+<p>An example of such a change given in Google’s article is adopting features of the next version of a programming language. That doesn’t seem to be a terribly high-priority motivation for me. While it is true that a central team might be experts in this area, and might be able to produce such patches more efficiently than code-owners, it also seems solvable in other ways, eg providing tools that code-owners can run which produce the desired patch. Code-owners can then run such tools at a time that is convenient for them - and that solution works without a monorepo too. Alternatively, it would be possible to create a system that checks out a list of repositories one at a time, runs a tool against each one, and submits the resulting patch to the owner of the repo - again, a solution for (non-atomic) global changes without a monorepo.</p>
+
+<p>The monorepo approach is one way to solve the problem of applying updates to “abandonware” where a codebase is not being actively maintained by anyone - commits can be force-pushed. However that could also be done in polyrepos, via a CI/CD tool which auto-approves any pull-request which hasn’t been acked or nacked within N days. And in the case a code-base is itself a “deployable artifact”, when a patch is merged to a code-base without owner approval then how is the resulting change tested and deployed to production?</p>
+
+<p>Another example given for bulk-refactoring is “removing use of old APIs”. This is a problem when dependency-management is based upon direct references to source-code, as it blocks the owners of the depended-upon source code from removing APIs which are in use. However this is simply not a problem when dependencies are based upon versioned libraries - those published libraries continue to exist regardless of changes to the upstream source-code. Consumers therefore don’t break until they deliberately upgrade their dependency versions - at which case it is the responsibility of the consumer to update to the new API. In other words, this justification for monorepos is a problem that was only caused by using a monorepo (plus source dependencies).</p>
+
+<p>Personally, I struggle to think of good reasons why so many global changes would be needed…</p>
+
+<h3 id="acknowledged-cons-of-googles-monorepo">Acknowledged Cons of Google’s Monorepo</h3>
+
+<p>Google’s article does note some downsides of their approach:</p>
+
+<ul>
+  <li>Significant investment in tooling</li>
+  <li>Can tempt people to add undesirable dependencies</li>
+  <li>Need to actively prune abandoned projects</li>
+  <li>IDE performance issues</li>
+</ul>
+
+<p>The first item is pretty clear and obvious: Google relies on Piper, Bazel, extensive pre-commit tests, and extensive tests in general, code-review tools, cross-codebase patch management tools, and more.</p>
+
+<p>The second item about undesirable dependencies has been addressed above.</p>
+
+<p>Given the tools that regularly build and scan all projects, it’s clear that an abandoned directory in Google’s monorepo does more harm than an abandoned repository in a polyrepo approach. However in both cases, cleanup is desirable…and shouldn’t be too hard in either.</p>
+
+<p>The consequences of source-level dependencies for build-times has been discussed, and Bazel is the solution for that. However IDEs have the same issue - open any project, and instead of seeing dependencies as binary libraries, the IDE sees dependencies as source-trees. This can lead to very sluggish performance in the IDE. Google has a custom Eclipse plugin to resolve this issue.</p>
+
+<p>Source-level dependencies present in order to get access to just a few functions of a referenced module are particularly problematic - the whole cost of source reference is paid for only a little benefit. The same problem exists for binary artifacts, but the cost is somewhat lower - particularly with static linking systems that only include referenced code. Source-level dependencies don’t get pruned in the same way.</p>
+
+<h3 id="supporting-experiments">Supporting Experiments</h3>
+
+<p>Google’s article makes the point that a monorepo simplifies experiments such as determining the performance impact on a wide range of projects from a change to a base library. I’m not quite sure how they manage to automatically instrument all those “downstream” projects in order to get reasonable performance data but I guess they have thought of ways.</p>
+
+<p>Google does use the entire codebase as “test input” for their compiler development teams to use. Their compilers then are tuned to deal with specific patterns, or report common code errors. That’s obviously not something relevant to any of us!</p>
+
+<p>These benefits apply only when an organisation has a central group with time and expertise to do such core profiling and upgrades.</p>
+
+<h3 id="other-google-monorepo-facts">Other Google Monorepo Facts</h3>
+
+<p>When making a release of any project, a tag or branch is usually made so that the exact source for that release can be retrieved later. With semantically-versioned dependencies, reproducing the build later is possible as the build-files in that branch contain the info needed to refetch the matching dependencies. In source-based dependencies, reproducability is automatic; all source-level dependencies are used in the same version present in the same branch.</p>
+
+<p>Google’s article states that “copied code” is easier to maintain, ie to update when the upstream copy changes. I suppose so, as long as the copying is done via full files or directories. I’m not quite sure why such copying would be a good idea though…</p>
+
+<p>The article does point out the benefits to code restructuring - there is never the need to move code to a different repo, no matter what restructuring is being done. Code ownership is also easy to transfer - just a directory move (as long as nothing is using the moved code as a library I presume!).</p>
+
+<p>If you are interested in this topic, you should read the original Google publication. I did personally find it a bit heavy on the pros and light on the cons - but maybe it really is as good as described (for an organisation with Google’s needs and resources).</p>
+
+<p>A number of benefits rely on a global view of all code. ISTM this could be created via a “federation of repositories” rather than a single one. Imagine a virtual filesystem in which each top-level directory is a reference to a repository. Browsing the contents of that directory would “activate” a view into that repository. This would allow complete read-only access to all code. It would not support some of the other cases, in particular “source-level dependencies” or “atomic cross-codebase commits” but would presumably be simple.</p>
+
+<h2 id="uber">Uber</h2>
+
+<p>There is a short but interesting presentation from an Uber employee titled <a href="https://www.youtube.com/watch?v=lV8-1S28ycM">Monorepo to Multirepo and Back Again</a> (2017). The presenter is unfortunately not clear about what monorepo means here. The presentation does talk about “the monorepo for our uber app” and “our android repo” though, so I’m guessing that this means what I call “type 2”, ie all code <em>for a specific project</em> even when that code may cross team boundaries - and that they migrated to that from a type 5 repository pattern.</p>
+
+<p>This is of course a case where the entire contents of the repo is released as a single atomic unit, ie inter-module dependency management is not a problem.</p>
+
+<p>Their application started with a monorepo. With increasing scale, problems encountered included IDE lag, slow Git pull times, broken trunk builds, long build times, so they moved to type 5. However with yet more scale, increasing problems were found again - and so they moved back to type 2 but with a lot of extra supporting tooling.</p>
+
+<p>Uber has also published an interesting article about its <a href="https://www.uber.com/en-AT/blog/go-monorepo-bazel/">type 1 repo for go-based code</a>.</p>
+
+<h1 id="other-topics">Other Topics</h1>
+
+<h2 id="source-code-migration">Source Code Migration</h2>
+
+<p>For service-based systems, having a repo per service (type 4 repo) assists greatly in reallocating responsibility for a service to a different team; the repo ownership is just reassigned. Retiring a service is also simple: delete the repository.</p>
+
+<p>If using a repo-per-team approach (type 3), then passing ownership of a service means exporting its code from one repo and importing it into another (ideally retaining history). When using Git, migrating a single directory of files from one repository to another, while retaining history, is not too complex; there are various articles on the internet describing how to do this. If you are using a different version control system, then it may be a good idea to check out whether this is possible before choosing the repo-per-team pattern.</p>
+
+<p>Retiring a service can simply mean deleting its directory - but some systems (eg Git), that history will still be retained and will still take up space in every checkout of that project for eternity.</p>
+
+<p>The type 1 monorepo also makes service ownership change easy; it means moving the base directory for affected code to somewhere else in the directory hierarchy - a simple operation in all systems.</p>
+
+<p>Therefore it seems that only the type 3 “repo per team” approach has a problem here. It’s also a problem that is reasonably solvable with Git - though may be more problematic with other systems.</p>
+
+<h2 id="build-pipelines">Build Pipelines</h2>
+
+<p>Many build-tools assume one repository = one artifact. Even those who don’t often assume things like one secrets-store per repository (thus requiring secrets managed by team A to be exposed to team B), or assume a single programming language for all artifacts in a single repository.</p>
+
+<p>Tools sometimes also assume they can cache intermediate artifacts keyed by the repository-id, or can enforce one-concurrent-build-per-repository, etc. When multiple teams with independent work cycles share such a repository, these assumptions can be inconvenient or fatal.</p>
+
+<h2 id="tool-support">Tool Support</h2>
+
+<p>If you choose a type 1 repository, then you’ll need some tooling support.</p>
+
+<p>You’ll probably need some repository-manager which can enforce write-access on a per-directory level. Git never provides any read-access control, ie every developer can see everything always. However various git-managers have their own ways of rejecting commits which touch specific directories unless made or approved by specific users.</p>
+
+<p>You’ll also need something which directs code-reviews to appropriate users depending upon the directories touched by a commit.</p>
+
+<h2 id="the-concept-of-sharing-code">The Concept of Sharing Code</h2>
+
+<p>A lot of these problems relate to the issue of shared code.</p>
+
+<p>Sharing infrastructure-related code is easy - dependency injection libraries, string or date manipulation libraries - fine. Note however that it doesn’t matter if different applications have different versions of such libraries - or even different implementations; it’s an internal issue for that application and as long as the application works, nothing else matters.</p>
+
+<p>Sharing business logic - be really careful about that. Ideally each “business rule” should exist in only one place within an organisation. Note that different <em>aspects</em> of the rule might live in different domains. It’s common for a rule to <em>coincidentally be the same</em> in multiple domains, and it to be fine for the rule to evolve in one domain but not another. Only if a change to a rule needs to be simultaneous in multiple places do you need to care - and should then centralize that logic in one place. This might require <em>refactoring</em> the domain, moving responsibility and changing interfaces so that the one-place rule is correct.</p>
+
+<p>One common concern is when a server publishes an “api library”; when the server API changes then the clients need to be updated. This is just a <em>wrong idea</em>; servers should never change their APIs in incompatible ways. And when the API is backwards-compatible, then any older client libs should continue to work fine. Actually, I’m not a fan of client libs; instead sytems such as gRPC or AVRO work by having an <em>interface specification</em> (which is a text file) from which client stubs can be generated. It is only this <em>specification file</em> that the team which owns a server publishes, not a library. And any changes to that spec need to be backwards-compatible.</p>
+
+<p>It is clear that a system composed of a complicated mesh of dependencies between shared codebases will be difficult to build. There seems to be two possible solutions:</p>
+
+<ul>
+  <li>reduce complexity by reducing the number of versions of each library available, or</li>
+  <li>reduce complexity by reducing the amount of sharing</li>
+</ul>
+
+<p>A monorepo using source-level dependencies is one way to take the first approach, and Google (plus others) have taken this path.</p>
+
+<p>The first path can lead to a few large libraries which need to satisfy a wide range of use-cases; the second can lead to a large number of smaller libraries specialised for particular use-cases - and in many cases, to components which copy/paste code from elsewhere and then tune it to their exact needs.</p>
+
+<p>The second option does lead to duplicated code; different projects are solving similar problems and so producing code which is similar code - but not identical, as their usecases are not identical.</p>
+
+<p>I think the first option could be compared to Maoist economics; everyone should keep the good of the whole in mind, and the system will be centrally planned and managed for the good of the whole. I see the second option as capitalist in nature; each project is responsible only for its own success - though where it results in a module which could be useful to others, that could potentially try to “market” itself as a standalone product and will succeed or fail depending on whether it can find customers. The capitalist approach is, at least in theory, less efficient due to the duplicated work. However it is more scalable, due to the lack of coupling via the shared libraries. And historically, planned economies have never turned out quite as well in practice as they seemed in theory.</p>
+
+<p>The second option can also be implemented by making use of shared libraries an <em>internal implementation detail</em>, ie applying build or runtime tools which <em>embed</em> dependencies into the consumer in a way that makes them invisible to the user. Languages which use static linking can do this very effectively. Languages which use runtime linking (eg Java) need to use tricks such as <em>shading</em>, OSGi, or JPMS. These approaches do increase the code-size of the resulting application, but that’s seldom a limiting factor in modern systems. These approaches work only when the shared code types are <em>not exposed via the API offered by the consuming code</em> but that’s not too hard to ensure.</p>
+
+<h2 id="thoughts-on-sysvbsd-monorepos-vs-linux-polyrepos">Thoughts on SYSV/BSD Monorepos vs Linux Polyrepos</h2>
+
+<p>SYSV unix and BSD unix (all variants) have always followed the tradition of a single source-code-repository for the operating system kernel, all device drivers, and the core user-space operating system tools. Linux distributions instead take a different approach of having a dedicated repo for the kernel and device-drivers, and then (in general) for each userspace tool in a standard distro to be its own independent project with its own repo (libc, shells, process managers, etc).</p>
+
+<p>A Linux distribution has the work of assembling multiple projects into a consistent whole, while the “monorepo” unix flavours simply need to tag their single repo. However while Linux distros are harder to create, the approach does provide far more room for experimentation and evolution; innovation in the open-source unix-like world is primarily driven by Linux (eg systemd, wayland, the many different shells). Systemd is in fact an interesting topic, as that project has itself created a single repo that unifies the source for a number of tools which were previously developed independently - ie there appears to be a “sweet spot” where some tools that share concepts can effectively be developed and released as a unit while other tools are developed more independently.</p>
+
+<p>There might be some parallels or lessons for the monorepo vs polyrepo patterns.</p>
+
+<h2 id="circleci">CircleCI</h2>
+
+<p>A <a href="https://circleci.com/blog/monorepo-dev-practices">CircleCI article on monorepos</a> covers many of the standard pro-monorepo points already addressed above. However there are a couple of points that may be worth discussing.</p>
+
+<p>It is claimed that a polyrepo can lead to “nobody knowing how to build and release the whole system”. Yep, true, but where’s the problem? In any sufficiently large organisation, that’s always going to be the case. The point of services is that each team knows how to maintain their code, and if each team does their thing correctly then the whole system is buildable. It’s just <em>distributed knowledge</em> at work.</p>
+
+<p>It is claimed that a monorepo makes browsing all code easy for all developers. However a decent git repo manager, and default read-for-everybody access rules, solves the same problem as far as I can see.</p>
+
+<p>Monorepos are claimed to support “standardization” of code. I would personally consider that an antipattern. Teams should be autonomous; as long as a team is achieving comparable productivity to other teams, there is no problem. Code naming conventions, code review processes, etc. are a team’s responsibility not an organisation-wide one. Only possible exception: security standards.</p>
+
+<h1 id="my-personal-view">My Personal View</h1>
+
+<p>Google have chosen a “type 1” repository for much of their work. They have some incredible talent, so I’m sure it is the best solution for the problems they have. However there are significant implications of this choice which I am sure means it’s not the best solution for everyone.</p>
+
+<p>Microsoft have chosen a “type 2” repo for their Windows product. This is a case of choosing a single repository for a product composed of multiple modules and multiple artifacts which are, however, released as an atomic whole. They presumably have found that the problems (particularly, teams breaking other teams code) can be reduced with custom tooling to a level that causes less pain than having code scattered across many different repos.</p>
+
+<p>When building a complex mobile app to access such business services, there might be some benefits to a “type 2” repository, where multiple teams each own a directory within a common repository that defines a module of the overall “monolithic” mobile app (Uber <a href="https://www.youtube.com/watch?v=lV8-1S28ycM">certainly think so</a>). And this same pattern <em>might</em> be useful for a complex modern web front-end to a complex system too - though I would seriously investigate possible “micro-frontend” patterns first before committing to such an architecture.</p>
+
+<p>For the kind of work I generally do - moderately complex business systems often using microservices or similar patterns - the type 1 (multiproduct) monorepo approach really doesn’t seem appealing. The primary benefits it provides also result in coupling between release cycles of different artifacts; this seems to be in conflict with the principles of agile development and potentially also domain-driven-design. I’d definitely prefer either “type 4” (one repo per service) or “type 3” (one repo per team), and a focus on minimising shared code.</p>
+
+<p>In larger organisations, dealing with many repositories does require some infrastructure support, eg a proper software catalog, cross-repo free-text-search, and perhaps some dependency analysis tools which can run against artifact repositories. However making a success of a large-scale “type 1” repository approach also requires significant investment in tooling (including a suitable VCS and a suitable build tool).</p>
+
+<p>Overall, moving from “type 5” to “type 4” repositories does seem to have strong benefits. In other cases, there are some advantages to smaller-scale “monorepos”, whether dedicated to a particular product or a particular team - though the implications are non-trivial and tuning traditional practices might be worth considering first (eg minimising the web of inter-module dependencies). Very small organisations might also get benefits from placing all their code in a single repo - though here I mean orgs whose development department could be considered one team anyway. Some very large organisations do seem to get benefits from massive monorepos, although they also needed to invest hugely in tooling and restructuring their development processes. However I’m somewhat sceptical of the longevity of that approach, and wouldn’t be too surprised if Google etc. are using a different strategy 10 years from now. For mid-sized organisations, I’m really sceptical of the benefits of org-wide monorepos, suspecting the high costs will outweigh any possible benefits.</p>
+
+<p>And for a startup, the simplest solution is usually the best; in this case it can well mean one repo. Given that the developers are effectively one team in the early phase, “type 1” (multi-product, multi-team) and “type 3” (multi-product, single-team) are in practice the same here. However I would recommend keeping the dangers of inter-product coupling (described above) in mind..</p>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<ul>
+  <li><a href="https://circleci.com/blog/monorepo-dev-practices">CircleCI: Monorepo Dev Practices</a></li>
+  <li><a href="https://www.squash.io/the-issue-with-monorepos/">Yulong Wu: The issue with Monorepos</a></li>
+  <li>
+<a href="https://cacm.acm.org/magazines/2016/7/204032-why-google-stores-billions-of-lines-of-code-in-a-single-repository/fulltext">Google Research: Why Google Stores Billions of Lines of Code in a Single Repository (2016)</a> - a very detailed description of their development processes. Also available as a <a href="https://www.youtube.com/watch?v=W71BTkUbdqE">video</a>.</li>
+  <li><a href="http://google-engtools.blogspot.com/2011/08/build-in-cloud-how-build-system-works.html">Google: Build System</a></li>
+  <li><a href="https://medium.com/@alessandro.traversi/monorepos-advantages-and-disadvantages-233c1b7146c2">Alessandro Traversi: Monorepos</a></li>
+  <li>
+<a href="https://devblogs.microsoft.com/bharry/the-largest-git-repo-on-the-planet/">Microsoft: The largest git repo on the planet</a> - note that the work eventually resulted in a <a href="https://github.com/microsoft/git">forked enhanced Git</a>
+</li>
+  <li>
+<a href="https://www.youtube.com/watch?v=VNqmHJtItCs">[video] Mike McGarr/Netflix: Dependency Hell, Monorepos, and beyond (2017)</a> - a truly insightful discussion of how to resolve conflicting dependencies. Netflix is looking at automatically building projects, and updating their source-code dependency declarations. Obviously easier if all is in one repo.</li>
+  <li>
+<a href="https://www.youtube.com/watch?v=VvcJGjjEyKo">[video] DevOps Toolkit: What is a Monorepo And Why You Should Care</a> - looks at the full-monorepo (option 1) primarily from the view of a back-end developer in a complex environment.</li>
+  <li>
+<a href="https://www.youtube.com/watch?v=rcmdyQL2DUM">[video] Software Developer Diaries: I used a Monorepo for 12 months</a> - recommends the repo-per-team approach (type 2), and points out that we aren’t Google.</li>
+  <li>
+<a href="https://www.youtube.com/watch?v=f0JHHHEg-RE">[video] Salesforce: Managing dependencies at scale</a> - describes problems encountered when scaling a type 1 monorepo (personally, some sound like reasons <em>not</em> to use a monorepo..)</li>
+  <li>
+<a href="https://www.youtube.com/watch?v=6rDImrIHuZk">[video] Yael Greem/Imubit: One Repo to Rule Them All</a> - a pro-monorepo presentation from a company developing a product with “atomic software release”</li>
+  <li>
+<a href="https://www.youtube.com/watch?v=KZIYdxsRp4w">[video] Salesforce: Building a monorepo with Bazel (2022)</a> - initial team built libraries for microservices; combined 10 repos into one. Now repo has 80 services + 50 libraries for 40 teams (350 devs).</li>
+  <li>
+<a href="https://www.youtube.com/watch?v=zK2pmeG4ia4">[video] Jetbrains: How your Monorepo breaks the IDE, and what comes next</a> - monorepos from the viewpoint of an IDE developer.</li>
+</ul>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:shading" role="doc-endnote">
+      <p>The <code>go</code> language effectively supports linking to multiple (major) library versions in parallel. Each module has a “module path”; <a href="https://go.dev/ref/mod">modules</a> with major versions higher than 2 should add a suffix to their module-path, eg “/v2” - making it, in effect, a different module (library). Libraries in the <code>java</code> language sometimes follow a similar convention, and sometimes not - but there are build-tools which can modify the package-name-prefix of any library, and update the project’s (compiled) code to reference the new package. <a href="#fnref:shading" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:msclient" role="doc-endnote">
+      <p>I’m looking at you, Microsoft! Using Azure from Python is (or was in 2019) a nightmare because the network APIs are crap, fixed by workarounds in client libs - which aren’t fully available for Python. <a href="#fnref:msclient" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/monorepo/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

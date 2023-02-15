@@ -1,0 +1,451 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - TP-Link WDR4300 and OpenWRT/LEDE</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>TP-Link WDR4300 and OpenWRT/LEDE</h1>
+    <aside>First published on: October 21, 2013</aside>
+    
+      <aside>Last updated on: November 2, 2014</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a>, <a href='/category/OpenWRT/'>OpenWRT</a></p>
+      
+<p>UPDATE 2019-04: The <a href="https://openwrt.org">OpenWRT website</a> lives again, following the merger of the OpenWRT and LEDE projects. I have recently updated this router to OpenWRT 18.06.2 and it works well. Information on updating has been added as a section near the end of this article.</p>
+
+<p>UPDATE 2017-11: The OpenWRT project (at least its website) is pretty dead at the moment - no updates for a very long time. However the codebase is being further maintained and developed by the <a href="https://lede-project.org">LEDE project</a>. I just updated the OpenWRT software to the latest LEDE version (17.01.4) using exactly the same steps described below for an OpenWRT update. Thank you LEDE team! The process is in fact so similar that the install-from-scratch instructions for OpenWRT below are probably also valid for LEDE. It’s actually quite impressive that a now 4-year-old router can be updated so easily.</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>I’ve just bought a new TP-Link WDR4300 router; this is both a review of the router and a description of how I installed the <a href="https://openwrt.org">OpenWRT linux distribution</a> on it. I’m familiar with Linux, and familar with networking basics, but no guru - this guide is most likely useful for people with beginner-to-intermediate network and linux administration skills.</p>
+
+<p>Overall verdict on the TP-Link WDR4300: thumbs up. Good functionality, reasonable price, and OpenWRT works well on it.</p>
+
+<p>NOTE: documentation updated 2014-11-02 with new links to OpenWRT resources, as OpenWRT version “Barrier Breaker” has now been released.</p>
+
+<p>Much of this information is derived from the official tl-wdr4300 page on the openwrt wiki. Since this article was written, that page has been significantly improved; if you have experience with linux on routers then you may wish to just use that page as a guide rather than this one.</p>
+
+<h1 id="my-home-setup">My Home Setup</h1>
+
+<p>This is the equipment I had at the time the WDR4300 was bought, ie what I had to work with while setting up the router. If you have a different setup, then you may need to make some adjustments to the steps below.</p>
+
+<ul>
+  <li>network access via a Cable TV provider, using the cable modem they provide (one cable connection in, one ethernet connection out)</li>
+  <li>an existing Linksys WRT45GL wireless router; bought 6 years ago with the intention of installing OpenWRT but never got around to it,
+so it’s still running the stock firmware. Network technology has improved to the point that it isn’t worth installing OpenWRT on
+it now - and it doesn’t have enough ram/flash to take a modern linux distro anyway!</li>
+  <li>a laptop running Linux Mint 15 Olivia (Ubuntu-based) using wireless to access the internet via the existing Linksys router</li>
+</ul>
+
+<h1 id="physical-assembly">Physical Assembly</h1>
+
+<p>Unpack and assemble router (attach antennae, remove label over network ports, throw away Windows CD). Nothing else to do.</p>
+
+<p>The router comes with a short ethernet cable.</p>
+
+<h1 id="download-required-files">Download Required Files</h1>
+
+<p>From <a href="http://downloads.openwrt.org/barrier_breaker/14.07/ar71xx/generic/">http://downloads.openwrt.org/barrier_breaker/14.07/ar71xx/generic/</a> download file “openwrt-ar71xx-generic-tl-wdr4300-v1-squashfs-factory.bin” (or whatever the latest patch-release of barrier-breaker is, ie use v2 instead of v1 if available).</p>
+
+<p>Also open this installation-guide webpage and leave it open for later reference!</p>
+
+<h1 id="obtain-the-existing-outbound-mac-address">Obtain the Existing Outbound MAC Address</h1>
+
+<p>My ISP (a cable provider) used to permit only a single device on a “home” connection; the MAC address of the device was registered at the provider, and only that MAC address was permitted. Of course this was rather pointless; any decent router simply provided the option to dynamically configure the MAC address it used on the WAN side, and then multiple devices could be connected to the router. This single-device limitation is getting pretty old-fashioned now that even “home” customers typically have multiple internet-capable devices (multiple PCs, WiFi tablets, televisions, etc). But for safety, I still connected to the admin page of the existing router and wrote down the MAC address it uses (for later use).</p>
+
+<p>Check your ISP’s terms and conditions to see whether you need to set the MAC address of your new router to emulate your current device.</p>
+
+<h1 id="connect-pc-to-new-router-and-log-in">Connect PC to New Router and Log In</h1>
+
+<p>Simply connect the ethernet cable from PC to any local port on the router (not the WAN port!). Ensure PC has switched to new network (ie has obtained a DHCP address from the new router).</p>
+
+<p>In a browser, go to “http://192.168.1.1” and enter credentials “admin/admin”.</p>
+
+<p>Theoretically it should be possible to establish a network from the PC to the new router while still having connectivity to the internet via your existing router. Unfortunately, I couldn’t get this to work : I use WIFI to connect to the old router (it is in a different room), and as soon as a physical ethernet cable was attached to my laptop the WIFI shut down.  According to advice on the internet, it should be possible to tell NetworkManager to run both a wireless and wired network concurrently, and indeed all the relevant options seemed to be present in NetworkManager. As I understand it the following should have worked; it didn’t for me but I’ll leave these notes here in case they work for someone else..</p>
+
+<ul>
+  <li>open NetworkManager applet by clicking on the status-panel network icon and choose Network Settings</li>
+  <li>select “wired” and then “options”</li>
+  <li>in the “general” tab, disable the “Automatically connect” option</li>
+  <li>in the IPv4 tab, set “Method” to Manual (ie laptop should not request DHCP address)</li>
+  <li>in the IPv4 tab, select “Routes” and enable “Use this connection only for resources on its network”, then add address
+192.168.1.1 with mask of ‘255.255.255.255’</li>
+</ul>
+
+<p>In my case, connecting the ethernet cable always terminated the wireless connection despite the above (running /sbin/ifconfig showed no relevant interface). Maybe this model laptop has something in ACPI that does this; unfortunately even “sudo rfkill unblock all” did not help.  I also tried connecting the new router directly to the existing one, hoping it would obtain a DHCP address from the current router and be accessable/configurable that way. Apparently that doesn’t work, at least out of the box with the standard firmware.</p>
+
+<p>However it isn’t actually necessary to have internet connectivity while configuring the new router as long as everything necessary has been downloaded first.</p>
+
+<h1 id="upload-new-firmware">Upload New Firmware</h1>
+
+<p>Go to “System Tools” page, and checked the status info. For my device it was:
+   WDR4300 v1 00000000 Firmware Version 3.13.23 Build 121225 Rel.37950n</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>Go to “System Tools</td>
+      <td>Firmware Upgrade”, select the openwrt-ar*-factory.bin file downloaded earlier. The upload and install took about 2 minutes on my system.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Allow the system to restart.</p>
+
+<h1 id="log-in-to-openwrt">Log In to OpenWRT</h1>
+
+<p>Disconnect ethernet cable (ie stop interface) and reconnect cable to router (reinit interface).</p>
+
+<p>The default behaviour for a new OpenWRT install is to have:</p>
+
+<ul>
+  <li>a DHCP server enabled, with the router having fixed address 192.168.1.1</li>
+  <li>a telnet server with no password (yes, very insecure but it’s only temporary)</li>
+</ul>
+
+<p>So:</p>
+
+<ul>
+  <li>connect to the router with “telnet 192.168.1.1”</li>
+  <li>run command “passwd” and enter a real password for the system (a good one).</li>
+  <li>log out (ctrl-d)</li>
+</ul>
+
+<p>Now that a password has been set, telnet is disabled. So reconnect with “ssh root@192.168.1.1” and enter the password from above.</p>
+
+<h1 id="configure-wireless">Configure Wireless</h1>
+
+<p>Ensure the physical wifi switch on the back of the router is in the “on” position.</p>
+
+<p>Run “vi /etc/config/wireless”</p>
+
+<p>In section “config wifi-iface”, change</p>
+
+<pre><code>  option ssid OpenWrt --&gt; option ssid '{newnetworkid}'
+  option encryption none --&gt; option encryption 'psk2' 
+  option key '{newWiFiPassword}'
+  option hidden '1'
+</code></pre>
+
+<p>In section “config wifi-device radio0”, make the following changes:</p>
+
+<pre><code>  option disabled 1 --&gt; option disabled '0'
+  option country '{code}' where code is US, GB, DE, etc
+</code></pre>
+
+<p>Run “wifi down; wifi up”. Some error messages may be displayed about “insufficient entropy to generate keys”, but reconfiguring the PC to connect to the new wireless network and using “ssh” over this network to log back in to the router should work fine.</p>
+
+<p>Note that I chose to make the network a ‘hidden’ one. I’ve never seen the point of making the SSID available; it’s very little more effort to connect to a hidden network than a nonhidden one, and more secure. For Windows PCs, just choose “unnamed network” to connect to, and enter the name. For Linux PCs with NetworkManager, just choose “connect to hidden network” from the wireless networks page.</p>
+
+<h1 id="connect-to-wan">Connect to WAN</h1>
+
+<p>Now disconnect the old router from the cable modem, and connect the new one (via the router WAN port of course). You should have internet access through the new OpenWRT-powered router!</p>
+
+<h1 id="install-web-admin-interface">Install Web Admin Interface</h1>
+
+<p>While OpenWRT can be configured fine by either editing config files or using the “uci” commandline tool, it can be nice to also have a more graphical interface. To install one (the LUCI web interface), do the following..</p>
+
+<p>Log in using SSH, and run:</p>
+
+<pre><code>  opkg update
+  opcg list luci-*
+  opkg install luci-ssl
+</code></pre>
+
+<p>Run “vi /etc/config/uhttpd” and change</p>
+
+<pre><code>  list listen_http 0.0.0.0:80 --&gt; remove line
+  list listen_https 0.0.0.0:443 --&gt; 192.168.1.1:443
+</code></pre>
+
+<p>Run</p>
+
+<pre><code>  /etc/init.d/uhttpd enable
+  /etc/init.d/uhttpd start
+</code></pre>
+
+<p>Then connect with a browser to “https://192.168.1.1” and log in with the root password.</p>
+
+<p>The changes to /etc/config/uhttpd above are because I have no reason to administer this router from anywhere but within the same network (ie no need to administer it from work, overseas, etc), and no reason to ever use the LUCI webserver over http (unencrypted!). Given that wireless is enabled, it would be nice to lock down this web interface (and ssh) even further; right now <em>anyone</em> who can connect to the wireless network can try to connect to the admin interface via a password.</p>
+
+<h1 id="still-to-do">Still To Do</h1>
+
+<ul>
+  <li>somehow lock down access to the admin interface further (eg by mac address, or by private key). Maybe use fail2ban or similar?</li>
+  <li>enable logging of all inbound and outbound connection attempts</li>
+  <li>figure out how to use the inbuilt tftp server (in case I misconfigure openwrt at some time and need to reinstall..)</li>
+</ul>
+
+<h1 id="upgrading-firmware">Upgrading Firmware</h1>
+
+<p>If a new version of OpenWRT is released, then the installation can be upgraded following the instructions in section “Upgrading OpenWRT” here:</p>
+
+<ul>
+  <li><a href="http://wiki.openwrt.org/toh/tp-link/tl-wdr4300">http://wiki.openwrt.org/toh/tp-link/tl-wdr4300</a></li>
+</ul>
+
+<p>I find the easiest way to upgrade is to use the LuCI web interface:</p>
+
+<ul>
+  <li>Download the appropriate *-sysupgrade.bin file from <a href="http://wiki.openwrt.org/toh/tp-link/tl-wdr4300">http://wiki.openwrt.org/toh/tp-link/tl-wdr4300</a>
+</li>
+  <li>Connect to LuCI via a browser</li>
+  <li>In menu “System | Backup/Flash Firmware”:
+    <ul>
+      <li>Generate Archive –&gt; saves settings to local PC</li>
+      <li>Flash new image –&gt; select “keep settings”, upload the wdr4300-*-sysupgrade.bin file and click the “flash image” button.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>After reinstall, internet access will be working, and ssh. However anything installed via opkg (such as LuCI) will not be working. Therefore, log in using ssh and reconfigure/reinstall any packages, eg:</p>
+
+<pre><code>opkg update
+opkg install luci-ssl
+/etc/init.d/uhttpd enable
+/etc/init.d/uhttpd start
+</code></pre>
+
+<p>To verify upgrade was successful, run the following from your ssh login session:</p>
+
+<ul>
+  <li>cat /etc/openwrt_release</li>
+  <li>cat /etc/openwrt_version</li>
+</ul>
+
+<h1 id="more-detailed-device-review">More Detailed Device Review</h1>
+
+<p>Pros:</p>
+
+<ul>
+  <li>reasonable native firmware (I played with it a bit)</li>
+  <li>really easy to install OpenWRT</li>
+  <li>reasonable price</li>
+  <li>good specs (gigabit ethernet, dual-band wireless, lots of flash and ram storage)</li>
+  <li>physical wireless enable/disable switch on the back - good if you don’t want wireless</li>
+  <li>physical on/off switch on the back - nice not to have to disconnect the powercable.</li>
+</ul>
+
+<p>Cons:</p>
+
+<ul>
+  <li>physically quite a large device (bigger than the Linksys WRT45GL that it replaces)</li>
+  <li>lots of bright LEDs on the front panel; as this device sits in my living room I had to put tape over the front panel</li>
+  <li>slightly rounded on top, making it trickier to stack things on top of it</li>
+  <li>a somewhat ugly device; won’t take pride of place in the glass-fronted electronics cabinet</li>
+  <li>quite a large wall-wart power supply; could be a problem in tight spaces.</li>
+  <li>so far, I haven’t been able to get great WAN performance out of it; might be just my setup or ISP though; more testing required.</li>
+</ul>
+
+<h1 id="updating-to-openwr-18062">Updating to OpenWR 18.06.2</h1>
+
+<p>Upgrading the router to OpenWRT 18.06.2 was relatively simple. It consisted of:</p>
+
+<ul>
+  <li>going to the downloads page, filtering by model=WDR4300</li>
+  <li>downloading from the <a href="http://downloads.openwrt.org/releases/18.06.2/targets/ar71xx/generic/openwrt-18.06.2-ar71xx-generic-tl-wdr4300-v1-squashfs-sysupgrade.bin">Upgrade URL</a>
+</li>
+  <li>following the <a href="https://openwrt.org/docs/guide-quick-start/sysupgrade.luci">upgrade instructions</a>
+</li>
+  <li>going to http://192.168.1.1, logging in as root/admin and setting up credentials</li>
+  <li>logging in via ssh root@192.168.1.1 (optional)</li>
+  <li>going to Network/Wireless and enabling the two radio channels (or doing this via the ssh terminal session)</li>
+</ul>
+
+<p>When choosing firmware to download, there are now two install options available: a base install without the LUCI web interface, and one with it. Using the one with LUCI enabled makes it possible to immediately log into the web interface, rather than using telnet. And from there, you can enable the SSH server (dropbear) and connect via ssh. However the included package is just luci and not luci-ssl - and therefore only an http (and not https) connection is supported, which is not a good idea. Therefore I recommend using the basic install bundle and installing luci-ssl manually as described above. Or use the luci install-package, then immediately use the web interface to install the luci-ssl package</p>
+
+<p>Note that the official install-instructions recommend unselecting the “keep previous settings” option in the LUCI interface when upgrading to a new major OpenWRT version. If you do this, then this effectively results in a “new install” rather than an upgrade - all passwords are lost, radio channel settings lost, etc.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://wiki.openwrt.org/toh/tp-link/tl-wdr4300">The OpenWRT page for the TP-Link WRT4300</a></li>
+  <li><a href="http://wiki.openwrt.org/doc/howto/secure.access">http://wiki.openwrt.org/doc/howto/secure.access</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Fail2ban">http://en.wikipedia.org/wiki/Fail2ban</a></li>
+  <li><a href="http://wiki.openwrt.org/doc/howto/generic.backup">http://wiki.openwrt.org/doc/howto/generic.backup</a></li>
+  <li><a href="http://lwn.net/Articles/619334/">Linuk Weekly News article on OpenWRT</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/tplink/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,523 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Junit Tests using Custom Classloaders</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Junit Tests using Custom Classloaders</h1>
+    <aside>First published on: January 1, 2003</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>Java classloaders can be very useful things. They can also be tricky to work with.
+But the trickiest thing can be writing unit tests for code that expects (or is 
+required to function) with specific classloader hierarchies.</p>
+
+<p>This article demonstrates a simple technique that allows a junit test class to 
+control the classloader structure used to execute its test methods.</p>
+
+<p>The project which prompted the development of this technique is the Jakarta
+Commons Logging (JCL) project which provides a common API for a number of different
+logging systems (java.util.logging, log4j and others). JCL is intended to behave
+differently depending upon what libraries are available in the classpath, and is
+also required to function in various complex classloader configurations such as
+may be found in J2EE frameworks.</p>
+
+<p>Note: This article was written around the year 2003, and has been sitting around
+waiting to be published. It should still apply, but might need some tweaking to be
+100% compatible with the latest junit version..</p>
+
+<h1 id="main-method-approach">Main-method approach</h1>
+
+<p>Junit tests are usually executed with junit, the classes being tested and any
+libraries that are required all being in the system classloader.</p>
+
+<p>Whether the unit tests are being run via ant, a gui junit front-end or otherwise
+it comes down to something like this:</p>
+
+<pre><code>  java 
+   -classpath tests.jar:app.jar:lib1.jar:junit.jar 
+     junit.textui.TestRunner FirstTestCase SecondTestCase
+</code></pre>
+
+<p>This provides no mechanism to build a complex classloader hierarchy for the
+unit tests to run within, nor does it provide the ability to set different
+classpaths for the test methods within FirstTestCase and SecondTestCase.</p>
+
+<p>A common solution is to have test case classes define a main method:</p>
+
+<pre><code>  public class FirstTestCase extends TestCase {
+    public static void main(String[] args) {
+      ClassLoader parentLoader = new URLClassLoader(...);
+      ClassLoader childLoader = new URLClassLoader(...);
+
+      Class testCase = childLoader.loadClass(FirstTestCase.class.getName());
+      junit.textui.TestRunner.run(testCase);
+    }
+  }
+</code></pre>
+
+<p>The tests within FirstTestCase can then be executed as:</p>
+
+<pre><code>  java 
+   -classpath tests.jar:app.jar:lib1.jar:junit.jar 
+   FirstTestCase
+</code></pre>
+
+<p>This approach has the following disadvantages:</p>
+
+<ul>
+  <li>this really only works with the junit text ui.</li>
+  <li>the main method needs to figure out where the needed jar files are</li>
+  <li>the main method runs only one test case.</li>
+</ul>
+
+<p>When using Ant to execute many test cases, the last point implies that
+there needs to be a separate target defined for each test case class to
+be executed, which can complicate the ant build file significantly. And
+this approach doesn’t work with GUI-based junit front ends at all.</p>
+
+<p>An alternative solution is to provide a “wrapper” class that looks
+at its command-line parameters to decide how to set up the classloader
+hierarchy, then executes junit.textui.TestRunner or equivalent. While
+this removes the need for the test case classes to define main methods,
+it moves a fundamental part of the actual test (the classloader environment)
+out of the test itself and into the wrapper class or a file that executes
+the wrapper class with various arguments (eg an Ant build file). This makes
+the test case classes incomplete (they can’t be understood in isolation) as
+well as still suffering from the one-target-per-test-case issue.</p>
+
+<h1 id="solution">Solution</h1>
+
+<p>The key to a more elegant solution is recognising that a junit TestSuite
+is a collection of references to methods to be executed - and each method
+object in the collection has an implicit reference to a specific class
+<em>object</em>:</p>
+
+<pre><code>public class FirstTestCase extends TestCase {
+    public static Test suite() throws Exception {
+        // create a classloader which is a child of the system classloader
+        URL[] parentPath = {...};
+        URLClassLoader parent = new URLClassLoader(parentPath);
+
+	URL[] childPath = {...};
+        URLClassLoader child = new URLClassLoader(childPath, parent);
+        
+        Class testClass = child.loadClass(FirstTestCase.class.getName());
+        return new TestSuite(testClass);
+    }
+
+   public void testSomething() {
+      ....
+   }
+}
+</code></pre>
+
+<p>When presented with a class, junit first checks for a static suite()
+method. If present, this method is expected to return a Suite object <sup id="fnref:suite_is_test" role="doc-noteref"><a href="#fn:suite_is_test" class="footnote" rel="footnote">1</a></sup> which is
+a collection of test methods available to be executed - and each test method
+knows the TestCase object it is a member of. When a suite method is not available, junit simply
+creates a TestSuite object initialised by introspecting the provided class to find its test methods.</p>
+
+<p>Here the class being executed by junit builds a standard junit TestSuite object
+as junit would - except that the class being introspected is not the “original”
+instance of the FirstTestCase class but instead one loaded via a custom classloader.
+The effect is that when the Method objects found by the TestSuite are executed,
+they are invoked on a class that sees the custom classloader hierarchy set up
+by the original suite method.</p>
+
+<p>If you are happy for your tests to have the system classpath visible in the
+custom classloader hierarchy then this solution works well. However tests 
+are more reliable when they completely control their environment, so it
+would be much better to make the system classloader completely invisible
+to the test:</p>
+
+<pre><code>   // create a classloader which is a direct child of the
+   // boot classloader
+   URLClassLoader parent = new URLClassLoader(parentPath, null);
+</code></pre>
+
+<p>Unfortunately bypassing the system classloader introduces a problem: when the test’s
+methods are invoked by the TestSuite they manipulate classes from the junit
+library. Simply ensuring that the junit library is in the classpath of one of the
+custom classloaders isn’t enough - when code in the “reloaded” test case calls
+   <code>child.getClass("junit.framework.Assert")</code>
+the returned class must be the <em>same class object</em> visible to the calling junit code,
+not just a copy.</p>
+
+<p>There’s a couple of other problems with the first version of the code shown above:</p>
+
+<ul>
+  <li>The test case class needs to know the exact URLs of the libraries and
+directories that are needed in the classpath.</li>
+  <li>The URLClassLoader class doesn’t provide the ability to do child-first
+class lookup as is commonly done by servlet and j2ee containers.</li>
+  <li>There is no control over the context classloader set during the test</li>
+</ul>
+
+<p>All these problems can be addressed by fairly simple custom ClassLoader and
+TestSuite classes:</p>
+
+<pre><code>public class FirstTestCase extends TestCase {
+    public static Test suite() throws Exception {
+        PathableClassLoader parent = new PathableClassLoader(null);
+        parent.useSystemLoader("junit.");
+        parent.addLogicalLib("app");
+        parent.addLogicalLib("lib1");
+
+        PathableClassLoader child = new PathableClassLoader(parent);
+        child.setParentFirst(false);
+        child.addLogicalLib("testclasses");
+        child.addLogicalLib("lib2");
+        
+        Class testClass = child.loadClass(FirstTestCase.class.getName());
+        return new PathableTestSuite(testClass, child);
+    }
+
+   public void testSomething() {
+      ....
+   }
+}
+</code></pre>
+
+<p>The useSystemLoader method instructs a PathableClassLoader to handle
+requests to load specific classes by forwarding the request to the
+system classloader instead of its parent classloader. This ensures that
+the test case code accesses exactly the same junit classes as the junit
+library invoking the tests.</p>
+
+<p>The addLogicalLib method causes the PathableClassLoader to look up the
+provided library name in the system properties to obtain an actual URL
+for the library. The ant build file, IDE or other mechanism invoking
+the actual unit test defines the mapping from logical lib name to 
+actual physical location by setting appropriate system properties.</p>
+
+<p>The setParentFirst method controls whether classes present in
+a classloader’s path can override classes of the same name present
+in a parent classloader’s path or not.</p>
+
+<p>And as you can see the PathableClassLoader allows components to be
+added to the classpath via individual calls rather than having an array
+passed to the constructor - this is not critical but is generally more
+convenient.</p>
+
+<p>The constructor for the PathableTestSuite class takes not only the
+TestCase class to introspect but also a classloader parameter. The
+specific classloader will be set as the Thread Context Classloader
+before each test method in the suite is invoked. This isn’t an
+essential feature as tests could set this themselves, but it is 
+more reliable and more convenient for the PathableTestSuite
+to handle this.</p>
+
+<p>With test cases written in this style, they can be executed in exactly
+the same manner as test cases that <em>don’t</em> require any custom classpath
+setup, with only one additional burden: system properties must be defined to map
+any logical library names used by the test cases to the actual URLs at
+which those libraries can be found.</p>
+
+<h1 id="suite-as-separate-class">Suite as separate class</h1>
+
+<p>There is one constraint on the above solution: junit needs to be able
+to load the FirstTestCase class in order to execute its suite method.
+That implies that the FirstTestCase and all of the classes that it
+references (fields, parameters, local variable types, etc) must be
+available to junit. It is often cleaner to omit these from the 
+classpath that junit sees. And in some cases different test case classes
+may require incompatible libraries.</p>
+
+<p>This can be handled by observing that the class containing the
+suite() method doesn’t actually need to be the TestCase class:</p>
+
+<pre><code>public class FirstTests extents TestCase {
+   public void testSomething() {
+     example.AwkwardDependency dep = new example.AwkwardDependency();
+      ....
+   }
+}
+
+public class FirstTestCase {
+    public static Test suite() throws Exception {
+        PathableClassLoader parent = new PathableClassLoader(null);
+        parent.useSystemLoader("junit.");
+        parent.addLogicalLib("app");
+        parent.addLogicalLib("lib1");
+
+        PathableClassLoader child = new PathableClassLoader(parent);
+        child.setParentFirst(false);
+        child.addLogicalLib("testclasses");
+        child.addLogicalLib("lib2");
+        
+        Class testClass = child.loadClass("FirstTests");
+        return new PathableTestSuite(testClass, child);
+    }
+}
+</code></pre>
+
+<p>While the example.AwkwardDependency class must be available via the custom
+classpath defined within FirstTestCase.suite, junit doesn’t need to have
+that class available in order to execute the FirstTestCase.suite method.</p>
+
+<h1 id="executing-the-same-tests-with-different-classloader-configurations">Executing the same tests with different classloader configurations</h1>
+
+<p>Sometimes it is necessary to verify that a certain set of tests have the
+same results despite changes in the classloader configuration. This can be
+achieved by creating an abstract TestCase (ie one which is not executed
+by junit) and creating concrete subclasses which just define suite()
+methods with the desired classloader hierarchies:</p>
+
+<pre><code>  public abstract class FirstTests extend TestCase {
+    public void testSomething() {
+      ....
+    }
+  }
+
+  public class FirstTestsWithSetup1 extends FirstTests {
+    public static Test suite() {
+      // set up hierarchy #1
+    }
+  }
+
+  public class FirstTestsWithSetup2 extends FirstTests {
+    public static Test suite() {
+      // set up hierarchy #2
+    }
+  }
+</code></pre>
+
+<h1 id="tests-involving-singletons">Tests involving Singletons</h1>
+
+<p>A quick search of the internet reveals a number of people asking how to
+write unit tests for code which directly or indirectly accesses Singleton
+objects. This is indeed a problem for traditional unit tests as there is
+no clean way to reset a Singleton’s state between tests.</p>
+
+<p>When a unit test executes in a custom classloader hierarchy, however,
+this issue is resolved as the class is reloaded into a “clean” classloader.</p>
+
+<h1 id="limitations">Limitations</h1>
+
+<p>The following restrictions apply to the above solution:</p>
+
+<ul>
+  <li>classloader hierarchies are controllable only per TestCase, not
+per individual test method</li>
+  <li>static variables visible from the suite() method are not visible
+to the test methods, as the test case class is actually a different
+instance. This means that it is more difficult for the suite() method
+to make data available to the test methods (esp. references to the
+classloaders it has created). This isn’t commonly needed, however, 
+and there are reflection-based solutions if it is necessary.</li>
+  <li>this approach may use more memory than traditional unit tests.
+As each TestCase has a custom classloader, all the libraries that
+test case loads are stored within that classloader hierarchy instead
+of being shared with other test cases.</li>
+</ul>
+
+<h1 id="unresolved-issues">Unresolved Issues</h1>
+
+<ul>
+  <li>How does this approach interact with the “fork” option for Ant?
+Presumably the execution of the suite() methods happens in the
+parent JVM, and then for each test class (method?) a JVM is forked
+and passed a message containing the name of the test (class?) to
+test. So what happens to the custom classloader setup?</li>
+  <li>How does this approach interact with GUI front-ends?</li>
+  <li>How does this approach interact with junit’s “reloading classloader”?</li>
+</ul>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:suite_is_test" role="doc-endnote">
+
+      <p>Well, actually the method just has to return a Test object. However a suite
+object <em>is</em> a Test object. <a href="#fnref:suite_is_test" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/junit-classloaders/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

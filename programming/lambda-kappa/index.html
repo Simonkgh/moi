@@ -1,0 +1,385 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Lamba and Kappa Architectures</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Lamba and Kappa Architectures</h1>
+    <aside>First published on: March 18, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>This article summarizes two related design patterns for managing persistent state in large enterprise systems.</p>
+
+<p>In 2011, Nathan Marz <a href="http://nathanmarz.com/blog/how-to-beat-the-cap-theorem.html">wrote a blog article</a> called “beating the CAP theorem” which describes a design-pattern that he later named “the lambda architecture”. His book “Big Data: Principles and Best Practices of Scalable Realtime Data Systems” (Manning press) explores this approach in more detail.</p>
+
+<p>In 2014, Jay Kreps <a href="https://www.oreilly.com/ideas/questioning-the-lambda-architecture">wrote an article</a> describing a simplification of this approach; he refers to it half-jokingly as “the kappa architecture”, noting that the concept is so simple that a name for it is possibly unnecessary.</p>
+
+<p>Simple or not, I found both ideas well worth getting to grips with. These ideas are also related to many other recent movements in IT, including functional sytems of all sorts, “event sourcing”, and event-processing in general.</p>
+
+<p>There are many good resources on these topics: the links above are good starting ppints. The rest of <em>this</em> posting is just my own non-expert opinion and musings on the matter; in part it is simply a “rephrasing” of the core concepts of both approaches in a way that helped me grasp what is central to the ideas.</p>
+
+<h1 id="motivation">Motivation</h1>
+
+<p>The Kappa architecture is is a variant of the Lambda architecture (and I see it as a special simplified case); you should read Jay Krep’s article (quite brief), and Nathan Marz’s original. The Manning book is large, and only worth the time for those who are seriously considering building such a system.</p>
+
+<p>Enterprise systems generally have one or more large relational databases at their center. These databases hold “the current state” of the system, and other applications query and update this state. However this approach has problems with race-conditions and performance bottlenecks. Caches are sometimes used to help scale such systems, but this introduces its own issues. Sometimes such systems keep “history” information (also known as audit trails) which theoretically show how the current state has been reached.  Both the lambda and kappa approaches invert this approach: the “history” is viewed as the real data in the system, and the “current state” is just a <em>cache</em> derived from this information. This approach can result in a more reliable and scalable system; it also is more resistent to <em>programmer failures</em> (bugs in the software responsible for updating state).</p>
+
+<p>As an example, a few years ago I worked on a large project to develop an account-management system for investment banks. Persistent data included users, accounts, and inter-bank reconciliation data. An Oracle database held the “current state” of many persistent entities; code would use a custom persistence layer to read “objects” from the database, modify them, and write them back. The persistence layer wrote “history records” tracking the changes that were made. This is all fairly standard practice in traditionally-architected systems, going back many decades. And development of this system was very painful. Data conflicts, transactional problems, and broken history information were always popping up during development and testing. Sadly, this is not unusual - many projects have such issues. The complexity of modern data-models and the volumes of data make persistence based on traditional read/modify/write much harder than it used to be.</p>
+
+<p>The lambda/kappa approach would be to instead store “change events” as the primary persistent data. Of course the system users do not want to view raw history information (except in specific cases); they want to know data <em>at the current time</em>. The answer is to <em>derive</em> the current state from the history and cache that in a database. The advantages are:</p>
+
+<ul>
+  <li>storing the original events is conceptually simpler</li>
+  <li>the original events are immutable</li>
+  <li>losing or corrupting the current state is not catastrophic - it can be derived again if needed</li>
+  <li>if there is a bug in the way the current state is derived, the code can be fixed and the state recomputed.</li>
+</ul>
+
+<p>The last two points in particular indicate the greatest difference between current-state-based and history-based approaches:</p>
+
+<ul>
+  <li>given the current state, the history cannot be derived, but</li>
+  <li>given the history, the current state <em>can</em> be derived.</li>
+</ul>
+
+<p>The Lambda/Kappa approaches are relevant any time an information system can be described as a large flow of events which cause modification to a <em>current state</em>.</p>
+
+<h1 id="the-lambda-design">The Lambda Design</h1>
+
+<p>Jay Krep’s <a href="https://www.oreilly.com/ideas/questioning-the-lambda-architecture">article on Kappa</a> summarizes Lambda very well, and links to Nathan Marz’ article for further details. I’ll therefore give only a <em>very</em> brief summary here..</p>
+
+<p>In Lambda, historical information is periodically reprocessed by a batch-mode program to generate “batch layer” outputs in a database. Such data can then be used for reporting or similar. At some later time, the historical information (now updated with additional events) is reprocessed, producing an updated version of the “batch layer” derived outputs which then replaces the older version. Between batch runs, a realtime-mode program runs against incoming events to incrementally update a “speed layer” database which is an incremental <em>overlay</em> of the batch-layer. Applications which need the very latest results must somehow merge the batch-layer and speed-layer results.</p>
+
+<p>Historical data does not need to reach back to “the beginning of time”. For some use-cases, ancient history can just be discarded. For others, a set of events can be replaced by a single event representing “the current state” at some point in time - or in other words, a “snapshot” of the state at some point in time can be used as the starting point, and earlier events discarded - though the snapshot should be chosen with care as modifying the computations that created it is obviously no longer possible.</p>
+
+<h1 id="the-problems-with-lambda">The Problems with Lambda</h1>
+
+<p>There are a couple of issues with the above design:</p>
+
+<ul>
+  <li>The batch-mode and realtime-mode code often has the same logic (eg <code>for each transaction: cust_balance = cust_balance + transaction_amount</code>). However they are implemented in different styles: batch vs streaming.</li>
+  <li>The “current state” is spread between two databases: “batch” and “speed”. Any app which wants the current state needs to somehow merge these.</li>
+</ul>
+
+<p>Implementing the same logic in two different forms (eg batch-mode spark and streaming-mode storm) is painful. Even if the implementation language is the same, the code differs: the streaming layer code is <em>aware</em> of the batch layer outputs.</p>
+
+<p>When “current state” is only exposed via REST services then the REST service implementations are responsible for this read/merge logic. However this makes it difficult/impossible to run reports against “the current state” - reporting tools do not understand how to read/merge the two DBs.</p>
+
+<p>The kappa solution is to have the current state in just one database, and use just one way of processing event data (whether historical or current): a streaming (realtime) program.</p>
+
+<h1 id="kappa-design">Kappa Design</h1>
+
+<p>Kappa is a simplification of Lambda which can be applied if:</p>
+
+<ul>
+  <li>processing of events can be done correctly in a streaming algorithm (not all logic can be so expressed), and</li>
+  <li>processing of incoming events can be done at sufficient speed without taking “shortcuts” or making approximations</li>
+</ul>
+
+<p>When derived data needs to be regenerated (eg when an algorithm has been changed) then you:</p>
+
+<ul>
+  <li>create a new output database (set of tables)</li>
+  <li>feed all the historical raw data into a new instance of the streaming algorithm</li>
+  <li>
+    <p>and when the reprocessing has “caught up to” the current time:</p>
+
+    <ul>
+      <li>start feeding the real-time data into the new streaming instance</li>
+      <li>make the new output database the “current” database for downstream apps</li>
+      <li>stop the old streaming instance and discard the old database</li>
+    </ul>
+  </li>
+</ul>
+
+<p>If you don’t mind some outage time where the target database is not available, you can simply stop the original stream, clear the output tables, then restart processing at the relevant historical point.</p>
+
+<p>The Kappa approach is rather similar to a database “materialized view”, where a table is simply an SQL statement applied to another table with the results cached (rather than a normal view which evaluates the view-sql on-the-fly).</p>
+
+<p>When reprocessing historical data with the Kappa approach, the number of parallel processes can be increased as needed. As example, if two parallel streaming processes may be sufficient to keep up with the incoming realtime data then “reprocessing” might be started with 10 parallel processes and reduced to two once it has “caught up” to realtime data.</p>
+
+<p>As mentioned above in the section on Lambda, history may start with some “base current state”, with events older than that date having been discarded.</p>
+
+<p>The benefits of Kappa over Lambda are significant (as long as the system requirements allow Kappa to be applied):</p>
+
+<ul>
+  <li>all the complexity of separate batch-layer and speed-layer databases disappear; the current state is held in just one database.</li>
+  <li>the complexity of two different programs for processing the same input data disappears; the same application is used in both cases.</li>
+  <li>reporting tools have access to the very latest data (no separate batch/speed databases)</li>
+  <li>system operations is simplified (fewer processes and datastores to manage and monitor)</li>
+</ul>
+
+<p>It is not always the case, however, that the “batch mode” logic can be implemented in realtime (streaming) form. The realtime component must optimise for performance of processing; the batch component may optimise for performance of querying the outputs. For some queries, “rollups” (denormalized precomputations) may be necessary when querying large datasets; it may be optimal to compute these during batch processing but skip them during realtime processing on the basis that the amount of data in the “speed layer” is limited. Sorting and indexing may be another case - in-memory sorts and linear searches may be adequate in the speed layer, given the limited amount of data.</p>
+
+<h1 id="why-reprocess-at-all">Why Reprocess At All?</h1>
+
+<p>In the Lambda approach, the realtime (“speed”) processing layer may be allowed to make approximations, and make simplifications such as ignoring the possibility of rare race-conditions. When the full batch-mode pass is made, any errors introduced by the realtime processing is discarded and replaced by the proper results. Obviously, when the realtime layer is taking advantage of this possibility, then batch-mode processing should be done regularly (eg weekly, daily or maybe hourly).</p>
+
+<p>When the realtime processing layer is considered to generate results just as correct as the realtime layer, then the “batch” computations has only one primary goal: to ensure that if it is ever necessary to regenerate the current state from historical data, then the infrastructure to do so still works. Running the reprocessing once a month would probably be sufficient in that case.</p>
+
+<p>In the Kappa approach, it can be assumed that the realtime processing code generates 100% correct outputs - after all, in Kappa it is the same code used to reprocess historical data. So reprocessing of historical data serves mostly to verify that history <em>can</em> be reprocessed if that should be necessary.</p>
+
+<p>Reasons why reprocessing history might be necessary include:</p>
+
+<ul>
+  <li>detection of a bug in the current algorithm,</li>
+  <li>enhancement of the current algorithm to produce additional outputs from the same input data, or improve the quality of outputs,</li>
+  <li>migration to a different database type or schema for current state storage,</li>
+  <li>or to regenerate the current state databases when they have been lost.</li>
+</ul>
+
+<p>The last item provides the ability to skip backups for the current-state databases, as they can be regenerated if needed (though the historical data of course must be reliably stored!).</p>
+
+<p>In both designs, it is possible to keep periodic snapshots, and just recompute data since that snapshot.</p>
+
+<p>Before discarding the Lambda “batch mode” component and going purely with the Kappa approach, it may also be worth considering the implications of “eventual consistency” and whether the realtime processing layer is in fact always generating the same outputs that would be generated at a later time after “convergence” of distributed systems has completed. To quote from Nathan Marz original article:</p>
+
+<blockquote>
+  <p>(Batch processing is) easy to reason about because you only have to think about data and functions on that data. There’s no read-repair, concurrency, or other complex issues to consider.</p>
+</blockquote>
+
+<h1 id="the-kafka-message-broker">The Kafka Message Broker</h1>
+
+<p>The Kappa approach is particularly easy if “historical” data only means a few weeks or months of data, and the message-broker is Kafka: just set the Kafka retention time so all required historical data is retained, and then have the new streaming instance read from the start of the Kafka queue. The new instance will automatically transition from “historical” to “realtime” data - it is all just data in the same queue.</p>
+
+<p>Note that data in a Kafka queue takes up no more (and probably less) disk-space than the same data held in a database of some sort; if you are prepared to dedicate disk-space to holding that history in a database then storing it in Kafka files is no more expensive. The disadvantage of course is that the data cannot be directly queried.</p>
+
+<h1 id="functional-systems">Functional Systems</h1>
+
+<p>In recent years the “functional programming” movement has received far more attention than previously. These somewhat neglected ideas are proving useful for a number of reasons, the most significant of which is <em>scalability</em>.</p>
+
+<p>In any system holding centralized state information, parallel processing (scalability) is a problem. Accessing and updating that central state is vulnerable to race-conditions, and thus requires locking when accessed in parallel. This applies equally to multi-threaded programming within a single process, and to systems of interacting processes.</p>
+
+<p>Functional programming consists (in part) of using immutable datastructures. Such structures do not require locking. They can also be safely <em>replicated</em>.</p>
+
+<p>The focus on “immutable history” in the Lambda/Kappa design patterns is similar.</p>
+
+<h1 id="domain-driven-design-event-sourcing-and-cqrs">Domain Driven Design, Event Sourcing and CQRS</h1>
+
+<p>The concepts behind the term “Event Sourcing” are clearly very similar to those in what Marz/Kreps name Lambda and Kappa.</p>
+
+<p>The concepts of “CQRS” and “Domain Driven Design” are often applied together with Event Sourcing.</p>
+
+<ul>
+  <li>
+    <p>Event Sourcing is the concept of storing the history of a system (the set of events which led to its current state) rather than just the current state.</p>
+  </li>
+  <li>
+    <p>Command-query responsibility segregation (CQRS) is a design pattern in which code that queries data is separated from the code which modifies data. The well-known model-view-controller pattern is somewhat similar; there, the controller is responsible for performing updates on the model while the view is responsible for “querying” it. CQRS is perhaps the “enterprise data version” of MVC. CQRS is pretty much the opposite of CRUD-based (Create Read Update Delete) DAO (Data Access Object) code which tightly couples queries and updates by implementing them in one object.</p>
+  </li>
+  <li>
+    <p>Domain Driven Design (DDD) is at its core simply the approach of modelling the system to be implemented as entities and operations, and using this model to drive the implementation. The book “Domain-Driven Design: Tackling Complexity in the Heart of Software” by Eric Evans (2004) created the term and formalizes many parts of the “object oriented design” approach.</p>
+  </li>
+</ul>
+
+<p>One of the nice properties of representing system changes as streams of events rather than updates to state is that such changes can be easily replicated and processed in parallel by multiple systems. When there are multiple places in which the same data is stored (eg caches), this can simplify the task of keeping everything up-to-date. The Apache Samza stream-processing-system is an interesting application of this approach.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>There is far more to the Lambda and Kappa design patterns than described here. In addition, I’m no expert in this area - all advice and opinion here should be read with caution. I found the ideas interesting, and there are many connections to other big-data topics and active IT-related movements. I hope you find it interesting too.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://milinda.pathirage.org/kappa-architecture.com/">Kappa Site</a></li>
+  <li><a href="https://www.oreilly.com/ideas/questioning-the-lambda-architecture">Kappa Article</a></li>
+  <li><a href="http://nathanmarz.com/blog/how-to-beat-the-cap-theorem.html">The Original Lambda Article</a></li>
+  <li><a href="http://www.h-online.com/developer/features/CQRS-an-architecture-precept-based-on-segregation-of-commands-and-queries-1803276.html">Heimeshoff &amp; Jander: CQRS</a></li>
+  <li><a href="http://www.cqrs.nu/Faq">Domain Driven Design, Event Sourcing and CQRS</a></li>
+  <li><a href="https://martinfowler.com/eaaDev/EventSourcing.html">Martin Fowler: Event Sourcing</a></li>
+  <li><a href="http://bloom-lang.net/calm/">CALM - Consistency as Logical Monoticity</a></li>
+</ul>
+
+<p>Other useful links:</p>
+
+<ul>
+  <li>
+<a href="http://www.datomic.com/">Datomic</a> - a database designed around a Kappa architecture which processes a stream of “persistent entity update” events to keep one or more (key,value) caches up-to-date, and then supports queries against these caches.</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/lambda-kappa/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

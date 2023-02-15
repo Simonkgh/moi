@@ -1,0 +1,240 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - ACPI</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='post'>
+    <h1>ACPI</h1>
+    <aside>Posted on: June 29, 2015</aside>
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <p>I’ve heard about ACPI (Advanced Configuration and Power Interface) many times, but didn’t really understand what it was: seemed to be some magical firmware thing related to device management. I’ve finally spent some time reading up on it, and it isn’t so complicated.</p>
+
+<!-- more -->
+
+<p>Every computer system has some stuff on the motherboard: USB controllers, fans, display backlights, etc. All this should be accessable from the operating system. However x86 systems have only two ways that a program can interact with stuff: via read/write of memory-space addresses (ie any CPU instruction that uses an address), or read/write of io-space addresses (ie the IN/OUT instructions). So all these external devices are listening on the memory or io bus (which might be the same physical thing), waiting for write commands or read requests to “their” address. But what address? That often isn’t standardized anywhere, ie there needs to be some system-specific configuration somewhere that an operating-system can query to find which devices exist and which addresses they can be contacted on.</p>
+
+<p>Some devices can be “discovered”, the most common being those on the PCI bus; given a known PCI bus an OS can find out which devices are on it and map them to free IO-space or memory-space address ranges. But the PCI bus controller itself cannot be discovered; the OS needs to somehow just <em>know</em> which addresses it responds to. The PCI bus controller is <em>usually</em> mapped to a specific pair of IO addresses. However there are many devices that are not standardised. And developing such standards is a slow and tedious process. Note for example that as part of the PCIe specification, a new way of accessing PCI configuration space was defined that uses only (physical) memory-space addresses (no io-space), and that the exact memory-space address is manufacturer-specific - but will be available in the ACPI tables.</p>
+
+<p>It is of course possible to just encode this information directly into device drivers; a USB controller driver might have a table of addresses for different models of PC and choose the right addresses based on querying the host hardware type. That’s not very elegant or reliable though. Or a driver can “try all possibilities” - but such <em>probing</em> can potentially cause unexpected side-effects.</p>
+
+<p>The BIOS can potentially provide a function to return the necessary data. But (a) that again requires consensus from multiple manufacturers and (b) calling the BIOS isn’t something OSes like to do for various reasons.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Device_tree">Device trees</a> are (roughly) a json-style datastructure describing the hardware and related io/mem addresses for a system. The device-tree info is then stored in some suitable location in the firmware. The OS then just needs to know one address: where to find the device-tree definition. This solution is used extensively in linux for embedded systems.</p>
+
+<p>ACPI is a more flexible, but much more complex, solution to the same problem. As with device trees, firmware holds a table of information which is loaded at startup. Well, in the case of ACPI there are half-a-dozen tables, but the end result is a tree of information describing the hardware. ACPI also defines a <em>virtual machine language</em> or bytecode (AML) with instructions like “read memory” or “write io”; ACPI table entries can then hold <em>simple programs</em> which specify a sequence of reads/writes to io or memory addresses (and possibly a few other things). The operating system kernel then must contain an <em>interpreter</em> for this bytecode.</p>
+
+<p>Device drivers in the OS can use the ACPI library to perform tasks like finding all built-in devices of a specific type by looking in the ACPI tables (actually, calling an ACPI function to return that info). And they can perform tasks like “disable builtin wireless” by invoking the appropriate ACPI method; the AML interpreter loads and executes the corresponding instructions from the ACPI tables, which results in calls to the “OS services layer API” to read/write the appropriate IO or memory addresses. Result: the OS can access devices by knowing the right ACPI “names” without needing to know the exact IO or memory addresses that the hardware manufacturer mapped those devices to.</p>
+
+<p>Interrupts are a third kind of interaction, and the ways in which builtin devices are connected to the system can vary between systems. I presume that the ACPI firmware for a system will also contain information that allows an OS to interpret interrupts correctly for the local system, but haven’t looked into that specifically.</p>
+
+<p>The ACPICA project provides an open-source implementation of much of the ACPI specification. The ACPICA code is meant to run with kernel privileges, but is os-independent in that it does not use any windows/bsd/linux/etc APIs directly; instead it defines an “OS Services Layer” API through which ACPICA performs operations such as memory-allocation and all memory and IO reads/writes. Whichever operating system is on the host provides its own implementation of the OS services layer. ACPICA is logically divided into the following parts:</p>
+
+<ul>
+  <li>an AML interpreter;</li>
+  <li>table management: functions that an OS can call to load the contents of “ACPI tables”</li>
+  <li>namespace management: functions for finding/iterating-over lists of available tables, lists of available devices, etc</li>
+  <li>resource management: functions for installing interrupt-handlers, etc</li>
+  <li>hardware management: functions for enabling/disabling ACPI as a whole, modifying “registers”, changing the sleep-state of devices or CPUs, etc</li>
+  <li>event handling: functions for configuring callbacks for various device events (similar to interrupt-handlers??)</li>
+</ul>
+
+<p>AML code actually manipulates devices by making calls back into the OS services layer to read/write IO-space or memory addresses, and to install traditional interrupt-handlers. There is therefore no magic integration between ACPI and the hardware: it is a repository of “system knowledge” in the form of AML instructions and hard-coded IO/memory addresses suitable for specific hardware, but all actual interaction with devices is always done <em>via</em> the operating system. The ACPI module within an OS is really an isolated bubble somewhat like a user-space process (though more performance-sensitive!).</p>
+
+<p>The data in the <em>primary</em> ACPI tables is loaded at ACPI init time, forming a tree of “scope” objects. A scope has a “name” (and therefore a path) and may contain “methods” (sequences of AML instructions).  There are about 10 standard “scopes” (aka namespaces), grouping together information about topics such as “event stuff”, “thermal stuff”, “processor stuff”.  The most important ACPI table is called the DSDT. To see all tables: <code>ls /sys/firmware/acpi/tables</code>.</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="[ACPI](https://en.wikipedia.org/wiki/Advanced_Configuration_and_Power_Interface)">Wikipedia on ACPI</a></li>
+  <li>
+<a href="http://queue.acm.org/detail.cfm?id=957774">Modern System Power Management (Dec 2003)</a> - a good overview of ACPI by Andrew Grover of Intel</li>
+  <li><a href="https://acpica.org/sites/acpica/files/acpica-reference_16.pdf">Intel ACPI Comonent Architecture Programmer Reference</a></li>
+  <li>
+<a href="https://01.org/linux-acpi">Intel’s ACPI project</a>.</li>
+  <li>File <code>documentation/acpi/namespace.txt</code> from the kernel sourcecode.</li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/posts/2015-06-29-acpi/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

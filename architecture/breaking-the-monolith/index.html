@@ -1,0 +1,453 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Breaking the Monolith - A Successful Refactoring Into Microservices</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Breaking the Monolith - A Successful Refactoring Into Microservices</h1>
+    <aside>First published on: March 17, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>During the last 3 years one of the projects I’ve been involved with (been a lead architect on) has the internal code-name <em>Breaking the Monolith</em>. This involves splitting a large existing codebase into multiple <a href="https://www.martinfowler.com/microservices/">microservices</a>, and this article summarizes the process we have been using. It’s still a work-in-progress, but has been going well so far and so you might perhaps find this useful.</p>
+
+<p>As this project is still in progress, this article sometimes uses the current tense and sometimes the past tense when discussing topics/decisions.</p>
+
+<h1 id="motivation">Motivation</h1>
+
+<p>My employer licensed the source-code to an existing software product in around 2006, and over the following years added significantly to it. The software itself was originally designed and implemented in the mid 1990s, and followed all the best practices of the time: a monolithic Java application using <a href="https://spring.io/projects/spring-framework">Spring</a> and JSPs deployed as a <a href="https://en.wikipedia.org/wiki/WAR_(file_format)">WAR file</a> into <a href="https://tomcat.apache.org/">Apache Tomcat</a>. Internally it had a reasonably nice modular structure, with the business logic fairly well separated from the user-interface part (JSPs and taglibs) and from the persistence layer (relational database <a href="https://en.wikipedia.org/wiki/Adaptive_Server_Enterprise">Sybase</a> with lots of stored procedures). It later received a ReST interface layer which by and large sits parallel to the old JSP-based HTML interface and calls the same business logic. New UIs (apps, reactive web) were then built on top of that ReST interface.</p>
+
+<p>When I joined the company, this application was still being actively developed and regularly released. The codebase was at least useable. There were, however, some problems:</p>
+
+<ul>
+  <li>The codebase is simply very large - hard to learn, very few people understand all of it.</li>
+  <li>The technologies are getting outdated, but changing any libraries or frameworks affects the whole codebase.</li>
+  <li>Developers keep conflicting with each other - from simple merge-conflicts to nastier and more subtle interactions.</li>
+  <li>Build-times and integration-test times are slow; IDEs are sluggish.</li>
+  <li>Releases are complicated - requiring several people for an hour or so.</li>
+  <li>Releases are infrequent - due to the complicated release process and complex test suites.</li>
+  <li>Rollbacks are frequent - because releases are infrequent, each release contains multiple unrelated changes, and any single problem which causes a rollback of course rolls back every change in that release.</li>
+  <li>Developer motivation/satisfaction was not high.</li>
+</ul>
+
+<p>Clearly something needed to be done.</p>
+
+<p>Note that a monolithic codebase can be the right solution for some situations. However it wasn’t for ours, as we:</p>
+
+<ul>
+  <li>Had over 20 developers working on the same codebase.</li>
+  <li>Had a steady stream of changes/improvements to add.</li>
+  <li>Wanted to release frequently (ideally multiple times on some days).</li>
+  <li>Wanted to make some significant changes to the infrastructure the application depended on.</li>
+  <li>Wanted to improve developer satisfaction in general (for retention and recruitment).</li>
+</ul>
+
+<p>Having a large <em>and</em> active codebase meant merge conflicts were common, rollbacks were common, slow IDEs and build-times were expensive, and changing anything fundamental in such a large system was difficult and risky.</p>
+
+<h1 id="goal-architecture">Goal Architecture</h1>
+
+<p>We decided to move to a microservice architecture - with the emphasis on service rather than micro. Distributed systems are hard, and the more parts they have the harder they become. We therefore want to walk before we consider whether to run. A series of workshops identified about 14 DDD subdomains for the whole company’s customer-facing IT systems and that felt about right for a first distributed system setup. We were already running multiple services, often stuff that sat “on top” of the core monolith, building on its ReST services to add features without having to integrate them into the monolith itself. So a distributed services setup wasn’t completely new territory, but swarms of them would be and we didn’t want to go there yet.</p>
+
+<p>You can find some relatively long articles about the team-structure and some architectural decisions we made <a href="/2023/02/architect">here</a>.</p>
+
+<p>The existing monolith that sits at the core of the company didn’t implement all of these 14 subdomains, but did implement a majority of them. That needed to be fixed.</p>
+
+<p>In the discussion below, the words component, service, and application basically mean the same thing: a deployable artifact that provides a remote API. Each component should implement a single <em>subdomain</em> in the DDD sense (though occasionally it makes sense to have a single component implement multiple subdomains). And generally, a <em>subdomain</em> is a <em>bounded context</em>.</p>
+
+<h1 id="rewrite-or-refactor">Rewrite or Refactor</h1>
+
+<p>So the first question was: rewrite or refactor? Create nice new components then throw away the old code-base, or instead split pieces off the monolith one-by-one?</p>
+
+<p>I was very strongly on the refactor side. There was considerable debate about this; and as a developer I can see the appeal of starting with a clean sheet. The latest JVM, the latest Kotlin version, the trendiest frameworks of the day. Finally that proper entity model that was always missing. However there are a few things that can derail a project like that:</p>
+
+<ul>
+  <li>What are the real requirements?</li>
+  <li>How can the new system be bug-for-bug compatible<sup id="fnref:bug-compatible" role="doc-noteref"><a href="#fn:bug-compatible" class="footnote" rel="footnote">1</a></sup>?</li>
+  <li>How can the old code be removed / old system decommissioned?</li>
+  <li>How can scope-creep be avoided?</li>
+  <li>How can code-freezes be avoided?</li>
+  <li>How can progress and the new code be visible to all team members, not just the refactoring team?</li>
+</ul>
+
+<p>As with many existing systems, there were absolutely no written requirements/specifications available for the software. Its original design documents had long been lost, and it had evolved ticket by ticket into something quite different anyway. Test coverage was reasonable, but not anywhere near complete.</p>
+
+<p>In addition, this is of course a for-profit company. The correct solution is the most <em>cost effective</em> solution, not the most perfect software.</p>
+
+<p>What we (the architecture team) therefore pushed for was iterative refactoring. For each subdomain (or occasionally a group of subdomains), separate existing code into <em>modules</em> within the existing codebase then fork the repo and:</p>
+
+<ul>
+  <li>In the new repo, delete all code not relevant to the factored-out functionality.</li>
+  <li>Deploy and test the new component.</li>
+  <li>Route requests to the new component.</li>
+  <li>In the original repo, delete the newly created module.</li>
+  <li>Deploy the original monolith (now without the factored-out code).</li>
+</ul>
+
+<p>This process provides the following benefits:</p>
+
+<ul>
+  <li>Discovery of the exact requirements for the new component (ie domain boundary) happens iteratively.</li>
+  <li>The newly separated component is 100% compatible with the old behaviour - it is in fact still the old code.</li>
+  <li>The factored-out code is easy to remove from the original codebase (unlike in the case of a rewrite) - just delete the (newly-created) module(s).</li>
+  <li>No scope-creep occurs; the task is to break the monolith apart <em>without</em> changing its functionality.</li>
+  <li>No code-freeze is required during the rework process; the original codebase is still deployable at any time.</li>
+  <li>New functionality can still be added to the application while this refactoring is in-progress.</li>
+  <li>Changes are occuring in the normal code-base and normal branches, so what is happening is visible to all developers.</li>
+</ul>
+
+<p>This process does of course need to start with a basic idea of which blocks of functionality of the original monolith are going to be separated out as new components, ie a rough definition of the subdomain to be factored out. However this doesn’t need to be precise, ie no need for a complete and perfect analysis before starting, as it becomes clear during the refactoring/code-separation process which functional and data dependencies exist<sup id="fnref:ddd-boundary" role="doc-noteref"><a href="#fn:ddd-boundary" class="footnote" rel="footnote">2</a></sup>.</p>
+
+<p>Testing and deployment is also simplified by this approach. During the refactoring process, all existing unit and integration tests are still valid - the code is still part of the monolith, just in a new location. Once the new component is complete, it can be deployed while the original monolith is still responsible for handling real requests. As interfaces are unchanged, clients should not notice any difference. As data-structures are (mostly) unchanged, data migration (assuming the new component has its own database) is relatively simple.</p>
+
+<p>After completion of the above process for each subdomain, at least some of the original issues have been solved:</p>
+
+<ul>
+  <li>The new component now has a code-base that is only a fraction of the size of the original monolith.</li>
+  <li>Build-times and test-times are faster, etc.</li>
+  <li>Release processes are easier simply because the number of developers and number of changes involved in each release are smaller.</li>
+  <li>Life is easier for developers working on the original code-base, as it is also now smaller.</li>
+</ul>
+
+<p>We identified about 8 subdomains in this code-base, so factoring out each one reduces the size of the original codebase by about 10% (there is of course non-domain code in the codebase too).</p>
+
+<p>What this process doesn’t produce are cleaner/moderner codebases for the new components - but doing such improvements is a much easier task in the new component codebase which is smaller and owned by a single developer team. In fact, even complete rewrites can be considered at this point in time - assuming a business case can be made for investing the necessary amount of time. Doing a refactor and <em>then</em> doing a cleanup or rewrite does initially seem less efficient/cost-effective than simply doing the rewrite straight away, but the list of concerns from above should be considered - particularly unclear requirements, scope-creep, and the need to remove the code from the original codebase. My personal experience is that projects which are estimated to take more than 1 person year in total (eg 4 devs for 3 months) before anything is deployed to production are in great danger of never delivering. The iterative approach avoids that by doing this work as a series of very small steps, each of which results in deployable code.</p>
+
+<h1 id="refactor-vs-the-strangler-pattern">Refactor vs the Strangler Pattern</h1>
+
+<p>Searching the internet for “break monolith” immediately brings up links to the <em>strangler pattern</em>. In this pattern, there is some layer of indirection between client applications and the monolith to be split. Functionality of the monolith is moved to a new component and the layer of indirection then redirects requests to the new component rather than the original implementation. This is also the pattern that the project in this article uses.</p>
+
+<p>However many of the articles on the strangler pattern imply or state that the new component is brand new code, rather than existing code moved out of the original application. Clearly when the goal is to radically change technology, eg replace code in C with code in Java, then this is the only option. However if the primary problem is the monolith’s large codebase and not the underlying technology then I would recommend considering the reuse option instead.</p>
+
+<p>As an example <a href="https://martinfowler.com/articles/break-monolith-into-microservices.html">this article from Thoughtworks</a> suggests:</p>
+
+<blockquote>
+  <p>In my experience, in majority of the decomposition scenarios, the teams are better off to rewrite the capability as a new service and retire the old code.</p>
+</blockquote>
+
+<p>The Thoughtworks article <em>does</em> state that reuse (refactoring/extraction) may be a better strategy for very complex logic, ie the correct decision (as always in architecture) requires estimating costs and benefits ie is a tradeoff. However for the reasons I give in the previous section, the costs of a rewrite are, in <em>my</em> experience, usually underestimated and often hugely so. I therefore recommend refactoring as the default strategy when extracting any subdomain. The quote above mentions “retire old code” casually as if that is a trivial process; when that code is tightly coupled with other code that hasn’t been rewritten (yet) then that can be a huge task in itself - except when using the suggested refactoring approach, which makes it trivial. The quoted article itself, in its last section, emphasises that the task isn’t done until the old code-path has been retired.</p>
+
+<p>It is important to remember that the system being refactored is of value. If it wasn’t providing an important function for the company which owns it, there wouldn’t be funds to refactor/split it. And if it were so buggy that it was unusable, then the company using it wouldn’t be successful and have funds to pay for its redevelopment. So, by definition, the thing being replaced embodies important business rules, and does it acceptably. It may therefore not be trivial to reimplement correctly and reusing existing code (even when not optimal) should be seriously considered. Improvements (assuming there is no radical change of design or programming language) can perhaps be most effectively applied as iterative improvements to a codebase after it has been extracted from its original monolith.</p>
+
+<p>With regards to iterative development, I always like to point to the Linux kernel: one of the most successful software projects the world has ever known. And their core principles are iterative improvement and never breaking existing APIs.</p>
+
+<h1 id="template-modules">Template Module(s)</h1>
+
+<p>As our monolith is being split into multiple components (estimated about 8), the “start phase” for a new component is performed repeatedly. It was therefore decided to create a “template new component” structure in the repository which can be copied as a consistent/reusable starting point for each project.</p>
+
+<p>This consists of a top-level directory containing 5 maven modules: model, services, persistence, remote-api, application. The first 4 modules are mostly empty and are simply places into which existing code is moved as the refactoring takes place; this mirrors the existing module structure of the monolith. The “application” module holds the entry-point for the application and everything else needed to run this set of modules as a standalone application.</p>
+
+<p>The modules also have dependencies on a couple of “common” modules belonging to the monolith codebase. Dependencies on existing modules which contain domain-specific types is avoided, but the original application (fortunately) had already separated most of its “supporting framework” code into dedicated modules which can also be used by the new component.</p>
+
+<p>When the refactoring process for a new component starts, this “template” top directory is simply copied and the metadata (maven artifact ids in this case) are updated. The original application is then updated to include these new modules as dependencies so that as code related to the new component is moved into this new set of modules, the original application still deploys and runs with all of its expected functionality. There is one exception: the “application” module does <em>not</em> become a dependency of the original application; building this module (and its dependencies) produces the <em>new component’s deployable artifact</em>.</p>
+
+<p>There have of course been a lot of lessons learned while factoring the first few components out of the monolith, eg how best to do integration-testing in the new components. Those lessons have been fed back into the template project so the next component starts with the best possible initial structure.</p>
+
+<h1 id="integration-testing">Integration Testing</h1>
+
+<p>One significant issue we ran into while doing refactoring is integration-testing. The original monolith has a release process in which a release-candidate is deployed into a “release acceptance test” environment and then test suites based on tools such as Selenium are applied to it. These tests also verify interactions between this application and other applications running in the same test environment. This is acceptable for testing a monolith with a release cycle of once per week or less often. However it doesn’t work well with microservices that have independent release cycles - particularly when wanting to release frequently (eg after each ticket is merged, ie multiple times per day in some cases).</p>
+
+<p>We therefore had to adopt some new testing principles. In general, integration tests for the new components are limited to testing against the component’s database only - and that is always a dedicated containerised instance for each integration-test run. Any tests that interact with other systems use mocked results only. This does raise the risk that a change may break communication with an external system; approaches such as PACT are applied to help address this.</p>
+
+<p>How to do testing of distributed systems is a rather complicated issue; we did quite a lot of research into this and I have written <a href="/architecture/testing-distributed-systems">a dedicated article on this topic</a>.</p>
+
+<h1 id="refactoring-process">Refactoring Process</h1>
+
+<p>Here’s a rough guide to how we actually factor existing code out into new components.</p>
+
+<p>Before work on each new component is started, we have a reasonable idea of what functionality it should contain (domain analysis). However the most important point is more technical than business: what data (database columns) does it own? Probably the most important feature of microservices is that each service <em>owns</em> its data, ie each item of data has only one owner. Finding out exactly what data belongs to the new component (and therefore which features it can sensibly offer) is a non-trivial process; for some data it is obvious but for others the optimal allocation of data to component is something discovered iteratively during refactoring. This is a major advantage of the refactoring approach over the rewrite approach; the dependencies between function and data are not always clear and so in a rewrite approach it is easy to make incorrect decisions which are only noticed a significant time later.</p>
+
+<p>Due to the importance of data ownership, we generally start refactoring from the bottom up: find some tables which we believe belong in the new component, identify all DAOs which access them, identify all business services which use those DAOs, and all remote endpoints which use those services. In the ideal case, this process identifies a clean set of functionality that can just be moved to the new component’s modules. However more commonly this reveals interdependencies between data or services that belong in multiple subdomains and then some serious thinking is needed to decide how best to untangle the concepts. In some cases, this leads to the understanding that the tables we originally started with don’t actually belong to the new subdomain - or at least not completely.</p>
+
+<p>For the “Break the Monolith” project we used the metaphor of splitting a boulder. Each bolder has natural “fault lines” along which it splits far more easily than if you just try to cut through the middle. An existing code-base is the same; there are natural divisions of data and functionality and it is important to find these rather than using force to chop along pre-chosen boundaries. The iterative refactoring approach supports discovery of these natural boundaries. These boundaries are almost always equivalent to domain boundaries - and are almost always important for a performant system (minimal inter-component communication).</p>
+
+<p>Splitting tables, splitting DAOs, and splitting business functions to untangle concepts from multiple subdomains is the majority of work in this approach. However it is necessary work - something that would need to be done even if a “greenfield rewrite” had been undertaken for the new subdomain, as it is also necessary to remove the equivalent code from the old codebase and add integration with the newly-created component anyway. However the refactoring approach allows this work to be done iteratively, rather than as a “big bang” - and avoids the dangers of having made wrong decisions in the new component that make such rework impossible.</p>
+
+<p>In some cases, remote endpoints already offered by the monolith also happen to match the domain boundaries, in which case the endpoints can simply be moved. However it is not uncommon for existing APIs to return (or sometimes modify) data belonging to multiple subdomains - the one being factored out now, and others that are currently still in the monolith. In such cases we convert the endpoint in the monolith into an “integration api” for backwards compatibility; that code calls both the new component/subdomain and the (implicit) subdomains still in the monolith. This does of course have performance implications; that call to the new component is a ReST call ie another hop. However this is only temporary. In some cases, clients are eventually rewritten to use the new subdomain/component’s APIs directly and the temporary endpoint can then be removed. Alternatively the endpoint might be useful long-term in which case it is moved up to the bff/integration layer of the overall architecture (in a separate task some time after go-live of the new component). Most important, though, is that the refactoring work never changes an existing API, ie the work never forces any clients to be updated; the cross-team work required for that makes project planning far more complicated.</p>
+
+<p>During the refactoring process, code is moved piece-by-piece. This can result in calls from code still in the monolith (not yet moved) to code which has been moved. Such calls are initially simply normal method calls. When it becomes clear that certain calls really are inter-domain/inter-component calls (ie the calling code won’t be moved to the new component) then these are replaced with calls using reflection APIs via a helper class. And these reflection-based calls are then eventually extended with a feature-toggle that allows these reflection-based calls to be replaced by ReST calls to a “real” deployed instance of the new component.</p>
+
+<p>Note however that building a microservice system with heavy use of synchronous calls between components leads to a slow and unstable system. Such calls should only be done at appropriate points. In fact, we are attempting to avoid such calls completely - at least within “business logic layer” components. In our goal architecture, components belong to layers<sup id="fnref:layers" role="doc-noteref"><a href="#fn:layers" class="footnote" rel="footnote">3</a></sup>: client, integration-layer, business layer, infrastructure layer (database/messagebroker/etc). Synchronous calls are allowed between layers, but not within a layer. In particular, components in the business layer (which is what we are mostly talking about here) do not make synchronous calls (ReST or otherwise) to other components in the business layer. Where a component needs access to data held by another component we use <a href="/2023/02/architect/">distributed read models</a>. The only exception is for those “backwards-compatibility” ReST endpoints in the original monolith - and as noted those are only temporary. These toggle-based call wrappers therefore really only apply to such backwards-compatibility endpoints in our case. However even if you choose to use synchronous integration between subdomains more than we chose to do, the same approach should work.</p>
+
+<p>When refactoring, we try to follow normal agile conventions. Changes are small, with developer work branches typically open only for a few hours to a few days before being merged back into the “main” (release) branch. Code is moved stepwise, a few classes at a time, rather than in large chunks. One colleague described this process as like playing the <a href="https://en.wikipedia.org/wiki/Mikado_(game)">Mikado game</a> in which you have to extract a stick from a pile without moving the others; there is certainly an art in determining which classes to move next in order to produce reasonable-sized changesets.</p>
+
+<p>The resulting code-base can be compiled in two different ways:</p>
+
+<ul>
+  <li>As a monolith with all existing functionality, by linking together all modules except module “application” from the new component.</li>
+  <li>As a standalone new component by linking together new component module “application” with the new business-logic, persistence, and remote-endpoints modules plus a few other supporting/framework modules shared with the monolith.</li>
+</ul>
+
+<h1 id="monolithic-remnants">Monolithic Remnants</h1>
+
+<p>As mentioned early in this article, the monolith being discussed also contains presentation code in the form of JSPs and taglibs. While not heavily used (most users interact with the reactive-web interface or use mobile apps), it is needed for some use-cases.</p>
+
+<p>As components are factored out, calls from the presentation layer to logic which is being moved are simply replaced with ReST calls. This results in the original presentation tier iteratively becoming a regular pure web tier application.  At the end of the refactoring, it will consist solely of presentation-logic which calls business-layer components via ReST. It can then be rewritten, or just left as is, depending upon whether a rewrite makes financial sense.</p>
+
+<p>As noted earlier, such calls are actually directed via a helper class that initially uses reflection to invoke the target code, but can also make ReST calls using a feature-toggle. This allows the application to run relatively efficiently while factoring-out is in progress, while allowing the UI to switch over to using the new component once it has been successfully deployed in production.</p>
+
+<h1 id="migrating-data-and-going-live">Migrating Data and Going Live</h1>
+
+<p>It is recommended to deploy the new component into the production environment with a reasonably recent copy of relevant data, but do not route any user requests to it. The component can then be tested by making direct calls to its remote endpoints. It can also potentially be tested by using client applications which set a specific attribute (eg an http header) that causes requests to be routed to the new system. Once the system has been deployed and tested, it is necessary to ensure it has all the latest data before truly going live, ie having real user requests routed to it.</p>
+
+<p>One of the nice benefits of preserving all existing APIs when splitting component out of a monolith is that switchover to the new system does not affect users.</p>
+
+<p>A core concept of microservices is that each service/component has its own database. Therefore once the code is ready, it’s necessary to do data migration. There are several possible approaches:</p>
+
+<ol>
+  <li>Stop the system, copy all data, restart with the new component active.</li>
+  <li>Disable writes to datasets being migrated (ie go read-only for related functionality), copy data, enable new component.</li>
+  <li>Copy data, enable new system, copy data again.</li>
+  <li>Have original system write to both original and new database.</li>
+  <li>Do real-time replication of data via some kind of change-data-capture.</li>
+</ol>
+
+<p>Option 1 is certainly the easiest, if your system usage allows it. There are various existing tools to do such migrations, or a dedicated program can be written to read from the original database and write to the new one. In our case, the monolith is in use 24 hours per day, so there is no period in which this kind of migration could occur.</p>
+
+<p>Option 2 is worth considering; it is often the case that users would accept certain functions being read-only for a few hours. For example, not being able to update their user profile is something that users might accept. This kind of behaviour can be added under control of a <a href="https://en.wikipedia.org/wiki/Feature_toggle">feature toggle</a>; switch the toggle on then migrate data, then redirect requests to the new system - at which point the feature once again supports updates.</p>
+
+<p>Option 3 requires some way of tracking changes to specific tables; using database triggers to record the keys of updated records is the most obvious and reliable way. Data can then be copied, requests can be redirected to the new system, and then any records which were updated in the original system since that copy started can be copied in a second pass. This approach is particularly useful when data-migration takes a long time. This does leave open the possibility that some data appears to revert to an older state for a short period of time, but that may be acceptable in many cases. The window for this “data regression” can be reduced by making multiple “data-copy” passes before enabling the new component (copying only data changed since the previous pass). Note that when tracking changes it is only necessary to record the ids of the <em>aggregate roots</em> which have been modified, ie triggers may need to be applied to multiple tables but they often only need to record (in some “audit table”) the ID of the root entity which the modified row is associated with, not the key of the row being changed. The entire entity can then be replicated from the original to the new system, rather than having separate replication processes for each table.</p>
+
+<p>Option 4 can potentially be applied from within remote endpoints of the original system; when an endpoint updates the system then <em>first</em> make a remote call to the corresponding endpoint of the new component and then call the local code. The result is that updates get applied to both systems - though there is a significant performance impact. This needs to be combined with option 1 or 2 in order to have a base dataset in the new component. Alternatively the original system (monolith) can connect directly to the underlying database for the new system; in the suggested iterative refactoring approach the corresponding DAOs are part of the monolith’s codebase after all.</p>
+
+<p>Option 5 can be implemented at different levels. When the new component’s database is of the same type and has similar/identical schema to the original system then native database replication tools can be used to mirror tables. However this is somewhat unlikely; the process of extracting a subdomain almost always results in changes to the database schemas - and in our case to using a completely different database provider. There are higher-level tools (eg Kafka Connect) which can deal with such mappings, but doing this is complicated. The most flexible but also most complicated/expensive approach is to track DB changes (eg via triggers) in the original system and for code to generate an event-stream which the new component consumes to keep its data up-to-date. I would recommend this approach only where absolutely necessary, due to the effort required.</p>
+
+<p>One benefit of options 4 and 5 is that the original and new systems can be run in parallel for an extended period of time, with the original monolith as the “primary” system; tests can then be executed to verify that the new component has correctly processed all incoming data. However if the refactor-not-rewrite approach is used (as described above) then this approach isn’t really necessary; the new component’s code is almost identical to the code performing the same functionality in the monolith - just linked to a different set of startup code. Actually in our case, as we were also changing the underlying database (necessary due to licensing conditions for the monolith’s database), there were some differences in the persistence layer - but the business logic implementation was identical.</p>
+
+<p>An important option to consider is whether “rollback” to the original system is required. We did need to do this in the case of one component go-live; the component was found to have performance issues when under production load. This required a day or two to resolve, so requests were routed back to the original system (the monolith). This did mean updating the monolith’s database with changes that had been written to the new component’s database during the period when it was live. Options 1 and 2 are rather dangerous to apply in the reverse direction (completely replace the original database with data copied from the new system). Option 3 (tracking db changes) can be used, ie copy back only changes which occurred in the new system. Options 4 and 5 can also be applied in reverse, but require a large amount of code which will be thrown away as soon as activation of the new component is considered successful.</p>
+
+<p>None of this is particularly unique to this project, and I’m sure there are plenty of articles/guides/tools available that describe how to do such data migration tasks. From experience, I can state that option (3) worked well for us.</p>
+
+<h1 id="project-planning-and-estimation">Project Planning and Estimation</h1>
+
+<p>We are not trying to create every new component at once. Instead we have at most two concurrent projects creating subdomains by refactoring the monolith. Once a component “goes live” as a standalone process, then the next component is started. The order in which projects are being done is chosen to optimise business benefit; those subdomains which change the most (or where big changes are expected in the near future) are given higher priority - though of course staff availability is also a major factor.</p>
+
+<p>Measuring the amount of code already moved is relatively easy - just count classes or lines of code in the new modules. Estimating the amount of work still to be done is somewhat harder. It is possible to review all remote endpoints of the monolith at the start of a project and estimate how many of those endpoints belong to the new subdomain; the number moved so far can then be measured. However in practice a lot of work needs to be done in the persistence and business logic areas before any remote endpoints can be moved - and then once that groundwork has been done many endpoints can rapidly be migrated. Counting endpoints is therefore not a great measure to use. In our case, the company was committed to breaking the monolith and it was known to be a multi-year project, so simply counting subdomains factored out was acceptable without tracking progress for individual subdomains in detail.</p>
+
+<p>One benefit of the iterative approach is that work can be paused at any time when higher-priority business needs exist; the code is always in a releasable state and the work done so far is integrated into the main branch and therefore doesn’t “get stale”. However this also turned out to be a disadvantage, as business owners of projects proved very effective at getting their short-term projects assigned higher priority than the long-term refactoring. The project made much better progress once it was agreed to dedicate a fixed-size pool of developers (typically 3) from each team to the “break the monolith” project.</p>
+
+<p>As architects, we were deeply involved in the work - and often joined the teams to do refactoring work for weeks at a time. This allowed us to understand the issues that were being encountered and work in partnership with the experts in each subdomain to find appropriate solutions.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>I’ve worked on a number of “refactor an existing system” projects over the years - and many of them have been complete failures.</p>
+
+<p>The project I’ve been talking about in this article uses a step-by-step approach, carefully limiting the complexity of the work. While the project isn’t complete, several components have been successfully factored out of it so far. We have also seen increased deployment frequency for the new components. I would therefore consider this approach a success, and would apply it again to similar projects in the future.</p>
+
+<p>One important context for the decisions we made is that the existing codebase was still maintainable and deployable. It had its problems, but was not a complete catastrophe; in particular although it wasn’t modularised by subdomain, it had reasonably good <em>technical layering</em>. We also didn’t need to change language or platform; the existing codebase ran on a Java Virtual Machine and we were happy to continue with that. If the original codebase had been Cobol for example, then the traditional strangler-pattern involving rewrites of existing functionality might have been a more tempting approach - though I would still recommend preserving all existing APIs, and carefully considering how to remove old code from the original system. Modularising the old system (by subdomain) before starting the rewrite might actually be worth doing, both to simplify removing of code later, and to clarify requirements and domain boundaries.</p>
+
+<h1 id="further-reading">Further Reading</h1>
+
+<ul>
+  <li>
+<a href="https://martinfowler.com/articles/break-monolith-into-microservices.html">Zhamak Dehghani/Thoughtworks: How to break a Monolith into Microservices</a> - an excellent article, and one largely consistent with the approach described in this article (though I would disagree with the default strategy of rewrite rather than refactor, as discussed above).</li>
+  <li><a href="https://techbeacon.com/app-dev-testing/how-break-apart-monolith-without-destroying-your-team">Matthew Skelton: How to break apart a monolith</a></li>
+  <li><a href="https://samirbehara.com/2018/09/10/monolith-to-microservices-using-strangler-pattern/">Samir Behara: Monolith to Microservices using Strangler Pattern</a></li>
+  <li><a href="https://www.ibm.com/garage/method/practices/code/chunking-strategy-strangler-pattern/">IBM Garage: Break the monolith: Chunking strategy and the Strangler pattern</a></li>
+  <li><a href="https://www.appdynamics.com/blog/engineering/how-to-avoid-antipatterns-with-microservices/">AppDynamics: How Anti-Patterns Can Stifle Microservice Adoption</a></li>
+  <li><a href="https://blog.christianposta.com/microservices/the-hardest-part-about-microservices-data/">Christian Polta: The Hardest Part About Microservices: Your Data</a></li>
+  <li><a href="https://blog.christianposta.com/microservices/the-hardest-part-of-microservices-calling-your-services/">Christian Polta: The Hardest Part About Microservices: Calling Your Services</a></li>
+</ul>
+
+<p>See also the Microservices section of the <a href="/architecture/links">architectural links page</a> on this site.</p>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:bug-compatible" role="doc-endnote">
+      <p>Every bug is someone’s feature - as explained by <a href="https://www.hyrumslaw.com/">Hyrum’s Law</a> and <a href="https://xkcd.com/1172/">XKCD</a>. <a href="#fnref:bug-compatible" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:ddd-boundary" role="doc-endnote">
+      <p>This is in fact one of the benefits of <a href="https://martinfowler.com/bliki/MonolithFirst.html">starting any project as a monolith</a>. <a href="#fnref:ddd-boundary" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:layers" role="doc-endnote">
+      <p>It is interesting that layering within a codebase is often better replaced with something like ports-and-adapters aka <a href="/architecture/hexagonal">hexagonal architecture</a> aka clean architecture. However (for us at least) a <em>component layering</em> which roughly mirrors the traditional module-layering seems appropriate. <a href="#fnref:layers" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/breaking-the-monolith/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

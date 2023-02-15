@@ -1,0 +1,713 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Introduction to Data Vault for Data Warehousing</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Introduction to Data Vault for Data Warehousing</h1>
+    <aside>First published on: November 28, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>This article gives an overview of the core concepts of the <em>Data Vault</em> method for building a data warehouse.</p>
+
+<p>This is an extension to my <a href="/programming/dwh-intro">earlier article on data warehousing</a>. You might also find my <a href="/programming/dwh-dimensional">article on dimensional modelling</a> helpful.</p>
+
+<p>This article assumes you (the reader) are familiar with relational databases, entity-relationship modelling, sql, reporting tools, computer networks, and client/server architectures.</p>
+
+<h1 id="information-sources">Information Sources</h1>
+
+<p>This article is primarily a summary of the content of the official book on the Data Vault method:</p>
+
+<blockquote>
+  <p>Building a Scalable Data Warehouse with Data Vault 2.0, Linstedt, Olschimke, publisher: Morgan Kaufmann 2015  (649 pages)</p>
+</blockquote>
+
+<p>Not only is that book hundreds of pages long, but the bibliography also contains hundreds of references to further sources - reading all these references would be a year’s work. This article is just one (long) page; it should therefore be clear that a lot of detail has been left out. This article is intended to give only an overview, to let you decide whether learning more about Data Vault is relevant for you. It is also my personal notes on the subject, in case I need to refer to them later…</p>
+
+<p>In short: data warehousing is a complex business; the following info just sets the scene..</p>
+
+<p>The Data Vault book is not as well written as <a href="https://www.amazon.com/Data-Warehouse-Toolkit-Definitive-Dimensional-dp-1118530802/dp/1118530802/ref=mt_paperback">Kimball’s book on data warehousing</a> (though that is a high goal). In particular, the first “overview” chapter is a bit waffly. The DV book also has poor formatting (appears to be a common problem with books from Morgan Kaufmann publishing house), and includes many examples (and screenshots) based on Microsoft products from the year 2014 - now rather dated, and a little annoying if you are not intending to use Microsoft products. In particular, chapter 11 and 12 are half full of MS product screenshots. Yecch. However the content is worth battling through the presentation issues for.</p>
+
+<p>I would recommend reading both the Kimball and Data Vault books - the Kimball book for its excellent presentation of the issues of data warehousing, and of dimensional modelling, and the Data Vault book for its very interesting and potentially superior approach.</p>
+
+<h1 id="why-data-vault">Why Data Vault?</h1>
+
+<p>Data warehousing has a long history; companies have been interested in centralizing and reporting over “all their data” for a long time. Two different design philosophies have been dominant for a long time: the Inmon approach (aka CIF or DW2.0) and the Kimball approach. Data Vault is a relatively recent alternative, but has become quite popular.</p>
+
+<p>The Data Vault approach is defined in a set of books by its inventor, Dan Linstedt. The Data Vault books describe “the data vault warehousing approach” which consists of:</p>
+
+<ul>
+  <li>Data Vault Methodology</li>
+  <li>Data Vault Modeling</li>
+  <li>Data Vault Architecture</li>
+  <li>Data Vault Implementation</li>
+</ul>
+
+<p>The Kimball DWH methodology also addresses all of these areas - ie neither methodology is limited to just a data model (representing entities and relationships).</p>
+
+<p>The name “Data Vault” is trademarked, and may be used only with permission. Anything that calls itself “Data Vault” is therefore an “official” product - unlike “dimensional modelling” for example, which is just a descriptive term. However Data Vault is a design pattern for data warehouses; it isn’t necessary to buy any specific products or tools to use the concepts.</p>
+
+<p>Like Kimball and Inmon, Data Vault recommends that end users be provided with “data marts”, each of which contains a subset of the available data, selected for their specific interests and represented using dimensional modelling principles to make it easier to write reports. Unlike Kimball (and like Inmon), Data Vault recommends an extra data tier.</p>
+
+<p>In a Kimball DWH, data comes from the upstream source into an ETL processing phase (which Kimball calls the “back room”) and is then written into a data mart in dimensional form. There may be storage within the ETL/backroom area, but this is only temporary “working” storage; long-term data persistence is done in the data marts. The overall DWH is the union of all data marts.</p>
+
+<p>The Data Vault approach differs from the Kimball approach by adding an extra layer:</p>
+
+<ul>
+  <li>upstream data is processed via ETL logic which might involve temporary tables (as with Kimball)</li>
+  <li>data is then written into a master database in “data vault format” called the <em>Raw Vault</em>
+</li>
+  <li>and then data is exported from the <em>Raw Vault</em> into data marts</li>
+</ul>
+
+<p>In a Kimball DWH, the data marts are the master storage, and losing one is a serious problem. In Data Vault (and the Inmon approaches), the data marts are not the master data storage, and can in fact be discarded and regenerated if necessary.</p>
+
+<p>Note that in both cases, users see just the data marts, and these are based on dimensional modelling principles to make life easy for users who write reports against the available data.</p>
+
+<p>Having a central DB of course increases the amount of storage needed - data is stored both in the central store and one (or more) data marts (but see later for info on “virtual data marts”). It also means that a database technology is needed which scales to “all the data” - unless the central store is sharded across multiple DBs which makes things somewhat more complex.</p>
+
+<p>However having a “master store” which does not need to be in “easily queryable form” provides a number of advantages. The exact form chosen by Data Vault (hubs, satellites and links) solves a lot of common DWH problems related to:</p>
+
+<ul>
+  <li>handling invalid data in the input</li>
+  <li>handling multiple upstream sources of data that are related to “the same entity”</li>
+  <li>handling schema changes in upstream sources</li>
+</ul>
+
+<p>Inmon appears to recommend a similar “mid-layer” called the Operational Data Store, holding data in 3rd normal relational form. However Inmon’s books and articles are so vague it is not entirely clear how this central data store works. The Data Vault books are very clear and comprehensive on this topic.</p>
+
+<p>The remainder of this article looks at what this intermediate form (hubs/satellites/links) is, what advantages it brings, and what complexity it adds.</p>
+
+<h1 id="data-vault-20">Data Vault 2.0</h1>
+
+<p>The original Data Vault approach (documented in articles, books, and taught in courses) has been updated - the latest recommendations are defined as Data Vault 2.0. The primary change is a switch to using “hash keys” instead of traditional surrogate keys; this allows more parallelisation in the ETL phase - which is in turn important for very large datasets. I am not sure what other changes exist between DV1 and DV2. This article discusses DV2.0 only.</p>
+
+<h1 id="data-vault-architecture">Data Vault Architecture</h1>
+
+<p>The overall architecture of a Data Vault-based data warehouse consists of:</p>
+
+<ul>
+  <li>a staging area which does not store historical info and does not transform the input data except basic type-mappings</li>
+  <li>a warehouse layer in data vault model format</li>
+  <li>one or more data marts</li>
+  <li>an optional operational vault - a vault-format database within the DWH to which external processes are granted read/write access</li>
+  <li>a “managed self-service BI with ability to write to the data warehouse” - not clear to me what this means</li>
+</ul>
+
+<p>The warehouse layer consists of:</p>
+
+<ul>
+  <li>a <em>raw vault</em> – the core data store</li>
+  <li>a <em>metrics vault</em> – information about DWH-internal processes such as ETL</li>
+  <li>a <em>business vault</em> – cache of post-processed raw data “after business rules have been applied”</li>
+  <li>a <em>meta mart</em> – metadata about the DWH</li>
+  <li>an <em>error mart</em> – holds information about ETL processing errors</li>
+</ul>
+
+<p>where things called “vault” are in data-vault (hub/satellite/link) format.</p>
+
+<p>The Data Vault architecture works fine with NoSQL systems as inputs. The book claims that NoSQL can also be used for the <em>vaults</em> in the core DWH - but the book does not provide any details (“out of scope”) and assumes a traditional relational DB.</p>
+
+<p>Splitting the transform from source to mart into two phases (ie introducing the raw vault in the middle) allows data transforms to be split into two categories:</p>
+
+<ul>
+  <li>normalisation applied during initial import into raw vault (“hard business rules”)</li>
+  <li>normalisation applied during export to data mart (“soft business rules”)</li>
+</ul>
+
+<p>This means less data needs to be rejected in the first phase. Data that cannot be imported at all is tricky to deal with. It is also possible to change “soft rules” later and re-export data; changes to hard rules can be more difficult to deal with.</p>
+
+<p>The staging area is generally expected to be a relational DB whose tables mirror the schemas of the sources of incoming data, but with all columns nullable and without foreign keys/indexes to enable loading of malformed data. The tables are expected to be cleared after each successful ETL run. Alternatively, data can be imported directly from files into the <em>raw vault</em> without being loaded into any intermediate database. The Data Vault book describes the staging area in more detail.</p>
+
+<p>The Raw Data Vault stores data in three kinds of structures: hubs, links, and satellites. These can be relational tables, but other options are possible. In general, for each “data type” represented in the incoming data (eg customer) there is:</p>
+
+<ul>
+  <li>a hub table for that data-type containing one significant column: the “business key”. Each instance of that data-type has one row in the corresponding hub table</li>
+  <li>link tables which join hubs together, ie represent relations between entities. A link refers to two or more hubs.</li>
+  <li>one or more satellite tables; each table provides a set of attributes associated with a hub entity or a link entity.</li>
+</ul>
+
+<p>This representation is covered in more detail below.</p>
+
+<p>The raw data vault contents (like all “vaults”) is not expected to be accessed by users.</p>
+
+<p>A Data Vault DWH also contains an Error Mart and Meta Mart. Errors that occur during data processing are written into the Error Mart, and end users are permitted to query the Error Mart to do analysis on data quality and other issues. The Meta Mart contains “data catalog” type information about the contents of the raw data vault, information about ETL processes, backup logs, parameters for “business rules” applied to data, etc.</p>
+
+<p>The DWH optionally includes a Metrics Vault which ETL processes write statistics to. If it exists, there may also be a corresponding Metrics Mart which end users are permitted to query for information on ETL performance.</p>
+
+<p>The DWH optionally includes a Business Vault which ETL populates with data that results from applying “business rules” to the contents of the Raw Data Vault. This is then used as an aid when exporting data to a Data Mart - ie the Business Vault cleanly separates derived data from raw data. A Business Vault can be recomputed from the Raw Data Vault when needed. In general, transformations are applied as part of the export to a data mart; however when a transformation is complex and is needed for more than one data mart it should instead be applied earlier with the results stored (cached) in the Business Vault.</p>
+
+<p>Datastores named “Vault” are in “data vault model” form (hub/satellite/link) and are not intended for use by business users. Datastores named “Mart” use dimensional-modelling, multidimensional modelling (OLAP cube), 3rd normal form modelling, or some other form which is suitable for business users. The various “Vaults” are usually within the same physical database. Each “Mart” may be in the same physical database or be in a physically separate system.</p>
+
+<p>While business users never access “Vault” datastores, it can sometimes be useful to allow external applications to access them. Such applications must be able to handle data in data-vault-model layout (hub/satellite/link). In particular, an external Master Data Management system may be set up to replicate data directly into the data vault, bypassing the staging area (as long as that system is data-vault-model-compliant). User-facing systems that display historical data might also be implemented via direct access.  The fact that incompatible changes to a schema for a data-type are handled by creating a new satellite rather than modifying an existing one makes this more stable. Real-time ETL (rather than batch-mode) may also write directly into the data vault model, bypassing staging. The subset of the raw data vault that is externally accessible is referred to as the Operational Vault.</p>
+
+<p>Ideally, users draw data from a Data Mart. However it takes time to set up a data mart and export the appropriate data into it; it is therefore considered valid to allow users to query the Raw Data Vault directly. Such users will need to be able to cope with the Data Vault model, and handle the fact that business rules have not been applied to the data (though data in the Business Vault may help) - or wait for a more user-friendly Data Mart customised for their needs to be built. This approach should be considered more as allowing users to do their own ETL from the vault into their own data-mart than as running analysis on the vault contents - the vault strucuture is not suitable for analysis.</p>
+
+<p>The methodology section of the Data Vault book (relating to management of the DWH development process) is a bit thin, vague, and has no original insights. However that may be partly because I come from a software development background where many of the principles of agile development are long considered standard practice - it might be different for teams used to developing BI solutions.</p>
+
+<p>The Data Vault book assumes the use of Microsoft database products. It also assumes that the Raw Data Vault fits onto a single SqlServer instance (with multiple disks). There are assertions in the book that “this design can scale”, but no details. It also assumes that traditional database backup strategies can be used. IMO, these assumptions are not valid for modern businesses - data no longer fits on a single server in most cases. Note that it does assume “data marts” (aka information marts) are physically separate.</p>
+
+<h1 id="data-vault-modelling">Data Vault Modelling</h1>
+
+<h2 id="overview-1">Overview</h2>
+
+<p>This section looks specifically at how the <em>raw vault</em> (or any other vault) actually stores the imported data.</p>
+
+<p>A Data Vault stores data in three kinds of structures: hubs, links, and satellites. These can be relational tables, but other options are possible. In general, for each “data type” represented in the incoming data (eg customer) there is:</p>
+
+<ul>
+  <li>a hub table for that data-type containing one significant column: the “business key”. Each instance of that data-type has one row in the corresponding hub table.</li>
+  <li>link tables joining the hub to other hubs, ie representing relations between entities. A link refers to two or more hubs.</li>
+  <li>one or more satellite tables; each table provides a set of attributes associated with a hub entity or a link entity.</li>
+</ul>
+
+<p>There is a separate satellite table for each data-source that provides information about instances of that hub or link. If a source changes its data-format in a non-backwards-compatible way, then that also results in a new satellite table. Each satellite table has appropriate columns to hold data coming from its upstream source - plus a foreign key to the corresponding hub or link entry.</p>
+
+<p>This data model makes it very easy to import data about the same entity from multiple upstream sources - there are no “column conflicts” because each source has a table customised to hold whatever data that source provides. The hub entry ties together data from different sources related to the same instance of a particular type (stored in satellites). Because the data has very few transformations applied to it (just char-set conversions, date conversions, etc) there is no danger of data-loss due to incorrect (or changing) transformation rules. It is also a representation suitable for auditing.</p>
+
+<p>Interestingly, this data model looks something like a graph database, with nodes (hubs), edges (links) and attributes (satellites).</p>
+
+<p>Data vault contents is not expected to be accessed by users. In special cases, external applications may have rights to read (or even write) directly into tables associated with a Vault - eg the Master Data Management system might be configured to replicate its data directly into the DWH.</p>
+
+<h2 id="hubs">Hubs</h2>
+
+<p>Each hub has <em>exactly</em> the following columns (no more and no less):</p>
+
+<ul>
+  <li>a “hash key” (rather than a surrogate key)</li>
+  <li>load date (date this entity was first seen)</li>
+  <li>record source (system this entity was first seen in)</li>
+  <li>a single “business key” (a single-component or compound key used by source systems to identify this entity)</li>
+  <li>an optional “last seen” timestamp</li>
+</ul>
+
+<p>The hash-key is a fixed-length string, generated via an algorithm such as MD5 or SHA-1. It is a hash of the “business key”.</p>
+
+<p>Sometimes the same entity has different “business keys” in different source systems. In this case, a hub entry is made for each different business key, then one of the entries is selected as the “master” and a “Same As” link entry is created to map each “secondary hub” to the “master” one. If the business keys “overlap” (eg are sequential integers) then the two hub entries need to be in different hub tables, with the link pointing between the tables. When not, it is simpler to put both hub entries in the same hub table - with a different value for “record source”. Of course the best solution of all is to update the source systems to use consistent keys for the same entities.</p>
+
+<p>The “last seen” field can be used to create deltas from full dumps of an upstream system; when only one upstream system provides that data entity, then an update can “touch” the <code>last_seen</code> date of each record as it is read (even when identical). After the load, any record with an old <code>last_seen</code> value has been “deleted”.</p>
+
+<p>Because a hub has no “business attributes” at all, except for the business key, it does not need versioning, and is almost immune to schema changes in upstream systems. This stability is really useful - a hub record acts as a point around which changing data associated with a specific entity is organised without itself ever being updated. The only time a hub entry is deleted is when that entity is completely purged from the data warehouse. All attributes for a hub are held by associated satellite records - which can have any schema necessary to represent upstream data.</p>
+
+<h2 id="links">Links</h2>
+
+<p>Links typically model:</p>
+
+<ul>
+  <li>transactions (events)</li>
+  <li>associations</li>
+  <li>hierarchies</li>
+  <li>redefinitions</li>
+</ul>
+
+<p>Links do not have time-stamps - other than a “load date” for auditing purposes. They represent a relation that was true at some time - regardless of whether that relation is still valid. Satellites attached to the link may include a start-date indicating when that link was active (with the start-date of other satellite entities providing an implicit end-date).</p>
+
+<p>There are two kinds of links:</p>
+
+<ul>
+  <li>Historized aka normal aka versioned</li>
+  <li>Nonhistorized aka transactional (I think “immutable” would be a better name)</li>
+</ul>
+
+<p>Historicized links represent things whose attributes might vary over time; this doesn’t mean that a link record is ever updated but instead that a new record might be inserted into the database which represents “more recent data”, making the existing record “of historical value only”. Associations and hierarchies are usually of this type.</p>
+
+<p>A historized (aka normal or versioned) link has <em>exactly</em> the following columns (no more and no less):</p>
+
+<ul>
+  <li>a “hash key”</li>
+  <li>load-date</li>
+  <li>record source</li>
+  <li>hash-keys for two or more hub entries</li>
+  <li>zero or more “dependent child keys” aka “degenerate fields” (special-case optimisation)</li>
+</ul>
+
+<p>The hash-key is a hash of the business keys of all hub entities that the link references, plus all dependent child keys.  A normal (mutable) link then has one or more satellites attached to it, showing the attributes valid from a specific timestamp. When these attributes change, another satellite is added with a new timestamp. Note that the original attributes are not modified; the link is “logically mutable over time” but the older data is never lost.</p>
+
+<p>A nonhistoricized (transactional aka immutable) link has attributes that never change over time. Events (eg financial transactions) are often of this type - an event binds various entities and cannot “unhappen”. The recommended way to model this is a (link, satellite) pair similar to the above, but where the link also has a “transaction id” field that uniquely identifies the actual event/transaction (and is part of the hash-key).  Alternatively, the satellite attributes can be added directly to the link table - but this makes such tables different in structure from other links, complicating ETL somewhat.</p>
+
+<p>A link table is capable of modelling many-to-many relations.</p>
+
+<p>The 3rd-normal-form approach of representing a many-to-one relation is to embed the foreign key of the “one” as a column on the “many”. However if the relation becomes many-to-many in the future, this is a significant change to the data model. Links represent any relation (regardless of multiplicity) with an approach similar to the one used in 3rd-normal-form for representing many-to-many relations (external table for relations) and thus avoids the need for such changes. In addition, one-to-one relations in normal form require the reference at one end, ie is implicitly a directional relation. The external link table does not make it necessary to choose which “end” of the relation is more important. Of course, the normal-form approach ensures that what is intended to be a 1:1 or 1:N relation is not incorrectly transformed into an inappropriate N:N - but such concerns are not important in a data warehouse where data is added in a very controlled way.</p>
+
+<p>Like hubs, links have no “business attributes” at all, except for the business key. They do not need versioning, and are almost immune to schema changes in upstream systems. The only time a link entry is deleted is when a referenced entity is completely purged from the data warehouse. All attributes for a link are held by associated satellite records - which can have any schema necessary to represent upstream data.</p>
+
+<p>The “dependent child keys” is a special case due to the fact that links often represent “events” (similar to fact tables in dimensional modelling). Because events (facts) can be extremely frequent, and are naturally immutable, it makes sense to push the event properties into the link record itself rather than store them in a separate satellite - though (unlike with satellites) this is problematic if the schema of those events change.</p>
+
+<h2 id="satellites">Satellites</h2>
+
+<p>A Satellite provides attributes for a hub or link. A satellite may have time-stamps defining the period over which those attributes apply.</p>
+
+<p>The primary key of a satellite is a compound value:</p>
+
+<ul>
+  <li>the hash-key of the entity it references (only ever one)</li>
+  <li>and a “load-version”</li>
+</ul>
+
+<p>The “load-version” is usually the timestamp at which the ETL run started; as no single ETL run should create multiple satellite records of the same type for the same entity, the (key, date) pair should be unique. However when a single ETL batch contains multiple “versions” of the same record (eg as happens when loading historical data) then an appropriate date should be chosen. And when the satellite is being populated “in real time”, eg via a change-data-capture feed, then the “load-version” should be (or include) an incrementing sequence number.</p>
+
+<p>A satellite entry only references one hub or link, and no other table ever references a satellite. Satellite tables are never hierarchical, and never shared between entities.</p>
+
+<p>A satellite record has as many additional attributes as needed to hold properties provided by the source. Optionally, an additional “hash difference” field may be stored which is a hash of all other fields in the satellite, in order to help with “delta detection” for data during ETL.</p>
+
+<p>When an update for a satellite record is received from upstream (ie new attributes for an entity), then a new satellite record is inserted - existing records are never deleted or updated. The new record contains a complete copy of all the relevant attributes, ie makes the old record “obsolete”. When a satellite associated with some source system has many fields, and some of those fields change often, then it may be appropriate to define multiple satellite tables to reduce churn in the non-changing properties.</p>
+
+<p>Unlike dimensional modelling, it is acceptable to have nulls (missing data) or other “invalid values” in satellite columns; in fact the data should be “as raw as possible”. Nulls and invalid values are acceptable as DataVault is an intermediate format, not one intended for actual reporting. Data quality control/validation is primarily done when exporting to data marts rather than importing into the raw vault.</p>
+
+<p>If an upstream system alters its data format such that it no longer fits into the existing satellite table(s), then new satellite tables should be defined to hold the new data. The older tables should be left as they are. The ETL export to data marts will need to be adapted to deal with the change in format.</p>
+
+<p>Every hub and every link entity is expected to have at least one satellite entity referencing it.</p>
+
+<h2 id="hash-keys">Hash Keys</h2>
+
+<p>In Data Vault 2.0, each hub, link, and satellite record has a primary key which is created via <code>hash(business-key)</code>. This is quite different from the usual approach of using an incrementing integer as a surrogate key.</p>
+
+<p>The use of hash-keys instead of surrogate keys means that federated systems are easier to build. Two disconnected databases which have the same business keys will derive the same hash-key independently.</p>
+
+<p>This use of hashes is somewhat similar to how the Git distributed version control system works. SHA-1 produces a 20-byte (160-bit) output; due to the “birthday paradox” the chances that two different business keys hash to the same value is somewhat more than 1 in <code>2^160</code> but still a large number - somewhere around <code>10^24</code> records would be needed in the database to get a 50% chance of collision. Assuming 1 million (<code>10^7</code>) records per second, this 50% threshold is reached after one thousand million (<code>10^10</code>) years. In short, collision is not a problem - it is more likely that the data-center gets hit by a meteorite.  There are a few deliberate attacks that someone could use to deliberately find two different business keys that hash (using SHA-1) to the same value - but those still require extreme amounts of processing power, lots of time, and the ability to then somehow inject those specific keys into the databases being loaded. Other hashes such as SHA-256 could be used if you are really worried about that.</p>
+
+<p>Having primary keys which are fixed-length fields (SHA-1 generates 20 bytes) mean that DBs can easily embed the data inline in a record. Variable-length fields are trickier to deal with.  And when the business-key is a compound of multiple fields, both time and space can be saved. The even distribution of outputs also means that hash-based partitioning of data results in a nice even spread of data across partitions. When concatenating fields before hashing, always use a field-separator.</p>
+
+<h2 id="handling-changing-data-and-schemas">Handling Changing Data and Schemas</h2>
+
+<p>Data Vault represents changing data significantly differently than the “SCD” approaches for dimensional modelling. Hubs, links and satellites never change - instead a change is represented by a new satellite entry. Satellite entries have a start-date only; an “end date” is implicitly implied by the start-date of another satellite entity linked to the same hub/link with a newer start-date.</p>
+
+<p>Hub, Link and Satellite tables are never updated, except:</p>
+
+<ul>
+  <li>when setting “last seen” on a hub or link entity to help with detecting records deleted upstream</li>
+  <li>when setting an “end date” on a satellite entity to help with performance of export to data marts</li>
+</ul>
+
+<p>A link referencing two hubs represents data “per x and y”. Sometimes upstream systems increase the grain of measurements, providing data “per x, y and z”. This is dealt with in Data Vault by defining a new link table with references to the new set of hubs. The old link table, with its associated data, can now be considered as a “rollup”. When exporting to a data mart, some tricky decisions need to be made about how to deal with this but at least at the <em>raw vault</em> level, the “real truth” of the situation is clearly preserved.</p>
+
+<p>Enhancing a link in this way is equivalent to adding a new dimension to a fact table in dimensional modelling - it increases the granularity of the data. However dealing with the situation when using a dimensional model as the “master data store” is more complex.</p>
+
+<p>Hierarchical relations between entities of the same type can be represented simply as links with “parent” and “child” references. This is simpler and more natural than dimensional modelling’s “bridge tables”. Relations modelled in the DataVault way cannot be easily queried from BI tools but that is not the role of Data Vault storage.</p>
+
+<h2 id="naming-conventions">Naming Conventions</h2>
+
+<p>Often “hub” tables are named with one of the following forms:</p>
+
+<ul>
+  <li><code>H_{Name}</code></li>
+  <li><code>HUB_{Name}</code></li>
+  <li><code>Hub{Name}</code></li>
+  <li><code>{Name}Hub</code></li>
+</ul>
+
+<p>Usually, link and satellite tables follow similar conventions.</p>
+
+<h2 id="data-vault-compared-to-dimensional">Data Vault Compared to Dimensional</h2>
+
+<p>Although Data Vault is not a dimensional model, I think it may still be useful to think about which tables have “bounded size” (dimensions) vs “unbounded size” (facts).</p>
+
+<p>Hubs always represent “dimensions”. Links also represent “dimensions”, except for “non-historicized links” which are roughly equivalent to fact-tables.</p>
+
+<h1 id="exporting-to-data-marts">Exporting to Data Marts</h1>
+
+<p>End users are not expected to access vault-format stores directly; instead after data has been imported into the <em>raw vault</em>, it is then exported into <em>data marts</em> (possibly with the help of the Business Vault).</p>
+
+<p>Implementing this export is non-trivial, but well documented in the Data Vault book. It may take the form of code to be executed, or simply be a series of (moderately complex) SQL statements performing “<code>insert into .. select ...</code>” to copy data from the <em>raw vault</em> and <em>business vault</em> into a target data mart.</p>
+
+<p>There are a couple of techniques recommended by the Data Vault book to make this process easier and more efficient.</p>
+
+<p>Creating a “type 1” dimension table (one without history) in a data-mart is reasonably easy:</p>
+
+<ul>
+  <li>truncate existing table</li>
+  <li>use something like “<code>insert into .. select .. from SomeHub h left join SomeSatellite s on h.hashkey = s.hashkey where s.ValidTo is null;</code>”</li>
+</ul>
+
+<p>The select chooses just the most recent satellite for each hub. In practice, data might be drawn from multiple hubs.  The joins are only on the hash-key, and filtering only on the valid-to, so this could also be feasible in a NoSQL database that has indexing only on the primary key.</p>
+
+<p>A “MERGE” SQL statement might be an alternative when the DB supports it.</p>
+
+<p>Creating a “type 2” dimension table (one with history) is somewhat more complex. The book example uses two subselects, a union, 3 joins and a where-not-exists.  The critical fields again appear to be the hash-keys and the load-dates, so possibly still feasible without indexes other than the primary key.</p>
+
+<p>To optimise export to data marts, a PIT (Point In Time) table can be generated for any link or hub table where multiple satellites exist. For each hub/link entity (ie hash key), and for each “date of interest”, a single row in the PIT exists which contains the key of all satellite records “active at that date”. The key of a satellite record is a compound of (parent-hash-key, load-version) - ie the table has 2 columns for each satellite table. The “hash key” is of course the same for each record (they all reference the same parent) - except when there is “no such record”, in which case the (hash, date) pair should point to a “ghost record” (dummy record) with default values. Each satellite table should have a single “ghost record”; the hash is typically set to all-zeros and the load-version set to the lowest possible value.  Such tables are part of the “business vault” - and are derived from the real data (ie can be regenerated at any time).</p>
+
+<p>PIT tables are also useful in the ETL phase.</p>
+
+<p>Similarly to PIT tables, a “bridge table” can be generated to summarize links. These are often implemented as “materialized views” of complex SQL statements.</p>
+
+<h1 id="virtual-data-marts">Virtual Data Marts</h1>
+
+<p>Sometimes it is possible to provide a specific data mart (subset of the data vault for a specific set of users or use-cases) simply via <em>database views</em> (a “virtual data mart”). Of course this assumes that all the data needed in a specific data mart is within a single database in <em>raw vault</em> form; the data mart is then presented within that same database instance as a separate schema containing views rather than concrete tables.</p>
+
+<p>A hybrid of traditional and virtual data mart is also possible; PIT and bridge tables can be materialized (ie are physically stored rather than being views executed on-demand) while all other tables are views defined in terms of the PIT and bridge tables. This provides performance that sits half-way between:</p>
+
+<ul>
+  <li>completely materialized data marts, ie where all data has been copied (disk-space-intensive, dev-intensive, but fast to query)</li>
+  <li>completely virtual (view-based) data marts (cpu-intensive, slow to query but fast and flexible to develop and without disk storage costs)</li>
+</ul>
+
+<p>Materialized PIT/bridge tables are considered to be part of the <em>Business Vault</em>.</p>
+
+<h1 id="metadata">Metadata</h1>
+
+<p>The DataVault book recommends keeping metadata on data and processes within the data warehouse environment. Metadata includes:</p>
+
+<ul>
+  <li>data structure and location</li>
+  <li>data meaning</li>
+  <li>data owner (data steward)</li>
+  <li>data source system (location, system version)</li>
+  <li>upload schedules</li>
+  <li>exception handling rules</li>
+  <li>business rules/parameters for data validation</li>
+  <li>data volumes (for capacity planning)</li>
+  <li>data quality</li>
+  <li>process execution control and logs</li>
+</ul>
+
+<p>Normally, there is no MetaVault (hubs and satellites) but instead a “mart” with such data. It might be a relational DB in relational normal form, or in dimensional form, or might be a “logical” source of data managed by the ETL tool rather than a raw DB.</p>
+
+<p>Often, ETL code is written to be almost completely parameter-driven, where the parameters are in the Metadata store.</p>
+
+<h1 id="staging">Staging</h1>
+
+<p>Staging is the component where data is accepted from upstream systems, and fed into the ETL processes that load the <em>raw vault</em>.</p>
+
+<p>Sometimes data is imported from upstream systems directly into a relational database within the staging area. In this approach, the target database schema usually contains no foreign-key constraints between tables, so that tables can be loaded from upstream systems in any order. (Note: using hashes for references when pushing data into the <em>raw vault</em> also helps with out-of-order loading, as synchronized sequence number allocation between referrer and referee is not needed).</p>
+
+<p>Processing of data (upload to raw vault) is usually done as something equivalent to “<code>for each record in the primary table joined against other tables ...</code>” - which means that indexes on tables are usually not helpful, and only slow down the initial insert into staging.</p>
+
+<p>Hash keys and hash-diffs (hashes over all attributes) can be computed early.</p>
+
+<h1 id="loading-the-raw-data-vault-from-staging">Loading the Raw Data Vault from Staging</h1>
+
+<p>The Data Vault book describes two basic approaches to moving data from a relational DB in the staging area into the <em>raw vault</em>:</p>
+
+<ul>
+  <li>using a sequence of SQL statements</li>
+  <li>using code (possibly generated via a dedicated ETL tool)</li>
+</ul>
+
+<p>The logic in either case is roughly the same.</p>
+
+<p>Step 1: retrieve all business keys from the source data (staging) and ensure that the corresponding hub entities exist (create if not).</p>
+
+<p>Step 2: create links similarly to hubs</p>
+
+<p>Step 3: create satellite records</p>
+
+<ul>
+  <li>try to omit obvious duplicate records in the staging area, for performance</li>
+  <li>retrieve the latest satellite for the same referenced entity (hub or link)
+    <ul>
+      <li>do a join from the staging data against the satellite table where load-end-date is null (ie is “current”)</li>
+    </ul>
+  </li>
+  <li>drop record if current is identical to staging (possibly use hash-diff for this)</li>
+  <li>otherwise insert new satellite</li>
+</ul>
+
+<p>Step 4: deactivate obsoleted satellites</p>
+
+<ul>
+  <li>set load-end-date on satellites where new versions were inserted, in order to mark them as “not active”
+    <ul>
+      <li>an UPDATE statement with nested select can do this, as can windowing functions</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Note that computation of hash-keys has been done during loading of data into staging.</p>
+
+<p>Note also that in step 3, the “drop obvious duplicates in staging” and “drop record if current” are required only if the data in staging is a “complete dump” of the upstream database. If the upstream system instead delivers a reliable “delta” only (ie only records which have changed) then these steps are not necessary.</p>
+
+<p>In general, hubs and links are not deleted. When an entity (hub entry) can become “no longer active” then a satellite table should be used to indicate whether the associated hub is active or not. The same approach is used for links. The satellite usually contains start and end dates (note that as usual, satellite entries are not <em>modified</em> after being created). Such a satellite is called an “effectivity satellite”.</p>
+
+<p>Sometimes records do need to be deleted for privacy reasons. That is a special case, and is done in the obvious way.</p>
+
+<p>Detection of deletes needs to be done with care: when the upstream system is just delivering “dumps” (snapshots) of the complete state, then there are various reasons why a particular entity might not be included in a dump <em>other</em> than it having been deleted upstream.  These include a dump being only partial due to the upstream system running out of disk space, or a bug in the ETL process.</p>
+
+<p>Deleted records can be detected obviously when a “change data capture” stream is provided. When a snapshot is provided, then either:</p>
+
+<ul>
+  <li>find the difference between the set of keys in staging and the set of keys in the raw data vault, or</li>
+  <li>have a “last seen” date or etl-version on each hub and link, and update this during ETL then find the keys that have not been updated. Normally, hubs and links are not updated in a data-vault, but this special timestamp is just an “ETL helper” field and not actually part of the user data. If such update is a problem, a separate table could be used to collect the updated keys.</li>
+  <li>combine the above: anything with a recent “last-seen” date can be skipped; compare the remaining set of records with the set of keys in the incoming data.</li>
+</ul>
+
+<p>Important: as much data as possible should be loaded into the raw data vault - data quality tests should be applied <em>after</em> loading, not before. The raw DV should hold “all the facts, good bad and ugly”. Of course business keys need to be populated. In addition, satellite tables have properly-typed columns eg date-typed instead of string-typed (using char-type for everything would mean extremely poor performance and complicated selects). That means that some type-conversions will not be possible and such records must be written to a “rejected/error” destination (an “error mart”) rather than being loaded. However such destinations are hard to deal with - import data into the raw data vault wherever possible. This means most/all columns should be nullable or have a special representation for incoming null values, etc., and data quality is applied at a later phase.</p>
+
+<p>A note regarding processing of “dumps” vs “deltas” as inputs. Obviously it is preferable from a performance point of view when the upstream systems provide only records which have changed within a table (a “delta”), rather than a complete copy of a table. However it is important to remember the difference between dimensions and facts in dimensional modelling - ie bounded vs unbounded datasets. Transactional events (facts) almost always have an associated timestamp (the point in time at which the event occurred), and thus upstream systems can very easily provide a “delta” (all records since the last ETL run). Reference data (dimensions) do not naturally have an associated timestamp (only some systems bother to keep a <code>last_modified</code> timestamp on such data) and therefore are often provided as full-dumps. However dimensions are bounded and thus small; inefficient processing is not so important here. Fact tables (representing events) may be very large - but will almost always be deltas.</p>
+
+<h1 id="data-vault-primary-strengths">Data Vault Primary Strengths</h1>
+
+<p>Now that the principles of Data Vault have been covered, it is useful to look at a couple of things it does very well in comparison to other approaches.</p>
+
+<h2 id="handling-invalid-data">Handling Invalid Data</h2>
+
+<p>One central requirement for any DWH is that data held for reporting purposes needs to be <em>clean</em>. Reports run against tables that have weird values, or “non-normalised” values, will behave badly and the result is unhappy users. However data <em>does</em> often arrive with weird or non-normalised values - so what can be done?</p>
+
+<p>In a system where the “master storage” is also the base for reporting (Kimball-style), the data <em>must</em> be cleaned or discarded before landing in long-term storage - and thus any original not-acceptable values are permanently lost. Of course data warehouses are just a cache for data from upstream “operational” systems. However often these upstream systems keep only a minimum of historical data, for cost and performance reasons. It may therefore not be possible to go back to them and “reimport” old data when needed.</p>
+
+<p>In a system where there is an extra tier of storage, data can be stored <em>as it was received</em> (even if invalid), and cleaned when being exported to data marts.</p>
+
+<p>The difference is particularly important when rules related to how data should be “cleaned” change over time. With the data mart as master storage, the original representation is gone and retrospective changes to data-cleanup are not possible. Auditing of the data-cleaning process is also not possible. With the data vault approach, incoming data is kept “as original as possible”; it can then be <em>re-exported</em> to data marts using different cleanup rules when necessary - and there is better traceability from the data-mart “clean” versions back to the original data.</p>
+
+<p>A related problem is that “clean” data may mean different things to different users. Having “raw data” in the <em>Raw Vault</em> allows different transformation rules to be applied as the same data is exported to different data-marts for different use-cases.</p>
+
+<p>Business users often state that a data warehouse should be a “single version of truth”. Data marts can provide this. However such data has been curated/cleaned/modified/selected. Data Vault’s internal storage (raw vault) instead provides a “single version of facts” - ie a wide range of corporate data in one place, raw and (relatively) uninterpreted.</p>
+
+<h2 id="handing-multiple-sources-for-the-same-entity">Handing Multiple Sources for the same Entity</h2>
+
+<p>When two upstream systems describe the same entity (at a business level), then a “hub table” is defined for that entity type (one row for each entity). The hub table has little more than a key. For each upstream system, a “satellite table” is then created which holds the properties of that entity as provided by that upstream system, plus a foreign key reference to a record in the corresponding hub table. When N upstream systems refer to the same entity, the data-vault will hold 1 “hub” entity, and 1 entry in N different satellite tables which all reference the common hub entity to tie them together.</p>
+
+<p>This makes the first step in ETL relatively easy - there is no need to figure out how to map different interpretations of specific attributes to a shared form. It also provides excellent traceability as the data in the data-vault is very close to the upstream form. Some normalisation is usually applied, eg converting characters to a standard character-set, representing dates and numbers in the same form, etc. However no mappings should be done which will “fail”; this minimises the chance that data simply cannot be imported, ie an import process must discard a record or reject a whole import batch.</p>
+
+<h1 id="data-quality">Data Quality</h1>
+
+<p>Ideally, upstream sources would provide perfect data. Next best option is for the data warehouse to detect when upstream sources are delivering bad data, and work with the business to get the problem fixed upstream (the consumers of the poor-quality data in the warehouse are the best people to estimate the costs of this problem and put pressure on upstream to fix it; the IT department can detect problems but neither estimate the financial impact nor apply pressure at business level).</p>
+
+<p>And the final option is to patch over the problem during data-warehouse ETL processes.</p>
+
+<p>Sometimes the correct action is to omit a bad record; in other cases to set an “invalid” column, and in others to replace invalid values with valid ones.</p>
+
+<p>The nice thing about Data Vault is that just about any data can be imported into the <em>raw vault</em>; cleaning up data is done during the export to a data mart instead. Where such cleanup is time-consuming, or needed by multiple data-marts (or both) the results of the cleanup can be written to the Business Vault.  A satellite table containing raw records with data quality errors can be “mirrored” by a different satellite table in the Business Vault with cleaned-up data. This derived satellite table can in some cases be implemented as a database view of the original table (a “virtual satellite”).</p>
+
+<p>A “data quality tool” can be used to define the rules that valid records must comply with, and what action to take when the rule is broken. The tool may then generate necessary code to derive a “cleaned” table from the original.</p>
+
+<h1 id="master-data-management-mdm">Master Data Management (MDM)</h1>
+
+<p>In order to get consistent reporting across multiple departments within a business, it is necessary to standardize the data. Costs and profits cannot be compared when gathered in different time-periods, using different tax rules, and using different product codes. The usual solution to this is to take each subset of reference data that should be standardized (whether time-periods, tax codes, or product lists), assign a single group to be responsible for that reference data, and have their “master” version of the reference data be replicated to each department rather than having the departments maintain their own versions of this reference data. This process is called <em>Master Data Management</em>.</p>
+
+<p>Master data management is not really <em>part</em> of data warehousing - but a data warehouse is less useful when a company does not have good Master Data Management practices established. It is not particularly useful for a DWH to gather corporate-wide data in one place if the inconsistencies between departments make it hard to compare the values anyway. It is therefore common for Master Data Management processes to be established at the same time as a DWH is built.</p>
+
+<p>WARNING: Kimball points out that Master Data Management is inherently a very political process - it requires changing the way that various departments gather/represent data. It therefore needs to be driven by management that have the authority to make the upstream providers of DWH data actually accept and integrate the new master data feeds into their systems. The DWH architects and developers themselves are unlikely to have such business-level authority and will just be ignored.</p>
+
+<p>Master Data Management usually has change-tracking controls to provide an audit trail of when master data was changed and by who. Some MDM systems have a kind of simplified entity-relationship-modelling tool built in so that non-technical users can define data structures and relations to hold master data without knowing SQL. These diagrams are also useful for browsing the available data; MDM also acts as a kind of “data catalog” for enterprise-wide standard tables of data. A specific entity may be owned by a “data steward” who is responsible for choosing the “official master data records”, eg lists of products or partner-companies.</p>
+
+<p>None of the above has anything specifically to do with Data Vault; it is a common problem for all data warehouses. However there is one thing that a DWH can do to help. Creating a data mart in normal form may be useful as a first step towards master data management: first gather the data available in multiple systems, and make the union of this data available in normal form. Then dedup the data and store the result as “the master version” (such processing may take a lot of manual work). Then resubmit the master version back to the upstream systems as the official, deduped version.</p>
+
+<h1 id="datavault-on-a-big-data-solution">DataVault on a big-data solution</h1>
+
+<p>The fact that hubs, links, and satellites have no logical need to change data once written is very friendly for many big-data systems (eg Hive, BigQuery).  DV2.0 does suggest that mutable “last seen” dates for hubs and links can be useful for detecting records deleted upstream - but maybe that could be stored in something like HBase or a simple key/value datastore instead. It also suggests that “end dates” on satellite records is useful for export for data-marts; again there may be an external solution for that. These date-values are not part of the data model, just optimisations for import and export processes which can be implemented via other mechanisms if needed.</p>
+
+<p>The primary problem when using big-data solutions (whether hive-like or hbase-like) is that DV2.0 does lots of lookups by key, while big-data solutions typically have very limited indexing ability (partitioning and clustering for hive, single rowkey for hbase).</p>
+
+<p>I am not yet sure how easy it would be to get Data Vault running on a non-relational storage layer; please let me know if you have good references on this topic!</p>
+
+<h1 id="quotes">Quotes</h1>
+
+<p>Here are some interesting quotes from the Data Vault book:</p>
+
+<blockquote>
+  <p>A key difference of the Data Vault model, as compared to other modeling techniques, is that it allows bad data into the (Raw) Data Vault and applies business rules <em>after</em> loading the Data Vault. 
+eg “same-as links” for deduplicating data, and “data quality services” such as replacing nulls with default values or clipping/discarding extreme values.</p>
+</blockquote>
+
+<blockquote>
+  <p>The goal of Data Vault 2.0 loads is to cover all data, regardless of its quality (“the good, the bad, and the ugly”).</p>
+</blockquote>
+
+<blockquote>
+  <p>Business users expect that the data warehouse will present correct information of high quality. However, data quality is a subjective concept. Data that is correct for one business user might be wrong for another with different requirements or another understanding of the business view. There is no “golden copy” or “single version of the truth” in data warehousing. Just consider the business user who wants to compare reports from the data warehouse with the reports from an operational system, including all the calculations, which might differ. In many cases, data warehouse projects divert from the calculations and aggregations in operational systems due to enterprise alignment or to overcome errors in the source system. This is not a desired solution, but is reality grounded in the fact that the data warehouse often fixes issues that should have been fixed in the source system or the business processes. In any case, the data warehouse should provide both “versions of the truth.” That’s why Data Vault 2.0 focuses on the “single version of the facts.”</p>
+</blockquote>
+
+<h1 id="related-products">Related Products</h1>
+
+<p>Attunity provides “model driven datawarehousing”. You define models, and attunity creates ETL code. Supports central data warehouse in 3NF or DataVault layout.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Data_vault_modeling">Wikipedia: Data Vault Modeling</a></li>
+  <li>
+<a href="https://www.youtube.com/watch?v=QbBmYMaQFec">Renz/Weed: Data Vault Data Warehousing Architecture</a> - Video presentation</li>
+  <li><a href="https://www.healthcatalyst.com/database-vs-data-warehouse-a-comparative-review">Database vs Data Warehouse</a></li>
+  <li><a href="https://www.talend.com/blog/2015/03/27/what-is-the-data-vault-and-why-do-we-need-it">Talend: What is the Data Vault</a></li>
+  <li><a href="https://www.vertabelo.com/blog/technical-articles/data-vault-series-data-vault-2-0-modeling-basics">Graziano: Data Vault 2.0 Modelling Basics</a></li>
+  <li><a href="http://tdan.com/data-vault-series-1-data-vault-overview/5054">TDAN: Data Vault</a></li>
+  <li><a href="http://tdan.com/applying-top-down-big-picture-models-to-data-vault-part-2/23763">TDAN: Top Down Modelling</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/dwh-datavault/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

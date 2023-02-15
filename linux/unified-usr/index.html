@@ -1,0 +1,595 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - The Unified Usr Approach</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>The Unified Usr Approach</h1>
+    <aside>First published on: August 25, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="intro">Intro</h1>
+
+<p>On a Linux install, should top-level directories {<code>/bin</code>,<code>/sbin</code>,<code>/lib</code>} hold only “system critical executables/libraries” (traditional approach), or should they simply be symlinks to corresponding subdirectories under <code>/usr</code> where the whole set of executables/libraries are (“unified usr”)?</p>
+
+<p>The <a href="http://www.freedesktop.org/wiki/Software/systemd/TheCaseForTheUsrMerge">Case For The /usr Merge</a> blog posting from 2014 discusses this issue (also known as “usrmove” or “unified usr”).  I’ve been working my way through the <a href="http://www.linuxfromscratch.org/">Linux From Scratch</a> tutorial, which started me thinking about this topic too. I’ve come to the conclusion that the unified approach is a good idea; the old approach works but there are some use-cases where unified is better. Below are my reasons, and some extra information on the related topics of <code>initramfs</code> and the Filesystem Hierarchy Standard.</p>
+
+<p>This article expands on <a href="http://www.freedesktop.org/wiki/Software/systemd/TheCaseForTheUsrMerge">The Case for the Usr Merge</a> and the <a href="http://fedoraproject.org/wiki/Features/UsrMove">Fedora UsrMove</a> plus info from various email threads with some additional background info and <a href="https://en.wiktionary.org/wiki/for_what_it%27s_worth#English">FWIW</a> my personal opinions.</p>
+
+<h1 id="who-should-care-about-this-issue">Who should care about this issue?</h1>
+
+<p>Frankly, this affects very few people. For 99.99% of Linux users, it makes no difference whatsoever whether executables are in a “unified usr” or not. Even for 95% of professional sysadmins it makes no difference.</p>
+
+<p>It does affect the following people:</p>
+
+<ul>
+  <li>sysadmins who are administering large datacenters</li>
+  <li>distribution maintainers, ie people who write package-specs for distributions</li>
+  <li>people who regularly install software on their Linux systems “from source” using upstream-provided makefiles (includes all Linux From Scratch users, but not Gentoo etc AFAIK)</li>
+  <li>embedded systems developers</li>
+  <li>sysadmins who recover “broken” computers by booting into rescue-mode and reconfiguring the system</li>
+  <li>people with very old computers where the root filesystem is on a tiny storage device (yes, this is a trivial percentage, but such people can be found on any email thread on this topic)</li>
+  <li>and those who are just curious about operating systems and how they work</li>
+</ul>
+
+<h1 id="the-issue">The Issue</h1>
+
+<p>A running system always has one “root filesystem” (aka “rootfs”) which starts at <code>/</code>, has some directories, and possibly some files in those directories. Other filesystems may be mounted on top of directories defined in the rootfs or on directories defined by other mounts.</p>
+
+<p>So where are executable files such as “sh”, “ping”, “vi”, and the libraries they depend on, stored?</p>
+
+<p>The traditional answer is to define directories {<code>/bin</code>,<code>/sbin</code>,<code>/lib</code>} on the root filesystem, and put “critical” files (eg sh) into those directories. The <code>/etc</code> directory is also always on the root filesystem. Non-critical applications (eg “vi”) <em>either</em> go into subdirs of local directory <code>/usr</code> directly (ie the files are really held on the rootfs), or go onto a separate filesystem that gets <em>mounted</em> on <code>/usr</code>.</p>
+
+<p>The problems with the traditional approach are:</p>
+
+<ul>
+  <li>It isn’t easy to decide which apps are “critical” and which are not, for example should wireless networking be included or not?</li>
+  <li>It is significant work for a distribution to ensure the packaging for all “critical” applications puts the files in the correct locations</li>
+  <li>It is easy to make mistakes such that applications in the “critical” category accidentally rely on files in the “non-critical” category, particularly in rarely-used corner cases and in race-conditions.</li>
+  <li>The rootfs is a mix of potentially sharable executables and host-specific files (eg <code>/etc/hostname</code>); this mixing makes it impossible to share the executables with other systems via common network storage</li>
+  <li>Executables which are stored on a centrally-managed (shared) <code>usr</code> filesystem but depend on libraries on a host-local rootfs are difficult to update</li>
+</ul>
+
+<p>The difficulty in deciding what qualifies as “critical” means that different distributions make different decisions, which can be confusing for users. It also means that unusual ways of mounting a separate usr fileysystem may be supported on some systems (which included the required software in the “critical” category) but not on others (which pushed the required software into the usr filesystem). There is nothing here that can’t be worked around, but it isn’t elegant.</p>
+
+<p>The “critical depends on non-critical” point is a <em>theoretical problem only</em> for systems where the <code>usr</code> directory is on the root filesystem, and a <em>real</em> (though fairly rare) problem for systems with a separate usr filesystem.</p>
+
+<p>The “corner cases” referred to above are executables that reside on the rootfs but accidentally depend on libraries, helper apps, or configuration which is on the usr filesystem. Such misconfigurations for commonly-used tools are quickly detected, but problems with less-frequently-used can be missed. Debian had such a problem that existed for years before being fixed.</p>
+
+<p>The “race conditions” referred to above are cases where the init sequence starts some background application from the rootfs, then continues on towards the step of mounting <code>/usr</code>. If that background application happens to depend on data or a helper application that is only on the usr filesystem then the data might or might not be present, depending on how fast the background process works with respect to the rest of the init process. This can result in a system that <em>usually works but not always</em>. Simple cases are where an executable on the rootfs requires a dynamic libarary that is under <code>/usr</code>. There are trickier cases such as udev or system daemons started via init; these can rely on <em>scripts</em> which can in turn depend on external files or executables. One possible kind of breakage is booting a system with a USB device attached, and that device not initially working because at the time udev processed it the necessary config was not available; if unplugging/replugging such a device after boot resolves the issues then looking where the udev-related config for that device is stored would definitely be worth-while!</p>
+
+<p>Blog posting <a href="http://freedesktop.org/wiki/Software/systemd/separate-usr-is-broken/">separate usr is broken</a> states that Fedora15 had <em>at least 23</em> problems related to the above “corner case”/”race condition” problems. Presumably other distributions also have (or had) such problems too; I couldn’t find any such information with a short search. I did try the recommended command on a debian8+systemd install, and found a bunch of errors including:</p>
+
+<ul>
+  <li>virtualbox: will fail to mount USB devices present at boot (<code>/etc/udev/rules.d/60-vboxdrv.rules</code> relies on <code>/usr/share/virtualbox/..</code>)</li>
+  <li>usbmux: AFAICT, an Apple iphone which is connected via USB at boot will not be correctly handled (<code>/lib/udev/rules.d/39-usbmuxd.rules</code> tries to run <code>/usr/bin/pkill ...</code>)</li>
+  <li>ceph distributed filestore: if the kernel detects an rbd device before usr is mounted, then the ceph service-file tries to execute <code>/usr/bin/ceph-rbdnamer</code> which won’t end well..</li>
+  <li>alsa sound-card handling that runs for each <code>/dev/controlC*</code> node also looks potentially broken (state saved on previous shutdown potentially not restored)</li>
+</ul>
+
+<p>I would guess that the sysv-init scripts that the same packages install will have similar problems, ie this isn’t a systemd-specific problem. So this issue is indeed real and not limited to Fedora.</p>
+
+<p>None of these are <em>huge</em> points - except for admins of large data-centers where having “centrally managed executables” is fairly important. However all of these are nice-to-haves. So can we do better? In the “unified usr” approach:</p>
+
+<ul>
+  <li>All (distribution-managed) executables go on the same filesystem, without bothering to distinguish between critical and non-critical</li>
+  <li>If sharing of executables with other systems isn’t needed, then the executables can simply go on the rootfs (and an initramfs is optional)</li>
+  <li>For clustered environments, all executables are on a <em>usr</em> filesystem that gets <em>mounted</em> on top of the rootfs (via a mandatory initramfs)</li>
+</ul>
+
+<p>Of course for backwards compatibility, the executables need to be reachable via the traditional paths such as <code>/bin</code>, etc. Regardless of what is mounted where, a few appropriate symbolic links can take care of that.</p>
+
+<p>There are of course some disadvantages to the unified approach too; the tradeoffs are discussed later.</p>
+
+<h1 id="to-partition-or-not-to-partition">To Partition or not to Partition</h1>
+
+<p>Let’s get one simple question out of the way first: when installing Linux, should a separate usr filesystem be created or not? For most people, the answer is simply <em>no</em>; a separate usr filesystem brings nothing for normal desktop users. It is mostly applicable for:</p>
+
+<ul>
+  <li>server clusters in datacenters, where the usr filesystem is on network storage and shared across multiple servers</li>
+  <li>embedded systems (maybe)</li>
+</ul>
+
+<p>Note that it can be a good idea to separate mostly-stable files from rapidly-changing files. The <code>/var</code> directory is intended to hold changing (“variable”) data; allocating a separate filesystem for mounting on <code>/var</code> can be a good idea. Alternatively, <code>/var</code> can be left on the root filesystem and <code>/usr</code> split off into a different filesystem instead (also achieving a split of stable/variable) but that is more complicated.</p>
+
+<h1 id="the-filesystem-hierarchy-standard">The Filesystem Hierarchy Standard</h1>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard">Filesystem Hierarchy Standard (FHS)</a> is a fairly short document, and well worth reading. It has some relevance to this discussion, so here is a quick summary.</p>
+
+<ul>
+  <li>
+    <p><em>static</em> files are those that do not change without sysadmin involvement. variable are “not static”</p>
+  </li>
+  <li>
+    <p>sharable are files that can be shared between hosts; nonsharable are host-specific.</p>
+    <ul>
+      <li>
+<code>/opt</code>, <code>/usr</code> are static and sharable</li>
+      <li>
+<code>/var</code> contains variable files</li>
+      <li>
+<code>/boot</code> and <code>/etc</code> are obviously host-specific</li>
+    </ul>
+  </li>
+</ul>
+
+<p>To summarize, the traditional concept is that:</p>
+
+<ul>
+  <li>
+<code>/bin</code> and <code>/sbin</code> hold “critical” applications (even though they otherwise qualify as <em>static + sharable</em>)</li>
+  <li>
+<code>/usr/bin</code> contains apps that are <em>not</em> needed for boot/recovery, ie are sharable</li>
+  <li>
+<code>/lib</code> holds libraries needed for boot, while <code>/usr/lib</code> holds all others</li>
+  <li>
+<code>/bin</code> holds apps that may be of use to normal users as well as sysadmins, eg “sh”</li>
+  <li>
+<code>/sbin</code> holds apps that only a sysadmin would need; <code>/sbin</code> is not on the PATH for normal users</li>
+</ul>
+
+<p>Kernel modules go in <code>/lib/modules</code> because they are <em>not sharable</em> (like <code>/boot</code>).</p>
+
+<p>Strangely, <code>/lib</code> also contains a number of <em>executable apps</em> and configuration files (ie it is not just libraries). The problem is that the FHS forbids any subdirectories at the top-level, and in <code>/bin</code> or <code>/sbin</code>, which leaves only <code>/lib</code> as an option. Examples of unusual (non-library) things found under ‘/lib`:</p>
+
+<ul>
+  <li>
+<code>/lib/udev</code> has “rules files”, executables</li>
+  <li>
+<code>/lib/systemd</code> also has config files and many executables</li>
+  <li>firmware binary blobs</li>
+</ul>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard">Wikipedia: FHS</a></li>
+  <li><a href="http://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch03s02.html">FHS: top-level directories</a></li>
+  <li><a href="http://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html">FHS: contents page</a></li>
+</ul>
+
+<h1 id="usage-in-current-distributions">Usage in Current Distributions</h1>
+
+<p>The very early releases of Unix, as made by its original inventors Thompson and Ritchie, had executables partitioned into “critical” (stored under <code>/bin</code> and friends) and non-critical (stored under <code>/usr</code>). Some later derivatives such as Solaris got rid of this distinction. Most Linux distributions have followed the traditional approach but several (most prominently Fedora 17 and later) no longer bother with this separation.</p>
+
+<p>The unified approach was discussed extensively for Debian v8 (Jessie). The email thread showed significant support for unified-usr, and from several well-known debian developers. However a number of changes would be required to the initramfs-generating tools and to <code>dpkg</code>. Debian v8 does not have a unified usr structure (yet).</p>
+
+<p>The current LFS book (v7.7) sets up the traditional “split”.</p>
+
+<h1 id="the-traditional-layout">The Traditional Layout</h1>
+
+<p>In the traditional approach, the bootloader is responsible for somehow mounting the root filesystem. After that point, the root filesystem has enough software to manage the rest of the boot process alone, including mounting any other filesystems which are required. In particular, <strong>if</strong> “non-critical” software has been pushed out to a separate usr filesystem, then the root filesystem must be capable of mounting that usr filesystem.</p>
+
+<p>The kernel started by the bootloader must somehow be able to mount the root filesystem (ie somehow read datablocks from the device on which it is stored, and interpret that data as a filesystem). Mounting the rootfs may therefore require kernel device driver modules, network drivers if the root filesystem is remote, decryption libraries if the root filesystem is encrypted, etc. For reasonably simple setups, the necessary support can just be compiled into the kernel. For more complex setups, or cases where a “stock kernel” is preferred, an <em>initramfs</em> is used which provides a temporary minimal userspace that can mount the root filesystem. See later for further information on initramfs.</p>
+
+<p>Usually the root filesystem also has sufficient sysadmin-specific commandline tools so that if the step of mounting the separate usr filesystem fails then basic diagnostics and recovery can be performed via an attached terminal (or maybe via SSH), and maybe backups can be restored from external storage.</p>
+
+<p>After reading various discussion threads on this topic (eg <a href="https://lists.debian.org/debian-devel/2013/05/msg00256.html">for debian8</a> and <a href="https://lwn.net/Articles/477467/">on lwn</a>), it seems that the primary reasons given for retaining the split approach are:</p>
+
+<ul>
+  <li>people want to wring every little bit of performance out of their system, want a separate usr filesystem, and consider even a minimal initramfs too big a price to pay</li>
+  <li>people are concerned about having to use an initramfs when they have a separate usr filesystem, and in particular keeping it up-to-date</li>
+  <li>people are comfortable with how things are currently done and the benefits of the unified-usr approach don’t apply to their use-cases</li>
+  <li>people are comfortable with performing “recovery” via the limited tools on a rootfs and aren’t interested in other solutions</li>
+</ul>
+
+<p>The “performance sensitive” group sometimes refer to the setup in which an embedded system has limited internal storage (yet big enough for a traditional rootfs), with the usr filesystem on an SD-card. I personally would consider this an excellent candidate for a minimal initramfs, a rootfs that just holds <code>/etc</code> and <code>/var</code> plus a unified usr filesystem on the SD-card. An initramfs has a minor boot-time performance hit, but it really is <em>very</em> small. It also requires a small amount of memory during boot - but less than the device will need during normal operation anyway, and that memory is released as soon as the root filesystem is mounted.</p>
+
+<p>Creating and configuring an initramfs is pretty simple; most distributions provide a generic one and also provide suitable tools to create custom ones when needed. Hooking one up to the boot process is a single line in the grub config file - and distro tools normally add that automatically anyway. In general, an initramfs does not have to be kept “up-to-date” unless the usr filesystem is mounted via some very unusual process - but distro tools automate this anyway. Note that an initramfs is <em>not</em> required unless a separate usr filesystem is also being used.</p>
+
+<p>It is true that many people are not affected by the problems of the traditional approach (listed early in this article); the burden is mostly on distribution maintainers to get the setup right in their package definitions. The greatest benefits of the unified approach are seen by distribution maintainers, sysadmins in datacenter environments - but also experienced occasionally by normal end-users who happen to run into mistakes made by distro maintainers.</p>
+
+<p>Although a unified approach doesn’t allow recovery tools to be present on the rootfs, there are several other alternatives for performing recovery on a broken system:</p>
+
+<ul>
+  <li>for desktop-like systems, plug in a storage device containing a “live distro” and boot from that</li>
+  <li>include the necessary recovery tools on the system’s normal initramfs</li>
+  <li>include an extensive “recovery initramfs” image on the boot partition, but don’t normally use it during boot. On boot failure, reboot the system with that initramfs active.</li>
+  <li>include a grml-rescueboot image (a simple “live distro”) on the boot partition, and on system problems boot that image</li>
+</ul>
+
+<p>It is important to remember that “I’m comfortable with the current setup” is a <em>valid</em> argument. When an experienced sysadmin knows how to use a system, then changing it has a negative impact for them even when the new system is <em>theoretically</em> better. Even for newbies an old approach can be better if they have access to more help/support/documentation for that environment.</p>
+
+<h1 id="the-unified-layout">The Unified Layout</h1>
+
+<p>Having all executable files stored under <code>/usr</code> (which might be a separate filesystem or might be a plain directory on the rootfs):</p>
+
+<ul>
+  <li>is simpler for distribution maintainers (no more deciding what goes where, and tweaking the build processes to install files appropriately)</li>
+  <li>works more reliably when installing from source-code (which almost always installs into /usr or /usr/local)</li>
+  <li>is slightly easier to understand for users and less-experienced sysadmins</li>
+  <li>has no “corner cases” in which an incorrectly configured rootfs will fail intermittently or in unusual circumstances (see “The Issue” above)</li>
+  <li>permits sharing of the filesystem holding all executables between systems (via network-mounted storage)</li>
+  <li>doesn’t require a package-manager to scatter stuff across separate rootfs and usr filesystems (yes, this already occurs with <code>/etc</code> but the fewer filesystems the better)</li>
+  <li>means apps on a separate usr filesystem never link against dynamic libraries on the rootfs (avoids potential upgrade issues when only the usr filesystem is accessable to the package-manager)</li>
+  <li>makes it possible to “snapshot” the usr filesystem to capture the entire set of executables, eg to allow rollback on upgrade failure (with the exception of <code>/etc</code>)</li>
+  <li>is mostly compatible with packaging designed for Solaris (eg some open-source software)</li>
+  <li>is mostly compatible with packaging designed for other unixy systems (with <code>/bin-&gt;/usr/bin</code>, installing into <code>/bin</code> still works fine)</li>
+  <li>makes it simple to mount the filesystem holding all executables as read-only</li>
+</ul>
+
+<p>The most important thing to note is that a “unified usr” cleanly separates sharable files from host-specific (<code>/etc</code>, <code>/var</code>, maybe <code>/boot</code>). Avoiding this mixing makes some interesting use-cases possible and simplifies other problems.</p>
+
+<p>As noted, the “snapshotting” feature above does not cover changes to <code>/etc</code> and similar directories. This means it is not bulletproof, but still useful. The cases of installing, updating and removing a package should be considered separately. It is rare that installing a package <em>overwrites</em> or <em>deletes</em> a file from <code>/etc</code>; therefore although rollback might leave some garbage in <code>/etc</code> (new files or new lines in existing files) it is not likely to break anything. Updating is similar. Removing a package usually does not remove config files, so restoring a snapshot will “undo the remove”. Using this to undo a “purge removal” will probably <em>not</em> be so successful. In the end, this should be considered a “free bonus” rather than a real feature.</p>
+
+<p>As already mentioned, having a unified <code>/usr</code> <em>and</em> having it on a separate filesystem means an initramfs is mandatory. The traditional setup could have a separate <code>/usr</code> filesystem without an initramfs. However having an initramfs is no big deal; it is a minor amount of work and brings many advantages. See later for a quick overview of initramfs.</p>
+
+<h1 id="thoughts-on-unifying-into-the-root-filesystem">Thoughts on Unifying into the Root Filesystem</h1>
+
+<p>Some have suggested that rather than having executables in <code>/usr/bin</code> and <code>/bin -&gt; /usr/bin</code> the reverse could be done: all executables in <code>/bin</code> and <code>/usr/bin -&gt; /bin</code>. This would also work, but does not cleanly separate host-specific from sharable. The sharable are (bin,sbin,lib) and the host-specific include (etc,var). The unified-usr approach ensures all sharable stuff is under one top-level directory.</p>
+
+<p>A possible solution is to have <code>/etc</code> and <code>/var</code> on separate partitions, and to have an initramfs mount each of those on top of a read-only root filesystem. AFAICT, that approach would have very similar properties to the everything-in-usr design.  On the positive side, it does result in a slightly cleaner path to the executables: one directory-lookup fewer which is nice. However IMO it seems natural for the rootfs to <em>belong</em> to the local system: the local system is “keeping control” of itself via its <code>/boot</code> partition (containing its kernel and initramfs) and local rootfs. When the local system <em>chooses</em> to mount an external filesystem and happens to choose a mount-point of <code>/usr</code>, that is its choice. Mounting a <em>rootfs</em> from elsewhere then reclaiming control by mounting a local <code>/etc</code> seems odd. This is perhaps analogous to invoking a <em>library function</em> vs using a framework and registering callbacks; the framework approach reminds me of the <a href="https://lwn.net/Articles/336262/">midlayer design antipattern</a>.  The mount-etc approach also make it impossible to add new mount-points at the root level though that isn’t very important.</p>
+
+<h1 id="data-center-environments">Data Center Environments</h1>
+
+<p>Unless you are a distribution maintainer, the benefits of a “unified usr” are most visible in large data-centres.  In this case, the usr filesystem is stored on a SAN and shared across many machines, while the rootfs is on a device attached locally to each host (or maybe is a small per-host filesystem also on a SAN). During boot, the initramfs on each host mounts the host-specific rootfs and then mounts the “usr filesystem” from the SAN read-only on <code>/usr</code>. To do updates to the usr filesystem for all servers concurrently, the system administrator can do something roughly like:</p>
+
+<ul>
+  <li>make a copy of the usr filesystem (eg via snapshot)</li>
+  <li>use a package-manager (apt, dnf, or other) to install or update the software on this filesystem. Note that:
+    <ul>
+      <li>the admin needs the corresponding “package database” files locally</li>
+      <li>the admin needs a suitable “/etc” directory which may be updated during package changes</li>
+      <li>the chroot command may be used to make the package-manager work in this scenario</li>
+    </ul>
+  </li>
+  <li>manually inspect the changes made to /etc, and if necessary push appropriate changes to all hosts via a tool like puppet/chef/etc. Most packages don’t need host-specific files in <code>/etc</code>.</li>
+  <li>make the updated usr filesystem “live” on the SAN</li>
+</ul>
+
+<p>(Warning: I’m a developer not a sysadmin; this is just my understanding of how such a process could work)</p>
+
+<h1 id="working-with-containers">Working with Containers</h1>
+
+<p>On a host that runs multiple identical containers, it can be useful for the container images to share a read-only view of the executables.</p>
+
+<p>With the “unified usr” approach, each container image gets a master usr filesystem bind-mounted (read-only of course) onto its private <code>/usr</code>, and also requires the relevant symlinks (<code>/bin-&gt;/usr/bin</code> etc). When the container image wants to use a “traditional layout” then four bind-mounts need to be established instead. This is, however, no big deal - ie AFAICT, in the container case the traditional system works fine. This is different from the clustering approach, as:</p>
+
+<ul>
+  <li>having multiple bind-mounts is still efficient while having multiple network-mounted filesystems is not;</li>
+  <li>in the container case <code>/usr</code> is expected to be mounted by the container’s host (as an initramfs would), while on real hardware the rootfs must mount it</li>
+</ul>
+
+<h1 id="cohabitation">Cohabitation</h1>
+
+<p>As <a href="https://lists.debian.org/debian-devel/2013/05/msg00412.html">Helmut Grohne pointed out</a>, it seems technically possible for distros to allow users to <em>choose</em> which approach they want. The difference in packaging is very minor - those few packages that install “critical” executables will still work fine when symlinks are in place. The only case that needs updating is where such packages then create symlinks from <code>/usr/*</code> to the critical executables outside of <code>/usr</code>; they should first check whether <code>/bin</code> is a symlink or similar.</p>
+
+<p>One impact of supporting both approaches is in testing; supporting split-directories means that somebody has to verify that no bad cross-dependencies have been introduced. Fully committing to the unified approach means such testing is unnecessary.</p>
+
+<h1 id="installing-from-source">Installing from Source</h1>
+
+<p>Most sysadmins simply use a Linux distribution in which experts pre-package software, and the admin just has to use a package-manager to install and update. In this case, the new/updated executables can be expected to be placed in the correct locations.</p>
+
+<p>However sometimes it is necessary to install or update directly from the upstream sourcecode - and some distributions (eg LFS) are primarily based this way. In this case, the sysadmin needs to be sure that the “make install” step places executables in the correct locations. With the “unified usr” approach, this generally happens automatically - just use “–prefix=/usr” and the executables will be placed in the appropriate location under <code>/usr</code>. When using a “traditional” filesystem layout, however:</p>
+
+<ul>
+  <li>there may be a <em>symlink</em> under /usr which points to the corresponding file on the rootfs; installing carelessly could overwrite this symlink</li>
+  <li>it may be necessary to manually move the installed executable out of /usr into the rootfs and then create/fix symlinks.</li>
+</ul>
+
+<p>A system using the unified layout therefore makes installing from source a little bit easier and less error-prone.</p>
+
+<h1 id="mounting-executables-read-only">Mounting Executables Read-Only</h1>
+
+<p>Some people include in their list of unified-usr advantages the ability to mount the usr filesystem read-only and thus improve security.</p>
+
+<p>When executable files are writable then a security hole can lead to a <em>persistent</em> security problem that remains even after a reboot. Truly unwritable executables is definitely a security boost.</p>
+
+<p>The traditional layout <em>does</em> support mounting the rootfs read-only (currently with some limitations). This provides some improvement in security, and in particular will prevent “oops” moments when logged in as root. However when the storage device is local to the host (ie not a network-mount) then there are various ways for an attacker who gains root provileges to mess with the content of that device anyway. A truly unwritable filesystem can be achieved with special hardware (rare), or by using <em>network storage</em>; the remote server then decides when to allow writing and an attack on the client can’t work around that.</p>
+
+<p>Placing the rootfs on a network server certainly can be done with the traditional layout. It is probably best done with an initramfs, but that’s not 100% necessary. More problematic is the fact that in the traditional layout the rootfs has a mix of host-specific files and sharable executables; the filesystem can therefore not be shared with other hosts even when the vast majority of the content (bin,sbin,lib) is identical across hosts. This point is irrelevant in some use-cases but rather important in others.</p>
+
+<p>The unified approach can achieve the same goals with less effort: the rootfs can be a local storage device and just the usr filesystem be mounted remotely. An attacker with root privileges on the host can at worst mess with the contents of the etc directory (which can itself be somewhat ugly, eg adding scripts to the init-system configuration dirs) but all executables are safely protected remotely. Of course the contents of the rootfs could also be protected by network-hosting that too, in which case the difference in effort between traditional and unified layouts is minimal.</p>
+
+<p>In summary: hosting executables on a network server that serves them read-only is a very nice security boost for “centrally managed” environments (rather than using puppet/chef/etc to manage each hosts files). It is slightly easier to achieve with a unified usr layout.</p>
+
+<p>Note: AFAIK, some advanced network storage devices can auto-detect identical files and share them in a copy-in-write manner. This may mitigate some of the problems of network-mounting traditional-format root filesystems (containing a few host-specific files) in datacenter environments (ie with lots of near-identical servers).</p>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>It has been pointed out that the distinction between <code>/bin</code> and <code>/sbin</code> is also debatable; many apps traditionally in <code>/sbin</code> are actually useful for “power” non-root users. However that’s another topic.</p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>I like the unified-usr approach. For my use-case (a plain desktop using LFS) it offers a simpler directory structure, easier install-from-source, and slightly easier setup of containers (which I use occasionally for development and experiments). The rest of the changes are irrelevant to me, as I don’t have a separate usr filesystem, and don’t network-mount anything. That’s three minor positives and no negatives. Hardly a world-changing impact but still a positive. And I can brag that my system is “cutting edge” :-)</p>
+
+<p>It’s quite interesting that it took quite a lot of research (this article is many pages long) to come to the conclusion that isn’t more, well, <em>interesting</em>. Nevertheless, I’ve learned quite a few things along the way - hope you have too!</p>
+
+<h1 id="appendix-the-var-directory">Appendix: the var directory</h1>
+
+<p>The <code>/etc</code> directory has been mentioned as a <em>host-specific</em> directory that is usually on the rootfs and thus prevents the rootfs from being shared. The <code>/var</code> directory has similar issues: it also has host-specific content. However there are some differences:</p>
+
+<ul>
+  <li>var is modified very frequently, thus raising the chance of filesystem corruption;</li>
+  <li>var can quite easily get filled to 100% by a misfunctioning application;</li>
+  <li>var is a non-trivial size (unlike /etc which just holds a few megabytes)</li>
+  <li>losing the contents of the var filesystem is often not a major problem; this depends on what is installed, and where it stores its files.</li>
+</ul>
+
+<p>This behaviour means that having a separate var filesystem is often a good idea (rather than making var just a directory on the root filesystem).</p>
+
+<p>When a separate var filesystem is used, then it is irrelevant whether the “merged usr” or traditional approach is used. However when <code>/var</code> is on the rootfs then the merged approach allows all executables to be on a separate read-only filesystem. These are exactly the same arguments as for <code>/etc</code>.</p>
+
+<h1 id="appendix-initramfsinitrd">Appendix: initramfs/initrd</h1>
+
+<p>An <a href="https://en.wikipedia.org/wiki/Initrd">initramfs</a> is an archive-file containing kernel modules, userspace executables and configuration-files that the kernel can invoke before the root and <code>/usr</code> filesystems are available. Normally, the initramfs holds just enough to mount the root and <code>/usr</code> filesystems (ie kernel modules for the relevant filesystems, possibly network drivers for mounting remote filesystems, decryption or LVM modules, etc). Some tools (eg Linux <em>installers</em> and tiny distributions such as Puppy Linux) run entirely from an initramfs, and this is also a valid option for small embedded systems.</p>
+
+<p>An initramfs is simply a cpio-format archive (like tar/zip), compressed (with gzip or bzip2) and stored on the boot-partition next to the kernel image - ie when a bootloader can read the kernel image then it can also read the corresponding initramfs image. When the bootloader is configured with such a file, it reads the entire file into memory and simply passes the address/size of this memory to the kernel as a boot-parameter. During the boot process, the kernel:</p>
+
+<ul>
+  <li>allocates some memory</li>
+  <li>formats the memory for use with the built-in trivial filesystem <code>tmpfs</code>
+</li>
+  <li>mounts this memory as a tmpfs filesystem at ‘/’</li>
+  <li>unpacks the initramfs archive into the tmpfs filesystem (using a builtin cpio unpack function)</li>
+  <li>frees the original block of memory holding the archive file</li>
+</ul>
+
+<p>The kernel then simply executes userspace application <code>/init</code> from the tmpfs at the end of its boot process. This userspace code then can do whatever it wants - but usually:</p>
+
+<ul>
+  <li>loads relevant kernel modules</li>
+  <li>mounts devtmpfs and waits for the device on which the rootfs is stored to appear</li>
+  <li>mounts the rootfs somewhere (eg <code>/mnt</code>)</li>
+  <li>invokes systemcall <code>pivot_root</code> to make the filesystem at ‘/mnt’ become ‘/’</li>
+  <li>unmounts the original tmpfs filesystem</li>
+  <li>execs file <code>/sbin/init</code> (ie the real init executable from the real rootfs)</li>
+</ul>
+
+<p>With this approach, the kernel requires only <code>tmpfs</code> (which is always built-in) and a (trivial) cpio-unpack function to mount the contents of the initramfs as a temporary rootfs. The initramfs then contains the necessary drivers to mount the <em>real</em> rootfs, and a simple “init program” (often a shell-script which relies on a shell-interpreter also on the initramfs).</p>
+
+<p>Optionally, the initramfs image can be appended to the linux kernel image file rather than having it as a separate file. This is particularly useful for developers with lots of different kernel images floating around; it prevents accidentally running a kernel with the wrong initrd (in particular one containing kernel modules compiled for a different kernel version).</p>
+
+<p>This approach cleanly isolates the kernel from the details of the rootfs and <code>/usr</code> partitions - and make it possible to support things like network-mounting, encrypted-root, root-on-lvm and other interesting combinations with a totally standard kernel that has <em>no</em> drivers at all statically linked in. Of course, this relies on the initramfs image being correctly populated with the necessary tools/drivers, but that is a simpler task than recompiling the kernel. Creating an initramfs is reasonably simple to do by hand (just create a directory with the desired tools and then create a cpio archive from it), but various tools exist to automate the process.</p>
+
+<p>Kernels for embedded systems typically link all drivers statically, so for such systems an initramfs may not be necessary. However for “desktop” systems, there are advantages (and no real disadvantages) to the initramfs approach; the system does need enough ram to hold the entire initramfs contents in memory but this is freed as soon as the real root is mounted.</p>
+
+<p>The (traditional) alternative was to compile <em>most</em> drivers as modules, but make a few static - the ones needed to mount the root filesystem at least. This then implies that the same kernel would no longer be capable of booting if the root filesystem was moved to a different technology.</p>
+
+<p>If the kernel has compiled-in drivers which need firmware, then an initramfs is also required. Initialising of compiled-in drivers will be done before the normal rootfs is mounted, but device initialisation is done earlier and drivers needing firmware will try to load it from <code>/lib/firmware</code> which doesn’t yet exist. An initramfs with the needed firmware resolves this issue - it is available and mounted <em>before</em> device-driver initialisation. This even supports holding the <em>real</em> rootfs on a device that requires firmware (including having the rootfs network-mounted where network access requires firmware).</p>
+
+<p>Note that “initrd” files are an old/obsolete form of initramfs (contain a complete ext2/ext4/etc filesystem image, thus requiring the relevant filesystem driver to be statically linked into the kernel). For historical reasons, initramfs-format files are usually stored as name <code>/boot/initrd.img-{version}</code>, even though they are not initrd-format at all. It doesn’t matter; the kernel auto-detects the format of the init-image passed to it by the bootloader.</p>
+
+<p>See:</p>
+
+<ul>
+  <li>dracut - redhat initramfs builder</li>
+  <li>yaird - debian initramfs builder</li>
+  <li>mkinitrd?</li>
+</ul>
+
+<h1 id="appendix-lfs">Appendix: LFS</h1>
+
+<p>While Linux From Scratch sets up a traditional “split” system, I simply converted the result to a merged form and it works fine. After completing the initial LFS book (using just one partition for everything), I:</p>
+
+<ul>
+  <li>moved all files from <code>/bin</code> to <code>/usr/bin</code>
+</li>
+  <li>did the same for /sbin and /lib</li>
+  <li>created symlinks <code>/bin-&gt;/usr/bin</code> etc</li>
+</ul>
+
+<p>Of course if done on a running system this must be done with great care in exactly the right order or the commandline will break. I did see a script somewhere which does this with bind-mounts and rename calls that can actually be executed from within a running system.</p>
+
+<p>I’m pretty sure that if these links are created right at the start (LFS chapter 2), then things would also work fine.</p>
+
+<p>And if you do have a separate usr partition then an initramfs will be needed - see the BLFS book. However, as I noted earlier, a separate usr filesystem doesn’t bring any benefits for “normal” systems.</p>
+
+<p>Personally I think it would be a good idea for the LFS book to use the “unified usr” approach - at least for the systemd variant. As noted by the above article, in a traditional system (in which usr may be mounted late), all udev scripts and init-scripts must be on the rootfs. From a quick look at the directory structure, it appears that LFS <em>does</em> get udev right (ie there are no deps from LFS-installed rules-files on <code>/usr</code>) - although there is always the danger that something in BLFS or other software will install additional broken udev rules.</p>
+
+<p>Note that the “check command” recommended by <a href="http://freedesktop.org/wiki/Software/systemd/separate-usr-is-broken/">this article</a> reports use of *_FROM_DATABASE in udev config files as an error, but that is not a problem on LFS: the hwdb is safely installed under <code>/lib</code>.</p>
+
+<p>Checking the systemd <code>.service</code> files (or the sysv init scripts) is trickier. Whether a particular entry can safely reference usr or not depends on which “target” it is part of. However I cannot find any problems in the standard config files installed by lfs+systemd.</p>
+
+<p>A unified-usr approach would save a large number of “mv” and “ln” commands. Simply creating links <code>/bin-&gt;/usr/bin</code>, <code>/sbin-&gt;/usr/sbin</code> and <code>/lib-&gt;/usr/lib</code> right at the start should be sufficient (untested!). Possibly the commands in the book “sourcecode” could have markup to allow a “systemd-unified” book variant to be generated, ie which simply omitted the marked-up commands from the generated book?</p>
+
+<p>LFS section 2.2 “Creating a New Partition” recommends <em>not</em> creating a separate usr partition, in which case an initramfs is <em>not</em> needed, and the unified hierarchy could be used without an initrd.</p>
+
+<ul>
+  <li><code>A separate /usr partition is generally used if providing a server for a thin client or diskless workstation. It is normally not needed for LFS..</code></li>
+</ul>
+
+<p>If the <code>/</code> and <code>/usr</code> directories are on the same partition, then keeping “critical” executables out of <code>/usr</code> is really irrelevant.  However <em>if</em> the system being build uses separate partitions for <code>/</code> and <code>/usr</code>, and a <em>unified <code>/usr</code></em> is wanted, then an <code>initramfs</code> is mandatory. The current LFS instructions do not include creating an initramfs but the BLFS book does cover this.</p>
+
+<p>The LFS instructions do not include creating an initramfs (a filesystem-in-a-file which is mounted by the kernel before the partition on which the root filesystem is stored is available); LFS instead statically links the relevant drivers into the kernel. The <code>make defconfig</code> command in section 8.3.1 (“Installation of the kernel”) will configure ext4 to be built statically; <code>grep EXT4 /boot/config-3.19</code> should show a <code>y</code> (static) rather than an <code>m</code> (module). As the root filesystem is a simple partition (not encrypted, no LVM, not remote, etc) this is all that is needed.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+<a href="http://www.freedesktop.org/wiki/Software/systemd/TheCaseForTheUsrMerge">The Case for the Usr Merge</a> - the original posting</li>
+  <li><a href="http://freedesktop.org/wiki/Software/systemd/separate-usr-is-broken/">separate-usr is broken</a></li>
+  <li>
+<a href="http://rusty.ozlabs.org/?p=236">Why everyone must oppose …</a> - Rusty’s very sarcastic opinion on the debate</li>
+  <li>
+<a href="https://lwn.net/Articles/477467/">LWN: The usr merge</a> - LWN discussion on the topic</li>
+  <li>
+<a href="http://www.linuxfromscratch.org/blfs/view/svn/postlfs/initramfs.html">BLFS on initramfs</a> for basic instructions on how to create an initramfs image.</li>
+  <li><a href="http://www.ibm.com/developerworks/library/l-initrd/">IBM: ramdisks</a></li>
+  <li><a href="https://wiki.grml.org/doku.php?id=rescueboot">grml-rescueboot</a></li>
+  <li><a href="http://lwn.net/Articles/525770/">LWN: eudev</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/unified-usr/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

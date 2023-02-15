@@ -1,0 +1,418 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Using the SecureRandom Class</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Using the SecureRandom Class</h1>
+    <aside>First published on: February 20, 2013</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/Cryptography/'>Cryptography</a></p>
+      <p>(<a href="/2013/02/encryption">back to main post</a>)</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>The java.security.SecureRandom class seems so simple and trivial to use. Looks can be very deceptive.</p>
+
+<p>Site thesaurus.com suggests many alternatives to “random” including “arbitrary”, “irregular”, “odd”, “erratic” and “unpredictable”. All good descriptions of the SecureRandom API and implementation.</p>
+
+<p>The primary intent of the SecureRandom class is to generate truly unpredictable sequences of bytes or integers. It isn’t meant for producing large amounts of data, or having high performance, but who needs large amounts of random data anyway?</p>
+
+<p>The alternative java.util.Random class is much “lighter weight”, working faster but producing less-random outputs than SecureRandom.</p>
+
+<p>Unfortunately, the SecureRandom class has significant platform-specific behaviour, and rather ambigious javadocs that can lead to some traps. The most dangerous behaviour is that on Linux it can intermittently <em>block</em> for minutes at a time, which can make application users a little unhappy.</p>
+
+<h1 id="applicable-java-versions">Applicable Java Versions</h1>
+
+<p>The behaviour described below appears to be the same on all Java versions from at least 6.0 through to at least 8.0 beta-releases.</p>
+
+<h1 id="creating-an-instance">Creating an Instance</h1>
+
+<p>An instance can be created via “new”, or can be obtained via the static method SecureRandom.getInstance(String algorithm).</p>
+
+<p>Using new simply returns the “default” implementation; the sun.security.provider.Sun “crypto provider” is the highest-priority “crypto provider” by default, and it:</p>
+
+<ul>
+  <li>registers the “NativePRNG” algorithm if it is available on the current platform, and</li>
+  <li>always registers the “SHA1PRNG” implementation.</li>
+</ul>
+
+<p>The default is therefore the Sun NativePRNG if it is applicable, else the Sun SHA1PRNG.</p>
+
+<p>There are no other standard implementations shipped in the Sun crypto provider; NativePRNG and SHA1PRNG are it.</p>
+
+<h1 id="the-api">The API</h1>
+
+<p>The Random class defines:</p>
+
+<ul>
+  <li>setSeed(long)</li>
+  <li>a bunch of next{type} methods</li>
+</ul>
+
+<p>The next* methods are all just wrappers around method <code>nextBytes(byte[])</code>.</p>
+
+<p>The SecureRandom class adds:</p>
+
+<ul>
+  <li>generateSeed, which returns an array of bytes</li>
+  <li>a static getSeed method, which is just a wrapper around generateSeed()</li>
+</ul>
+
+<p>The generateSeed() method is meant to return <em>truly</em> random data, while the next* methods are less clearly defined, and are typically pseudo-random.</p>
+
+<p>The setSeed() method is something to be wary of: the behaviour depends on the underlying SecureRandom implementation, and on whether the object has already been seeded (explicitly or implicitly). See the next sections for a definition of the behaviour in each case.</p>
+
+<h1 id="a-quick-note-about-devrandom-and-devurandom">A quick note about /dev/random and /dev/urandom</h1>
+
+<p>On Linux, the operating system exposes two kernel-level random number generators to userspace as files.</p>
+
+<p>The /dev/random file can be read by anyone, and returns truly random numbers or as good as the kernel can make them. Random numbers are based upon unpredictable things such as the times at which disk-drive interrupts occur, or network packets arrive, or mouse and keyboard events. The intention is to gather data in a way that a remote or local attacker cannot well predict. The values are then mixed together and fed through an appropriate algorithm to generate an “entropy pool” which reads of /dev/random draws from. Unfortunately while this approach generates very high-quality randomness, it doesn’t do it quickly. Reading lots of data from this file will “exhaust the entropy pool”. At this point the kernel simply makes all further reads <em>block</em> until more entropy arrives, on the principal that when doing security-sensitive things, not working is better than working incorrectly. This file is shared across all applications on the system, so different applications can indirectly cause others to “block” while reading this file.</p>
+
+<p>The /dev/urandom file is more forgiving; it uses a pseudo-random-number-generation algorithm which it “reseeds” from time to time from the /dev/random data. Reads of this file never block.</p>
+
+<p>Question: are there per-process limits on read rates from the /dev/random file?</p>
+
+<p>Microsoft Windows apparently has a “Crypto API” that provides random numbers for windows-based programs. I am not aware of the details of this, and in particular whether it also “blocks” if truly random data cannot be guaranteed.</p>
+
+<h1 id="the-nativeprng-algorithm-on-linux">The NativePRNG Algorithm on Linux</h1>
+
+<p>Despite this being the default implementation of SecureRandomSpi on Linux (normally), you won’t find any documentation on its behaviour in the standard javadocs, because it is “just a pluggable implementation” in a sun.* package. Hey, who needs to know about the details, right?</p>
+
+<p>It actually does the following:</p>
+
+<ul>
+  <li>the algorithm is implemented in class sun.security.provider.NativePRNG (which subclasses SecureRandomSpi)</li>
+  <li>a singleton instance of that class is shared across all SecureRandom instances</li>
+  <li>it opens the /dev/random and /dev/urandom files and keeps them open</li>
+  <li>
+    <p>it creates an instance of the SHA1PRNG random generator and seeds it with 20 bytes read from /dev/urandom</p>
+  </li>
+  <li>method <code>generateSeed()</code> reads bytes directly from /dev/random</li>
+  <li>method <code>nextBytes(byte[])</code> reads bytes from both /dev/urandom and from the prng, and xors them together</li>
+  <li>method <code>setSeed()</code> is passed through to the SHA1PRNG helper object</li>
+</ul>
+
+<p>Despite the name, the class is <em>not</em> a pseudo-random-number generator (at least not itself, although /dev/urandom is). It therefore never needs to “seed itself”. And the helper “prng” object is seeded from /dev/urandom which does not block. As a result, it will never block unless generateSeed() is invoked.</p>
+
+<p>As noted above, the setSeed() method simply sets the seed for the “helper” prng object used by the nextBytes method. Because this data is mixed with data from /dev/urandom, setting the seed never results in repeatable sequences of output values. And setSeed has absolutely no effect on data returned by the generateSeed() method.</p>
+
+<p>The helper isn’t really needed, but without it the setSeed() calls would simply be ignored, which isn’t very nice. So it is used to “enhance” the data from nextBytes.</p>
+
+<p>In summary: if you create a SecureRandom of type NativePRNG then its next* methods always read from /dev/urandom and never block. If you use its generateSeed method, then it can block - but if you pass it around as parent type Random (which does not have the generateSeed method) then blocking cannot happen (without downcasts).</p>
+
+<p>Whether this class <em>is</em> the default can be changed via properties inside the JRE, and even a commandline option. See later.</p>
+
+<h1 id="the-sha1prng-algorithm-on-all-platforms">The SHA1PRNG Algorithm On All Platforms</h1>
+
+<p>This is the default algorithm on Microsoft Windows platforms, and can be explicitly requested on Linux platforms.</p>
+
+<p>The concrete class implementing the “SHA1PRNG” algorithm is sun.security.provider.SecureRandom (which subclasses SecureRandomSpi). It does the following:</p>
+
+<ul>
+  <li>generateSeed method delegates to a singleton “SeedGenerator” helper</li>
+  <li>nextBytes causes the object to seed itself if necessary, and then uses an internal PRNG algorithm</li>
+  <li>setSeed initialises the object if not already seeded (ie avoids use of SeedGenerator in nextBytes), otherwise “mixes in” the additional data to the existing PRNG seed.</li>
+</ul>
+
+<p>In effect, the main class implements the pseudo-random-number algorithm, and delegates the rest of the work (generating truly random numbers) to a SeedGenerator helper class. The SeedGenerator is a singleton (ie shared across all SHA1PRNG SecureRandom objects) that itself delegates to one of:</p>
+
+<ul>
+  <li>NativeSeedGenerator() if property “securerandom.source” is /dev/random <em>or</em> /dev/urandom</li>
+  <li>URLSeedGenerator(url) if property “securerandom.source” is something else</li>
+  <li>ThreadedSeedGenerator otherwise</li>
+</ul>
+
+<p>ThreadedSeedGenerator attempts to generate random data by starting a pool of threads which race against each other in ways determined by the operating system’s thread scheduling and load. Quite what the results are, nobody can predict - which is the point. This is the adhoc fallback algorithm when nothing better is available.</p>
+
+<p>On Windows, NativeSeedGenerator is a wrapper around the Windows Crypto API.</p>
+
+<p>On Linux, NativeSeedGenerator is actually a trivial subclass of URLSeedGenerator and is effectively URLSeedGenerator(“file://dev/random”).</p>
+
+<p>URLSeedGenerator opens the specified URL and reads data from it. Interestingly, this gives the possibility of specifying random data seeds for testing by just pointing the URLSeedGenerator at a fixed (and sufficiently long) file of data.</p>
+
+<p>Note that setSeed() has absolutely no effect on the return values for generateSeed().</p>
+
+<p>Note also that generateSeed() can block, and that calling nextBytes without having explicitly seeded the SecureRandom instance can also block (because it seeds itself via generateSeed along with other data from SeedGenerator.getSystemEntropy) if the NativeSeedGenerator is being used, which is the case by default.</p>
+
+<h2 id="seeding">Seeding</h2>
+
+<p>An instance of SHA1PRNG initially has <em>no</em> seed. If setSeed() is called on it, this <em>sets</em> the seed used, and numbers returned by the nextBytes method (and all those next* methods derived from it) then become repeatable if the same seed is reused.</p>
+
+<p>If setSeed() is called on an instance that is already seeded, then the new value is just “mixed in” to the existing seed.</p>
+
+<p>If nextBytes is invoked before the object is explicitly seeded, then the generateSeed method (and therefore the SeedGenerator helper) will be used (together with other values) to generate the initial prng seed. This may block if the SeedGenerator is reading from /dev/random.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>In summary: if you create a SecureRandom of type SHA1PRNG then its next* methods always derive values from the existing “seed”, and don’t block as long as the object is already seeded. However if the object isn’t seeded then the first call will trigger a read of /dev/random (and therefore might block) if NativeSeedGenerator is being used. The generateSeed method always reads from /dev/random if the NativeSeedGenerator is used.</p>
+
+<h1 id="configuring-the-securerandomsource-property">Configuring the “securerandom.source” property</h1>
+
+<p>As noted above, the SHA1PRNG algorithm uses some configuration properties to determine where its SeedGenerator actually gets its data from.</p>
+
+<p>File $JRE_HOME/lib/security/java.security has an optional property “securerandom.source”; by default on both Windows and Linux installations this has the value “file:/dev/urandom”.</p>
+
+<p>This is misleading for several reasons:</p>
+
+<p>On Linux:</p>
+
+<ol>
+  <li>when this value is “file:/dev/urandom” then the NativePRNG algorithm is registered by the Sun crypto provider as the default
+implementation; the NativePRNG algorithm then reads from /dev/urandom for nextBytes but /dev/random for generateSeed</li>
+  <li>when this value is “file:/dev/random” then the NativePRNG algorithm is <em>not</em> registered by the Sun crypto provider, but the
+SHA1PRNG system uses a NativeSeedGenerator which reads from /dev/random.</li>
+  <li>when this value is anything else then the SHA1PRNG is used with a URLSeedGenerator that reads from that source.</li>
+  <li>when the value is undefined, then SHA1PRNG is used with ThreadedSeedGenerator</li>
+  <li>when the code explicitly asks for “SHA1PRNG” and the value is either “file:/dev/urandom” <em>or</em> “file:/dev/random” then (2) also occurs</li>
+  <li>when the code explicitly asks for “SHA1PRNG” and the value is some other “file:” url, then (3) occurs</li>
+  <li>when the code explicitly asks for “SHA1PRNG” and the value is undefined then (4) occurs</li>
+</ol>
+
+<p>On Windows systems:</p>
+
+<ol>
+  <li>when the value is “file:/dev/urandom” then SHA1PRNG is used with the MS Crypto API</li>
+  <li>when the value is any other “file:” url, then SHA1PRNG is used with a URLSeedGenerator that reads from that source</li>
+  <li>when the value is not defined, then SHA1PRNG is used with ThreadedSeedGenerator.</li>
+</ol>
+
+<p>And “-Djava.security.egd” can be used to override the above property. Question: does “” emulate removing the property?</p>
+
+<p>It’s all pretty complicated.</p>
+
+<p>The most interesting result is that deleting this property completely will force SHA1PRNG with the inbuild ThreadedSeedGenerator which never blocks.</p>
+
+<p>Another interesting result is that a commandline option “-Djava.security.egd=file:/tmp/randomNums” can be used to provide a <em>file</em> of random numbers that will be used as seeds.</p>
+
+<p>The -D option can’t be used on linux to redirect /dev/random reads to /dev/urandom: “-Djava.security.egd=file:/dev/urandom” still triggers the NativePRNG which reads /dev/random (linux). However the following works:</p>
+
+<pre><code>sudo ln /dev/urandom /dev/fakerandom
+java -Djava.security.egd=file:/dev/fakerandom
+</code></pre>
+
+<p>With the above hack, the URLSeedGenerator is instantiated and reads from /dev/fakerandom (ie /dev/urandom) and then never blocks. Note: requires SHA1PRNG be specified in the code first :-(</p>
+
+<p>Note also that the -Djava.security.egd option overrides the setting in $JRE_HOME/lib/security/java.security.</p>
+
+<h1 id="inconsistencies">Inconsistencies</h1>
+
+<p>As noted, the NativePRNG algorithm for Linux will never block in the nextBytes() method; it always reads from /dev/urandom.</p>
+
+<p>However the SHA1PRNG algorithm on Linux <em>can</em> block in the nextBytes() method if the SecureRandom.setSeed() method has not been invoked, as it tries to seed itself using generateSeed() which in turn reads from /dev/random.</p>
+
+<p>The NativePRNG algorithm will never return predictable sequences of bytes; calling “setSeed” does affect the nextBytes output, but not in a predictable way.</p>
+
+<p>The SHA1PRNG algorithm <em>will</em> return predictable sequences of bytes if setSeed is invoked before the first call to nextBytes.</p>
+
+<p>The NativePRNG algorithm is not at all configurable; generateSeed comes from /dev/random and nextBytes comes from /dev/urandom.</p>
+
+<p>The SHA1PRNG algorithm is quite configurable; it can be forced to use the adhoc ThreadedSeedGenerator by editing a file in the JRE directory; it can be forced to use a standard file on the filesystem via a “-D” commandline option. And with some trickery, it can be forced to use /dev/urandom even for generateSeed.</p>
+
+<h1 id="consistencies">Consistencies</h1>
+
+<p>Both implementations can block in the generateSeed method if the underlying source of randomness is /dev/random (which it is by default for both algorithms on Linux). Well, unless a trick is used to force SHA1PRNG to use /dev/urandom, in which case it will not block. So not consistent at all then.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+    <p><a href="/java/symmetric-encryption">Symmetric Encryption in Java</a></p>
+  </li>
+  <li>
+    <p><a href="https://www.cigital.com/justice-league-blog/2009/08/14/proper-use-of-javas-securerandom/">Proper use of Java’s SecureRandom</a></p>
+  </li>
+  <li>
+    <p><a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/6-b14/sun/security/provider/">Implementation Source Code, Java 6</a></p>
+  </li>
+  <li>
+    <p><a href="http://hg.openjdk.java.net/jdk8/jdk8/jdk/file/5ea0024ba765/src/share/classes/sun/security/provider/SeedGenerator.java">Implementation Source Code, Java 8</a></p>
+  </li>
+  <li>
+    <p>The command “man 4 random” on any linux system will provide information on the /dev/random and /dev/urandom files</p>
+  </li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/securerandom/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

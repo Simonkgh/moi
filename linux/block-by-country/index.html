@@ -1,0 +1,357 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Blocking Network Connections By Country</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Blocking Network Connections By Country</h1>
+    <aside>First published on: January 28, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      
+<h1 id="the-problem">The Problem</h1>
+
+<p>The logs on my Linux (Ubuntu 16.04 LTS) server show continuous attempts to log in via SSH; they are unlikely to get in that way but it is still annoying and a little worrying if I make any slip-up in configuration. In addition, I’m getting a fair bit of spam to my personal account. Using <a href="/linux/fail2ban">fail2ban</a> helps, but not as much as I had hoped.</p>
+
+<p>Running “whois” on the IP addresses reported in the logs almost always shows the source is one of two countries, so I have decided (at least as a temporary experiment) to just block all network connections from those countries. That is perhaps a little unfair on honest open-source developers and Linux users who are now denied access to this wonderful blog, but I suspect it won’t bring either country down. A minor variant of the rules below could make an exception for port 80, but I don’t care enough at the moment.</p>
+
+<p>Unfortunately, I couldn’t find a good tutorial on how to set this up. There are fragments of answers on the iptables website, and on various stackoverflow discussions, but nothing complete. Here’s how I ended up doing it.</p>
+
+<h1 id="solution-overview">Solution Overview</h1>
+
+<p>There are some websites that publish collections of IP-address-ranges for various purposes, including per-country mappings.</p>
+
+<p>The <code>iptables</code> network filtering built into Linux can block by address, but there are two problems: the list of addresses is extremely long, and iptables doesn’t automatically get restored after server reboot. Fortunately, the <a href="http://ipset.netfilter.org/">ipset</a> extension enables <code>iptables</code> to efficiently determine if an address is within a set. And <code>systemd</code> can be used to restore the configuration on reboot.</p>
+
+<p>In summary, the complete solution is to:</p>
+
+<ul>
+  <li>download the current country/address-range mappings;</li>
+  <li>generate a shell-script which builds an IPSET that holds the undesired address-ranges and registers the IPSET with iptables;</li>
+  <li>write a systemd one-shot-service unit file that executes that script when desired (eg on server boot)</li>
+</ul>
+
+<p>The country/address mappings are not automatically updated, but that doesn’t bother me. This is a “good enough” solution, it doesn’t need to be perfect or 100% up-to-date at all times.</p>
+
+<p>Warning: installing the routes can take 30 seconds or so, depending on how many countries you choose to ban. As this needs to be run on boot, it does delay reboots somewhat.</p>
+
+<h1 id="solution-details">Solution Details</h1>
+
+<ul>
+  <li>visit <a href="http://www.ipdeny.com/ipblocks/">ipdeny</a> and download the “aggregated zone file” for all countries (both IP4 and IP6 versions).</li>
+  <li>install ipset if not already done: <code>apt install ipset</code>
+</li>
+  <li>create a directory to hold the work and  convert zonefiles to iptables-script (see below)</li>
+  <li>build the systemd unit file (see below)</li>
+  <li>start service</li>
+</ul>
+
+<p>All the following steps must be executed as root.</p>
+
+<p>The <code>iptables/ip6tables</code> infrastructure is used rather than <code>nftables/nft</code>. While <code>nftables</code> may be the future of network-filtering in Linux, it still appears to be a work-in-progress.</p>
+
+<h2 id="convert-zonefiles-to-iptables-script">Convert Zonefiles to iptables-script</h2>
+
+<p>Perform the following steps.</p>
+
+<pre><code>mkdir -p /etc/block_by_country/ipv4
+mkdir -p /etc/block_by_country/ipv6
+cd /etc/block_by_country
+</code></pre>
+
+<p>Now unpack file <code>all-zones.tar.gz</code> (from ipdeny) in directory ipv4, and file <code>ipv6-all-zones.tar.gz</code> in directory ipv6.</p>
+
+<p>Now create a script with the following commands:</p>
+
+<pre><code># countries to block - adjust according to your requirements
+COUNTRIES="aa bb cc"; 
+
+# Create set of ip4 addresses
+echo "ipset create block4_by_country hash:net family inet" &gt; add.sh
+
+# For each ipv4 zonefile, create commands to add the content to the set:
+for country in $COUNTRIES; do
+  awk '{print "ipset add block4_by_country", $0}' &lt; ipv4/$country.zone &gt;&gt; add.sh
+done
+
+# Create set of ip6 addresses
+echo "ipset create block6_by_country hash:net family inet6" &gt;&gt; add.sh
+
+# For each ipv6 zonefile, create commands to add the content to the set:
+for country in $COUNTRIES; do
+  awk '{print "ipset add block6_by_country", $0}' &lt; ipv6/$country.zone &gt;&gt; add.sh
+done
+
+# Create command to add the ipsets to the global filtering rules:
+cat &gt;&gt; add.sh &lt;&lt; EOF
+iptables -N BLOCK_BY_COUNTRY
+iptables -A BLOCK_BY_COUNTRY -m state --state ESTABLISHED,RELATED -j RETURN
+iptables -A BLOCK_BY_COUNTRY -m set --match-set block4_by_country src -j DROP
+iptables -I INPUT -p tcp -j BLOCK_BY_COUNTRY
+
+ip6tables -N BLOCK_BY_COUNTRY
+ip6tables -A BLOCK_BY_COUNTRY -m state --state ESTABLISHED,RELATED -j RETURN
+ip6tables -A BLOCK_BY_COUNTRY -m set --match-set block6_by_country src -j DROP
+ip6tables -I INPUT -p tcp -j BLOCK_BY_COUNTRY
+EOF
+</code></pre>
+
+<p>Note that the <code>DROP</code> commands can be fine-tuned to block (or allow) access to specific ports if desired.</p>
+
+<p>Also create a shellscript that removes the rules again; not absolutely necessary but useful:</p>
+
+<pre><code># Create script to disable rules
+cat &gt; remove.sh &lt;&lt; EOF
+iptables -D INPUT -p tcp -j BLOCK_BY_COUNTRY
+iptables -F BLOCK_BY_COUNTRY
+iptables -X BLOCK_BY_COUNTRY
+ipset destroy block4_by_country
+
+ip6tables -D INPUT -p tcp -j BLOCK_BY_COUNTRY
+ip6tables -F BLOCK_BY_COUNTRY
+ip6tables -X BLOCK_BY_COUNTRY
+ipset destroy block6_by_country
+EOF
+</code></pre>
+
+<h2 id="define-the-systemd-unit-file">Define the systemd Unit File</h2>
+
+<pre><code>echo &gt; /etc/systemd/system/block_by_country.service &lt;&lt; EOF
+[Unit]
+Description=Block network connections by country
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh /etc/block_by_country/add.sh
+ExecStop=/bin/sh /etc/block_by_country/remove.sh
+
+[Install]
+WantedBy=network.target
+EOF
+</code></pre>
+
+<h2 id="start-the-service">Start the service</h2>
+
+<p>The following command will execute the script, but won’t enable it on reboot (good for testing without permanently locking yourself out :-)</p>
+
+<pre><code>systemctl start block_by_country
+</code></pre>
+
+<p>The following command will ensure the service is started on each reboot:</p>
+
+<pre><code>systemctl enable block_by_country
+</code></pre>
+
+<h1 id="testing-the-service">Testing the service</h1>
+
+<p>The following commands might be useful to verify that the rule is active:</p>
+
+<ul>
+  <li><code>iptables -t filter --list INPUT</code></li>
+  <li><code>iptables -t filter --list BLOCK_BY_COUNTRY</code></li>
+  <li><code>ipset list</code></li>
+</ul>
+
+<h1 id="results">Results</h1>
+
+<p>Before blocking by country, fail2ban was blocking approximately 400 separate IP addresses per day which were attempting to login via SSH (<code>grep Failed /var/log/auth.log | grep "Jan 01" | wc -l</code>). After blocking just two large countries (from which I do not need any SSH or SMTP traffic), fail2ban triggered only around 50 times per day. So problem not completely solved, but reduced to around 10% of what it was - which is well worth having. Presumably my email spam has been reduced correspondingly.</p>
+
+<h1 id="references">References</h1>
+
+<p>The following links gave me some hints towards the above solution:</p>
+
+<ul>
+  <li><a href="http://xmodulo.com/block-unwanted-ip-addresses-linux.html">xmodulo</a></li>
+</ul>
+
+<p>Other sources of address-lists:</p>
+
+<ul>
+  <li><a href="https://www.iblocklist.com/lists.php">iblocklist</a></li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/block-by-country/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,276 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - A Shared Git Repo Mirroring Multiple Remotes</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>A Shared Git Repo Mirroring Multiple Remotes</h1>
+    <aside>First published on: August 5, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Git/'>Git</a></p>
+      <h1 id="the-use-case">The Use Case</h1>
+
+<p>I recently had to create a single Git repo (company internal) holding a mirror of several other projects (from Github). While Git can do this, the default behaviour is not optimal; it is difficult for others to view the uploaded branches, and tag names from remote repos are mixed into the primary tag namespace leading to rather confusing results.</p>
+
+<p>To be more specific, I needed to clone a central internal repo, pull down all code from several remote Github repos, and then push all the retrieved code back to the central internal repo where it can be accessed by the internal build tools.</p>
+
+<p>Usually, when internal software depends on an external open-source component, the compiled version (binary) of that component is available via some public artifact repository. A company-internal maven repository manager may be used as a mirror/proxy for external repos, ensuring that a company-local copy exists for every binary artifact used in internal builds. Builds of internal software then remain valid (and reproducable) even if the external repositories disappear (or in the unusual case where a single artifact is removed, or even changed).</p>
+
+<p>However in some cases it is necessary to copy the <em>source code</em> of an external project rather than just the resulting binary:</p>
+
+<ul>
+  <li>some open-source projects do not produce binary artifacts (eg kafka-connect connectors, which is my particular use-case)</li>
+  <li>sometimes it is necessary to patch/modify the original code for local purposes.</li>
+</ul>
+
+<h1 id="basic-git-remote-functionality">Basic Git Remote Functionality</h1>
+
+<p>Importing code from a remote repo into a local Git repo is trivial: <code>git remote</code> and <code>git fetch</code> do the hard work. However there are two problems:</p>
+
+<ul>
+  <li>while <code>git fetch</code> on a remote nicely namespaces remote branches, it does not handle remote tags so elegantly, and</li>
+  <li>remote definitions are inherently local to the repo in which they are declared; you cannot push a remote-definition up to a central repo from which colleagues can pull them. Code, branch and tag definitions can be pushed - but not remote definitions.</li>
+</ul>
+
+<p>When all that is desired is to import a single specific branch or tag from a remote repo into a central (shared) repo then the workflow is fairly easy:</p>
+
+<ul>
+  <li>clone the central repo</li>
+  <li>define a remote referencing the desired remote repo</li>
+  <li>
+<code>git fetch</code> the required branch or tag</li>
+  <li>make a suitable local name for that remote branch or tag (ie create an alternative name pointing at the same commit)</li>
+  <li>push the alternative name to the central repo</li>
+</ul>
+
+<p>When the goal is to import all of the branches/tags from the remote repo, then push references to those objects into the central repo in a way which is easily readable and useable by colleagues, then things are a little trickier - the standard behavour of <code>git remote</code> and <code>git fetch</code> doesn’t work so well for that.</p>
+
+<h1 id="how-git-remote-works">How Git Remote Works</h1>
+
+<p>First, an explanation of what <code>git remote</code> and <code>git fetch</code> really do…</p>
+
+<p>The command <code>git remote add {remotename} {remoteurl}</code> defines a local alias for the URL of an external git repository. Technically, it just creates some entries in file <code>.git/config</code> which look something like this:</p>
+
+<pre><code>[remote "remote1"]
+	url = git://remotehost/remoterepo
+	fetch = +refs/heads/*:refs/remotes/remote1/*
+</code></pre>
+
+<p>The command <code>git fetch {remotename}</code> will retrieve the HEAD commit of every branch in the remote repository, and of course all commits in their history. For each fetched branch, Git stores the commit-id in a file under <code>.git/refs/remotes/{remotename}/{branchname}</code>. Running <code>git branch</code> only shows “local” branches (whose commit-ids are stored under <code>.git/refs/heads/{branchname}</code>. Running <code>git branch -r</code> instead shows branches whose commit-ids are stored under <code>git/refs/remotes</code>; the branches are shown together with the remote-name which shows where the branch was fetched from.</p>
+
+<p>Note that when the local repo was created as a clone of another repo, then there is already one remote defined, named <code>origin</code>, which is stored in the same way as any other remote.</p>
+
+<h1 id="the-problems-with-git-remote">The Problems with Git Remote</h1>
+
+<p>Although <code>git fetch {remotename}</code> does fetch branches nicely, they cannot be pushed so easily to a central repo. The default behaviour of command <code>git push</code> is to push the current branch to its “upstream repo”; <code>git push --all</code> will instead push every local branch (everything under <code>.git/refs/heads</code>) to the origin repo. However “push all” ignores those remotes obtained via <code>git fetch {remote}</code> (which are under <code>.git/refs/remotes</code>). Command <code>git push --mirror</code> pushes everything under <code>.git/refs/*</code> to the origin repo, which at first appears to be exactly what we want - but colleagues who simply clone that origin repo, or <code>git fetch</code> to download from it, will not receive those “remote branches”, only stuff under <code>.git/refs/heads</code>. It is possible to download such remote-branches from an origin repo, but it is non-trivial and what we really want for this use-case is for others to be able to see the imported copies of remote code without complex steps. In short, remote branches are tricky even in the repo where the remotes were defined, and doubly tricky when trying to share them with others via a shared upstream repo.</p>
+
+<p>In addition, <code>git remote</code> and <code>git fetch</code> handle <em>tags</em> in remote repos differently from branches in remote repos. By default <code>git fetch {remotename}</code> only downloads branches. Command <code>git fetch --all {remotename}</code> will download both branches and tags - but whereas the remote branches were stored separately from local branches under <code>.git/refs/remotes</code>, any fetched tags are just mixed in with the local tags. That is good in that pushing the tags to the upstream repo happens easily with <code>git push --tags</code>. However the bad part is that such tags are not “namespaced” in any way; there is no indication of where they came from. When the tags are just labels like “v1.0” then that is not very helpful. And when the upstream repo should host clones of multiple external projects, then the danger of tagname-clashes is significant.</p>
+
+<p>Note: when fetching from some remote repos, the downloaded code with its branch and tag references can be in “packfiles” under <code>.git/packed/refs</code>, ie looking in <code>.git/refs</code> doesn’t always provide the whole picture.</p>
+
+<h1 id="my-solution">My Solution</h1>
+
+<p>My solution for defining a repository containing a clone of multiple external repos is as follows:</p>
+
+<ul>
+  <li>clone the upstream repo</li>
+  <li><code>git remote add {remotename} {remoteurl}</code></li>
+  <li><code>git config --unset-all remote.{remotename}.fetch</code></li>
+  <li><code>git config --add remote.{remotename}.tagOpt --no-tags</code></li>
+  <li><code>git config --add remote.{remotename}.fetch +refs/heads/*:refs/heads/{remotealias}/*</code></li>
+  <li><code>git config --add remote.{remotename}.fetch +refs/tags/*:refs/tags/{remotealias}/*</code></li>
+  <li><code>git fetch  {remotename}</code></li>
+  <li><code>git push --all</code></li>
+</ul>
+
+<p>Value remotealias can be the same as remotename if desired.</p>
+
+<p>This solution simply overrides some of the default behaviour of <code>git fetch</code>. It causes the head of each branch to be fetched, but disables the fetching of tags, and instead of creating the branch under <code>refs/remotes/remotename</code> it creates it under <code>refs/heads/remotename</code>. Then it causes all tags to be fetched, and creates the local equivalents under <code>refs/tags/remotename</code>. Both branches and tags are now namespaced in the same way.</p>
+
+<p>I mentioned earlier that when a single branch or tag from a remote repo is needed, then that specific branch/tag can be fetched, and then a local branch or tag can be made which points at the desired commit. This solution is really just an automated version of that approach - rather than allowing <code>git fetch</code> to register remote branches under <code>.git/refs/remotes</code> it causes git-fetch to immediately register them under the normal branch base dir. And rather than allowing <code>git fetch</code> to register tags under the normal tag base dir, it causes them to be created with a specific prefix. The result is that those imported branches/tags are not “special” like remote-branches are by default, but are normal branches which can be pushed/fetched just like the others - just with special names which indicate their source.</p>
+
+<p>The disadvantage of this approach is that it is not so easy to push changes back to the real upstream project. However that was never part of this use-case.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/git-multiple-remotes/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

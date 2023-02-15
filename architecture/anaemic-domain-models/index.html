@@ -1,0 +1,304 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Anemic Domain Models</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Anemic Domain Models</h1>
+    <aside>First published on: June 18, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/OSGi/'>OSGi</a>, <a href='/category/Programming/'>Programming</a>, <a href='/category/Architecture/'>Architecture</a></p>
+      
+<p>Update: this article is mostly superceded by <a href="/architecture/domain-models-rich-vs-anaemic">a new article</a>. However the major “corrections” to my earlier thoughts as expressed in this article can be found at the end of this article under section “Corrections and Clarifications”..</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>In object-oriented code, how much logic should be co-located with the data it manipulates, and how much should be externalized? And does the answer change when talking about OSGi vs traditional Java code?</p>
+
+<p>After significant thought and experience, I have come to the conclusion that data model types should provide methods which <em>preserve the model type invariants</em> as far as possible, ie prevent callers from placing an object into a state which is not valid. The model type may also provide basic business logic which depends upon its fields only. However any logic which requires access to data which is not “owned” by the model object should instead be defined in a service class (which is typically a singleton). This does make models somewhat thinner than some authors appear to recommend, but having model types access/manipulate other model types has major drawbacks which are described below.</p>
+
+<p>And yes, with this advice I am contradicting <a href="http://www.martinfowler.com/bliki/AnemicDomainModel.html">Martin Fowler’s advice (from 2003)</a> (or at least a common interpretation of that advice) which is something I do only reluctantly. However I hope/believe that his opinion may have changed since then.</p>
+
+<h1 id="procedural-vs-object-oriented">Procedural vs Object Oriented</h1>
+
+<p>Early programming languages were all <em>procedural</em>, and many modern ones still are. Data is stored in <em>datastructures</em>, and the logic that manipulates datastructures is stored elsewhere. Such logic takes a datastructure as a <em>parameter</em> and either transforms it or returns a modified version. Examples of such languages are C, Fortran, Cobol, Basic, plain Lisp. Object-oriented programming instead tries to group data and associated logic together.</p>
+
+<p>One of the influential object-oriented books I read many years ago (title long forgotten) stated that any class with the word “manager” in its name should be regarded as suspicious; normally such logic should instead be moved to the <em>managed</em> type. Martin Fowler coined the term <a href="https://en.wikipedia.org/wiki/Anemic_domain_model">Anemic Domain Model</a> for the approach in which objects are either “state with no behaviour” or “behaviour with no state” (my rephrasing). Note that trivial getter and setter methods do <em>not</em> count as <em>real behaviour</em> - they are just a cleaner form of access to a datastructure (anemic domain model).</p>
+
+<p>Martin’s <a href="http://www.martinfowler.com/bliki/AnemicDomainModel.html">article</a> (often referencing Eric Evans) talks about a <em>service layer</em> and the services in it: <em>The key point here is that the service layer is thin - all the key logic lies in the domain layer</em>.</p>
+
+<p>The <a href="http://en.wikipedia.org/wiki/Procedural_programming">procedural programming</a> article on Wikipedia addresses some of the same issues.</p>
+
+<p>The object-oriented idea of grouping data and logic together has some great benefits during analysis, development, and maintenance. Costs for system changes tend to be better aligned with business expectations in an OO system : a small conceptual change is more likely to map to a small code change when the code-structure is modelled on the same concepts the business users have. I’ve worked on a number of large bespoke applications that needed maintenance over many years, and having IT effort correlated with managers’  <em>perception</em> of the size of the effort is very valuable. At a developer level, <a href="https://en.wikipedia.org/wiki/Encapsulation_%28computer_programming%29">encapsulation</a> brings many well-known benefits.</p>
+
+<p>Unfortunately, the idea of grouping data and logic together encounters some problems in the real world:</p>
+
+<ul>
+  <li>serialization</li>
+  <li>OSGi services and their lifecycle</li>
+  <li>logic that affects multiple domain objects</li>
+</ul>
+
+<h1 id="an-example-and-its-implications-for-code-structure">An Example and its Implications for Code Structure</h1>
+
+<p>One example use-case I encountered recently: a <em>relative date</em> class which expresses an offset in days. The offset can optionally be counted in <em>working days</em>, in which case the relative date instance also specifies a <em>calendar</em>. Different countries have different calendars (and a company might have its own private calendar). However calendars can be large objects so the relative-date instance should hold a calendar <em>identifier</em> rather than a reference to a calendar instance (this also helps with serialization and persistence). The obvious API for a relative-date to provide would be <code>Date resolveRelativeTo(Date d)</code>. When the relative-date is not a working-days-offset, this is trivial to implement. Otherwise, it needs access to a <em>calendar service</em> through which it can map the calendar-id to a calendar, and thus return the correct date.</p>
+
+<p>Initialising a new instance of a relative-date with a reference to a suitable calendar service is no problem. However (a) when such a class is serialized/deserialized, what happens? And (b) in an environment (such as OSGi) where a service may be replaced at runtime with an updated version, then what?</p>
+
+<ul>
+  <li>
+    <p>With some custom serialization/deserialization code, it is possible to solve (a) by replacing the <code>service</code> reference on serialization with a <em>logical service id</em> of some sort, and performing the reverse on deserialization. I have actually implemented this in the past (though I later regretted it).</p>
+  </li>
+  <li>
+    <p>it is possible to solve (b) by using a service proxy. This also works with serialization/deserialization : as above, map to a <em>logical service id</em> on serialization, and rebuild the proxy on deserialization. However it is complicated.</p>
+  </li>
+</ul>
+
+<p>Note: there might be some security issues when creating service proxies. If the other end is <em>trusted</em> to specify any service it <em>might</em> be possible to point to a service that was not expected. However it’s a fairly unlikely attack vector, as the service must implement the interface that the deserialized type expects. Any code that <em>gets</em> a service should also ensure that the service is <em>released</em> at an appropriate time (see <code>BundleContext.ungetService</code>); AFAIK this is actually only relevant for cleanup of per-bundle objects allocated via a ServiceFactory, but is the <em>correct</em> thing to do.</p>
+
+<p>However consider what would happen if such an object were to be held long-term (eg placed in a cache).  When using “native” OSGi lifecycles, it makes little sense for a POJO to hold a reference to another service; instead such an object should be <em>managed</em> so that it is disabled/discarded when that service is not available. The cleanest way to avoid invoking a non-available mandatory service is for the code doing the invoking to be itself unavailable when any of its mandatory services are. That clearly makes no sense for an object like a relative-date, which would appears to leave only one option: pull out the relevant logic into a separate <em>service</em> and reduce the domain object to a dumb datastructure.</p>
+
+<p>In some cases, such refactoring could instead be limited to <em>passing</em> services as parameters to the domain object (rather than the domain object having a permanent reference to such services), though that has its own price: the caller is then exposed to intimate details the domain object would not otherwise need to expose. In the relative-date example, (a) it doesn’t seem logically relevant for the caller to have to provide a calendar; it just wants to transform a date and (b) in this particular example, the calendar is only needed sometimes which makes it even uglier to force the caller to provide the corresponding service. This approach also works poorly if additional subclasses are added in the future, which might need different services to perform their <code>resolveRelativeTo</code> behaviour.  <a href="https://en.wikipedia.org/wiki/Information_hiding">Information-hiding</a> really is useful.</p>
+
+<p>It may be worth considering OSGi services in two groups: mandatory and optional. When thinking about domain objects and their use of sevices, we are almost always talking about <em>mandatory</em> services. And even in OSGi, <em>mandatory services</em> don’t come and go often. Well, except when using <em>bndtools</em> for development, which relies on being able to unload/reload any bundle whose code has changed. On the positive side, in the bndtools situation there are no “inflight transactions”, ie the <em>short-lived</em> kinds of objects discussed in the previous paragraph are presumably all gone.</p>
+
+<p>It is interesting how the popularity of ideas evolves:</p>
+
+<ul>
+  <li>structured programming (procedural code operating on data structures)</li>
+  <li>object-oriented programming with deep class hierarchies (extension based on subclassing)</li>
+  <li>object-oriented programming with interfaces and delegation (aggregation preferred over subclassing)</li>
+  <li>POJOs (based on annotations and naming-patterns to avoid having framework interfaces polute the business logic). See JEE for example, which initially was very intrusive.</li>
+  <li>and now with clustering and polyglot programming on the rise, the benefits of a data-structure approach is rising again</li>
+</ul>
+
+<p>And functional programming is also generally based on transforming of data-structures (though a number of functional languages also support object-style coding).</p>
+
+<p>In the end, <em>procedural</em> code is not the end of the world. Many successful applications have been developed this way, and as the wikipedia article notes, this is still a disputed area with various advantages and disadvantages. The Haskell programming language is a functional language with object-oriented features, yet some in the community consider the OO features undesirable and would like to see them removed. There certainly is no consensus (any more) that OO programming is the most effective style.</p>
+
+<p>And OO programs have always been a mix of these styles; there were always cases where logic did not belong directly on domain types - controllers, validators, etc. Persistence frameworks have almost always been implemented as <em>external</em> logic: persister.save(user) rather than user.save().</p>
+
+<p>So if OSGi services also push us towards separating logic and data, then maybe the resulting procedural-plus-datastructures code is acceptable. Interfaces are still useful; they decouple service implementation from service interface, and can be used to hide some minor variations in data structure representation behind the getters and setters. However it does not allow the kind of extensibility that was hoped for with OO, where new business rules could be implemented just by creating a new variant of an existing domain model type and implementing the desired behaviour in the methods of that type. Instead, such modifications will affect both the datastructure class <em>and</em> every service that manipulates it - the loss of polymorphism increases coupling.</p>
+
+<h1 id="using-domain-terminology-in-model-classes">Using Domain Terminology in Model Classes</h1>
+
+<p>One principle of Domain Driven Design (though it was well known before that too) is that names and structures in software should mirror the business domain it represents.</p>
+
+<p>In the case of model objects, an effort should be made to avoid primitive types such as “String” and “Integer” where there is a real business meaning that could be used instead. As example, an <code>Account</code> object should not have method ‘setBalance(Integer)’ but instead method ‘deposit(Amount)’:</p>
+
+<ul>
+  <li>in accounting, balances are incremented and decremented, not set to absolute values</li>
+  <li>and a monetary amount is not just an integer, but (at least) a (currency, amount) pair.</li>
+</ul>
+
+<p>Having methods related to the business domain, rather than just raw getters/setters, may rescue a data model from the accusation of being “anemic”, even when cross-model-entity logic is in services.</p>
+
+<p>It is also recommended to use immutable objects for such model types where possible (immutable objects are always good).</p>
+
+<h1 id="other-thoughts">Other Thoughts</h1>
+
+<p>The primary difference between annotations and interfaces is that annotations are optional at runtime (class-resolution time). Interesting thought : what if Java had simply made interfaces optional when loading a class? This could have covered the same use-case as annotations on types, and some of the use-cases for annotations on methods.</p>
+
+<p>Having business logic on domain models has always been a problem for cases where two objects need to <em>cooperate</em> to perform an operation. Which of them holds the overall logic?</p>
+
+<p>Eclipse EMF is another technology which encourages anemic domain models. Datastructures are defined via a GUI editor, and code is then generated. However it is very difficult to associate real business logic with such classes.</p>
+
+<p>When performing dependency injection, each object can have an associated <em>lifetime scope</em>, and injecting a short-lived object into one with a longer one will cause problems, as the long-lived object may later try to reference this object when it is no longer ‘live’. Unfortunately, an OSGi service can be considered to have <em>undetermined</em> scope, as it can be stopped at any time. This is discussed in my recent article on <a href="/java/osgi-dependency-injection">OSGi and Dependency Injection</a>. And unfortunately this again implies that a “domain model” should never have a reference to a service - and the longer the lifetime of the domain object is, the worse the problem. Reducing the functionality implemented directly on the domain model (so the service is not needed) appears to be the only solution…</p>
+
+<p>In OO development, it is important that a class <em>enforce its invariants</em> (ie ensure its internal consistency); it must not expose fields directly, or expose methods that can leave the object in an invalid state. However whether other functionality to manipulate an object is implemented on the class, or externally is open for debate; moving logic related to a class into that class is certainly “more OO”, and via polymorphism allows different implementations of such logic. However as noted above that can lead to the object needing to hold references to <em>services</em> which can have nasty consequences. Some languages support “dynamic dispatch” via mechanisms other than an object’s vtable which makes externalising object-specific logic more practical; sadly Java does not.</p>
+
+<h1 id="corrections-and-clarifications">Corrections and Clarifications</h1>
+
+<p>Seven years later I revisited this topic, and have a somewhat different view. My current view can be found <a href="/architecture/domain-models-rich-vs-anaemic">here</a> but the primary differences from the above contents is provided here.</p>
+
+<p>The term “service” unfortunately has multiple meanings. There are <em>domain services</em> which are classes holding <em>domain-relevant logic without state</em>, and there is an <em>application service layer</em> which acts as a bridge between the non-domain code and the domain-specific world (which includes services, entities, etc). I originally interpreted Fowler’s recommendation “the service layer is thin” to mean that <em>domain services</em> should be thin, when the recommendation was instead that the <em>application services</em> should be thin. With this cleared up, what I am recommending above is much more in-line with Fowler’s recommendations.</p>
+
+<p>Fowler and other DDD supporters still recommend putting logic on stateful types (entities and value-objects) rather than services where possible - something that I didn’t entirely agree with above. The primary reason is that there is still no clear solution to the problem of providing stateful model types with references to services that they may need to implement an operation.</p>
+
+<p>In short, the suggestion of this article to put logic requiring access to “services” into other domain services, rather than into methods on stateful domain types, still seems valid to me - for operations <em>which rely on other services</em>. This can lead to a few more fine/grained getters/setters on stateful domain types, ie a slight move towards “anemic” domain types, but I do still recommend that types offer only methods which allow them to still enforce their invariants. This leads to a slight disagreement with the “leaders” of DDD, but it’s a matter of degree rather than a radical departure.</p>
+
+<p>One limitation of this article is that it focuses mostly on this service-references-related issue. The topic of rich vs anemic models includes many other aspects - see the latest article for more complete coverage.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/anaemic-domain-models/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

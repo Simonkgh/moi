@@ -1,0 +1,365 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Apache Yarn Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Apache Yarn Overview</h1>
+    <aside>First published on: January 28, 2016</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      <p><a href="/bigdata/hadoop">back to overview</a></p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>This is a discussion of the Yarn component of the Apache Hadoop “big data” project.</p>
+
+<p>Yarn is a system for distributing <em>processes</em> through a cluster, ie running an application on some arbitrary node in a cluster of servers. A client application builds an <em>application context</em> consisting of a set of arbitrary files (“resources”), a set of constraints on the kind of node that should be chosen, and then a list of commands to execute. The application context is submitted to the primary yarn server (“resource manager”) which then chooses a suitable node from the available cluster, unpacks the resources there, and executes the specified commands. Typically the resources include files that the commands “run”; they might be bash scripts,  python scripts, java jars, or potentially native code.</p>
+
+<h1 id="yarn-installation">Yarn Installation</h1>
+
+<p>Yarn consists of the following components:</p>
+
+<ul>
+  <li>resource-manager daemon</li>
+  <li>node-manager daemon</li>
+  <li>client libraries</li>
+</ul>
+
+<p>A typical Yarn cluster consists of a series of racks in a datacenter, each with multiple “blade” servers running Linux (either booted from a local disk, or from an OS image on network-accessable storage).</p>
+
+<p>One of the servers runs the resource-manager daemon, and all others run the node-manager daemon. For high-availability, it is possible to run “standby” instances of the resource-manager daemon on a few additional nodes, but only one resource-manager is considered “active” at any time.</p>
+
+<p>Each “worker node” (running the node-manager daemon) is configured with the network address of the resource-manager, and registers with it on startup.</p>
+
+<p>As the yarn daemons are implemented in Java, each server also needs a suitable JVM installed. Otherwise, there is little unusual about the physical servers or their configuration - just a reasonable CPU and adequate amounts of RAM.</p>
+
+<p>The resource-manager daemon listens on a TCP port; the worker nodes and client applications connect to it and communicate using messages in Thrift protocol format. Because Thrift is language-independent (unlike Java’s native RPC for example), clients can theoretically be implemented in any language. However the message format is not officially “stable”, and the Hadoop project only provides client libraries in Java.</p>
+
+<h1 id="submitting-an-application-context">Submitting an Application Context</h1>
+
+<p>A client application can build a request to execute an application, and submit it to the Yarn resource-manager. The request is sent over a normal TCP socket, and is in Thrift format so theoretically such a request can be built in any language with a Thrift client library. However the message format is not officially stable. It is therefore best to instead use the Yarn <em>client library</em> to build such requests and pass them to the Yarn resource-manager - and Hadoop provides only a Java client library implementation.</p>
+
+<p>The first step for a client is to connect to the Yarn resource-manager and request a (unique) application-id. Once this is returned, the client (usually via the client library API) builds a datastructure with the following components:</p>
+
+<ul>
+  <li>the application-id (as allocated by the resource-manager)</li>
+  <li>an <em>application name</em> (not necessarily unique)</li>
+  <li>a work-queue name</li>
+  <li>a set of resource files (such as configfiles, scripts, jarfiles, or executable binaries)</li>
+  <li>a set of <em>node constraints</em>
+</li>
+  <li>a set of flags such as whether to auto-restart the application on failure</li>
+  <li>and finally, a list of commands to execute</li>
+</ul>
+
+<p>This datastructure is then sent to the Yarn resource-manager, which places the request on the specified work-queue.</p>
+
+<p>Any client application can connect to the yarn resource-manager and ask it for information about an application-context, searching either by application-id or by application-name. The original submitter of course has the application-id, and should use it. Other applications can use the application-name string, but must be aware that there could potentially be multiple applications using that name. The status initially shows the job as “waiting”; once the job has started execution on some node in the cluster, additional information is available - including custom data that the application can itself register. Common custom status information include (IP/Port) address on which the application might be listening, counters for various events occurring in the application. Once the application has terminated, this information and the termination status is also available via the resource-manager.</p>
+
+<p>The resource-manager keeps hold of the submitted application-context until the application has successfully terminated. If it terminates unexpectedly then yarn can optionally restart it.</p>
+
+<p>Yarn provides a simple “command line client” which is just a wrapper over the standard libraries; command “yarn jar …” can be used to submit a suitable java application:</p>
+
+<ul>
+  <li>an “application-id” is auto-allocated and printed as output of “yarn jar”</li>
+  <li>its “application name” is ??</li>
+  <li>it is placed on the default queue, and run on any node</li>
+  <li>the associated “command” is simply “<code>java -jar {theJarName}</code>”</li>
+</ul>
+
+<p>The Yarn resource-manager daemon provides (since v2.5.0) a <a href="http://hadoop.apache.org/docs/r2.6.0/hadoop-yarn/hadoop-yarn-site/ResourceManagerRest.html">REST API</a> for querying status information and submitting new application requests. The input/output request formats are actually a pretty good guide to the options available via the programmatic API too; see “Cluster New Application” and “Submit Application” in the above link.</p>
+
+<h1 id="scheduling">Scheduling</h1>
+
+<p>Yarn includes a <em>scheduler</em> which is continually monitoring the state of its available <em>worker nodes</em>, looking for nodes which are able to run jobs waiting on its work-queues. The process of matching waiting jobs with available nodes is not trivial, and there are many many configurable options for tuning the system, assigning certain queues higher priorities than others or ensuring that each work-queue gets a fair time-share of the available cluster capacity, etc. Scheduling won’t be discussed here in detail; it will be assumed that the cluster has enough capacity to immediately run submitted jobs.</p>
+
+<p>The application context specifies a set of “node constraints” which the scheduler takes into account. Examples are:</p>
+
+<ul>
+  <li>run only on the worker node with a specific id</li>
+  <li>run <em>near</em> the worker node with a specific id</li>
+  <li>run only on a worker node with a specific <em>label</em>
+</li>
+  <li>run only on a node with at least N GB of free memory</li>
+  <li>run only on a node with at least N free CPUs</li>
+</ul>
+
+<h1 id="executing-a-queued-job">Executing a Queued Job</h1>
+
+<p>Once the scheduler has found a suitable node, the resource-manager sends the entire application-context over the network to the chosen node.</p>
+
+<p>The nodemanager first creates a temporary directory for the new application, and unpacks all the <em>resource files</em> in the context into this directory. Some of the resources may be URLs (and in particular, references to files in HDFS) in which case the nodemanager will automatically download that file into the temporary directory. Distributing such files via HDFS is a very efficient way to ensure code running in Yarn has quick access to the resources it needs; tools such as the Hadoop MapReduce library take advantage of this feature.</p>
+
+<p>The nodemanager then executes each of the specified commands, as separate processes. Examples of commands are:</p>
+
+<ul>
+  <li><code>/bin/sh myscript.sh</code></li>
+  <li><code>/usr/bin/python3 myscript.py</code></li>
+  <li><code>${JAVA_HOME}/bin/java -jar myapp.jar -classpath mylib1.jar:mylib2.jar</code></li>
+</ul>
+
+<p>where the specified scripts/jarfiles were included in the application-context as resource-files. This process <em>does</em> make some assumptions about the worker node, eg that “/bin/sh” exists, or python or java are preinstalled.</p>
+
+<h2 id="isolating-executed-jobs">Isolating Executed Jobs</h2>
+
+<p>The environment in which a job is executed is called a “container”. However this is just a generic term; the actual mechanisms available are listed below.</p>
+
+<p>In its simplest mode, a nodemanager daemon just performs a <em>fork</em>, changes current-working-directory to the temporary dir created for the application context and executes the commands as the same user the nodemanager daemon is running as. Of course this approach is vulnerable to accidents or malicious behaviour.  The nodemanager is normally installed/started using a system account “yarn”, which does limit the danger somewhat but a malicious job can certainly interfere with other jobs running concurrently on the same node, and with the nodemanager itself.</p>
+
+<p>An option on some operating systems (eg Linux) is to run all application-contexts in a single dedicated user account, eg the standard user “nobody” or a user specially defined for this purpose. This makes it more difficult for an application to interfere with the nodemanager itself, but concurrent jobs can still interact in undesired ways.</p>
+
+<p>When the cluster is configured to use Kerberos, each request to the resource-manager is accompanied by a Kerberos ticket proving the identity of the job submitter. It is then possible to configure nodemanagers to run each submitted job <em>as the Linux user account belonging to the submitter</em>. This requires the relevant user-accounts to be defined on every server running the nodemanager daemon (or at least on all nodes that the application context constraints might select).</p>
+
+<p>To achieve this “run as other user” behaviour on Linux, the Hadoop install includes a Linux binary application <code>$HADOOP_HOME/bin/container-executor</code>. This is initially installed with owner=yarn; enabling “run as other user” requires changing its ownership to “root” and setting the suid-bit. Yes, this has significant security implications - I’m not sure what measures the application takes to limit the commands it can carry out. The nodemanager configuration supports “whitelists” and “blacklists” to limit the accounts that it will run containers as. In particular, a minimum-user-id can be defined (default:1000) to ensure yarn applications are never run as system-user accounts. Of course, no request with a valid Kerberos ticket for such an account should ever be received.</p>
+
+<p>On Linux, the nodemanager can be configured to use Linux Containers to create a (mostly) isolated environment for each application-context. The executed commands run with a limited filesystem, and optionally CPU and ram quotas which really reflect the settings in the application request (without containers, these are just voluntary limits).</p>
+
+<p>On Linux there is also the option to start each application-context in a <em>docker container</em>. The container image is specified in the nodemanager config, not in the application-context, ie applications cannot choose which image to be run in. Nevertheless this is a very nice way to provide a stable and predictable runtime environment for jobs in a Yarn cluster, regardless of the configuration of the OS on which the nodemanager itself is running.</p>
+
+<p>Warning: Linux containers still have significant security issues. Using one is more secure than running as the nodemanager user, but less secure than running as another user account.</p>
+
+<p>Warning: with the current state of Docker, the Docker approach is <em>not</em> as secure as running as a separate local user. Linux containers have only recently gained “user namespace” support in which root user privileges within the container can be mapped to non-root privileges outside the container. Docker has (at the current time) not gained supp`ort for this feature; it is therefore not too difficult for a malicious application within a docker environment to obtain elevated privileges within the host operating system.</p>
+
+<p>Of course security is not always a major concern when using clusters for “big data” processing; the code (application contexts) being run in such environments is often from “trustworthy” sources.</p>
+
+<h2 id="environment-variables">Environment Variables</h2>
+
+<p>The original Application Context can define environment-variables that should be set before invoking the commands. A Yarn nodemanager also sets a bunch of standard variables that executed applications can rely on, including <code>$JAVA_HOME</code> and a <code>$CLASSPATH</code> which includes common Hadoop libraries.</p>
+
+<h2 id="reusing-jobs">Reusing Jobs</h2>
+
+<p>An application context is also sometimes referred to as a “container” - and it can reasonably be compared to something like a Docker container, as it is a set of resources providing an environment in which to execute some command.</p>
+
+<p>It is common for the “same task” to be executed many times, and thus Yarn makes some attempts to <em>cache</em> contexts on worker nodes, in case the same job is executed again on the same node in the near future.</p>
+
+<h1 id="heartbeats-and-status-reports">Heartbeats and Status Reports</h1>
+
+<p>The application executed by a nodemanager should immediately connect back to the resource-manager and report its status; environment variables are provided by the nodemanager with useful data such as the resource-manager address. For long-running programs, regular status reports (heartbeats) should be sent. These messages are in Thrift format, as with all communication to the resource-manager.</p>
+
+<p>This channel from executing job to resource-manager can also be used by the started application to queue additional jobs; MapReduce uses this extensively. Yarn then recognises the parent/child relation and handles retries/notifications appropriately. When using this design-pattern, the single job submitted by the original client process is referred to as an “Application Master”, and the subjobs it spawns are referred to as “tasks”; the Application Master then <em>manages and monitors</em> the tasks it spawns, and only terminates when all of its child tasks have completed.</p>
+
+<h1 id="application-masters-and-jobs">Application Masters and Jobs</h1>
+
+<p>An application started by making a request from a client to the Yarn resource-manager is called an “Application Master”, or AM.</p>
+
+<p>An AM must connect back to the Yarn resource-manager to report status. It may use the same communication channel to request that additional “containers” (execution environments) be reserved for it in the Yarn cluster; these requests may specify the same sort of constraints that a client application specifies when requesting the launch of an ApplicationMaster, eg WorkQueue, memory-size, cpu-type, and various other attributes. If the request can be satisfied, then the resource-manager returns the id of the yarn nodemanager that can provide a suitable container. The AM may then communicate with that nodemanager to specify that specific resources be unpacked into that environment and specific commands be executed - similar to how the AM itself was launched. These “subtasks” do not have their own unique “application name” and status information within the Yarn resource-manager; an AM is responsible for managing code executing in the containers it allocates.</p>
+
+<p>In Hadoop MapReduce programs, a program (eg a complex “query” over large amounts of data) produces a single Application Master application which then allocates containers on or near the HDFS datafile blocks that need to be read, and starts code in those containers which then processes data from those datafile blocks, ie the code has been brought to the data for efficient IO. A MapReduce program that needs to process an HDFS file that is 100 blocks large does not necessarily allocate 100 Yarn “containers” before starting; the appropriate level of parallelism is determined more dynamically.</p>
+
+<p>An Application Master does not have to allocate containers for subtasks; it is valid for an AM to perform logic itself. It is also valid for an AM to run for long periods of time (or until explicitly shut down).</p>
+
+<h1 id="auxiliary-services">Auxiliary Services</h1>
+
+<p>Yarn provides the ability to specify zero or more “auxiliary services” in a Yarn nodemanager configuration file; these are java jars that are loaded and invoked when the nodemanager is started.</p>
+
+<p>The primary use for this is to start an embedded MapReduce daemon which is responsible for providing Reduce tasks with access to the output of Map tasks. A Hadoop MapReduce map task will produce a bunch of files on the local filesystem (one for each reduce partition) then exit. The reduce nodes later connect back to the same yarn node to fetch those files via http, and something needs to be running locally to serve them up.</p>
+
+<p>Auxiliary services run as a library/plugin within the same process as the nodemanager. A nodemanager is thus still just <em>one unix process</em>.</p>
+
+<h1 id="use-cases">Use Cases</h1>
+
+<p>The ability to run anywhere in the cluster, to rely on the resource-manager to restart an app if it (or its host node) dies, and the ability to make the current IP/Port information available via a search of the yarn resource-manager using an application-name makes a yarn cluster a nice place in which to execute long-running services/daemons. Compared to the alternate approach of configuring the service to run on a <em>specific machine</em>, many administration tasks become easier. Service dies or host machine dies? Yarn will auto-restart. Need to scale up to multiple copies of the same service? No big deal, just submit some more copies of the same context to the yarn resource-manager.</p>
+
+<p>The ability to run many short-term programs is also useful. To process a hundred files in parallel, submit the same context 100 times with a different filename for each. Or in the case of HDFS, process each <em>chunk</em> of a large file in parallel by submitting the same context once for each file-chunk.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>The fundamentals of Yarn are really simple: it transfers a set of resource-files to some suitable host and then executes a list of commands there.</p>
+
+<p>There is nothing language-specific about clients that subnmit requests; they just need to be able to send an appropriate Thrift message to the yarn resource-manager. There is also nothing language-specific about the executed commands - the OS on which the yarn nodemanagers execute just need to be able to “bootstrap” the command (eg support python when the command is a python script, or java when the command runs a java jarfile). However in practice, because yarn is implemented in Java, life is easier when clients and commands are implemented in Java (or at least JVM langauges).</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://docs.hortonworks.com/Hadoop2.0/hadoop-yarn/hadoop-yarn-site/WritingYarnApplications.html">HortonWorks: writing yarn applications</a></li>
+  <li>
+<a href="https://hadoop.apache.org/docs/current/api/org/apache/hadoop/yarn/api/records/ResourceRequest.html">Yarn Javadoc for class ResourceRequest</a> - api for expressing “constraints” on the node to be allocated.</li>
+  <li>
+<a href="http://hortonworks.com/blog/introducing-apache-hadoop-yarn/">HortonWorks: Introducing Apache Yarn</a> - a bit dated, but plenty of detail</li>
+  <li><a href="http://hortonworks.com/hadoop/yarn/">HortonWorks: Yarn</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/yarn/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

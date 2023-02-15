@@ -1,0 +1,208 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Dropwizard and Hystrix</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='post'>
+    <h1>Dropwizard and Hystrix</h1>
+    <aside>Posted on: June 12, 2016</aside>
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Java/'>Java</a></p>
+      <p>I’ve recently been doing some maintenance work on an existing Java application (a server providing REST APIs to clients, and talking to a database). Two of the libraries used there (Dropwizard, Hystrix) were new to me, and interesting - worth a brief post at least.</p>
+
+<!-- more -->
+
+<p><a href="http://www.dropwizard.io">Dropwizard</a> is a framework which is useful when developing Java server applications which provide REST APIs to clients; it provides a standard set of libraries (including an embedded webserver) and a set of helpful APIs for parsing a configuration file, registering callbacks with the embedded webserver, basic statistics gathering and reporting, and related stuff.</p>
+
+<p>There isn’t anything in Dropwizard that could not be done manually, but it is nice not to have to. It’s a fairly small amount of code, and gives a nice “standard pattern” to the resulting application, particularly when you are writing multiple such REST-based servers. It is also reasonably non-intrusive, ie little of the actual application code needs to use dropwizard-specific APIs.</p>
+
+<p>Dropwizard is similar to <a href="http://propjects.spring.io/spring-boot/">Spring Boot</a>; I’ve seen some comments that state that Spring Boot is actually better but have no experience with it and am generally happy with Dropwizard.</p>
+
+<p><a href="https://github.com/Netflix/Hystrix">Hystrix</a> is a library which is useful when writing a server application that provides an API to its clients, where those APIs depend upon services provided by other external applications - ie when writing “middleware”. The problem with such middleware is that when the external dependencies stop responding, or start reporting errors, then cascading effects can cause havoc in the middleware. Threadpools allocated by the middleware for serving a range of APIs can get filled up with requests that depend on a specific not-responding service, thus causing <em>all</em> services in the middleware to become unresponsive rather than just the ones that depend on the failing service. Service implementations which depend on <em>multiple</em> external services where one is not responding can also waste time performing (successfully) initial steps when it is known that a later step in the sequence will fail anyway. Hystrix can be used to track a “status” for external services, in order to <em>immediately</em> fail a middleware service implementation when a required external dependency is failing. The downstream service is periodically <em>retried</em> so that when it returns to functional status then uses of it within the middleware layer also resume (rather than reporting errors immediately).</p>
+
+<p>The core concept of Hystrix is somewhat related to <a href="https://en.wikipedia.org/wiki/Hysteresis">hysteresis</a> which may explain the origin of the project name. When the frequency of errors rises above a threshold, the connection switches into a “disabled” state for a period of time before letting a single request through to see if it can switch back to “available”.</p>
+
+<p>Unfortunately, Hystrix uses the <a href="https://en.wikipedia.org/wiki/Template_method_pattern">template method anti-pattern</a> - it provides <em>base classes</em> which application code must subclass, implementing abstract methods or overriding default implementations to add application-specific logic. The “template method” pattern was included in the classic <a href="https://en.wikipedia.org/wiki/Design_Patterns">Design Patterns book</a> and was widely used for several years in the early 90s - for example in graphical APIs such as Java’s AWT. However this approach works very poorly with dependency-injection, unit-testing, aspect-oriented programming, and several other modern techniques - and in the case of Hystrix, complicates unit-testing significantly. In short - interfaces good, helper classes good, base classes bad. Despite this problem, Hystrix is still useful; hopefully a later version will provide the same functionality with a better API.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/posts/2016-06-12-dropwizard-hystrix/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

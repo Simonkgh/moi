@@ -1,0 +1,448 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Symmetric Encryption</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Symmetric Encryption</h1>
+    <aside>First published on: January 28, 2013</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Cryptography/'>Cryptography</a></p>
+      <p>(<a href="/2013/02/encryption">back to main post</a>)</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>This article presents the fundamental concepts of symmetric encryption, and adds some notes on OpenSSL.</p>
+
+<p>There is a lot of information out on the internet regarding encryption - and a scary amount of it is simply wrong. There are also a few sources of correct information, but they are often written in almost incomprehensible form; it seems that those who know most about encryption are the least capable of explaining it.</p>
+
+<p>One of the best sources I’ve found is Wikipedia (see references section below); even there the explanations are not easy to follow. And although thorough, there is almost <em>too much</em> information there; wading through it all takes a significant amount time. Hopefully this article provides the necessary overview and base information to make sense of more detailed presentations.</p>
+
+<p>This article is intended for programmers (any language) but does not assume any knowledge of cryptography. It is the result of extensive reading of online information and source code that was done as preparation for an encryption-related project, but I am not a trained cryptographer; any corrections are welcome.</p>
+
+<h1 id="some-terminology">Some Terminology</h1>
+
+<ul>
+  <li>Symmetric encryption - where the same key is used to encrypt and decrypt data.</li>
+  <li>Plaintext - data that is not encrypted</li>
+  <li>Ciphertext - data that is encrypted</li>
+  <li>Cipher - an algorithm for transforming Plaintext into Ciphertext and back</li>
+  <li>AES - Advanced Encryption Standard : a specific Cipher algorithm approved by the U.S. National Institute of Standards and Technology, aka NIST.</li>
+</ul>
+
+<h1 id="the-basic-concepts">The Basic Concepts</h1>
+
+<p>It is really important to grasp the following concepts. There is far more to these than first appears!</p>
+
+<ul>
+  <li>Key</li>
+  <li>Password</li>
+  <li>Salt</li>
+  <li>Initialization Vector</li>
+  <li>Padding</li>
+  <li>Block Ciphers vs Stream Ciphers</li>
+</ul>
+
+<h2 id="keys">Keys</h2>
+
+<p>An encryption key is a set of bits of a <em>very specific</em> length, with specific mathematical properties.</p>
+
+<p>For some algorithms (eg AES, DES) the key simply needs to be an unpredictable sequence of bits, ie where there is no obvious internal pattern to the bits that make up the key. For other cipher algorithms, the key may need specific internal structure.</p>
+
+<p>A password is <em>not</em> a key; the sequence of bits are not at all “unpredictable” (randomly distributed), it isn’t a fixed length block, etc. And even if a block of data is created which does have the right size and randomness, it still isn’t a key if it is passed to some encryption application as a “password” parameter! This is worth noting because this appears to be one of the most common errors made in encryption-related discussions found on internet forums.</p>
+
+<p>From the user’s point of view, a key is a block of bytes (eg 16 bytes [128-bits] or 32 bytes [256-bits]).</p>
+
+<h2 id="passwords">Passwords</h2>
+
+<p>Because keys are effectively fixed-size blocks of nearly-random bits, they aren’t easy to memorize. Passwords are far easier.</p>
+
+<p>However as noted, a password is <em>not</em> a key. There are some standard ways of converting a password into a key though; these are called Password Based Key Derivation Functions, or PBKDF for short. The general concept of using (password + PBKDF) at each end is also referred to as Password Based Encryption (PBE).</p>
+
+<p>As one example, the algorithm known as PBKDF#2 can compute a block of bytes suitable for use by the AES or DES algorithms. It does this by running the SHA1 hash algorithm on a password which results in a set of N bits which are fairly well distributed, ie any number is nearly as likely as any other number. The first few bits of the result are saved, and the hash is then applied to the result of the previous round, the next few bits taken, etc. This is repeated until the desired key-size is reached.</p>
+
+<p>To further annoy attackers, an “iteration count” can be specified where the hashing step of the PBKDF algorithm is run many times (eg 100 or 1000) for each step rather than just once. This still has a very small effect for people who enter a correct password (as they do this time-consuming calculation only once), but is a significant performance hit for attackers trying to guess a password by “brute force”; they must try converting millions of passwords to keys in the hope of ending up with a key that can successfully decrypt the target data. When using Password Based Encryption (PBE) to derive a key from the same password at both ends of a communication channel, the encrypting and decrypting ends also need to agree on the same iteration count, otherwise the derived keys will not match.</p>
+
+<h2 id="salts">Salts</h2>
+
+<p>A <em>salt</em> is a random value that is used to block attacks related to <em>precomputing</em> tables of plaintext-to-hashvalue or plaintext-to-ciphertext which can then be applied in reverse (ie to a hashvalue or ciphertext) to determine the original input. A salt value does not need to be kept secret.</p>
+
+<p>It is important to understand that salts can be used in two quite different ways: when hashing and when encrypting.</p>
+
+<p>To allow password-based authentication (eg “login”), a <em>hash</em> of the password is stored in a database. A <em>salt</em> can (and should) be used when computing the hash value, ie what is stored is the pair of values <em>[salt, hash(salt, password)]</em>. Using a salt in this way primarily prevents precomputing tables of the hash-values of common passwords. The same salt should not be used for a large number of entries, because two users with the same salt and hash probably have the same password, which is possibly useful information. However in general the salt does not need be be particularly unique, nor frequently changed - even using a “userid” or “creation date” value as a salt in this scenario would possibly be adequate.</p>
+
+<p>When using password-based-encryption, the process of deriving a key from a password is repeatable; the same password always produces the same key. Although keys are supposed to be unpredictable (ie any possible value for the key is as likely as any other), this is not true if PBE is used and the input password is weak (ie one of the “common” passwords). This problem can be partially worked-around by generating a random salt value and including this as an input to the PBKDF algorithm, ie key = PBKDF(salt,password). In order for the receiver to correctly decrypt the data, it needs the original (secret) password <em>and</em> the salt value which is not necessarily kept secret (openssl simply prepends the salt value to the encrypted data). The result still isn’t as good as using a properly random key but is certainly better than using a key derived from a weak password without salt. In particular, if an attacker precomputes a table of <em>[password-&gt;encrypted-output(some-known-text)]</em> for a set of common passwords, and can then somehow trick users into encrypting the <em>some-known-text</em> string with PBE, no salt, and no IV (see below) then the attacker can do a reverse-lookup in the table to see if that user has one of the “common passwords”.</p>
+
+<p>Note that there are other possible attacks on encrypted data which do not depend upon the strength of the key; see the following section on Initialization Vectors (IV) which are a kind of per-message salt. Using an IV when performing encryption also blocks <em>lookup-based</em> attacks, ie a salt is not necessary when an IV is used. Nevertheless, ensuring that PBE derives keys using PBKDF(password,salt) ensures that encryption is better even without (or with faulty) IVs.</p>
+
+<h2 id="block-chaining-and-initialization-vectors">Block Chaining and Initialization Vectors</h2>
+
+<p>Encryption algorithms usually work on fixed-size blocks of data at a time; they convert the first N bits into encrypted form then stop. The block size is surprisingly small; for example, the AES algorithm has a block-size of 128 bits. Other algorithms encrypt just 64 bits at a time.</p>
+
+<p>A simplistic way of processing a large file is therefore to simply encrypt each “block” of input separately, and concatenate the results. This is known as “Electronic Code Book” mode, or ECB. It is also a very bad idea, and simplifies the job of breaking the encryption in several ways. The worst flaw is that two identical files encrypted with the same key produce exactly the same result; an attacker who can’t see <em>what</em> is in the encrypted blocks, but knows that the plaintext content of one file is the same as the plaintext content of a different file can possibly guess what those contents are. The problem also occurs if the same text occurs somewhere <em>within</em> two files at an offset which is a multiple of the encryption block-size; it is possible that an attacker can arrange this. Because encryption effectively restarts for each “block”, common text sections may be detectable. As examples of attacks that this makes possible:</p>
+
+<ul>
+  <li>
+    <p>If the attacker can cause a large number of users to encrypt a known string with a key derived from their password (without a salt), and two users generate the same output, then those two users have the same (and therefore probably weak) password. Note however that if the two users include different <em>salts</em> in the PBKDF process, the outputs are different.</p>
+  </li>
+  <li>
+    <p>If a user encrypts many different messages with the same key, and the possible inputs are known to the attacker, then statistical analysis may reveal information. As an example, imagine a database holding answers to a health questionnaire. For each user, the answer “yes” or “no” is encrypted and stored in the database, using a user-specific encryption key. However if the word “yes” always gets encoded to exactly the same block of encrypted bytes (ie ECB mode is used), and the answer “yes” is always more common than the answer “no”, then it is possible to know a user’s answers without “breaking the encryption” (determining the key) at all.</p>
+  </li>
+</ul>
+
+<p>To avoid the problems of ECB described above, some kind of <em>block chaining</em> should be used, where part of the results from the previous block are fed into the encryption step for the next block. Effectively, the encryption key changes for each block; this makes the output <em>much</em> harder to crack. It also solves the problems with identical blocks of text (on a block boundary) within a file being mapped to identical encrypted output.</p>
+
+<p>By itself, however, this still means that using the same key to encrypt two completely identical files will produce identical encrypted output. But given that there is a way to feed in “previous state” to each pass (block) of the algorithm, it is also possible to feed in some “initial state” when encrypting the first block. This “initial state” is called an Initialization Vector (IV). And if a different (random) IV is used when encrypting each file, then the full problem is solved.</p>
+
+<p>Even nicer, the IV does not have to be kept secret. It isn’t there to make the encryption algorithm stronger as such (like the key), it is just there to fix the problem of identical files encrypted with the same key producing identical output. There is therefore no reason why it can’t be passed around along with the encrypted file if desired. An IV plays a somewhat similar role for keys that “salt” does for a password (see below). As an example, RFC-2406 (“Encapsulating Security Payload”) describes how an IV can be simply prefixed to the encrypted data.</p>
+
+<p>The most common block chaining algorithm for encryption is called CBC. In Java, the most common identifier for symmetric encryption cipher is therefore “AES/CBC/PKCS5Padding”, or AES algorithm with CBC block chaining enabled and using the PKCS#5 method for padding the input data to a full block-length. The encryption key length is controlled by the Key object passed to init, not by the algorithm identifier.</p>
+
+<p>The process of “chaining” encryption steps together, or “feeding forward” results, is technically referred to as “modes of operation”. Not a very helpful term really :-)</p>
+
+<p>Reusing IV values is a bad idea. When using some “block chaining” algorithms, reusing a (key,IV) pair totally destroys cryptographic security. Even with “safer” block chaining algorithms (including CBC), skilled attackers can deduce the presence of identical files (and files that <em>start</em> with identical text).</p>
+
+<p>Note that the problems of ECB mode can be partly mitigated by using (salt, password, iteration-count) values to generate a key where the salt is a random value different for each message; in effect the key is different for each message and encrypting the same file twice with <em>different</em> keys will at least generate different results. It still leaves issues regarding duplicated contents <em>within</em> the same file though; so just avoid ECB.</p>
+
+<p>As with a key, an IV has to have specific properties; in particular each algorithm requires an IV of a specific fixed length. OpenSSL (and perhaps other tools) can <em>derive</em> an IV from a (salt, password) pair. In this case, it is <em>very</em> important that the salt is <em>random</em> and never <em>reused</em>; it is in effect an IV itself. As noted in the previous section on salts, a salt is not needed for a PBKDF function if an IV is used.</p>
+
+<h2 id="padding">Padding</h2>
+
+<p>Because block ciphers work on fixed numbers of plaintext bits at a time, input messages must be “padded” to the appropriate size before being encrypted, and then this padding must be detected and removed after the cyphertext has been decrypted. There are several common methods; the one described in the PKCS#5/PKCS#7 specifications is probably the most common, but others exist. The encrypting and decrypting parties must be configured to use the same padding algorithm.</p>
+
+<h1 id="block-ciphers-vs-stream-ciphers">Block Ciphers vs Stream Ciphers</h1>
+
+<p>While block ciphers work on N bits at a time (eg 64 or 128), “stream” ciphers generate an infinite-length pseudo-random sequence of bits (aka keystream) then just XOR the plaintext with it. They therefore can encrypt data of any input length (no padding needed), and generate an output of exactly the same length as the input.</p>
+
+<p>However the use of “xor” means that the same “keystream” must never be used for two different messages; if both messages are intercepted then breaking the code becomes very simple. The answer is to use a different random “IV” for each message; as with block ciphers, the IV can safely be made public.</p>
+
+<p>One other disadvantage of stream ciphers is that any old garbage will successfully decrypt to <em>something</em>; this is different from most block ciphers where decryption will fail (with high probability) if the input was not encrypted with the same key - or was modified in any way. Detecting failed decryption can be useful; note however that “encrypting” and “validating” data are two different features (see section on Message Authentication Codes below). Occasionally, the fact that stream-ciphers do not detect decryption “failures” can be useful: if an attacker is trying to break encryption via brute-force then they will also need some way of checking whether decryption has actually worked or not. For some cases, detecting successful decryption is trivial (eg when it is known that the desired value is plain ascii, or an image file) but for some use-cases a stream-cipher might make brute-force attacks harder.</p>
+
+<p>Stream ciphers do have the advantage that they are easier to implement in hardware.</p>
+
+<p>Some block ciphers can be used in “stream mode” where they effectively encrypt any length input without needing padding (ie have a similar behaviour to <em>true</em> stream ciphers). See the “CFB”, “OFB” and “CTR” modes of operation. There are some weaknesses in these modes though, similar to those described above for stream ciphers; use block-mode where possible.</p>
+
+<p>In short: for normal software development, block ciphers are the best choice; stream ciphers should usually only be considered in embedded systems.</p>
+
+<h1 id="common-encryption-algorithms">Common Encryption Algorithms</h1>
+
+<ul>
+  <li>
+    <p>AES</p>
+
+    <p>This is the current US Government encryption standard, and used world-wide. The algorithm supports keys of length 128, 196 and 256 bits. The 128-bit key is regarded as pretty good, but possibly vulnerable now for seriously-equipped attackers; use 256-bit keys when possible.</p>
+
+    <p>Unfortunately, some software limits access to encryption with support for stronger keys. In particular, the standard Java distribution from Oracle includes only support for 128-bit AES keys; to support longer keys a separate file must be downloaded and installed. Who is responsible for this policy isn’t clear - some sources say that the US laws limit export of strong encryption, while others say this is done because some countries ban <em>import</em> of software with strong encryption. Regardless, it’s a nuisance but not a major one to work around.</p>
+  </li>
+  <li>
+    <p>DES and triple-DES</p>
+
+    <p>These are old encryption algorithms that should be avoided, except when needed for accessing old systems or old saved data.</p>
+  </li>
+  <li>
+    <p>Blowfish</p>
+
+    <p>Modern algorithm, highly regarded but not better than AES for most purposes. If AES-256 isn’t good enough for you, you probably need to consult a cryptography expert.</p>
+  </li>
+</ul>
+
+<h1 id="message-authentication-codes-macs">Message Authentication Codes (MACs)</h1>
+
+<p>The discussion above has mostly been about <em>encrypting</em> data, ie ensuring that nobody can know what was originally transmitted (except hopefully the expected recipient).</p>
+
+<p>MACs are instead about detecting tampering, ie attaching a checksum value to a message that prove that what was received was exactly what was sent. A MAC is like a “message digest” algorithm such as SHA1 except that it also uses a shared key. While an attacker can modify a message’s plaintext and simply recompute a matching SHA1 checksum, it isn’t possible to modify a message’s plaintext and recompute a matching MAC value without knowing the appropriate shared key that the receiver will be using to validate the MAC with.</p>
+
+<p>Fortunately, it isn’t necessary to use totally different encryption algorithms to generate MAC outputs from plaintext, but just to change the way that “block chaining” is done. The block chaining algorithms designed for encryption do provide some limited protection against tampering and data-corruption, but aren’t specialised in it like MACs are.</p>
+
+<p>Well-known MAC block chaining algorithms are HMAC, GMAC and CMAC.</p>
+
+<p>Block chaining algorithms that are good at both encryption <em>and</em> verification are referred to as “AE” (Authenticated Encryption) and include CCM, GCM, CWC, EAX, IAPM, OCB.</p>
+
+<h1 id="key-agreement">Key Agreement</h1>
+
+<p>There are some very clever algorithms named “Key Agreement” algorithms, of which Diffie-Hellman is the best known. These allow two communicating parties (eg two ends of a network socket) to together create an identical “shared secret” without ever actually passing that key between them.</p>
+
+<p>As a rough description, both ends generate an asymmetric (public, private) key pair and send the public keys to each other. They then exchange some further apparently random values and then each executes an algorithm combining these exchanged values together with (a) the public key they received from the other party, and (b) their own private key that never left the local application. Due to some magic mathematical properties in the original (public, private) values, they both end up with the same result even though each never saw the private key of the other party. And because an eavesdropper never sees <em>either</em> private key, they cannot compute the shared value.</p>
+
+<p>This “shared secret” can then be used as the key for a symmetric encryption algorithm.</p>
+
+<p>Note that the algorithm used to create a (public, private) key pair for this purpose is <em>not</em> the same as the algorithm for generating “normal” RSA/DSA asymmetric key pairs, and this pair should not be used for encryption or authentication - just for “key agreement”.</p>
+
+<p>Note also that by itself this does not prove the identity of the other party; a shared key immune to eavesdroppers is derived but the other party might still be a man-in-the-middle.</p>
+
+<p>In most cases, it is simpler to set up encrypted communications via asymmetric encryption (eg SSL) and then just send a key over this channel. However one nice thing about the “key agreement” approach is that if an attacker records the encrypted communications and spends several years breaking the code (or just steals the key from the server) they will still be unable to read data encrypted with the “shared secret” because the relevant parts only ever existed in memory and were never written to disk or sent over the (intercepted) network. This is called “perfect forward secrecy”.</p>
+
+<p>See the Wikipedia article on this topic (link below in the References section) for a more detailed description.</p>
+
+<h1 id="some-notes-on-openssl">Some notes on OpenSSL</h1>
+
+<p>The open-source “OpenSSL Project” distributes encryption libraries, and a commandline application that is built on those libraries.</p>
+
+<p>The OpenSSL command-line application provides “enc -e” and “enc -d” options for encrypting and decrypting data respectively.</p>
+
+<p>When encoding, the user may either:</p>
+
+<ul>
+  <li>provide a Key and (random) IV directly, or</li>
+  <li>provide a password and (random) salt, from which are automatically derived the Key and (in a non-standard extension) the IV. Actually, the salt is optional, as openssl will generate a random one for you.</li>
+</ul>
+
+<p>The resulting encrypted file has the <em>salt</em> value attached to the front of it (the first 16 bytes). This is ok, as the salt is not there to strengthen the encryption algorithm as such, but just to prevent precomputed tables from being effective.</p>
+
+<p>OpenSSL currently only supports iteration-count=1; this is reasonable as the primary use for an iteration-count is in password-based-authentication (ie hashing of passwords), not in encryption.</p>
+
+<p>When decoding, the same data is required, ie either:</p>
+
+<ul>
+  <li>Key and (original) IV, or</li>
+  <li>Password and (original) salt, from which key and (using the non-standard extension) IV are derived. Actually, the salt is normally not needed as openssl-generated files will have the salt prepended to the encrypted file. As noted above, iteration-count is always assumed to be 1.</li>
+</ul>
+
+<p>As described above, an IV will also be needed. While openssl could potentially generate a random IV, and also prepend this to the file (because an IV does not <em>have</em> to be private), it takes a different (and unfortunately also non-standard) approach. The IV is instead <em>derived</em> from the password and salt, just like the key. In fact, a modified version of the standard PBKDF1 (“Password Based Key Derivation Function #1”) algorithm is used; the modified version simply repeats the algorithm with the previous output as the new input as often as needed until enough bits have been generated not just for the key but also for an IV. As long as the salt really is random, this is even better than a public IV as:</p>
+
+<ul>
+  <li>the IV is kept private (can’t be known unless the password is known); this is not necessary, but is a bonus</li>
+  <li>no storage space is wasted in the generated output; the salt already has been attached (to derive the key) and this (together with the password) is all that is needed at the decoding
+end to recompute the IV again;</li>
+</ul>
+
+<p>As long as the salt is different for each message (which it is by default), encrypting the same text multiple times with the same password results in different output files. If the same salt is reused (which can be forced via openssl command options) then encryption becomes repeatable - which might be useful for testing, but is very bad in real use.</p>
+
+<p>Unfortunately, the fact that the IV must be recomputed using an openssl extension to the standard algorithms can make decoding of such files with other software tricky. In this case, you can always explicitly generate an IV, pass it to openssl, and then somehow communicate the IV to the recipient along with the encrypted message.</p>
+
+<p>How often a salt can be reused depends upon its purpose:</p>
+
+<ul>
+  <li>The salt used when hashing a password typically stays unaltered for a very long time; optionally it can be changed when a user changes their password but there is no need to;</li>
+  <li>The salt used to generate a key from a password can also be reused if desired (eg be a per-user value that is used for all encryption passwords for that user) - unless using ECB mode (ie no IV), in which case using a different salt per message is  good idea;</li>
+  <li>The salt used to generate an IV from a password <em>must</em> be changed for each message.</li>
+</ul>
+
+<h1 id="the-pkcs-encryption-standards">The PKCS Encryption Standards</h1>
+
+<p>There are a number of standard algorithms that have names starting with “PKCS#”. These commonly pop up in discussions on encryption. However PKCS algorithms are mostly related to asymmetric (public key) encryption; only two of them are directly relevant to basic symmetrical key encryption.</p>
+
+<ul>
+  <li>
+    <p>PKCS#5 - Password Based Encryption : describes several algorithms, including some for computing a “key” from a password (and optional salt) (also known as a Key Derivation Function, or KDF). Openssl uses a related algorithm to derive a key from a password, and extends it to also derive the IV. PKCS#5 also defines an algorithm for “padding” a message to a multiple of the cipher’s block-size; this algorithm is identical to the one in PKCS#7.</p>
+  </li>
+  <li>
+    <p>PKCS#7 - Cryptographic Message Syntax Standard : has a small section describing how to pad a message to a suitable block-size for use with block ciphers. As noted above, the padding algorithm is identical to the one specified in PKCS#5.</p>
+  </li>
+</ul>
+
+<h1 id="most-common-misconceptions">Most Common Misconceptions</h1>
+
+<p>The most common bad advice seen on the internet is due to people confusing “key” with “password”.</p>
+
+<p>The next common is people using ECB (Electronic CookBook mode), either by passing wrong parameters to an encryption library, or manually looping and encrypting the input one block at a time themselves.</p>
+
+<p>And the next most common is code that does enable CBC mode, but fails to provide a random IV.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://en.wikipedia.org/wiki/Encryption">Encryption</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Symmetric-key_algorithm">Symmetric Key Encryption</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Block_cipher">Block Ciphers</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Stream_cipher">Stream Ciphers</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Initialization_vector">Initialization Vectors</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Cryptographic_nonce">Nonces</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation">Modes of Operation</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Password_salt">Using Salt when Hashing Passwords</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/PKCS">PKCS</a></li>
+  <li>
+<a href="https://learncryptography.com">Learn Cryptography</a> - an introduction to cryptography for beginners/intermediates</li>
+</ul>
+
+<p>More Advanced Topics</p>
+
+<ul>
+  <li><a href="http://en.wikipedia.org/wiki/Cryptographic_protocol">Protocols - TLS, IPSEC, Kerberos, etc</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Hash_function">Hash Functions</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">Diffie-Hellman Key Exchange</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/symmetric-encryption/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

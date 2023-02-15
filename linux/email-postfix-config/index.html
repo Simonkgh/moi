@@ -1,0 +1,855 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Email Postfix in Practice</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Email Postfix in Practice</h1>
+    <aside>First published on: January 5, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      
+<p>(Back to the <a href="/linux/email-overview">main article</a>)</p>
+
+<p>(Updated 2024-04-14 to Postfix version 3.6.4 on Ubuntu 22.04 LTS)</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>This article describes the steps needed to install Postfix + Dovecot + SpamAssassin on an Ubuntu server. The implemented solution is very light-weight, and suitable for handling mail for a small number of users (eg a single person, a family or small startup). In particular, user-accounts are defined via config-files (not a database), in order to use the least amount of resources.</p>
+
+<p>The reasons for choosing such a setup are described <a href="/linux/email-overview">here</a>. A general overview of email is described <a href="/linux/email-theory">here</a>. Some background information on Postfix can be found <a href="/linux/email-postfix-theory">here</a>.</p>
+
+<p>The instructions describe how to set up email for <code>user@example.com</code> on a server with name <code>mail.example.com</code>. Replace <code>example.com</code> with your domain-name.</p>
+
+<p>The solution described here uses the Postfix virtual delivery transport, with email-accounts defined in a hand-editable plain text file.</p>
+
+<h1 id="set-up-a-test-email-domain">Set up a Test Email Domain</h1>
+
+<p>The steps below are rather complicated, and getting it right first time is not easy. If you are migrating an existing email-domain from a hosted service to a self-configured system then it can be awkward to switch over and find the new system isn’t working right.</p>
+
+<p>If you are migrating an existing email domain, then I recommend first setting up a new email system for a “test domain”, and switching the real domain over after confirming that emails via the test-domain work. Assuming you have a domain-name <code>example.com</code>, it is possible to apply the following instructions to set up email-domain <code>@test.example.com</code>, send and receive emails, then update to handle the real <code>@example.com</code> addresses - mostly just a case of replacing <code>@example.com</code> with <code>@test.example.com</code> below…</p>
+
+<h1 id="configure-a-host-name">Configure a Host Name</h1>
+
+<p>As well as registering a DNS record for your email-domain, you need to register a DNS name for the host on which the SMTP server for that domain runs. I recommend creating an alias-record for <code>mail.example.com</code> which points at whichever host you want to deploy your SMTP server on. That is not only clean, but also allows you to restructure later with reduced impact - in particular the SSL certificate for the alias host name is still valid even if you move the underlying infrastructure to a new host.</p>
+
+<p>See the section below on DNS configuration for more details.</p>
+
+<h1 id="create-an-ssl-certificate">Create an SSL Certificate</h1>
+
+<p>It is assumed that you have already obtained an SSL certificate for “mail.example.com” (replace example.com with your domain). Using Letsencrypt <a href="/linux/letsencrypt">is a good option</a>.</p>
+
+<h1 id="configure-the-system-firewall">Configure the System Firewall</h1>
+
+<p>Ubuntu automatically uses <code>UFW</code> to block most incoming ports by default. Run <code>ufw status verbose</code> to see the current rules; if ufw is active then:</p>
+
+<ul>
+  <li>
+<code>ufw allow 465</code>  # smtp-over-tls</li>
+  <li>
+<code>ufw allow 587</code>  # submission</li>
+  <li>
+<code>ufw allow 993</code>  # imap-over-tls</li>
+  <li>
+<code>ufw allow 220</code>  # imap (hopefully with STARTTLS)</li>
+</ul>
+
+<h1 id="install-dovecot">Install Dovecot</h1>
+
+<p>Before setting up Postfix to handle incoming email, we should set up the system that actually stores those emails on disk, and provides access to them. Postfix <em>can</em> store files on disk, but doesn’t support POP or IMAP protocols for retrieving them remotely - for that you need something like Dovecot. And if you’re using Dovecot then Postfix should <em>not</em> store incoming mails directly, but instead pass them to the Dovecot server as soon as they are received and validated.</p>
+
+<p>Dovecot accepts emails from a Postfix instance (via lmtp) and stores them. It also handles email-client-applications connecting via the IMAP protocol to view/manage/delete existing emails.</p>
+
+<p>Outgoing emails from an email-client-application point at the Postfix “submission port”, not at Dovecot.</p>
+
+<p>Install Dovecot with:</p>
+
+<ul>
+  <li><code>apt install dovecot-core dovecot-imapd dovecot-lmtpd</code></li>
+</ul>
+
+<p>In <code>/etc/dovecot/conf.d</code>, configure files as follows. Note that commented-out lines in the installed config-files indicate the default values.</p>
+
+<h2 id="dovecot-auth">Dovecot Auth</h2>
+
+<p>When using Postfix and Dovecot together, doing user authentication is a little tricky; Dovecot needs to authenticate users accessing email via IMAP/POP3, but Postfix also needs to authenticate users who send email via the “submission port” and needs to at least verify that a user exists when receiving email via SMTP from other systems.</p>
+
+<p>There are a few ways to set up this “shared authentication”; both Dovecot and Postgres are very configurable in this area.</p>
+
+<p>Larger systems (and most tutorials on email setup) use a relational database (eg MySQL or Postgres) to store users, and share this DB between Postfix and Dovecot. However this is obviously resource-intensive - the DB needs to run continuously.</p>
+
+<p>It is possible for Postfix and Dovecot users to simply be local Linux users, ie to use standard user accounts on the mail host - and in fact the default “auth-system” settings for Dovecot assume this approach (via the PAM login system).  However (a) that makes obtaining user-related info needed in other contexts difficult and (b) it seems a bad idea to link email passwords to login passwords.</p>
+
+<p>This article recommends having a plain-text file for Dovecot user information and credentials. This is easy to understand and debug, and seems safer. Postfix can then authenticate users sending outbound mail via a “SASL” connector to Dovecot - ie ask Dovecot to do the user validation. Unfortunately, when handling incoming mail Postfix needs to check if the destination email account exists but cannot use SASL for that as there is no password available; the only solution I am aware of is a separate file for Postfix - ie duplicated info that needs to be kept in-sync.</p>
+
+<p>Using simple file-based user authentication does mean that adding new users (or even changing their passwords) requires editing a text file on the mailserver; it is therefore appropriate for systems with a small number of users and a technically-minded admin. But if you are reading this article, that’s presumably you..</p>
+
+<p>Edit <code>/etc/dovecot/conf.d/10-auth.conf</code> to:</p>
+
+<ul>
+  <li>include only <code>auth-passwdfile.conf.ext</code> (see end of file)</li>
+  <li>set <code>auth_username_format = %Ln</code> (alternative is to use full <code>user@domain</code> names in <code>/etc/dovecot/users</code> and in the email-client “userid” field).</li>
+</ul>
+
+<p>Now edit <code>auth-passwdfile.conf.ext</code>:</p>
+
+<pre><code>passdb {
+  driver = passwd-file
+  args = ... username_format=%u /etc/dovecot/users
+}
+
+userdb {
+  driver = passwd-file
+  args = username_format=%u /etc/dovecot/users
+}
+</code></pre>
+
+<p>A Dovecot “passdb” indicates where (username -&gt; password) mappings can be found to authenticate users over imap or sasl. A Dovecot “userdb” instead specifies where (username -&gt; userinfo) mappings can be found; for some email-storage-mechanisms Dovecot needs to know a user’s “home dir” and UID in order to write files. This article actually sets up email storage in such a way that this info is irrelevant, but the userdb is still required. The passdb and userdb can be separate files, or can be a combined file in <code>/etc/passwd</code>-style layout.</p>
+
+<p>The specified file <code>/etc/dovecot/users</code> should look somewhat like this:</p>
+
+<pre><code># SHA512 passwords created via "sha512sum&lt;enter&gt;password&lt;ctrl-d&gt;&lt;ctrl-d&gt;" then copy-and-paste
+me:{SHA512}aabbccdd11223344....:1000:1000
+</code></pre>
+
+<p>Ensure the file has suitable access-rights! It must be readable by the user specified in “service auth” and in “service auth-worker” (<code>10-master.conf</code>) who is by default <code>root</code>. A safer config is to set these entries to <code>user=$default_internal_user</code> and ensure the file is readable by that user (<code>dovecot</code>).</p>
+
+<p>As mentioned, this is basically <code>/etc/passwd</code> format with “columns” holding username, passwd, userid, groupid, description, shell, home-dir.</p>
+
+<p>However the “passwd” column holds a password-hash prefixed with the hash-method used, so that Dovecot can hash an incoming password and compare it to the expected value.</p>
+
+<p>When Dovecot is configured to deliver emails to a user’s homedir then the homedir is of course relevant; however in this article Dovecot is instead configured to store email under <code>/var/dovemail/{user}</code> so the homedir in this file is not actually relevant. Neither is description or shell, so only 4 columns are needed.</p>
+
+<p>If you have problems with authentication, try editing <code>/etc/dovecot/conf.d/10-logging.conf</code> and setting the “verbose” options to “yes” to get more info in <code>/var/log/mail.log</code>.</p>
+
+<p>By default, unencrypted-logins are disabled, which is what we want.</p>
+
+<h2 id="dovecot-delivery">Dovecot Delivery</h2>
+
+<p>Edit file <code>conf.d/10-mail.conf</code> to specify where email is to be stored in the local filesystem. Set</p>
+
+<pre><code>mail_location = maildir:/var/dovemail/%u/Maildir
+mail_access_groups=dovecot
+</code></pre>
+
+<p>Also create directory <code>/var/dovemail</code>, set its group to the dovecot user, and set the group-sticky-bit:</p>
+
+<pre><code>mkdir /var/dovemail
+chgrp dovecot /var/dovemail
+chmod g+s /var/dovemail
+</code></pre>
+
+<p>This will store user-specific settings for user <code>me</code> under <code>/var/dovemail/me</code>, and emails under <code>/var/dovemail/me/Maildir</code>. The “home” column of the userdb (file <code>/etc/dovecot/users</code>) will be ignored (and can be empty).</p>
+
+<p>The files will be owned by the UID specified in the Dovecot userdb. When accessing emails on behalf of a user, Dovecot will “switch user” to the UID specified in this file, in order to have the needed filesystem read/write access. An alternative is to define a new system user to “own all emails” (by convention, name=vmail) and specify this via config-setting <code>mail_uid</code>. The file defining users can then omit userids completely.</p>
+
+<h2 id="dovecot-services">Dovecot Services</h2>
+
+<p>Edit <code>10-master.conf</code> to define which ports/sockets Dovecot will listen on. Postfix will be set up to not deliver (write) emails itself but instead to pass them on to Dovecot for storage; the protocol between Postfix and Dovecot will be LMTP over a local filesystem socket, so configure Dovecot to create/listen on that socket:</p>
+
+<pre><code>service lmtp {
+  unix_listener /var/spool/postfix/private/dovecot-lmtp {
+    group = postfix
+    user = postfix
+    mode = 0600
+  }
+}
+</code></pre>
+
+<p>Postfix will also be configured to use Dovecot’s password-database to authenticate users who perform SMTP-AUTH with Postfix (ie local users wanting to send email over the Postfix submission-port). Postfix will communicate with Dovecot using the SASL protocol over a local filesystem socket, so configure Dovecot to listen on that:</p>
+
+<pre><code>service auth {
+  unix_listener /var/spool/postfix/private/auth {
+    mode = 0666
+  }
+}
+</code></pre>
+
+<p>See <a href="http://wiki2.dovecot.org/HowTo/PostfixDovecotLMTP">this Dovecot Wiki page</a> for more information on Postfix+Dovecot+LMTP.</p>
+
+<h2 id="ssl">SSL</h2>
+
+<p>Connections from email clients to Dovecot’s IMAP port should <em>always</em> be encrypted. That means Dovecot needs to be given access to the SSL server-certificate for <code>mail.example.com</code>.</p>
+
+<p>I presume you’ve already created such a certificate, so now edit <code>conf.d/10-ssl.conf</code>:</p>
+
+<pre><code>ssl = required
+ssl_cert = &lt;/etc/letsencrypt/live/mail.example.com/fullchain.pem
+ssl_key = &lt;/etc/letsencrypt/live/mail.example.com/privkey.pem
+</code></pre>
+
+<h2 id="other">Other</h2>
+
+<p>Edit <code>conf.d/15-lda.conf</code> and set the postmaster_address to <code>postmaster@example.com</code>.</p>
+
+<h2 id="starting-dovecot">Starting Dovecot</h2>
+
+<p>Just run “<code>systemctl restart dovecot</code>” (or <code>service dovecot restart</code>) to pick up all the changes. Check <code>/var/log/mail.err</code> and <code>/var/log/mail.log</code> for any error-messages.</p>
+
+<p>Note: In order to start dovecot, postfix needs to have been installed (see next section) - though it doesn’t need to be configured or running.</p>
+
+<h2 id="testing-dovecot">Testing Dovecot</h2>
+
+<p>From the Dovecot wiki:</p>
+
+<pre><code>  openssl s_client -connect mail.example.com:993
+  ==&gt; "OK DOVECOT READY"
+  A1 LOGIN username password
+  ==&gt; LOGGED IN
+  A2 LIST "" "*"
+  A3 EXAMINE INBOX
+</code></pre>
+
+<p>Other options:</p>
+
+<ul>
+  <li>
+<code>doveadm user someuser</code> checks whether user-lookup of the specified user works</li>
+  <li>
+<code>doveconf userdb</code> displays the current userdb configuration</li>
+  <li>use sendmail (after Postfix is configured) - which will place email directly on mailqueue bypassing smtpd.</li>
+</ul>
+
+<p>See <code>/var/log/mail</code> for messages.</p>
+
+<h1 id="install-postfix">Install Postfix</h1>
+
+<p>Postfix can be simply installed via:</p>
+
+<ul>
+  <li><code>apt install postfix</code></li>
+</ul>
+
+<p>Also <a href="https://help.ubuntu.com/community/Postfix/SPF">install the SPF module for Postfix</a> to verify SPF for incoming mail:</p>
+
+<ul>
+  <li><code>apt install postfix-policyd-spf-python</code></li>
+</ul>
+
+<h2 id="set-up-submission-port">Set up Submission Port</h2>
+
+<p>Edit <code>/etc/postfix/master.cf</code> to add an extra SMTPD server specifically for outgoing email:</p>
+
+<pre><code>submission inet n       -       y       -       -       smtpd
+  -o syslog_name=postfix/submission
+  -o smtpd_tls_security_level=encrypt
+  -o smtpd_sasl_auth_enable=yes
+  -o smtpd_tls_auth_only=yes
+  -o smtpd_reject_unlisted_recipient=no
+  -o smtpd_client_restrictions=$mua_client_restrictions
+  -o smtpd_helo_restrictions=$mua_helo_restrictions
+  -o smtpd_sender_restrictions=$mua_sender_restrictions
+  -o smtpd_recipient_restrictions=$mua_recipient_restrictions
+  -o smtpd_relay_restrictions=$mua_relay_restrictions
+  -o milter_macro_daemon_name=ORIGINATING
+</code></pre>
+
+<p>Don’t be worried about the many other “services” defined in this file; they don’t “run” unless needed - and our configuration will never need them.</p>
+
+<p>The meaning of the entries here is described in the <a href="/linux/email-postfix-theory">Postfix email theory</a> article.</p>
+
+<p>Note option <code>-v</code> to <code>smtpd</code> above; that turns on verbose logging in the standard syslogs (<code>/var/log/syslog</code>); remove that once everything is working well.</p>
+
+<p>Here’s my full Postfix <code>master.cf</code> file:</p>
+
+<pre><code># standard services
+pickup    unix  n       -       y       60      1       pickup
+cleanup   unix  n       -       y       -       0       cleanup
+qmgr      unix  n       -       n       300     1       qmgr
+tlsmgr    unix  -       -       y       1000?   1       tlsmgr
+rewrite   unix  -       -       y       -       -       trivial-rewrite
+bounce    unix  -       -       y       -       0       bounce
+defer     unix  -       -       y       -       0       bounce
+trace     unix  -       -       y       -       0       bounce
+verify    unix  -       -       y       -       1       verify
+flush     unix  n       -       y       1000?   0       flush
+proxymap  unix  -       -       n       -       -       proxymap
+proxywrite unix -       -       n       -       1       proxymap
+showq     unix  n       -       y       -       -       showq
+error     unix  -       -       y       -       -       error
+retry     unix  -       -       y       -       -       error
+discard   unix  -       -       y       -       -       discard
+local     unix  -       n       n       -       -       local
+virtual   unix  -       n       n       -       -       virtual
+lmtp      unix  -       -       y       -       -       lmtp
+anvil     unix  -       -       y       -       1       anvil
+scache    unix  -       -       y       -       1       scache
+postlog   unix-dgram n  -       n       -       1       postlogd
+
+# incoming from processes on same host
+smtp      unix  -       -       y       -       -       smtp
+
+# incoming from external systems (email to be delivered to Dovecot)
+smtp      inet  n       -       y       -       5       smtpd
+
+# incoming from registered users (email to be queued for sending)
+submission inet n       -       y       -       2       smtpd -v
+  -o syslog_name=postfix/submission
+  -o smtpd_tls_security_level=encrypt
+  -o smtpd_sasl_auth_enable=yes
+  -o smtpd_tls_auth_only=yes
+  -o smtpd_reject_unlisted_recipient=no
+  -o smtpd_client_restrictions=$mua_client_restrictions
+  -o smtpd_helo_restrictions=$mua_helo_restrictions
+  -o smtpd_sender_restrictions=$mua_sender_restrictions
+  -o smtpd_recipient_restrictions=$mua_recipient_restrictions
+  -o smtpd_relay_restrictions=$mua_relay_restrictions
+  -o milter_macro_daemon_name=ORIGINATING
+
+# discussed later in section on SPF
+policy-spf  unix   -     n       n       -       -       spawn
+  user=nobody
+  argv=/usr/bin/policyd-spf
+</code></pre>
+
+<h2 id="local-delivery-vs-virtual-delivery">Local delivery vs Virtual delivery</h2>
+
+<p>As described in the “Postfix Theory” article, Postfix smtpd first categorizes incoming email into:</p>
+
+<ul>
+  <li>“local” (when the recipient address domain is in <code>$mydestination</code>)</li>
+  <li>“virtual” (when the recipient address domain is in <code>$virtual</code>)</li>
+</ul>
+
+<p>For emails with class=local, it then checks <code>$local_recipient_maps</code> to see if the recipient user exists - which looks in <code>/etc/passwd</code> and <code>/etc/aliases</code> by default. Assuming that passes, the emails are then delivered using the service specified in <code>$local_transport</code>; that is mapped in <code>master.cf</code> to an actual application to execute - usually <code>/usr/lib/postfix/sbin/local</code>. That then looks up the user in <code>/etc/passwd</code> again then usually writes emails directly to a file, although <code>$mailbox_transport</code> can be used to pass the email elsewhere, eg to Dovecot.</p>
+
+<p>A similar process is applied to incoming emails with class=virtual, except that custom files are used instead of <code>/usr/passwd</code>, and that the “email domain” remains attached to the “userid”, ie virtual-delivery treats the recipient as “user1@example.com”, not as “user1”.</p>
+
+<p>For a simple email-server handling just one email-domain and with just a few users, either approach works. Using the local approach does require each email-recipient to have a native unix account on the mailserver, but the account does not need to have <em>login rights</em> and for just a few users that is no great problem. And it allows per-user “forwarding files”, ie each user can determine if/where their email gets forwarded to.  I initially set up my Postfix configuration with my target email-domain in <code>$mydestination</code> (thus categorising incoming emails as class=local), together with configuring <code>$mailbox_transport</code> to use LMTP to forward emails to Dovecot. However there is one disadvantage: setting up a catch-all email account (ie one to which email for unknown-users is saved) is very difficult (maybe impossible); the local delivery agent supports <code>$luser_relay</code> for this use-case, but that does not work in combination with LMTP, and I could not figure out how to configure catch-all behaviour on the Dovecot side.</p>
+
+<p>I therefore use virtual delivery in this solution, even though I support only one email domain. Postfix users are defined in a plain text file (<code>/etc/postfix/virtual</code>) and Dovecot users are defined in a separate plain text file (<code>/etc/dovecot/users</code>). Having duplicated configuration is a shame, but the required file formats are different. Given a small number of users, this duplication is acceptable. Local delivery also requires duplicated entries (as far as I can tell). Having just a single definition for users between Postfix and Dovecot appears to only be possible when using a SQL database (both Postfix and Dovecot can then be configured to use the same SQL tables). Fortunately, setting up a “catch-all” account for Postfix virtual addresses is trivial, as is setting up email-forwarding (although changing the forwarding-address must be done by the mail-admin, not an end-user).</p>
+
+<h2 id="configure-postfix-maincf">Configure Postfix main.cf</h2>
+
+<p>Postfix is a set of about a dozen separate applications. Each application has a set of <code>variables</code> that influence how it behaves; these variables have builtin defaults (usually very sensible ones) which can be overridden in file main.cf and those can be overridden via “-o” options on the commandline (as shown above).</p>
+
+<p>So now edit <code>/etc/postfix/main.cf</code> as follows:</p>
+
+<pre><code># Postfix Config settings for services started in master.cf
+# See /usr/share/postfix/main.cf.dist for a commented, more complete version
+#
+# Note that these are _defaults_ for services, which can be overridden on the commandline specified in master.cf.
+# In fact, these settings are simply variable-declarations that are referenced from elsewhere (typically master.cf)
+
+# Indicate that this config-file is version-3.6-format, and that backwards-compat settings
+# for earlier config-formats are not wanted
+compatibility_level=3.6
+
+# Basic settings
+#
+# Note that when $mydestination includes "example.com" then incoming mail for user@example.com will be considered "local".
+mydomain = example.com
+myhostname=mail.example.com
+myorigin = $myhostname
+mydestination = $myhostname, $myorigin, localhost, localhost.localdomain
+mynetworks_style = host
+mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+mailbox_size_limit = 0
+recipient_delimiter = +
+inet_interfaces = all
+append_dot_mydomain = no
+
+# Some generic settings
+smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)
+biff = no
+readme_directory = no
+
+# Send outgoing email direct to destination, not via some intermediate
+relayhost =
+
+# Rate Limiting
+smtpd_recipient_limit = 5
+smtpd_client_recipient_rate_limit = 50
+
+# TLS parameters
+# See /usr/share/doc/postfix/TLS_README.gz in the postfix-doc package for
+# information on enabling SSL in the smtp client.
+smtpd_tls_security_level=may
+smtpd_tls_cert_file=/etc/letsencrypt/live/mail.example.com/fullchain.pem
+smtpd_tls_key_file=/etc/letsencrypt/live/mail.example.com/privkey.pem
+smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+
+smtp_tls_security_level=may
+smtp_tls_CApath=/etc/ssl/certs
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+smtp_tls_protocols=!SSLv2, !SSLv3
+
+# Dovecot settings
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+
+# Handling incoming LOCAL email
+#
+# Aliases are transformed via alias_maps. Then the user is expected to exist in /etc/passwd (else email rejected).
+# Then the email is accepted (sender is given an accepted-code) and the "local" delivery agent is applied. This
+# delivery agent looks for ".forward" files, then uses local_transport
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+
+# Handling incoming VIRTUAL mail
+#
+# Email to any address of form @foo where foo is in $virtual_alias_domains will be delivered via $virtual_transport
+#
+# Use service lmtp (from master.cf) for "virtual transport", passing that application/service
+# some extra parameters ("unix:private/dovecot-lmtp") that indicate which socket to pass data over.
+#
+# Note that Postfix provides a program called "the virtual delivery agent" but that is not being used here; instead
+# we deliver mail via LMTP to dovecot rather than letting Postfix deliver it directly to the local filesystem. That
+# allows dovecot to consistently manage storing incoming mail along with POP/IMAP access to the mail. Unfortunately
+# it is currently still necessary for postfix to know whether the target user exists before it does LMTP.
+virtual_alias_domains = example.com
+virtual_alias_maps = hash:/etc/postfix/virtual
+virtual_transport = lmtp:unix:private/dovecot-lmtp
+mailbox_transport = lmtp:unix:private/dovecot-lmtp
+
+# == Custom variables used by the "submission" smtpd instance (see master.cf)
+# ie "$mua*" are variables applied to connections to port 587 (mail user agents aka mail clients)
+mua_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination, reject
+mua_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, reject
+mua_client_restrictions =
+mua_helo_restrictions = 
+
+# == Custom variables used by the "primary" smtpd instance (see master.cf)
+# ie variables used (implicitly) when receiving inbound email from other servers on port 25
+
+# client-restrictions are rules applied to the (identity of the) mailserver sending mail (its IP address),
+# ie very early in processing an incoming request.
+#
+# See https://docs.spamhaus.com/datasets/docs/source/40-real-world-usage/MTAs/020-Postfix.html
+# A DQS_Key can be obtained by registering at spamhaus.com, then going to user portal
+dqs_key = YOUR_SPAMHAUS_DQS_KEY
+rbl_reply_maps = hash:$config_directory/dnsbl-reply-map
+smtpd_client_restrictions =
+  reject_rbl_client $dqs_key.zen.dq.spamhaus.net=127.0.0.[2..11],
+  reject_rhsbl_sender $dqs_key.dbl.dq.spamhaus.net=127.0.1.[2..99],
+  reject_rhsbl_helo $dqs_key.dbl.dq.spamhaus.net=127.0.1.[2..99],
+  reject_rhsbl_reverse_client $dqs_key.dbl.dq.spamhaus.net=127.0.1.[2..99],
+  reject_rhsbl_sender $dqs_key.zrd.dq.spamhaus.net=127.0.2.[2..24],
+  reject_rhsbl_helo $dqs_key.zrd.dq.spamhaus.net=127.0.2.[2..24],
+  reject_rhsbl_reverse_client $dqs_key.zrd.dq.spamhaus.net=127.0.2.[2..24]
+
+# sender-restrictions are rules applied to the MAIL-FROM header (ie earlyish in processing)
+# Support blocking annoying senders (aka "killfile")...
+smtpd_sender_restrictions =
+  check_sender_access hash:/etc/postfix/sender_blocklist
+
+# relay-restictions are rules applied after all mail headers have been received (but before body).
+# This allows validation of the "To:" header etc. The recipient-restrictions are also run
+# in the same "phase" and the two rulesets _can_ be combined - but it's cleaner to separate them,
+# and safer if recipient-restrictions contain any rules which may trigger "allow/permit".
+# Note that incoming email is accepted only if it passes BOTH of smtpd_relay_restrictions AND smtpd_recipient_restrictions
+#
+# Rule reject_unauth_destination is what prevents this from being an "open relay".
+relay_domains =
+smtpd_relay_restrictions = reject_unauth_destination
+
+# recipient-restrictions are rules applied after all mail headers have been received (but before body).
+# This allows validation of the "To:" header etc.
+smtpd_recipient_restrictions =
+  reject_unauth_pipelining, reject_non_fqdn_recipient, reject_unknown_recipient_domain,
+  check_policy_service unix:private/policy-spf
+
+# Set max message size to 20MB (overriding default of 10MB)
+message_size_limit = 20480000
+
+# SPF settings
+policy-spf_time_limit = 3600s
+
+# Useful in initial setup
+# defer_transports=smtp
+</code></pre>
+
+<p>There is a lot to explain here…</p>
+
+<p>Most of these settings are for use by the SMTPD daemon, although some are also used by the Postfix-variant of <code>sendmail</code> which is used by Spamassassin among other things.</p>
+
+<p>Variable <code>mydomain</code> should be your email domain, ie the bit after <code>@</code> in email addresses intended for your users. The default is to use <code>$myhostname</code> without the first part of the name, eg when <code>myhostname=somehost.example.com</code> then implicitly <code>mydomain=example.com</code>. However it seems safer to me to define this explicitly.</p>
+
+<p>Variable <code>myorigin</code> is (according to <a href="http://www.postfix.org/postconf.5.html#myorigin">the docs</a>) “the domain name that locally-posted mail appears to come from and that locally posted mail is delivered to”. On Debian/Ubuntu, this is set by default via file <code>/etc/mailname</code> while in others it defaults to <code>$hostname</code>. However I think it is clearer to define this explicitly. Warning: this is an <em>email domain name for internal (local) delivery</em>; if this value is equal to <code>$mydomain</code> but you are trying to use <em>virtual delivery</em> (as this article does) then incoming email for <code>user1@$mydomain</code> gets rejected with the very misleading message “User unknown in virtual alias table”.</p>
+
+<p>Variable <code>mydestination</code> has been set up so email to <code>user1@localhost</code> or <code>user1@$myhostname</code> is still delivered as a “local” email (ie assumes there is a native unix account named user1). However this variable does not include <code>$mydomain</code> so such emails will <em>not</em> be classified as local.</p>
+
+<p>The <code>relay</code> options are set to values that effectively disable “explicit relaying”. Here, the word relay means relaying between cooperating email servers, eg within a single company. We are setting up a personal email-server here, so this kind of “relay” is not needed. Later, the word <code>relay</code> is used to mean sending email to arbitrary email-servers on the internet; this reuse of terminology is unfortunate and confusing.</p>
+
+<p>The SSL entries are hopefully obvious. Inbound email coming from external email-servers should really be transferred over an encrypted link for privacy, New emails being submitted by local users (via email client apps) over SMTP should <em>definitely</em> be encrypted to hide the transfer of passwords etc. And this encryption requires Postfix to have access to an SSL server certificate for <code>mail.example.com</code>. Outbound email from from this server to external email-servers should of course also be encrypted, but in that case the certificate is the responsibility of the remote server. Note that the “submission” SMTP server may <em>require</em> SSL (and we do set this up via a “-o” option in master.cf), but the SMTPD service on port 25 is not supposed to <em>require</em> SSL, just to offer it as an option.</p>
+
+<p>The standard aliases are applied to emails of class “local”.</p>
+
+<p>The email domain <code>example.com</code> (ie emails like <code>user1@example.com</code>) is defined as a recognised virtual domain. The valid users for this domain are defined in file <code>/etc/postfix/virtual</code>. File <code>virtual_alias_maps</code> defines not only which users exist, but also optionally defines “forwarding rules” equivalent to the “dot-forward” feature of the local-delivery-agent, eg forwarding all emails for a user to <code>user@gmail.com</code>. And the file can also define a “catch-all” target email address. As noted earlier, there is duplication between this file and <code>/etc/dovecot/users</code> that is unfortunately unavoidable AFAICT; there is no common file-format supported by both Dovecot and Postfix. Unified data is possible via an SQL database, but that is not worth-while for a small email server.</p>
+
+<p>Setting <code>virtual_transport</code> indicates that emails for <code>example.com</code> should be passed via <code>lmtp</code> to Dovecot.</p>
+
+<p>The config-item “<code>defer_transports=smtp</code>” can be useful when trying to get Postfix set up; it ensures that all email queued for the smtp-service to send out over the internet will instead be placed “on hold” until explicitly sent via <code>postqueue -f</code> to “flush queues”. It is then possible to check the deferred queue first before flushing the queues, to ensure no spammer has managed to route emails via your Postfix instance due to incorrect Postfix rules. Once your email server is registered in DNS (see later), spammers will start probing it within minutes. If your server is temporarily misconfigured, and starts forwarding such spam mails, then you can quickly land on a black-list from which it is difficult to get removed again. So blocking outgoing email can be a nice initial safety-net.</p>
+
+<p>Now we come to potentially the most confusing part: mua-restrictions, client-restrictions, relay-restrictions, and recipient-restrictions.</p>
+
+<p>Client-restrictions (<code>*_client_restrictions</code>) are used to reject entire remote mailservers, ie prevent a mailserver from submitting <em>any</em> mail. Here we reject any remote email-server which is on a spamhaus blocklist.</p>
+
+<p>Recipient-restrictions (<code>*_recipient_restrictions</code>) are used to reject specific emails on the basis of the recipient address (“to-address”) - or any other header. For the <code>smtpd</code> instance that handles incoming email, we expect only email to <code>someone@example.com</code>; constraint <code>reject_non_fqdn_recipient</code> ensures the address <em>does</em> specify a domain, and  <code>reject_unknown_recipient_domain</code> ensures the domain is <code>example.com</code>.</p>
+
+<p>Relay-restrictions (<code>*_relay_restrictions</code>) are also used to reject specific emails on the basis of the recipient address; an email will only be accepted by <code>smtpd</code> if it passes the tests in both lists (see article Postfix Theory for why two lists are a good idea). There is usually just one rule in <code>smptd_relay_restrictions</code>: <code>reject_unauth_domain</code> which checks whether the domain of the to-address (eg example.com) is the local-domain or in var <code>relay_hosts</code>. And <code>relay_hosts</code> is usually empty (except for large orgs) - so the result is that this server cannot be abused by spammers to send email to arbitrary servers on their behalf (an “open relay”). Note that “auth” here means “allowed in config file”, not “is user authenticated”. For the “submission” smtpd instance which handles outgoing email from email clients, <code>master.cf</code> specifies <code>mua_recipient_restrictions</code> and the restrictions defined in that variable <em>do</em> allow specifying remote domains for the “to” address - but only after a “user login via sasl” (see sasl later).</p>
+
+<p>Phew - done. Now emails are rejected on port 25 unless destined <em>for</em> a user defined in the <code>virtual_alias_maps</code>, and rejected on port 587 unless coming <em>from</em> a logged-in user.</p>
+
+<h2 id="note-on-sasl-authentication">Note on SASL Authentication</h2>
+
+<p>An email-server should be very careful about sending email into the internet unless it knows that the email is from a “trustworthy source”. Applications running on the local host are generally considered “sufficiently trustworthy”, as are applications which authenticate themselves via (username, password). Postfix thus supports authentication - but Dovecot also needs to authenticate users who want to view email via IMAP, and it is not good to have separate (user,pwd) databases for each. There are several possible solutions, but the most common is to make Dovecot the master “authenticator” and for Dovecot to offer authentication as a service on a local filesystem socket. Postfix can then be configured to pass on (user, hash) pairs to this socket, and read the ok/fail response back. Actually, the SASL protocol is more complicated than that, but the details are not relevant here. Note that checking <em>which users exist</em> is needed for <em>incoming</em> email, and this is not checked over SASL - only <em>logins</em> performed by users wanting to submit outgoing email. This can lead to some duplicated config - but for a few users the nuisance is bearable.</p>
+
+<h2 id="restart-postfix">Restart Postfix</h2>
+
+<p>Run <code>service postfix restart</code> to pick up all changes. Check <code>/var/log/mail.err</code> and <code>/var/log/mail.log</code> for messages. If you have problems, any application listed in master.cf can have “-v” added to its options to increase the amount of logging it does (as shown above for the submission sevice).</p>
+
+<h2 id="define-email-accounts">Define Email Accounts</h2>
+
+<p>Define users in <code>/etc/dovecot/users</code> and in <code>/etc/postfix/virtual</code> as appropriate.</p>
+
+<p>Note that a “local aliases” file has lines of form “<code>aliasname:realname</code>” while “virtual aliases” files have lines of form “<code>aliasaddress &lt;whitespace&gt; realaddress</code>”.</p>
+
+<p>After updating <code>/etc/postfix/virtual</code>, run <code>postmap /etc/postfix/virtual</code> to generate file <code>/etc/postfix/virtual.db</code>.</p>
+
+<h2 id="define-sender-blocklist">Define “Sender Blocklist”</h2>
+
+<p>Create file <code>/etc/postfix/sender_blocklist</code> with content of form:</p>
+
+<pre><code>email-address   REJECT  "Spam"
+</code></pre>
+
+<p>where email-address can be a full address or a domain (<code>example.com</code>). Any spammers or other annoying email sources can be added to this file.</p>
+
+<p>Run <code>postmap /etc/postfix/sender_blocklist</code> to convert this to “database form” (creates a file with suffix <code>.db</code>).</p>
+
+<p>See <a href="http://www.postfix.org/access.5.html">Postfix docs for access databases</a> for more details.</p>
+
+<h2 id="testing">Testing</h2>
+
+<p>You should now be able to use a desktop email client to login-in to the submission port, set up encryption, and submit an email from <code>foo@example.com</code> to <code>foo@example.com</code>. After a few seconds, the email should appear in the IMAP inbox for the same account. Aliases should also work.</p>
+
+<p>However before sending email to other hosts, DNS should be set up properly.</p>
+
+<h2 id="useful-postfix-commands">Useful Postfix Commands</h2>
+
+<p>Command <code>postsuper</code> can perform a range of useful functions, eg deleting all mail from a queue. Can only be executed by root. Examples:</p>
+
+<ul>
+  <li>
+<code>postsuper -d ALL</code> – delete all queued emails</li>
+</ul>
+
+<p>Command <code>postqueue</code> can perform some other useful functions, and can be run by a regular user.</p>
+
+<p>Command <code>postconf</code> shows the current configuration (and with the right flag, the default configuration). Examples:</p>
+
+<ul>
+  <li>
+<code>postconf -d</code>  – displays default settings for all variables</li>
+  <li>
+<code>postconf -n</code>  – displays all variables which differ from the default value (ie which have been overridden locally)</li>
+</ul>
+
+<p>Command <code>postfix</code> can also perform some useful functions, eg:</p>
+
+<ul>
+  <li>
+<code>postfix flush</code>  – send all queued mail now</li>
+</ul>
+
+<h1 id="configure-dns">Configure DNS</h1>
+
+<p>Now we need to inform other systems that email should be directed to this server, and set up some safety-nets to prevent other servers from impersonating our domain when sending spam.</p>
+
+<ul>
+  <li>ensure an A-record maps <code>somehost.example.com-&gt;ip4-address</code>
+</li>
+  <li>ensure an AAAA-record maps <code>somehost.example.com-&gt;ip6-address</code>
+</li>
+  <li>ensure a PTR record exists for somehost.example.com (ie maps ip4-address back to <code>somehost.example.com</code>)</li>
+  <li>define TXT records for SPF and DMARC (and optionally DKIM)</li>
+  <li>define CNAME record for <code>mail.example.com -&gt; somehost.example.com</code>
+</li>
+  <li>define MX record for <code>example.com -&gt; mail.example.com</code>
+</li>
+</ul>
+
+<p>The first step is to ensure that the domain-name-registrar through which the base domain-name (<code>example.com</code>) is registered has registered NS records for the domain which point at a set of DNS servers that can be further configured. Some registrars also provide DNS servers and a suitable web-page. Virtual-hosting companies also do. In my case, the mail-server runs on a virtual server rented from digitalocean.com, and digitalocean.com provide DNS servers for their hosted systems; I therefore use my domain-name-registrar admin page to register NS records that point at the digitalocean domain-name servers and then register the above PTR/TXT/CNAME/MX records via an admin-page for the digitalocean DNS.</p>
+
+<p>The A-record is the “standard” record for DNS; when somebody types <code>http://somehost.example.com</code> into a browser address-bar, or runs <code>ping somehost.example.com</code> then the A-record or AAAA-record is retrieved for that name to find the “real” address.</p>
+
+<p>The PTR record is used by email-servers to filter out “real servers” from hacked desktops, routers, or other systems which have been taken over and used to generate spam; such things have an IP-address but won’t have a PTR record. The incoming ip-address is always available to the receiving email-server, so it can use that address as the key for a DNS-lookup of the PTR record. If no record exists, that is a strong indication that the remote system is not a “serious” server. The resulting server-name can also be used when verifying SPF records.</p>
+
+<p>Each email has two “source addresses”: MAIL-FROM aka Return-Path, and the “From:” header. Spammers have a nasty habit of using the addresses of real (innocent) people in both of these addresses when generating spam. Many email servers therefore implement the <a href="https://en.wikipedia.org/wiki/Sender_Policy_Framework">Sender Policy Framework (SPF)</a>; for each email they take the supposed MAIL-FROM address (eg <code>sender@example.com</code>) and extract the domain (<code>example.com</code>) then perform a lookup of TXT records that have that key. If a TXT record is found which looks like an SPF-record then the data in that record will hold the host-name of all servers (usually one) that are permitted to generate emails with that address. This is then compared with the hostname found via the PTR-record lookup; a mismatch means the remote system is using faked email addresses and they are rejected. In other words, once you have registered an SPF record for <code>yourmaildomain-&gt;yourmailhost</code> then no spammer can generate spam with fake MAIL-FROM addresses that claim to be from your email-domain. And that can help keep your system off blackhole-lists. The exact syntax for SPF records is non-trivial, but the following is an initial guide:</p>
+
+<pre><code>v=spf1 +mx +a ip4:111.222.333.444 -all
+</code></pre>
+
+<p>Unfortunately, SPF does nothing to prevent spammers from faking the “From:” header - which is what the user actually sees. SPF is therefore a partial but not complete fix. Publishing a DMARC record in addition to the SPF record protects the from-header too (for all email servers that actually apply DMARC checks to incoming mail). However enabling DMARC is not addressed in this article.</p>
+
+<p>The CNAME record is useful here because I want to pay for just one server which not only runs email but also hosts a website and various other stuff. However SSL certificates are issued for a specific hostname (aliases are possible, but tricky and letsencrypt doesn’t support them). A CNAME record is an elegant solution - it gives a dedicated hostname (eg mail.example.com) but points to the shared server. Registering an additional A-record is not so useful because digitalocean will only register a PTR record for the “real” hostname of a virtual server. The major email servers are fortunately smart enough to realize that <code>MX:example.com-&gt;CNAME:mail.example.com-&gt;A:somehost.example.com-&gt;PTR:somehost.example.com</code> is a valid setup, and don’t require the PTR record to map back to <code>mail.example.com</code>.</p>
+
+<p>And the MX record says that email destined for “<code>@example.com</code>” should be sent over a socket opened to <code>mail.example.com</code> - ie maps between two different “namespaces” (mail-namespace to host-namespace).</p>
+
+<p>There is yet another framework designed to frustrate spammers - DKIM. It has roughly the same effect as SPF, though via a different approach. Hopefully I can cover that in another article in the future. However it doesn’t seem critical to implement that straight away; I’ve had no problems without it so far.</p>
+
+<h1 id="configure-the-email-client">Configure the Email Client</h1>
+
+<p>The client should read email using IMAP on port 993.</p>
+
+<p>The client should send email using SMTP on port 587 (the submission port). Trying to send emails to external addresses via port 25 will just trigger “relaying not permitted” which is exactly correct; a system which accepts emails on port 25 (which does not require user authentication) and forwards them to external systems is called an “open relay”. That would be very bad for us, very good for the spammers.</p>
+
+<p>In both cases, the username to login with is without domain (assuming you configured <code>auth_username_format = %Ln</code> in Dovecot, as recommended), and the password is whatever was entered in <code>/etc/dovecot/users</code>.</p>
+
+<p>Note that some systems don’t have a “submission” instance, and instead carefully order the validation-constraints for the main SMTPD instance so that authenticated remote senders have different rights to unauthenticated ones. However the rules need to be <em>exactly right</em> or an “open relay” can accidentally be created. Separating “authenticated remote senders” onto their own port (the “submission port”) makes the rules easier to define and less vulnerable to mistakes.</p>
+
+<h1 id="spamassassin">SpamAssassin</h1>
+
+<p>Spamassassin can be installed with:</p>
+
+<ul>
+  <li><code>apt install spamassassin spamc</code></li>
+  <li><code>systemctl enable --now spamassassin.service</code></li>
+</ul>
+
+<p>Then update <code>/etc/postfix/master.cf</code>:</p>
+
+<pre><code>smtp      inet  n       -       y       -       5       smtpd
+  -o content_filter=spamassassin
+
+spamassassin unix  -     n       n       -       -       pipe
+  user=debian-spamd
+  argv=/usr/bin/spamc -f
+  -e /usr/sbin/sendmail -oi -f ${sender} ${recipient}
+</code></pre>
+
+<p>Spamassassin configuration is also discussed in article <a href="/linux/email-postfix-theory">Postfix Theory</a>.</p>
+
+<p>Spamassassin simply assigns a “spam score” to each email, and stores it into an email header; if you wish to take some action based upon that score then one option is to configure Dovecot to use <a href="/linux/email-sieve-spam">sieve</a> rules. Postfix itself does not do anything with the information that spamassassin adds to the email.</p>
+
+<p>Spamassassin scores email based upon a set of <em>rules</em> which are initially installed into <code>/usr/share/spamassassin</code>. When installing spamassassin on Ubuntu via <code>apt</code> then <code>/etc/cron.daily/spamassassin</code> is also installed to ensure these rules are kept up-to-date via the <a href="https://wiki.apache.org/spamassassin/RuleUpdates">sa-update</a> tool. Somewhat confusingly, the updated rules are not written into <code>/usr/share/spamassassin</code> but into <code>/var/lib/spamassassin/3.004001</code> instead. They are then “compiled” into <code>/var/lib/spamassassin/compiled</code>; presumably this is the same location that the original rules in <code>/usr/share/spamassassin</code> are compiled into, and thus spamd (the spamassassin daemon) sees the updated rules.</p>
+
+<p>IMPORTANT: by default, <code>/etc/cron.daily/spamassassin</code> is disabled; you need to edit it and set CRON=1 for updates to actually work.</p>
+
+<p>The spamassassin wiki has further information on the <a href="https://wiki.apache.org/spamassassin/RuleUpdates">sa-update</a> tool. Unfortunately, at the current time the instructions on the wiki refer to <code>updates.spamassassin.org</code> which no longer exists; the spamassassin project recently moved to the Apache foundation, and it appears that some things have changed but not yet been updated in the wiki. By the way, there appears to be a bug in the <code>/etc/default/spamassassin</code> file used by <code>/etc/cron.daily/spamassassin</code>: it sets PIDFILE=<code>/var/run/spamd.pid</code> but the systemd spamassassin file writes the pid to <code>/var/run/spamassassin.pid</code>. However the cron-script does not use this variable.</p>
+
+<h1 id="enabling-spf-checks">Enabling SPF Checks</h1>
+
+<p>Publishing an SPF record as described earlier in the section on DNS protects your domain - ie prevents spammers from faking your domain when sending email to mail-servers that perform SPF checks. That’s critical to prevent your domain from being black-listed as a “spam origin”.</p>
+
+<p>Your Postfix instance should also perform SPF checks on incoming email so spam using faked addresses is blocked before delivery to <em>your</em> users. The necessary setup has already been described above. See article <a href="http://moi.vonos.net/linux/email-validation/">Email Validation</a> on this site for more details.</p>
+
+<h1 id="enabling-dmarc-checks">Enabling DMARC Checks</h1>
+
+<p>Ideally, every email server should have DMARC validation enabled; this extracts the “domain” part of the “From:” header of each email, and looks for a DMARC record in DNS matching that domain. If one is present, then either an SPF record should exist for that domain, or the email should be signed via DKIM.</p>
+
+<p>While enabling DMARC is not particularly difficult, it is not built-in in Postgres. You can find futher information <a href="http://moi.vonos.net/linux/email-validation/">in a separate article on this site</a>.</p>
+
+<h1 id="configuring-new-users">Configuring New Users</h1>
+
+<p>Just to repeat for clarity: with the setup described above, there are two sources of user information: Postfix and Dovecot. The process of adding a new user is therefore:</p>
+
+<ul>
+  <li>edit <code>/etc/dovecot/users</code> to add the username and password</li>
+  <li>edit <code>/etc/postfix/virtual</code> to add the user then execute <code>postmap virtual</code> to generate file <code>virtual.db</code>
+</li>
+</ul>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>I found that as soon as I registered an MX record in DNS, the number of login-attempts via SSH as user root increased. It is therefore probably worth checking that you have login-as-root disabled in ssh (ie login as another user, then su to root): file <code>/etc/ssh/sshd_config</code> should contain <code>PermitRootLogin no</code>.</p>
+
+<p><a href="/linux/fail2ban">Setting up fail2ban</a> is also recommended.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://www.postfix.org">Postfix home site</a></li>
+  <li><a href="https://www.digitalocean.com/community/tutorials/how-to-set-up-a-postfix-e-mail-server-with-dovecot">Guide: set up postfix with dovecot</a></li>
+  <li><a href="https://www.digitalocean.com/community/tutorials/how-to-set-up-a-postfix-email-server-with-dovecot-dynamic-maildirs-and-lmtp">Guide: set up postfix with dovecot and lmtp</a></li>
+  <li><a href="https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-postfix-on-ubuntu-16-04">Guide: install and configure postfix on Ubuntu 16.04</a></li>
+  <li><a href="https://help.ubuntu.com/community/Postfix">Ubuntu: postfix</a></li>
+  <li><a href="https://help.ubuntu.com/community/PostfixVirtualMailBoxClamSmtpHowto">Ubuntu: postfix Virtual mailbox setup</a></li>
+  <li><a href="https://www.cyberciti.biz/faq/postfix-limit-incoming-or-receiving-email-rate/">nixCraft: Postfix: limiting email rate</a></li>
+  <li><a href="https://wiki.centos.org/HowTos/postfix_restrictions">Centos: Postfix Restrictions</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/email-postfix-config/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

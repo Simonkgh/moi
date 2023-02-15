@@ -1,0 +1,449 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - OSGi and Dependency Injection</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>OSGi and Dependency Injection</h1>
+    <aside>First published on: May 23, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/OSGi/'>OSGi</a></p>
+      <h1 id="the-problem">The Problem</h1>
+
+<p>In any object-oriented application, there needs to be a way for objects to find other objects that provide “services”. There have been many different solutions to this, such as <a href="http://en.wikipedia.org/wiki/Singleton_pattern">the static singleton pattern</a>, <a href="http://en.wikipedia.org/wiki/Java_Naming_and_Directory_Interface">JNDI</a>, and <a href="http://en.wikipedia.org/wiki/Dependency_injection">Dependency Injection</a> (aka DI). The singleton pattern and JNDI are “lookup-based” approaches where an object needing a service contains code to <em>actively find</em> the needed resource. Dependency Injection instead decouples users of services from the implementation by having objects <em>accept references</em> to the services they need as parameters to either the constructor or setter-methods, thus moving the hard coupling between service user and provider into whatever instantiates the object - and then having that instantiation done by a framework which is <em>configured</em> via xml or code to inject the desired references.</p>
+
+<p>The OSGi service registry provides a central place where service users can find service providers, ie can be used in a “lookup” style to obtain references to services. However an object cannot just fetch references to services from the registry once on init; the required service might <em>not be available yet</em>. And OSGi provides another potential problem: a required service can potentially <em>disappear</em> or be <em>replaced</em> later (not usual in traditional Java applications). Thus lookup needs to be done <em>every time the service is needed</em> (inefficient), or the service registry needs to be <em>watched</em> for changes (complex). And any lookup-based approach requires OSGi-specific lookup code in classes which is not elegant - classes should remain POJOs where possible. It also means that an object may during some periods <em>exist without its mandatory dependencies</em>, which is also not elegant.</p>
+
+<p>The best solution is to combine DI and OSGi. Application classes are POJOs with injected references to the common “service objects” they require, and the DI framework retrieves the services from the OSGi registry.</p>
+
+<p>Unfortunately typical DI frameworks such as Guice and Spring don’t work well in an OSGi environment. This article discusses why, and what alternatives exist.</p>
+
+<h1 id="traditional-dependency-injection-framework-assumptions">Traditional Dependency Injection Framework Assumptions</h1>
+
+<p>Traditional (non-OSGi) DI frameworks make an assumption when injecting singleton “service” objects into other objects under construction: that they can <em>create</em> the required service object if it doesn’t yet exist, and that the service object <em>never goes away</em>. These assumptions are not true in an OSGi environment. Under OSGi, when a DI framework instantiates some object T which requires some singleton <em>service</em> A (ie an object implementing interface A):</p>
+
+<ul>
+  <li>Service A might not exist <em>yet</em> (the bundle that supplies it might not have been loaded, or might not have completed startup)</li>
+  <li>An <em>implementation</em> of A cannot be <em>created</em> on-demand by the DI framework because the implementation is in a separate bundle. In a monolithic java application,
+there is usually just one DI configuration that is responsible for all objects (ie capable of instantiating all of them). This is not the case in OSGi.</li>
+  <li>Even if object A is available, it might <em>disappear</em> at some future time.</li>
+</ul>
+
+<p>Because of these issues, libraries such as Guice or Spring just don’t work (by themselves) in OSGi environments. You could possibly use them to initialise parts of a bundle which have no direct <em>or</em> indirect dependencies on services provided by other bundles - but in practice that is pretty rare. It is also potentially error-prone, as it would be easy for an indirect dependency to accidentally creep in. An example of an indirect dependency chain could be:</p>
+
+<ul>
+  <li>An instance of S1 needs to be created and registered as a service. It depends on external service X1 and an instance of local type T (ie an X1 and a T need to be injected)</li>
+  <li>An instance of T needs an instance of local type V</li>
+  <li>An instance of V needs a reference to an external service X2</li>
+</ul>
+
+<p>In this case, S1, T and V cannot be created until X2 is available - something traditional DI frameworks don’t support. And for best integration with OSGi S1, T and V should be somehow <em>deactivated</em> if X2 is later removed, also something that traditional DI frameworks cannot do.</p>
+
+<h1 id="osgi-aware-di-frameworks">OSGi-aware DI frameworks</h1>
+
+<p>The following dependency-injection frameworks are explicitly designed for use under OSGi:</p>
+
+<ul>
+  <li><a href="http://wiki.osgi.org/wiki/Blueprint">OSGi Blueprint</a></li>
+  <li><a href="http://wiki.osgi.org/wiki/Declarative_Services">OSGi Declarative Services</a></li>
+  <li><a href="http://felix.apache.org/documentation/subprojects/apache-felix-dependency-manager.html">Apache Felix Dependency Manager</a></li>
+  <li><a href="http://felix.apache.org/documentation/subprojects/apache-felix-ipojo.html">Apache Felix iPojo</a></li>
+  <li>
+<a href="https://github.com/ops4j/peaberry">Peaberry</a> - an extension for Guice</li>
+</ul>
+
+<h1 id="blueprint-formerly-spring-dm">Blueprint (formerly Spring-DM)</h1>
+
+<p>The OSGi standard defines a dependency-injection framework called Blueprint, which is derived from the earlier spring-dm framework. Blueprint solves the problems of traditional DI frameworks by always using a <em>proxy</em> for services:</p>
+
+<ul>
+  <li>Service X1 or X2 doesn’t exist at startup? No problem, just inject a proxy anyway and hope the target service exists before the proxy is used (or optionally fail after a timeout, which has its own problems)</li>
+  <li>No need to create the actual implementation; assume that something else will register service X1 or X2, and the proxy will look it up when needed - or fail when used.</li>
+  <li>Service X2 disappears (and possibly reappears) after using object V has been created? Proxy will silently rebind to new service - or fail when used.</li>
+</ul>
+
+<p>This allows a bundle to configure many different objects, injecting other objects from the same bundle, and services from external bundles. Much of the traditional functionality of Spring is available, but not all. For example, configuration of objects from properties-files is not supported - it is expected that the OSGi ConfigAdmin service will be used instead.</p>
+
+<p>Unfortunately there are some major disadvantages to the Blueprint proxy-based approach. Instead of services being plain references to real Java objects, they are proxies which:</p>
+
+<ul>
+  <li>makes for ugly stack-traces</li>
+  <li>has a significant impact on performance</li>
+  <li>changes the behaviour of <em>identity</em> comparisons on objects (which can break the spring transaction-manager for example)</li>
+  <li>makes interactive debugging (stepping into service-calls) unpleasant</li>
+  <li>turns any call to a service into something that can fail at runtime (technically, this can happen with other solutions, but is much more common with Blueprint)</li>
+  <li>and <em>most significantly</em>, services which are published by a blueprint-enabled bundle don’t behave like “proper” OSGi services; they don’t get deregistered when their dependencies disappear.</li>
+</ul>
+
+<p>Blueprint is clearly <em>useable</em>, but I personally don’t like it; the above issues are just too severe.</p>
+
+<p>The Peaberry extension for Guice takes a similar approach to Blueprint: any reference to a <em>service</em> is replaced by a reference to a proxy object which looks up the desired object from the OSGi service registry when needed. Peaberry therefore has the same limitations. It’s a “quick fix” to get a guice-based app running under OSGi, but instantiated objects don’t participate in the “native” OSGi lifecycle.</p>
+
+<h1 id="osgi-declarative-services-aka-ds-or-scr">OSGi Declarative Services (aka DS or SCR)</h1>
+
+<p>The OSGi standard defines a simple dependency-injection system called <a href="http://wiki.osgi.org/wiki/Declarative_Services">Declarative Services</a>. A Declarative Services (aka DS) XML file declares which objects should be created and which <em>OSGi services</em> should be injected into them. At runtime the OSGi environment must include an <em>extender</em> bundle which watches for bundle registration events, scans the bundle for DS configuration files and instantiates objects as required. This extender bundle is named the SCR (Service Component Runtime).</p>
+
+<p>SCR is fully OSGi-aware; when the config specifies that an object has a mandatory service dependency then it will only be created when that service is available, and will be discarded if the required service disappears.</p>
+
+<p>The DS specification defines a set of annotations which can be placed in the java code, and which tools (such as BND) can use at compile-time to generate corresponding DS-format xml files and manifest entries, as an alternative to writing the config files by hand.</p>
+
+<p>DS has a very limited feature-set when compared to Guice and Spring - and even Blueprint. In some cases, the lack of features in the DI support itself is because that functionality is part of the OSGi service registry behaviour, is not relevant under OSGi, or is provided by one of the “standard services” defined in the OSGi specification. However one particular omission is significant: the only objects that DS can inject into an object it constructs are references to <em>OSGi services</em>, ie if an object is to be injected into another object then it <em>must</em> be registered as an OSGi service in the <em>osgi-container-wide</em> service registry. SCR can also optionally provide a ComponentContext object to the target object’s activate method, containing a map&lt;String,String&gt; of properties defined in the DS xml file. Of course using the ComponentContext means the object is no longer a plain pojo, but instead references an OSGi type. See the section below on “DS and DM Service Injection” for further discussion on the lack of support for injecting things other than services.</p>
+
+<p>One advantage of using XML-based configuration (compared to using a BundleActivator or similar) is that bundle initialisation can be “lazy”; when the SCR extender bundle detects a DS-enabled bundle it can potentially choose to <em>delay</em> initialisation of the bundle. DS config files are plain data, not classes, which means classloader resolution for the bundle does not need to be performed until the SCR environment decides that the bundle is needed. In particular, this allows things like IDEs to load bundles that provide additional functionality, but not <em>initialise</em> them until the user performs an operation that requires a service from that bundle. The Eclipse IDE is built from large numbers of OSGi bundles and tries to optimise startup performance and memory use by not initialising bundles (plugins) that are not used. Any approach that relies on a Bundle-Activator within the bundle to configure dependency injection naturally forces most of the bundle’s classes to be loaded immediately.</p>
+
+<p>The Apache Felix project provides an implementation of SCR. They also provide a set of Gogo shell commands which can be used to query the state of DS-managed services and in particular which services have not been registered because a dependency is missing. This is extremely useful for debugging purposes; the draft OSGi R6 enterprise spec defines internal APIs for SCR which can be used to provide such functionality for <em>any</em> SCR implementation.</p>
+
+<p>SCR is implemented using the standard OSGi features for listening for bundle and service events. An SCR implementation is not tightly coupled to the framework implementation; it’s just a “helper” - which shows the elegant extensibility of OSGi.</p>
+
+<h1 id="apache-felix-dependency-manager-aka-dm">Apache Felix Dependency Manager (aka DM)</h1>
+
+<p>The <a href="http://felix.apache.org/documentation/subprojects/apache-felix-dependency-manager.html">Apache Felix Dependency Manager</a> is an OSGi-enabled dependency injection framework. This is a subproject of the <a href="http://felix.apache.org/">Apache Felix</a> project which provides the Felix Framework OSGi container, but DM is not coupled to the Felix Framework container - it works on any standard OSGi container.</p>
+
+<p>A bundle’s BundleActivator uses the DM API to declare object dependencies in a similar manner to Guice Modules, but the lifecycle of objects (<em>components</em>) is managed in a similar manner to DS: objects are instantiated when their dependencies can be found in the OSGi registry, and are discarded when those dependencies disappear. Internally, DM creates a set of standard OSGi ServiceTracker instances which trigger the creation or removal of the managed objects. In other words, Felix DM is just a user-friendly wrapper over standard OSGi mechanisms for tracking services - just like SCR. However the increase in user-friendliness (and thus code reliability and readability) over hand-written service-tracking code is large.</p>
+
+<p>One advantage that Felix DM has over extender-based solutions like SCR is that a bundle <em>uses</em> Felix DM just as it would use any other library. It therefore has a normal package-import dependency on felix-dm code, and can choose whichever version it wishes. There is no problem with multiple bundles within a single OSGi container having dependencies on different versions of Felix DM. [Possibly multiple versions of SCR could be supported via different xml namespaces, or by a contract-entry in the manifest or similar; I don’t know if any SCR implementation actually does this].</p>
+
+<p>Felix DM also supports the annotations + compile-time processing + extender-bundle approach used by DS, which potentially supports “lazy” initialisation.</p>
+
+<p>As with DS (and unlike Blueprint) Felix DM can only inject <em>OSGi services</em> into other objects, not arbitrary DI-managed objects. See the section on “DS and DM Service Injection”.</p>
+
+<p>Felix DM has some interesting abilities that DS does not:</p>
+
+<ul>
+  <li>
+    <p>Adapter services: an “adapter type” can be defined for some target service-interface. Whenever a matching target service is registered, a new instance of the adapter is automatically created and <em>also</em> registered with service-interface matching the adapter type.</p>
+  </li>
+  <li>
+    <p>Aspect services: a “decorator class” can be defined for some target service-interface. Whenever a matching target service is registered, a new object is created which <em>wraps</em> the original. The new instance is then published <em>with the same interface name</em> and <em>higher priority</em>, causing consumers of service X to bind to the “aspect” implementation by default. Effectively provides the <em>decorator</em> pattern.</p>
+  </li>
+  <li>
+    <p>Temporal Dependencies: like Blueprint, DM can generate a proxy which is always available, and internally forwards method-calls to whichever service is available - or fails when invoked if no service available within a specified timeout. This can then be injected into objects instantiated by DM instead of a reference to the real service.</p>
+  </li>
+  <li>
+    <p>Configuration Dependencies: wait until configuration for a specific pid is available, then instantiate component, invoke update to provide configuration, then invoke activate.</p>
+  </li>
+  <li>
+    <p>Instance-bound dependencies: a component’s init method can dynamically add extra service dependencies. This covers the case where a class can’t know its full set of dependencies until runtime. Felix-DM starts the component only after the known dependencies are available (as usual), then leaves the component in a special “pending” state until the extra runtime-computed dependencies are available.</p>
+  </li>
+  <li>
+    <p>Composites: declare a single set of dependencies, and when they are satisfied then instantiate a <em>set</em> of objects together.</p>
+  </li>
+</ul>
+
+<p>And by the way, the optional Gogo shell commands provided by the Felix DM project are <em>excellent</em> for diagnosing missing dependencies and other runtime problems.</p>
+
+<p>See:</p>
+
+<ul>
+  <li>
+<a href="http://arnhem.luminis.eu/introduction-apache-felix-dependency-manager/">Introduction to the Apache Felix Dependency Manager</a> - and part two is linked to at the bottom of the article.</li>
+</ul>
+
+<h1 id="apache-felix-ipojo">Apache Felix iPojo</h1>
+
+<p><a href="http://felix.apache.org/documentation/subprojects/apache-felix-ipojo.html">iPojo</a> is yet another dependency-injection framework run as a subproject of Apache Felix. And like Felix DM, it can be used with any OSGi container.</p>
+
+<p>It can be configured via annotations in the code, hand-written XML files or via explicit Java code. Like Declarative Services or Felix Dependency Manager, the objects defined via iPojo follow the usual OSGi lifecycle - ie are created only when required dependencies exist, and are removed when those dependencies vanish. As with both DS and DM, annotations on Java classes are processed at compile-time.</p>
+
+<p>iPojo was created initially for a PhD thesis published in December 2008. Coincidentally, Felix Dependency Manager development started in 2002 but it also became an Apache open-source project in 2008; it appears that both projects were invented completely independently.</p>
+
+<p>iPojo offers many more features than DS (and a few more than DM). There are ways:</p>
+
+<ul>
+  <li>to initialise fields of a service impl on construction</li>
+  <li>to bind properties of an exported service to the value of a field on the service impl.</li>
+  <li>for a service impl to “deregister itself” without making any osgi-specific calls (component config defines a boolean field used to signal impl state)</li>
+</ul>
+
+<p>iPojo’s <a href="http://felix.apache.org/documentation/subprojects/apache-felix-ipojo/apache-felix-ipojo-gettingstarted/ipojo-composition-tutorial.html">composition</a> feature allows creation of <em>nested</em> service registries, so that components can be created without making them globally visible. The <code>&lt;composite&gt;</code> tag defines a new registry as a child of some other one (eg of the global registry), the <code>&lt;subservice&gt;</code> tag imports a service from the parent registry, and the <code>&lt;provides&gt;</code> tag exports a service to the parent registry. A composite cannot span multiple bundles (ie it is not a replacement for the Subsystem service) but does mean that, like Blueprint, this DI framework can be used to manage objects internal to the bundle.</p>
+
+<h1 id="the-osgi-subsystem-service">The OSGi Subsystem service</h1>
+
+<p>The OSGi standard (R5 or later) defines a way to group a number of bundles together as a “subsystem”, and control which services are exported from this subsystem into the container-wide service registry. However this standard isn’t widely implemented (the Apache Felix project doesn’t provide an implementation of this service for example). It also appears to be quite “heavy-weight”, comparable to building a .ear file for JEE environments. Thus while it seems possible to use it to “hide” services which are internal details of a bundle, it isn’t convenient enough to be a solution to the issue of bundle-private services published just to make them usable with DS or DM.</p>
+
+<h1 id="ds-and-dm-service-injection">DS and DM Service Injection</h1>
+
+<p>DS and DM both currently only support injecting <em>OSGi services</em> into the objects they construct, ie references to objects retrieved from the global OSGi registry.</p>
+
+<p>All objects created by a “real” OSGi-aware DI framework (ie not Blueprint or Peaberry) need to be managed via a service registry, due to the reasons listed at the top of this article: that services can come and go, which normal DI frameworks cannot handle. Removing a dependency should trigger a cascade of removals of the objects that depend on them, and a service registry is the way to handle that.</p>
+
+<p>DS and DM currently support only a single global service registry, ie in order to inject any object T into any other object, T must be managed via the global service repository, and thus visible to all bundles. There are different opinions on whether this is a problem or not; <a href="http://www.mail-archive.com/users%40felix.apache.org/msg16356.html">here</a> and <a href="http://www.mail-archive.com/users%40felix.apache.org/msg16349.html">here</a> are statements from experienced OSGi developers that (to paraphrase) dependency injection of services is all that is needed, and all other construction of objects within a bundle (including providing them with their dependencies where needed) can be done by hand. If you agree, then please skip the rest of this section. For those who feel otherwise, read on.</p>
+
+<p>DI configuration within a single bundle is often concerned with wiring together objects whose only valid users are other objects within the same bundle. As DS/DM only inject OSGi services, one solution is to publish these private objects in the global registry anyway. However the issues are:</p>
+
+<ul>
+  <li>clutters the global registry with large numbers of ‘useless’ objects, potentially causing performance problems;</li>
+  <li>allows other bundles to (accidentally or deliberately) access purely internal objects which are <em>implementation details</em> of another bundle</li>
+</ul>
+
+<p>As lookup of services “by interface” (ie with a filter-expression that specifes the desired OBJECT_CLASS) is extremely common, I would have thought that OSGi containers would optimise for this case, and thus would scale well with lots of registered services as long as they were registered with different service interfaces. However Felix DM has a <a href="http://felix.apache.org/documentation/subprojects/apache-felix-dependency-manager/guides/performance-tuning.html">special feature</a> which allows “filter indices” to be defined to speed up service lookup - including by-interface. It therefore appears that at least some OSGi containers at some time had performance problems with service-lookup, so avoiding publishing unnecessary (bundle-internal) objects (regardless of which interface they are registered with) seems to be a good idea.</p>
+
+<p>The deliberate-or-accidental use by an external bundle of what was intended to be an “internal” service is not <em>so</em> serious as it first appears. Internal objects will often be registered with an OBJECT_CLASS which is an interface from a bundle-private (ie not-exported) package. In that case, other bundles won’t be able to see the service unless they go to considerable effort, and when they do get a reference they cannot cast it to any useful type. Yes, they could use reflection to access it but that is then going from “accidental” use to deliberate abuse.</p>
+
+<p>Nevertheless, it does feel weird to clutter the global service registry with objects that are only <em>internal</em> to a bundle. And if a bundle registers an object intended for internal use using a common interface (eg javax.sql.DataSource), then other bundles might accidentally retrieve it.</p>
+
+<p>As noted earlier, Blueprint and Peaberry don’t have this problem - they support injecting non-services. Bundles using iPojo can solve this problem with the <code>composite</code> tag which creates a new service-registry.</p>
+
+<p>I believe that with a moderate amount of work, the DM DependencyManager and Component classes could be extended to also define a “nested service registry” where:</p>
+
+<ul>
+  <li>a call to Component.setInterface(someiface.class, someprops, Scope.LOCAL) would register the service only in the “nested” registry, not in the global one;</li>
+  <li>lookups of a single service by interface would look in the nested registry before the parent one;</li>
+  <li>lookups of a list of services would return the union of the nested registry and the parent one.</li>
+</ul>
+
+<p>As a less-elegant solution, possibly the ConditionalPermissionAdmin could be configured with a custom rule such that any service with property “service.local” set can only be seen/got from the same bundle that registered the service. This would solve the visibility issue, but the performance impact is not clear.</p>
+
+<p>Another alternative might be to use the OSGi “Service Hooks” or “Resolver Hooks” feature. These are deliberately intended to allow control over which services are visible to which bundles, and the specification includes examples of how to hide a service. The API appears to have sufficient information to be ablt to hide services with a property “service.local” from all bundles except the one that registered the service. As with the ConditionalPermissionAdmin approach, this would solve the visibility issue but the performance impact is not clear.</p>
+
+<h1 id="framework-comparisons">Framework Comparisons</h1>
+
+<p>The iPojo wiki has a <a href="https://cwiki.apache.org/confluence/display/FELIX/iPOJO+FAQ#iPOJOFAQ-HowdoesiPOJOcomparetoDeclarativeServicesorBlueprint%3F">nice table comparing iPojo, DS and Blueprint</a>.</p>
+
+<p>Note however:</p>
+
+<ul>
+  <li>DS now supports annotations</li>
+  <li>for “composite services” with DS, there should perhaps be a note to “see SubSystem services”.</li>
+  <li>OSGi enterprise R6 adds “damping” for DS</li>
+</ul>
+
+<p>Unfortunately I can’t find any page comparing Felix DM with iPojo. As far as I can see, they are almost identical and there is no reason to choose one over the other except for:</p>
+
+<ul>
+  <li>composites (see above)</li>
+  <li>better support for optional services via “Null Objects”</li>
+</ul>
+
+<h1 id="lifetimes-and-scopes">Lifetimes and Scopes</h1>
+
+<p>Every object has an associated <em>lifetime scope</em>. When performing dependency injection, it is valid for a long-lived object to be injected into a short-lived one. However injecting a short-lived object into one with a longer lifetime will cause problems, as the long-lived object may later try to reference this object when it is no longer ‘live’. Technically, a <em>holder</em> object’s lifetime should be <em>enclosed</em> by the lifetime of any <em>holdee</em> object it keeps a reference to. One example is server-side web applications with scopes like <em>application</em>, <em>session</em>, and <em>request</em>; a session-scoped object should never hold a direct reference to a request-scoped object.</p>
+
+<p>Some dependency injection frameworks detect scoping problems and report an error; for example the dependency-injection performed by JSF will report something like:</p>
+
+<pre><code>Unable to create managed bean bean. The following problems were found: 
+   The scope of the object referenced by expression #{param.foo}, request, is shorter
+     than the referring managed beans (bean) scope of view
+</code></pre>
+
+<p>Others just fail mysteriously at runtime. Spring does so; the recommended solution is to use the <code>&lt;aop:scoped-proxy&gt;</code> tag, which works similar to a Blueprint service reference, in that a proxy is generated which looks up the target object as needed (and might not find it, ie might fail).</p>
+
+<p>In an OSGi environment, every service can be considered to have an undetermined lifetime - it can be stopped/unregistered at any moment. When the service is <em>optional</em>, then ensure the holder of a reference to a service gets <em>notified</em> when the service is no longer available, so the reference can be set to null or equivalent.  When the service is <em>mandatory</em>, possible solutions are:</p>
+
+<ul>
+  <li>Use a proxy so that a valid instance will be <em>looked up</em> when needed (or service will fail). Blueprint does this automatically, and DM can be configured to do this if desired (see <em>temporal dependency</em>).</li>
+  <li>Inject a <em>service locator</em> of some kind which fetches the relevant service when needed; however in the case of a mandatory service, this then has the potential to fail in a similar way to the proxy approach; in OSGi the <em>elegant</em> way to handle code that is missing its mandatory services is to deregister the code so that it is not callable in the first place.</li>
+  <li>Make the holder itself a service, and link the lifetimes of the holder and holdee so that when the referenced service is unregistered, the holder service is also unregistered (becomes unavailable for use); OSGi-aware dependency injection frameworks such as DS or DM are designed for this. Note that this can trigger cascades of service deregistrations.</li>
+</ul>
+
+<p>This is really just another way of rephrasing the statement in section <em>Traditional Dependency Injection Framework Assumptions</em>: standard DI frameworks don’t understand OSGi.</p>
+
+<p>Note that if you use some kind of <em>service locator</em> to look up an OSGi service, then you need to make sure the service reference is <em>released</em> later. Using a Java 8 lambda expression (as a callback to a method that acquires/releases the service) would be an elegant way to do this.</p>
+
+<p>And remember that this applies to objects that hold a reference to a service for a long time; if an object is created, used, and then discarded within a short time-period (eg one “transaction”) then it might be acceptable for it to hold a direct reference to a service.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>A DI framework for OSGi really should have an <em>event driven</em> design, to match OSGi itself. Traditional DI frameworks don’t do that at all. Proxy-based solutions such as Blueprint and Peaberry try to hide event-related behaviour behind the proxies but are only partially successful. Declarative-services, Felix Dependency Manager and iPojo are fully event-aware.</p>
+
+<p>The event-driven DI frameworks require all objects which can be injected to be managed by a “service registry”. Sadly, DS and DM support only a single global service registry, which isn’t really an appropriate place to manage objects that are intended to be used only within the bundle that registered them. Nevertheless, as long as they are registered as a type which is private to the bundle, this is acceptable. Adding support for bundle-private service registries (to DM at least) seems feasable. iPojo does support bundle-private registries, although the syntax is somewhat clumsy.</p>
+
+<p>My personal preference is Felix Dependency Manager. When “lazy loading” of bundles is not important then I would recommend using DM via its Java API - otherwise use the annotation/xml-config approach.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://felix.apache.org/documentation/subprojects/apache-felix-dependency-manager/guides/design-patterns.html">Felix DM Examples</a></li>
+  <li>
+    <p><a href="http://felix.apache.org/apidocs/dependencymanager/4.0.0/index.html?org/apache/felix/dm/DependencyManager.html">Felix DependencyManager javadoc</a></p>
+  </li>
+  <li>
+    <p><a href="http://blog.osgi.org/2014/09/how-should-i-use-guicespringblueprint.html">Peter Kriens on dependency injection</a>. Note that I don’t happen to agree with the opinion, but Peter’s post and the comments on the article are definitely worth reading.</p>
+  </li>
+  <li>
+<a href="http://de.slideshare.net/mfrancis/the-ultimate-dependency-manager-shoot-out-x-uiterlinden-s-mak">Ultimate Dependency Management Shootout</a> - slideshow</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/osgi-dependency-injection/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

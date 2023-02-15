@@ -1,0 +1,307 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - High-performance remote OSGi service calls</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>High-performance remote OSGi service calls</h1>
+    <aside>First published on: May 15, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/OSGi/'>OSGi</a></p>
+      <h1 id="overview">Overview</h1>
+
+<p>The <a href="https://en.wikipedia.org/wiki/OSGi">OSGi</a> specification includes a standard way of exporting methods for invocation by remote systems and of finding/invoking services exported by remote systems. The mechanism is really quite elegant to use, but unfortunately most of the currently-available implementations have very poor performance. I recently needed to provide support for high-performance remote OSGi service invocations; if you have the same problem you might find my solution useful.</p>
+
+<p>The specific problem I had was an existing application running on FuseESB which used the provided clustering functionality to make many remote method calls to OSGi services in other FuseESB instances - ie java-to-java calls between JVMs. FuseESB is based on Apache Felix and includes a fast implementation for making such remote calls, but unfortunately the existing FuseESB implementation is effectively abandoned; it was therefore necessary to move to “plain” Apache Felix plus a suitable remote OSGi implementation. Finding the right implementation turned out to be more difficult than expected; the final solution turned out to be extracting the relevant (APL-licenced) code from FuseESB (Fabric) and patching it a little to run on plain Felix. I cannot provide actual source-code as this work was done for an employer but can give some hints on how to perform the same steps yourself.</p>
+
+<h1 id="background">Background</h1>
+
+<p>OSGi is an abstract <a href="http://www.osgi.org/Specifications/HomePage">specification</a> separated into two parts : “core” and “enterprise”. The current <a href="http://en.wikipedia.org/wiki/OSGi_Specification_Implementations">active implementations</a> of the “core” are:</p>
+
+<ul>
+  <li>Apache Felix</li>
+  <li>Eclipse Equinox</li>
+  <li>Knopflerfish</li>
+  <li><a href="http://projects.eclipse.org/projects/iot.concierge/">Concierge</a></li>
+</ul>
+
+<p>Various projects exist which implement the parts of the “enterprise” specification as OSGi bundles; a full OSGi implementation can then be built by installing these additional OSGi bundles on an OSGi core implementation.</p>
+
+<p>The enterprise spec (v4.2+) includes a section defining how to export services for external use, or import external services. The OSGi registry is designed to allow bundles to locate objects which implement any desired interface, and then invoke methods on that object. It is simple to extend this design to allow use of remote services : just register a proxy object which implements the desired interface whose implementation sends data over a network to a remote system. Similarly, services can be exposed for external use by providing a bundle that watches for new services being registered with the OSGi registry and defines a handler for incoming network data which forwards to the “real” service implementation. There are of course a number of issues in the details (which are discussed below), but in general OSGi-based applications can be quite easily extended to support distributed operation.</p>
+
+<p>Note: OSGi Remote Services were previously known as <em>Distributed OSGi</em> before final standardisation, and this terminology can be found in a number of places.</p>
+
+<p>What the OSGi <em>remote services</em> specification deliberately leaves undefined are:</p>
+
+<ul>
+  <li>how parameters to the invoked method get serialized to a suitable form for transfer over the network;</li>
+  <li>how the network connection to the remote process is established;</li>
+  <li>how the return-value (and possibly exception thrown by the remote service implementation) are serialized by the other end so the method invoker can deserialize them.</li>
+  <li>how new services are “announced” by the implementer and detected by potential users</li>
+</ul>
+
+<p>Different implementations of <em>remote services</em> can then choose different solutions for the above. Unfortunately, it turns out that many of the projects that provide an OSGi <em>remote services</em> implementation do not have a focus on performance:</p>
+
+<ul>
+  <li>The <a href="http://cxf.apache.org/distributed-osgi.html">Apache CXF Distributed OSGi project</a> (which is a subproject of Apache CXF) represents method-calls as SOAP requests (ie serializes parameters to XML), and opens a separate TCP connection for each method call;</li>
+  <li>
+<a href="http://www.amdatu.org/components/remote.html">Amdatu Remote</a> uses the Jackson library to serialize parameters to JSON, and opens a separate TCP connection for each method call;</li>
+  <li>
+<a href="https://wiki.eclipse.org/OSGi_Remote_Services_and_ECF">Eclipse ECF Remote Services</a> supports a range of protocols; unfortunately their behaviour is not currently documented (but see below).</li>
+</ul>
+
+<p>Apache CXF Distributed OSGi does allow an OSGi container to register proxies for remote SOAP services which code within the OSGi container can then access as if the service were a local Java object (except that all parameters must be serializable via Apache CXF); this can be convenient. Similarly, it allows code within the OSGi container to register a java object as a local service and that service can then be invoked by any remote application that supports the SOAP protocol. However the method-calls are <em>slow</em>. And sadly the Apache-CXF remote-services implementation does not support any hooks to change the serialization or network access behaviour.</p>
+
+<p>Amdatu’s implementation based on JSON-over-http makes it simple for Javascript code in web-pages to make calls to services exported from an OSGi container. Potentially, Java code in an OSGi container could also make calls to services exported by NodeJS or similar. And as most languages have good support for JSON, it is also a general-purpose format for intercommunication with code in other languages. However the JSON format is non-standard (unlike CXF’s use of SOAP). And the OSGi container needs to be configured to support mapping of all parameter/return/exception types to/from JSON. And this implementation is slow : mapping to JSON is not high-performance and a new network connection is established for each method call.</p>
+
+<p>The Eclipse project has a subproject named Eclipse Communications Framework (ECF) which includes a vast amount of code. A part of the ECF project is an implementation of OSGi remote services. Unfortunately the ECF project as a whole, and the remote services part in particular, appears to be suffering a severe lack of developers. Git commit history shows only 1 regular committer, documentation is fairly sparse, the code itself is not well commented, the Felix OSGi container is apparently supported but clearly not a priority, the remote services implementation pulls in a <a href="https://wiki.eclipse.org/images/d/dd/Karafinst3.png">large number of eclipse libraries</a>. From the available documentation and code it does appear that the implementation is reasonably sophisticated and <a href="https://wiki.eclipse.org/Comparison_of_Discovery_and_Distribution_Providers">extensible</a> but given the issues listed above, no detailed analysis of its performance was made.</p>
+
+<p>Update: there was recently an interesting email thread on ECF that may be helpful in choosing a remote-services implementation. See <a href="http://www.mail-archive.com/users%40felix.apache.org/msg16377.html">this email</a> and the replies in the same thread (linked at bottom of that page).</p>
+
+<p>Given that none of the obvious candidates provide a solution, I looked into reusing the currently-used solution : <a href="https://fabric8.io">Fabric</a>.</p>
+
+<h1 id="fuseesb-and-fabric">FuseESB and Fabric</h1>
+
+<p>Apache Felix is an implementation of the “core” parts of OSGi. Apache Karaf is an “administration console” for Felix. Apache Servicemix is Felix + Karaf + a bunch of other open-source libraries that a typical “integration” type project might find useful such as ActiveMQ and Camel. Fabric (aka Fabric8) is a semi-open-source project that implements a bunch of extra extensions to OSGi, in particular focusing on building clusters of OSGi containers. FuseESB is a commercial project that combines Apache Servicemix + Fabric.</p>
+
+<p>FuseESB was originally a commercial product of a company named FuseSource; that was then sold to Redhat’s JBoss division who spent over a year being completely indecisive over what they were going to do with FuseESB. First they renamed it to “JBoss Fuse” and <a href="http://blog.eisele.net/2014/09/jboss-fuse-component-details-and-versions.html">released it</a> with a version# that was confusingly <em>lower</em> than the previous version (JBoss Fuse 6.x is the repackaging of FuseESB 7.x). Eventually in September 2014 it was decided to completely redesign the whole product, keeping the product name but almost nothing else from the original code (at least AFAICT). The <a href="http://fabric8.io/docs/index.html">new architecture</a> is referred to as “Fabric8 v2”. As a result the “1.x” code in fabric is effectively abandoned (at the current time, no commits have been merged to the branch named “1.x” since Nov 2014, ie in the last 6 months) - although <a href="https://github.com/fabric8io/fabric8/issues/3905">in response to a question</a> it was stated that a last release of the 1.x code was expected in “sommer 2015”.</p>
+
+<p>Note that both Servicemix and FuseESB are really intended as platforms to be <em>configured</em> rather than as an environment into which to deploy custom code. The idea is that camel configuration files are used to define “workflows”, and (in the case of FuseESB) the whole system then distributes the configuration across a cluster of nodes for scalability, reliability, etc.  The occasional custom java bundle can be deployed to implement data transforms that cannot be specified via XML configuration, but large amounts of custom code are not expected.</p>
+
+<p>I have called the Fabric project “semi-open-source” because although the code is available via a Git repository under the Apache 2.0 licence, development was always driven by a single company with no open community. There is a <a href="https://github.com/fabric8io/fabric8">public Github repository</a> and bugtracker, though I suspect that much development and many issues are handled elsewhere. The build process assumes a specific company environment, so external contributions have clearly not been common.</p>
+
+<p>FuseESB’s core feature is clustering, and therefore the Fabric repository contains their implementation of OSGi remote services. Well, actually the code was implemented before remote services were part of the official specification so what is currently there is called “distributed osgi” and is not structured quite the way that the official spec defines - ie not divided into “Distribution Provider”, “Topology Manager” and “Remote Services Admin”. Nevertheless, for most code that consumes or exports remote OSGi services there is no difference. And this implementation <em>is</em> high-performance. It serializes method parameters, return-values and exceptions using the normal ObjectOutputStream/ObjectInputStream classes, and it maintains a pool of open connections to other servers rather than opening a new connection for each method call. This does mean that it only communicates with other OSGi containers that also use the same protocol (ie is not using a standard like SOAP or JSON-over-http) but for a cluster-of-OSGi-containers usecase this is exactly what is needed.</p>
+
+<p>All code in the Fabric git repository is intended to be released at once. The last official release of FuseESB was v7.1 and included Fabric version 1.3 (ie included a set of java bundles built from the Git repository which is tagged as version 3.1). After that release, the developers started work on the next version, and a number of useful changes were made but no radical changes. In late 2014 the current status was tagged as “1.4.0.Beta”, then apparently the decision was made to completely redesign and massive changes were made to the “master” branch. Fortunately the “1.4.0.Beta” tag marks a good point at which to extract useful code. The “beta” tag sounds a little scary at first, but this is mostly minor changes to the officially-released 1.3 version, and there is a reasonable suite of unit tests. The code also was found to be stable in my own testing.</p>
+
+<h1 id="extracting-dosgi-from-fabric">Extracting DOSGi from Fabric</h1>
+
+<p>The Fabric Git repository includes a lot of code, but the point here is to extract only the OSGi remote services implementation, which is found in just one bundle named “fabric-dosgi”.</p>
+
+<p>Unfortunately there are two problems:</p>
+
+<ul>
+  <li>The git repo as a whole has a maven-driven build, but doesn’t build out-of-the-box; as usual with a company-driven project the build environment and tests sometimes assume resources that are only present within the developing companies’ environment.</li>
+  <li>The fabric-dosgi bundle has a number of dependencies on other Fabric bundles which in turn have dependencies on more Fabric bundles, which add a whole lot of features we don’t want. The point is just to have a good remote services implementation, not a complete Fabric 1.x environment.</li>
+</ul>
+
+<p>I recommend cloning the main repo, and then editing the top-level pom to just build the “fabric” module, and editing fabric/pom.xml to just build module fabric-dosgi (and possibly zk-commands; see later). It is then necessary to look through the code within the fabric-dosgi module and remove references to classes from other fabric bundles by copying the source-code of the required class into the fabric-dosgi module (and changing package-name to something appropriate). About a dozen classes need to be copied; not trivial but not a massive amount of work either. The result is a standalone fabric-dosgi module that can be deployed into any OSGi container, and which:</p>
+
+<ul>
+  <li>handles exporting any OSGi services which have the magic “service.exported.interfaces” OSGi service property;</li>
+  <li>watches for services announced by other OSGi containers (via zookeeper) and publishes proxies into the local OSGi registry</li>
+</ul>
+
+<p>Some fiddling about with zookeeper and curator-related code is required too; Fabric has its own copies of slightly older versions of these libraries which I replaced with references to <em>official</em> releases of these Apache projects which in turn required some minor adjustments to the fabric code.</p>
+
+<p>There may be a couple of other minor tweaks I’ve forgotten to mention here; in total the work took a day or two.</p>
+
+<h1 id="zookeeper">ZooKeeper</h1>
+
+<p>Fabric’s dosgi implementation relies on access to an Apache Zookeeper instance. When an OSGi container registers a service to export, fabric-dosgi first creates the “handler” that accepts incoming network calls and forwards it to the real service, then it creates a <em>node</em> within zookeeper under path “/fabric/dosgi” containing (interface-name, host, port) where host and port are the address on which the handler is listening. Other containers running fabric-dosgi which are connected to the same zookeeper cluster then detect this new entry and create a proxy for the specified interface which, when invoked, forwards the invocation across the network to the specified host/port.</p>
+
+<p>Fabric-dosgi assumes that some other bundle will use the Apache Curator library to establish a connection to an Apache ZooKeeper server and then publish a CuratorFramework instance as an OSGi service; fabric-dosgi does not start up until such a service is registered. The CuratorFramework instance is then used to create nodes or listen for new nodes as described above. Therefore, in order to use fabric-dosgi to build a cluster of communicating OSGi containers, you will also need to separately deploy either a single Zookeeper instance, or a cluster of them - and write code that uses Apache Curator to connect to a suitable server on OSGi container startup.</p>
+
+<p>Note that Apache Zookeeper is intended to be run as a single standalone process or a set of standalone processes configured to talk to each other.  Although Zookeeper happens to be written in Java and distributed as a single jarfile, its developers do not really intend it to be <em>embedded</em> within other applications. Nevertheless, this is possible given a bit of effort (FuseESB does) if you really wish.</p>
+
+<h1 id="zkcommands">ZkCommands</h1>
+
+<p>There is one other module within the Fabric Git repository that may be useful - the zkcommands bundle provides a set of commandline tools for the Apache Karaf console for viewing the contents of a Zookeeper server. This is particularly useful for debugging any problems with remote osgi services that may occur. As with the fabric-dosgi bundle, zkcommands has a number of undesirable dependencies on code from other fabric bundles; this can be resolved by copying the relevant classes into the zkcommands bundle (and changing the package name). The amount of effort is around 1 day but I found it well worthwhile.</p>
+
+<h1 id="differences-between-local-and-remote-services">Differences between local and remote services</h1>
+
+<p>I mentioned above that the difference between a local service and a remote service is “almost” transparent to an OSGi bundle that uses the service. In both cases, the consuming code simply requests a specific interface from the OSGi registry and receives some object that implements that interface. In many cases existing code will work fine with a local or remote service. However the following should be considered:</p>
+
+<ul>
+  <li>A remote service can theoretically throw an unchecked exception due to network failures. Usually this is not a problem; when a remote container unpublishes a service, or when zookeeper notices that it has disappeared from the cluster, the service proxy will be removed from the OSGi registry which will trigger the usual OSGi callbacks on any object that depends on that service - so as long as your code correctly handles deregistration of OSGi services (which it should do for local services) it will be rare to get an exception due to network problems at runtime.</li>
+  <li>All input parameter types and return types of the interface need to be serializable via whatever mechanism the remoting protocol uses (native Java serialization in the case of fabric-dosgi).</li>
+  <li>All input parameter types and return types need to be defined in <em>exported</em> packages, so fabric-dosgi can deserialize them on receipt of an incoming network packet; classes private to a bundle cannot be found by name and therefore cannot be deserialized.</li>
+  <li>If a service modifies an input parameter, then this change will be seen by the caller for a local service call (params passed by reference), but not seen for a remote call (params passed by value).</li>
+  <li>Performance of course</li>
+</ul>
+
+<p>The OSGi specification (enterprise part) contains a good discussion of the constraints that apply to remote service calls.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/dosgi-fabric/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

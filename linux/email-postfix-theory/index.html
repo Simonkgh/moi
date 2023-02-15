@@ -1,0 +1,549 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Email Postfix Theory</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Email Postfix Theory</h1>
+    <aside>First published on: January 5, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      
+<p>(Back to the <a href="/linux/email-overview">main article</a>)</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>This article describes some of the concepts and terminology used by the <a href="http://www.postfix.org/">Postfix</a> suite of email tools. This hopefully makes descriptions of how to install Postfix easier to understand.</p>
+
+<p>The version of Postfix described here is v3.4 (as included in Ubuntu 20.04-LTS).</p>
+
+<h1 id="origins">Origins</h1>
+
+<p>Postfix was intended to be (and largely is) a replacement for the sendmail program. The configuration is far saner than sendmail, and the security aspects much better.</p>
+
+<p>Postfix competes with Exim (and earlier with qmail). Postfix is almost completely implemented and maintained (over decades) by Wietse Venema, an IBM research fellow.</p>
+
+<p>Wikipedia has a brief <a href="https://en.wikipedia.org/wiki/Postfix_(software)">overview of postfix</a>, which links to the <a href="http://www.postfix.org/OVERVIEW.html">postfix architecture</a> page on the postfix website; this article can be seen as an extension of the information there.</p>
+
+<h1 id="the-postfix-master-process">The Postfix Master Process</h1>
+
+<p>Postfix consists of many separate programs that work together. This design is for security; any code that parses user input is potentially vulnerable to carefully-crafted malicious input which may cause buffer-overruns or trigger other undesired behaviour. Such code can be made more secure by making it a separate program and running that program with restricted rights; the worst case is that an attacker causes the program to perform user-specified actions but when it runs with restricted permissions the damage it can cause is reduced.</p>
+
+<p>There are some standard services on Unix systems that most administrators will be familiar with:</p>
+
+<ul>
+  <li>inetd is configured with a list of (port, program) pairs; it listens on all the specified ports and starts the corresponding program when a remote system opens a connection to a listed port.</li>
+  <li>cron is configured with a list of (schedule, program) pairs; it invokes the specified program whenever the specified schedule matches the current time</li>
+</ul>
+
+<p>The postfix master application is somewhat like a combination of inetd and cron. The master runs continuously (started via systemd or similar) and starts other programs as needed. The programs that it may start are configured in file <code>/etc/postfix/master.cf</code>. In particular, on master startup it looks for all listed services with type=inet (ie which listen on a network port) and listens <em>itself</em> on that port, starting an instance of the application when the first client connects. On master shutdown or reload, it sends a signal to all such processes to shutdown. Entries with type=unix are instead started each time they are needed (ie are not long-running daemons); those with a non-zero “wakeup” setting are cron-like batch-mode applications which the master starts at the specified interval (seconds).</p>
+
+<h1 id="the-mastercf-file">The master.cf File</h1>
+
+<p>Each entry starts at column 0 in the file (ie no preceding whitespace). It may be extended over many lines, as long as the following lines are indented.</p>
+
+<p>The first column in an entry is the “service name”, a logical key that the master process (or other processes) use to refer to a particular postfix program. This is followed by various settings (see file header), and then the binary application to execute (eg “smtpd”) and its commandline-arguments.</p>
+
+<p>Probably the most important entry, and usually the first one, is “smtp inet  ….. smtpd ..” which defines that the “smtp service” as the “smtpd” MTA application listening on an inet (network) port. This is the daemon that listens on port 25 for incoming email, and places it in a queue. The master process will listen on port 25 for incoming connections and start an instance of “the smtp service” as needed (inetd-like).</p>
+
+<h1 id="configuration-settings-and-the-maincf-file">Configuration Settings and the main.cf File</h1>
+
+<p>When the postfix master starts a process listed in <code>master.cf</code>, it provides it with a large set of configuration-variables that the program may read from; these:</p>
+
+<ul>
+  <li>have default values hardwired into the Postfix configuration system</li>
+  <li>which can be overridden in file <code>/etc/postfix/main.cf</code>
+</li>
+  <li>which can be overridden via <code>-o name=value</code> options in <code>master.cf</code>.</li>
+</ul>
+
+<p>Entries in <code>master.cf</code> may reference variables defined in <code>main.cf</code>, eg “<code>-o foo=$bar</code>” where bar is defined in <code>main.cf</code>.</p>
+
+<p>Applications with type=unix are started repeatedly (depending on context but often once per email). Those started per-email can include email-specific variables such as $sender in their argument-list. Applications with type=inet are long-running daemons that handle many emails so such variables obviously are not available.</p>
+
+<p>Each postfix program has a set of configuration-values that it looks up from the “postfix configuration” when it starts. Exactly which variables a specific program uses is documented in that program’s man-page.</p>
+
+<p>Postfix has an inbuilt default value for each variable; these can be seen by running <code>postconf -d</code>. The defaults can be overridden via entries in <code>main.cf</code> and via <code>-o</code> commandline options in <code>master.cf</code>.</p>
+
+<p>Postfix is intended to be scalable enough to be usable by very large companies and internet-service-providers. Sadly for those wanting to use it simply for a personal or family mailserver, this means it has a very large number of configuration-options which are mostly irrelevant to smaller configurations. However Postfix does have very good default settings.</p>
+
+<p>The full set of configuration variables can be seen at:</p>
+
+<ul>
+  <li><a href="http://www.postfix.org/postconf.5.html">http://www.postfix.org/postconf.5.html</a></li>
+</ul>
+
+<p>The current set of configuration values is displayed by command <code>postconf</code> while the default values are displayed by <code>postconf -d</code>.</p>
+
+<p>More information about configuration can be found at:</p>
+
+<ul>
+  <li><a href="http://www.postfix.org/BASIC_CONFIGURATION_README.html">http://www.postfix.org/BASIC_CONFIGURATION_README.html</a></li>
+</ul>
+
+<p>The Postfix default values are very carefully chosen, and for simple setups the number of variables that need to be overriden is just a dozen or two. The problem is simply to know <em>which</em> ones need to be overridden from the vast list in the Postfix documentation!</p>
+
+<p>A long variable definition can be split over multiple lines simply by indenting the following lines.</p>
+
+<p>Some variables are <em>lists</em> of values; the items in the list can be separated by commas or by whitespace, at your choice - unless items may contain whitespace, in which case commas are needed.</p>
+
+<h1 id="queues-and-the-queue-manager">Queues and the Queue-Manager</h1>
+
+<p>Emails go through various “phases” as they are processed, in which they are temporarily stored on a queue then later taken from the queue and processed - possibly being written to yet another queue.</p>
+
+<p>A queue is just a directory under <code>/var/spool/postfix</code>, eg <code>/var/spool/postfix/incoming</code> for emails received by smtpd or sendmail which are waiting to be delivered.</p>
+
+<p>The queue-manager application periodically looks at all queue-directories, and invokes applications to process the emails it finds. Column <code>wakeup</code> in file <code>master.cf</code> defines how often the queue-manager runs, and the mapping between “service to execute” (from email metadata) and “binary to execute” is defined in <code>master.cf</code>.</p>
+
+<h1 id="mtas-and-mdas">MTAs and MDAs</h1>
+
+<p>A Mail Transfer Agent (MTA) is something that communicates with external systems to either accept incoming emails and store them in a local “incoming queue”, or to take emails from a local “outgoing queue” and pass them to an external system.</p>
+
+<p>A Mail Delivery Agent (MDA) is something that takes email from an “incoming queue” and writes it to a recipient’s “mailbox” on the same host.</p>
+
+<p>Sometimes an entire email-setup consisting of MTAs, MDAs, and their various internal components is also described as an MTA.</p>
+
+<h2 id="mail-transfer-agents">Mail Transfer Agents</h2>
+
+<p>Postfix includes the following Mail Transfer Agents:</p>
+
+<ul>
+  <li><code>sendmail</code></li>
+  <li><code>smtpd</code></li>
+  <li><code>smtp</code></li>
+</ul>
+
+<p>This sendmail is a postfix-specific application which is named <code>sendmail</code> for historical reasons, and provides the same command-line-interface as the original application of the same name. It is an extremely simple program which reads email from its STDIN and writes the email to a “maildrop directory”. The postfix <code>pickup</code> daemon process detects new emails in the maildrop-directory, applies the mail-processing rules defined in postfix configuration-files <code>master.cf</code> and <code>main.cf</code>, and moves the email to the <code>incoming queue</code>. Together these provide a way for applications running on the same host as postfix to generate outgoing email.</p>
+
+<p>An instance of the smtpd application is started by the postfix master process when a remote client connects to port 25 (smtp) or 587 (submission). It exchanges a sequence of ESMTP commands with the remote application and if all is valid it accepts the contents of an email from the remote server and writes it to a local “incoming queue”.</p>
+
+<p>The smtp application is used to send outgoing email. The postfix master process periodically executes the “queue manager” which then starts an instance of the smtp application for each email in the “outgoing queue”. The smtp app takes the domain-part of the recipient address (eg <code>@google.com</code>), performs a DNS lookup of the MX-record for that domain to get a host-name, opens a socket to port 25 on that remote host and exchanges a sequence of ESMTP commands with that remote email-server in order to transfer the contents of the outgoing email. Actually, the <code>smtp</code> application could be described as either an MTA or an MDA; it sits somewhere in-between.</p>
+
+<h2 id="mail-delivery-agents">Mail Delivery Agents</h2>
+
+<p>Postfix includes several Mail Delivery Agents:</p>
+
+<ul>
+  <li><code>local</code></li>
+  <li><code>virtual</code></li>
+  <li><code>lmtp</code></li>
+  <li><code>pipe</code></li>
+</ul>
+
+<p>The postfix MDAs handling incoming email (sendmail + smtpd) determine which delivery-agent should be used for an email (based on the rules in main.cf and master.cf), and include this in metadata associated with the emails they write into the “incoming queue”. The postfix master-process periodically runs the queue-manager which checks each email in the “incoming queue” and executes the associated delivery-agent.</p>
+
+<p>Note that each entry in <code>master.cf</code> starts with a <em>postfix service name</em> and then a later column specifies the <em>binary application to execute</em> (with default path of <code>/usr/lib/postfix/sbin</code>). These are often the same, eg service “local” is mapped to application “local” (thus <code>/usr/lib/postfix/sbin/local</code>). However the service-name and binary-app are separate concepts.</p>
+
+<p>These specific Mail Delivery Agents are described in more detail later.</p>
+
+<h1 id="email-classes-and-the-smtpd-server">Email Classes and the SMTPD Server</h1>
+
+<h2 id="dataflow">Dataflow</h2>
+
+<p>The smtpd server listens on port 25. A remote application connects to it, and exchanges a series of ESMTP messages with it, first to identify itself and then to transfer (submit) one or more emails.</p>
+
+<p>The general steps that the smtpd server performs are:</p>
+
+<ul>
+  <li>listen on port 25 for a new TCP connection</li>
+  <li>wait for remote app to identify itself with an EHLO $(servername) message</li>
+  <li>performs a DNS reverse-lookup on the IP address of the remote app
+    <ul>
+      <li>if no PTR record is found, this is not a “serious” email server - probably a hacked desktop or similar, so drop connection</li>
+      <li>if PTR record does not match servername in EHLO message, this is an untrustworthy email server, so drop connection</li>
+    </ul>
+  </li>
+  <li>check whether the EHLO $(servername) is “permitted” according to the local rules</li>
+  <li>check remote server name and IP-address against the configured “blacklists” of known spammers</li>
+  <li>receive email; for each email:
+    <ul>
+      <li>categorize the email into local/virtual/relay/default (see later)</li>
+      <li>check whether the “recipient” address in the email-header is “permitted” according to the local configured rules</li>
+      <li>check whether the “sender” address in the email-header is “permitted” according to the local configured rules</li>
+      <li>execute any configured “rewrite” operations, filters, etc</li>
+      <li>determine which postfix “service” should process the email next (delivery agent aka transport)</li>
+      <li>store the email into an “incoming queue” (a directory) labelled with the “transport”</li>
+      <li>return a success-code to the remote app for this email (email accepted)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>At some later time, the Postfix master-process will start the queue-manager which will deal with any queued emails.</p>
+
+<p>Note that Postfix is extremely configurable; the above flow is just a <em>typical</em> one.</p>
+
+<h2 id="categorization">Categorization</h2>
+
+<p>Incoming email is categorized by the Postfix MTA into one of the following classes:</p>
+
+<ul>
+  <li>local mail (the domain-part of the address matches an entry in list $mydestination)</li>
+  <li>virtual mail (the domain-part of the address matches one of the configured virtual-domains; see below)</li>
+  <li>relay mail (the domain-part of the address matches one of the configured relay-domains; see below)</li>
+  <li>default (the email is destined for some arbitrary mailserver in the internet)</li>
+</ul>
+
+<p>This categorization is done as the remote application submits the email to the local smtpd server, ie before an “ok, accepted” status code is returned for the email being transferred from remote system to this one.</p>
+
+<p>The local category is generally intended for the use-case where each valid email-account corresponds to a native unix-user-account on the mail-server itself. The virtual category is intended for the use-case where a single server holds email for multiple users who are somehow “registered” with that mailserver but not directly as native unix users (eg being registered in a database or a simple text-file). The relay category is for large companies with several cooperating email-servers (not relevant for this article) and “default” is for outgoing email generated by local users which is intended for some email server in the internet.</p>
+
+<p>The “relay” class here does not mean “relaying of email in general”; that is covered by the “default” class. The relay class is intended for cases where a large company may own multiple email-domains, and wishes to have a single front-end server for all domains which then delegates to separate back-end servers, or similar. The domains for which relaying are enabled must be explicitly configured. This is not relevant for a small “personal” email setup. Although “relay” is a class of email, any relayed email will be sent via the SMTP protocol to a remote server, so the smtp Mail Delivery Agent (“smtp”) is the standard transport for this class.</p>
+
+<p>When an email is categorized as local or virtual, a check is immediately made to see if the email-recipient actually exists; if not then the email is not accepted (ie an error is returned to the SMTP client that is trying to pass the email on). Local-type emails are accepted only when <code>local_recipient_maps</code> points to a table that includes the email address, and by default that is set to the <code>/etc/passwd</code> and <code>/etc/aliases</code> files; therefore emails categorized as “local” are rejected unless the recipient really does have a local account, or is listed as an alias. Virtual-type emails are processed similarly, but with different tables of users. Note that aliases are not actually <em>processed</em> at this time, ie the incoming email is not modified. User-validation cannot easily be performed for relay-type mail, and cannot be performed at all for default-type mail.</p>
+
+<p>The SMTPD server then consults a table to determine which <em>transport</em> (postfix service as defined in <code>master.cf</code>) should be used to process that email. For simple setups, this just means that one of the following variables is used to find a string which is then a key into the services-list defined in master.cf:</p>
+
+<ul>
+  <li>
+<code>local_transport</code> (default value: “local”)</li>
+  <li>
+<code>virtual_transport</code> (default value: “virtual”)</li>
+  <li>
+<code>relay_transport</code> (default value: “smtp”)</li>
+  <li>
+<code>default_transport</code> (default value: “smtp”)</li>
+</ul>
+
+<p>Finally, the SMTPD application stores the email in the “incoming queue” (which roughly means writing it as a file in a specific directory), labelled with the transport (postfix-service-name) that should be used to deliver it. And then a success-status-code is returned to the submitting application.</p>
+
+<p>Periodically the Postfix queue-manager process runs, and for each file in the “incoming queue” it:</p>
+
+<ul>
+  <li>gets the associated transport-service name from the queue-entry</li>
+  <li>looks up master.cf to find out which application to execute for that email (which should be under <code>/usr/lib/postfix/sbin</code>).</li>
+  <li>removes the email from the queue, starts a new process as specified in master.cf, and passes the email contents to that new process.</li>
+</ul>
+
+<p>Yes, this means the queue-manager starts a new process to deliver each email. The standard MDA applications provided by postfix are, however, fairly light-weight.</p>
+
+<p>Note that Postfix is extremely configurable: each processing step listed above is typically implemented in the Postfix SMTPD server as “execute the operations specified by configuration-variable <code>${..}</code>”, where that variable defines sensible default behaviour as described above, but which can be configured to perform fewer, extra, or even completely different operations at that processing stage. Some of the available options are described below in “Email Checks”.</p>
+
+<h2 id="email-checks">Email Checks</h2>
+
+<p>The checks that the smtpd server applies to email before it “accepts” (queues) it are defined in variables which have sensible defaults but can be customized:</p>
+
+<ul>
+  <li>
+<code>smtpd_client_restrictions</code> – a list of tests to apply after the remote application has identified itself with an EHLO message; these check whether the remote app is permitted to submit ANY email.</li>
+  <li>
+<code>smtpd_sender_restrictions</code> – a list of tests to apply to the “sender address” of the email; normally there is nothing here.</li>
+  <li>
+<code>smtpd_recipient_restrictions</code> – a list of tests to apply to the “recipient address” of the email</li>
+  <li>
+<code>smtpd_relay_restrictions</code> – another list of tests to apply to the “recipient address” of the email</li>
+</ul>
+
+<p>An email is only accepted if all tests pass. Each variable defines a list of tests which can return PERMIT, REJECT or DUNNO. As soon as a test returns PERMIT or REJECT, that is the result of the overall test. When a test returns DUNNO then the next item is tested.</p>
+
+<p>There is some overlap between <code>smtpd_recipient_restrictions</code> and <code>smtpd_relay_restrictions</code> - and in fact in earlier versions of Postfix they were just one variable. However having two vars means that the relay-restrictions tests can really focus on checking outbound email while recipient-restrictions can focus on testing inbound email.</p>
+
+<h2 id="inbound-vs-outbound">Inbound vs Outbound</h2>
+
+<p>Email coming from external email-servers (eg gmail) is transferred via ESMTP. Email coming from “known users” running email-client-apps on desktops is also transferred via ESMTP. It is possible to have a single smtpd server that handles both types of incoming data over port 25. However this can lead to lots of confusion, as what kinds of email are allowable are very different in the two cases. It is common practice to instead have two smtpd configurations on two different ports, with different settings in recipient-restrictions and relay-restrictions.</p>
+
+<h2 id="early-reject">Early Reject</h2>
+
+<p>If an email is not going to be delivered, then it is far better to reject it while the remote SMTP server is in the process of sending it, than accepting and queuing it only to later reject it. In that case, it must either be silently discarded or a “bounce” mail be sent; neither is desirable.</p>
+
+<p>Before-queue processing takes place while the originating SMTP server is still connected, and is submitting the email. A mail-rejection at this point is easier on all parties. If an email is accepted (ie success is returned to the originating SMTP server) and the email written to a local “incoming queue”, and then the email is analysed <em>later</em>, then that is “after-queue” processing. After-queue processing can be more efficient, but leads to problems if analysis comes to the conclusion that the email should not be delivered.</p>
+
+<h1 id="mail-delivery-agents-1">Mail Delivery Agents</h1>
+
+<p>It has already been discussed how the SMTPD server receives email from a remote system and writes it to a local “queue” (directory) together with the name of the postfix-service that should next be invoked. This service is almost always an application which is a Mail Delivery Agent (MDA) (a notable exception is spamassassin; see later).</p>
+
+<p>The master application eventually starts the queue-manager which passes each queued email to an instance of the specified postfix-service.</p>
+
+<h2 id="the-local-mda">The Local MDA</h2>
+
+<p>The <code>local</code> Mail Delivery Agent (ie the postfix program <code>/usr/lib/postfix/sbin/local</code>):</p>
+
+<ul>
+  <li>extracts the recipient-name from the base part of the email recipient address (eg “foo” from “foo@example.com”)</li>
+  <li>consults the aliases table (usually <code>/etc/aliases</code>), transforming recipient-address to canonical name</li>
+  <li>consults <code>/etc/passwd</code> to find a user’s home-directory and UID (triggering a “bounce email” if no entry found)</li>
+  <li>looks for user-specific <code>.forward</code> files</li>
+  <li>then looks for a special <code>mailbox_transport</code> variable, and if defined then delegates delivery to that service</li>
+  <li>else  writes the email to a file with name/location specified via configuration (eg <code>$HOME/.Maildir</code> for the recipient-name)</li>
+</ul>
+
+<p>It also has a few other features; see the man-page for the postfix <code>local</code> application for more information.</p>
+
+<p>The local MDA only supports one domain-name, eg “foo@example.com” and thus discards the domain-part and assumes that the name (“foo”) is sufficient to identify the recipient.</p>
+
+<p>In short, the local Mail Delivery Agent is intended for writing email to local mailbox-files where the recipient has a native unix login on the emailserver host.</p>
+
+<p>Local delivery can be used to pass emails on to other software (such as Dovecot) by taking advantage of the <code>mailbox_transport</code> option to point at an LMTP-server provided by the other software. The two systems can also simply be configured to read/write mailboxes in exactly the same format and disk-locations (though this can be tricky to keep in-sync).</p>
+
+<p>Note that for incoming emails of type=local, the existence of the recipient is checked twice: once by smtpd using its <code>local_recipient_maps</code> settings before the email is queued (in before-queue-processing), and then later by <code>local</code> when performing delivery (in after-queue-processing). By default these two applications use the same configuration-files to determine which users exist (<code>/etc/passwd</code> and <code>/etc/aliases</code>).</p>
+
+<p>The local delivery agent also has a config-option <code>luser_relay</code> which states where to forward an email if no user-account can be found for it. This doesn’t normally happen, as smtpd checks for the existence of users before accepting/queuing the email. However smtpd can be configured to NOT do that, in which case <code>luser_relay</code> takes effect. When <code>luser_relay</code> is not defined, and an email cannot be delivered, then a BOUNCE email is sent back to the original sender of the email to inform them of the problem. The <code>luser_relay</code> option has no effect when email using <code>mailbox_transport</code>.</p>
+
+<h2 id="the-virtual-mda">The Virtual MDA</h2>
+
+<p>The <code>virtual</code> Mail Delivery Agent uses a <code>virtual users file</code> rather than hard-wiring <code>/etc/passwd</code> as the source of information about valid email recipients. And rather than defaulting to writing emails into a mailbox relative to a user <code>$HOME</code> directory, mailboxes are stored into mailboxes under a “virtual base directory”.</p>
+
+<p>Unlike the local MDA, the virtual MDA supports multiple domain-names, eg “me@example1.com” and “me@example2.com”. All configuration therefore identifies users with the “full” address, not just the name-part, and the target mailbox into which emails are written is also domain-specific (so that the two addresses above are different mailboxes).</p>
+
+<p>In most other aspects, the virtual MDA is similar to the local MDA. This application also has a man-page with further information.</p>
+
+<p>In short, the virtual Mail Delivery Agent is intended for writing email to local mailbox-files where the recipient does not have a native unix login on the emailserver host.</p>
+
+<h2 id="the-smtp-mda">The SMTP MDA</h2>
+
+<p>Although the <code>smtp</code> application was categorised as a “mail transfer agent” above, it is also a kind of mail-delivery-agent. When invoked, it performs some DNS lookups to find the host-server for the recipient’s email address (eg for ‘recipient=you@example.com’ looks up the MX record for <code>example.com</code>) then opens a socket to port 25 on that server and passes the email contents over.</p>
+
+<p>In practice, the Postgres “smtp” program is probably just a trivial app which passes the email on to a longer-running local postfix process so that outgoing emails to the same target server can be batched and sent over one network-socket for efficiency. It is likely that the communications-channel from the trivial “smtp” app and its corresponding daemon is the socket at <code>/var/spool/postfix/private/smtp</code>. However that is an internal Postfix implementation detail that is not relevant for configuring Postfix.</p>
+
+<p>The smtp delivery agent is used to handle emails with class=default, ie those which are outgoing from the local server to somewhere on the internet. It is also used for emails with class=relay, ie outgoing from this email server to another tightly-coupled “partner server”, but relaying is a “big company” feature not relevant for this article about personal email servers.</p>
+
+<h2 id="the-lmtp-mda">The LMTP MDA</h2>
+
+<p>The <code>lmtp</code> Mail Delivery Agent is much simpler than <code>local</code> or even <code>virtual</code>: it just opens a specified socket (usually a filesystem-socket) on which an LMTP-daemon process is presumably listening, and exchanges a series of LMTP-protocol messages with that server to transfer the contents of the email to the LMTP server. This sounds a lot like SMTP, and in fact it is: LMTP is a subset of SMTP, with many of the security-related features taken out as an LMTP server expects its clients to be “trustworthy”. LMTP is therefore suitable only for delivery <em>within</em> an email-server or set of cooperating email servers. And LMTP servers are not expected to write their incoming email into an <em>inbound queue</em>, but instead into <em>a user mailbox</em>. Postfix provides an LMTP <em>client application</em> which acts as a “gateway” to any other applications that provide an LMTP server - such as the Dovecot IMAP server.</p>
+
+<p>And as it happens, the Postfix “smtp” program can be used as a client to talk to an lmtp server, so in <code>/etc/postfix/master.cf</code> the entry for servie “lmtp” also points at the smtp application.</p>
+
+<p>There are two ways to integrate Postfix with Dovecot: either use local or virtual transport, and very carefully ensure that the way that emails are written by postfix is exactly what/where dovecot expects - or use lmtp transport and let Dovecot handle writing of the emails to disk (much better).</p>
+
+<h2 id="the-pipe-mda">The Pipe MDA</h2>
+
+<p>The <code>pipe</code> application is a simple gateway to any arbitrary email-processing application. When the queue-manager finds an email waiting in a queue which is labelled with delivery-service “pipe” then it executes the pipe application with whichever arguments are defined in file <code>master.cf</code>; the pipe application then forks a new process as specified with its commandline arguments and writes the email contents to the STDIN of that child process.</p>
+
+<h1 id="debugging-a-postfix-installation">Debugging A Postfix Installation</h1>
+
+<p>All postfix applications support a “-v” commandline option which can simply be added in master.cf to obtain more information in <code>/var/log/mail.log</code>.</p>
+
+<p>See also <code>/var/log/mail.err</code>.</p>
+
+<p>The current postfix configuration can be seen with:</p>
+
+<ul>
+  <li><code>postconf</code></li>
+</ul>
+
+<p>The default configuration can be seen with:</p>
+
+<ul>
+  <li><code>postconf -d</code></li>
+</ul>
+
+<h1 id="postfix-and-spamassassin">Postfix and Spamassassin</h1>
+
+<p>Spamassassin is a completely different project than Postfix, but is very often used together with it. It is a very widely-used application and can be installed via apt (just like postfix and dovecot). It needs almost no configuration itself, but configuring Postfix to use it is not entirely trivial.</p>
+
+<p>Spamassassin evaluates the “spam factor” of an email so that other applications can then choose whether to discard it, move it to a spam-folder, or take other action. In a home-email-server scenario, it is probably best to just pass emails through Postfix even when they have a high spam-factor, and use dovecot-configuration or even email-client-configuration to push these to a spam-folder so they can be easily ignored or deleted by the end-user. Spam evaluation is purely heuristic in nature, and can sometimes go wrong so automatic deletion of emails is probably best avoided.</p>
+
+<p>Spamassassin comes as two applications: a server (spamd) and a client (spamc). The server runs continuously, while the client is started for each email to be evaluated. As a simple “email recipient” it is possible to install and use spamassassin to evaluate your emails after they have been delivered, ie to use spamassassin even when your email-provider does not. However it is more common for spamassassin to be integrated into the email-server so that all incoming (and possibly outgoing) emails are checked for spam.</p>
+
+<p>Spamassassin accepts a valid Email as input (via a pipe, smtp, lmtp, amavis, or other protocol), and returns the same email with some additional mime-headers which indicate the “spam score” for the email. The score is computed by running a set of configurable <em>rules</em> against the mail; there are official sources of rules which are regularly updated (daily or weekly).</p>
+
+<p>The email-server can potentially take action depending upon the email spam-score (eg just delete it); however it is more usual to deliver the email to the end user anyway, and for the email client application to place the email in a “spam folder” if the spamassassin spam-score is above a certain threshold and the sender is not in the user’s address-book.</p>
+
+<p>There are several ways to integrate spamassassin with Postfix, but the easiest way is to tell the smtpd server to use a specific service (defined in master.cf) as a “content filter”; content-filters are applications that accept an email and return a modified version of the input - which is exactly what spamassassin does. The service definition then just specifies that “spamc” should be started and the email written to it via STDIN (“pipe”).</p>
+
+<pre><code>spamassassin unix  -     n       n       -       -       pipe
+  user=debian-spamd
+  argv=/usr/bin/spamc -f
+  -e /usr/sbin/sendmail -oi -f ${sender} ${recipient}
+
+smtp      inet  n       -       y       -       5       smtpd
+  -o content_filter=spamassassin
+</code></pre>
+
+<p>Param <code>user</code> indicates which user-account to start the app as.</p>
+
+<p>Param <code>argv</code> = arguments to use when execing the service:</p>
+
+<ul>
+  <li>/usr/bin/spamc = binary to execute (spamc)</li>
+  <li>-e … = don’t write results to STDOUT but instead execute the specified app; everything after a “-e” belongs to the other program</li>
+</ul>
+
+<p>Note that because the service-entry in master.mf is executed by queue-manager once for every queued email, per-email variables like <code>$sender</code> and <code>$recipient</code> can be used in the commandline of the executed application.</p>
+
+<p>See the spamassassin <a href="https://spamassassin.apache.org/full/3.1.x/doc/spamc.html">spamc documentation</a> for more information.</p>
+
+<p>The spamassassin <code>spamd</code> application happens to be implemented in Perl; however that isn’t really relevant. The <code>spamc</code> application is native (fortunately, as it is started frequently on servers handling large volumes of email).</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/email-postfix-theory/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

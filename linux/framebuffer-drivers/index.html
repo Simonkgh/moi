@@ -1,0 +1,490 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Linux Framebuffer Drivers</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Linux Framebuffer Drivers</h1>
+    <aside>First published on: September 30, 2012</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="intro">Intro</h1>
+
+<p>The simplest code-path for displaying graphics on a Linux system is by using a “framebuffer driver”. This article describes how a Linux framebuffer driver works.</p>
+
+<p>The article here is for (beginner) kernel developers, or those just curious how linux graphics work. It might be a little interesting for linux sysadmins as background info. And a total waste of time for general users, or even userspace application developers.</p>
+
+<p>For information about the whole linux graphics stack, see <a href="/linux/graphics-stack">this article</a>.</p>
+
+<h1 id="accessing-graphics">Accessing Graphics</h1>
+
+<p>There are 3 different ways that graphics can be performed:</p>
+
+<ul>
+  <li>Using a kernel framebuffer driver</li>
+  <li>Using a kernel DRM driver</li>
+  <li>Mapping the card’s control registers into user-space (via <code>mmap()</code> calls on <code>/dev/mem</code>), and using user-space code to access the card (very complex)</li>
+</ul>
+
+<h1 id="what-is-a-framebuffer-driver">What is a Framebuffer Driver?</h1>
+
+<p>It is a Linux kernel driver which exposes a file <code>/dev/fb{N}</code> for a graphics card it is responsible for. Through that file, userspace apps can perform reads/writes to directly access the video card framebuffer - ie the pixel values being displayed on the screen. Via IOCTL calls on that file, other functionality can be accessed including:</p>
+
+<ul>
+  <li>setting the graphics mode (width, height, pixel-depth, etc)</li>
+  <li>passing bitmaps to be copied into video memory</li>
+  <li>passing coordinates of a rectangle to be filled with a specified colour</li>
+</ul>
+
+<p>The framebuffer interface does not offer much in the way of acceleration other than the bitblits and fills mentioned above.</p>
+
+<p>There is a fairly generic “vesafb” driver that is capable of controlling any graphics card compatible with the VESA standard. Linux also comes with dozens of card-specific framebuffer drivers that support products of specific manufacturers. On boot, Linux uses the PCI ID of a graphics card to load the most appropriate framebuffer driver, which in turn creates the <code>/dev/fb{n}</code> control file.</p>
+
+<h1 id="why-use-a-framebuffer-driver">Why Use a Framebuffer Driver?</h1>
+
+<p>Embedded systems use them because they often don’t have complex graphics requirements, want a small kernel, and don’t want an X server running in userspace. While X can use a framebuffer to display graphics, so can other simpler graphical libraries.</p>
+
+<p>For many graphics chips, there is a framebuffer driver available but no specific X driver, and no 3D driver.</p>
+
+<p>Graphics display during startup is also a candidate for a framebuffer driver.</p>
+
+<p>And linux text consoles can use a framebuffer driver to display text at nice resolutions (better than available via the BIOS) without otherwise actually wanting to display graphics.</p>
+
+<h1 id="framebuffers-and-drmkms">Framebuffers and DRM/KMS</h1>
+
+<p>The was originally a dedicated kernel framebuffer driver module for most cards; this driver would provide the <code>/dev/fb*</code> node used by userspace to interact with this driver.</p>
+
+<p>For many cards, there is now a “DRM” (Direct Rendering Manager) driver which provides “KMS” (Kernel Modesetting) functionality, supports the framebuffer interface, and optionally provides interfaces needed to do accelerated 3D rendering (GEM/TTM and other features). When the DRM kernel driver for a card is loaded, it provides the <code>/dev/fb*</code> node - ie opening that file creates a channel to the multi-purpose DRM driver rather than the single-purpose framebuffer driver; this makes coordination between multiple users of the graphics card (X servers, and direct framebuffer users such as virtual terminals) better. However in many cases the standalone framebuffer driver code is still maintained, for cases where the complexity of a DRM driver is not wanted (eg embedded systems).</p>
+
+<h1 id="the-x-server-and-the-framebuffer">The X Server and the Framebuffer</h1>
+
+<p>The X server predates the concept of a Linux kernel framebuffer driver, ie the original X usermode graphics drivers directly implement their own modesetting and access to the card framebuffer memory. In addition, the framebuffer interface is a Linux-specific concept while X runs on multiple operating systems.</p>
+
+<p>The userspace-based approach to accessing graphics was used by the X server for many decades; few other applications have tried this as (a) maintaining the necessary card-specific code is very complex, (b) the application must run as ‘root’ to have the right to use <code>/dev/mem</code>, and (c) integration with other users of the graphics card is tricky. As an example of (c), the boot console and virtual consoles (ie those accessed via <code>ctrl-alt-F{n}</code>) usually use a framebuffer driver. To solve (c), a tricky dance is needed to keep things working. The framebuffer driver configures graphics when it is loaded (shortly after boot) and provides the traditional text bootup messages (may be hidden when using a modern distro that uses something like Plymouth to display a pretty bootsplash screen by default). When X starts, its drivers save the current graphics state, then start directly poking the graphics control registers to set things up the way it wants. Obviously, if anything tries to then use the framebuffer driver then things will get ugly as X has changed settings “behind the back” of the framebuffer driver; however this normally doesn’t happen. If the user presses the magic <code>ctrl-alt-F{n}</code> sequence to switch to a text console, then X detects this and restores the original saved graphics state before allowing the (framebuffer-based) text console to run. When the user then presses <code>ctrl-alt-f{n}</code> to switch back to X, X needs to reinstate <em>its</em> graphics settings. These reinitialisations of the graphics card cause switching to be slow, and the screen to “flicker”.</p>
+
+<p>The X server on Linux now mostly uses user-space drivers which rely on a DRM driver that provides KMS; as the same driver also provides the framebuffer interface that driver has all the knowledge needed to correctly arbitrate between X and framebuffer users, and the above problem is resolved.  The same driver handles both APIs, and therefore knows what modes are selected regardless of which API was used. Switching between framebuffer-using applications (such as a text console) and X applications then does not need to reinitialise the graphics (as no sneaky changes occur behind the back of the driver).</p>
+
+<p>The X server can alternatively use a generic userspace driver that relies on the framebuffer API, rather than a card-specific driver. X then relies on the framebuffer to do modesettings, and does all rendering in software; it then passes the rendered screen to the graphics card using either write() or the bitblit IOCTL. In this mode, X can’t do much acceleration.</p>
+
+<h1 id="linux-driver-source">Linux Driver Source</h1>
+
+<p>Directory drivers/video holds a implementations of the framebuffer interface for a <em>truckload</em> of different chips. Among them are some generic drivers:</p>
+
+<ul>
+  <li>“vesafb.c” can drive any VESA2.x compliant chip</li>
+  <li>“vga16.fb” can drive any VGA-compliant chip</li>
+  <li>“xen-fbfront” can be used by virtual machines running on Xen hypervisor; presumably framebuffer graphics calls
+get routed to the Xen hypervisor which then allows the administrator to display that appropriately.</li>
+</ul>
+
+<p>There are also drivers for playstation3 graphics, atari onboard graphics, cirrus, sparc, trident, etc.</p>
+
+<p>The vesa driver is one of the simplest drivers, and below we will walk through some of the internal implementation.</p>
+
+<h2 id="vesafb">VesaFB</h2>
+
+<p>File drivers/video/vesafb declares <code>module_init(vesafb_init)</code>, ie an init function which is executed on module load. This:</p>
+
+<ul>
+  <li>
+    <p>Parses any driver options provided by <code>mod_probe</code></p>
+  </li>
+  <li>
+    <p>Invokes <code>platform_probe</code> which calls back into <code>vesafb_probe(platform_device)</code>. The “platform” part is because VESA is accessed via the BIOS; a framebuffer driver for a PCI card would instead register itself with the PCI framework, which then calls back into the device’s probe function passing a <code>struct pci_dev</code>.</p>
+  </li>
+  <li>
+    <p>Invokes request_mem_region which checks to see whether any other driver has already reserved the specified <em>hardware</em> memory address range (fixed in the case of VESA, more dynamic for PCI); if not, then the requested range is registered as “reserved”. See macro <code>include/linux.ioport.h:request_mem_region</code> -&gt; <code>kernel/resource.c:__request_region</code> -&gt; <code>__request_resource</code>.</p>
+  </li>
+  <li>
+    <p>allocates a <code>framebuffer_info</code> structure (see <code>fbsysfs:framebuffer_alloc</code>) followed by N bytes of buffer for the color palette values (<code>info-&gt;par</code>).</p>
+  </li>
+  <li>
+    <p>Invokes <code>request_region</code> to try to reserve the historical range of I/O address ports for VESA. The driver doesn’t actually care if it fails, as it doesn’t use them. However it’s elegant to mark them, as this info appears in the sysfs structure representing IO ports, and traditionally VESA has this specific range.</p>
+  </li>
+  <li>
+    <p>Optionally sets up MTRRs (Memory Type Range Registers) to mark the <em>hardware address range</em> region (reserved above  by <code>request_mem_region</code>) as having the appropriate cacheing behaviour. Appears to be somewhat card or system dependent, so driver parameters are available to tweak it. Defaults to “write-through”, ie the slowest but safest setting for volatile memory accesses.</p>
+  </li>
+  <li>
+    <p>uses ioremap function to create a kernel virtual address mapping for the <em>hardware</em> address of the graphics framebuffer (with appropriate caching flags set).</p>
+  </li>
+  <li>
+    <p>stores an fbops (“framebuffer operations”) structure into the <code>framebuffer_info</code>, containing pointers to callback functions. The callbacks are used from the generic framebuffer support code; in particular, many of these get invoked as the result of a user IOCTL call. Callbacks include:</p>
+
+    <ul>
+      <li>imageblit  // accelerate copying images from userspace to graphics framebuffer</li>
+      <li>copyarea   // copy data around within the existing framebuffer</li>
+      <li>fillrect   // fill a rectangular area in the framebuffer with a specific colour (eg blank the screen!)</li>
+    </ul>
+  </li>
+  <li>
+    <p>calls infrastructure function <code>fbmem.c:register_framebuffer()</code> to register the /dev/fb{n} file, hook up write and IOCTL methods etc.</p>
+  </li>
+</ul>
+
+<h2 id="fbmem-module">FBMem module</h2>
+
+<p>Several files in this directory (fbmem.c, fb_sys_fops.c, fbsysfs.c) are common code that are compiled into their own kernel module. This module doesn’t expose functionality to the user itself, just acts as “library code” for other drivers. Although it is a module, it is usually statically linked into the kernel, and therefore does not appear in the “modules.dep” dependency list for the vesafb.ko module even though vesafb.c invokes functions exported from these files via EXPORT_SYMBOL macros.</p>
+
+<h3 id="module-init">Module Init</h3>
+
+<p>File fbmem has <code>module_init(fbmem_init)</code> which:</p>
+
+<ul>
+  <li>
+    <p>defines an array of registered framebuffers (<code>registered_fb</code>) - initially empty.</p>
+  </li>
+  <li>
+    <p>registers file /proc/fb - which can be read to determine what framebuffer is currently “active”</p>
+  </li>
+  <li>reserves major device# FB_MAJOR for later use, but doesn’t create any /dev nodes yet. It also associates a file_operations structure with that major device#; the major callbacks are:
+    <ul>
+      <li>syscall open –&gt; fb_open</li>
+      <li>syscall ioctl –&gt; fb_ioctl</li>
+      <li>syscall mmap –&gt; fb_mmap</li>
+      <li>syscall write –&gt; fb_write</li>
+      <li>syscall read –&gt; fb_read</li>
+    </ul>
+  </li>
+  <li>uses class_create to create sysfs entry /sys/class/graphics. When drivers call framebuffer_register, then a child sysfs node is created which automatically creates a symlink under /sys/class/graphics.</li>
+</ul>
+
+<p>The FB_MAJOR major device number is used when creating /dev/fb{n} nodes later in calls to the <code>register_framebuffer()</code> function; those nodes then inherit the settings of the parent major device - ie when the user performs open/read/write/mmap/ioctl on the <code>/dev/fb{n}</code> node, the handler functions for the major device# are invoked. They then delegate to the callback functions in the <code>framebuffer_info-&gt;fbops</code> structure if defined, otherwise perform the default behaviour.</p>
+
+<p>The default <code>fb_ioctl</code> function allows the user to:</p>
+
+<ul>
+  <li>get the current graphics mode settings (screen resolution etc)  [FBIOGET_VSCREENINFO]</li>
+  <li>request the current graphics mode settings be changed   [FBIOPUT_VSCREENINFO]</li>
+  <li>read/write the color palette [FBIOGETCMAP/FBIOPUTCMAP]</li>
+  <li>read/modify which virtual consoles are on which framebuffer devices [FBIOGET_CON2FBMAP/FBIOPUT_CON2FBMAP]</li>
+</ul>
+
+<p>The default <code>fb_mmap</code> function uses io_remap_pfn_range to map the graphics framebuffer into the virtual memory space of the calling userspace application, and returns the userspace address at which the data has been mapped.  The userspace app can then use normal reads/writes to access the graphics framebuffer.</p>
+
+<p>The default <code>fb_write</code> function just copies data from userspace to the graphics framebuffer (ie assumes caller has the layout correct). This implementation uses an intermediate buffer, repeatedly copying a page worth of data from userspace into the buffer, then from there to the real framebuffer using <code>include/linux/fb.h:fb_memcpy_tofb</code> which maps to memcpy_io (for x86). Many drivers override this operation to instead use common function <code>fb_sys_fops.c:fb_sys_write</code> which does the copy in one go.</p>
+
+<p>The default <code>fb_read</code> function just copies data from the graphics framebuffer to userspace.</p>
+
+<p>So in short, for video devices which have a fairly normal framebuffer layout, userspace just uses <code>FBIOGET_VSCREENINFO</code> to figure out what the layout is, then generates an appropriate image and does standard file-writes against the <code>/dev/fd{N}</code> file. These map to direct copies into the videocard memory. Alternatively, userspace can use mmap() to get access to the framebuffer addesses and then just memcpy its prepared pixel data into the address range returned by the mmap call. For video devices with odd IO-mappings or odd framebuffer layouts, the <code>fbops-&gt;fb_write</code> callback can be overridden to manually handle userspace-&gt;videocard data translation; presumably such drivers provide a custom mmap callback that simply rejects mmap() calls (return an error).</p>
+
+<p>Modesetting for framebuffer devices is done via an IOCTL of type <code>FBIOPUT_VSCREENINFO</code>. As noted above, “KMS” drivers include framebuffer functionality.</p>
+
+<p>The “fbset” commandline tool uses these IOCTLs to display/update the current graphics mode. Note that the “randr” tool is a front-end for X, not the framebuffer - it just sends a network message to X, which then asks its current driver to set the selected mode.</p>
+
+<p>The strucures and constants used in IOCTL calls from userspace are defined in <code>include/linux/fb.h</code>.</p>
+
+<p>The core filebuffer code also broadcasts “notifications” when certain significant changes occur to a framebuffer; other code can register as a listener for these events. In particular, this is used by the framebuffer-console code (described later).</p>
+
+<h3 id="the-logo">The Logo</h3>
+
+<p>File fbmem.c also has quite a lot of code for displaying the penguin “logo” on the boot console (which is usually a framebuffer console). The logo is normally embedded in the kernel image. Code exists to show muliple copies of it (which indicate #CPUs), and to show it rotated 90 or 180 degrees.</p>
+
+<p>A remarkable amount of code is dedicated to this feature…</p>
+
+<h3 id="registering-a-framebuffer">Registering a Framebuffer</h3>
+
+<p>During initialisation, a framebuffer driver (eg vesafb) will call <code>fbmem.c:register_framebuffer</code>. This:</p>
+
+<ul>
+  <li>
+    <p>creates <code>/dev/fb{N}</code> using FB_MAJOR (as registered by <code>fbmem_init</code>). This device therefore inherits
+the <code>file_operations</code> callbacks defined for the major#.</p>
+  </li>
+  <li>
+    <p>stores a pointer to the registered driver in the <code>registered_fb</code> array (and increments <code>num_registered_fb</code>)</p>
+  </li>
+  <li>
+    <p>allocates an 8bk block of ram for “pixmap”</p>
+  </li>
+  <li>
+    <p>calls <code>fb_init_device</code> to create a sysfs entry with lots of control functions..</p>
+  </li>
+</ul>
+
+<h2 id="file-fbsysfops">File fb_sys_fops</h2>
+
+<p>This file provides convenient implementations for read/write syscalls on the <code>/dev/fb{N}</code> operation, which simply
+copies bytes between userspace buffers and the memory-mapped video buffer set up by the framebuffer driver.
+It presumably assumes that the user data is in the appropriate format already.</p>
+
+<p>As noted above, there is a default implementation of read/write/etc in file fbmem.c. These alternate implementations can be used by a driver simply by setting the appropriate member in its ops structure (which the fbmem code checks before calling its default).</p>
+
+<h2 id="file-cfbimgblt">File cfbimgblt</h2>
+
+<p>This file provides implemenations for copying images from userspace to video memory, with optional
+format changes (eg colorspace). Takes an <code>fb_image</code> parameter as the source.</p>
+
+<h1 id="sysfs-interface">Sysfs interface</h1>
+
+<p><code>fb_init_device</code> (fbsysfs.c) creates an entry in sysfs, with control files for things like:</p>
+
+<ul>
+  <li>
+<code>show_bpp</code>/<code>store_bpp</code>
+</li>
+  <li>
+<code>show_blank</code>/<code>store_blank</code>
+</li>
+  <li>
+<code>show_console</code>/<code>store_console</code>
+</li>
+  <li>
+<code>show_cursor</code>/<code>store_cursor</code>
+</li>
+  <li>
+<code>show_mode</code>/<code>store_mode</code>
+</li>
+  <li>
+<code>show_modes</code>/<code>store_modes</code>
+</li>
+  <li>
+<code>show_pan</code>/<code>store_pan</code>
+</li>
+  <li>
+<code>show_virtual</code>/<code>store_virtual</code>
+</li>
+  <li><code>show_name, show_stride</code></li>
+  <li>
+<code>show_rotate</code>/<code>store_rotate</code> (screen rotation, eg 90%)</li>
+  <li>
+<code>show_fbstate</code>/<code>store_fbstate</code>
+</li>
+  <li>
+<code>show_bl_curve</code>/<code>store_bl_curve</code>  (backlight for LED screens)</li>
+</ul>
+
+<p>The other functions in this file handle reads or writes of those sysfs files.</p>
+
+<h1 id="the-framebuffer-console-driver">The Framebuffer Console Driver</h1>
+
+<p>Linux has the concept of a “tty driver” for text input and output. The implementation of various TTY devices can be found in drivers/tty. In particular, drivers/tty/vt defines the concept of “virtual terminals” : having multiple concurrent sessions on a single computer, and switching between them using magic key sequences.</p>
+
+<p>The interface that a kernel module must implement in order to register itself as a TTY is defined in <code>include/linux/console.h:struct consw</code>.</p>
+
+<p>File drivers/video/console/fbcon.c implements a “text console interface” API on top of a framebuffer device. Actually, it supports up to <code>NR_CONSOLES</code> independent consoles which might be mapped to the same or different framebuffer devices. In effect, it implements the “consw” interface defined for <code>/dev/tty{N}</code>, and uses a framebuffer device as the output medium. Type “struct consw” is declared in <code>include/linux/console.h</code> and defines an API like:</p>
+
+<ul>
+  <li>
+<code>con_init(..)</code>    // initialise a caller-provided datastructure as console#N</li>
+  <li>
+<code>con_putc(..)</code>    // write a single character at the current cursor location</li>
+  <li>
+<code>con_scroll(..)</code>  // scroll a section of the screen by N lines</li>
+</ul>
+
+<p>It creates a sysfs entry for fbcon, and adds sysfs entries so user can query and update some graphical output stuff like screen rotation or cursor size. User writes to these sysfs files are equivalent to IOCTL calls on the framebuffer device node itself - but more convenient. There is only one entry for all the fbcon consoles; properties are bound to the “currently active” fbcon console.</p>
+
+<p>Useful sysfs nodes include:</p>
+
+<ul>
+  <li>/sys/devices/graphics/fbcon</li>
+  <li>/sys/devices/virtual/graphics/fbcon</li>
+</ul>
+
+<p>The fbcon module attaches itself as a <em>listener</em> on framebuffer events, in order to make sure it keeps “in sync” with changes to framebuffers, eg resolution changes.</p>
+
+<p>Framebuffer “instances” and console “instances” have only a loose binding; there is effectively a matrix that specifies which console is to be displayed on which framebuffer. Array con2fbmap holds this data, ie indicates for console#N which framebuffer# it is attached to, eg <code>con2fbmap[3]=1</code> means that console#3 is on framebuffer#1. A value of -1 means “not attached to any framebuffer”. On start, the first-registered framebuffer is considered the “primary”, and all possible consoles (<code>NR_CONSOLES</code>) are mapped to this framebuffer. Of course, most machines only <em>have</em> one framebuffer (actually, max# of consoles can be reduced via module parameter “vc” to less than <code>NR_CONSOLES</code>).</p>
+
+<p>It is the TTY system that creates the <code>/dev/tty{n}</code> files, not fbcon. The fbcon code then “takes over” responsibility for consoles using function <code>drivers/tty/vt/vt.c:take_over_console</code>. Any further IOCTL operations on this file are then redirected to the “struct consw” hooks defined by fbcon.</p>
+
+<h1 id="userspace-tools">Userspace Tools</h1>
+
+<p>The <code>fbset</code> command can be used to change graphics modes via IOCTL operation FBIOPUT_VSCREENINFO on /dev/fb{n} files.</p>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>The memory buffer that the graphics card scans repeatedly in order to generate signals to the display (the framebuffer) is also known as the “scan out buffer”.</p>
+
+<h1 id="references">References</h1>
+
+<p>See also:</p>
+
+<ul>
+  <li><a href="http://people.freedesktop.org/~marcheu/linuxgraphicsdrivers.pdf">http://people.freedesktop.org/~marcheu/linuxgraphicsdrivers.pdf</a></li>
+  <li>Linux Device Drivers, Third Edition (Corbet, Rubini, Kroah-Hartman) <a href="http://lwn.net/Kernel/LDD3/">http://lwn.net/Kernel/LDD3/</a>
+</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/framebuffer-drivers/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

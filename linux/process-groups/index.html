@@ -1,0 +1,468 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Process Groups</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Process Groups</h1>
+    <aside>First published on: November 3, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="overview">Overview</h1>
+
+<p>One of the fundamental duties of an operating-system kernel is to manage <em>processes</em>, ie executing applications. There are a few interesting features about processes in Linux…</p>
+
+<h1 id="memory-namespaces-and-open-files">Memory Namespaces and Open Files</h1>
+
+<p>The general definition of a <em>process</em> is a set of one or more <em>threads of execution</em> which share a <em>set of resources</em>. The most important resources are a virtual-memory address-space, and a set of open file-descriptors - though a Linux file-descriptor can actually be a handle to many things such as a source-of-events (eg inotify), or an open socket, in addition to simple data-files.</p>
+
+<p>A thread is basically a datastructure with at least:</p>
+
+<ul>
+  <li>the address of the next instruction to be executed (ie a program-counter),</li>
+  <li>values for other CPU registers, and</li>
+  <li>a call-stack (indicating how it got to the instruction being executed, along with local-variables allocated along the way)</li>
+</ul>
+
+<p>A kernel can “run” a thread at any time by loading the thread state into a CPU. In particular, the program-counter value then causes the appropriate instructions to be executed. A kernel can “suspend” a thread by saving the current state of a CPU into the thread’s datastructure - and then “run” some other thread instead. This is done by a kernel component called the “scheduler”.</p>
+
+<p>Multiple threads associated with the same <em>process</em> see the same memory addresses and thus can “race” with each other when reading/writing those memory locations. It is the responsibility of the programmer to use <em>synchronization primitives</em> to avoid problems.</p>
+
+<p>It is technically possible to share blocks of memory between threads in different <em>processes</em>, but it is not the default. It is also possible to share other resources such as <em>file handles</em> with other processes, and the linux kernel (and Posix standard) provides several mechanisms to do this. A process which starts a new “child” process (via the “fork”, “clone” or related systemcall) can share <em>some</em> resources with the child, but unrelated processes share nothing by default.</p>
+
+<h1 id="threads-and-processes">Threads and Processes</h1>
+
+<p>On Linux, every “schedulable entity” (aka task or thread) is represented via a <a href="http://lxr.free-electrons.com/source/include/linux/sched.h#L1343">struct task_struct</a> within the kernel, and each <code>task_struct</code> has a unique integer id which I will call the “task-id” (see later). Every <code>task_struct</code> also has an integer field (which I will call the “process-id”) which groups (labels) threads belonging to the same “process”. Systemcall <code>clone</code> creates a new <code>task_struct</code> with its unique task-id; one of the flags this call supports is CLONE_THREAD:</p>
+
+<ul>
+  <li>when CLONE_THREAD is set then the new task_struct has process-id=parent.process-id ie is labelled as “belonging to the same process” as the thread that created it.</li>
+  <li>when CLONE_THREAD is not set, then the new task_struct has process-id=task-id, ie is labelled as being the “primary thread” in a new process.</li>
+</ul>
+
+<p>The “fork” and “vfork” systemcalls are simply wrappers around <code>clone</code> which always set CLONE_THREAD=0, ie always label the new “schedulable entity” as being a new process.</p>
+
+<p>Confusingly (for historical reasons), the <em>kernel sourcecode</em> uses name “pid” (and datatype “pid_t”) for the <em>unique task-id</em> (ie unique <code>task_struct</code> identifier) and name “tgid” (thread-group-id) for the “process-id” while the <em><code>ps</code> command</em> uses the name “tid” for the “task-id” and “pid” for the “process-id”. This can be seen by comparing the output of <code>ps</code> with the information in <code>/proc/{N}/status</code> for any non-primary thread in a multi-threaded process. The status-file shows <code>task_struct.pid</code> (ie the unique task_struct id) as “Pid:” and <code>task_struct.tgid</code> as “Tgid:”, while the “ps” command will (by default) output the “Tgid” value under column-heading “PID”. Actually, the “ps” command has the more sensible naming.</p>
+
+<p>Note that a new task (task_struct) has an integer field holding the <em>current thread group id</em> (ie current process) and the <em>parent thread group id</em> (ie parent process), but not the parent <em>thread id (tid)</em>. It is interesting that information on exactly which thread created the current thread/task is simply not available - but it is actually irrelevant; only the identity of the <em>thread groups</em> (current and parent) are actually needed.</p>
+
+<p>The <code>clone</code> systemcall has many other interesting flags that control which resources will be shared/isolated between the caller of clone (the “older” schedulable entity) and the new one created by the call to <code>clone</code>. This article doesn’t address any of these flags except the ones related to thread-group/parent-threadgroup/session/process-group/controlling-tty. See the man-page for the clone systemcall for full details of other flags.</p>
+
+<p>It is interesting to look at the processes on a running Linux system using command</p>
+
+<pre><code>ps -e -L -o tid,pid,ppid,state,euid,egid,sid,pgid,tty,tpgid,command
+</code></pre>
+
+<p>where:</p>
+
+<ul>
+  <li>-e means “every process” (ie including those associated with other ttys than the one issuing the command)</li>
+  <li>-L means include “schedulable entities” where tid != pid, ie include non-primary threads</li>
+  <li>
+    <p>-o is followed by a list of information to print for each process</p>
+  </li>
+  <li>tid = the “schedulable entity” id, aka task-id or thread-id</li>
+  <li>pid = the process-id of the process (aka tgid or threadgroup-id)</li>
+  <li>ppid = the parent process id (aka parent threadgroup-id, aka tid of “primary thread” in parent thread-group)</li>
+  <li>state = the state of the process (eg running, stopped)</li>
+  <li>euid = the effective user-id associated with this process; column “ename” can be used to get the text representation instead of the number</li>
+  <li>egid = the effective primary user-group associated with this process (there can also be secondary-groups); column “egroup” can be used to get the text representation instead of the number</li>
+  <li>sid = session-id, ie the tid of the session leader</li>
+  <li>pgid = process group id, equivalent to the tid of the “process group leader” (note: related to session-management, not directly related to concept of parent process)</li>
+  <li>tty = controlling tty (terminal) name</li>
+  <li>tname = controlling tty (terminal) name</li>
+  <li>tpgid = id of the foreground process on the associated tty (tty-pgid), or -1 if there is no associated tty</li>
+  <li>command = the commandline of the process</li>
+</ul>
+
+<p>Entries in the <code>/proc</code> filesystem provide a direct view of the “schedulable entities” tracked by the kernel scheduler using the task_struct datastructure. The “ps” command simply provides a nicely formatted/filtered view of this information; directory <code>/proc/{N}</code> provides access to information about tid=N, eg:</p>
+
+<ul>
+  <li>file <code>/proc/{N}/status</code> shows a subset of of the info from the corresponding kernel task_struct (sadly, not including sid/pgid/tty/tpgid)</li>
+  <li>file <code>/proc/{N}/stat</code> also shows information from task_struct (including sid/pgid/tty/tpgid), but in less readable format</li>
+  <li>file <code>/proc/{N}/statm</code> shows some memory-consumption-related info about the task: size/resident/shared/text/0/data/0</li>
+  <li>file <code>/proc/{N}/cmdline</code> shows the commandline associated with the task, ie <code>argv[0]</code>
+</li>
+  <li>dir <code>/proc/{N}/task</code> shows info about all other tasks with the same pid (ie all threads in the same thread-group)</li>
+</ul>
+
+<p>By default, “ps” omits entries representing <em>secondary threads</em> of a process, ie entries where tid!=pid. Omitting threads is normally desirable, but for this example it is interesting to include it (via option “-L”). The Xorg X server is an example of a process that has multiple threads, as are NetworkManager, rsyslogd, gdm3.</p>
+
+<p>The kernel <code>task_struct</code> datastructure includes various fields to mark entries as belonging to various different “groups”. Usually, membership of such a group is defined by setting a task_struct field to the tid of the task_struct entry that is the “leader” (primary or first member) of the group.</p>
+
+<p>For more information, see the source-code for debian package <code>procfs</code>, in particular file <code>proc/readproc.[ch]</code>. The kernel code responsible for providing the status/stat/statm files can be found in <code>fs/proc</code>; see functions proc_pid_status(file “<code>status</code>”), proc_pid_statm (file “<code>statm</code>”), proc_tgid_stat (file “<code>/proc/{N}/stat</code>”), proc_tid_stat(file “<code>/proc/{N}/task/{N}/stat</code>”).</p>
+
+<h2 id="grouping-entities">Grouping Entities</h2>
+
+<p>The Linux kernel allows schedulable entities to be <em>grouped</em> in various ways. The general approach taken by Linux is to add a simple integer field to the task_struct to specify “group membership”; all entities with the same integer value in that field “belong to the same group”.  The actual integer value used is usually the TID of the “primary thread” in the group.</p>
+
+<p>The concept of a <em>process</em> has already been discussed above, and follows exactly this design: datastructure task_struct has an integer field named “tgid” which holds the TID of the “primary thread” in the thread-group. The primary thread has its own TID in this field (tgid=tid), secondary threads have their tgid set to the TID of the primary thread.</p>
+
+<h2 id="sessions-and-process-groups">Sessions and Process Groups</h2>
+
+<p>This section discusses the meaning of the sid/pgid/tty/tname/tpgid fields from the ps output above.</p>
+
+<p>When the primary way of interacting with a computer was via a text console, it was important to be able to switch between logical “jobs”, ie from within a “shell”, to suspend and later resume a process or set of processes. It is still moderately important, although not as critical as it once was, given graphical displays where multiple terminal windows (or tabs) can be open concurrently.</p>
+
+<p>To support “job management”, two concepts were invented: sessions and process-groups (aka jobs), and support was added to the kernel for these. Despite their “primary driving use-case” for enhancing interactive text terminal management, these groups are implemented in a fairly generic way and so can potentially be used for other purposes.</p>
+
+<p>The typical meaning of a “session” is a set of process-groups associated with the same <em>terminal</em> (tty) of which only <em>one</em> is active (“foreground”) at a time. A process-group is typically used to link a set of (one or more) processes which “belong together” in the sense that they should all be active (or suspended) at the same time. The first-created process-group within a session is the “leader”; this is the one that becomes “active” when the currently-active one is suspended.</p>
+
+<p>As an example:</p>
+
+<ul>
+  <li>a text-mode shell is started;</li>
+  <li>the user types “<code>yes | more</code>” to tell the shell to start two “cooperating” child processes (aka a “job”)</li>
+  <li>the user  types “<code>ctrl-z</code>” to “suspend the current job” (making the “leader group” active)</li>
+  <li>the user types “bg” to allow the two processes in the suspended job to <em>resume execution</em> as long as they don’t try to read from the terminal</li>
+  <li>the user types “top” to tell the shell to start another process</li>
+  <li>the user types “q” to tell the “top” process to exit</li>
+  <li>the user types “exit” to tell the shell to exit</li>
+</ul>
+
+<p>This example will look something like this on the console:</p>
+
+<pre><code>$ PS1="&gt;&gt;" sh
+&gt;&gt; yes | more
+   ...
+  ^Z  # ctrl-z -- displays "Stopped(SIGTSTP)"
+&gt;&gt; bg -- displays "Stopped(SIGTTOU)"
+&gt;&gt; top
+   q  # terminate top
+&gt;&gt; exit
+$
+</code></pre>
+
+<p>This example requires the shell and kernel to perform a number of operations. In overview, the steps are:</p>
+
+<ul>
+  <li>create session</li>
+  <li>bind session to a controlling terminal</li>
+  <li>create a process-group (in that session) and start new processes in it</li>
+  <li>handle ctrl-z by suspending one process-group and handing control of the terminal back to the shell</li>
+  <li>handle “bg” by resuming a process-group while preventing it from writing to the controlling terminal (see the SIGTTOU message)</li>
+  <li>create another process-group (in same session) and start new process (“top”) in it</li>
+</ul>
+
+<p>The actual steps in more detail are as follows..</p>
+
+<p>The shell process creates a new session when it starts, with itself in that session. It also creates a new process-group and again places itself in that group.</p>
+
+<p>The shell then opens node “<code>/dev/ttyN</code>”; the kernel-mode tty-driver updates the task_struct to mark the session associated with the calling process as being “controlled” by the specified tty. A file-descriptor is then returned as usual.</p>
+
+<p>The shell performs a blocking read of its STDIN filedescriptor, ie the tty file-descriptor opened above. The tty-driver checks whether the calling process is in a session (it is) and if so whether it is in the “active group” (it is); the read is therefore <em>valid</em>. However there is currently no data to read, so the calling thread is placed on a list of threads to <em>wake</em> when data is available, and then marked as “blocked”.</p>
+
+<p>The string “yes|more” from the keyboard is processed by the tty-driver; it wakes all threads blocked on input (the shell), and the shell then receives the entered text (the read call returns with data).</p>
+
+<p>The shell creates a new process-group within the same current session, and marks this new group as the “active process group” (aka “foreground group”) for the session. The shell then creates the pipe, and spawns the “yes” and “more” processes within the new process-group. The processes start running.</p>
+
+<p>The shell then goes back to read from STDIN. This time, the tty-driver sees that it <em>is</em> in a session, but is <em>not</em> in the session’s active (foreground) process group - so the tty driver calls into the scheduler to queue a SIGTTIN for the shell, which in turn causes the calling thread (the shell) to be marked as “not runnable”.</p>
+
+<p>The user types <code>ctrl-z</code> which is handled by the tty-driver. The driver calls into the kernel scheduler to queue a SIGTSTP for all processes in the currently active process-group of the session “controlled” by that specific tty; the yes and more processes will be marked as “not runnable”. The driver then finds the <em>leader process group</em> for the tty session, marks it as the “active” (foreground) process group in that session and tells the scheduler to resume all suspended threads in that process group. The shell is now once again ready to receive input from the tty as soon as keystrokes are entered.</p>
+
+<p>The user types “bg” which causes the shell’s read operation to return that data. The shell tells the kernel to unblock all threads in the relevant process-group (sends a SIGCONT), allowing yes/more to run again (ie make them eligible for CPU time). However their process-group is not marked as active; if any process in that group should try to read from the tty then the tty driver would simply tell the scheduler to suspend it again. This is basically the definition of a “background” process. Optionally, this auto-suspend behaviour can also be triggered when a process <em>writes</em> to a tty - ie the shell can choose whether “background” processes should be able to scribble over the screen or not. The fact that message “Stopped(SIGTTOU)” is shown in the example above indicates that exactly this is happening - the “more” process tried to write to the terminal, the tty-driver queued a SIGTTOU for it, the default libc signal-handler caught the signal and wrote out the message then let the kernel suspend the process.</p>
+
+<p>Although the yes/more “job” has been allowed to resume, the “active group” is still the one including the shell, so when it tries again to read STDIN it is permitted (and blocks until data is present). When “top” is entered, the read returns with that data. The shell creates a new process-group within the same session, marks it as “active” and spawns the “top” process within that group. Top periodically polls for keyboard input (permitted, as it is in the active group) while the shell’s call to <em>read</em> causes it to be suspended (not in the active group).</p>
+
+<p>There are now three process-groups in one session (shell, yes|more, top); one of these groups has multiple processes in it. The active group is the one containing “top”; no process in any other group within the same session can successfully read (it would be blocked if it tries, as the shell currently is). Thus when “q” is entered, it is the <em>top</em> process that sees it, and then exits.</p>
+
+<p>As the terminating process had a session and was the last process in the active process-group, the scheduler makes the “leader process group” active (the shell).</p>
+
+<p>And so on…</p>
+
+<p>The “Stopped(SIGTSTP)” and “Stopped(SIGTTOU)” messages are generated by the default <em>signal handlers</em> provided by libc. If the child registers its own handlers for these signals then the messages will not be output.</p>
+
+<h2 id="creating-new-sessions">Creating New Sessions</h2>
+
+<p>A child process inherits the sessionid of its parent.  The systemcall <a href="http://linux.die.net/man/2/setsid">setsid</a> allows any process to become the “leader” of a new session, ie sets sid=tid.</p>
+
+<p>The “session” feature can also be used to group sets of processes together for any desired purpose. Desktop environments (eg Gnome) typically include a “session manager” which is the first thing started, and it then starts a bunch of “core” processes such as a “per-session dbus instance”, a “per-session pulse-audio instance” and similar items. However because any process can reset its session-id, <em>ensuring</em> that all child-processes of a particular parent can be found regardless of what they do is best achieved via the <em>control group</em> subsystem instead (a much more modern and currently Linux-only feature).</p>
+
+<p>As usual with “groups” of processes, the group identifier (sid) is equal to the TID of the “primary” schedulable entity in the group, ie the setsid call updates the caller’s task_struct so that sid=tid.</p>
+
+<p>TODO: in a multi-threaded process, when one thread calls setsid does that affect all threads in the process? I expect it does.. though doing that is probably poor style (better to call setsid early after fork before spawning threads).</p>
+
+<h2 id="creating-new-process-groups">Creating New Process Groups</h2>
+
+<p>The pgid field (ie forming groups of processes) is usually used for a “pipeline” of processes, ie a sequence of processes joined via pipes such as “<code>ls | grep foo | more</code>”. In this case, the first process is normally the “group leader” and each of these processes has pgid = tid of the group-leader process. Note that these processes are normally “siblings” (ie all are children of a common parent, usually a shell).</p>
+
+<p>Systemcall <code>setpgid</code> can be used to create a new group, ie update the task_struct of the calls so that tpgid=tid. Interestingly (and unlike setsid), this call can also be used to move an existing process from its current process-group into another existing process-group (though the target group must be within the same session). Also, systemcall <code>setsid</code> automatically creates a new process-group. See the man-pages for more details.</p>
+
+<p>The first-created process within a process-group is the group “leader”.</p>
+
+<p>A shell must keep track of all the process-groups it creates within its own session, and the command “<code>jobs</code>” will output one line per <em>process group</em>.</p>
+
+<h2 id="tracking-the-foreground-group">Tracking the Foreground Group</h2>
+
+<p>The tpgid field specifies which of the other process-groups in the tty’s associated session is currently active (aka “has focus” or “is in foreground”). Threads of any process in that group are allowed to read keystrokes from that terminal and write characters to it; threads belonging to other processes which try to read/write the terminal will be suspended. Systemcall <a href="http://linux.die.net/man/3/tcsetpgrp">tcsetpgrp</a> is used by the shell to specify the process-group with “focus” when a new process-group is started, or “fg” is run on an existing one.</p>
+
+<h1 id="the-controlling-tty">The Controlling TTY</h1>
+
+<p>The expression “controlling TTY of a process” is sometimes used when talking about this kind of “job control”.  This indicates that the tty driver <em>controls</em> the processes, in the sense of sending signals to them when keystrokes like “ctrl-z” are pressed, or telling the scheduler to mark them as unrunnable when a <code>read()</code> call is made while the associated process group is not active.</p>
+
+<p>As described earlier, opening a <code>/dev/ttyN</code> file invokes the “open” logic of the kernel tty-driver which then (optionally) marks the session associated with the caller as being “controlled” by that TTY. The NOCTTY flag can be passed on open() to prevent that behaviour if desired. As mentioned earlier, <a href="http://linux.die.net/man/2/setsid">setsid</a> can be used to <em>clear</em> the controlling-tty for a threadgroup (process).</p>
+
+<p>Using “setsid” to start a new session “clears the controlling tty” in the sense that the tty driver will no longer send signals to that process-group. However the process may still have STDIN/STDOUT file-descriptors pointing to that tty, and so can still read/write that device. If a “non-controlled” process tries to read data from the tty, then there will simply be a race with other readers; exactly one reader will get the keystrokes. Similarly if multiple processes in the active process group try to read from the TTY, they will race against each-other; this whole system guarantees <em>exclusive access</em> to <em>one process group</em> within <em>the same session</em>.</p>
+
+<p>The documentation for <code>setsid</code> specifies that the call:</p>
+
+<ul>
+  <li>fails if the caller is a process-group-leader - presumably because the group would otherwise be left without a leader</li>
+  <li>makes the caller a process-group-leader - because every group needs a leader</li>
+  <li>clears the “controlling terminal” - because the tty-driver is arbitrating exclusive-access for that tty between the process-groups in the <em>previous session</em>; it doesn’t make sense for it to do so for two sessions at a time.</li>
+</ul>
+
+<p>As already noted, setsid will not close any file-descriptors, ie the caller may still have open file-descriptors pointing to the same tty - it just isn’t “controlled” by the tty any more, in the sense of being automatically signalled/suspended when it reads/writes that filedescriptor.</p>
+
+<p>In the output of a “ps” command, the tty column indicates which “controlling terminal/tty” the task is associated with. A new task always inherits the tty field of its parent process (if any). A process is “disconnected” from the inherited tty when it calls setsid, or when its session-leader terminates.</p>
+
+<h1 id="relevant-kernel-data-structures">Relevant Kernel Data Structures</h1>
+
+<p>The <a href="http://lxr.free-electrons.com/source/include/linux/sched.h#L1343">task_struct</a> structure definition in the kernel (<code>include/linux/sched.h</code>) has the following datafields relevant for this article:</p>
+
+<ul>
+  <li>
+<code>struct list_head tasks</code> – maps to /proc/N/tasks, ie the list of all tasks within a process? There is a separate “children” property elsewhere..</li>
+  <li>
+<code>unsigned long jobctl</code>  – a bitmask of <code>JOBCTL_*</code> flags defined in the same file</li>
+  <li>
+<code>pid_t pid</code> – the “schedulable entity id” aka TID</li>
+  <li>
+<code>pid_t tgid</code> – the group of threads forming a process</li>
+  <li>
+<code>task_struct parent</code> – the “creating thread” or the “primary thread” in the parent process?</li>
+  <li>
+<code>list_head children</code> – pointers to child schedulable entities created with <code>clone</code> or <code>fork</code>
+</li>
+  <li><code>list_head sibling</code></li>
+  <li>
+    <p><code>task_struct group_leader</code> – threadgroup leader??</p>
+  </li>
+  <li>
+<code>pid_link pids[PIDTYPE_MAX]</code> ??</li>
+  <li><code>list_head thread_group</code></li>
+  <li>
+    <p><code>list_head thread_node</code></p>
+  </li>
+  <li><code>u32 parent_exec_id</code></li>
+  <li>
+    <p><code>u32 self_exec_id</code></p>
+  </li>
+  <li><code>struct signal_struct *signal</code></li>
+</ul>
+
+<p>A “<code>signal_struct</code>” is shared by all threads within a process (ie all data_structs with the same tgid) - ie holds “per-process” (aka per-threadgroup) information. Settings related to “signal handling” do fall into this category (hence the name) but this structure also holds many fields not related to signals at all. The following fields are relevant for this article:</p>
+
+<ul>
+  <li>
+<code>int leader</code> – boolan : is this thread-group the session group leader?</li>
+  <li>
+<code>tty_struct *tty</code> – which tty is this thread-group asociated with?</li>
+</ul>
+
+<p>The signal_struct has a boolean “session group leader” flag, and a “struct tty_struct *tty” field.</p>
+
+<h1 id="references">References</h1>
+
+<p>API documentation:</p>
+
+<ul>
+  <li>man 2 clone</li>
+  <li>man 2 fork</li>
+  <li>setpgid()</li>
+  <li>man 2 prctl</li>
+  <li>
+<a href="http://linux.die.net/man/7/credentials">man 7 credentials</a> - has a good discussion of group and session ids</li>
+</ul>
+
+<p>Related articles:</p>
+
+<ul>
+  <li><a href="/linux/ttys">Mine of Information: Terminals, Gettys and Display Managers</a></li>
+  <li><a href="http://opensourceforgeeks.blogspot.in/2014/03/processes-and-threads-in-linux.html">Processes and Threads in Linux</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Job_control_%28Unix%29#Implementation">Wikipedia: Job Control</a></li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/process-groups/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

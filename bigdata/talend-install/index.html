@@ -1,0 +1,592 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Talend Basic Install on Linux</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Talend Basic Install on Linux</h1>
+    <aside>First published on: March 18, 2019</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="article-overview">Article Overview</h1>
+
+<p>Talend sells <a href="/bigdata/talend">a suite of tools</a> for processing enterprise data.  Unfortunately, their installation documentation is rubbish. Truly rubbish, some of the worst I have ever seen. This article provides a walk-through of installing the core Talend components on a Linux server (optionally with a basic cluster of execution-servers for running jobs).</p>
+
+<p>The focus here is on installation of a <em>licensed</em> Talend suite, with the core proprietary components such as the Talend Administration Console and the logging components. This article is not likely to be helpful if you are wanting to use the (few) open-source Talend components available for free.</p>
+
+<p>The instructions here are also not intended to be a complete guide to setting up a production environment. The process for installing a robust and secure Talend environment is so extremely complex that I <em>strongly</em> recommend any company which is considering purchasing a Talend license also pay Talend to install the product.</p>
+
+<p>What the instructions here <em>do</em> provide is instructions for creating a basic test/development environment. This article may also be useful when validating/understanding what Talend will/should do when setting up a production environment in an on-premise datacenter.</p>
+
+<p>The version of Talend used to write this guide was 7.0.1 (released mid 2018).</p>
+
+<p>To be precise, these instructions:</p>
+
+<ul>
+  <li>are only relevant to companies with at least a license to the TAC component</li>
+  <li>do try to follow good security practices with regards to separation of user accounts</li>
+  <li>partially follow good administration practices with regards to file locations (and note where good practice is not followed)</li>
+</ul>
+
+<p>and do not cover:</p>
+
+<ul>
+  <li>creating automated install scripts for provisioning systems such as Puppet, Chef, Ansible</li>
+  <li>SSL encryption of connections</li>
+  <li>single-signon integration</li>
+  <li>enabling high-availability</li>
+</ul>
+
+<p>These instructions are also <em>mine</em>, ie do not reflect the opinion of Talend themselves.</p>
+
+<p>Recently (since mid 2018), Talend has released a “cloud-based” Talend environment, and is trying to push new customers to using that approach rather than an on-premise deployment. I am not sure how successful they will be with that. These instructions are for the on-premise approach, not the cloud - though this article might possibly be helpful by shedding some light on what is happening in the cloud VMs “behind the scenes”.</p>
+
+<h1 id="relevant-components">Relevant Components</h1>
+
+<p>The following servers will be created and configured with the following software:</p>
+
+<ul>
+  <li>master</li>
+  <li>TAC, AMC, commandline</li>
+  <li>ELK-based logserver</li>
+  <li>nexus</li>
+  <li>git server (your choice of gitblit or gitlab)</li>
+  <li>mysql</li>
+  <li>workers x 2
+    <ul>
+      <li>jobserver or runtime (your choice)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Note that these instructions include setting up a mysql database rather than using the “toy” H2 database that is included with Talend’s “easy install”. However in general, this is still a “play” environment rather than a production-ready setup.</p>
+
+<p>Not covered (ie no install-instructions here):</p>
+
+<ul>
+  <li>ssl encryption of connections</li>
+  <li>high-availability configuration</li>
+  <li>proper configuration automation (puppet/chef/ansible/etc)</li>
+  <li>proper systemd-init service scripts (basic ones are provided, but they could be improved)</li>
+  <li>single signon (SSO)</li>
+  <li>dqportal, data-steward, MDMServer, dictionary-service, dataprep</li>
+  <li>ESB Container</li>
+  <li>zookeeper, kafka, activemq, etc</li>
+</ul>
+
+<h1 id="downloadable-files">Downloadable Files</h1>
+
+<p>When you purchase (or otherwise obtain) a Talend license, you receive an email from Talend like the following, with a “license” file attached:</p>
+
+<pre><code>Dear Customer,
+
+You will find in this email all the information you need to install your copy of 
+Talend Data Fabric 7.0.1 with the following runtime (s):
+- 1 ESB non-production core runtime(s)
+- 1 ESB non-production core runtime(s)
+
+Your license key for YOURCOMPANY - License Talend Data Fabric ( / 5 MDM Admin User(s) / 99 MDM Interactive User(s) ) 
+is available in the file attached to this email. The expiry date is SOMEDATE. Once you have downloaded the
+application and related documentation, save the attached License key file onto your hard drive then place it 
+at the root of the application extraction folder.
+
+Use the following login details to connect to the download website:
+User: xxxxxxxxx
+Password: xxxxxxxxx
+
+Caution : Please keep this email in a safe place, as the user and password information will be required 
+for the Software Update configuration. For more information, see the Installation Guide.
+
+Download the application from:
+
+Windows Platform Installer (via download manager):
+www.opensourceetl.net/tis/tdf_701/Talend-Installer-20180411_1414-V701-installer-win-dlm.exe
+www.opensourceetl.net/tis/tdf_701/Talend-Installer-20180411_1414-V701-installer-win-dlm.exe.MD5
+
+Platform Installer (without download manager):
+www.opensourceetl.net/tis/tdf_701/Talend-Installer-Starter-20180411_1414-V7.0.1-installer.zip
+www.opensourceetl.net/tis/tdf_701/dist
+www.opensourceetl.net/tis/t...ip.MD5
+www.opensourceetl.net/tis/tdf_701/dist.MD5
+
+Studio-only installers (via download manager):
+www.opensourceetl.net/tis/tdf_701/TalendStudio-20180411_1414-V701-installer-win-dlm.exe
+www.opensourceetl.net/tis/tdf_701/TalendStudio-20180411_1414-V701-installer-win-dlm.exe.MD5
+www.opensourceetl.net/tis/tdf_701/TalendStudio-20180411_1414-V701-installer-mac-dlm.dmg
+www.opensourceetl.net/tis/tdf_701/TalendStudio-20180411_1414-V701-installer-mac-dlm.dmg.MD5
+
+Studio-only installers (without download manager):
+www.opensourceetl.net/tis/tdf_701/TalendStudio-20180411_1414-V7.0.1-windows-installer.exe
+www.opensourceetl.net/tis/tdf_701/TalendStudio-20180411_1414-V7.0.1-windows-installer.exe.MD5
+www.opensourceetl.net/tis/tdf_701/TalendStudio-20180411_1414-V7.0.1-osx-installer.app.tar
+www.opensourceetl.net/tis/tdf_701/TalendStudio-20180411_1414-V7.0.1-osx-installer.app.tar.MD5
+www.opensourceetl.net/tis/tdf_701/TalendStudio-20180411_1414-V7.0.1-linux-x64-installer.run
+www.opensourceetl.net/tis/tdf_701/TalendStudio-20180411_1414-V7.0.1-linux-x64-installer.run.MD5
+
+Manual Installation:
+www.opensourceetl.net/tis/tdf_701/Talend-Studio-20180411_1414-V7.0.1.zip
+www.opensourceetl.net/tis/tdf_701/Talend-Studio-20180411_1414-V7.0.1.zip.MD5
+www.opensourceetl.net/tis/tdf_701/Talend-AdministrationCenter-20180411_1414-V7.0.1.zip
+www.opensourceetl.net/tis/tdf_701/Talend-AdministrationCenter-20180411_1414-V7.0.1.zip.MD5
+... and urls for various other components ...
+
+Local update sites for installation without internet:
+http://www.opensourceetl.net/tis/tdf_701/Talend_Full_Studio_p2_repository-20180411_1414-V7.0.1.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend_Full_Studio_p2_repository-20180411_1414-V7.0.1.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend_ESB_cMessageEndpoint_p2_Repository-20180411_1414-V7.0.1.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend_ESB_cMessageEndpoint_p2_Repository-20180411_1414-V7.0.1.zip.MD5
+
+Get the related documentation, including the installation guide, from:
+Online: https://help.talend.com/search/books?filters=EnrichProdName~%2522Talend+Data+Fabric%2522*EnrichVersion~%25227.0%2522
+
+PDF English:
+http://www.opensourceetl.net/tis/tdf_701/DocumentationSet_Talend_DataFabric_7.0.1_English.zip
+.. and other languages ..
+==================================================================================================
+Talend's consulting programs offer a comprehensive set of services, from Quickstart implementations and Accelerators to more
+adoption and strategically-oriented programs.
+Talend consultants have years of experience, and proven success with strategic and technical planning in a multitude of
+implementation circumstances. You will receive one-on-one attention and support to see your projects through to a successful
+outcome.
+</code></pre>
+
+<p>Note that at the bottom of the emails are links to “DocumentationSet” downloads. Within the zip are installation manuals for different operating systems.</p>
+
+<p>The installation manuals are large (240 pages for linux) but rather poorly presented, and in my opinion do not make good choices with respect to security. See file “<code>Talend_DataFabric_IG_Linux_7.0.1_EN.pdf</code>” for Linux.</p>
+
+<p>The install-instructions below are hopefully clearer than the official guide - or at least gets straight to the point for the specific use-case of setting up a test cluster on Linux.</p>
+
+<h1 id="create-the-vms">Create the VMs</h1>
+
+<p>(Note: it is assumed below that each node on which Talend software is being installed is a virtual machine (aka VM). Of course physical servers could also be used - but is less usual these days, particularly for a test/dev environment)</p>
+
+<p>In your server environment, allocate three VMs:</p>
+
+<ul>
+  <li>name=talend-tac (or similar)
+    <ul>
+      <li>Ubuntu 16.04 LTS</li>
+      <li>2 CPU cores (recommended)</li>
+      <li>16GB ram (ie 16384 MB)</li>
+      <li>256 GB disk (core system takes around 20GB, leaving rest for user-data)</li>
+      <li>32GB swap (ie 2x ram)</li>
+    </ul>
+  </li>
+  <li>name=talend-work1 (or similar)
+    <ul>
+      <li>Ubuntu 16.04 LTS</li>
+      <li>2 CPU cores (recommended)</li>
+      <li>256 GB disk</li>
+      <li>8GB swap (ie same size as ram)</li>
+    </ul>
+  </li>
+  <li>name=talend-work2 # config options are same as talend-work1</li>
+</ul>
+
+<p>Update the VMs.</p>
+
+<p>If you do not have DNS set up to resolve the above names, then edit your local /etc/hosts file to add the names for each server; various webservers on these machines will use hostnames which must be resolvable on client machines on which the browser is running.</p>
+
+<p>Install your SSH key into each VM to make later logins easier:</p>
+
+<pre><code>ssh-copy-id root@talend-tac
+ssh-copy-id root@talend-work1
+ssh-copy-id root@talend-work2
+</code></pre>
+
+<p>On each VM, apply all OS upgrades:</p>
+
+<pre><code>ssh root@talend-tac
+apt update
+apt dist-upgrade
+reboot now
+# repeat for workers
+</code></pre>
+
+<h1 id="configure-shared-filesystem">Configure Shared Filesystem</h1>
+
+<p>It is recommended by Talend that all components be configured to write their logfiles to a shared filesystem. Presumably this is so that in the case of failure of a node, logs that were previously on that system are still accessible. If you are setting up a highly-available system, then you will need to allocate such a shared filesystem, and mount it in each server.</p>
+
+<h1 id="install-version-control-system">Install Version Control System</h1>
+
+<p>Talend needs a git or svn repository for developers to store data in, and for the Talend build-tools to compile code from.</p>
+
+<p>The install guide p52 describes how to set up a hosted SVN instance.  The install guide also includes instructions related to Git - but the instructions are just nonsense as far as I can see; having read them multiple times I still have no idea what they are trying to say. It is best to just ignore them…</p>
+
+<p>Assuming you wish to use git, a server is necessary and there are several options:</p>
+
+<ul>
+  <li>use an existing Atlassian Bitbucket or Github repo (but creating new users is obviously somewhat tricky)</li>
+  <li>install Gitlab</li>
+  <li><a href="/bigdata/gitblit-install">install gitblit</a></li>
+</ul>
+
+<p>Gitlab can be run in a docker container on the Talend master VM - or a dedicated VM if you wish (installing gitlab without container is rather complicated). The necessary instructions are here - and fortunately no Talend service runs on port 80, so the Gitlab container port can be run there. Note that Gitlab requires reasonable amounts of resources - it is a full suite, not just a simple Git wrapper (among other things, it runs a full Postgres database). The talend-tac server resources shown above are, however, sufficient to handle a Gitlab instance.</p>
+
+<p>Gitblit is much simpler than Gitlab, but still provides all the necessary functionality. It is a simple war-file that is deployed within a jetty or tomcat instance. It then provides a web-ui through which git-repos can be created, users can be defined, user-access-rights assigned, and then it handles git-clone/git-push/etc. The project is very dormant, but it still appears to work fine (tested under tomcat8), and I would recommend it as the simplest solution. The necessary instructions <a href="/bigdata/gitblit-install">are here</a>.</p>
+
+<h1 id="configure-master-node-talend-tac">Configure master node “talend-tac”</h1>
+
+<h2 id="install-mysql">Install mysql</h2>
+
+<p>You should of course choose better passwords than the ones used here!</p>
+
+<pre><code>ssh root@talend-tac
+apt install mysql-server mysql-client
+
+# reconfigure mysql
+vi /etc/mysql/mysql.conf.d/mysqld.cnf
+
+# replace "max_allowed_packet = 16M" with "max_allowed_packet = 64M"
+# replace "bind-address = 127.0.0.1" with "bind-address = 0.0.0.0"
+
+service mysql restart
+</code></pre>
+
+<h2 id="create-databases-and-users">Create databases and users</h2>
+
+<pre><code># create dbs and users
+mysql # or mysql -p if you set a password during mysql install
+
+## for TAC
+create database talend_admin;
+GRANT ALL ON talend_admin.* TO talend_admin@'%' identified by 'pwd1';
+
+## for MDM
+create database talend_mdm;
+GRANT ALL on talend_mdm.* to talend_mdm@'%' identified by 'pwd1';
+
+## for DQ
+create database talend_dq;
+GRANT ALL on talend_dq.* to talend_dq@'%' identified by 'pwd1';
+
+## done
+quit;
+</code></pre>
+
+<p>Note that the mysql users created here are “any network” users (<code>domain="@%"</code>). We could use “<code>@localhost</code>” instead, as we are installing all apps which need mysql access on the same host. However I want to keep these instructions applicable also to cases where the DB is on another host, or where some services are moved to other VMs.</p>
+
+<p>For production, the mysql rights granted can be better limited - this guide does not attempt to do so.</p>
+
+<p>As noted earlier, the “DQ” (Data Quality) component requires an external db (embedded H2 not supported) - and the installer verifies the connection during install configuration.</p>
+
+<h2 id="install-software">Install Software</h2>
+
+<p>See page <a href="/bigdata/talend-install-manual">Install Manually</a> for details on how to get the basic software components installed.</p>
+
+<p>Or see page <a href="/bigdata/talend-install-wizard">Install with Wizard</a> if you want to install faster, but end up with a completely broken/useless system.</p>
+
+<p>RPMs are also available for some licenses. For example, the install-documentation for “Talend Data Integration” describes RPM-based installation, while the install-documentation for “Talend Data Fabric” does not.  Given Talend’s general poor approach to system security, I would be reluctant to run talend-provided RPMs on a system - manual install seems safer.</p>
+
+<h2 id="configure-tac">Configure TAC</h2>
+
+<p>Visit the TAC website at http://talend-tac:8080/org.talend.administrator (password = “password” or maybe “admin”).</p>
+
+<p>Initial Config Page</p>
+
+<p>This first page is an “admin page” where the following can be set up:</p>
+
+<ul>
+  <li>database connectivity (already defined if the “install wizard” has been used)</li>
+  <li>license (must be uploaded from PC running browser)</li>
+</ul>
+
+<p>Database connect params should be:</p>
+
+<pre><code>database type: mysql
+driver: org.gjt.mm.mysql.Driver
+url: jdbc:mysql://{yourhostname}:3306/talend_admin
+username: talend_admin # as specified when creating database earlier
+password: pwd1
+# as specified when creating database earlier
+</code></pre>
+
+<p>Then click on “check” at bottom, before clicking on “save” in the middle.</p>
+
+<p>The “finalize” button writes to file tomcat/webapps/org.talend.administrator/WEB-INF/classes/configuration.properties, permanently storing the config params.</p>
+
+<p>The “go to logon” link then takes you to the real page.</p>
+
+<p>Note that the buttons “Project Check” and “Transfer Libraries” are used when migrating from one major Talend version to another (migrating code in version-control, and libraries in Nexus respectively). For a new Talend install, these features are not needed.</p>
+
+<h2 id="create-admin-user">Create Admin User</h2>
+
+<p>TAC comes with a default user: “security@company.com”, password: “admin” - or whatever was entered in the install wizard. This user has the single role “Security Administrator”, which allows them to create users, and to perform some system-config tasks but not all. Therefore the first thing you need to do is create an “application administrator” user, then log in as that user. For maximum access, the new user should have roles:</p>
+
+<ul>
+  <li>Security Administrator</li>
+  <li>Administrator</li>
+  <li>Operation Manager</li>
+  <li>Viewer</li>
+</ul>
+
+<p>This new user now has a full set of options in their “Settings/Configuration” menu. Note that in the page associated with this menu option:</p>
+
+<ul>
+  <li>there is a refresh button in the top left corner; after changing a setting this can be clicked to verify the setting is correct</li>
+  <li>the page (somewhat annoyingly) automatically invokes refresh every 30 seconds or so</li>
+  <li>a “lightning bolt” symbol means “verifying…” (working on it, or blocked waiting for some other config)</li>
+  <li>the “finalize” button should not be used.</li>
+</ul>
+
+<p>Note also that in the Configuration page, it is apparently normal for features that are not used (eg DataPrep when you have no dataprep module installed) show as “errors”.</p>
+
+<h2 id="set-up-version-control">Set Up Version Control</h2>
+
+<p>From the main page for an administrator user, version control can be set up via menu option “Settings/Configuration”.</p>
+
+<p>For Git access, you first need to create (eg via gitblit or gitlab UI) a repository in the target git server, and a user for the TAC. Then in TAC web ui, under settings/configuration/git, define:</p>
+
+<ul>
+  <li>Git server url: <code>ssh://tac@{githostname}:29418/talendrepo.git</code> (assuming user=tac, and a repo name of talendrepo)</li>
+  <li>username: whatever user you created</li>
+  <li>password: whatever password you definedAFAICT, the TAC does not support authenticating against a git server using an ssh key - only username/password are possible.</li>
+</ul>
+
+<p>As noted in the <a href="/bigdata/talend-install-manual">manual install page</a>, using git ssh protocol requires the TAC unix user have appropriate entries in its <code>~/.ssh/known_hosts</code> file.</p>
+
+<p>See the <a href="/bigdata/talend-install-manual">manual install page</a> for more details.</p>
+
+<h2 id="set-up-other-config">Set up Other Config</h2>
+
+<p>The following options are all under menu “Settings/Configuration” (available only for a Talend application admin user).</p>
+
+<ul>
+  <li>Commandline/primary
+    <ul>
+      <li>set job generation folder = /var/talend/commandline/exports (or whatever you created; see <a href="/bigdata/talend-install-manual">manual install instructions</a>)</li>
+    </ul>
+  </li>
+  <li>Monitoring
+    <ul>
+      <li>AMC url: <code>{yourhostname}:8080/amc</code> =&gt; do NOT use “localhost” in this URL, as this is output as a “src” attribute on an html iframe, ie is interpreted by the user’s browser.</li>
+      <li>Kibana: <code>{yourhostname}:5601/...</code> =&gt; do not use “localhost” here either..</li>
+    </ul>
+  </li>
+  <li>Artifact Repository
+    <ul>
+      <li>Nexus url: <code>{yourhostname}:8081</code> =&gt; default usually ok, unless you are using an external nexus or have set up HA</li>
+    </ul>
+  </li>
+  <li>Job conductor:
+    <ul>
+      <li>Generated jobs folder =&gt; /var/talend/admin/generated-jobs (or whatever you created; see manual install instructions)</li>
+      <li>Tasks logs folder =&gt; /var/talend/admin/execution-logs (or whatever you created)</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="other-setup">Other setup</h2>
+
+<p>For more details, see the official Talend Administration Center user manual.</p>
+
+<h2 id="check-other-components">Check Other Components</h2>
+
+<p>If you have set up additional components, then visit those apps:</p>
+
+<ul>
+  <li>MDM: <code>http://{yourhostname}:8180/talendmdm</code>
+</li>
+  <li>Data Stewardship: <code>http://{yourhostname}:19999 (user="tds-user", password="duser")</code>
+</li>
+  <li>DQ Portal: <code>http://{yourhostname}:8580/tdqportal (user="tdq_admin", password="tdq")</code>
+</li>
+  <li>DataPrep: <code>http://{yourhostname}:9999 (user="dataprep-user" password="duser")</code>
+</li>
+</ul>
+
+<h1 id="random-notes">Random Notes</h1>
+
+<p>Component “CI-Builder” is documented in Talend’s “Software Development Lifecycle Guide”. It is an advanced tool for sites that wish to drive their deployment processes using an external tool (eg Jenkins) rather than the standard Talend tools. It can be useful when a system has hundreds of jobs.</p>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<ul>
+  <li>
+<a href="https://community.talend.com/t5/Architecture-Best-Practices-and/Introduction-to-Talend-deployment-with-Ansible/ta-p/39675">Talend Community: Install with Ansible</a> - example Ansible configuration for installing a TAC and jobservers. IMO, this leaves out a <em>lot</em> of important steps though..</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/talend-install/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

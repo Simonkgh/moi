@@ -1,0 +1,771 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Linux Graphics Stack Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Linux Graphics Stack Overview</h1>
+    <aside>First published on: July 22, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="intro">Intro</h1>
+
+<p>This article gives a brief overview of how graphics are generated on a Linux system.</p>
+
+<p>If you’re trying to figure out how to configure your X server - you’ve found the wrong article. This is really only of interest to software developers (or maybe even interesting to nobody other than myself).</p>
+
+<p>As with any attempt to summarize, there are areas below that are only <em>approximately</em> correct - this isn’t meant to be textbook length. However if you see any fundamental errors, please let me know!</p>
+
+<p>Towards the end of this article is a picture showing how the parts fit together; you might want to jump forward to look at that briefly before reading through the following text. However not everything on that drawing will make sense until <em>after</em> the descriptions below.</p>
+
+<p>Note that I use the expression “graphics card” regularly below; however most of the time the information applies equally to embedded graphics systems (ie those on the motherboard or even on the same package as the CPU) as well as physical PCI/PCIe-based cards. You may find it useful to <a href="/linux/the-pci-bus">read about the PCI bus</a> first.</p>
+
+<h1 id="graphics-hardware-overview">Graphics Hardware Overview</h1>
+
+<h2 id="frame-buffers">Frame Buffers</h2>
+
+<p>In the end, all graphics cards generate a “frame buffer”, ie a block of memory with 3 bytes per pixel, being the RGB color to show at that pixel on the screen. One frame-buffer known to the graphics card is the “scan-out buffer”, ie the one that will be displayed.</p>
+
+<p>For analogue outputs such as composite-video or component-video, card circuitry periodically reads each pixel of the scan-out buffer in turn and generates an appropriate voltage output at the appropriate time. For digital outputs such as HDMI, the graphics card simply dumps that data to the output cable (with some minor transformations), and lets the display device map that data to appropriate voltages to drive the physical output.</p>
+
+<p>Very simple graphics cards do no more than support a “frame buffer” and associated output circuitry, and let the operating system write RGB values into that buffer. Libraries in the operating system then provide more sophisticated APIs for 2-D graphics or 3D graphics, and use software algorithms running on the CPU to compute the color of pixels to be written to the framebuffer.</p>
+
+<p>More sophisticated cards provide various ways for an operating-system to offload the work of mapping graphics operations into pixel-colors from the CPU to the graphics card - but in the end the result is still a buffer full of pixel-values.</p>
+
+<p>Of course modern cards provide multiple output options (eg component, HDMI, multiple monitors). Cards also usually support different <em>resolutions</em> (ie change the size of the scan-out buffer and the way its contents are mapped to pixels on the screen). Some cards support more than one “scan-out” buffer for a single display (the buffer contents are “layered” on top of each other). Selecting the output-device, resolution, and scan-out buffers is called “modesetting”.</p>
+
+<h2 id="graphics-acceleration-with-modern-cards">Graphics acceleration with modern cards</h2>
+
+<p>Modern graphics cards are basically a co-processor, ie perform “offloading” of CPU work. The general process for rendering graphics is:</p>
+
+<ul>
+  <li>Allocate a buffer in which to write the output;</li>
+  <li>Allocate one or more buffers and fill them with input parameters, eg tuples of (x,y,z,normal,color);</li>
+  <li>Allocate one or more buffers and fill them with CU instructions for the Compute Units of the GPU to execute;</li>
+  <li>Fill a “command stream” buffer with CS instructions for configuring the GPU;</li>
+  <li>Pass the buffers to the GPU for processing.</li>
+</ul>
+
+<p>Modern GPUs support two completely different instruction-sets: (a) the “command stream” used for configuring the card, and initiating rendering, and (b) the SIMD “compute stream” used for calculating pixel values. Early graphics cards with basic 2D support had only the “command stream” instruction-set; these instructions can configure the card output, map memory appropriately, and include explicit operations for drawing operations such as bitblits, drawing lines, etc. Later 3D cards added various fixed-purpose computation units that the command-stream could configure. Eventually GPUS added generic SIMD processing (primarily for “programmable shaders”) and defined a corresponding instruction-set; over time this SIMD processing became so powerful that most of the original 2D drawing operations and 3D “fixed function” units are now obselete (using SIMD instructions is faster). The original “command stream” instructions are still used for “setup” tasks.</p>
+
+<p>When execution is complete, the output buffer contains a 2D pixel array of RGBA values, suitable for copying/composing to an appropriate area of the framebuffer. Asynchronously to this process, the card’s output circuitry is repeatedly turning the “scan-out buffer” contents into appropriate signals to the display device. Actually, some cards have multiple sets of output circuitry, each of which can be using a different scan-out buffer - and potentially have a different resolution (“multi-head”).</p>
+
+<p>Cards can have internal memory, or can share the CPU’s main memory. When the RAM is on card, then loading the program, vertex graph and textures from the CPU into the card is slow, but computing the results and writing to the frame buffer is fast. When RAM is “system memory”, then the reverse is true. Possibly more importantly, separate graphics RAM allows the CPU to perform memory accesses while graphics rendering is in progress, without contention for the memory bus.</p>
+
+<p>Modern DRM-based kernel graphics drivers provide access to the GEM/TTM modules that allow user-space programs to allocate and access the buffers mentioned above: for “window backing buffers”, vertex graphs, textures, shader programs, and configuration commands. Apart from actually allocating/managing these buffers, preparation for rendering (mapping from graphics API calls such as OpenGL or GTK+ into the appropriate data and GPU instructions for the specific installed video card) is done via card-specific <em>userspace</em> libraries (eg Mesa-3D + gallium).</p>
+
+<h1 id="graphics-with-x">Graphics with X</h1>
+
+<p>The standard way of running multiple graphical applications on a single machine is by using the X (aka X11) display system. I’ll therefore talk about that primarily, with occasional comments on alternatives.</p>
+
+<h2 id="display-managers-startup-and-login">Display Managers, Startup and Login</h2>
+
+<p>The most direct way of using X is for a user to <em>log in</em> via a <em>console</em> (ie a physically-attached keyboard and screen), resulting in a text-only session. The user can then start an X server instance (resulting in a graphical display), and a “window manager” application which connects to the X server as a client. The user can then interact with the window manager to launch further graphical applications. Exactly which <em>client</em> applications are started when the X server instance is started is controlled by file “<code>$HOME/.xinitrc</code>”; when that script terminates the X server is also terminated. Note that starting the X server is done via a SUID script, so that the X server instance runs as the root user.</p>
+
+<p>Alternatively, the user first interacts with a <a href="https://en.wikipedia.org/wiki/X_display_manager_%28program_type%29)">display manager</a> via a graphical <em>greeter</em> dialog. On a normal desktop system, a single display-manager process is started on system bootup. This then starts an X server instance attached to the system console, and displays a graphical “greeter” dialog-window. The code to display the greeter may be a separate application that the display-manager starts, or may be built in to the display-manager itself; in either case the process displaying the greeter window connects to the X server as a <em>client</em>.  When the user enters credentials into the greeter, and the login succeeds, then the current X server instance is terminated and a new one is started for the user (though it still usually runs as root). On user logout, that X server is terminated and a new one is created for use by the greeter. The display manager manages the start/termination of the relevant processes. There are many different display manager implementations including <a href="https://en.wikipedia.org/wiki/X_display_manager_%28program_type%29">XDM</a>, <a href="https://en.wikipedia.org/wiki/GNOME_Display_Manager">GDM</a> (Gnome Display Manager), <a href="https://en.wikipedia.org/wiki/Simple_Desktop_Display_Manager">SDDM</a> (the Simple Desktop Display Manager), etc. Although some of these display-managers are developed as part of a specific desktop environment project (eg Gnome), they are all capable of launching different desktop environments. There are a few greeter implementations which are not X clients but instead use <em>framebuffer</em> APIs to render graphics; in this case no X server is needed to display the greeter. Most modern greeter implementations also support the <em>Wayland display server</em> in addition to X.</p>
+
+<p>In the last few years, effort has been put into supporting “rootless X”, ie running the X server as a non-root user. In this case, the X server running when nobody is logged-in uses a non-root “system” account. When a user logs in, that X server instance is terminated and a new one running as the logged-in-user is started. On logout, the current X server instance is again terminated and a new one started (to support the greeter program). An X server cannot run as non-root with “userspace DDX drivers”, and instead must rely on kernel-modesetting aka KMS (see later).</p>
+
+<p>TODO: how is graphical “fast user switching” supported?</p>
+
+<p>See Also:</p>
+
+<ul>
+  <li><a href="https://wiki.debian.org/DisplayManager">Debian Wiki: Display Manager</a></li>
+  <li><a href="https://help.gnome.org/admin/gdm/3.18/overview.html.en">GDM Overview</a></li>
+</ul>
+
+<h2 id="x-server-instances">X server instances</h2>
+
+<p>An X server instance “takes control” of a local graphics card (and some local input devices, though that is not relevant here), initialises the card (using the settings in an X config file or specified on the commandline), then waits for other processes to connect to it and send it graphics commands over a socket (which may be a TCP socket or a local socket).</p>
+
+<p>A more recent approach to graphics is Wayland. As with X, a server is started when a “desktop” user logs in, and client applications connect to it. However wayland requires clients to use local sockets only, ie client applications must be on the same server. Clients do not send “drawing commands” but instead pass references to memory-buffers containing pre-rendered graphics; the server then simply <em>composites</em> the images provided by all clients onto the scan-out buffer.  Buffers (and other resources) are passed efficiently over the socket as <em>filehandles</em> or <em>buffer ids</em>, thus the requirement for local sockets only. Remote clients can be supported by running some “proxy” which is a normal client of the wayland server but also accepts data over the network in some form; one option is for the proxy to accept standard X11-format graphics commands.</p>
+
+<p>Note that an “X server” is a process running on a computer with a graphics card; it accepts commands over a network from multiple clients and writes to the graphics card. When a user has a weak desktop and a powerful remote computer available, then it is possible to run <em>cpu-intensive</em> applications on the remote computer while having the graphical interface for those applications appear on the desktop. The terminology gets a little tricky in this case; the remote computer is often referred to as a “server” - but the applications running on it are “clients” of the “X server” running on the local desktop. Under Wayland, the terminology would be the same: the “wayland server” is on the desktop, the “wayland client apps” run on the <em>remote (server) computer</em>.</p>
+
+<p>An X server is a complicated thing; a recent count of source code lines showed the xorg X11 server to have significantly more lines of code than the Linux kernel.</p>
+
+<h2 id="x-network-protocols-and-client-libraries">X Network Protocols and Client Libraries</h2>
+
+<p>The core network protocol for X is basically a generic remote-procedure-call protocol.</p>
+
+<p>An X server must support a “core” set of functions. It may then support any number of “extensions” that add more functions. An X client can query an X server to see which extensions it supports. Over the years, a large number of X extensions have been defined, and many of these are now <em>effectively</em> mandatory in that a large number of X client applications simply won’t work without them.</p>
+
+<p>When writing an X client, there are two direct APIs for X: <code>xlib</code> and <code>xcb</code>. Both use the same <code>wire protocol</code> (ie network packets) to communicate with an X server. XCB is the modern, better, API; in particular <code>xlib</code> provides many functions that <em>block</em> until the server returns a result, while <code>xcb</code> is based around callbacks or queues of events. Of course many applications don’t use the X APIs directly, but instead use GTK+ or Qt or similar libraries which have “back ends” that use xlib or xcb to talk to an X server.</p>
+
+<h2 id="x-clientserver-2d-apis">X Client/Server 2D APIs</h2>
+
+<p>X offers a set of functions (an API) for performing traditional 2D drawing operations (chars, rectangles, lines, etc). An X client application can call these functions directly (using <code>xlib</code> or <code>xcb</code>), or via a wrapper such as GTK+, but in either case network packets are sent from the X client to the X server to invoke the X 2D drawing functions.</p>
+
+<p>Exactly how the X server handles such requests from clients is an implementation-detail. The xorg server implementation performs a mixture of internal operations and calls to the DDX api; see section on “X Userspace drivers” later.</p>
+
+<p>Actually, much of the “core” set of X functions are no longer needed; they were designed in a quite different era and the drawing operations (line, rectangle, circle) and text-display (server-side fonts) they support were simply becoming obsolete. The XRender extension defines a large set of graphics operations that basically replace all the originals with better-designed alternatives - new text (glyph) operations, sophisticated shapes defined as lists of tesselated triangles and <em>composition</em> of such shapes together with support for alpha-channels etc. XRender doesn’t quite define a “scene graph” to be rendered but it comes fairly close. Data for XRender is still transferred using the normal X network protocols; the DDX API (see later) was presumably updated to efficiently accelerate rendering of such structures - 2D graphics cards are very good at exactly these sorts of things.</p>
+
+<h2 id="x-clientserver-3d-apis">X Client/Server 3D APIs</h2>
+
+<p>The <a href="https://www.khronos.org/">Khronos group</a> publish several graphics-related specifications, including the OpenGL specification which defines an API for drawing 3-dimensional graphics.</p>
+
+<p>An X client uses the EGL, GLX, or GLUT API to obtain an OpenGL context object. It then invokes functions on this context. EGL/GLX/GLUT are all “bootstrap” libraries for OpenGL which glues OpenGL to some specific system (eg X11+DRI or Wayland or Mir). GLX is x-specific while EGL and GLUT are cross-platform. GLX can optionally be configured to perform “indirect rendering” while EGL supports “direct rendering” only.</p>
+
+<p>In “indirect rendering”, creating the OpenGL context sends a request to the X server to invoke a function from the GLX extension, which reserves/creates necessary resources. Further calls on the client to the OpenGL context are batched on the client side and sent to the X server when appropriate. On the server, this data is passed to a local OpenGL library which generates GPU instructions for the local graphics card and passes them on.</p>
+
+<p>In “direct rendering”, creating the OpenGL context immediately sends a request to the X server to invoke a function from the DRI extension. The server returns the ID of a <em>local device node</em> (<code>/dev/dri/card*</code>) which the client then opens (or in DRI3, an already-open filehandle is returned). The client then uses <code>libdrm</code> to perform operations on this device-node in order to allocate graphics buffers and map them into the client’s memory-space. The client then uses OpenGL functions to generate appropriate sequences of GPU instructions into these buffers and submit them to the GPU directly. The device-driver underlying the opened node validates the submitted GPU instructions to ensure that only a “safe” subset of commands are issued, that buffer transfers do not overwrite resources for other clients, etc - ie the X client has <em>direct but limited</em> access to the actual graphics hardware. Finally, after the GPU has rendered the resources submitted by the client into a client-specified buffer, the client uses another DRI extension function to submit the buffer to the X server for <em>compositing</em> onto the scan-out buffer.</p>
+
+<p>Obviously, DRI is only supported when the X client and X server are on the same host.  The kernel-drivers behind the <code>/dev/dri/card*</code> nodes (one node per graphics card in the system) are card-specific, and are called DRM drivers; userspace uses ioctls to perform buffer-management and (for modern DRM drivers) modesetting.  There is more detailed information on DRI and DRM later in this article.</p>
+
+<p>In “indirect” mode, the X server needs access to a card-specific OpenGL library in order to generate appropriate GPU instructions; in “direct” mode it is the X client which needs access to an appropriate OpenGL library. Further information on OpenGL is presented later.</p>
+
+<p>Note that the library which creates the original OpenGL context object (mesa?) needs to know about GLX and DRI, in order to create a context object that behaves appropriately.</p>
+
+<p>As noted earlier, an X server (or Wayland server) also controls <em>input devices</em> such as keyboards and mice, forwarding events to the relevant application. However this article is about graphics not input-devices so this will be ignored in the rest of the article.</p>
+
+<p>libdrm is maintained by the xorg project, ie the same project that implements the standard X server.</p>
+
+<h2 id="x-userspace-drivers">X Userspace drivers</h2>
+
+<p>The Xorg implementation of an X11 server splits the code into a “front end” (Device Independent X aka DIX) and “back end” (Device Dependent X aka DDX). DDX back-ends include:</p>
+
+<ul>
+  <li>xwin - backend for running xorg on Windows</li>
+  <li>xquartz - backend for running xorg on OS/X</li>
+  <li>xnest - backend for running xorg as a client of another xorg instance</li>
+  <li>xwayland (since v1.16) - backend for running xorg on top of Wayland</li>
+  <li>xfree86 - the “normal” backend for linux (though xwayland may become more popular in the near future)</li>
+</ul>
+
+<p>Note that the name “xfree86” has been retained even after maintenance of the xfree86 sourcecode was transferred (back) to <em>xorg</em>.</p>
+
+<p>The xfree86 backend has a “plugin” architecture; it loads (at runtime) a suitable “userspace driver” for the graphics card it is using. There is of course therefore an <em>API</em> that such drivers must implement; actually this api comes in two parts: a “base” api and an “acceleration” api. The card-specific xfree86 drivers are usually named <code>xf86-video-*</code> or <code>xserver-xorg-video-*</code>. Each driver declares a structure of type XF86ModuleData which contains a pointer to a “setup function”; X invokes that setup function and the function then calls xf86AddDriver, passing a structure of type DriverRec which has pointers to several callback functions including a “probe” function. That eventually gets called, and returns a ScrnInfoPtr struct which (yet again) holds pointers to various functions, including a ScreenInit function. When that gets called, it invokes xf86LoadSubModule to <em>load the relevant generic acceleration module</em> (eg loads module “exa”), then registers a bunch of callback methods with that module.</p>
+
+<p>There have been several “acceleration APIs” over the years: XAA (obsolete), <a href="https://en.wikipedia.org/wiki/EXA">EXA</a>, UXA - and Intel are currently working on a new one named SNA.</p>
+
+<p>Xorg maintains a collection of xfree86-compatible drivers for various graphics cards. Traditional drivers are 100% <em>userspace code</em> which communicate with graphics cards directly, without using any kernel functionality other than MMAP calls on <code>/dev/mem</code> to map arbitrary PCI address ranges (corresponding to the graphics card) into the userspace X server’s address-space [1].  These drivers drivers are responsible for generating the appropriate commands to the graphics card to do any 2D acceleration, ie how fast X 2D graphics goes depends very much on how clever the xfree86 driver is in generating commands for the GPU.  These userspace drivers are quite portable across different unix-like operating systems; once the graphics card control registers have been mapped into the X server’s memory space then all further operations are card-specific but not operating-system-specific.</p>
+
+<p>[1] Question: I thought that the PCI bus itself merely determines what BARs exist, and leaves it to a matching driver to select which BARs to actually map. But if there <em>is</em> no matching kernel driver, then what maps the BARs so that they appear in <code>/dev/mem</code>?</p>
+
+<p>The disadvantage of having purely user-space drivers (ie drivers where 100% of the functionality is in userspace) is that other processes, and even the kernel itself, no longer has any knowledge of the current state of the graphics card. Switching control of the card between processes is therefore very tricky to implement; examples of such handovers include:</p>
+
+<ul>
+  <li>On login, shutting down the X server instance used by the “greeter” and starting a user-specific instance</li>
+  <li>Switching user session without logging the original user off (“switch user”)</li>
+  <li>Switching from an X session to a virtual console and back</li>
+</ul>
+
+<p>The result of the above operations is therefore often “blinks” as the card is reset to a clean state, or sometimes graphics corruption.</p>
+
+<p>Suspending/resuming a laptop is also tricky as the kernel cannot restore the appropriate graphics mode itself but must instead rely on a user-space app to do that.</p>
+
+<p>Most of the xfree86 drivers have therefore been updated to support “mixed” operation, where at least the modesetting is delegated to a card-specific linux kernel driver; this is referred to as KMS (kernel modesetting).</p>
+
+<p>There is a fairly new xfree86 driver named xf86-video-modesetting which works with any card for which there is an in-kernel card-specific DRM driver that supports KMS. However this driver does not support any kind of 2D acceleration (it cannot as the driver is not card-specific so cannot perform any card-specific optimisiations).</p>
+
+<p>There is a fairly new xorg project named <a href="http://www.freedesktop.org/wiki/Software/Glamor/">GLAMOR</a> which implements 2D graphics operations by mapping them to OpenGL drawing operations. The initial implementation of GLAMOR was as an “acceleration API” that xfree86 drivers could optionally use (though the Intel driver is the only current user of it). It is expected that in the near future a complete DDX driver will be created that internally combines the xfree86-video-modesetting driver with GLAMOR, resulting in a driver that can configure <em>and</em> accelerate <em>all types of cards</em> as long as they have a suitable DRM driver and OpenGL implementation.</p>
+
+<p>A GLAMOR-based driver will be particularly useful for the Wayland project, making it possible for them to provide XWayland (a “proxy” X server) without major effort. Existing xfree drivers write to the underlying card directly, bypassing Wayland’s compositing process - ie no existing xfree86 driver could be used unmodified with Wayland, and modifying <em>every</em> existing driver is an unreasonable amount of effort. However using the GLAMOR approach, it is possible to develop a single GLAMOR-based driver which is compatible with Wayland and handles <em>all</em> cards. This is what the “xwayland” DDX driver does: X client apps think they are talking to a normal X server; Xwayland uses OpenGL/DRI to draw window contents to a buffer then uses the Wayland protocol to hand the buffer over to a compositor for actually writing to the scanout buffer.</p>
+
+<h2 id="kernel-based-graphics-drivers">Kernel Based Graphics Drivers</h2>
+
+<p>Over the years, three different types of kernel driver “helpers” for graphics have evolved: framebuffer, DRMv1 and DRMv2.</p>
+
+<p>First were the “framebuffer” kernel drivers. These provide a fairly simple API that is capable of setting the graphics mode on the “main” output for a graphics chip, allowing applications to explicitly set individual pixels in the output framebuffer, and do a few simple accelerated operations (bitblits and rectangular fills). Framebuffer drivers expose a file <code>/dev/fb{n}</code> which userspace performs reads/writes and ioctls on; all card-specific drivers provide exactly the same API so userspace apps can use any framebuffer driver. X has a simple userspace DDX driver which can handle all cards with framebuffer drivers, but with very little in the way of acceleration - the 2D drawing API (ie computing individual pixels) is implemented in software. See <a href="/linux/framebuffer-drivers/">this article</a> for more details.</p>
+
+<p>Next were the DRM (Direct Rendering Manager) drivers; these were created to <em>support</em> the “DRI” (Direct Rendering Interface) extension for X, ie in order to perform “direct” 3D rendering. The kernel provides a “drm core” kernel module that contains common code, and card-specific drivers register themselves with the drm core to add card-specific logic (see the <code>drm_*_init</code> functions). The drivers pass a set of flags to indicate which capabilities they support (eg <code>DRIVER_MODESET</code> indicates kernel-modesetting aka KMS support).</p>
+
+<p>The first DRM drivers provided just basic “DMA-style” buffer-management. Later the DRM core was enhanced to support many more (optional) capabilities, and the card-specific drivers were updated to implement the optional functionality, effectively producing a “DRM version 2” API. These new drivers support:</p>
+
+<ul>
+  <li>the complete functionality of the old framebuffer drivers (ie the “old” modesetting API, pixel-level read/write, bitblits and rectangular fills)</li>
+  <li>the complete functionality of the old DRM drivers</li>
+  <li>a new graphics modesetting API (also known as Kernel Mode Setting aka KMS) which is an improvement over the framebuffer-style modesetting</li>
+  <li>a new graphics buffer management  API (GEM or TTM)</li>
+</ul>
+
+<p>The DRM drivers primarily exist to allow userspace code (whether X client or X server) to allocate memory buffers, fill them with data or GPU instructions, and pass them to the graphics card. The “DRM v2” drivers (note: my invented name, not an official term) also support mode-setting (aka KMS). When an “old DRMv1 style” driver is registered with the DRM core, the core creates a device node named <code>/dev/drm*</code>; when the flags passed to the core indicate more modern capabilities then the DRM core create nodes named <code>/dev/dri/card*</code>, <code>/dev/dri/control*</code>, <code>/dev/dri/render*</code> and <code>/dev/fb*</code>. The DRM core handles <code>ioctl</code> syscalls on these device-nodes, returning errors for operations that the underlying driver does not support.</p>
+
+<p>Because newer DRM drivers support both framebuffer modesetting and KMS modesetting APIs, graphics card state can be consistently tracked regardless of which API userspace applications use. TODO: what if old-style userspace DDX drivers is also concurrently in use?  This allows smooth switching between framebuffer applications (eg ‘fbcon’ virtual consoles) and X applications; all information related to the state of a card is known to the corresponding driver rather than being embedded in the userspace DDX driver. The existence of DRMv2 drivers which support modesetting also opens up the possibility of performing graphics <em>without</em> using X at all, ie much of the tricky logic related to mode-configuration which was formerly embedded in DDX drivers has now been migrated to the DRM drivers. This allows things like Weston to be implemented without massive duplication of code from xorg. It also makes it possible to reliably switch control of graphics between various applications, eg between different X-servers (user-switch), or server and virtual console.</p>
+
+<p>While DRMv1 and DRMv2 both provide a kind of “buffer management” API, the newer (GEM/TTM) APIs are far superior to the older “DMA management” style api provided by DRMv1 drivers - although AFAIK both are supported.</p>
+
+<p>For each graphics card, there is one <code>/dev/dri/card*</code> node, one <code>/dev/dri/render*</code> node, and one or more <code>/dev/dri/control</code> nodes:</p>
+
+<ul>
+  <li>The ‘card’ node supports ioctls for the full set of driver functionality.</li>
+  <li>The ‘render’ node provides just the buffer-management functions. Separating this out makes it possible to grant applications access to a GPU without allowing them to change output configuration. This can be useful for applications that just wish to perform off-screen rendering, or which want to use the GPU for number-crunching (GPGPU) rather than graphics. In particular, such an application can open the render node directly rather than via a DRI call to the display server.</li>
+  <li>There is one ‘control’ node for each independent output (“head”) that a graphics card supports - ie the max number of concurrent scan-out buffers. Simple cards have only one set of display-output circuits and so can only generate one output stream at a time; “multihead” cards can generate multiple independent outputs from multiple scan-out buffers. Having separate control nodes makes it possible to grant an application modesetting rights on just <em>one</em> of the outputs (“heads”). This is particularly useful in a “multi-seat” environment where one server supports multiple concurrent users each with their own display; multiple X instances can each “own” a different control-file and perform modesetting independently.</li>
+</ul>
+
+<p>The exact ioctl operations supported by the DRM core is not considered a stable API; drm functionality is accessed instead through userspace library <code>libdrm</code> which does have a stable API.</p>
+
+<p>For 2D operations, X has a separate userspace xfree86 driver for each DRMv2 driver, but they are somewhat simpler than the “pure userspace” xfree86 drivers as they no longer need code to poke card-specific registers to set up graphics modes - the logic for these is now in the kernel driver. In all cases except the “framebuffer”, userspace drivers are responsible for generating the right instructions to a GPU for accelerating 2D graphics operations (ie OpenGL or similar is not used - though see information on GLAMOR later). In older cards, this was a reasonably simple job - the cards provided operations that mapped fairly directly to 2D operations. Modern cards, however, often require drivers to generate GPU “programs” to do even 2D graphics - a far from trivial process.</p>
+
+<p>Although a DRMv2 driver implements the framebuffer API, there may also be a separate (simpler) framebuffer driver available for the same card. This is true for some intel and nvidia cards for example, while AMD have just a single combined driver. Duplicated code is bad, but a simple framebuffer driver is good - the tradeoff is difficult to judge.</p>
+
+<p>With the invention of KMS, it would have been possible to rewrite DDX drivers to use the DRM apis to pass commands to the graphics hardware rather than map registers into memory directly; this would then have made it possible to run X as a non-root process. However this is a big job, and there were also some other corners of X that needed tidying up to allow non-root use. This was eventually achieved for at least some graphics drivers, but has never made it into a production linux distribution AFAIK - and may well be moot with Wayland looking to replace X as the standard display server. Converting xorg DDX drivers to use DRM is also controversial as the xorg server runs on non-linux systems too, and many do not have DRM/KMS.</p>
+
+<h2 id="atomic-modesetting">Atomic Modesetting</h2>
+
+<p>At the current time (mid 2015), work is underway on something called “atomic modesetting”. This is yet another rework of the APIs used to tell graphics cards to change resolution, output device, and other such settings (KMS). Often it is required to change several display-related settings at once - but the original framebuffer API and even the improved KMS-style API only allow settings to be changed one-at-a-time, ie one change per system call. This can lead to undesirable flickering and other visible artifacts while the changes are in progress. Worse, there are some changes that the card can refuse - which then means the caller needs to “undo” the previous steps in order to restore the display to its original state. Failing to “undo” such steps can leave graphics output in an unintended “intermediate” mode.</p>
+
+<p>The solution is to provide an API that is effectively a <em>list</em> of state-changes to apply, and then let the card-specific driver apply them “atomically”, ie all-or-none, and in the most appropriate order for that particular card. Of course this requires changes to the drm-core, libdrm, and the card-specific drivers so is taking some time to complete.</p>
+
+<p>See <a href="https://lwn.net/Articles/653071/">this LWN article</a> for related information.</p>
+
+<p>Update: see also <a href="http://phoronix.com/scan.php?page=news_item&amp;px=Understanding-Atomic-KMS">this presentation</a>.</p>
+
+<h2 id="more-on-dri-and-drm">More on DRI and DRM</h2>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Direct_Rendering_Infrastructure">DRI</a> functionality has gone through several iterations. However the basic concept has remained the same: the client fills memory buffers with graphics data such as textures, and other buffers with card-specific GPU instructions, and submits the buffers for execution. A DRM driver validates the buffers and forwards them to the graphics hardware. The results are rendered into another buffer which is then submitted to the X server for composition.</p>
+
+<p>Traditionally, memory for graphics cards and memory for the main system CPUs have been separate, ie graphics cards have had separate “on board” memory. This memory was quite often <em>faster</em> than normal memory, with wider buses from it to the GPU. Data was transferred between CPU memory and GPU memory with a kind of DMA system - a significant performance hit. Graphics rendering also often requires lots of memory, ie only data <em>currently needed</em> by the GPU should be kept in GPU memory. The result is that allocating of “buffers” to share data between CPU and GPU needs to be handled very carefully to get good performance. The GEM/TTM kernel modules exist to perform exactly this task: efficient allocation of buffers. While they are kernel modules, they are not intended for direct access from userspace; they are called from the DRM drivers instead. Some GPUs share their memory and memory-bus with the CPU, in which case memory-buffer-management is somewhat easier.</p>
+
+<p>The original DRMv1 drivers were just responsible for buffer management. New DRMv2 drivers also support KMS, ie the same device node can be used for mode-setting as well.</p>
+
+<p>DRI1 is now completely obsolete.</p>
+
+<p>In <a href="http://cgit.freedesktop.org/xorg/proto/dri2proto/tree/dri2proto.txt">DRI2</a> buffer allocation is mostly done by the X server, ie there is a function in the X DRI extension which allocates a suitable buffer and returns a <em>global integer id</em> for that buffer. The X client could then use this ID as a source or destination in various DRI/libdrm functions, or could map the buffer into its local memory-space via the ID. Because these IDs are <em>global</em>, other applications on the same machine could potentially interfere with them. The DRI2 “create context” method returns the filename of the <code>/dev</code> node which the X client must use with libdrm; when this file is opened there is a tricky “authentication” dance to allow the driver to figure out what rights this X client should have.</p>
+
+<p>In DRI3 (since late 2013) buffers are allocated by the client via <code>libdrm</code>, which returns a <em>file descriptor</em> rather than an integer id - much more secure. DRI3 functions take file-descriptors as parameters to identify buffers (passing file-descriptors over a local socket between processes is permitted). The DRI3 “create context” method opens the <code>/dev</code> node which the client must use with libdrm, and returns the <em>file descriptor</em>; this is much better than the DRI2 “filename” approach as it allows the X server to directly configure the driver with any security-restrictions etc. before the client gets access to the file-descriptor.</p>
+
+<p>Presumably, closing the <code>/dev/dri/*</code> node will release all associated graphics resources - ie no need for a “close” function in DRI. And nicely, this means everything gets cleaned up on client crash too.</p>
+
+<p>libdrm provides about 60 functions for X client use, including:</p>
+
+<ul>
+  <li>drmOpen</li>
+  <li>drmCommandWrite</li>
+  <li>drmMap - map graphics card memory directly into caller’s memory space (subject to limits set by display-server via drmAddMap)</li>
+  <li>drmDMA - reserve DMA buffers from the pool allocated by the display server (see drmAddBufs), or request transfer of the contents of a reserved buffer between client memory and videocard-memory (subject to checks applied by DRM kernel module)</li>
+</ul>
+
+<p>libdrm provides about 60 functions specifically for display server use, including:</p>
+
+<ul>
+  <li>drmSetMaster/drmDropMaster : gain exclusive access over a DRM node (done by the display server process)</li>
+  <li>drmCreateContext - configure a “DMA queue” and return a handle for use by clients in the drmDMA operation</li>
+  <li>drmCreateDrawable</li>
+  <li>drmAddBufs  - Allocate blocks of system memory in an address-range suitable for performing DMA to/from the GPU.</li>
+  <li>drmAddMap - defines which graphics-card address-ranges X clients are permitted to map directly into their memory-space. In effect, this allows non-root applications to mmap parts of <code>/dev/mem</code> which the X server has determined are appropriate for the client to map.</li>
+</ul>
+
+<p>See <a href="http://dri.sourceforge.net/doc/drm_low_level.html">this documentation on drmv1</a> for some documentation on the (original) DRM functions.</p>
+
+<p>There appears to be a different libdrm library implementation for each specific graphics card - ie the userspace/kernel implementation differs depending upon which card-specific DRM kernel module is loaded. TODO: how does the X client know which libdrm to load?</p>
+
+<p>See definitions in files <code>xf86drm.h</code>, <code>xf86drmMode.h</code> and <code>include/drm/libdrm.h</code> from repo <code>cgit.freedesktop.org/mesa</code> for the full API.  Note that “xf86” refers to the old name of the xorg server (‘xfree86’) rather than any chipset.</p>
+
+<p>As noted, some buffers will contain sequences of instructions for a GPU to execute. While theoretically various mechanisms could be used to generate such instructions, the X client typically dynamically loads an appropriate card-specific OpenGL library and passes the buffers to the OpenGL functions as the “target”. That is, DRI can theoretically be used to accelerate all sorts of graphics but in practice it is used for OpenGL.</p>
+
+<p>Some <a href="http://cgit.freedesktop.org/xorg/proto/dri2proto/tree/dri2proto.txt">DRI2 functions</a> (from about 10 total):</p>
+
+<ul>
+  <li>DRI2Connect</li>
+  <li>DRI2Authenticate : links the buffers associated with the calling X client to a token, so the client can then
+  pass that token to libdrm and get access to the same buffers</li>
+  <li>DRI2CopyRegion : schedule a copy from one buffer to another</li>
+  <li>DRI2SwapBuffers : replace the “active” buffer (ie displayed window) with the specified “offscreen” one</li>
+</ul>
+
+<p>The <em>full</em> set of DRI3 functions:</p>
+
+<ul>
+  <li>Open</li>
+  <li>PixmapFromBuffer</li>
+  <li>BufferFromPixmap</li>
+  <li>FenceFromFD (a kind of synchronization primitive)</li>
+</ul>
+
+<p>DRI3 also relies on the “PresentPixmap” function of the new Present extension, which tells the X server to “make this buffer the contents of this window”, ie effectively to composite the contents of the buffer into the scan-out buffer at that window’s current location.</p>
+
+<p>There is a <a href="http://landley.net/kdocs/htmldocs/drm.html">DRM Developers Guide</a> which is an excellent source of more details on the DRM module, GEM and TTM.</p>
+
+<h2 id="gem-and-ttm">GEM and TTM</h2>
+
+<p>One of the big bottlenecks in 3D is passing data between userspace applications and the graphics card.</p>
+
+<p>Discrete graphics cards have onboard memory, and physical-address ranges on the system-bus are mapped to address-ranges on the graphics cards by writing to the PCI BAR registers. When the CPU writes to a physical address in this range, the PCI controller detects the write and forwards the data on to the graphics card. Similarly, when the CPU reads a pyhsical address within this range, the PCI controller passes the read-command on to the graphics card which returns data that the PCI controller then passes on to the system bus, ie back to the CPU. Data can therefore be transferred either via direct reads/writes from the CPU (as just described), or by setting up DMA transfers between “normal” system memory and graphics-card memory address ranges. Because graphics cards can have large amounts of memory, it is sometimes necessary to map only <em>parts</em> of the graphics-card memory to physical system bus addresses; deciding which addresses to map is important for high performance, and non-trivial. Mapping graphics-ram to system-physical-addresses is particularly difficult on 32-bit systems; a 32-bit physical address can only address 4GB of data at a time.</p>
+
+<p>Integrated GPUs use memory that sits on the standard system bus, ie memory that can also be addressed by the CPU; this is called Unified Memory Access (UMA). Of course code running on a CPU should be very careful accessing physical memory that is also being used by the graphics card - all sorts of race conditions could occur. <em>AFAIK</em>, there are two possible solutions:</p>
+
+<ul>
+  <li>allow the GPU to perform DMA copies between the pages “owned” by the GPU and the pages “owned” by the CPU;</li>
+  <li>
+<em>map</em> pages in and out of the GPU/CPU MMUs, ie “transfer ownership” of pages.</li>
+</ul>
+
+<p>Question: do integrated GPUs always access memory via an MMU? How can the operating system ensure that code running on the GPU does not access other physical memory, ie allow applications with access to the GPU to read/write all physical memory?</p>
+
+<p>Question: can discrete cards also reference system memory directly? A PCI device can become “bus master” and read/write system memory directly..</p>
+
+<p>Question: can graphics chips on the motherboard have dedicated memory?</p>
+
+<p>The userspace DDX drivers previously managed this CPU/GPU data-transfer (buffer management) themselves, but presumably not very effectively as they don’t have complete control over the CPU’s MMU settings. They do have complete control over the graphics card’s DMA functionality so DMA-based data transfer works fine (ie where all memory is on the card) but UMA-style systems (where the GPU can page in system memory) was presumably rather ugly.</p>
+
+<p>The TTM kernel module was eventually created to provide a common kernel-private API for managing the transfer of data between system and GPU. Because TTM covered both the mem-on-card and UMA usecases, the API was quite complicated. The GEM kernel module was invented shortly after, with a much simpler API and a much simpler implementation - but it only supported UMA (it was developed by Intel who only produce integrated graphics). The TTM code was later reworked to keep the same functionality but provide the same simple API as GEM (“gemified ttm”). Both TTM and GEM are now in the kernel, and which is used depends on the underlying card: GEM works faster for UMA-only cards, but TTM is needed for NUMA cards.</p>
+
+<p>The interface to GEM/TTM is hidden behind the /dev/dri/card0 ioctls which are hidden by libdrm - ie an X client manipulates buffers by invoking libdrm functions which perform ioctls which are handled by the DRM driver which forwards to GEM or TTM.</p>
+
+<p>TODO: Strangely, it appears that libdrm provides very card-specific APIs, eg function <code>drm_intel_bo_gem_create_from_name(...)</code>. So the user of libdrm must have card-specific code in it too - well, at least card-family-specific. The DRM driver defines different IOCTL commands for GEM and TTM operations; a DRM driver which uses GEM will return an error if TTM ioctls are invoked, and vice-versa. Somewhat ugly, saved only by the fact that there are very few users of libdrm which perform buffer management - in fact, really only OpenGL implementations: mesa, intel-opengl, and nvidia-opengl.</p>
+
+<p>Question: do userspace DDX drivers interact with GEM/TTM at all? If not, how do they perform buffer management? Presumably they (a) do what they used to do, and (b) don’t actually need to do much complex buffer management because they only support 2D graphics which has far lower data volumes than 3D.</p>
+
+<ul>
+  <li><a href="http://thread.gmane.org/gmane.comp.video.dri.devel/30488">Keith Packard’s announcement of GEM with lots of API info</a></li>
+  <li><a href="https://www.kernel.org/doc/htmldocs/drm/drm-memory-management.html">kernel.org info on GEM and TTM</a></li>
+  <li><a href="http://landley.net/kdocs/htmldocs/drm.html">DRM Developers Guide</a></li>
+</ul>
+
+<h2 id="d-drivers-opengl-etc">3D Drivers (OpenGL etc)</h2>
+
+<p>3D libraries (eg implementations of OpenGL) running in userspace access the graphics card by asking X or libdrm to set up an appropriate output buffer, then filling other buffers with vertex data, textures, shader programs, etc., and asking (via libdrm) the appropriate DRM kernel driver to pass those data buffers on to the GPU for rendering into the output buffer.</p>
+
+<p>Note that there is very little kernel-specific code in an OpenGL library; such libraries are mostly portable across posix-compatible systems. The OpenGL implementation for a card is therefore more a <em>library</em> than a <em>driver</em>.</p>
+
+<p>The OpenGL implementation for many graphics cards is part of the <a href="https://en.wikipedia.org/wiki/Mesa_%28computer_graphics%29">Mesa</a> project, and often share significant portions of code. The Gallium framework is also developed as part of the Mesa project, and the OpenGL support for many cards (both within and outside the mesa project) is based on Gallium which thus also allows code to be reused. One important exception to this are the OpenGL drivers created by Intel for their own GPUs; this code is open-source but is currently not hosted on the Mesa site nor uses Gallium. However there is a driver for Intel GPUs developed by an independent team which is in Mesa and uses Gallium (though features and performance lag the intel-developed version). There is a driver for nvidia cards in Mesa, but this lags well behind the proprietary drivers from Nvidia themselves. Until 2015, AMD had separate open-source (mesa/gallium) drivers and closed-source “catalyst” drivers; for their latest GPUs they now have a single mesa/gallium open-source driver and a proprietary user-space “helper” which accelerates performance for some uses.</p>
+
+<p>The first accelerated 3D rendering library was Utah-GLX, and is now referred to as “GLX indirect rendering”. OpenGL API calls on the client are simply sent to the X server (via the GLX extension), which passes them to a suitable GLX-enabled driver. A GLX driver is userspace code that uses a card-specific OpenGL library to generate GPU instructions and card-specific code to pass these instructions directly to the graphics card. This suffers from the drawback that there is no “shortcut” for local x clients to access the 3D hardware; all operations must be encapsulated as X calls to the local X server which is simply a <em>huge</em> impact for something as data-intensive as 3D graphics. It would be preferable for clients to directly access the graphics card themselves, but this simply cannot be done from userspace; X can do it as (a) it is a “trusted app”, (b) it can run as “root”, and (c) only one instance runs at a time.</p>
+
+<p>The DRI approach effectively pushes parts of the graphics rendering down into a DRM kernel module so that (a) the module can perform security checks on the data passed by the client, and (b) the kernel module can arbitrate between multiple processes. The rest of the functionality for performing 3D graphics can remain in userspace (OpenGL, libdrm, and DRI). This approach lets client applications safely generate graphics directly, solving the performance problems of “GLX indirect rendering”.</p>
+
+<p>For remote clients, this “shortcut” is of course not possible, and they must use the GLX indirect rendering approach as originally designed.</p>
+
+<h2 id="wayland">Wayland</h2>
+
+<p>Recently, Wayland has been developed as an alternative to X. In some ways, Wayland can be thought of as a factoring-out of the lowest levels of X, dealing just with mapping of multiple windows into a common framebuffer and little else. Alternatively, Wayland can be considered an X server that exposes DRI to client apps. Wayland does not provide a 2D drawing protocol like X; instead it just provides a simple API for clients to pass full windows (buffers of pixels). Wayland still needs to set the graphics mode (but that is easy with KMS support), and to do lots of bit-blitting.</p>
+
+<p>With Wayland, therefore, client applications use DRMv2 directly to allocate output buffers (rather than asking X), and use DRMv2 to pass data (vertexes, textures, shader programs, etc) to the GPU. The GPU then renders directly into the client app’s buffers and the client eventually “hands over” the completed buffer to the Wayland server for <em>compositing</em> (merging) into the scan-out buffer.</p>
+
+<h2 id="cairo">Cairo</h2>
+
+<p>X defines a very primitive 2D drawing API. The XRender extension defines an X network protocol extension for transferring far more sophisticated drawing primitives between an X client and an X server - but doesn’t provide a <em>client API</em> for generating such data. <a href="https://en.wikipedia.org/wiki/Cairo_%28graphics%29">Cairo</a> provides a modern API for 2D drawing which maps well to the XRender extension - ie when an application uses the Cairo API to draw, the results can be efficiently represented as an XRender package for sending to the X server. The <a href="http://cairographics.org/">Cairo</a> API also (not coincidentally) maps well to the MS-Windows drawing API, and to other windowing systems too.</p>
+
+<p>Potentially, the DRI system could also be used to render Cairo graphics - ie for a Cairo “back-end” to use libdrm to allocate buffers, write GPU-specific commands into them, and then use the X DRI commands to “hand over” the results to the X server for rendering. This would avoid significant amounts of client-to-server network traffic, but would require the client and server to be on the same host. The “opengl backend” for Cairo is currently marked <em>experimental</em>.</p>
+
+<h2 id="opengl-mesa-gallium">OpenGL, Mesa, Gallium</h2>
+
+<p>The above discussions omit the hardest part in all this - generating the vertexes and textures that describe a 3D scene, and generating the GPU-specific commands to implement vertex and pixel shading. The OpenGL specification defines a suitable API. Some graphics vendors provide their own opengl implementation that knows how to map the calls into tables and instruction-streams that the card understands. Others are supported by the open-source Mesa project which has common code for handling the vertices stuff, and card-specific back-end drivers for generating the card-specific instructions.</p>
+
+<p>There are also 2D drawing APIs (eg Cairo) which want to take advantage of graphics acceleration. Cairo has one back-end that generates openGL calls; there are also experimental card-specific back-ends that generate GPU-specific commands directly.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Mesa_%28computer_graphics%29">Mesa</a> project is a collection of graphics-related libraries. It started as a <em>software rendered</em> implementation of OpenGL, but now also hosts various card-specific opengl implementations, and various wrappers.</p>
+
+<p>Q: according to one source, when using Mesa, OpenGL features that are not yet implemented in a card-specific driver are instead <em>rendered in software</em>. Is this true?</p>
+
+<p>Q: The <a href="http://mesamatrix.net">mesamatrix</a> site shows the current state of Mesa’s opengl drivers. AFAIK, the first “mesa” column indicates the state of the “opengl Gallium state tracker”, ie the “gallium front-end” that provides an OpenGL API to applications. The other columns then indicate the state of the card-specific “gallium back-ends” - except for the i965 column, as the i965 driver is not gallium-based. Hmm - maybe not; some features (for example, OpenGL4.5:GL_ARB_direct_state_access) were implemented <em>simultaneously</em> for all hardware types. This suggests that MESA actually is a “front end” that the various card-specific impls plug in to, ie that there is an internal Mesa API that all the “back ends” implement - whether gallium-based or not.</p>
+
+<p>As <a href="http://blogs.igalia.com/itoral/2014/08/">described by Iago Toral</a>, “Mesa is best seen as a framework for OpenGL implementators that provides abstractions and code that can be shared by multiple drivers.”</p>
+
+<p>Gallium is an open-source framework that aims to split the task into two parts: a front-end “state tracker” provides a user-level api and generates “intermediate code”, and card-specific back-ends then generate the card-specific output. There are “state trackers” for OpenGL, Cairo, DirectX11(!) and potentially other APIs which can all reuse the same card-specific back-end code. Of course a “state tracker” for a complex API typically reuses significant amounts of code from the existing project (eg mesa, cairo). The above article by Iago Toral also has a useful overview of Gallium.</p>
+
+<p>EGL is an API for managing windows and buffers. An OpenGL implementation is primarily responsible for generating appropriate blocks of data for a card to process, ie textures, tables of vertices, and streams of instructions - and all of this is <em>card-specific</em> but <em>not operating system specific</em>. However the data needs to be <em>put</em> into some buffer; OpenGL just requires the necessary buffers to be <em>passed in</em> as parameters, in order to retain its OS-independence. These buffers also need to be <em>pushed</em> to the card at some time. The responsibility of managing “windows” and “buffers” and “submitting” data has always been done external to OpenGL; the GLX API traditionally performed that glue for X on posix systems. However having a graphical application directly invoke a windowing-and-os-specific library is undesirable; EGL was therefore invented as a standard API which can have a different implementation for each OS/windowing system. An app coded against the EGL and OpenGL interfaces therefore just needs to be linked to the right library at compile or runtime. Note that EGL does <em>not</em> provide any “drawing” operations like OpenGL (or OpenVG) does; it simply handles the buffer management. There is an EGL implementation that uses the MS-Windows GDI interface to output the generated graphics, and one that supports DRI on linux (ie uses DRI X extension functions together with libdrm to talk to the DRM kernel module). Because EGL is a “helper for OpenGL”, and GLX (on the client side) is a <em>proxy</em> for OpenGL (ie doesn’t actually generate any GPU instructions), EGL is not a wrapper for GLX - so an app that wants to be able to renter 3D on a remote graphics card must support GLX explicitly.</p>
+
+<p>The standard implementation of the GLX API is <a href="http://dri.freedesktop.org/wiki/libGL/">Mesa libGL</a>.</p>
+
+<h1 id="the-big-picture">The Big Picture</h1>
+
+<p>Now that the general topics have been presented, here is a diagram that shows the dependencies in graphical form..</p>
+
+<p><img src="/linux/graphics-stack-png.png" height="1024" width="768"></p>
+
+<!--
+<object type="image/svg+xml" data="/linux/graphics2.svg" style="width:1024px;height:768px">Your browser does not support SVG</object>
+-->
+
+<p>Below the main points from this diagram are discussed; this will often repeat the information from the first part of this article, but in context.</p>
+
+<h2 id="x-client">X Client</h2>
+
+<p>An X client opens a socket to whatever location is specified in environment variable <code>$DISPLAY</code>. The X client app then uses either the xlib API or the xcb API to communicate with the X server; window-management and drawing commands are sent to the remote server, and events (keyboard, mouse, etc) are sent by the server to the client. The <code>xlib</code> API is the original api, and has many functions that “block” the calling thread; <code>xcb</code> is a newer API which is more consistent and based around event-queues rather than blocking. However both libraries generate identical output to the X server.</p>
+
+<p>The X11 network protocol is very generic; basically a kind of “RPC” mechanism. Each packet specifies a “function” and parameters; the client can query the server to see which functions it supports.</p>
+
+<p>2D drawing may be done via the original X functions (draw-line, fill-rectangle) or via the more modern functions belonging to the “XRender extension”. In theory an X server might not suport the XRender extension - but in practice most clients simply assume it is available on the server.</p>
+
+<p>In practice, most applications do not use either xlib or xcb directly, but instead use a higher-level API such as Qt or GTK+.</p>
+
+<p>Performing 3D graphics is more complex : the “direct” and “indirect” approaches are significantly different.</p>
+
+<h3 id="direct-opengl-with-x">Direct OpenGL with X</h3>
+
+<p>In DRI (“direct 3D”), the client application uses some “glue api” to load a suitable OpenGL library implementation and initialise it. OpenGL defines an API for drawing to “surfaces”, but deliberately does not concern itself with concepts such as “windows”; it is therefore necessary to somehow integrate OpenGL with whatever windowing system is being used on this host (whether X, news, ms-windows GDI, Mac, etc). In particular, an <em>opengl context</em> structure needs to be created for use with the OpenGL APIs.</p>
+
+<p>The traditional API used on linux systems to bind OpenGL to X is <a href="https://en.wikipedia.org/wiki/GLX">GLX</a>. The WGL library does something similar for MS-Windows, and CGL for Mac. GLX/WGL/CGL all have different APIs, ie an application written for one window system is not useable on another.</p>
+
+<p>The Khronos group which specifies the OpenGL API has created its own API named EGL which can be used to bind OpenGL to various windowing systems; initially the EGL API could only be used to create contexts that are compatible with the “OpenGL ES” subset of OpenGL, but this restriction has recently been lifted - a flag can now be passed to EGL to ask it to return a “full opengl-compatible” context. There are dynamic libraries that implement the EGL API for various windowing systems including X11 and Windows, ie an X client app just needs to load the appropriate one at runtime.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/OpenGL_Utility_Toolkit">GLUT</a> API is older than EGL, and solves the same problem: a portable API for binding OpenGL to various windowing systems.</p>
+
+<p>The Mesa project provides a single library <code>libGL</code> which provides the EGL and GLX apis. This library has support for using DRI and <code>libdrm</code> for direct rendering; the GLX implementation also supports “indirect” mode (see later). Mesa also provides open-source card-specific OpenGL implementations which libGL can load and integrate with.</p>
+
+<p>Some vendors choose to provide their own OpenGL libraries rather than work with the Mesa project (eg the closed-source NVidia driver, the closed-source AMD Catalyst driver, and the open-source Intel driver). TODO: do these suppliers then need to implement EGL and GLX corresponding to their custom OpenGL implementations, or can libGL load these drivers anyway?</p>
+
+<p>The Mesa libraries can also be <a href="https://wiki.freebsd.org/Graphics">used on BSD</a> operating systems. The DRM driver code is linux-specific but generally released under a liberal license to permit porting to non-linux systems, so that the BSDs can also provide DRI-based accelerated graphics.</p>
+
+<p>To display graphics in a “window”, the client first uses standard X calls to create a window, then uses either (a) DRI2 to get back the filename of a <code>/dev/dri/card*</code> node to open or (b) DRI3 to get back an already-open filehandle for that node. It then uses libdrm calls to manage buffers, and OpenGL calls (together with the correct card-specific driver) to generate data to put into those buffers. Eventually the buffer gets handled back to the X server for output. The <code>libdrm</code> primarily uses <code>ioctl()</code> calls to communicate with the DRM driver. <code>libdrm</code> provides a rather ugly API, with many functions relevant only to specific families of graphics cards - but is guaranteed to be backwards-compatible.</p>
+
+<h3 id="indirect-opengl-with-x">Indirect OpenGL with X</h3>
+
+<p>In “indirect 3D”, the client application uses the GLX (OpenGL-for-X) APIs to create a “GL context”, and then uses normal OpenGL calls on that context. These calls are simply passed over the network to the X server. On the server, these calls are then processed via OpenGL and libdrm in a similar manner to how X clients perform “direct 3D” rendering; this part of the xorg server is called <a href="https://en.wikipedia.org/wiki/AIGLX">AIGLX</a>.</p>
+
+<p>Mesa’s <code>libGL</code> library supports indirect GLX; as GPU instructions are generated only on the server, there is no card-specific code needed on the client side.</p>
+
+<p>3D graphics is very data-intensive, in particular when making heavy use of <em>textures</em>. The performance of “indirect OpenGL” is therefore not always acceptable - though it depends on the application and on the network bandwidth.</p>
+
+<h2 id="wayland-clients">Wayland Clients</h2>
+
+<p>The diagram does not show any client application integrating with Wayland rather than an X server; that really needs another separate diagram which would make this article <em>way</em> too long.</p>
+
+<p>However in general, the same principles apply. A client app opens a socket to a wayland-compatible server, and sends commands over the socket to manage windows. The wayland-compatible server sends back events such as keystrokes and mouse movements. However unlike X, no “drawing” commands are sent over the socket; instead the client uses libdrm to allocate buffers, uses card-specific libraries to generate GPU commands and other data into those buffers, and requests the graphics card to process these commands. When a buffer full of graphics is ready for display, the client then “passes control” of the buffer to the wayland-compatible server which then “composes” the buffer contents into the scan-out buffer.</p>
+
+<p>Buffer handles can be passed across the socket between wayland client and server, but AFAIK the DRM module also provides ways for buffers to be “handed over” to the wayland server as soon as processing is complete.</p>
+
+<p>There is technically no such thing as a “wayland server”; Wayland is a <em>protocol</em> rather than an actual implementation. Because the protocol is reasonably simple, implementation of the API is not a huge job. Typically a <em>window manager</em> implements the wayland protocol, ie when a client communicates with a “wayland-compatible server” it is actually talking directly to the desktop’s window-manager. This is somewhat different from X, where the X-server and window-manager are separate applications with a complex protocol between them.</p>
+
+<p>Because Wayland clients are expected to use libdrm, they must be on the same host as the wayland server. Performing “remote graphics” is supported by having a <em>proxy</em> application which the Wayland server sees as a normal wayland client (ie something that passes it buffers full of graphics). The proxy can then implement any network protocol it desires to communicate with the real client app - ie network protocols have been factored out of the core display server. XWayland is a modified X server which talks normal X network protocol to clients, and acts like a normal Wayland client - allowing most X applications to run unmodified. Proxies for other network protocols may be added in the future, eg one based on rendering on the client and transferring compressed images to the server (a kind of remote-desktop-protocol).</p>
+
+<p>Note that XWayland does not support 100% of the X API, in particular things related to status-bars, messing with keyboard events, etc. Such applications do need to be <em>adapted</em> to work properly with a wayland display server. Examples of such programs are screen-savers and login managers (“greeters”).</p>
+
+<h2 id="gpu-computation">GPU Computation</h2>
+
+<p>Some math-intensive applications can be accelerated by using a GPU for things other than generating graphics for immediate output. Such applications can simply open a <code>/dev/dri/render*</code> node and use <code>libdrm</code> directly without ever connecting to an X (or Wayland) server.</p>
+
+<h2 id="x-server">X Server</h2>
+
+<h3 id="ddx-drivers">DDX Drivers</h3>
+
+<p>The xorg server is split internally into a “front end” (DIX) and “back end” (DDX); on Linux xorg usually uses the “xfree86” DDX back end, which in turn loads a suitable card-specific userspace driver.</p>
+
+<p>A traditional 100% xfree86 userspace driver relies on the fact that the Linux kernel will have already scanned the PCI bus and created datastructures to represent all the devices present on the bus(es), including the device ids and the requested memory ranges. This information can be seen under <code>/sys</code> (and the <code>lspci</code> command prints it out nicely).  The driver can therefore use <code>/sys/</code> to determine which physical addresses correspond to the graphics card, open <code>/dev/mem</code> (which represents all <em>physical memory</em> on the system), and use <code>mmap</code> calls to map those physical pages into its (ie the X server’s) virtual memory. The driver then has a direct method of communication to the graphics card. Note that opening <code>/dev/mem</code> is restricted to <em>root</em> for obvious reasons; this means that with this approach the X server also needs to run as root - even though an X server instance typically “serves” just one user.</p>
+
+<p>Originally, these xfree86 drivers would use this “direct method of communication” to configure the “display modes” of the card. All modern xfree86 drivers have now been updated to use <code>libdrm</code> to communicate (via <code>/dev/dri/card0</code>) with the in-kernel DRM driver instead, so that display mode information is centralized. I am not currently sure whether 2D drawing commands performed by DDX drivers also goes through <code>libdrm</code> or whether the DDX driver still communicates directly with the card.</p>
+
+<p>If xfree86 drivers were to avoid using <code>/dev/mem</code> and instead only use libdrm to talk to the card, then running X as a “normal user” would also be possible (with <a href="http://hansdegoede.livejournal.com/14268.html">some complications</a>).</p>
+
+<p>When an xfree86 driver opens <code>/dev/dri/card0</code> it immediately makes an <code>ioctl</code> systemcall to make itself the “master” of that node. A card node can be opened by multiple processes concurrently, but some functionality is only available to the process marked as the “master”.</p>
+
+<p>Question: Somehow, the graphics card BARs are set up to map appropriate physical memory ranges to the card (the kernel doesn’t do this automatically AFAIK). I would guess that when a DRM driver for that card is available then that driver will configure the mappings. But how does this get done when using old-fashioned DDX drivers?</p>
+
+<h3 id="aiglx">AIGLX</h3>
+
+<p>When a client app uses GLX in “indirect mode”, then OpenGL commands are passed from the client to the server. The xorg server then invokes the AIGLX component which uses libdrm and a card-specific OpenGL implementation to basically do what a client in “direct mode” would have done.</p>
+
+<h2 id="other-topics">Other Topics</h2>
+
+<p>? maybe more info on GLAMOR ?</p>
+
+<p>? displaying video: VDPAU, VAAPI, Xvideo/Xv ?</p>
+
+<p>? brief intro to X “window managers” ?</p>
+
+<p>DDX drivers originally wrote <em>directly</em> into the frame-buffer. A driver was expected to <em>clip and translate</em> its output to match the visible part of the relevant “window”. No “compositor” was possible; instead when a window moved then an “expose event” was sent to the owner of the “underlying window” to draw the necessary section. Hacks were later added to redirect output into per-window buffers, and a compositor would then <em>merge</em> the buffers (max once per frame). Each window actually has two buffers: the <em>front buffer</em> which is the one that gets copied to the framebuffer, and the <em>back buffer</em> which is not visible until the app owning the window performs a <em>buffer switch</em>. Compositing is a more <em>secure</em> manner of graphics than allowing applications to write direct to the framebuffer; it ensures that an app cannot overwrite output from other apps (eg hide warnings), cannot pretend to be other apps (eg draw a popup “enter network password” window), and cannot <em>read</em> graphics generated by other apps (eg password input fields). It is because the “target buffer” was originally a part of the framebuffer that DRI1/DRI2 originally had the X server allocate buffers, and the client then simply “gained access” to them. DRI3 instead has the client using the DRM APIs to allocate buffers, and then “transfer” them to the display server; this <em>requires</em> the display server to perform composition (ie cannot use the “fast path” of having a client write directly into the framebuffer) - but the advantages of composition are so high that all modern systems (even embedded ones) do that anyway.</p>
+
+<p>Some graphics hardware supports “composing” multiple framebuffers in hardware at scanout time - ie there can be multiple framebuffers. This can reduce the amount of copying a compositor needs to do; as long as there are not <em>too many</em> windows active, then the hardware can composite directly from the per-window buffers. Or at least, desktop-background, cursor and all-other-windows can be in separate buffers. Such hardware is common in embedded systems (where power is important and IO bandwidth is limited); the different buffers accessed directly by the hardware are sometimes called “sprites”.</p>
+
+<p>AFAIK, a Gallium3D “State Tracker” is the front-end part of a gallium3d-based driver. The state-tracker provides the API to the client application (eg provides the OpenGL API, or OpenVG, or Direct3D, or other). It then generates appropriate calls to the Gallium3D back-end which generates a card-independent stream of data which is then passed to a card-specific library to generate card-specific instruction and data streams. TODO: add more info on Gallium3D.</p>
+
+<p>A 3D “texture” can be used to perform the equivalent of a 2D “bitblit”: executing a 3D operation to draw a flat polygon with a specified texture-image places the specified texture unaltered into the output buffer at the polygon’s coordinates. Rotating/skewing the specified polygon will transform the specified texture. This is used for example to display individual frames of video.</p>
+
+<p>The following projects/acronyms are completely obsolete and can be ignored if you see them referenced elsewhere:</p>
+
+<ul>
+  <li>xgl - replaced by AIGLX</li>
+  <li>glitz - replaced by GLAMOR?</li>
+  <li>compiz</li>
+</ul>
+
+<p><a href="http://freedesktop.org">Freedesktop.org</a> is a “hub” for development of open-source graphics-related software on unix-like systems.<a href="http://www.freedesktop.org/wiki/Software/">Many projects</a> are hosted there, including DRI, Glamor, Cairo, libinput - though many of these projects have their primary home-page on a dedicated domain.</p>
+
+<h1 id="references">References</h1>
+
+<p>Update: The official kernel docs for graphics are now <em>much</em> better than they were when this article was originally written:</p>
+
+<ul>
+  <li><a href="https://01.org/linuxgraphics/gfx-docs/drm/gpu/index.html">Web version of the official Linux kernel graphics documentation</a></li>
+</ul>
+
+<p>There are other articles on this site that are related to graphics:</p>
+
+<ul>
+  <li><a href="/linux/graphics-card-interfaces/">Detailed Info on Modern Graphics Cards</a></li>
+  <li><a href="/linux/framebuffer-drivers/">Detailed Info on Linux Framebuffer Drivers</a></li>
+  <li><a href="/linux/drm-and-kms/">Detailed Info on DRM/KMS Implementation</a></li>
+  <li><a href="/linux/the-pci-bus/">The PCI Bus</a></li>
+</ul>
+
+<p>Information in this article has been pulled from <em>many</em> sources. Here are a few of them:</p>
+
+<ul>
+  <li>
+    <p><a href="http://blog.mecheye.net/2012/06/the-linux-graphics-stack/">Mecheye: The Linux Graphics Stack</a> - a well-written article that covers many of the same topics as this article, but in less detail</p>
+  </li>
+  <li>
+    <p><a href="http://people.freedesktop.org/~marcheu/linuxgraphicsdrivers.pdf">Stephane Marchesin: Linux Graphics Drivers: an Introduction</a> - general info about the linux graphics stack. Sadly very incomplete.</p>
+  </li>
+  <li>
+    <p><a href="http://download.intel.com/design/intarch/papers/325350.pdf">Intel: Intel Linux Graphics Stack</a> - general info about the linux graphics stack</p>
+  </li>
+  <li>
+    <p><a href="http://blogs.igalia.com/itoral/2014/07/29/a-brief-introduction-to-the-linux-graphics-stack/">Iago Toral: Brief Introduction to the Linux Graphics Stack</a>. There are many articles on this blog which provide <em>excellent</em> introductions to 3D rendering and modern graphics chips.</p>
+  </li>
+  <li>
+    <p><a href="http://blogs.igalia.com/itoral/2014/08/">Iago Toral: Diving into Mesa</a></p>
+  </li>
+  <li>
+    <p><a href="https://en.wikipedia.org/wiki/Direct_Rendering_Infrastructure">Wikipedia on DRI</a></p>
+  </li>
+  <li>
+    <p><a href="http://landley.net/kdocs/htmldocs/drm.html">DRM Developers Guide</a> - from 2012. Very detailed discussion of internal DRM details.</p>
+  </li>
+  <li>
+    <p><a href="https://www.kernel.org/doc/htmldocs/drm/drm-memory-management.html">DRM Memory Management</a> - very detailed info on GEM/TTM</p>
+  </li>
+  <li>
+    <p><a href="http://www.mesa3d.org/dispatch.html">GL Dispatch in Mesa</a> - some information about Mesa’s implementation, and about the OpenGL APIs in general.</p>
+  </li>
+  <li>
+    <p><a href="http://dri.freedesktop.org/wiki/DRM">Xorg dri/drm page</a> - appears quite out-of-date</p>
+  </li>
+  <li>
+    <p><a href="http://dri.freedesktop.org/wiki/DRMRedesign">Xorg drm redesign</a> - proposal for what became the current DRM architecture</p>
+  </li>
+  <li>
+    <p><a href="https://lwn.net/Articles/283793/">LWN: GEM v. TTM</a> - somewhat obsolete (written while GEM/TTM were under development) but has some interesting background info</p>
+  </li>
+  <li>
+    <p><a href="http://lwn.net/Articles/257417/">LWN: Memory management for graphics processors</a> - Nov 2007</p>
+  </li>
+  <li>
+    <p><a href="http://dri.freedesktop.org/wiki/DRM/">DRM article from freedesktop.org wiki</a> - currently describes DRMv1 only</p>
+  </li>
+  <li>
+    <p><a href="https://www.khronos.org/registry/egl/specs/eglspec.1.4.20110406.pdf">EGL specification</a> - the official specification of the Khronos EGL API (see p42 in particular)</p>
+  </li>
+  <li>
+    <p><a href="https://sites.google.com/site/jonsmirl/graphics">Jon Smirl: The State of Linux Graphics</a> - Jon Smirl, 2005</p>
+  </li>
+  <li>
+    <p><a href="http://nouveau.freedesktop.org/wiki/IntroductoryCourse/">Nouveau Introductory Course</a></p>
+  </li>
+  <li>
+    <p><a href="http://keithp.com/blogs/Sharpening_the_Intel_Driver_Focus/">Keith Packard: Sharpening the Intel Driver Focus</a> - from 2009</p>
+  </li>
+  <li>
+    <p><a href="http://www.x.org/wiki/Development/Documentation/Glossary/">xorg glossary</a></p>
+  </li>
+  <li>
+    <p><a href="http://www.x.org/releases/X11R7.6/doc/xorg-server/DESIGN.html">xfree86 DDX Design</a> - 2010. Excellent low-level information on the internals of the xorg DDX layer, including how userspace drivers interact with graphics cards.</p>
+  </li>
+  <li>
+    <p><a href="https://en.wikipedia.org/wiki/Video_card">Wikipedia on graphics hardware</a></p>
+  </li>
+  <li>
+    <p><a href="https://en.wikipedia.org/wiki/X_video_extension">Wikipedia on the Xvideo extension</a></p>
+  </li>
+  <li>
+    <p><a href="https://en.wikipedia.org/wiki/Free_and_open-source_graphics_device_driver">Wikipedia on Open Source Graphics Drivers</a></p>
+  </li>
+  <li>
+    <p><a href="http://blog.mecheye.net/2014/04/xwayland/">Mecheye: XWayland</a>. Not just information on Xwayland, but also a nice overview of the whole X environment</p>
+  </li>
+  <li>
+    <p><a href="http://www.freedesktop.org/wiki/Software/gallium/">Gallium3D Architecture</a></p>
+  </li>
+  <li>
+    <p><a href="http://keyj.emphy.de/files/linuxgraphics_en.pdf">Martin Fiedler: Linux Graphics Demystified</a> - from 2014.</p>
+  </li>
+  <li>
+    <p><a href="http://www.techspot.com/article/650-history-of-the-gpu/">Techspot: history of the GPU</a></p>
+  </li>
+  <li>
+    <p><a href="https://fgiesen.wordpress.com/2011/07/09/a-trip-through-the-graphics-pipeline-2011-index/">Fabien Giesen: A trip through the graphics pipeline</a></p>
+  </li>
+  <li>
+    <p><a href="https://developer.nvidia.com/content/life-triangle-nvidias-logical-pipeline">Nvidia: Life of a triangle</a></p>
+  </li>
+  <li>
+    <p><a href="http://www.phoronix.com/scan.php?page=news_item&amp;px=Linux-Kernel-DRM-Janitors">Phoronix: DRM Janitors</a></p>
+  </li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/graphics-stack/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

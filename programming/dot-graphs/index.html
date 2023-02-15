@@ -1,0 +1,288 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Drawing Diagrams with Dot</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Drawing Diagrams with Dot</h1>
+    <aside>First published on: May 13, 2020</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a></p>
+      
+<p>A very quick intro to <a href="https://www.graphviz.org">GraphViz</a> and Dot.</p>
+
+<p>Dot is a text-file format in which you define nodes and edges between nodes. The <code>dot</code> application (part of the <code>graphviz</code> suite of applications) then takes this file and generates an image in any of multiple formats:</p>
+
+<ul>
+  <li>SVG (scalable vector graphics)</li>
+  <li>PNG</li>
+  <li>PDF</li>
+  <li>and others</li>
+</ul>
+
+<p>There is a pretty nice user’s document available on the Graphviz site; this article just gives a quick intro.</p>
+
+<p>Note that when talking about “graphs” here, “directed graphs” are meant, not numerical graphs. In other words, GraphViz/Dot draw diagrams of nodes-and-edges not line-graphs or pie-charts.</p>
+
+<p>To install on Ubuntu:</p>
+
+<pre><code>sudo apt install graphviz
+</code></pre>
+
+<p>A simple example file:</p>
+
+<pre><code>digraph "mygraph" {
+  node [shape="box",style="rounded",fontname="Helvetica",fontsize="14"]
+  edge [fontsize="10",fontname="Helvetica"]
+
+  // Node Definitions
+  "nodeid1"[label=&lt;Node N1&gt;]
+  "nodeid2"[label=&lt;Node N2&gt;]
+  "nodeid3"[label=&lt;Node N3&gt;]
+
+  { // subgraph
+    rank=min
+    "rootnode"[label=&lt;Initial Node&gt;]
+  }
+
+  { // subgraph
+    rank=same
+    "peer1"[label=&lt;Peer Node 1&gt;]
+    "peer2"[label=&lt;Peer Node 2&gt;]
+  }
+
+  { // subgraph
+    rank=max
+    "termnode"[label=&lt;Terminal Node&gt;]
+  }
+
+  // Edge Definitions
+  "rootnode" -&gt; "nodeid1"
+  "rootnode" -&gt; "nodeid2"
+  "rootnode" -&gt; "nodeid3"
+  "nodeid1" -&gt; "peer1"
+  "nodeid2" -&gt; "peer2"
+  "nodeid3" -&gt; "peer2"
+  "peer1" -&gt; "termnode" [weight=5]
+  "peer2" -&gt; "termnode"
+}
+</code></pre>
+
+<p>The symbol <code>-&gt;</code> indicates a directional relation; symbol <code>--</code> indicates a non-directional relation.</p>
+
+<p>Multiple definitions can be placed on the same line by separating them with semicolons, eg <code>node1;node2;node3</code>.
+Quotes are optional around a single “atom”, and labels are optional (node name is used).</p>
+
+<p>Running dot:</p>
+
+<pre><code>dot -Tsvg -o mygraph.svg mygraph.dot 
+eog mygraph.svg  # or any other suitable viewing app
+</code></pre>
+
+<p>And the result:</p>
+
+<p><img src="/programming/dot-graphs-png.png" height="1024" width="768"></p>
+
+<p>Dot’s layout mechanism works with DAGs (directed acyclic graphs) only; a graph with cycles is first converted to a DAG by invisibly “reversing” some edges (based on heuristics). You can give hints to <code>dot</code> about where to break cycles in various ways (hidden edges, weights, etc).</p>
+
+<p>Given a DAG, dot lays out the graph by first choosing a “rank” for each node, ie what “layer” (from top to bottom or left to right) each node should be assigned to. A referencing node is always given a lower rank than any node it references - but the algorithm may assign a node a lower-than-necessary rank if this simplifies the interconnection lines. The placement of nodes within a rank (first to last) and the layout of interconnecting lines is then done to produce a “good looking” result - as far as dot can estimate that.</p>
+
+<p>By defining a set of nodes together in a “subgraph” and marking the subgraph with a “rank” category the layout can be forced to “align” nodes in a limited way:</p>
+
+<ul>
+  <li>rank=min pushes all the associated nodes to the “top” (or left) layer of the diagram</li>
+  <li>rank=max pushes all the associated nodes to the “bottom” (or right) layer of the diagram</li>
+  <li>rank=same lets dot decide where to place them, but all nodes in the set are aligned (vertically or horizontally depending on graph layout)</li>
+</ul>
+
+<p>Note that an explicit rank-number cannot be assigned; just min/max/same (plus options source and sink; see docs).</p>
+
+<p>The “weight” attribute of an edge can be used to influence how near to each other two nodes should be placed; nodes with an “important relationship” can be assigned a weight higher than the default (1). Alternatively, the “group” attribute can be used on nodes with an “important relationship”, eg <code>[group=processors]</code>.</p>
+
+<p>The <code>graphviz</code> package actually provides a suite of different tools and layout engines; dot is an “extensible framework” that can be tweaked to produce many different types of output. See the official website or the many online tutorials for a full description.</p>
+
+<p>There does not seem to be any useful “graphical editor” for dot files at the current time. There are half-a-dozen semi-broken and abandoned projects, and a few tools which don’t offer much more than a text-editor with dot-syntax-checking. However they aren’t necessary; dot files use a syntax that is pretty easy to edit manually.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/dot-graphs/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

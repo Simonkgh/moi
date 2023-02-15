@@ -1,0 +1,344 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - OSGi-aware Serialization</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>OSGi-aware Serialization</h1>
+    <aside>First published on: June 11, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/OSGi/'>OSGi</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>Java native serialization was not designed for use in an OSGi environment, and there are some issues that OSGi developers might be interested in.</p>
+
+<p>I recently developed a solution which solved these issues for my particular (reasonably common) use-case : a client/server design where both ends were OSGi-based, and
+both developed by the same team (so many bundles were shared between client and server). Details are presented below…</p>
+
+<h1 id="the-classname-problem">The Classname Problem</h1>
+
+<p>It is quite common to map a java object (including the objects it references) to a stream of bytes, send it across a network, and turn it back into a tree of objects at the other end. When both ends are implemented in Java, then Java’s native serialization is a good choice for the serialization process.</p>
+
+<p>It is common for there to be a dedicated bundle that handles such communication, and that this bundle:</p>
+
+<ul>
+  <li>does the serialization for outgoing data (ie is passed objects from other bundles, not streams) and</li>
+  <li>does the deserialization for incoming data (ie converts the incoming stream to objects before passing them to other bundles)</li>
+</ul>
+
+<p>Writing objects to the stream is done by a <code>java.io.ObjectOutputStream</code>. As it writes each object, it checks whether that object’s class has previously been written to the stream; if not then it writes a class-descriptor to the stream first. All instances of that class (including the first one) then include the id of the object-descriptor before their field-data is written. This class-descriptor contains the <em>fully qualified name</em> of the class, as a string. In an OSGi environment, this presents no problems; given a reference to an object (even an OSGi service), a simple call to Object.getClass() returns the concrete class even when that class is not exported from the defining bundle.</p>
+
+<p>Reading from the stream is done by a  <code>java.io.ObjectInputStream</code>. Each time a class-descriptor is found in the incoming data, the local class with that name is located and added to a table. As instances of that type occur in the stream, the table is used to find the corresponding concrete class and a new instance of that class is instantiated. Finding a class <em>by name</em> isn’t a problem in a traditional Java application with a flat class-path: <code>Class.forName(somename)</code> will find it if it is available. However <em>in an OSGi environment</em>, <code>Class.forName</code> doesn’t work well - it only sees classes in packages which the bundle doing the deserialization has imported!</p>
+
+<p>Even if there is no dedicated bundle for doing the communications, the problem of mapping a classname to a class during deserialization still exists; whichever OSGi bundle is doing the deserialization might not have access to the <em>implementation</em> class specified in the incoming stream.</p>
+
+<h1 id="using-dynamicimport-package">Using DynamicImport-Package</h1>
+
+<p>The bundle doing deserialization can use <code>DynamicImport-Package:*</code> which allows it to see all packages exported by all bundles in the OSGi container. However this has the following problems:</p>
+
+<ul>
+  <li>it still can’t see classes which are not exported by the bundle that defines it;</li>
+  <li>dynamic imports are slow and inelegant;</li>
+  <li>it doesn’t handle cases where multiple bundles export the same class in different versions</li>
+</ul>
+
+<p>In many cases, the code doing the deserialization knows which bundle will <em>consume</em> the object being deserialized. However that doesn’t always help - asking that bundle to load the class by name may still fail in cases where the object is being referenced via an abstract interface. A bundle may accept an object with interface X as a method-parameter without having access to all implementations of interface X.</p>
+
+<p>I believe the <em>common</em> solution to this kind of problem when developing cooperating OSGi applications is to ensure that all the concrete (implementation) type of all objects that might be serialized are <em>exported</em> from their defining bundle, and having the deserializing bundle use DynamicImport-Package as described above. However I personally find it rather ugly to have bundles export the implementations of many classes <em>only</em> to be able to support deserialization (when they could otherwise remain cleanly hidden as implementation details).</p>
+
+<h1 id="delegating-to-another-bundle">Delegating to Another Bundle</h1>
+
+<p>Using a custom subclass of ObjectInputStream, it is possible to look up classes via a specific bundle - or even a list of bundles.</p>
+
+<p>In some cases, a “communications” bundle may know which other bundle it will be passing the deserialized objects to. In this case, it may be best to look up each class by-name using that bundle rather than the “communications” bundle. Or perhaps try both.</p>
+
+<p>This may work in many cases. However it doesn’t guarantee that <em>all</em> classes can successfully be deserialized; consider:</p>
+
+<ul>
+  <li>Bundle X defines an interface MyDomainObject1</li>
+  <li>Bundle Y defines a service that returns a MyDomainObject1Impl</li>
+  <li>Bundle Z defines a service that accepts a MyDomainObject1 as a parameter</li>
+  <li>Bundle C is the communications bundle</li>
+</ul>
+
+<p>In this case, when C processes an input-stream containing the data for an instance of MyDomainObject1Impl, asking bundle Z to provide that class won’t work - even though Z would be the recipient of the deserialized object.</p>
+
+<h1 id="writing-the-bundle-symbolic-name-to-the-serialization-stream">Writing the Bundle Symbolic Name to the Serialization Stream</h1>
+
+<p>I have implemented a solution to this serialization problem which may not work for <em>all</em> usecases, but does work for a significant portion of them : subclassing ObjectOutputStream so that when a <em>class descriptor</em> is written (method <code>annotateClass</code>), a marker object containing the <em>symbolic name</em> of the bundle that the class came from is also written. This information is easy to obtain: static method <code>org.osgi.framework.FrameworkUtil.getBundle(Class c)</code> returns the bundle associated with any Class. There is little performance hit - this is only done once for each <em>unique class</em> written to the stream, not each instance.</p>
+
+<p>The receiving end needs a subclass of ObjectInputStream which retrieves the bundle symbolic-name and then loads the class from that bundle (in method <code>resolveClass</code>). There is no standard API to find an OSGi bundle by name; I used a bundle-tracker to maintain a map with this information.</p>
+
+<p>There are two limitations I am aware of:</p>
+
+<ul>
+  <li>the bundle symbolic-name must be the same at the sending and receiving end; and</li>
+  <li>there should not be multiple <em>versions</em> of that bundle available.</li>
+</ul>
+
+<p>When developing a typical client/server application which communicate using serialized objects, neither of these issues are likely to be a problem.</p>
+
+<p>Note: some classes should be exempted from having the bundle-name output for them. The custom class that wraps the bundle-symname is one (to prevent infinite recursion!). For performance, I also excluded any classes coming from the system bundle - but when testing for that, make sure that <em>primitive</em> types and <em>arrays</em> are correctly handled!</p>
+
+<p>The total amount of code for my implementation was:</p>
+
+<ul>
+  <li>about 30 SLOC for the custom ObjectOutputStream</li>
+  <li>about 50 SLOC to determine whether a class is a <em>system class</em> (ie whether to skip writing the bundle-symname for it)</li>
+  <li>about 100 SLOC for the custom ObjectInputStream</li>
+  <li>a dozen lines of code for the bundle-tracker that maintains name-&gt;bundle information</li>
+  <li>about 200 SLOC to implement a method <code>loadClass(ClassLoader cl, String type)</code> which is capable of handling the types present in the serialized streams. Sadly, Class.getName returns strings that ClassLoader.loadClass does not support - particularly related to primitives and arrays.</li>
+</ul>
+
+<p>So: a significant amount of work, but not huge.</p>
+
+<h1 id="mixing-standard-and-custom-serialization">Mixing Standard and Custom Serialization</h1>
+
+<p>The custom ObjectOutputStream/ObjectInputStream implementations need to be used as a pair : if one end of a socket sends a ‘standard’ object stream to a server, and the receiver tries to read bundle-names from the stream, the stream will fail to deserialize. A similar failure happens if the custom format is sent but the receiver uses a normal ObjectInputStream.</p>
+
+<p>In many use-cases this will never happen, ie on a given socket the receiver can be sure which serialization format has been used. However if you need to support a mix of code using custom serialization and standard serialization then this is possible. Each stream starts with a ‘stream header’ containing a (magic, version) pair of short (16-bit) integers. The version value can be used to indicate when the serialization format has been modified.</p>
+
+<h1 id="other-options">Other Options</h1>
+
+<p>The (dead) <a href="http://felix.apache.org/documentation/subprojects/apache-felix-serialization-framework.html">Apache Felix Serialization Framework</a> project was an attempt to address the serialization issue by defining a “serialization service” that each bundle could hook into. This was apparently abandoned without any real progress being made, and I am not aware of any other attempts to solve this issue. AFAIK, most people just use the “DynamicImport” approach documented above, and export lots of implementation classes from their bundles just for the purpose of supporting serialization.</p>
+
+<p>It may also be that many people serialize to JSON or XML, in which case there are other problems to deal with…</p>
+
+<h1 id="the-serialversionuid-problem">The serialVersionUID Problem</h1>
+
+<p>I previously wrote <a href="/java/serialization/">an article</a> about serialVersionUIDs, and recommended that in general explicit serialVersionUIDs are a bad idea, and that the JVM should be left to compute them automatically. However there is a <a href="/java/serialization-synthetic/">problem</a> with classes containing <em>synthetic methods</em>. These can at least be <em>detected</em> via custom ObjectInputStream/ObjectOutputStream classes, and reported so that manual serialVesionUIDs can be added to the (relatively few) classes which are affected. This isn’t an OSGi-specific issue, but if a custom classloader is being built to support OSGi-aware serialization then it makes sense to also add support for this too.</p>
+
+<p>In methods ObjectOutputStream.annotateClass and ObjectInputStream.resolveClass, the class being handled can be tested and an error reported if it:</p>
+
+<ul>
+  <li>uses a default (autogenerated) serialVersionUID; and</li>
+  <li>contains any <em>synthetic methods</em>
+</li>
+</ul>
+
+<p>Reasonable testing will then reveal any problem classes which really require a manually-assigned serialVersionUID due to the existence of synthetic methods.</p>
+
+<p>As checking for the serialVersionUID and synthetic methods is a moderate performance hit, it is best to keep a cache of classes seen so far. In an OSGi environment this needs some careful implementation, in order to correctly support uninstallation of bundles.</p>
+
+<p>Alternatively, if you prefer to assign all serialVersionUIDs manually (and update them whenever an <em>incompatible</em> change is made!), then custom input/output streams can be used to detect <em>any</em> classes without explicit UIDs. Sadly, it cannot be used to detect cases where incompatible changes were made without changing the UID…</p>
+
+<h1 id="implementation-issues">Implementation Issues</h1>
+
+<p>I mentioned earlier that the stream header can be used to distinguish between “standard” and “custom” serialization formats. However the ObjectOutputStream code has a design flaw : method writeStreamHeader is invoked from the constructor. There is therefore no easy way to pass <em>information</em> to a customised version of this method: the method signature is fixed, and no members on a subclass can be initialised before it is invoked from the parent constructor. The only reasonable way I found to pass parameters to an ObjectOutputStream which influence the (magic, version) header output by the stream was to use a <em>thread local</em> variable!</p>
+
+<p>Handling primitive types and arrays is tricky. Given an object to serialize, the class-descriptor written includes a string which is simply generated via object.getClass().getName(). When the object is a <em>normal</em> object then the behaviour is reasonably obvious : the string is just the fully-qualified classname. However when the object is a primitive, or an array, or an array of arrays, or an array-of-primitives, etc. then some very special string syntax is generated. Unfortunately the standard method <code>ClassLoader.loadClass</code> doesn’t accept such strings, so on the deserialization side a significant amount of work is needed to ensure the right object gets instantiated in these cases.</p>
+
+<h1 id="related-topics">Related Topics</h1>
+
+<p>When building RPC-style communication using serialized objects over a network, the handling of exceptions can be tricky. I wrote an <a href="/2012/11/rounding-up-exceptions/">article about that</a> earlier.</p>
+
+<h1 id="quirks-of-serialization">Quirks of Serialization</h1>
+
+<p>Pop quiz: under what circumstances can a class-descriptor for a non-serializable class be written to a serializable output stream?</p>
+
+<p>Answer 1:</p>
+
+<pre><code>class NonSerializable {
+}
+
+class Foo&lt;NonSerializable&gt; implements Serializable {
+  private String thing;
+  private transient NonSerializable thang;
+}
+</code></pre>
+
+<p>Although no <em>instance</em> of the NonSerializable type is ever written to the stream, a class-descriptor is still written. And yep, this is from experience :-)</p>
+
+<p>Answer 2:</p>
+
+<pre><code>class Foo implements Serializable {
+  private Class&lt;?&gt; clazz = NonSerializable.class; // ok as long as no INSTANCES are sent..
+}
+</code></pre>
+
+<p>Another quirk of serialization: the standard ObjectInputStream silently fails when readObject/readResolve throws an unexpected (Runtime) exception. For anyone subclassing ObjectInputStream and overriding these methods, the solution is to catch all runtime exceptions and rethrow them as checked type InvalidObjectException.</p>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/osgi-aware-serialization/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

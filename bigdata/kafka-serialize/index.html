@@ -1,0 +1,501 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Kafka Serialization and the Schema Registry</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Kafka Serialization and the Schema Registry</h1>
+    <aside>First published on: April 18, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>I’ve already written about <a href="/bigdata/kafka">the Apache Kafka Message Broker</a>. It is a fine tool, and very widely used. The <a href="/bigdata/kafka-connect">Kafka Connect</a> extension helps in importing messages from external systems, or exporting messages to them, and is also excellent.</p>
+
+<p>This article looks at best practices for representing data-structures passing through a system as messages in a Kafka topic - ie how meaningful data-structures can be serialized to a Kafka message. It is assumed that you have read the above articles on Kafka and Kafka Connect (or already understand them well).</p>
+
+<p>This article is based on Kafka 0.10.0.</p>
+
+<h1 id="confluent-and-kafka">Confluent and Kafka</h1>
+
+<p>The Apache Kafka project provides the Kafka broker, Kafka Connect, and Kafka Streams.</p>
+
+<p>The company <a href="https://confluent.io">Confluent</a> was founded by one of the primary inventors of the Kafka broker. It provides commercial support for Kafka-related products, provides a few commercial add-ons for Kafka (in particular the Confluent Control Center web UI for monitoring and configuration), and also develops/hosts a number of open source projects.</p>
+
+<p>Relevant for this article is that Confluent hosts (and primarily develops) the open-source Schema Registry, and some open-source “converters” for Kafka Connect which communicate with it. These tools are very useful on their own - though there is no UI provided (that is part of the commercial Confluent Control Center product).</p>
+
+<p>I am not an employee of Confluent, nor do I have any financial interest in promoting their products or anything Kafka-related. I just think Kafka is excellent, and the schema registry is too.</p>
+
+<h1 id="the-message-serialization-problem">The Message Serialization Problem</h1>
+
+<p>In the Kafka message broker itself, each message consists simply of a (key, value) pair where both key and value are plain byte-arrays. Some Kafka command-line tools (eg script <code>kafka-console-consumer.sh</code>) are smart enough to recognise when a key or value byte-array is actually a UTF8 string, and to render it appropriately on the console <sup id="fnref:formatter" role="doc-noteref"><a href="#fn:formatter" class="footnote" rel="footnote">1</a></sup>. However that’s as far as the Kafka message broker goes in “interpreting” key or value contents.</p>
+
+<p>Messages transferred between applications are, however, structured data. There are very few applications which just pass around blocks of bytes whose content they are not interested in; what applications usually pass around are <em>datastructures</em> with fields. The producer of a message must therefore <em>serialize</em> a datastructure into a byte-array before writing to Kafka, and the consumer must <em>deserialize</em> a byte-array into a datastructure before processing each message. Actually, as a Kafka message is a (key, value) pair this process applies to both key and value.</p>
+
+<p>There are two problems consumers need to deal with when deserializing a message:</p>
+
+<ul>
+  <li>knowing the dataformat</li>
+  <li>handling changes in the dataformat</li>
+</ul>
+
+<p>When someone needs to know what each topic holds (the purpose of the data, and its actual format) then they can potentially ask the development team for the applications which read and write those topics - or read the code. That’s fairly clumsy, but probably works for small projects. When the Kafka Broker cluster has scaled to hold dozens or hundreds of topics, read and written by dozens or hundreds of applications, then that just doesn’t scale - it is clear to outsiders at that point that a lot of very useful data is flowing through the system, but exactly what it is and how it is formatted will be very hard to determine.  Requiring documentation for each topic to be added to a central point (eg a wiki page for the Kafka cluster) might work for a while. However we all know that eventually projects will be deployed without updating documentation - or ever writing any at all. And a simple documentation site will not detect errors involving accidental incompatible changes to the data-format for a topic - until the applications consuming that data break.</p>
+
+<p>Applications evolve over time, so the producer of data may need to start writing messages with slightly different format at some time, eg to add a new field to the datastructure written to the Kafka topic. There might also be multiple producer applications writing messages to the same topic with slightly different versions of the same data. This makes life for the consumer(s) even more complicated - they somehow need to know how to deal with messages of different formats on the same topic.</p>
+
+<p>The rest of this article looks at how basic serialization works in the Kafka client library, and then at the KafkaAvroSerializer + Confluent-Schema-Registry approach to solving these problems.</p>
+
+<h1 id="basic-message-serialization-and-deserialization">Basic Message Serialization and Deserialization</h1>
+
+<p>Producer applications initialize the Kafka client lib with config-options “key.serializer” and “value.serializer” which specify a class implementing the Kafka client Serializer interface. They then invoke method <code>send</code> passing objects of type <code>ProducerRecord&lt;K,V&gt;</code> which have a field “key” of type K and a field “value” of type V; it is a runtime error if the configured “key.serializer” does not handle objects of type K or the “value.serializer” does not handle objects of type V.</p>
+
+<p>Similarly, consumer applications initialize the Kafka client lib with config-options “key.deserializer” and “value.deserializer”. The consumer app then calls <code>poll()</code> which returns objects of type <code>ConsumerRecord&lt;K,V&gt;</code> with a field “key” of type K and a field “value” of type V; it is a runtime error if the configured deserializer encounters data of the incorrect format in the incoming messages, or if the deserializer produces objects which are not of the expected type K or V. There is no standard way for a deserializer to confirm that a message (bytearray) within a topic is of the expected format, ie no fixed header or similar within the message; the deserializer must simply be correctly configured to match the topic serializer.</p>
+
+<p>The Kafka client libraries provide only trivial Serializer (and matching Deserializer) implementations:</p>
+
+<ul>
+  <li>ByteArraySerializer which accepts only byte-arrays as input and returns the data unchanged</li>
+  <li>StringSerializer which accepts only strings and returns the equivalent sequence of UTF8 bytes</li>
+  <li>and some serializer objects for primitive types (eg LongSerializer) which are not of much use for serializing message values, but might occasionally be useful for serializing message keys.</li>
+</ul>
+
+<p>A Serializer implementation is not limited to supporting just one input type, although all the basic serializers do in fact support only their own type.</p>
+
+<p>A producer/consumer pair which want to exchange structured data can do their own serialization, where the producer configures the ByteArraySerializer then maps its data with any desired serialization framework (eg Java native serialization, Protobuf, Kryo, or similar) to a byte-array itself. The consumer would similarly use the ByteArrayDeserializer and then explicitly apply the matching framework to deserialize that byte-array itself. If the intermediate form is Json, then perhaps the Json framework would be used to produce a string, and then the StringSerializer used.</p>
+
+<p>However rather than embed serialization in the producer/consumer code, it is also possible for the producer to send ProducerRecord objects containing key/value objects with more complex types and then to configure the producer with a corresponding serializer implementation that can handle that more complex type. The effect is the same, but the work is more elegantly split: the producer now only concerns itself with its core functionality and leaves the complexities of serialization to a separate step. This also allows these more complex serializers to be reused across producers - after all, the work of serialization does not depend on any specific business logic. Similarly, the consumer can be written to expect method <code>poll</code> to return whatever the desired deserializer type returns - a datastructure rather than just a byte-array. The core kafka client lib does not (currently) provide such serializers, but additional libraries do.</p>
+
+<p>A common pattern is for type K or V to somehow embed the associated schema, eg V may be a type holding a (schema, data) pair which the serializer knows how to handle. When the producer is provided with (schema, data) for each message, that component can potentially do interesting things with the schema information (see later). Of course the consumer will need to be aware of such behaviour - but as deserialization is also separated from the consumer business logic, a producer and consumer can successfully exchange datastructures as long as their serializer/deserializer “plugins” are configured to match each other.</p>
+
+<p>The separation of business-logic from serialization/deserialization also provides a point (before serialization, after deserialization) at which Kafka can call out to plugins which then can see the data in its <em>unserialized form</em> and potentially do all sorts of interesting things as messages are being produced/consumed.</p>
+
+<!--
+Each Kafka serializer (including ByteArraySerializer, StringSerializer, JsonSerializer, etc) prepends [a small header][serializer-wire-format] to the keys and values it generates, specifying which serializer generated the message. This allows the consumer to verify that it is using the correct deserializer - and allows tools like `kafka-console-consumer.sh` to know how to print out messages.
+-->
+
+<h1 id="json-serializationdeserialization">Json Serialization/Deserialization</h1>
+
+<p>Maven artifact <code>org.apache.kafka:connect-json:${kafka.version}</code> provides class <code>org.apache.kafka.connect.json.JsonSerializer</code>. which implements the Kafka Serializer interface, ie has a method “serialize” which takes an Object as parameter.</p>
+
+<p>The object to serialize <em>must</em> be of type <code>com.fasterxml.jackson.databind.JsonNode</code>. Serialization is <em>always</em> done via a default-configured instance of <code>com.fasterxml.jackson.databind.ObjectMapper</code>. The serializer accepts no schema information, and has no configuration settings.</p>
+
+<p>The same artifact provides a JsonDeserializer class which can be configured for a KafkaConsumer instance. The consumer’s <code>poll</code> method then returns instances of JsonNode. Again, no schema is available and there are no configuration settings.</p>
+
+<p>Note that the JsonSerializer and JsonDeserializer are provided in an artifact indicating kafka-connect; this is because the same artifact defines the JsonConverter type for use in kafka-connect. However there is no reason why JsonSerializer/JsonDeserializer cannot be used in a plain producer/consumer application. They don’t provide much functionality (embedding Jackson directly in the app and using ByteArraySerializer is just as easy) but do allow the general concept of separation of serialization to be used.</p>
+
+<h1 id="avro-serializationdeserialization-and-the-schema-registry">Avro Serialization/Deserialization and the Schema Registry</h1>
+
+<p>Json is not a very efficient way of encoding data. There are several good frameworks for encoding Java objects to binary forms including Protobuf, Kryo and Avro; the only one with an available Kafka serializer/deserializer adapter (as far as I know) is Avro, and that serializer is provided by the company Confluent. Note however that the Avro serializer provided by Confluent is tightly integrated with the Schema Registry (see later) and cannot be used without it.</p>
+
+<p>The KafkaAvroSerializer and KafkaAvroDeserializer classes are provided in maven artifact <code>io.confluent:kafka-avro-serializer:{confluent-platform-version}</code>. Note that the somewhat clumsy names with the Kafka prefix are needed because underneath they depend on a class from the Avro serialization library called AvroSerializer, and reusing the same name would be too confusing. Jackson’s equivalent class is called <code>ObjectMapper</code> so no such name-clash occurs in the JsonSerializer.</p>
+
+<p>Avro (and many similar frameworks) can serialize objects given a (schema-descriptor, data-descriptor) pair, where the data-descriptor is a map-like set of (fieldname, fieldvalue) entries; this mode is called “dynamic serialization”. It is also possible to write a schema ahead-of-time and then generate Java DTO classes from that schema, and then pass instances of those generated classes (which hold a ref to their schema) to Avro for serialization. Avro’s wrapper-type for (schema, data) pairs is called <code>GenericRecord</code>.</p>
+
+<p>When using the static/pre-generated-class approach, the producer and consumer applications do not directly use Avro functionality; they deal in the generated types only. The producer sends ProducerRecord objects whose key and/or value are instances of an Avro-generated type; the AvroSerializer extracts the schema from the object and then serializes it. On the consumer side, if the generated classes are also available, and the Avro deserializer was configured with <code>SPECIFIC_AVRO_READER_CONFIG=true</code> then instances of the corresponding types are returned, else GenericRecord. Note that when deserializing into generated types, then the generated classes in the classpath have their own embedded schema - and so the Avro framework has a “reader schema” to use/validate-against when deserializing.</p>
+
+<p>When using the dynamic approach, producer applications need to send ProducerRecord objects which contain GenericRecord instances, ie (schema, map-like) pairs. Alternatively, the ProducerRecord can have a null schema and a value of one of the following types; there is a “generic schema” which can be applied to represent any of these:</p>
+
+<ul>
+  <li>boolean, int, long, float, double, String</li>
+  <li><code>byte[]</code></li>
+</ul>
+
+<p>Note that the Kafka-connect <code>Struct</code> type is not supported (see later).</p>
+
+<p>On the consumer side, reading of data serialized as a GenericRecord is returned as a GenericRecord, and other types are returned as their type. <a href="http://docs.confluent.io/current/schema-registry/docs/serializer-formatter.html">This example</a> uses Avro types GenericRecord and IndexedRecord directly.</p>
+
+<p>The only significant config-setting for the KafkaAvroSerializer is <code>schema.registry.url</code> which is a comma-separated list of schema-registries.</p>
+
+<p>Note that when using the Avro serializer (or a similar serializer implementation for Protobuf/Kryo/etc), serialization is elegantly separated from the business-logic of producing messages, but the producer still <em>compiles in</em> the schema-definitions (as it embeds a reference in each ProducerRecord object). This static relation is correct - the code really does produce messages of <em>fixed structure</em>, and cannot do otherwise without changing the code. On the consumer side, there is a compiled-in schema only when using Avro-generated classes. However even when using dynamic behaviour on the consumer side, the code still makes assumptions about the incoming data ie there is <em>implicitly</em> a kind of schema.</p>
+
+<p>Just to repeat once more: the ProducerRecord type must embed key/value objects which are either instances of GenericRecord (ie (schema, map-like) pairs), or instances of generated types (which implement IndexedRecord). On the consumer side, the <code>poll</code> method will either return instances of GenericRecord, or instances of generated classes (which implicitly have a link to their schema).</p>
+
+<p>There are two very big differences between the described Json serializer and this Avro serializer: that with Avro the producer specifies a schema (directly or indirectly), and that the producer and consumer integrate with the schema registry. When a record is written by a producer to a specific topic, the KafkaAvroSerializer fetches the “current schema” for the target topic from its local cache - or downloads it from the schema registry if it is not already locally cached. The writing then proceeds with the (writerschema, topicschema) pair - something that Avro serialization supports. When the two schemas are identical, then the behaviour is obvious. When the writerschema is <em>compatible with</em> the topicschema then Avro makes the necessary adaptations (eg discarding fields from the input object which are in the writerschema but not in the topicschema). When the writerschema is <em>incompatible with</em> the topicschema, then serialization fails and the record is not written.</p>
+
+<p>The result is that each message in the kafka topic always contains the ID of the schema which was associated with the topic at the time that the message was written - and only at the cost of a 4-byte schema id rather than a complete copy of the schema. If the schema for a topic needs to be changed, then a new schema (with a new id) becomes the “current schema” for the topic, but the old schema is not modified or removed. Existing messages in the topic are therefore still correctly tagged with the schema that applies to their content.</p>
+
+<p>On the consumer side, as a message is read its schema-id is extracted. If this matches no locally-cached schema then the specified schema is downloaded from the registry and cached. The Avro library then has access to the schema it needs to properly decode the message contents. When deserializing into generated classes in the local classpath, which have their schema associated with them, then schema compatibility can also be verified at that point.</p>
+
+<p>The KafkaAvroSerializer is open-source, but the binary is <em>not</em> available from any standard Maven repository. The kafka-avro-serializer artifact is part of the “schema registry” project at <a href="https://github.com/confluentinc">the confluent github site</a>. The easiest way to obtain the binary artifact is to do the following:</p>
+
+<pre><code>  git clone https://github.com/confluentinc/schema-registry.git
+  git checkout v3.2.0
+  mvn install -DskipTests
+</code></pre>
+
+<h1 id="additional-features-of-the-schema-registry">Additional Features of the Schema Registry</h1>
+
+<p>As described in the section on the KafkaAvroSerializer, the Schema Registry provides a central point for registering schemas for each topic in order to efficiently bind a schema to each message in kafka without having to embed entire schemas. It also provides an official schema for each topic, preventing producers from writing incompatible data to the topic.</p>
+
+<p>However having the schema for each topic in the registry provides some other useful features. In particular, it is possible to <em>browse</em> the schema registry to see the official schema for each topic - something very useful when there are many topics in a system.  Having schemas associated with topics is comparable to having relational schemas associated with tables. I’m sure everyone would agree that being able to look at the schema for an arbitrary table is very useful when writing new programs which access existing data. It’s also good to know that data can only be inserted into a relational table if it is compliant with the schema for that table. Using the schema registry with Kafka provides both of these benefits to the Kafka world - data is introspectable and guaranteed consistent. There is a slight difference, however - different records within a Kafka topic can potentially be associated with different versions of the same schema.</p>
+
+<p>Schemas in the registry are immutable, allowing client applications to cache them efficiently. The current binding from topic to schema can be changed (ie the topic-&gt;schemaId mapping) but a registered schema is never modified or deleted.</p>
+
+<p>Note: currently the Confluent schema registry only supports one kind of schema and serialization - Avro.</p>
+
+<p>The Schema Registry itself is open-source, and available via Github. However the Web UI available to nicely browse the contents in interactive manner is part of the Confluent enterprise package (license required). Even without the UI, the registry can be very useful - and if your system is so successful that browsing of schemas becomes important, then maybe licensing the necessary software is reasonable..</p>
+
+<p>The Schema Repository manages <em>only</em> Avro schemas; Json serializers/converters cannot take advantage of it. The schema definitions themselves are stored in compacted Kafka topics, meaning the Schema Repository is stateless - and so multiple instances can be started for high availability (workers configured to use the Schema Repository will fail if it is not available).</p>
+
+<h1 id="kafka-connect-connectors">Kafka Connect Connectors</h1>
+
+<p>The Kafka Connect framework for moving data between external storage and Kafka sometimes needs more control over schemas than is provided by the fairly simple Kafka core Serializer and Deserializer interfaces. It therefore has invented a wrapper type <code>org.apache.kafka.connect.storage.Converter</code>; a Converter has a method for serializing and one for deserializing. Converters are also typically more featureful than the pretty single-purpose Serializer and Deserializer implementations presented above.</p>
+
+<p>Although the standard converters are intended for use with Kafka Connect, there is no reason why these cannot be used in a standalone producer or consumer application if desired.</p>
+
+<p>The KafkaAvroSerializer just uses the native schema types from the Avro library to represent schemas. However Connectors exist for other serialization formats (including Json) and so there is a need for a portable representation of schemas and map-like data representations; these types have been added to the Kafka libraries as <code>org.apache.kafka.connect.data.Schema</code> and <code>org.apache.kafka.connect.data.Struct</code>.</p>
+
+<p>The Connector interface is:</p>
+
+<pre><code>void 	        configure(Map&lt;String,?&gt; configs, boolean isKey);
+byte[] 	        fromConnectData(String topic, Schema schema, Object value);
+SchemaAndValue 	toConnectData(String topic, byte[] value);
+</code></pre>
+
+<h2 id="the-stringconverter">The StringConverter</h2>
+
+<p>While there is a trivial Serializer implementation for every primitive type, the only “primitive” converter implementation is StringConverter. However JsonSerializer supports all basic types (including String) so it can be used where needed (with schema.enable off) to serialize other types.</p>
+
+<p>The StringConverter simply calls <code>toString</code> on every object passed to it - ie it is NOT suitable for many types, including byte-arrays.</p>
+
+<p>The StringConverter ignores schemas.</p>
+
+<h2 id="the-jsonconverter">The JsonConverter</h2>
+
+<p>The JsonConverter implementation can be found in the same artifact as JsonSerializer/JsonDeserializer.</p>
+
+<p>While the JsonSerializer supports only JsonNode as an input parameter, JsonConverter can be passed any of the following types, with or without a schema:</p>
+
+<ul>
+  <li>boolean, byte, short, int, long, float, double, String</li>
+  <li>
+<code>byte[]</code>, ByteBuffer</li>
+  <li>Collection</li>
+  <li>Map</li>
+  <li>Struct  (ie the kafka-connect representation of generic map-like data)</li>
+</ul>
+
+<p>The JsonSerializer <em>cannot</em> be passed arbitrary Java beans to serialize.</p>
+
+<p>When a schema is provided to the fromConnectData method, then:</p>
+
+<ul>
+  <li>the value parameter is validated against the specified schema (eg unknown fields in the value cause serialization to be rejected)</li>
+  <li>values (whether direct or embedded in a Map/Struct) may also be of type Date, Timestamp or BigDecimal</li>
+</ul>
+
+<p>A schema is necessary for supporting Date/Timestamp/BigDecimal because Json is limited in how it represents values: they are either quoted-strings or not. Round-tripping data via Json can therefore lead to type-loss, eg a date must be stored in Json as a string - but then it is not clear when deserializing what the original type was. Similarly, BigDecimals must be represented in Json as strings.</p>
+
+<p>On the consuming end, a schema is also necessary if Date/Timestamp/BigDecimal types are to be deserialized correctly.</p>
+
+<p>The JsonConverter has just one significant configuration option: <code>schema.enable</code><sup id="fnref:schemaEnable" role="doc-noteref"><a href="#fn:schemaEnable" class="footnote" rel="footnote">2</a></sup>. When <code>schema.enable</code> is false then Json serialization happens just as would be expected. When <code>schema.enable</code> is true then the generated Json is of form</p>
+
+<pre><code>{
+  "schema":{...},
+  "payload": ...
+}
+</code></pre>
+
+<p>The schema part allows a consumer to dynamically obtain more information about fields in the Json payload than can be deduced from raw Json - eg whether a Json string should actually be a Date or BigDecimal. It also allows the sender to specify “default values” for fields in the schema, which are applied if the payload does not define them. Method <code>JsonConverter.toConnectData(..)</code> uses exactly this approach to correctly round-trip those tricky date/timestamp/numeric fields.</p>
+
+<p>When schema.enable is true but null is passed as the schema parameter of method <code>fromConnectData</code> then the “schema” field of the output Json is just null (no schema is auto-generated).</p>
+
+<p>Of course, when a topic contains many messages with small payloads then enabling schemas can have a significant overhead.</p>
+
+<p>In short, JsonConverter adds a <em>lot</em> of functionality to JsonSerializer. It may therefore be worth using this directly from producer/consumer apps which are not kafka-connect connectors. However given the inefficiency of Json, moving to the Avro serializer or converter is even better.</p>
+
+<h2 id="the-avroconverter">The AvroConverter</h2>
+
+<p>While the Avro serializer class is called KafkaAvroSerializer to avoid a name-clash with a class from the Avro library, the converter has no such problem and so can be named in the obvious way.</p>
+
+<p>Unlike the combined JsonSerializer/JsonConverter artifact, the KafkaAvroSerializer and AvroConverter are in different artifacts; see <code>io.confluent:kafka-avro-converter:{confluent-platform-version}</code>.</p>
+
+<p>Like the JsonConverter, the AvroConverter accepts:</p>
+
+<ul>
+  <li>boolean, byte, short, int, long, float, double, String</li>
+  <li>
+<code>byte[]</code>, ByteBuffer</li>
+  <li>Collection</li>
+  <li>Map</li>
+  <li>Struct  (ie the kafka-connect representation of generic map-like data)</li>
+</ul>
+
+<p>However such data is still encoded in Avro, using the “default schema” which is flexible enough to represent all the above data-types.</p>
+
+<p>Like the KafkaAvroSerializer (because it wraps one), AvroConverter requires a schema registry server. The KafkaAvroSerializer could potentially be implemented like the JsonConverter with “schema.enable” and embed the schema in each message - but no such functionality exists, and it is unlikely anyone would bother, given the advantages of having a schema registry.</p>
+
+<p>The KafkaAvroSerializer requires schema information encoded in the Avro types; the AvroConverter takes schema information in the kafka-connect Schema representation and then internally maps that to the Avro equivalent.</p>
+
+<h1 id="kafka-connect-and-the-schema-registry">Kafka Connect and the Schema Registry</h1>
+
+<p>Kafka Connect takes an opinionated approach to data-formats in topics; its design strongly encourages writing <em>serialized datastructures</em> into the key and value fields of a message. In particular, they really recommend using the Avro converter to define schemas for keys and values. They also (somewhat reluctantly) support the Json converter for keys and values. If you really insist, you can use the ByteArraySerializer or StringSerializer, but the documentation and examples do not cover this well. Support for structured data makes sense when thinking about moving data to and from storage such as relational databases, non-relational databases, Hive files in Parquet/ORC format, etc. It can be less useful when exchanging data with sensors or old IT systems where converting data into a structured form is significant work that is perhaps better done somewhere other than a connector.</p>
+
+<p>In the Kafka client library, each Producer or Consumer instance is configured with its own properties, including its own serializer/deserializer. However a Kafka Connect worker instance “hosts” multiple connectors, and the global worker configuration properties define default <em>converters</em> (one for message keys, one for message values) to be applied to each connector (ie to all messages written to the Kafka message broker, or read from it).</p>
+
+<p>In Kafka Connect versions prior to 0.10.1.0, this default converter configuration cannot be overridden - it is identical for all connectors in that worker instance (and should be identical for all workers in a cluster). This works acceptably when all reading and writing of data is done by Kafka Connect sources and sinks. Sadly, it means that if some Kafka topics really must contain Json format messages, then that representation is forced on <em>all</em> topics accessed by that Kafka Connect cluster. Similarly, if some Kafka producer or consumer application requires “raw” messages not in Json or Avro format, then that representation is also forced on all topics managed by the Kafka Connect cluster. Kafka Connect version 0.10.2.0 introduces the ability to override the global default converters on a per-connector basis, by defining the converters to be used in the per-converter configuration; see <a href="https://issues.apache.org/jira/browse/KAFKA-3845">this ticket</a> and <a href="https://github.com/apache/kafka/pull/1721/commits">this commit</a>.</p>
+
+<p>Kafka Connect offers custom sources/sinks a slightly different API for writing and reading messages than the broker:</p>
+
+<ul>
+  <li>instead of calling Producer.send(ProducerRecord), sources must implement a <code>poll</code> method which returns <code>List&lt;SourceRecord&gt;</code>
+</li>
+  <li>instead of calling Consumer.poll(ConsumerRecord), sinks receive a call to <code>put(Collection&lt;SinkRecord&gt;)</code>
+</li>
+</ul>
+
+<p>The SourceRecord/SinkRecord interfaces are more abstract than ProducerRecord/ConsumerRecord, and force more “policy” on connector code than the Kafka broker does on producers/consumers. In particular, schemas are only present in plain Kafka producer applications if the ProducerRecords being generated are wrapping Avro IndexedRecord instances. However in Kafka Connect, the SourceRecord type (equivalent to ProducerRecord) has explicit keySchema and valueSchema parameters; opting out of “strict data validation” is much harder to do.</p>
+
+<p>A SourceRecord includes (topic, keyschema, keyobject, valueschema, valueobject) fields. The (keyschema, keyobject) are passed to the configured “key converter” and the (valueschema, valueobject) are passed to the “value converter”. Connect uses the standard Schema type to abstract away the details of which serialization method is used (eg Json or Avro); in both cases the schema is defined in code and must match the associated data. Unlike the broker, Connect offers wrapper class <code>Struct</code> for representing “structured” data in dynamic form - thus custom connector code does not need to deal with Avro GenericRecords directly. Structs are also compatible with the JsonSerializer.</p>
+
+<p>As with Kafka producers, the connect framework uses the converter (serializer) to verify that the data is consistent with the declared schema. And like plain Kafka, when the converter is AvroConverter (wrapping KafkaAvroSerializer) and the schema-registry is enabled for it, then the current schema for the target topic is retrieved and used during serialization, and the ID of that schema is embedded in the generated output.</p>
+
+<p>In a sink connector, the process is reversed; Kafka Connect pulls a message (as byte-array) from a topic then uses the configured converter to parse it into an appropriate form (usually a Struct instance) before passing it to the sink’s task object for processing.</p>
+
+<p>A nice thing about the converters feature is that it is transparent to the connector/task code whether Avro and the Schema Registry are being used or not; the code generates a Schema object declaring how it intends to format messages (sources) or how it expects messages to have been formatted (sinks), and the converters take care of the rest. When the schema registry is activated, then additional validation and visibility is available, but it can be enabled/disabled at any time - or encoding can be switched to Json if desired.</p>
+
+<h1 id="partitioning-data">Partitioning Data</h1>
+
+<p>Note that messages from source-connectors are by default partitioned via <code>hash(message-key)</code> as with any Kafka producer. Care must therefore be taken when building a message-key if a specific partitioning of the output is desired, and the effects of the converters for message-keys should be taken into account. The Kafka Connect “transforms” API (added in v0.10.2.0) allows the code to generate a complex-structured message-value, and connector configuration to map specific fields from that message-value into the message key. The result is that the administrator deploying a connector can configure partitioning of outputs rather than it being fully defined by the connector implementation.</p>
+
+<p>The KafkaProducer API accepts ProducerRecords which have an explicit parameter allowing the target partition for a message to be specified. The Kafka Connect SourceRecord API does not have this option - as far a I know, routing is always done on the message-key.</p>
+
+<h1 id="propagating-schema-metadata">Propagating Schema Metadata</h1>
+
+<p>One interesting feature of using schemas can be demonstrated by combining a source JDBCConnector with a sink HiveConnector. The JDBC connector is capable of retrieving the metadata for the table it is loading from, and registering this metadata automatically as a schema (if it does not already exist). Records from the source relational table are then tagged with this schema-id when they are written to Kafka. The Hive connector is capable of retrieving the schema for incoming records (cached for performance of course), detecting missing colums in the target Hive table and automatically declaring them.</p>
+
+<p>Tools like Sqoop, Flume or LogStash just don’t do that sort of thing.</p>
+
+<h1 id="using-the-kafkaavroserializer">Using the KafkaAvroSerializer</h1>
+
+<p>The steps required to use the Avro “dynamic” approach are well documented in the link above.</p>
+
+<p>The steps required to use the Avro “generated code” approach are simple:</p>
+
+<ul>
+  <li>define an Avro schema as a textfile</li>
+  <li>use Avro tools to generate Java classes corresponding to that schema (which will be subtypes of Avro’s SpecificRecordBase and thus IndexedRecord, though that is not relevant for the using code)</li>
+  <li>include the kafka-avro-serializer jarfile in the classpath</li>
+  <li>in the configuration properties used to initialise the Producer object, specify <code>serializer=KafkaAvroSerializer</code>
+</li>
+  <li>for each output record
+    <ul>
+      <li>call <code>new SomeGeneratedType(..)</code> to create an instance of a desired class which was generated from the schema</li>
+      <li>call setters on the object in the usual Java manner</li>
+      <li>call <code>KafkaProducer.send(...)</code> passing a ProducerRecord which wraps the (strongly typed) object</li>
+    </ul>
+  </li>
+</ul>
+
+<p>In the dynamic case, the producer code includes a lot of calls to Avro-specific APIs. With just one or two calls more, the Avro serialization to byte-array could also be done in the producer code, and then that byte-array passed to the Kafka client library, with the simple ByteArraySerializer being configured. In other words, in the dynamic case, pushing the Avro serialization down into the Kafka client framework doesn’t help much.</p>
+
+<p>In the static case, however, the custom producer has no direct calls to Avro at all, and thus delegating the actual serialization to Avro makes the code cleaner.</p>
+
+<p>And when we look at the Schema Registry integration, using a KafkaAvroSerializer makes more sense - integration with the Schema Registry can be added transparently to the custom producer code.</p>
+
+<h1 id="references">References</h1>
+
+<p>For more reading on serialization and the schema registry:</p>
+
+<ul>
+  <li><a href="http://docs.confluent.io/3.2.0/schema-registry/docs/">Confluent: Official Schema Registry Documentation</a></li>
+  <li><a href="https://www.confluent.io/blog/schema-registry-kafka-stream-processing-yes-virginia-you-really-need-one/">Confluent: Yes you really need a schema registry</a></li>
+  <li>
+<a href="https://vimeo.com/167028700">Confluent: Schema Registry and REST Proxy</a> - video</li>
+</ul>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:formatter" role="doc-endnote">
+      <p>The console consumer can be explicitly configured with a “formatter” for displaying messages serialized using more than just StringSerializer <a href="#fnref:formatter" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:schemaEnable" role="doc-endnote">
+      <p>Actually, the JsonConverter config options are “key.schema.enable” and “value.schema.enable” because the setting is global but there are separate converters for key and value; a converter knows whether it is serializing keys or values, and uses the corresponding setting. <a href="#fnref:schemaEnable" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/kafka-serialize/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

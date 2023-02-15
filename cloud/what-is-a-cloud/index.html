@@ -1,0 +1,451 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - What is a Cloud (IaaS and Paas)?</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>What is a Cloud (IaaS and Paas)?</h1>
+    <aside>First published on: December 4, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>Cloud computing and cloud-based services are the buzzwords of this decade. So what exactly is a cloud?</p>
+
+<p>Unfortunately, the term “cloud” is not very well defined. It usually refers to one of three things:</p>
+
+<ul>
+  <li>Infrastructure as a Service (IaaS),</li>
+  <li>Platform as a Service (PaaS), or</li>
+  <li>Software as a Service (SaaS).</li>
+</ul>
+
+<p>Software as a Service (hosted apps you can log into) is boring - this article looks at the other two.</p>
+
+<h1 id="a-minimal-iaas-cloud">A Minimal IaaS Cloud</h1>
+
+<p>First, you take a large room and fill it with racks of servers, routers and storage devices. Ideally, add redundant power supplies, high-speed optical networking, and other goodies. However what you then have is simply a <em>datacenter</em>. To make these resources an IaaS “cloud”, you need to add a (reasonably) simple REST API for managing these servers. The API should provide endpoints which:</p>
+
+<ul>
+  <li>list/create/update/delete network subnets and firewall rules</li>
+  <li>list/create/update/delete network loadbalancers</li>
+  <li>list/create/update/delete virtual disks</li>
+  <li>list/create/update/delete/start/stop virtual machines</li>
+</ul>
+
+<p>The API for creating a virtual machine must take as parameters at least:</p>
+
+<ul>
+  <li>either num-cpus + amount-of-ram + similar settings, or a “machine type” which is a predefined set of values for those settings</li>
+  <li>the network(s) to which the machine has access</li>
+  <li>and the storage location of the virtual machine image to be booted on that machine</li>
+</ul>
+
+<p>Usually, as well as providing an API for managing resources in the cloud, the cloud-management software also provides a web-based user interface for performing the same tasks. This combination of API and interactive interface allows users to get started quick, and to discover functionality via the API and then to move on to more advanced usage such as using scripting and tools to manage resources. In particular, an API allows systems to automatically respond to load by triggering the creation of additional resources (“scaling”).</p>
+
+<p>Cloud-management software usually also provides some kind of account-management and user-management functionality, so that different users/groups can share the resources of the cloud without getting in each other’s way - and perhaps also so they can be billed for the resources they use. Of course user and account management requires some kind of authentication and authorization system.</p>
+
+<p>Commonly, a “cloud provider” which offers the minimal IaaS API described above also offers many additional useful APIs. Some kind of “shared filesystem” service is usually provided, and things like “hosted kubernetes”, “serverless functions”, hosted nosql databases, and other more advanced components are also often included.</p>
+
+<p>Note: the above description specifies a REST API as the interface; of course it is possible to create a cloud api using some other kind of communication protocol. The Google cloud, for example, provides access to services over both REST (http + json) and grpc (http + protobufs).</p>
+
+<h1 id="iaas-cloud-implementations">IaaS Cloud Implementations</h1>
+
+<p>Cloud-management software as described above has been implemented independently several times. A company which offers a cloud API backed by a datacenter is sometimes called a “cloud provider”.</p>
+
+<p><a href="https://aws.amazon.com/products/">Amazon</a> have invented their own cloud API which does the above (and more), created an implementation of the API, and use it to make resources from their (many) datacenters available to paying customers. Their “core” cloud system is called Amazon Elastic Compute Cloud (aka EC2), and their extended system is called Amazon Web Services (AWS).</p>
+
+<p><a href="https://cloud.google.com/products/">Google</a> have done the same - invented their own cloud API which has the same basic functionality as Amazon’s cloud, but of course incompatible with it. Their system is called Google Compute Platform (aka GCP).</p>
+
+<p><a href="https://azure.microsoft.com/en-us/services/">Microsoft</a> have also invented a cloud API with proprietary implementation, and call their cloud service (api plus datacenters) Azure.</p>
+
+<p><a href="https://www.alibabacloud.com/?lang=en">Alibaba Cloud</a> is not yet a big name in the western world, but as the Amazon of China it is possibly something for developers in Asia to consider, and may also be a significant player in the world market in the near future.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/OpenStack">OpenStack project</a> is an open-source cloud API and corresponding implementation with many contributors, the most significant being RedHat and NASA. It is used widely within company datacenters to provide cloud services for company-internal projects.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Apache_CloudStack">Apache CloudStack project</a> is an alternate open-source API and implementation.</p>
+
+<p><a href="https://www.digitalocean.com/">Digital Ocean</a> has its own cloud API, proprietary implementation, and datacenters. The service offering is less extensive than that of Amazon, Google, or Microsoft but easier to understand and somewhat cheaper.</p>
+
+<p><a href="https://www.exoscale.ch/">Exoscale</a> uses a modified version of the Apache Cloudstack infrastructure to provide cloud services over its europe-only datacenters. Like DigitalOcean, its offering is simpler but less expensive than the main players.</p>
+
+<p><a href="https://www.rackspace.com">Rackspace</a> is primarily a consulting company with expertise in Amazon, Google and Microsoft clouds. However they also run their own OpenStack-based cloud (and in fact were one of the inventors of OpenStack).</p>
+
+<p><a href="https://onapp.com/">OnApp</a> is a company with its own cloud API and proprietary implementation. Unlike Amazon/Google/Microsoft, OnApp does not run datacenters itself, but instead licences its software to other companies with datacenters which they wish to use as a cloud - either for internal use, or to offer to customers.</p>
+
+<p>Note: this is not a complete list!</p>
+
+<p><a href="https://www.gartner.com/newsroom/id/3808563">According to Gartner in 2016</a>, marketshare was:</p>
+
+<ul>
+  <li>AWS: 44.2%</li>
+  <li>Azure: 7.1%</li>
+  <li>Alicloud: 3.0%</li>
+  <li>GCP: 2.3%</li>
+  <li>Rackspace: 2.2%</li>
+  <li>Other: 41.2%</li>
+</ul>
+
+<p><a href="https://www.skyhighnetworks.com/cloud-security-blog/microsoft-azure-closes-iaas-adoption-gap-with-amazon-aws/">According to Skyhigh</a>, marketshare by revenue was:</p>
+
+<ul>
+  <li>AWS: 47.5%</li>
+  <li>Azure:  10.0%</li>
+  <li>GCP: 3.95%</li>
+  <li>IBM: 2.77%</li>
+  <li>Other: 36.2%</li>
+</ul>
+
+<p>while marketshare by workload was:</p>
+
+<ul>
+  <li>AWS: 41.5%</li>
+  <li>Azure: 29.4%</li>
+  <li>GCP: 3%</li>
+  <li>IBM: 2.6%</li>
+  <li>Rackspace: 2.9%</li>
+  <li>Other: 20.7%</li>
+</ul>
+
+<h1 id="how-does-an-iaas-implementation-work">How does an IaaS implementation work?</h1>
+
+<p>How can an API be used to configure networks or allocate virtual machines, ie what happens when such an API is called?</p>
+
+<p>The details are rather complicated - that’s why projects like OpenStack have been developing code for years. However at least a rough outline is possible in a few paragraphs.</p>
+
+<h2 id="allocating-vms">Allocating VMs</h2>
+
+<p>Each server in the datacenter which is intended to be used as a “virtual machine host” needs some kind of base operating system which acts as a <em>hypervisor</em>. Hypervisors are generally divided into two categories:</p>
+
+<ul>
+  <li>
+    <p>those with an extremely small core of privileged code which coordinates between the hosted virtual machines, where one of those virtual machines is a special “manager” instance that runs management programs that accept network commands and pass them on to the hypervisor itself; <a href="https://en.wikipedia.org/wiki/Xen">Xen</a>, <a href="https://en.wikipedia.org/wiki/VMware_ESXi">VMWare ESXi</a> and <a href="https://en.wikipedia.org/wiki/Hyper-V">Hyper-V</a> are the best known of that type.</p>
+  </li>
+  <li>
+    <p>those which are a reasonably normal operating system (though trimmed of unnecessary software) that both manage virtual machines <em>and</em> host the management software directly; <a href="https://en.wikipedia.org/wiki/Kernel-based_Virtual_Machine">Linux KVM</a> is the best known hypervisor of this type.</p>
+  </li>
+</ul>
+
+<p>In addition, server-class computers come with embedded firmware that can be used to order them to turn on the primary processing components and boot from an image hosted on a server with a specified IP-address.</p>
+
+<p>Sometimes servers to be used as virtual machine hosts have the necessary hypervisor installed on a disk attached to the system, and sometimes the embedded firmware is used to make servers boot from a suitable image on a network server.</p>
+
+<p>When a cluster management server receives a suitably-authorized request to start (boot) a new VM, it must perform a “best fit” search to determine which physical host in the datacenter is most appropriate for the new VM. It must then communicate with the management software on that host to tell it to allocate a new VM with appropriate settings and the appropriate boot-image. Some minimal pre-boot or post-boot modification of the server might also be necessary; one common technology for such boot-time config is <a href="http://cloudinit.readthedocs.io/en/latest/">cloud init</a>.</p>
+
+<p>Boot-time config may be required to mount network filesystems within the booted system as specified in the VM configuration.  The primary network address of the virtual machine is generally allocated via DHCP, but some post-boot setup may also be needed in order to define additional network interfaces for the VM instance.</p>
+
+<p>Installing of software and other significant reconfiguration of the booted system is <em>not</em> the responsibility of the cloud management software - either the image to boot should be suitably prepared, or the booted image should contain pre-installed software which connects to a configuration-server such as <a href="https://en.wikipedia.org/wiki/Puppet_(software)">Puppet</a> to obtain its full desired configuration.</p>
+
+<p>When a start-VM request is received, the cluster management server must also generally communicate with network-related systems to ensure that DHCP works as expected, and that the new VM instance is able to communicate with other servers that are on its subnet. In traditional networking, subnets are often quite physical - servers which are logically related are also physically co-located. In a cloud-based datacenter this is usually not the case, and servers which logically belong together can be physically separated - network routing must therefore be more flexible.</p>
+
+<h2 id="allocating-storage">Allocating Storage</h2>
+
+<p>VMs can request “local storage” and are simply given access to disks attached to their host (which assumes that the vm-to-host allocation algorithm must ensure a vm is only started on a host with sufficient free disk). However such storage does not “survive” if a VM is migrated to another host.</p>
+
+<p>More commonly, an API is available to define a logical volume of a specific size. This API communicates with the storage system to define the logical volume name and reserve storage blocks <sup id="fnref:thinprov" role="doc-noteref"><a href="#fn:thinprov" class="footnote" rel="footnote">1</a></sup>. The booted VM then mounts the logical volume as “remote block storage” - to the VM user-space it appears almost identical to a local disk of the same size, except that each “read” or “write” operation does not use a local protocol like SCSI to communicate with a nearby disk but instead sends a network packet to communicate with one of the datacenter storage servers.</p>
+
+<h2 id="optimisation-monitoring-and-billing">Optimisation, Monitoring and Billing</h2>
+
+<p>The cloud management software is responsible for monitoring the datacenter, giving the center admins information about hardware problems. Virtual machines may be moved from host to host to reduce costs or to free up a machine for maintenance; sometimes this can even be done without needing to stop the virtual machine operating system.</p>
+
+<p>And of course the cloud management software is responsible for tracking who is using how many resources, for the purposes of implementing quotas or generating bills.</p>
+
+<h1 id="additional-iaas-services">Additional IaaS Services</h1>
+
+<p>What other services do cloud providers such as Amazon or Google offer in addition to the basic IaaS functionality?</p>
+
+<p>Commonly, an <em>authentication infrastructure</em> is provided, ie a scalable database of (accountid, credentials) for recording information about users and systems. APIs and UIs are provided for creating/managing/deleting accounts, and for “logging in” to get some kind of “authentication token” that can be used in calls to other APIs offered by the cloud provider.</p>
+
+<p>An <em>authorization infrastructure</em> usually goes together with the <em>authentication</em>, ie a way to assign <em>permissions</em> to specific accounts.</p>
+
+<p>Some kind of project-based or account-based isolation is usually available, so that resources (such as storage described below) are accessible only to virtual machines defined within the same project or account. This avoids conflict between groups, and security issues.</p>
+
+<p>Billing/accounting is typically provided, in order to track who is using how much of cloud resources and charge for it if appropriate.</p>
+
+<p>Network-mounted filesystems are commonly provided, ie fileservers which virtual machines can mount in order to share data with other systems, via protocols such as <a href="https://en.wikipedia.org/wiki/Network_File_System">NFS</a> or <a href="https://en.wikipedia.org/wiki/Server_Message_Block">SMB</a>.</p>
+
+<p>Network-based block storage is commonly provided, aka “logical volumes”, separating virtual machines and their storage. Virtual machines live on a <em>host system</em>, and if they simply store data on the disk(s) physically attached to their host then (a) the amount of storage is limited, (b) if the host crashes then the data is lost, and (c) the virtual machine cannot be moved to another host. When the virtual machine instead can treat a range of disk-blocks provided over the network as if they were disk-blocks on a local system then these issues go away. of course IO performance does then depend heavily on the performance of the local network - but datacenters such as those provided by Google and Amazon typically have fiber-optic cable to each rack. Note that block-based storage can only be mounted by <em>one virtual machine at a time</em>, ie it is <em>not shared storage</em>. It is, however, far faster than using a network-mounted filesystem via NFS/SMB/etc, and the lifetime of the volume contents is not tied to a specific VM or host.</p>
+
+<p>Object storage is a kind of shared filesystem which is optimised for the cloud, providing rapid access and very high amounts of storage. Existing shared-filesystem protocols such as <a href="https://en.wikipedia.org/wiki/Network_File_System">NFS</a> and <a href="https://en.wikipedia.org/wiki/Server_Message_Block">SMB</a> were designed for centralized file storage, not distributed storage on the scale that clouds provide; object stores therefore cannot be treated like traditional remote filesystems. Typically an object-store is accessed via the HTTP protocol, using REST operations to “list files”, “write to file at offset” and “fetch from file at offset”. The term “storage bucket” is often used to represent the object-store equivalent of a single remote filesystem, ie a tree of directories containing files. Interestingly, Google Cloud Platform (GCP) can be configured to use a storage bucket as a website - ie a website consisting only of static files can be served directly from an object store without needing an (explicit) webserver.</p>
+
+<p>An API for providing database-type storage is often offered. Of course given basic functionality such as the ability to create VMs, networks, and large amounts of block file storage, it is possible for a cloud user to install and run their own database servers. However this is a significant amount of work; using a cloud-provided alternative can be appealing. More significantly, a database <em>service</em> is usually cheaper than running databases on dedicated VMs because the cloud provider is hosting the service for many customers and can consolidate costs. And often most significantly of all, the database <em>service</em> can usually scale automatically from few requests and small data amounts to very large numbers of requests and large data amounts without needing additional configuration on the part of the user. To be able to scale well, such database services are often not traditional SQL-style systems but instead NoSQL systems with different constraints (particularly around transactions and joins) that allow data to be spread efficiently across a cluster.</p>
+
+<p>Cloud environments often offer an API for sending asynchronous messages, ie a “message broker”.</p>
+
+<p>They also often provide an API to manage Domain Name Service (DNS) data. Sometimes this is purely for internal use, ie the API can be used to register names that can point to virtual machines within the cloud environment but which are not usable outside that environment. However sometimes they also provide an API to manage public DNS records for domains.</p>
+
+<p>Sometimes the cloud provider includes <a href="https://en.wikipedia.org/wiki/Content_delivery_network">Content Delivery Network</a> features to improve the delivery of static resources to external users, eg html/javascript/css/icons related to applications running within the cloud environment.</p>
+
+<p>And some IaaS cloud environments offer the ability to run/manage Docker containers (or equivalent) as well as pure virtual machines, via the Kubernetes container orchestration system (or equivalent). Given the ability to create virtual machines, a cloud user could install the necessary software (Docker, Kubernetes, etc) themselves - but a cloud provider can often provide that service cheaper, more reliably, and more scalable, making such features appealing to cloud users.</p>
+
+<p>Finally, cloud environments may offer Platform as a Service (Paas) features too; see the next section of this article.</p>
+
+<p>This <a href="https://aws.amazon.com/products/">list of services provided by Amazon AWS</a> and this <a href="https://cloud.google.com/products/">list of services provided by Google GCP</a> shows the kind of things a user of those cloud environments can take advantage of. In addition, cloud providers often partner with other companies to offer additional APIs that code running in a “cloud” can use - for an appropriate licence fee.</p>
+
+<h1 id="security">Security</h1>
+
+<p>A VM is the owner’s responsibility; the cloud provider (hopefully) applies security patches to their hypervisors, but applying patches to (and rebooting) VM instances is not their responsibility.</p>
+
+<h1 id="configuring-iaas">Configuring IaaS</h1>
+
+<p>As noted earlier, an IaaS cloud generally provides both an API and an interactive interface for manipulating resources within the cloud. However configuring complex sets of VMs and networks by hand is slow, error-prone, and not repeatable. There are several good tools to allow such resources to be defined declaratively and then to “apply” the definition to a cloud to create (or destroy) the necessary resources. See <a href="/cloud/terraform-overview">this article on Terraform</a> for an example.</p>
+
+<h1 id="platform-as-a-service">Platform as a Service</h1>
+
+<p><a href="https://en.wikipedia.org/wiki/Platform_as_a_service">PaaS</a> is a “higher level” abstraction than IaaS - still an automatable collection of resources, but at an application-runtime level rather than at virtual-machine/network-router level.</p>
+
+<p>While the ability to configure a VM allows a cloud user to achieve almost anything, it does not necessarily make it easy or cheap. Scaling the system in a cost-effective manner is particularly tricky; when a system is running software on N virtual machines and the load suddenly increases, starting further machines to handle the load is not an instantaneous process, and not trivial to implement. Scaling down can also be an issue - particularly for development environments or intranet environments, it is nice when the number of active machines (ie resources being paid for) can drop to a minimum (ideally zero) when no load is present.</p>
+
+<p>Like IaaS, a PaaS provider often also provides external services such as databases and file-storage.</p>
+
+<p>The PaaS environment I personally know best is Google AppEngine, so that will briefly be described here - but there are many systems that work similarly.</p>
+
+<h2 id="google-appengine">Google AppEngine</h2>
+
+<p>AppEngine is a service that allows “applications” to be deployed - custom code without needing to deal with VM-level details. Such applications must obey a strict set of limitations and be packaged in a suitable way; in return the PaaS environment can scale them (start multiple instances) and handle request routing (loadbalancing) and similar complex issues automatically.</p>
+
+<p>AppEngine supports Java Web Application Archives (aka war-files), and similarly packaged apps written in Python, PHP, node.js, Go, Ruby, and dot-net.</p>
+
+<p>For Java webapps, the developer simply creates a standard-format war-file (following all the rules for a standard webapp) and AppEngine (standard mode) provides the servlet-engine environment, the Java runtime environment, and the underlying operating system. Unlike regular webapps, the Java code cannot start threads, cannot write to local disk, and must complete each http-request within 60 seconds. In return, AppEngine will monitor the amount of time requests are taking and when a threshold is reached it will simply start new instances of the application - as many as are needed to handle the load, even if it is thousands. Such instances start in just a couple of seconds, and are automatically registered with load-balancers to distribute requests across them. When load drops, unneeded instances are stopped - all the way down to zero instances when no load is present (and thus no fees), which is great for development-environments or intranet-like apps which are only used during business hours. When a request is eventually received and zero instances are running, then one is simply started. In addition, the per-hour costs for running each AppEngine instance are very low - significantly lower than the price of a single VM in the same cloud.</p>
+
+<p>Google doesn’t explicitly say how AppEngine (standard mode) instances are deployed on the Google infrastructure, but from looking at the logs it is clear that each AppEngine instance is actually running within a Linux container; the “deploy appengine” step causes Google to generate a container image internally.</p>
+
+<p>Google doesn’t document exactly how they can afford to charge such low prices for AppEngine standard-mode apps, or how they can be started so quickly on demand. My personal speculation is that for Java-based AppEngine deployments they <em>once</em> start a container which runs a VM, Java instance, and Jetty servlet engine with zero webapps, and then snapshot the container running state. To start a new Java AppEngine standard-mode instance they then simply “clone” that snapshotted image and mount the webapp war-file into the image. Jetty must then execute its standard war-deploy logic, but no other per-app startup logic is needed, making startup fast. By “cloning” existing images and taking advantage of operating-system-level copy-on-write memory pages they can also share a significant amount of both disk and memory between multiple AppEngine processes running on the same physical host - and thus pack more AppEngine instances into a single physical host than would be normally possible. This in turn would reduce per-instance costs. Presumably other supported languages (eg PHP) can be supported similarly.</p>
+
+<p>Normally, container images from independent customers should not be run on the same host system, as inter-container security is not great - there are multiple ways for one container to interfere with others that happen to be on the same host. However in this case, the restrictions on AppEngine applications (eg no native libraries for Java-based apps, and no local files) reduce these risks. I suspect that Google takes advadvantage of this and packs containers for different customers onto the same host, allowing it to reduce costs further.</p>
+
+<p>As noted, Google AppEngine also supports applications written in other languages and provides a comparable “execution environment” for those apps. Additional languages/runtimes may be implemented in future.</p>
+
+<p>Java AppEngine instances are very limited in the amount of memory - a maximum of 1GB is available for the largest environment. This does make AppEngine standard-mode unsuitable for heavy processing; the environment is best used for receiving requests, reading/writing databases or communicating with other back-end systems, and then either returning JSON or returning HTML built by combining a template with the data fetched from a database etc. That still covers a lot of use-cases.</p>
+
+<p>What is nice about using the Google environment is that both IaaS and PaaS are available. In particular, front-ends can be build with AppEngine standard-mode while back-ends can be run on farms of virtual machines or docker-servers in the same cloud. Note however that an AppEngine front-end (with all the scalability benefits) can talk to dedicated back-ends in a company-specific datacenter too, ie hybrid solutions are definitely possible.</p>
+
+<h2 id="other-paas-providers">Other PaaS Providers</h2>
+
+<p>One of the oldest PaaS providers is <a href="https://en.wikipedia.org/wiki/Heroku">Heroku</a>, which supports application development in several languages.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Cloud_Foundry">Cloud Foundry</a> is a complete app-management environment; applications may be built in any form for which a “build template” exists, eg Java webapps. Cloud Foundry is open-source, with many commercial providers offering hosting based on the product.</p>
+
+<p>Amazon <a href="https://en.wikipedia.org/wiki/AWS_Elastic_Beanstalk">Elastic Beanstalk</a> is the AWS PaaS solution, roughly equivalent to Google AppEngine.</p>
+
+<h2 id="container-based-paas">Container-based PaaS</h2>
+
+<p>Running code in Linux containers has experienced a huge boom over the last few years. A cloud which supports deployment of container images sits somewhere between IaaS and PaaS, depending on your viewpoint. It is unlikely to scale quite as quickly as traditional PaaS environments, as the cloud environment has less control/knowledge of what is occurring within the container. However it gives the developer far more control over what tools or languages they use and how their application is packaged.</p>
+
+<p>Each cloud provider seems to have invented their own API for deploying and executing containers; Amazon has ECS (two variants), Azure has Service Fabric, etc. Google’s solution is Kubernetes, and fortunately it appears that Kubernetes is slowly becoming a kind of standard with multiple cloud providers now offering a “hosted Kubernetes” service (Google Kubernetes, Amazon EKS, Azure AKS, etc).</p>
+
+<p>Most cloud providers also offer a more managed application deployment environment which is based on containers but offers fewer config options in return for easier configuration and more scalable deployment. Google “AppEngine Flexible mode” is a cross between Docker and its traditional AppEngine standard mode - apps are packaged as a container but “orchestrated” using the AppEngine infrastructure rather than Kubernetes. Amazon Fargate is somewhat similar, as is the Azure App Service.</p>
+
+<h2 id="serverless-computing">Serverless Computing</h2>
+
+<p>PaaS is intended to take away the pain of managing a runtime environment for applications (at the price of some flexibility). The most extreme kind of PaaS is the very recent availability of “serverless” environments, in which developers write individual <em>handler functions</em> and deploy them into a cloud environment. A handler function is typically either an HTTP handler (ie processes HTTP requests) or a message-handler (processes messages on a message-queue).</p>
+
+<p>Amazon’s implementation of this concept is called <em>AWS Lambda</em> and Google’s implementation is called <em>Cloud Functions</em>.</p>
+
+<p>There are a lot of things that such functions are not suitable for - but development can be very rapid, price low, and scalability truly enormous.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>The options for deploying code - VM-based, container-based, PaaS-based, serverless - provide a range of options from most-flexible/least-scalable/highest-admin to least-flexible/most-scalable/lowest-admin. In short, something for everyone.</p>
+
+<h1 id="further-reading">Further Reading</h1>
+
+<p>Here are some more resources that may be of interest:</p>
+
+<ul>
+  <li><a href="https://www.networkworld.com/article/2163430/cloud-computing/paas-primer--what-is-platform-as-a-service-and-why-does-it-matter-.html">Network World: PaaS Primer</a></li>
+</ul>
+
+<h1 id="footnotes">Footnotes</h1>
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:thinprov" role="doc-endnote">
+      <p>Often fewer blocks are initially reserved for a logical volume than requested (“thin provisioning”) on the assumption that overall the amount of storage used by all VMs will be significantly less than the amount they request. Of course, if every VM suddenly tried to fill every volume attached to it then there would be problems - but that would require the majority of users of the cloud to act simultaneously which is not likely. <a href="#fnref:thinprov" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/what-is-a-cloud/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

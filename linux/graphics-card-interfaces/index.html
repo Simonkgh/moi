@@ -1,0 +1,586 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Graphics Card Interfaces</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Graphics Card Interfaces</h1>
+    <aside>First published on: October 16, 2012</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="intro">Intro</h1>
+
+<p>This article gives a brief overview of how an operating system interfaces with a modern graphics card - ie what “API” cards expose to operating systems. The purpose is to give some context in which to understand both the user-space and kernel-space code for linux graphics. Warning: I’m not an expert in this area; these are notes-to-myself deduced from information available on the internet and some reading of linux-kernel source-code.</p>
+
+<p>The following topics can be found below:</p>
+
+<ul>
+  <li>a little information about generating outputs to physical displays;</li>
+  <li>a very brief look at the linux graphics stack;</li>
+  <li>a look at the Command Stream used to configure a card (aka the Command Processor);</li>
+  <li>an overview of AMD Southern Islands Compute Units (ie where vertex/pixel shading and GPGPU programs run)</li>
+</ul>
+
+<p>If you’re trying to figure out how to configure your X server - you’ve found the wrong article. This is really only of interest to beginner kernel hackers (or maybe even interesting to nobody other than myself), or <em>perhaps</em> linux sysadmins who are curious about <em>why</em> userspace commands/config work the way they do.</p>
+
+<p>If you’re not familiar with the overall architecture of the Linux graphics stack, then you should read <a href="/linux/graphics-stack">this article</a> first.</p>
+
+<p>As with any attempt to summarize, there are areas below that are only <em>approximately</em> correct - this isn’t meant to be textbook length. However if you see any fundamental errors, please let me know!</p>
+
+<p>It is assumed that you know how a PCI bus works, and roughly how Linux interacts with one; if not, you may wish to read <a href="/linux/the-pci-bus">this article</a> first.</p>
+
+<p>This article particularly describes an AMD “Southern Islands” graphics card (HD7000 series), attached via PCIe. However the general principles should apply to many cards, and at least partially to embedded graphics devices as well as PCIe ones.</p>
+
+<p>AMD “Southern Islands” (aka Radeon HD7000) is the first AMD chip to use AMD’s Graphics Core Next (GCN) architecture, which is based on SIMD instructions; earlier chips used VLIW instructions. The VLIW approach makes GPUs simpler (more logic is pushed into the compiler stage), but ended up not being a good match for modern graphics demands (esp. DX10 and later) nor for generic GPU-based computing. This GPU series was first released late 2011.</p>
+
+<p>Note that the AMD “Northern Islands” (Radeon HD6000 series) is still the “old” VLIW architecture, despite the name.</p>
+
+<p>It appears that although the instruction-set has changed, the way that an OS <em>configures</em> the GPU is common between all AMD chips since r600</p>
+
+<h1 id="frame-buffers">Frame Buffers</h1>
+
+<p>In the end, all graphics cards generate a “frame buffer” (aka “scan out buffer”), ie a block of memory with 3 bytes per pixel, being the RGB color to show at that pixel on the screen.</p>
+
+<p>For analogue outputs such as composite-video or component-video, card circuitry periodically reads each pixel in turn and generates an appropriate voltage output at the appropriate time. For digital outputs such as HDMI, the graphics card simply dumps that data to the output cable (with some minor transformations), and lets the display device map that data to appropriate voltages to drive the physical output.</p>
+
+<p>Very simple graphics cards do no more - just provide a “frame buffer” and associated output circuitry, and let the operating system write RGB values into that buffer. Libraries in the operating system then provide more sophisticated APIs for 2-D graphics or 3D graphics, and use software algorithms running on the CPU to compute the color of pixels to be written to the framebuffer.</p>
+
+<p>More sophisticated cards provide various ways for an operating-system to offload the work of mapping graphics operations into pixel-colours from the CPU to the graphics card - but in the end the result is still a buffer full of pixel-values.</p>
+
+<p>Of course modern cards provide multiple output options (eg component, HDMI, multiple monitors); the OS therefore also needs to support sending the appropriate commands to the card to select the right outputs. Cards also support different <em>resolutions</em> (ie change the size of the scan-out buffer and the way its contents are mapped to pixels on the screen); again the OS needs to send appropriate commands to select the appropriate resolution.</p>
+
+<p>See <a href="/linux/framebuffer-drivers">here</a> for more information about framebuffer drivers on Linux.</p>
+
+<h1 id="graphics-acceleration-with-modern-amd-cards">Graphics acceleration with modern AMD cards</h1>
+
+<p>Modern graphics cards are basically a co-processor, ie perform “offloading” of CPU work. The general process for rendering graphics is:</p>
+
+<ul>
+  <li>Allocate a buffer in which to write the output.</li>
+  <li>Allocate one or more buffers and fill them with input parameters, eg tuples of (x,y,z,normal,colour)</li>
+  <li>Allocate one or more buffers and fill them with CU instructions for the Compute Units of the GPU to execute</li>
+  <li>Fill a “command stream” buffer with CS instructions for configuring the GPU</li>
+  <li>Pass the “command stream” buffer to the GPU for execution.</li>
+</ul>
+
+<p>When execution is complete, the output buffer contains a 2D pixel array of RGBA values, suitable for copying/composing to an appropriate area of the framebuffer. Asynchronously to this process, the card’s output circuitry is repeatedly turning the framebuffer contents into appropriate signals to the display device.</p>
+
+<p>These cards can also be used for things other than graphics;  they are really CPUs with special math-oriented instruction sets, and can simply be viewed as so, taking data as input and generating data as output. Having the input data be a 3D vertex graph plus texture maps, and the output data being per-pixel colour value is simply one application.</p>
+
+<p>Quite how general-purpose the GPU is depends on how modern it is; the trend is clearly to move from GPU instructions with very graphics-specific operations to more generic mathematical instructions. In fact, modern GPUs usually have two quite distinct instructionsets: one is a “command stream” that configures the card, and performs a limted set of 2D and 3D drawing operations, while the other set performs mostly mathematical operations using SIMD (ie where each instruction operates on multiple data elements).</p>
+
+<p>Cards can have internal memory, or can share the CPU’s main memory. When the RAM is on card, then loading the program, vertex graph and textures from the CPU into the card is slow, but computing the results and writing to the frame buffer is fast. When RAM is “system memory”, then the reverse is true. Possibly more importantly, separate graphics RAM allows the CPU to perform memory accesses while graphics rendering is in progress, without contention for the memory bus.</p>
+
+<p>The Linux DRM kernel module provides device nodes under <code>dev/dri/*</code> which can be used to access the GEM/TTM kernel modules; these allow user-space programs to allocate and access the buffers mentioned above: for “window backing buffers”, vertex graphs, textures, shader programs, and configuration commands. With this basic support in kernel-space, the rest of the logic for generating graphics can run in user-space; mapping from graphics API calls such as OpenGL or GTK+ into the appropriate data and GPU instructions for the specific installed video card is done via card-specific userspace libraries (eg Mesa-3D + gallium).</p>
+
+<h1 id="page-flips-and-vblank">Page Flips and VBlank</h1>
+
+<p>Above, it is mentioned that circuitry generates output signals to display devices by “scanning the framebuffer”. There are actually <em>two</em> buffers in use: one used by the output circuitry, and one currently being modified. When all drawing is ready, a “page flip” swaps the two. This ensures that the buffer that the output circuitry is using is “stable”, which prevents flickering.</p>
+
+<p>Output devices also typically refresh pixels on the display starting from the top-left, and working line-by-line down to the bottom right. After refreshing a screen-worth, the circuitry pauses until it is time to do the refresh again. The pause duration depends upon the configured screen “refresh rate”. The point in time when this pause starts is called the “vblank”, and it is a good time to do a “page flip”.</p>
+
+<h1 id="programmable-components">Programmable Components</h1>
+
+<p>There are actually two completely different instruction-sets in the GPU :</p>
+
+<ul>
+  <li>
+    <p>The “GFX Command Processor” supports an instruction-set which is used for:</p>
+
+    <ul>
+      <li>configuring the card;</li>
+      <li>doing 2D immediate graphics operations;</li>
+      <li>
+<em>initiating</em> scene rendering or GP-GPU programs (ie starting the rendering pipeline working)</li>
+    </ul>
+  </li>
+  <li>
+    <p>The “Compute Units” support an instruction-set for high-speed data processing (including “pixel shading”).</p>
+  </li>
+</ul>
+
+<p>In addition, there are some tasks that are just better done in a fixed manner with customised hardware than by general-purpose computing instructions. Most cards (including Southern Islands) therefore have “fixed function units” that can do “tesselation, geometry and high-order surface processing” on input data then pass the output to the Compute Units. A “rendering pipeline” consists of a sequence of fixed-function and programmable stages through which the “scene description” flows until it ends up at last as a flat 2d pixel array.</p>
+
+<p>Documentation on recent graphics chips sometimes have a tendency to heavily document the Compute Units and almost completely skip over the Command Processor and fixed-function units. This is because the documentation is intended for people doing GPGPU computing, not for people writing graphics drivers. GPGPU programs can be loaded and executed using vendor-provided tools.</p>
+
+<h1 id="the-command-processor">The Command Processor</h1>
+
+<p>In order to configure the graphics card, code running on the CPU can either</p>
+
+<ol>
+  <li>do a sequence of writes to special memory addresses mapped to the graphics card “registers”, or</li>
+  <li>pass a sequence of “CS instructions” to the graphics card which are then interpreted by the “command processor”.</li>
+</ol>
+
+<p>According to the documentation, option (2) is preferred and option (1) is now recommended only for debugging, as it is much slower.  However in the current linux drivers, both are used depending on circumstance. And reading of card values is done via direct reads of the appropriate mapped memory addresses.</p>
+
+<p>To pass CS instructions to the GPU, the CPU does some initialisation at startup - it allocates a smallish memory buffer in normal memory, and pokes some GPU registers to set up a pair of head/tail pointers to turn this memory into a circular buffer. It can then write instructions into this buffer and when ready update the GPU’s “tail” pointer register via the traditional “poke a value to a fixed address”. When the GPU is ready, it reads a block of instructions (usually everything that is in the buffer) in one go, usually using DMA. It then updates its “head” pointer register to indicate that there is now more free space in the buffer, and raises an interrupt so the CPU notices. Transferring instructions in batches like this is efficient with respect to memory access, and importantly also decouples the GPU and CPU somewhat (ie neither has to wait for the other so often). See <code>radeon_ring.c:radeon_ring_write()</code>.</p>
+
+<p>A single instruction in the command buffer can also instruct the GPU to load the contents of a separate “indirect” buffer (IB) full of commands, ie the CPU side can allocate a buffer and fill it with commands, then write a single command to the circular buffer to execute the prepared instructions. This ensures that there are no problems with a “circular buffer full” state being encountered at an inconvenient time.</p>
+
+<p>The “programs” to be executed in the “Compute Units” are instead treated just like “data”, ie a buffer is allocated, the instructions are written into it, and then as part of the “command stream”, the GPU is told which buffers to execute in the Compute Unit.</p>
+
+<p>Because the command stream can be used to configure/trigger DMA by the graphics card to/from addresses in kernel memory, any userspace application with the right to send arbitrary commands can take over the host machine. In addition, it is even possible in some cases to set graphics modes that will damage the card or the display. Therefore, KMS kernel drivers typically <em>scan</em> the command-stream for safety before passing it on to the card; for X native DDX drivers, X is simply “trusted” to get it right in userspace.</p>
+
+<p>Scratch registers: there are 8 GPU registers that can be configured to be “replicated” to ram via DMA. When anything in the GPU writes to one of these registers, the value is also pushed to memory. Particularly useful is that a command in the command-stream can write a magic value to one of these registers; polling the corresponding memory location from the CPU then reveals when that instruction has been completed. ?? Is this how the “fence” works?</p>
+
+<h1 id="command-stream-cs-instructions">Command Stream (CS) Instructions</h1>
+
+<p>There is unfortunately no documentation that I can find on the “command stream” used to configure southern islands chips, and kick off the rendering process. However from a look at the kernel driver code, it appears that this has changed little since even the r200 series of cards (unlike the programmable vertex/pixel shader parts which have now been replaced by Compute Units). And fortunately, the command stream is well documented for r500 cards. The only major difference appears to be an additional two “ring buffers” specifically for feeding GPGPU programs directly to the compute units. See <code>radeon_cs.c:radeon_cs_get_ring()</code>.</p>
+
+<p>Each CS instruction has a “type” and “length” field; type 0 is for “write to register” and type 3 is a ‘normal’ instruction, with embedded instruction-code. Types 1 and 2 are not very important. The length field indicates how many additional words of parameters are associated with the instruction.</p>
+
+<p>Examples of “CP” (Command Processor) instructions include:</p>
+
+<ul>
+  <li>(type-0 command): write the following N constant values from the command-stream into registers P..P+N</li>
+  <li>(type-1 command): write the following N constant values from the command-stream into a single register P</li>
+  <li>
+<code>PAINT</code>: paint a rectangle with a given brush</li>
+  <li>
+<code>BITBLT</code>: copy a rectangular area from elsewhere in frame buffer</li>
+  <li>
+<code>POLYLINE</code>: draw a sequence of connected lines</li>
+  <li>
+<code>NEXTCHAR</code>: render a font glyph at the “current location”</li>
+  <li>
+<code>3D_DRAW_VBUF</code> – trigger the full 3d rendering path, ie load shader programs, textures, etc. and then</li>
+</ul>
+
+<p>The GPU has an internal space for storing “PVS (Programmable Vertex Shader) code”, ie shader programs. The command-stream loads the necessary commands into this, and sets registers to indicate the start-point. As noted earlier, the PVS instruction-set is completely different from the Command Stream instruction-set.</p>
+
+<p>See the r5xx documentation sources in the “references” section at the end of this article for the full details.</p>
+
+<h1 id="memory-management">Memory Management</h1>
+
+<p>Modern graphics cards often have large amounts of very fast RAM available.</p>
+
+<p>For userspace applications running with 64-bit addressing, it is trivial to expose this memory to userspace applications  - there is plenty of user address-space available, and mapping gigabytes of graphics ram into the application’s address-space can simply be directly done.</p>
+
+<p>For 32-bit operating systems, things are really tricky. Basically, it is necessary for the application to map a buffer into the graphics card when needed, and then to unmap it once finished so that there is sufficient address-space available to map the next needed buffer. These mapping/unmapping operations have significant performance impact, and therefore graphics on 64-bit systems runs significantly faster.</p>
+
+<p>The primary purpose of the Linux GEM/TTM libraries is to allow user-space code to manage memory buffers shared with the graphics card in order to transfer data such as vertexes and textures.</p>
+
+<p>Here’s an interesting table from “GPU Gems Ch 30”, by Nvidia:</p>
+
+<p>Table 30-1. Available Memory Bandwidth in Different Parts of the Computer System</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>Component</td>
+      <td>Bandwidth</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td>GPU Memory Interface</td>
+      <td>35 GB/sec</td>
+    </tr>
+    <tr>
+      <td>PCI Express Bus (x16)</td>
+      <td>8 GB/sec</td>
+    </tr>
+    <tr>
+      <td>CPU Memory Interface (800 MHz Front-Side Bus)</td>
+      <td>6.4 GB/sec</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h2 id="graphics-translation-table-gtt">Graphics Translation Table (GTT)</h2>
+
+<p>Some integrated graphics systems (ie those using normal system memory rather than dedicated memory) contain a GTT (Graphics Translation Table) aka GART (Graphics Addres Remapping Table). This is a kind of simplified memory-management unit used to map memory-addresses in the GPU’s instruction stream to physical memory addresses on the system bus. One example is the modern series of Intel integrated graphics, as present on i3/i5/i7 chips; these are referred by intel as GEN graphics (Broadwell is GEN7, ie generation 7, of this design).</p>
+
+<p>There is a <a href="https://bwidawsk.net/blog/index.php/2014/06/the-global-gtt-part-1/">very good document on the Intel GTT</a>, which also helps to understand some of the design of the GEM memory manager used by Linux to allocate memory. The referenced document talks frequently about PCI; AIUI although the Intel integrated graphics is actually on the same die as the CPU, it is <em>also</em> connected to the PCI bus.</p>
+
+<p>While a “proper” MMU as present on standard CPUs can map large amounts of memory (due to having three or four “levels” of page-tables), GTTs (the intel ones at least) have far fewer table entries, meaning that there is a limit to the amount of memory that the CPU can make available to them. In particular, this means that when a user-space application passes large amounts of data to the graphics system, existing GTT mappings may need to be <em>removed</em> to allow the new data to be mapped in. Managing this is one of the responsibilities of the GEM memory manager. Note also that when multiple applications are concurrently performing graphics (“timesharing the GPU”), managing the GTT entries efficiently becomes even more complex.  Intel Sandybridge graphics and later have a Per-Process Graphics Translation Table (PPGTT) which allows better “context switching” when processing graphics.</p>
+
+<p>An “aperture” is the section of a PCI graphics card’s onboard memory that has been mapped via a BAR so it is directly accessable from the CPU. As noted in a document referenced above, there appears to be no reason why a 64-bit system with discrete graphics on a PCIe bus should not support an <em>extremely large</em> aperture - but it appears that nobody does this. Instead, the settings “requested” by the graphics card (via the values it returns when the BARs are <em>read</em>) specify a reasonably small memory range.</p>
+
+<p>According to the above document: “the aperture is a subset of the GTT which can be accessed through a PCI bar”. Intel integrated graphics has no “dedicated memory”, instead using memory on the system bus. The CPU configures the graphics system’s GTT so that it can access certain physical pages, and the CPU can potentially write directly to those same pages. However apparently that can lead to “memory coherence problems”; instead the CPU should only write to addresses mapped via the graphics BARs, for which the graphics system presumably gets <em>notifications</em> from the PCI controller so that it can flush caches etc.</p>
+
+<h2 id="dma-units">DMA Units</h2>
+
+<p>A PCI device has the ability to become “bus master” and then read/write system memory. Some graphics systems have an inbuilt DMA module which allows them to set up asynchronous “fetches” of data from system memory into local card memory, or vice-versa. When DMA is initiated from the CPU side, then the only on-graphics-card memory that can be addressed is that which has been mapped via a PCI BAR (the “aperture”). However when DMA is initiated by the graphics card, it can address all of system memory, <em>and</em> all of the card memory.</p>
+
+<p>Note however that allowing a PCI device to access all of system memory is somewhat of a security issue; some PCI controllers therefore contain an IOMMU through which bus-mastered read/writes are mapped so that the host system can keep control of the addresses that the graphics card can access.</p>
+
+<p>The Intel integrated graphics uses a GTT or PPGTT whose mappings are under control of the CPU, thus allowing the CPU to limit the pages visible to code running on the GPU.</p>
+
+<h1 id="the-compute-units">The Compute Units</h1>
+
+<h2 id="example-compute-unit-instructions">Example Compute Unit Instructions</h2>
+
+<p>Just in case you are curious, it is interesting to see what kinds of instructions a Compute Unit offers. This information is really only needed by people writing code to implement accelerate graphics operations in X drivers or OpenGL libraries. Knowing something about programming with these instructions helps to understand why graphics drivers are large and complicated, and why some approaches rely on embedding a complete compiler like LLVM.</p>
+
+<p>Here is a selection of interesting instructions from the AMD Southern Islands GPU..</p>
+
+<p>Scalar (SISD) Instructions:</p>
+
+<ul>
+  <li>ADD, SUB, MUL, ABS, MIN, MAX - standard maths ops</li>
+  <li>AND, OR, XOR, SHL, SHR, NOT - standard bit ops</li>
+  <li>BFM, BFE - bitfield operations</li>
+  <li>CMP_EQ, CMP_GT, CMP_LT, CMP_GE, CMP_LE, BITCMP - set condition flag</li>
+  <li>CBRANCH - jump if condition flag set</li>
+  <li>CMOV - copy data if condition flag set</li>
+  <li>WQM : wholeQuadMode: if any bit in a group of 4 is set, set all bits</li>
+  <li>CountZeroBits, CountOneBits, FindLastBit</li>
+  <li>ICACHE_INV - invalidate instruction cache</li>
+</ul>
+
+<p>Vector (SIMD) Instructions:</p>
+
+<ul>
+  <li>ADD(t,s1,s2) : <code>lane[i].reg[t] = lane[i].reg[s1] + lane[i].reg[s2]</code> for all i (ie perform t=s1+s2 on all lanes)</li>
+  <li>as above for SUB, MUL, MIN, MAX</li>
+  <li>SHR(t,s1,s2) : <code>lane[i].reg[t] = lane[i].reg[s1] &gt;&gt; lane[i].reg[s2]</code> for all i ( ie perform t=s1»s2 on all lanes)</li>
+  <li>AND/OR/XOR/BFM etc vectorised too</li>
+  <li>LDEXP: result = arg1 ^ (2*arg2)  – ie C library function ldexp() in hardware</li>
+  <li>about a dozen types of float-&gt;int conversion operations</li>
+  <li>about a dozen types of int-&gt;float conversion operations</li>
+  <li>CEIL/FLOOR</li>
+  <li>RCP, RSQ – reciprocal value, reciprocal square root</li>
+  <li>SQRT, SIN, COS – trigonometry</li>
+  <li>CUBEID - compute a “face id” from a cubemap  (result is an integer 0..5)</li>
+  <li>CubeMapS, CubeMapT, CubeMapMajorAxis</li>
+  <li>LERP - unsigned 8bit pixel average (linear interpolation)</li>
+  <li>MED - compute median of 3 values</li>
+  <li>SAD - sum of absolute differences</li>
+  <li>INTERP - vertex parameter interpolation with barycentric coordinates</li>
+  <li>IMAGE_SAMPLE, IMAGE_GATHER - read from image buffer, and store “processed” values in registers rather than whole image</li>
+  <li>copy <code>lane[i]</code> value to a scalar register</li>
+  <li>BUFFER_LOAD, BUFFER_STORE: transfer data between vector registers and main memory. 
+  Load/store ops explicitly control whether they want coherent data or not.</li>
+  <li>IMAGE_* (for texture maps and typed surfaces) : can compute “fragid”, slice, z and face_id values</li>
+  <li>SAMPLE_* : can compute sample_b, sample_c, sample_d, gather values, or “derivatives” (ie slopes of geometric faces)</li>
+  <li>EXPORT : stores RGBA data into memory, and optionally Z (depth)</li>
+</ul>
+
+<p>Vector operations apply to N data values concurrently (“lanes”). The basic concept is that input data is broken up into groups of N values, and then they are fed through a “program” in one pass. When the program completes (S_ENDPGM is encountered), the next N values are fed through the same program, etc.</p>
+
+<p>Example of a conditional vector operation is: “execute val=val*2 if val is odd”.</p>
+
+<h2 id="compute-unit-hardware">Compute Unit Hardware</h2>
+
+<p>A Southern Islands GPU:</p>
+
+<ul>
+  <li>
+    <p>Has 32 Compute Units (CUs), each of which has 64kb of private ram - ie is like a cluster of CPUs. Each CU also has its own L1 cache.
+And each CU has its own set of registers.</p>
+  </li>
+  <li>
+    <p>Each CU has 1 scalar and 4 vector units. Each vector unit can apply the same instruction to 64 values concurrently.
+A scalar instruction executes in one cycle; a vector instruction in 4 cycles (where the vector instruction can
+manipulate 64 values concurrently).</p>
+  </li>
+</ul>
+
+<p>AMD’s terminology is a little unusual for those of us used to traditional programming; it is “data driven”, ie their view is that you take data and apply a program to it, rather than take a function and apply it to data. It is necessary to keep this in mind when reading AMD documentation. For example, when doing “pixel shading”, they describe this as taking a batch of 64 pixels, and applying the same program to each pixel.  Note: their name for a GPU program is a “kernel” :-)</p>
+
+<h2 id="wavefronts">Wavefronts</h2>
+
+<p>A “wavefront” is an invocation of a SIMD “program” (kernel) together with up to 64 input values. A wavefront can have a mix of scalar and vector instructions, ie executes on either the scalar component of the CU, or one of its vector units. A wavefront has a single Program Counter (PC) value, ie exactly one of its instructions is executed at a time. Multiple “wavefronts” can be assigned to the same CU in which case they can interact (can see shared registers and shared memory); presumably a wavefront will block on a scalar instruction if some other wavefront on the same CU is using the scalar unit. However because there are 4 vector units in a CU, 4 wavefronts can potentially be running vector operations concurrently (each processing 64 values) on the same CU.</p>
+
+<p>Each CU is allocated many more “wavefronts” than it has vector units to support them; this allows the CU to implement “hyperthreading”, ie when a wavefront blocks (due to memory access, or competition for the scalar unit, etc) then another of the allocated wavefronts can be executed in its place. This means that wavefronts may be completed in a different order than they were originally scheduled; for the rare cases where this matters, there are a number of synchronization instructions available. Each “kernel” (ie GPU program) must declare the amount of working memory and number of registers it intends to use; the dispatching unit can therefore distribute wavefronts (which reference kernels) across CUs in order to maximise the chances of parallel execution. This ability to schedule an alternate wavefront when an existing one “blocks” is in fact one of the important factorys which drove the change from VLIW to GCN architecture; with VLIW, the compiler is responsible for figuring out when an operation might block, and so rearrange instructions to avoid it - but in some cases, behaviour can’t be predicted until runtime.</p>
+
+<h2 id="vector-forkjoin">Vector fork/join:</h2>
+
+<p>Conditions are interesting when using vectors of data: an “if” statement may be true for some vector elements, and false for others! The standard way this is handled is for there to be an “exec” bit for each vector element; a test instruction is applied to all vector elements which sets the exec bit for that element iff the test is true for that element. Then when the next instruction is executed, all elements where the exec bit is false treat it as a NOOP. This way, the program counter remains identical for all vector elements. It is assumed that only a few instructions are executed before the “exec” bit is forced to true for all elements again.</p>
+
+<p>Implementing a conventional “if” statement is done via the “fork” command; effectively the program instructions are applied only to those data values which are “true”, up until end of program or “join” command is encountered. At that point, the program counter gets reset back to the “fork” point, and the instructions are repeated for the “false” data items. Clearly, the performance impact of this is significant - avoid where possible.</p>
+
+<h1 id="other-items">Other Items</h1>
+
+<p>An i2c bus is commonly used by graphics cards to communicate with (modern) attached displays to retrieve monitor parameters (eg EDID codes and resolutions).</p>
+
+<h1 id="references">References</h1>
+
+<p>Information in this article has been pulled from <em>many</em> sources. Here are a few of them:</p>
+
+<ul>
+  <li>
+    <p><a href="http://www.x.org/wiki/Development/Documentation/HowVideoCardsWork/">x.org: how video cards work</a></p>
+  </li>
+  <li>
+    <p><a href="http://people.freedesktop.org/~marcheu/linuxgraphicsdrivers.pdf">Linux Graphics Drivers: an Introduction - Stephane Marchesin</a> - work in progress</p>
+  </li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Radeon">AMD Radeon series summary</a>
+    <ul>
+      <li>general overview of AMD/ATI Radeon models</li>
+    </ul>
+  </li>
+  <li>
+<a href="http://www.x.org/docs/AMD/R5xx_Acceleration_v1.5.pdf">AMD R5xx Acceleration, AMD June 8 2010</a>
+    <ul>
+      <li>useful information about the Command Processor and ring buffer. Alas, the equivalent information does not seem to be
+available for the Southern Islands cards.</li>
+    </ul>
+  </li>
+  <li>
+<a href="http://www.anandtech.com/show/4455/amds-graphics-core-next-preview-amd-architects-for-compute/1">Anandtech review of AMD architecture</a>
+    <ul>
+      <li>general Radeon architecture review</li>
+    </ul>
+  </li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Graphics_Core_Next">AMD Graphics Core Next (GCN)</a>
+    <ul>
+      <li>general Radeon architecture review</li>
+    </ul>
+  </li>
+  <li>
+<a href="http://download.intel.com/design/intarch/papers/325350.pdf">Intel Linux Graphics Stack</a>
+    <ul>
+      <li>general info about the linux graphics stack</li>
+    </ul>
+  </li>
+  <li>
+<a href="http://developer.amd.com/afds/assets/presentations/2620_final.pdf">Slides - AMD GCN Architecture, Fusion Developer Summit June 2011</a>
+    <ul>
+      <li>general Radeon architecture review</li>
+    </ul>
+  </li>
+  <li>
+<a href="http://www.amd.com/us/Documents/GCN_Architecture_whitepaper.pdf">GCN Architecture Whitepaper</a>
+    <ul>
+      <li>general Radeon architecture review</li>
+    </ul>
+  </li>
+  <li>
+<a href="http://developer.amd.com/tools/hc/amdappsdk/assets/AMD_Southern_Islands_Instruction_Set_Architecture.pdf">AMD Southern Islands Instruction Set Architecture</a>
+    <ul>
+      <li>lots of details about the Compute Unit instructions. Note that while the process of <em>writing</em> programs using the CU instruction set is thoroughly
+documented, the process of <em>loading</em> the data into the GPU is not (ie the Command Processor is only very briefly mentioned). Information about the process
+of defining vertex buffers, etc is also missing (when compared to the documentation for the 5xx series for example). This is because the above document
+is really intended for people doing GP-GPU computing, <em>not</em> for people writing graphics drivers. The process of loading GP-GPU programs via the
+Command Processor onto the Compute Units is simple: use the AMD-provided tools!</li>
+    </ul>
+  </li>
+  <li>
+    <p><a href="http://http.developer.nvidia.com/GPUGems2/gpugems2_frontmatter.html">GPU Gems 2 - NVidia</a></p>
+  </li>
+  <li>
+    <p><a href="http://dri.freedesktop.org/wiki/DRM">XOrg dri/drm page - appears quite out-of-date</a></p>
+  </li>
+  <li>
+    <p><a href="http://dri.freedesktop.org/wiki/DRMRedesign">Xorg drm redesign – appears to reflect current code</a></p>
+  </li>
+  <li>
+    <p><a href="http://blogs.igalia.com/itoral/2014/11/">Iago Toral: A brief overview of the 3D pipeline</a></p>
+  </li>
+  <li>
+<a href="http://blogs.igalia.com/itoral/2015/03/03/an-introduction-to-mesas-glsl-compiler-i/">Iago Toral: An Introduction to Mesa’s GLSL compiler</a>. This describes the internal structure of the Mesa non-Gallium drivers. TODO: This could be the basis of an article on Mesa architecture..</li>
+</ul>
+
+<p>Since this article was written, a number of useful resources have been published:</p>
+
+<ul>
+  <li><a href="https://www.amd.com/en/technologies/rdna">AMD: RDNA Architecture</a></li>
+</ul>
+
+<h1 id="unresolved-questions">Unresolved Questions</h1>
+
+<ul>
+  <li>
+    <p>Where is the CS documentation for Southern Islands?</p>
+  </li>
+  <li>
+    <p>for X userspace drivers, what maps BARs to addresses accessable via /dev/mem?</p>
+  </li>
+  <li>
+    <p>what is a “fence” in the graphics drivers? It is some kind of <em>synchronization primitive</em> between the writer and reader of a shared buffer, but I’m not sure of the exact details..</p>
+  </li>
+</ul>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<p>(none yet)</p>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/graphics-card-interfaces/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

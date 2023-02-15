@@ -1,0 +1,271 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Hexagonal Architecture</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Hexagonal Architecture</h1>
+    <aside>First published on: March 13, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a>, <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>A friend and colleague of mine was recently praising <a href="https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)">the Hexagonal Architecture design pattern</a> (also known as Ports and Adapters). I hadn’t heard of it so did a little research.</p>
+
+<p>To my surprise it was actually proposed in 2005 and is well-known in at least some circles. It’s not terribly complicated, and it’s not particularly radical. However I think it’s a nice idea and an improvement over the traditional “layered architecture”. The Onion Architecture and Clean Architecture are very similar in concept.</p>
+
+<h1 id="the-problem">The Problem</h1>
+
+<p>Hexagonal architecture is a technical code pattern which can be useful to structure non-trivial codebases. As I see it, there are four problem areas addressed:</p>
+
+<ol>
+  <li>clear separation of business logic from other code (into dedicated modules)</li>
+  <li>clear separation of code that handles sets of incoming requests (into dedicated modules)</li>
+  <li>clear separation of code that handles sets of outgoing requests (into dedicated modules)</li>
+  <li>appropriate structuring of compile-time dependencies between the above modules to make the code understandable and maintainable</li>
+</ol>
+
+<p>The need for the first item isn’t particularly surprising; I think most software developers these days are convinced of the benefits of separating the code that implements business concepts (the “functional requirements”) from the other parts. Yes, there are plenty of code-bases that don’t do this but we are at least <em>ashamed</em> of them. There are also some codebases which just don’t have a significant amount of business logic - in which case this whole architecture pattern is not relevant.</p>
+
+<p>The usefulness of the second item is also reasonably accepted. If an application renders a web UI, but also has a REST interface, and accepts commands via a message-broker, then the code for each of those 3 mechanisms should be properly separated to make the system easier to understand and to maintain. Note that when an application <em>polls</em> another for data, that is also a kind of incoming request; it’s logically equivalent to the same data being <em>pushed</em> to the application.</p>
+
+<p>Item 3 is perhaps less thought-about. An application often writes to a database, a message-broker, and various systems via REST or various RPC protocols.  Separating these different topics seems helpful - particularly if one of them gets replaced with an alternative, or additional external connection types are needed.</p>
+
+<p>In a non-trivial-sized application, item 4 is needed to keep the system understandable, maintainable, and testable. Even when code is nicely separated into modules as described above, if compile-time dependencies are allowed from any module onto any module then the code will soon become very hard to understand and change. Testing any piece of it requires building the set of objects to test, and isolating some of them with test dummies (aka mocks) - something that becomes very hard when dependencies go in all directions.</p>
+
+<p>The traditional solution to all this is the “layered architecture” in which a presentation-tier sits “above” a business-tier which sits “above” a persistence/infrastructure tier. Each tier is allowed to reference types declared in the tier below it, but not in the tier(s) above it, thus preventing circular dependencies between layers - which soon turns into a complicated web of dependencies. This layering can be enforced by convention, by tooling (code validators), or by placing each layer into a separate artifact (library) and controlling the compile-time dependencies between these artifacts.</p>
+
+<p>There are, however, a few problems with the layered architecture.</p>
+
+<h1 id="the-problems-with-layered-architecture">The Problems with Layered Architecture</h1>
+
+<p>The “presentation tier” is just one conceptual blob, without addressing the fact that an application may have multiple kinds of “inputs” (external systems that initiate data transfers to it).</p>
+
+<p>The persistence/infrastructure tier has the same problem - no prompt to developers to separate it further. However more importantly it has no access to types in the business tier; “DAO” classes cannot take model types as inputs or return them as outputs. Persistence frameworks are limited to general-purpose APIs like:</p>
+
+<pre><code>class DBSession {
+  void save(Object o);
+  Object fetchById(Class&lt;?&gt; type, Object id);
+  List&lt;?&gt; fetchByCriteria(Class&lt;?&gt; type, Criteria criteria);
+}
+</code></pre>
+
+<p>The business-tier must then add type-safe wrappers over this general-purpose interface for different types. This pushes unnecessary code up into the business tier which really should be kept free of anything but business-relevant code.</p>
+
+<p>This strategy of “type-unsafe” interfaces also doesn’t extend well to things other than persistence.</p>
+
+<p>Rather than using type-unsafe underlying layers, an alternative sometimes adopted is to split the business tier into two parts: “model types” and “business services”, with the business services layer <em>above</em> the persistence/infrastructure layer (so it can invoke the necessary APIs) while the “business model” sits <em>below</em> the persistence/infrastructure so that helper code in that layer can reference those types. This however is (a) ugly and inconsistent, and (b) forces the model types to be “anemic” - ie plain data-holders with no significant functionality. That kills any useful “data-hiding” in those types, often makes it impossible for those model types to enforce invariants, and generally breaks the concepts of object-oriented development, domain-driven-design, and various other principles.</p>
+
+<p>And finally, the layered architecture tempts developers to write business-tier code that depends on concrete types in the persistence/infrastructure layer - they are accessible after all. This can make it hard to swap out those technologies later, with the changes having impact on the important business logic. It also makes it hard to test the business logic alone; those “hard” dependencies can be difficult to mock.</p>
+
+<h1 id="how-hexagonal-helps">How Hexagonal Helps</h1>
+
+<p>The primary principle is that a clear “business tier” should exist, and it should have <em>no</em> compile-time dependencies on any other code in the application. When business-tier code needs to <em>initiate</em> an interaction with the outside world, the business-tier declares an <em>interface</em> to support that operation, and then its code just calls that interface. The implementation of that interface of course needs to be provided to the business-tier somehow; this is done either by dependency-injection or some “service lookup” mechanism - ie this is applying standard <em>dependency inversion</em>.</p>
+
+<p>The code supporting various input and output mechanisms is then separated into modules. Those providing input mechanisms (ie wait for contact from the outside world) just call into the business tier. Those providing output mechanisms (ie initiate interaction with the outside world) implement those interfaces declared in the business tier (and thus need a compile dependency on the business tier in order to “see” those types). These are the “ports and adapters” modules which give the pattern its (alternative) name.</p>
+
+<p>And because the business-tier has <em>no</em> dependencies on the application code, interacting only via special-purpose interfaces that it declares itself, the code in that tier is very isolated from the implementation. That implementation can obviously be replaced with anything for which that interface can be implemented. And unit-testing of the business code can always be done in isolation from the environment simply by providing dummy implementations of those interfaces.</p>
+
+<p>It does have the disadvantage that persistence/infrastructure code now has transitive dependencies on everything that the business-tier code depends on - ie extends a weakness in the layered-architecture pattern that previously applied only to “input” code. While some languages allow “api” to be separated from “implementation” (eg for Java: OSGi or the Java Module System), this doesn’t seem very helpful here. The API for the business-tier is likely to involve most of the domain model types (entities and value objects in DDD terms), which is actually most of the code (assuming there is a <em>rich domain model</em>). Creating a separate “business tier API” consisting of DTO or anemic data model types doesn’t seem helpful or worthwhile. The problem of persistence/infrastructure code being exposed to these transitive dependencies is minor and it seems best to just accept that. It’s certainly a better problem to have than exposing the business tier to the transitive dependencies of the persistence/infrastructure tier which the layered architecture does..</p>
+
+<p>The rule that business-tier code must not depend on application code should be enforced if possible. Using separate <em>artifacts</em> (eg <em>maven modules</em>) is effective; otherwise code-checking tools may help (eg jqassistant or archunit for Java).</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>Hexagonal Architecture, aka Ports and Adapters, is a technical code pattern which is applicable to applications which are of a non-trivial size and implement a significant amount of <em>business logic</em>. The pattern places business logic in modules that have <em>no dependencies on other application code</em>, with various “adapter” modules which surround it and depend on the business tier - calling it, or implementing interfaces to allow the adapter to be called.</p>
+
+<p>It addresses the same problems that the “layered architecture” pattern does - but does it better.</p>
+
+<p>As <a href="https://www.youtube.com/watch?v=SxJPQ5qXisw">pointed out by Ian Cooper</a>, the “input ports” to the business logic are also the “use cases” which the system implements, ie are things which should be unit-tested (and the “output ports” are the things which need to be mocked). In fact, <a href="/2023/05/testing/">in a different presentation</a> he argues that these are the <em>only things</em> which should be unit-tested.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)">Hexagonal Architecture</a></li>
+  <li><a href="https://www.youtube.com/watch?v=SxJPQ5qXisw">[video] Ian Cooper: The Clean Architecture (2019)</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/hexagonal/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

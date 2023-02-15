@@ -1,0 +1,535 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Symmetric Encryption in Java</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Symmetric Encryption in Java</h1>
+    <aside>First published on: January 30, 2013</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/Cryptography/'>Cryptography</a></p>
+      <p>(<a href="/2013/02/encryption">back to main post</a>)</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p><a href="/programming/symmetric-encryption">A previous article</a> presented the basic terminology and algorithms of symmetric encryption; this article discusses the related classes from the Java standard library, and from the alternative open-source BouncyCastle cryptography library.</p>
+
+<h1 id="general-comments-on-the-standard-java-cryptography-apis">General Comments on the Standard Java Cryptography APIs</h1>
+
+<p>The jdk has an extensive set of classes in the <code>java.security</code> and <code>javax.crypto</code> packages for performing encryption, decryption, signing, and other such operations. Sadly these APIs are a disaster. Due to an attempt to provide “pluggable” security (cryptography) libraries, the API involves a weird mismatch of completely type-unsafe methods and types. For absolutely no good reason it then adds classes of rare and extremely specific purpose, names that seem to be deliberately confusing (security through obscurity?) and strange inheritance structures. To round it off, the javadoc is often incomplete or ambiguous.</p>
+
+<p>Fortunately there are some people out there who understand this maze and have posted good advice that can be found via appropriate searches. Sadly, there are also a lot of people out there who <em>misunderstand</em> this maze and have posted dangerously bad advice that is found via the same search terms. Beware in all directions!</p>
+
+<p>Hopefully the information in this article is correct; if it is not then please let me know immediately and the article will be corrected.</p>
+
+<h1 id="standard-java-cryptography-apis">Standard Java Cryptography APIs</h1>
+
+<p>Java cryptography classes are found in either <code>java.security</code> or <code>javax.crypto</code>.</p>
+
+<p>The package <code>java.security</code> is mostly about <em>asymmetric</em> encryption (ie public/private key encryption). This is because the java environment itself uses asymmetric encryption for:</p>
+
+<ul>
+  <li>signing jarfiles (and thus being able to grant them specific permissions) - which also requires <em>message digest</em> (ie hashing) support</li>
+  <li>implementing SSL/TLS ie https; an https server identifies itself by providing a <em>certificate</em> in which is embedded a <em>public key</em>
+</li>
+</ul>
+
+<p>The addition of symmetric encryption features was done later, and these are mostly in the <code>javax.crypto</code> package.</p>
+
+<h1 id="some-standard-java-classes">Some Standard Java Classes</h1>
+
+<p>The javadoc on a number of critical classes is - less than optimal, so here is some additional information on the most important classes. This list contains about 10% of the classes under <code>java.security</code> and 30% of the classes under <code>javax.crypto</code>; the rest are not relevant for symmetric encryption.</p>
+
+<p>The entries are grouped in an order that the following sections will hopefully make clear.</p>
+
+<h2 id="all-jdk-classes-relevant-for-symmetric-encryption">All JDK classes relevant for symmetric encryption</h2>
+
+<ul>
+  <li>javax.crypto.Cipher</li>
+  <li>javax.crypto.CipherInputStream</li>
+  <li>javax.crypto.CipherOutputStream</li>
+  <li>java.security.Key</li>
+  <li>javax.crypto.SecretKey</li>
+  <li>javax.crypto.interfaces.PBEKey</li>
+  <li>java.security.spec.KeySpec</li>
+  <li>javax.crypto.spec.SecretKeySpec</li>
+  <li>javax.crypto.spec.PBEKeySpec</li>
+  <li>javax.crypto.SecretKeyFactory</li>
+  <li>java.security.AlgorithmParameters</li>
+  <li>java.security.spec.AlgorithmParameterSpec</li>
+  <li>javax.crypto.spec.IvParameterSpec</li>
+  <li>java.security.AlgorithmParameterGenerator</li>
+  <li>javax.crypto.KeyGenerator</li>
+  <li>javax.crypto.Mac</li>
+  <li>javax.crypto.spec.PBEParameterSpec</li>
+</ul>
+
+<h2 id="ciphers-and-streams">Ciphers and Streams</h2>
+
+<p>Class <code>javax.crypto.Cipher</code> represents an object that is capable of turning plaintext into ciphertext and reverse. When an instance is created (via the getInstance static factory methods) it has an internal algorithm but does not have the “configuration” necessary to actually encrypt or decrypt. One of the many init methods must be called to provide it with the necessary configuration data. In the case of symmetric encryption, the data needed is:</p>
+
+<ul>
+  <li>a symmetric key (ie a SecretKey object) - which might be an already-prepared block of bytes, or data from which one can be generated by the Cipher (see PBEKey later)</li>
+  <li>usually an IvParameterSpec object to specify the Initialization Vector to use</li>
+</ul>
+
+<p>A Cipher instance (as returned from a getInstance method) is actually simply a wrapper class that delegates to an object that does the real work - one created by a “pluggable security provider” implementation. The wrapper class is always the same type, provided by the JDK. And the wrapper enforces any restrictions on the encryption strength - the infamous maximum of 128-bit keys (see section below). There is no avoiding this limit when using the standard Cipher class.</p>
+
+<p>The CipherInputStream and CipherOutputStream classes do show the benefit of unifying all types of encryption/decryption under a single Cipher interface; these classes transparently decrypt or encrypt data that flows through them and don’t care if the encryption is symmetric or asymmetric.</p>
+
+<p>There are a number of bizarre API features in the Cipher class:</p>
+
+<ul>
+  <li>why are encryption and decryption unified, with an init parameter to set the “direction”? Surely separate Encipher and Decipher interfaces would have been clearer..</li>
+  <li>why is an instance created without already having the data necessary to work? The object returned from getInstance() is totally useless; why not have the getInstance methods take the parameters that init does?</li>
+  <li>actually, why have these bizarre init methods at all? The key and parameter objects passed to the Cipher have to have “algorithm” types that match the algorithm parameter passed to the Cipher.getInstance method or a <em>runtime</em> failure occurs. So why not have concrete Cipher subclasses and do away with the getInstance factory method, and the init method?</li>
+</ul>
+
+<p>The reason for the above design flaws is the hidden fact that a Cipher instance is a <em>standard wrapper</em> that simply delegates to a real implementation supplied by a pluggable provider. However this is no consolation when having to <em>use</em> this API.  In short, the Cipher API is so designed that it is impossible to use without documentation, and without carefully keeping the key-loading and cipher-creating parts of the code in sync. Failure to do this results in runtime failures, not compile-time ones.</p>
+
+<h2 id="key-types">Key types</h2>
+
+<p>Interface <code>java.security.Key</code> represents the magic data that a cipher needs to encrypt or decrypt data. Instances of type Key are usually created by a KeyFactory (asymmetric) or SecretKeyFactory (symmetric) from a KeySpec. For symmetric encryption, the resulting object is always a subtype of <code>javax.crypto.SecretKey</code>.</p>
+
+<p>Interface <code>javax.crypto.SecretKey</code> is a subtype of Key that represents a symmetric key. For some algorithms (eg AES or DES), the key object is just a wrapper around an array of random bytes, and the <code>getEncoded</code> method simply returns those raw bytes.</p>
+
+<p>Interface <code>javax.crypto.interfaces.PBEKey</code> is a subtype of SecretKey that wraps values from which a “real” symmetric encryption key can be derived: (password, salt, iteration). The type is actually seldom referenced directly in Java code, as they are generated by a SecretKeyFactory from a PBEKeySpec - and the return type of a SecretKeyFactory is SecretKey, not PBEKey. Ciphers that require a PBEKey will throw a runtime exception if passed a Key instance which is not a PBEKey.  Such Ciphers knows how to internally derive a real key from the password and associated parameters encapsulated in the PBEKey object. Bizarrely, although instances of this type must be generated by a SecretKeyFactory (see later) from a KeySpec, this class <em>also</em> simultaneously extends KeySpec - because it does remember the parameters with which it was created. The generic SecretKey interface can’t do that because it is a more abstract type that doesn’t record <em>how</em> its internal key (byte-array) was actually created.</p>
+
+<p>The API is somewhat weird: types are scattered across various packages, and while there is a specific interface for PBEKey there is none representing a SecretKey derived directly from a byte-array (eg “RawSecretKey”). Yes, a RawSecretKey interface would be redundant as it couldn’t offer any more methods than are present on its parent type but it would make the inheritance tree more symmetrical and comprehensible.</p>
+
+<h2 id="keyspec-types">KeySpec types</h2>
+
+<p>Interface <code>java.security.spec.KeySpec</code> encapsulates “the values from which a key can be derived”. Generally, a KeySpec instance is fed into a matching KeyFactory instance resulting in a Key object. As an example from asymmetric encryption, a DSA key is derived from numbers named p, q, x and d which satisfy specific mathematical constraints.</p>
+
+<p>Class <code>javax.crypto.spec.SecretKeySpec</code> represents a byte-array from which a secret-key can be derived via the trivial process of um - doing nothing, because the byte-array <em>is</em> the key. Because in this case the specification is identical to the key, the SecretKeySpec class <em>also</em> implements the SecretKey interface - unlike other keyspec classes such as PublicKeySpec, PrivateKeySpec and PBEKeySpec. While short-circuiting the normal type structures (making this spec class implement a key interface directly) makes sense from an implementation (and maybe performance) point of view, it certainly doesn’t assist <em>understanding</em> the cryptography classes when this type directly implements an unexpected parent interface just because the normal transformation (<code>spec -&gt; keyfactory -&gt; key</code>) happens to be an <em>identity</em> transformation in this case. Sigh. The fact that this class has a bad name - IdentityKeySpec would perhaps have been better - doesn’t help. Sigh again.</p>
+
+<p>Class <code>javax.crypto.spec.PBEKeySpec</code> represents “Password Based Encryption” parameters from which a SecretKey can be derived - password, salt and iteration-count.</p>
+
+<p>Note that the “keyspec” types don’t actually define the <em>algorithm</em> which should be used to transform the “specification” into a key. That is the role of a KeyFactory.</p>
+
+<h2 id="key-factories">Key Factories</h2>
+
+<p>A key-factory converts a key-spec into a key. As an example from asymmetric encryption, an appropriate keyfactory can unpack a <em>certificate</em> into a public-key object.</p>
+
+<p>From the naming patterns above, you would expect that <code>java.security.KeyFactory</code> is a base type representing the abstract concept of turning a KeySpec into a Key, right? And that SecretKeyFactory extends KeyFactory. Nah, far too obvious and consistent for the designers of the JDK crypto APIs. In fact, although the classes are indeed doing the same logical thing (<code>keyspec -&gt; key</code>), they are not related at all. KeyFactory is the original class designed for dealing with asymmetric encryption as present since the early versions of Java (1.2?). SecretKeyFactory was added when symmetric-encryption support was added and fulfils the same role but is not related.</p>
+
+<p>The implementation of both KeyFactory and SecretKeyFactory are similar to the Cipher class: a single common “wrapper” class that delegates to an actual implementation created by a “pluggable security provider”.</p>
+
+<p>Actually, it is good that SecretKeyFactory does not subclass KeyFactory; there is no benefit to it (and KeyFactory has asymmetric-specific methods like generatePrivateKey). However it would have been good if the designers had also:</p>
+
+<ol>
+  <li>not chosen class names that <em>suggest</em> a parent-type/subtype relation, and</li>
+  <li>not taken exactly the opposite approach with Key/SecretKey and KeySpec/SecretKeySpec, where type/subtype relations do exist.</li>
+</ol>
+
+<p>The reason for (2) is that Key/SecretKey and KeySpec/SecretKeySpec are <em>data objects</em> that are not implemented by a “pluggable security provider”, while Cipher and SecretKeyFactory implementations are. However IMO that is no justification for such naming chaos.</p>
+
+<p>Obviously, specific KeyFactory implementations (algorithms) accept only specific KeySpec types, and return the corresponding Key types - which must then be fed into an appropriate Cipher type. A mismatch anywhere results in a runtime failure.</p>
+
+<p>This is (IMHO) yet another API design failure; keyfactories are so tightly coupled to their input keyspec types that it makes no sense for there to be a common abstract type for doing this. The API has been seriously distorted to allow different algorithm implementations with various different configuration needs to be squeezed through a common “service provider” interface.</p>
+
+<p>To convert a PBEKeySpec to a SecretKey, an appropriate KeyFactory needs to be used. Method <code>SecretKeyFactory.generateSecret</code> returns an instance of type SecretKey - but this can be downcast to PBEKey if (and only if) the input is a PBEKeySpec and the algorithm is a PBE algorithm. Yet another type-unsafe interface.</p>
+
+<p>And oddly, because the transformation from SecretKeySpec to SecretKey is an <em>identity</em> translation (see comments in previous section), there is actually no need to use a SecretKeyFactory for this mapping; just use the SecretKeySpec directly - as it also implements SecretKey itself.</p>
+
+<h1 id="algorithm-parameters">Algorithm Parameters</h1>
+
+<p>The java crypto APIs have to funnel data from the application to “security provider” implementations, so rather than have sane simple typesafe APIs, they use generic types and collections of those types. In particular, <code>java.security.AlgorithmParameters</code> is a collection of “stuff that some class in a security provider library might need to know”. All those “things a library might need to know” must be represented as classes subclassing <code>java.security.spec.AlgorithmParameterSpec</code>.</p>
+
+<p>The most significant user is the Cipher class. Its init method can be passed an AlgorithmParameters object containing data that the underlying wrapper implementation needs. Sadly, this is completely type-unsafe; the API gives no hint as to what is needed (because what is needed depends upon the string passed to the getInstance method), and if the wrong objects are passed then an exception occurs at runtime.</p>
+
+<p>Fortunately, there is only one algorithm parameter used by Cipher implementations for symmetric encryption: <code>javax.crypto.spec.IvParameterSpec</code> containing the InitialisationVector for any cipher algorithm that uses a “block chaining mode” that requires an initialisation vector (and you <em>should always</em> be using a block chaining mode).</p>
+
+<pre><code>  IvParameterSpec ivSpec = new IvParameterSpec(someBytes);
+  cipher.init(opmode, key, ivSpec);
+
+  // or this - although as Iv is the only thing you'll ever need to store in the params, it is somewhat pointless..
+  //
+  // AlgorithmParameters algoParams = AlgorithmParameters.getInstance("AES-CBC");
+  // algoParams.init(ivSpec);
+  // cipher.init(opmode, key, algoParams);
+</code></pre>
+
+<p>The <a href="/programming/symmetric-encryption">article on symmetric encryption</a> describes what an IV is, and how you might get one.</p>
+
+<p>There is also a class (<code>java.security.AlgorithmParameterGenerator</code>) for <em>generating</em> algorithm parameters. Presumably it could be used to generate an IV when encrypting outgoing messages. However given that an IV is just a random sequence of bytes it is easier to just use SecureRandom.nextBytes for that.</p>
+
+<h1 id="key-generators">Key Generators</h1>
+
+<p>Class <code>javax.crypto.KeyGenerator</code> supports <em>creating new</em> keys. As far as I am aware (and note that I am NOT a cryptographer), an AES key is just a random block of bytes and therefore it is just as valid to use SecureRandom.nextBytes to generate an AES key as to use <code>javax.crypto.KeyGenerator</code>. However for other key types this is not necessarily true, and using the KeyGenerator is required.</p>
+
+<p>Some encryption algorithms do have specific ranges of numbers which are considered “weak keys”, ie which interact with the algorithm to generate output which is easier to decrypt than for most other keys; hopefully a KeyGenerator will know how to avoid returning such keys. However AES does not have any such ‘weak keys’.</p>
+
+<h1 id="message-authentication-codes">Message Authentication Codes</h1>
+
+<p>A <a href="https://en.wikipedia.org/wiki/Message_authentication_code">MAC algorithm</a> (class <code>javax.crypto.Mac</code>) is a kind of secure-hash; hash algorithms such as MD5 or SHA1 do not have a “key”, but MAC algorithms do.</p>
+
+<p>As noted in my article on symmetric encryption, block-mode algorithms such as AES will <em>usually</em> fail to decrypt data if it has been accidentally or deliberately modified in transit. However encryption algorithms don’t specialize in this work. If you (a) just want to ensure a message is not modified without bothering to encrypt it, or (b) might really want to be sure it hasn’t been messed with, then a MAC algorithm may be what you need.</p>
+
+<h1 id="key-sizes">Key Sizes</h1>
+
+<p>Some encryption algorithms only support keys with a certain “size” (eg 128-bit). Other algorithms support several different key-sizes, and some algorithms support any keysize. The actual key size used can therefore be specified in one of three different ways:</p>
+
+<ul>
+  <li>key size is implicit in the “cipher algorithm” string passed to <code>Cipher.getInstance</code>, ie the specified cipher only supports one key size</li>
+  <li>key size is explicit in the “cipher algorithm” string passed to <code>Cipher.getInstance</code> (eg “<code>AES_128</code>”)</li>
+  <li>key size is controlled by the Key object passed to <code>Cipher.init</code>
+</li>
+</ul>
+
+<p>In the first two cases, the Key object passed to <code>Cipher.init</code> must match the size expected by the Cipher instance. In the last case, the Key object may be any size supported by the Cipher instance.</p>
+
+<h1 id="more-on-password-based-encryption-pbe">More on Password Based Encryption (PBE)</h1>
+
+<p>Password-based-encryption is the approach of having the sender and receiver of encrypted data have a shared <em>password</em> rather than a shared <em>key</em>. Keys are blocks of random numbers which are sometimes hard to transfer from one system to another - they cannot easily be ready  aloud over a telephone, or memorized. However encryption algorithms are mathematical, and require “key” inputs which are large and random - something that passwords are not. The solution is to <em>transform</em> a password into a key via a “password based encryption key derivation function” or PBEKDF. Note that real keys are always more secure - even a good password does not have as much variety as a binary key, and a bad password of course has far less.</p>
+
+<p>There are several common algorithms used for mapping a PBEKey (ie password, salt, iteration-count) into a SecretKey. The most standard ones are PBKDF#1 and PBKDF#2 (password based key derivation functions #1 and #2). However OpenSSL has its own slight variation on this which is somewhere between the two. Other encryption libraries often use adhoc (and much less secure) ways of mapping password to key.</p>
+
+<p>PBE encryption can be implemented with the Java standard library as follows:</p>
+
+<pre><code>    String password = "secret";
+    String salt = "salt";
+    int iterationCount = 1000;
+
+    PBEKeySpec keyspec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), iterationCount);
+    SecretKeyFactory skf = SecretKeyFactory.getInstance("PBEWithHmacSHA256AndAES_128");
+    SecretKey key = skf.generateSecret(keyspec);
+    Cipher cipher = Cipher.getInstance("PBEWithHmacSHA256AndAES_128");
+
+    cipher.init(Cipher.ENCRYPT_MODE, key);
+    String plaintext = "hello, world";
+    byte[] ciphertext = cipher.doFinal(plaintext.getBytes());
+
+    cipher.init(Cipher.DECRYPT_MODE, key);
+    String recovered = new String(cipher.doFinal(ciphertext));
+</code></pre>
+
+<p>In this approach, no IvParameterSpec is needed by <code>Cipher.init</code> - the “salt” parameter associated with the key effectively solves the same problem (ensuring the same data encrypted with the same key does not generate the same output). However this only works if multiple data-blocks are encrypted with different salts - the same input encrypted with the same (password, salt) obviously produces the same output.</p>
+
+<p>A minor variant to the above is to omit the salt and iteration-count params when creating the PBEKeySpec; instead instantate a PBEParameterSpec instance with these values and pass that as an additional parameter to <code>Cipher.init</code>. The result is the same.</p>
+
+<p>Unfortunately, in this approach the SecretKey object is not yet a real key, just a wrapper around the PBEKeySpec data. The real key is derived from the SecretKey within the Cipher.init method. By design, key-derivation-functions are meant to be slow to hinder attackers (the iteration-count parameter controls exactly <em>how</em> slow). If your encryption use-case only requires <code>Cipher.init</code> to be called occasionally then this is fine. However if your use-case requires encoding many small blocks of data with the same key then that means calling <code>Cipher.init</code> very often which is a performance issue.</p>
+
+<p>A password can be transformed explicitly into a real binary key by directly using a PBKDF algorithm as follows:</p>
+
+<pre><code> private static final String PBKDF_ALGO = "PBKDF2WithHmacSHA256";
+
+  private static SecretKeySpec passwordToAESKey(String password, int keylength) throws GeneralSecurityException {
+    SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(PBKDF_ALGO);
+    PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), SALT, NITERATIONS, keylength);
+    SecretKey key = keyFactory.generateSecret(keySpec);
+    byte[] tmp = key.getEncoded();
+    return new SecretKeySpec(tmp, "AES");
+  }
+</code></pre>
+
+<p>This key can then be used with a standard AES algorithm:</p>
+
+<pre><code>  private static final String AES_ALGO = "AES/CBC/PKCS5Padding";
+
+  public String encrypt(SecureRandom secureRandom, SecretKey key, Cipher cipher, String in) {
+    try {
+      // Allocate a new IV for each string (equivalent to "salting" the encryption). As with salts, an IV is
+      // not secret information - it is only there to make it impossible to detect when the same input has
+      // been encrypted in multiple places. And the IV is needed for decryption. The IV is therefore prefixed
+      // to the returned result.
+      byte[] iv = new byte[16];
+      secureRandom.nextBytes(iv);
+      IvParameterSpec ivSpec = new IvParameterSpec(iv);
+
+      // Initialise the instance and configure the key + ivspec + random-number-generator
+      cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec, secureRandom);
+
+      byte[] data = cipher.doFinal(in.getBytes(UTF8));
+      return base64Encoder.encodeToString(iv) + ":" + base64Encoder.encodeToString(data);
+    } catch (GeneralSecurityException e) {
+      throw new ConnectException(e);
+    }
+  }
+</code></pre>
+
+<p>Method encrypt does not repeat the KDF on each init, so it can be called efficiently:</p>
+
+<pre><code>
+  SecretKey key = passwordToAESKey(password, keylength); // slow, but only once
+  Cipher cipher = Cipher.getInstance(AES_ALGO);
+
+  for(String plaintext : inputs) {
+    String ciphertext = encrypt(secureRandom, cipher, key, plaintext);
+    ...
+  }
+</code></pre>
+
+<h1 id="java-keystores">Java Keystores</h1>
+
+<p>The java.security package provides quite a few classes related to ‘keystore’ functionality. Keystores are mostly used for asymmetric encryption purposes; in particular a keystore mostly holds public keys of other people and systems in order to:</p>
+
+<ul>
+  <li>verify the identity of a remote website when connecting to it via SSL</li>
+  <li>verify the identity of a signed jarfile [ie where a java security policy grants special privileges to code signed by a particular key]</li>
+</ul>
+
+<p>When java is used to implement the <em>server</em> side of an SSL communication, then a keystore also holds the relevant asymmetric <em>private</em> key.</p>
+
+<p>It is technically possible to load symmetric keys into a keystore, but that isn’t very common and there is not much benefit.</p>
+
+<h1 id="the-standard-java-policy-and-limited-strength-128-bit-encryption">The standard Java policy and limited-strength (128-bit) encryption</h1>
+
+<p>Unfortunately, the standard Java distribution from Oracle (and earlier, from Sun) includes only support for 128-bit AES keys; to support longer keys a separate file must be downloaded and installed. Who is responsible for this policy isn’t clear - some sources say that the US laws limit export of strong encryption, while others say this is done because some countries ban import of software with strong encryption. Regardless, it’s a nuisance but not a major one to work around.</p>
+
+<p>Quite how this policy stops us evil developers from doing the evil that we do is not clear. The restriction can be bypassed with only mild inconvenience in two ways.</p>
+
+<p>Oracle provides a download link for “Java Cryptography Extension Unlimited Strength Jurisdiction Policy Files”. This is a zipfile containing two jars named “<code>local_policy.jar</code>” and “<code>US_export_policy.jar</code>”. These need to be placed into the <code>$JAVA_HOME/jre/lib/security</code> directory, overwriting the existing files with those names.</p>
+
+<p>Alternatively, a different encryption implementation can be used, such as the one from the “bouncycastle” project, which despite the silly name and logo is very well respected. And not being based in the US (originally founded by Australians), it is not bound by these laws. Actually, although the mathematics behind good symmetric encryption algorithms is very clever, the algorithms themselves are fairly simple to implement (just a few hundred lines).</p>
+
+<p>Note that when using an alternative implementation, it is not possible to register a library as a plugin “JCE Provider”, and then use the normal Java standard library APIs; the javax.crypto.Cipher class delegates to the specified “provider library” only <em>after</em> checking the encryption strength is allowed by the JDK policy, ie only 128-bit keys allowed unless the “unlimited strength” policy has been installed. However the bouncycastle library provides its own API that can be called directly, and this avoids all policy limitations.</p>
+
+<h1 id="using-the-bouncycastle-cryptography-library">Using The BouncyCastle Cryptography Library</h1>
+
+<p>As mentioned above, the <a href="http://bouncycastle.org">bouncy castle project</a> provides a library that duplicates all the encryption functionality provided in the standard JDK, and many additional algorithms. The code is open-source and of high quality. And best of all, it can be accessed via either the standard java APIs discussed above, or via its own native API.</p>
+
+<p>The bouncycastle native APIs are somewhat saner than the JDK ones because they don’t funnel many algorithms through a few common SPI interfaces. And best of all, by avoiding the java.security.Cipher wrapper class, the limit of 128 bits on keylength is avoided.</p>
+
+<h2 id="encrypt-and-decrypt-given-just-a-key">Encrypt and decrypt given just a key</h2>
+
+<p>The following code shows how to use the BouncyCastle native API to encrypt a string given (somehow) the raw <em>key</em> data (not a password). A random IV is generated for use when encrypting the plaintext, and that IV is stored on the front of the resulting output (which is then base64-encoded).</p>
+
+<p>Decryption of course simply base64-decodes the data, retrieves the IV from the front of the resulting byte-array, and then uses (key,iv) to decode the rest of the string.</p>
+
+<p>See <a href="/java/symmetric-encryption-bc">example</a>.</p>
+
+<h2 id="decrypt-data-that-has-previously-been-encrypted-via-openssl-using-a-password">Decrypt data that has previously been encrypted via OpenSSL using a password</h2>
+
+<p>The following code shows how to use the BouncyCastle native API to decrypt a string which has been encrypted using the openssl library (via its commandline, or via some program that uses the openssl libraries). Openssl uses slightly non-standard algorithms which are not supported in the JDK. It is also possible to access the bouncycastle algorithms through the standard JDK crypto API to also implement openssl compatibility, but why bother?</p>
+
+<p>See <a href="/java/symmetric-encryption-openssl-bc">example</a>.</p>
+
+<h2 id="decrypt-data-that-has-previously-been-encrypted-via-openssl-using-a-password-1">Decrypt data that has previously been encrypted via OpenSSL using a password</h2>
+
+<p>Although it is tidier to just use the BouncyCastle APIs directly, here is an example of decoding OpenSSL using BouncyCastle’s extended algorithm support but via the standard JDK APIs.</p>
+
+<p>See <a href="/java/symmetric-encryption-openssl-jdk">example</a>.</p>
+
+<h1 id="warnings">Warnings</h1>
+
+<p>The following code is a very common error found on internet forums:</p>
+
+<pre><code>  Key key = new SecretKeySpec(pwd.getBytes("UTF-8"), "AES");
+</code></pre>
+
+<p>This is using the password <em>as</em> the key, rather than deriving a key from the password. Keys should be fixed-size blocks of almost-random data - which passwords certainly are not. It is the role of a “key derivation function” to hash/mangle a password in such a way that it becomes a key; calling “getBytes” does not do this. See the section on “password based encryption” earlier in this document for more information.</p>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>The concept of random numbers (and the SecureRandom class) has been mentioned several times above; you might be interested in <a href="/java/securerandom">this article on SecureRandom</a>.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+    <p><a href="/java/securerandom">Using the SecureRandom Class</a></p>
+  </li>
+  <li>
+    <p><a href="http://stackoverflow.com/questions/5641326/256bit-aes-cbc-pkcs5padding-with-bouncy-castle">Posted example of native BouncyCastle APIs for AES</a></p>
+  </li>
+  <li>
+    <p>Java Security (2nd Ed), Oaks, 2001</p>
+  </li>
+  <li>
+    <p>Beginning Cryptography with Java, Hook, 2005</p>
+  </li>
+  <li>
+    <p>Java Cryptography Extensions: A practical guide, Weiss, 2004</p>
+  </li>
+  <li>
+    <p>Java Cryptography, Knudsen, 1998</p>
+  </li>
+  <li>
+    <p><a href="http://www.jasypt.org/">Jasypt project</a></p>
+  </li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/symmetric-encryption/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

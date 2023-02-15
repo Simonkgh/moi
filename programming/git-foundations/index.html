@@ -1,0 +1,743 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Git Foundations</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Git Foundations</h1>
+    <aside>First published on: December 17, 2012</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Git/'>Git</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>This article presents the fundamental data structures and algorithms that underly the Git version control system. This isn’t a tutorial on how to use Git, but after understanding these principles other Git manuals and tutorials may be easier to grasp.</p>
+
+<p>The excellent book “Pro Git” is <a href="http://git-scm.com/book/en/">available online</a>, and has similar information in <a href="http://git-scm.com/book/en/Git-Internals">Chapter 9, Git Internals</a>. This article is significantly shorter than Pro Git Chapter 9, presents the concepts in a somewhat different order, has less implementation-specific detail, and tries to show the link between common Git commands and the effects on the underlying datastructures. If you are learning Git, I would suggest skimming this article first, then reading Pro Git while using this information as supporting background when Git commands start to seem more like voodoo than science.</p>
+
+<p>Chapter 22 of <a href="http://gitimmersion.com/lab_22.html">Git Immersion</a> covers similar territory to the ‘Git Internals’ chapter of the official book. If, after reading this article, you are still hungry for Git implementation details then this is also a good source to continue with.</p>
+
+<p>The alternative to learning the concepts first is instead to treat Git as a magic black box; exactly the approach taken by <a href="http://www-cs-students.stanford.edu/~blynn/gitmagic">Git-Magic</a> (although even that book ends with a chapter about the underlying details). However, if you are a programmer (and if you are using Git then you probably are) then learning the concepts first really will help.</p>
+
+<h1 id="git-objects">Git Objects</h1>
+
+<p>Git maintains a persistent pool of nodes keyed by checksum (ie a key-value store mapping checksum =&gt; node), which it calls “objects”. Each node (“object”) has:</p>
+
+<ul>
+  <li>an object type</li>
+  <li>type-specific fields</li>
+  <li>content</li>
+</ul>
+
+<p>Object types:</p>
+
+<ul>
+  <li>Blob - holds a block of user data (eg the <em>contents</em> of a file, but not filename or other metadata)</li>
+  <li>Tree - holds a map of (filename =&gt; checksum) - and therefore implicitly (filename =&gt; object)</li>
+  <li>Commit - holds (commit-message, patch-checksum, list of parent-checksums, root-dir-object-checksum)</li>
+  <li>Tag - holds (tagname, commit-object-checksum)</li>
+</ul>
+
+<p>While it is useful to know that these objects exist, only the “commit” object type is usually directly referenced from the git command-line. Except in advanced cases, tree/blob objects are only implicitly accessed via the “commit” object they are attached to. Tag objects are referenced by their “tagname”.</p>
+
+<p>Note that “object” is not meant in the sense of object-oriented, but rather in the ordinary English language meaning of “thing”, “item”. Because Git “objects” are often logically linked together using checksums as references/pointers, “objects” are often better thought of as nodes in a graph.</p>
+
+<h1 id="storing-the-objects">Storing the Objects</h1>
+
+<p>In the simplest case, the map of checksum=&gt;object is stored in the filesystem with filename=checksum and file-contents=object. Then loading the object with a specific checksum is simply a matter of opening the file with that name. Of course this doesn’t scale very well; the first optimisation is to distribute files across multiple subdirectories whose names are chars (1..2) of the checksum. To save disk-space, object file content is compressed with zlib. A Git “packfile” representation is another alternative storage approach for sets of objects.</p>
+
+<p>The checksums are calculated using the SHA1 algorithm, and are long enough that it is <em>extremely</em> unlikely that two objects in the same repository will have the same checksum.</p>
+
+<h1 id="representing-a-filesystem-using-git-objects">Representing a Filesystem using Git Objects</h1>
+
+<p>Given the “blob” and “tree” object types, a hierarchical filesystem can be created. A Git tree object can be considered equivalent to a unix directory inode, and similarly maps names to object-ids. The major difference is that traditional inodes have ids that are not particularly significant - an inode might have id 17 or 18994, it is just an internal implementation detail. In Git, the id is a <em>checksum</em> of the contents which means:</p>
+
+<ul>
+  <li>the same data can potentially be referenced from multiple places (like unix hard-links)</li>
+  <li>the same data has the same id even on different computers</li>
+  <li>it is easy to find duplicated contents</li>
+  <li>the contents of a file cannot be <em>changed in place</em>
+</li>
+</ul>
+
+<p>The last is the most significant; if a file needs to be updated, then a new blob object is created with the new contents. Because the checksum has changed, the tree object that referred to the old blob then needs to be updated - which means <em>a new tree object</em> must be created, the old contents copied, the checksum of the old file replaced with the checksum (ie key) of the new version. And if that tree object is referred to by a parent tree object, then that needs to be updated too. The effects therefore “bubbles up” to the top of the directory tree, resulting in a new root tree (directory) object. The old root tree (directory) object still exists - ie the “previous version” of the filesystem can still be accessed if you start from the right point.</p>
+
+<p>This “bubble up” effect occurs in other filesystems, notably BTRFS and Subversion’s filesystem. In fact, this part of Git is pretty similar to Subversion.</p>
+
+<p>It may seem weird to use a filesystem to hold a store of (checksum-&gt;object), then use those objects to define a filesystem, but the difference is that the filesystem built from object nodes has some unusual properties:</p>
+
+<ul>
+  <li>copy-on-write (and therefore <em>versioned</em>);</li>
+  <li>consistent across multiple hosts</li>
+</ul>
+
+<p>The pool of objects can also hold objects that are not part of any “filesystem”, ie things that need to be persistent but which are not expected to ever be represented on disk as files. Examples include commits and signed tags. These are addressable only by their checksums.</p>
+
+<h2 id="checking-out-files">Checking out files</h2>
+
+<p>A node-based filesystem can be “checked out”, ie converted to a traditional filesystem, by simply starting at a tree object. For each (filename,fileattrs,checksum) entry in that tree object:</p>
+
+<ul>
+  <li>get the object with that checksum</li>
+  <li>if the object is of type “blob” then create a file with the specified name and attributes and write the data contents of the object into it.</li>
+  <li>if the object is of type “tree” then create a directory with the specified filename and recursively process the
+list of (filename=&gt;checksum) entries in that tree (directory) object.</li>
+</ul>
+
+<p>The files that result from “checking out” a version is called a “working copy”.</p>
+
+<h2 id="switching-to-another-checkout">Switching to another checkout</h2>
+
+<p>Once a specific version of the filesystem has been checked out, it is possible to then perform <code>git checkout {checksum}</code> on a different tree object. The work done to switch versions can be made very efficient by comparing the tree objects of the current and new checkouts; for example if the root tree object of the new checkout points to any “subdir” tree object whose checksum is the same in the currently checked-out version, then there is no need to process that subdir; it has the same files in both versions. Similarly, if any “file” entry in a tree object has the same checksum in the current and new versions, then there is no need to update the file contents from the blob object.</p>
+
+<p>The current state of the Git “index” file may also help speed up checkouts; see the section on the Index file later in this article.</p>
+
+<h1 id="commits">Commits</h1>
+
+<p>A commit is stored as an object (node) in a repository’s pool of objects, with its own object-type and associated fields.</p>
+
+<p>A commit always contains a reference to (ie the checksum of) a tree object that is the root dir of the filesystem that is the <em>result</em> of this commit. Therefore, given the id (checksum) of a commit, checking out the state of the software at that point is trivial (see above).</p>
+
+<p>A commit object of course has an internal field that contains a commit message.</p>
+
+<p>The commit object also internally stores the checksums of zero or more parent commits, ie the keys of other objects of type ‘commit’. Zero parents is a special case - normally only for the first commit to a new repository. One parent is the normal case and indicates “linear” development. Multiple parents occur in the case of a (non-fast-forward) <em>merge</em>.</p>
+
+<p>Note that (unlike some other version-control systems) Git does not directly store “diffs” or patches, but instead stores ‘snapshots’ of the state of the filesystem at each commit; the differences between two commits is computed from the snapshots when necessary. Git does internally use diffs within its “packfiles” (effectively zip-files containing many object files), but this is just an internal space-optimisation detail.</p>
+
+<h2 id="a-normal-linear-commit">A Normal (Linear) Commit</h2>
+
+<p>When <code>git commit</code> is run, the list of modified files (relative to the most recent checkout, ie the ‘parent’) is determined. Then the following new objects are added to the Git storage:</p>
+
+<ul>
+  <li>a new blob object for each added or modified file</li>
+  <li>new tree objects for all directories containing added or modified files (containing the checksums of the above file objects)</li>
+  <li>new tree objects for directories containing the above modified tree objects, etc - ie the “bubble up” process described
+above, resulting eventually in a brand new “root” tree object</li>
+  <li>a commit object, containing:
+    <ul>
+      <li>the checksum of the new “root” tree object, ie a filesystem describing the state after this commit</li>
+      <li>the checksum of the <em>parent</em> commit object</li>
+      <li>the name of the patch author/committer, date committed, etc</li>
+      <li>the commit message</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="a-merge-commit">A Merge Commit</h2>
+
+<p>Merging of two branches of development is done in the following steps:</p>
+
+<ol>
+  <li>
+<code>checkout</code> the “target” commit (usually the head of some branch)</li>
+  <li>
+<code>git merge</code> some other commit (usually the head of some other branch that diverged from the primary some time in the past)</li>
+  <li>if merging resulted in conflicts for some file, then manually modify things until all files have the desired state.</li>
+  <li>do <code>git commit</code>
+</li>
+</ol>
+
+<p>As an example, here is an initial graph of commits:</p>
+
+<pre><code>A = B = C = D
+    \
+     \= E = F
+</code></pre>
+
+<p>Assuming a user checks out D, then merges the branch with HEAD=F into it, and makes some manual fixups to resolve conflicts, the result of <code>git commit</code> is then the following:</p>
+
+<pre><code>A = B = C = D = G
+    \          /
+     \= E = F /
+</code></pre>
+
+<p>If you are used to SVN, CVS or similar then the above looks odd. The commit structure is no longer <em>linear</em> (ie E/F are not put “on top of” D); instead there are now multiple paths from the head commit (G) backwards in time. This is the critical difference between SVN/CVS and Git. This structure does make viewing history in a linear fashion (<code>git log</code>) a little odd and unpredictable. However the repository truly reflects the way the code was developed. This approach also works better when doing repeated merges, or where A..D is not a “centralised trunk branch” but instead something that others pull commits from.</p>
+
+<p>The inbuilt git help (<code>git help merge</code>) describes the merge algorithm in full detail. However to summarize, the algorithm applied by Git for the merge is approximately this:</p>
+
+<ul>
+  <li>find the most recent common ancestor of the two branches being merged (in this case, B).</li>
+  <li>reapply each change on the “from” branch since the common ancestor (ie E,F) to the head of the “to” branch (ie D).</li>
+</ul>
+
+<p>Any commits on the “from” branch which have already been “cherry-picked” into the to-branch are skipped.</p>
+
+<p>If a patch does not apply cleanly to any particular file, then remember that file.</p>
+
+<p>If no conflicts occurred (ie no patches failed to apply), then a <code>git commit</code> is automatically triggered.</p>
+
+<p>If any patches failed to apply, then the user is presented with a list of the problem files, and must manually edit the files to the appropriate state then mark the problem as resolved (by calling <code>git add</code>) before finally calling <code>git commit</code>.</p>
+
+<p>The <code>git commit</code> operation then simply:</p>
+
+<ul>
+  <li>creates new blob/tree objects that store a filesystem matching what is currently in the “working directory” (well, actually the <em>index</em>)</li>
+  <li>creates a commit-object which has:
+    <ul>
+      <li>checksum of the new “root tree object” created above</li>
+      <li>checksum of the commit-object for parent0 (object D)</li>
+      <li>checksum of the commit-object for parent1 (object F)</li>
+      <li>the name of the patch author/committer, date committed, etc</li>
+      <li>the commit message</li>
+    </ul>
+  </li>
+</ul>
+
+<p>At this point, development can then continue further based on either F or G (or indeed, any other object if desired).</p>
+
+<p>Merges can also be 3-way, or even more, eg merging commits F,X,Y and Z into D. In this case, the <code>git merge</code> processing (find ancestors, apply patches) is applied to F,X,Y and Z in order, and the “commit object” points to them all as parents.</p>
+
+<p>A special case of merge is where the branch structure looks like this:</p>
+
+<pre><code>A = B = C         (branch1)
+         \ D = E  (branch2)
+</code></pre>
+
+<p>In this situation, merging patches D/E back into branch1 does <em>not</em> need to create a merge-commit; all that is necessary is to mark commit E as being the head of branch1 (ie write e’s checksum into the reference-file for branch1). The result is just as if D/E had been developed on branch1 in the first place. This is called a “fast forward merge”. And in fact, any merge can be transformed into this style by <em>rebasing</em> the “from” branch before merging it.</p>
+
+<p>FYI, fast-forward merging is very common when using <code>git pull</code> to retrieve updates from a remote repository; <code>git fetch</code> updates a “remote tracking branch”, and that branch is then merged into a local development branch. If no commits have been added to the local branch since the previous update from the remote repo, then fast-forwarding is all that is needed. Pull/Fetch operations are discussed below, so don’t worry if this paragraph doesn’t make sense yet.</p>
+
+<p>A “fast forward” merge does look much more like the kind of thing that users of SVN/CVS/etc are used to (a linear history). And in fact, when using the “git-svn” bridge between Git and svn, “fast forward merges” are the only ones that can be pushed to an SVN repository.</p>
+
+<p>A normal branch can be converted into the above format (suitable for a fast-forward merge) via the <code>git rebase</code> operation; see later.</p>
+
+<h1 id="cherry-picking-commits">Cherry-picking commits</h1>
+
+<p>It is possible to merge just <em>one</em> patch from another branch, without merging that patches’ ancestors.</p>
+
+<p>The resulting commit has just one attached patch, being based on the patch associated with the source commit + any fixups needed. There is no explicit link back to the “picked” patch; Git tools have a configurable “fuzz factor” that they use to find “similar” changes when doing later merges, and simply skip them.</p>
+
+<p>Note however that with normal (and fast-forward) merges, the original commits are completely untouched. It is therefore a fairly simple process to determine which commits in one branch (or a remote repository) have already been merged into some other branch. Cherry-picking instead creates a <em>new</em> commit which happens to have a very similar patch-file in it. Fetch/merge/rebase operations then need special code to skip cherry-picked commits.</p>
+
+<h1 id="intermission">Intermission</h1>
+
+<p>With just the above features, a fully-functional version control system exists; ie all that is really needed is:</p>
+
+<ul>
+  <li>datastructures: blob/tree/commit objects findable by sha1 checksums</li>
+  <li>operations: checkout, merge, commit</li>
+  <li>some way to specify the parent of a commit</li>
+</ul>
+
+<p>The system is already a full distributed version-control system; the rest is just helpful “sugar” and performance optimisations on top of this base (ok, references and efficient remote fetches are very <em>useful</em> additions). In fact, originally the rest of Git was built using shellscripts; nowadays the primary implementation is in C but the point is the same - the core of Git is very elegantly small and simple.</p>
+
+<p>For the curious, you can inspect a Git repo directly to find object checksums, then use various commands (<code>git cat-file</code>, <code>git ls-tree</code>, <code>git show</code>) to get info on that object. In particular, it is interesting to run <code>git log</code> to find a commit#, then use the following commands to view it, its associated tree, etc.:</p>
+
+<ul>
+  <li>
+<code>git cat-file -t {checksum}</code> - prints the object type (commit, tree, blob, tag)</li>
+  <li>
+<code>git cat-file -p {checksum}</code> - prints the contents of an object</li>
+  <li>
+<code>git ls-tree {checksum}</code> - prints the contents of a tree object in slightly prettier format than cat-file</li>
+  <li>
+<code>git show --raw {checksum}</code> - works for some objects but not others. Particularly useful for ‘commit’ objects, where it shows the (filename, oldchecksum, newchecksum) tuples that describe what changes the commit actually made relative to the previous commit’s filesystem. From this information, a “patchfile” can be quickly created by Git.</li>
+</ul>
+
+<p>Because objects are compressed with ‘zlib’, running <code>zlib-flate -uncompress .git/objects/AA/BBBBBB....</code> can also be interesting; works pretty well on commit and blob objects but not so well on tree objects.</p>
+
+<p>Note by the way that the process of <em>creating</em> a branch hasn’t been mentioned. That’s because a new commit can specify <em>any</em> commit object in the repository as its parent; when there is no other commit that has the same parent then this is traditional linear development, and when multiple commits share the same parent then a “branch point” exists. Support for “branching” is therefore an almost trivial property of the design of the repository. Think of the repository as holding one or more “directed acyclic graphs” of commits. A commit that has no parent is the initial object (node) of a graph, and each subsequent commit object has zero or more “upstream” objects. Occasionally the graph will diverge (tree-like) and sometimes the branches will meet again (merge).  Normally a repository will have only one “initial” commit (with no parent) but that isn’t a firm rule. And normally the graph will have a fairly low branching factor (ie linear development is more common than branching).</p>
+
+<p>The following sections describe some of the most common “helpful sugar” commands, and how they interact with the repository. As noted in the introduction, this isn’t meant to be a full Git tutorial or manual; Git has many commands with many options. However understanding the way common commands manipulate repository state will help in understanding the more complex cases.</p>
+
+<h1 id="remote-repositories">Remote Repositories</h1>
+
+<p>Forgetting for the moment about “references” (addressed below), and performance optimisations, cloning an existing repo and fetching commits from another repo are trivial.</p>
+
+<p>To clone a repo, just get a bitcopy of the original. All the history is there, in the objects of the repository.</p>
+
+<p>Importing (“fetching”) commits from one repository into another is almost as trivial:</p>
+
+<ul>
+  <li>get a bitcopy of the repo being imported</li>
+  <li>for each checksum-&gt;object mapping (ie each file) in the imported repo
+    <ul>
+      <li>verify that the file contents checksum <em>is correct</em> (security)</li>
+      <li>if the checksum doesn’t already exist in the local repo, then install the file there</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The result is that the local repo now holds both the previous commits and any commits that were in the remote repo but not yet local.  Because the SHA1 “names” for objects uniquely identify the content, it is trivial to see whether a particular version of a file (or version of a directory of files) already exists in the local repo or not. In fact, a blind copy that overwrites existing files will still work; commits that exist in the local repo point to their parent(s) via checksum values, which don’t change. So as long as objects are not <em>removed</em> from the repo, all will be fine. Even if the remote repository contained files that are <em>bit for bit identical</em> with files in the local repo (eg because both had separately pulled files from some other repo), this common data will have the same checksum regardless of how it reached each repository, and so there is no confusion.</p>
+
+<p>In addition, commit objects that were imported will point to objects representing the filesystem resulting from that commit. Because directories are objects with checksums, any common subdirs will have the same checksum. So a patch that touches one file deep within the tree will be just as efficiently represented in the local repository as in the remote repo from which the commit was imported - if the local system has copies of the directories/files already then they are not duplicated.</p>
+
+<p>The standard <code>git clone</code>/<code>git fetch</code> commands do optimise the process a little, and track some metadata to make the operations more convenient; see later.</p>
+
+<h1 id="git-references">Git References</h1>
+
+<p>While it is possible to create commits by explicitly providing the checksum of the parent commit (or commits for a merge), it isn’t very convenient. And using checksums to specify what tree to check out (eg to switch “branches”) is equally clumsy. So Git adds the concepts of a “reference”; a reference has a simple human-readable-name, and its value is either a checksum or the name of another reference. References are stored simply as a file (under directory <code>.git</code>) whose name is the human-friendly reference name, and whose contents is either the checksum, or <code>ref:{some-other-ref-file-name}</code>. You’ll find some in the <code>.git</code> subdirectory of any repository; just poke around.</p>
+
+<p>Note that after a Git “packing” pass (which optimises performance and storage-space), the contents of reference files are merged into a .git/packed-refs file; if you can’t find a reference you are looking for, then check there!</p>
+
+<h2 id="reference-types">Reference Types</h2>
+
+<p>References belong to the following categories:</p>
+
+<ul>
+  <li>local tag reference</li>
+  <li>branch reference</li>
+  <li>remote branch reference</li>
+  <li>HEAD reference</li>
+</ul>
+
+<p>A local tag reference is trivial: a name points to the checksum of a commit that is important to the developer for some reason. A new tag can be created via <code>git tag {name}</code>, which simply creates a file with the specified name containing the checksum of the currently-checked-out (HEAD) commit. A tree can be “checked out” of the repository by specifying the human-readable name instead of the equivalent checksum. Checking out a tag also sets the HEAD reference; see below.</p>
+
+<p>A branch reference is not much more complicated than a tag. Again, a file in the <code>.git</code> directory whose name is the “branch name” contains the checksum of a commit object, and “checking out a branch” is equivalent to checking out a tag. And just like a tag, <code>git branch {name}</code> just creates a file with the specified name and the checksum sum of the currently-checked-out commit. The difference from a tag is in the way the HEAD reference is updated (see later).</p>
+
+<p>The HEAD reference is, just like other references, a file (named <code>.git/HEAD</code>) containing a raw checksum or the name of another reference (<code>ref:{filename}</code>). It has the following effect:</p>
+
+<ul>
+  <li>
+    <p>After a tag has been checked out, the HEAD reference contains the raw checksum that the tag reference file had, ie it points to the same commit. Doing <code>git commit</code> creates a new commit object with the checksum from HEAD as the parent. The contents of the HEAD file are updated to the checksum of the newly created commit; the tag file is not updated. This is not a recommended operation - it is valid, but has effectively created a new commit object for which no nice human-readable name exists. It is therefore quite easy to “lose track of” this commit in the repo and be unable to find it again. Generally, commits should be done only after checking out an object using a “branch name”, not a “tag name”. Note: when the HEAD file contains a raw checksum, it is said to be a “detached head”.</p>
+  </li>
+  <li>
+    <p>After a branch has been checked out, the HEAD reference contains <code>ref: {name of branch-file}</code> (and as noted above, the branch-file will contain the checksum). When a commit is created, the parent of the commit is the checksum from the file that HEAD references (ie the “tip of the branch”). In addition, the contents of the <em>branch file</em> are updated to have the checksum of the newly created commit. In effect, the branch tip has “moved forward” - and HEAD still points to the branch (contains the branch name, not a raw checksum).</p>
+  </li>
+</ul>
+
+<p>A remote branch reference is one that points to an object imported from some other repository; in all other ways it is a standard reference-file that holds the raw checksum of an object in the local pool of objects. All reference files associated with a specific repo are stored in a directory specifically for that remote repository, so the names don’t clash with local branches; their names are of form <code>reponame/refname</code>, eg <code>origin/master</code>. Although these reference files have a valid object checksum, Git refuses to “check out” remote branch references directly. Instead, a local branch or tag reference must be made to point to the same commit that the remote branch reference points to (which is most easily done with the <em>merge</em> command). This restriction is so that remote branch references remain in-sync with the repository they are drawn from; their value is important when fetching updates from the remote repository. Because these branches can’t be checked-out (ie HEAD will never hold the name of a remote branch reference file), they can never be committed to (ie updated as a result of <code>git commit</code>)! However if you wish, you can still manually check out a commit object using the checksum in the reference file, and then create a normal tag or branch for it (or use <code>git merge</code>). What is important, though, is that because HEAD never contains the name of the remote branch file (as when checking out a normal branch), remote branch references never get updated when doing commits to the local repo; the only thing that updates the checksum in a “remote branch reference” is a <code>git fetch</code> operation.</p>
+
+<h1 id="remote-repositories-and-git-fetch">Remote Repositories and Git Fetch</h1>
+
+<p>An existing Git repository can be informed of the existence of an external repo via the <code>git remote add {name} {url}</code> command. This:</p>
+
+<ul>
+  <li>adds a mapping for name=&gt;url into <code>.git/config</code>
+</li>
+  <li>creates a directory <code>.git/refs/remotes/{name}</code> to hold reference files copied from the remote repository</li>
+</ul>
+
+<p>Importing of commits from other repos was partially covered above. As described there, it is simply a matter of copying the desired commit/file objects from the remote repo into the local one. To avoid having to copy <em>all</em> objects from the remote repository for each update, the existing reference files are used to determine  what commits for each branch have already been imported - hence the need to keep these reference files ‘pure’ (see previous section).</p>
+
+<p>When a repository is cloned, some of the above is automatically configured, using a standard naming convention. In particular:</p>
+
+<ul>
+  <li>a local branch named ‘master’ is created</li>
+  <li>the cloned repository is registered in <code>.git/config</code> under name ‘origin’</li>
+  <li>a mapping from local branch ‘master’ to ‘origin/master’ is also stored in the <code>.git/config</code> file. This sets the default parameters for the
+<code>git pull</code> command when the local ‘master’ branch is checked out. The same thing can be set manually via the <code>--tracking</code> option to some
+commands.</li>
+</ul>
+
+<p>The command <code>git fetch {reponame}</code> looks for an entry in the <code>.git/config</code> file for that repository to find the URL of the repo, and then in the same file finds the branches that are being tracked. It then reads the checksums from the reference files in <code>.git/refs/remotes/{reponame}/</code> to see which objects it already has, and passes this info to the remote repo. The remote repo then passes back all objects that have been added to the specified branches since the provided commit checksums. After these objects have been added to the local pool of objects:</p>
+
+<ul>
+  <li>file <code>.git/FETCH_HEAD</code> is updated to list the “fetched branches”, and their checksums</li>
+  <li>the reference-files for the remote repository are updated with the checksum of the latest commit to each branch</li>
+  <li>new reference-files are added if the remote repository has new branches</li>
+</ul>
+
+<p>As noted previously, Git refuses to check-out branches stored under the “remotes” directory, ie refuses to allow the HEAD file to contain the name of a file under <code>.git/refs/remotes</code>. However you <em>can</em> merge the contents of this branch into some other branch, and check that out - which is the usual way of working with remote code. This is in fact what <code>git pull</code> does by default.</p>
+
+<h1 id="remote-tracking-branches">Remote Tracking Branches</h1>
+
+<p>As noted, Git has a single mechanism for tracking branches : a reference file. The only differences between a branch “from a remote repository” and one “from the local repository” are:</p>
+
+<ul>
+  <li>
+    <p>the branch reference for remote repos are stored in a directory whose name is the “remote repository name”, eg “.git/refs/remotes/origin”. Note that the contents of the reference file is still just a checksum which points to a commit-node in the local store of objects.</p>
+  </li>
+  <li>
+    <p>if <code>git checkout</code> is given a remote reference, eg <code>git checkout origin/master</code> then HEAD is <em>not</em> updated to point to origin/master but instead is set to contain the raw checksum. A warning message about “detached HEAD” is then given. Any commit made in this state then effectively is in an “anonymous” branch, and does not cause the remote branch reference to be updated.</p>
+  </li>
+</ul>
+
+<p>For convenience, Git does support a way of “linking” a pair of (local,remote) branches together though; when this is done then the local branch is said to “track” the remote branch, and:</p>
+
+<ul>
+  <li>
+    <p>a <code>git pull</code> when on the local branch will trigger <code>git fetch</code> to update the linked remote branch, and then triggers a <code>git merge</code> to merge any new commits fetched from the remote repository into the current branch.</p>
+  </li>
+  <li>
+    <p>a <code>git push</code> when on the local branch will send any commits on the local branch which are not on the linked remote branch to the associated remote repository.</p>
+  </li>
+</ul>
+
+<p>When a repository is initially cloned, some tracking branches are set up. They can also be set up manually with various options to <code>git branch</code> and similar commands.</p>
+
+<h1 id="pruning-branches-and-commits">Pruning branches and commits</h1>
+
+<p>At the logical level, removing a branch is simply a matter of deleting the reference file, meaning the branch is no longer accessable by name. However the objects still exist in the repository. There is a tool available which scans the repository for all commits which are not pointed to by a named reference, nor are an ancestor of such a commit. These objects can then be removed from the repository.</p>
+
+<p>On the other hand, there are also various tools and tutorials around for finding such objects and giving them names again - so presumably there are cases where people have found that “recovering” such objects has been important. See the <em>reflog</em> section below for further information on this topic.</p>
+
+<p>Deleting commits which are at the “tip” of a branch, ie which no other commits point to as their parent is easy - the branch reference just needs to be updated to point to the preceding commit. See the various forms of “git reset”. Deleting commits elsewhere is trickier; see the Git tutorials listed in the reference section.</p>
+
+<h1 id="file-renames-and-removals">File Renames and Removals</h1>
+
+<p>Git doesn’t explicitly track renames; instead it assumes that if two files have N% of lines in common, then they are the ‘same’ file.</p>
+
+<p>There is an explicit <code>git mv {src} {dst}</code> command, but it is effectively an alias for <code>git rm {src}; mv {src} {dst}; git add {dst}</code></p>
+
+<p>This approach has some advantages and some disadvantages. The most significant advantage is that development tools do not need to be aware of the version control system; they can move files around using normal file operations, and Git will figure out at commit-time whether “renames” have taken place. This is significantly better than Subversion for example, which gets very confused if tools move files without explicitly using <code>svn mv</code> (also known as <code>svn rename</code>).</p>
+
+<h1 id="the-index-aka-the-staging-area">The Index (aka the Staging Area)</h1>
+
+<p>When “git checkout” is run for the first time, Git starts from a “root” tree object in the repository, and iterates over its entries, turning the “blob” objects it points to into files, and recursively processing “tree” objects. At the same time it builds an “index” file, being a fairly simple list of all the files that it checks out as (filename, checksum, status) tuples; try “strings .git/index” to see all the checked-out files.</p>
+
+<p>Implementing the <code>git status</code> command (which shows which local files have been modified since they were checked out) is simply a matter of iterating over the contents of the working directory and comparing it with the index; any files on disk whose checksums don’t match their corresponding entry in the index are “locally modified and not added”.</p>
+
+<p>To include a changed or new file in a commit, the <code>git add</code> command is needed. This immediately stores the current state of the specified file as a blob in the object store, and then updates the entry for the file’s pathname in the index file to specify the new status (staged for commit) and the checksum of the new blob object. A <code>git commit</code> then can quickly find the files that have been modified; it must create new tree objects for each directory containing modified files (the “bubble up” process described earlier), but the blobs representing files themselves are already in the repository.</p>
+
+<p>The <code>git reset</code> command has many purposes, but one is to restore modified entries in the index file to the original values. If a form of the command which does not affect the working copy is used, then it effectively reverses the effect of <code>git add</code> - ie sets the index back to original state but leaves local modifications in place.</p>
+
+<p>The effect of the index is to act as a “staging area” where you can choose exactly which modified files from the working copy will be included in the next commit; very useful for deliberately not including debugging changes or changes intended for inclusion in different commits.</p>
+
+<p>If <code>git add</code> is used several times, then “orphaned” blob objects will exist within the database (containing the intermediate forms of the file). These will get cleaned up during Git’s next “garbage collection” run.</p>
+
+<p>As noted earlier, <code>git checkout {branch}</code> can be very quick when switching between related branches because Git knows what the difference between two versions are, and can skip a lot of processing. The index file helps here, as Git knows exactly what files it already has written into the local directory.</p>
+
+<h1 id="the-reflog">The Reflog</h1>
+
+<p>Git keeps an “audit trail” that tracks changes to all references, ie all those files under .git that hold either a checksum or the name of another reference-file, like:</p>
+
+<ul>
+  <li>the HEAD reference (which points to the currently checked-out branch, eg <code>.git/refs/heads/master</code>).</li>
+  <li>local branch references (which contain the checksum of the “tip” commit on that branch, eg <code>.git/refs/heads/master</code>)</li>
+  <li>remote branch references</li>
+  <li>tag references</li>
+</ul>
+
+<p>Examples of operations that change a reference file are:</p>
+
+<ul>
+  <li>
+<code>git commit</code> : updates the reference file for the currently-checked-out branch to point to the new commit</li>
+  <li>
+<code>git checkout foo</code> : updates the HEAD reference file to point to the <code>foo</code> reference file</li>
+  <li>
+<code>git fetch origin</code> : after copying objects from the remote <code>origin</code> repo to the local one, this updates the files under <code>refs/remotes/origin/</code>.</li>
+</ul>
+
+<p>Interestingly, commits are recorded not only in the reflog information for the <em>current branch</em>, but also in the reflog information for the HEAD reference (even though technically the HEAD reference value didn’t change; it still just has the name of the current branch).</p>
+
+<p>The logs are useful because reference files aren’t themselves versioned (there is only one copy, unlike with objects). Various Git helper commands use the reflog to help you recover from accidental errors; as long as the objects are still available, the checksums in the logs can help track things down. This history information can also be used for interesting statistical analyses and similar purposes. In fact, the ways the reflog can be used is rather impressive - and very complicated. See descriptions in some of the excellent online Git references (eg those listed in the References section of this article).</p>
+
+<p>The reflog is not shared across repositories; it is just for the local repository.</p>
+
+<p>Entries in the reflog are kept for a couple of months by default, and when doing “garbage collection” of objects, Git considers objects pointed to by entries in the reflog to still be “referenced”, ie are not to be garbage-collected. Therefore when a branch is deleted, the commits that are on that branch are not garbage-collected for at least a couple of months. To really discard objects, see the documentation for <code>git prune</code> and particularly the <code>--no-reflogs</code> option for <code>git fsck</code> (which <code>git prune</code> invokes).</p>
+
+<p>Note that when a branch is <em>deleted</em> (<code>git branch -D bar</code>), then the reflog information for that branch is also <em>immediately</em> deleted. This makes restoring a deleted branch a little trickier than it could have been. Hopefully you recently switched to that branch and did a commit; in this case, the reflog for the HEAD reference will have information about that commit, and you can simply recreate the branch by providing the commit’s checksum as a commandline parameter.</p>
+
+<h1 id="git-log">Git Log</h1>
+
+<p>The <code>git log</code> command shows the history for any specific commit (HEAD, ie the tip commit of the current branch is the default). When showing “linear” history, the behaviour is obvious. However when non-fastforward-merges occur, behaviour gets a little tricky and the output may come in an unexpected order.</p>
+
+<p>Assume the repository looks like the following:</p>
+
+<pre><code>A = B = C = D = G = H
+    \          /
+     \= E = F /
+</code></pre>
+
+<p>By default, <code>git log</code> lists all commits in the date-order in which they were created. So whether the order is H-G-D-C-F-E-B-A or H-G-F-E-D-C-B-A or even H-G-D-F-C-E-B-A depends upon the “committed at” date stored within each commit. And when commits are being transferred around between repositories, the date never changes : it is always the date at which the commit was made to its original repository (otherwise, the commit checksum would change).</p>
+
+<p>The <code>git log</code> command has dozens of options for messing with the displayed data and the order in which it is output. See the manuals for full details.</p>
+
+<h1 id="combining-patches-and-rebasing">Combining Patches and Rebasing</h1>
+
+<p>If you have created a branch and added half-a-dozen commits to it, then want to merge back into a master branch but don’t want the full workings to be seen, then you can use “interactive rebasing” to reorder or merge various commits.</p>
+
+<p>You may also have created a branch some time ago, and want to submit commits based on more recent code. This can be done with <code>git rebase</code>, which effectively takes the changes on the current branch, and then recreates the branch based on the tip of the specified “rebase onto” branch and reapplies the patches.</p>
+
+<p>Rebasing can be very useful, but must only be used on patches that have never been exported to another repository; rewriting public history causes all sorts of confusion.</p>
+
+<p>Git’s rebase algorithm is roughly as follows:</p>
+
+<ul>
+  <li>create temporary reference ORIG_HEAD pointing to head of target branch</li>
+  <li>for each commit in target branch which is not yet in source branch
+    <ul>
+      <li>take the associated patch from the commit and store it as a file <code>.git/rebase-apply/NNN</code>
+</li>
+    </ul>
+  </li>
+  <li>set HEAD to checksum of the head commit of source branch (aka “upstream” because rebasing is usually done when this branch is maintained by someone else, and you’ve branched it to do some work and now want to submit “clean” patches back).</li>
+  <li>check out HEAD commit (effectively puts working copy in “detached head mode”, as HEAD contains a checksum not a branch-name)</li>
+  <li>for each patch file <code>.git/rebase-apply/NNNN</code>
+    <ul>
+      <li>apply patch to HEAD</li>
+      <li>if conflict occurred, then pause the rebase, let the user resolve the conflicts (ie edit the patch) and then run rebase –continue.</li>
+      <li>create a commit with the current change using HEAD as the parent, then set HEAD = new commit (ie normal commit behaviour).
+This effectively create a new “anonymous” branch, starting from the current head of the source branch.</li>
+    </ul>
+  </li>
+  <li>after all patches are applied then set target branch to reference the current HEAD commit, and set HEAD to reference the target
+branch. This effectively discards the old target branch and instead makes the same name point to a new branch that splits off from source
+branch at its current HEAD and contains the same patches as the old branch (tweaked interactively as needed).</li>
+  <li>delete the <code>.git/rebase-apply</code> directory.</li>
+</ul>
+
+<p>The ORIG_HEAD file still exists and points to the head of that old (obsolete) branch, just in case something went wrong; you could for example copy this value into the target branch reference file to “cancel” the rebase. Or create a new tag that references that commit, or similar. However this file gets overwritten on the next rebase (and maybe merge too?) so it is only a temporary safety measure. Because it isn’t a “real” reference, it probably doesn’t block garbage-collection of “dead” repository objects either.</p>
+
+<p>Because the target branch reference is not updated until of the temporary references, it is possible at any time that a conflict occurs to:</p>
+
+<ul>
+  <li>skip the current patch (<code>git rebase --skip</code>)</li>
+  <li>cancel the rebasing completely (<code>git rebase --abort</code>) - in which case the temporary references are simply discarded; the source and target branch references still point to their original locations.</li>
+</ul>
+
+<p>In fact, simply deleting the <code>.git/rebase-apply</code> directory and doing <code>git checkout {branch}</code> is sufficient to “cancel” a rebase - although it is advisable to use the normal commands instead.</p>
+
+<p>Special handling exists to avoid reapplying “cherry-picked” patches; any commit whose patch-file is identical to the patch-file in a commit already in the target branch is skipped, even if the commit-message is different.</p>
+
+<h1 id="tag-objects">Tag Objects</h1>
+
+<p>As described above, tag references are simply local (name=&gt;checksum) mappings stored in a local file. These are shared between repositories (copied during <code>git fetch</code>, optionally uploaded during <code>git push</code> etc). However they are not <em>versioned</em> objects; when a tag reference is modified there is no way (except possibly looking in a reflog file) to see the previous value. And there is no associated meta-data on them; changes to a tag cannot be traced back to any person or a time.</p>
+
+<p>It is sometimes useful to have tags (ie names for commits) whose creation is properly tracked in the repository history. A special Git “tag” object type exists for this purpose. A tag object has a single parent (like a commit), a name, a description, and optionally a cryptographic signature. Because the signature covers the object, and the object contains the checksum of its parent and its filetree, and the parent/filetree contain checksums of their dependent data items, a single signature really “locks down” the entire history which lead to that point. If you can validate the signature on the tag, then you know <em>who</em> created the tag, <em>when</em> they created the tag, and that the version they tagged has not been modified since the tag was created.</p>
+
+<p>Tag objects are created with <code>git tag -a {name}</code> or <code>git tag -s {name}</code>, and an object is created and stored in the object pool. These tags are listed in the output of <code>git tag</code> just like the “lightweight” tag references, but <code>git show {tagname}</code> clearly shows the difference: on lightweight tags, what is shown is simply the commit that the lightweight tag points to while for “tag objects”, the tag object data is shown including who, when, and the tagged commit’s checksum.</p>
+
+<p>Tag objects aren’t part of the commit history (ie no commit has a tag as its parent) so they don’t show up in <code>git log</code> output, but the useful <code>git describe</code> command will show the most recent tag for the current working copy.</p>
+
+<h1 id="the-stash">The Stash</h1>
+
+<p>As noted in many Git guides, it is possible to ‘temporarily’ save work with the <code>git stash save</code> command, work on something else, then restore your in-progress work with <code>git stash pop</code>. What they often don’t bother to mention is that <code>git stash save</code> simply does a real commit; however rather than moving the “tip” of the current branch to point to that commit (which is what normally happens when a commit is done), it leaves the current branch reference file alone, and simply stores the checksum of the new commit on a stack (well, appends a line to file <code>.git/refs/stash</code> which gives the effect of a stack). The commit’s name is automatically generated as “WIP on {branchname} : {prevcommit-id} {prevcommit-msg}”.</p>
+
+<p>The commits stored on the stack can be referred to with a slightly odd syntax “stash@{n}”, but otherwise they are rather like ordinary tags; <code>git show stash@{0}</code> will display the actual commit created. Real tags can be created pointing to them, and similar tricks if you feel like it; you can even check one out directly (but as it isn’t a branch, Git warns about being in a ‘detached head’ state). When <code>git stash pop</code> is run, it simply restores the index and current workspace using the data from that ‘anonymous’ commit object, and removes the line from <code>.git/refs/stash</code>. As nothing now points to the commit any more, it is eventually garbage-collected.</p>
+
+<h1 id="git-security">Git Security</h1>
+
+<p>Because checksums are used, Git is inherently resistant to tampering. Modifying a blob object’s contents without updating its checksum will cause checks to fail during <code>git fetch</code>. Modifying its checksum to match is simply equivalent to creating a branch - which means the bad code is not on the branch any more, and will be ignored.</p>
+
+<p>Signed tags also help (see above).</p>
+
+<p>While some version control systems provide the ability to restrict <em>read</em> access to some parts of the repository for some users, this is not possible with Git. Firstly, it would destroy one of Git’s fundamental features: that all repositories are complete mirrors of each other, and only a workflow convention marks some repositories as being more important than others. Secondly, it is technically difficult to allow somebody to <em>clone</em> an existing repository, yet not send <em>all</em> of the nodes; each commit references the root of a tree, and at the leaves of the tree are all the “blob” file objects, with checksums that should match their contents. For nodes to not exist, or for their contents to not match their checksums, would cause major problems for Git’s consistency checks. For all these reasons, access control for <em>read</em> operations is not supported; if you need to prevent read access to some files to unauthorised users, then the only option is to put those files in a different Git repository.</p>
+
+<p>However, implementing <em>write</em> access control to parts of a repository is quite possible. A Git repository supports “hook scripts” which are invoked on various operations, including push and pull. A quick search of the internet should locate hook scripts which can be used to prevent remote users from performing a “push” from their repository to the restricted one if any commit includes specific paths.</p>
+
+<h1 id="git-terminology">Git Terminology</h1>
+
+<p>The following term definitions are useful</p>
+
+<p>Treeish ==&gt; the checksum of a tree (directory) object</p>
+
+<h1 id="comparing-git-to-svn">Comparing Git to SVN</h1>
+
+<p>Git’s filesystem snapshots and SVN’s tree are fairly similar in many respects. Both have immutable files/directories, and a new commit results in a new tree where changes to leafs “bubble up” to produce a new “root” tree object for the filesystem.</p>
+
+<p>And like Git, an svn “commit” record contains an identifier of the root tree object for the filesystem tree that results from that patch. However unlike Git, SVN’s directory/file identifiers are arbitrary integers, not checksums. So when importing a commit from some other system it is difficult/impossible to know which files have been modified and which already exist in the local repository.</p>
+
+<p>In SVN, creating a branch is equivalent to creating a directory within the filesystem. The disadvantage of this is that there is no “graph” of commits representing the relationship between branches. This in turn makes proper merging difficult.</p>
+
+<h1 id="references">References</h1>
+
+<p>Information about learning Git in general:</p>
+
+<ul>
+  <li>
+    <p><a href="http://git-scm.com/book/en">Git SCM</a> - The official Git manual</p>
+  </li>
+  <li>
+    <p><a href="http://gitready.com">Git Ready</a> - Tutorial and cookbook for Git, including advanced commands</p>
+  </li>
+  <li>
+    <p><a href="http://gitimmersion.com">Git Immersion</a></p>
+  </li>
+  <li>
+    <p><a href="http://gitfu.wordpress.com/">Git Fu</a></p>
+  </li>
+</ul>
+
+<p>Information about Git internals:</p>
+
+<ul>
+  <li>
+    <p><a href="http://git-scm.com/book/en/Git-Internals">Git SCM - Git Internals</a></p>
+  </li>
+  <li>
+    <p><a href="http://gitimmersion.com/lab_22.html">Git Immersion - Git Internals</a></p>
+  </li>
+  <li>
+    <p><a href="http://eagain.net/articles/git-for-computer-scientists/">Git for Computer Scientists - eagain.net</a> - a somewhat similar article to this one.</p>
+  </li>
+  <li>
+    <p><a href="http://longair.net/blog/2009/04/16/git-fetch-and-merge">Git Fetch and Merge - longair.net</a></p>
+  </li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/git-foundations/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

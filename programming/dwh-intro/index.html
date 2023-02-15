@@ -1,0 +1,1032 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Introduction to Data Warehousing</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Introduction to Data Warehousing</h1>
+    <aside>First published on: November 26, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>Data warehousing is a complex topic. It is a career on its own, separate from being a software developer or software architect. It has some aspects of database administration, but that too is a separate career. There are half a dozen books that provide an “introduction to data warehousing” - you then need a few years practical experience. This one-page article is therefore just an introduction to the introduction..</p>
+
+<p>Sadly, this complexity doesn’t stop companies from delegating the creation of data warehouses, or datawarehouse-like projects, to IT departments which have no data-warehousing experts (I know this from personal experience). Then you just need to do the best you can. Hopefully this article is a good starting point. Further details on <a href="/programming/dwh-dimensional">dimensional modelling</a> and <a href="/programming/dwh-datavault">Data Vault</a> are available in separate articles. I have also written up some brief notes on <a href="/programming/normalform">normal forms</a>.</p>
+
+<p>This article assumes you (the reader) are familiar with relational databases, entity-relationship modelling, sql, reporting tools, computer networks, client/server architectures, and basic programming.</p>
+
+<p>Note that I’m just a beginner in data-warehousing myself (with experience in software development and architecture as a base); I’ve read the introductory texts and this is my summary of the most important points. There is probably an introduction comparable to this one, but better, by an acknowledged expert, somewhere on the internet - however I have not been able to find it. I therefore hope this article may be helpful. The content below almost certainly contains errors; corrections and feedback is welcome.</p>
+
+<h1 id="sources">Sources</h1>
+
+<p>This article gives an overview of the methods recommended by the three best-known authors on the topic of data warehousing: Bill Inmon (CIF, DW2.0), Ralph Kimball (Kimball Group Method), and Dan Linstedt (Data Vault).</p>
+
+<p>The three authors listed above (Inmon, Kimball, Linstedt) have all written regularly on their own sites, for trade publications, and presented at conferences. But most importantly, all three have written textbooks describing their approach to implementing a data warehouse.</p>
+
+<p>Bill Inmon (and co-authors) describes his method in several books, of which the following appear to be the most significant:</p>
+
+<ul>
+  <li>Building the Data Warehouse, 4th ed. (2005)</li>
+  <li>DW 2.0: The Architecture for the Next Generation of Data Warehousing (2010)</li>
+</ul>
+
+<p>Inmon’s book “Corporate Information Factory 3rd Ed. (2002)” is obsolete, replaced by the above “DW2.0” book.</p>
+
+<p>Ralph Kimball (and co-authors) describe their method in a set of three books:</p>
+
+<ul>
+  <li>
+<a href="https://www.amazon.com/Data-Warehouse-Toolkit-Definitive-Dimensional-dp-1118530802/dp/1118530802/ref=mt_paperback">The Data Warehouse Toolkit (The Definitive Guide to Dimensional Modeling) 3rd Ed.</a> (2013) - 601 pages</li>
+  <li>
+<a href="https://www.amazon.com/Data-Warehouse-ETL-Toolkit-Techniques-Extracting/dp/0764567578">The Data Warehouse ETL Toolkit, 1st Ed.</a> (2004)</li>
+  <li>
+<a href="https://www.amazon.com/Data-Warehouse-Lifecycle-Toolkit-2nd/dp/0470149779">The Data Warehouse Lifecycle Toolkit, 2nd Ed.</a> (2006)</li>
+</ul>
+
+<p>The first of these books covers <a href="/programming/dwh-dimensional">dimensional modelling</a>, together with a summary of an approach to <a href="https://en.wikipedia.org/wiki/Extract,_transform,_load">ETL (extract, transform, and load)</a> and to project management. The second and third books above provide more detail on ETL and project management respectively. The information below on the Kimball methodology and dimensional modelling come exclusively from the first book (600 pages); I haven’t read the remaining two (yet) - and given their age, I suspect they are not so relevant as the core book.</p>
+
+<p>Unfortunately the Data Warehouse Toolkit book does not provide an intro to data warehousing in the usual manner; the book takes the approach of “learning by example”, which does make some sense - but means the “intro to data warehousing” is effectively 10 chapters long. The book is highly recommended if you are involved in building a data warehouse. However if you just need to know “what is this data warehousing stuff about” , and “when might this stuff be relevant” it is a long read.</p>
+
+<p>Dan Linstedt’s method is described in one (long) book:</p>
+
+<ul>
+  <li>Building a Scalable Data Warehouse with Data Vault 2.0 (2015) - 649 pages</li>
+</ul>
+
+<p>This book does have a reasonable introductory chapter.</p>
+
+<p>All of the above books address the following topics (more or less successfully):</p>
+
+<ul>
+  <li>Project Management</li>
+  <li>Data Modelling (deciding how to represent data entities and their relationships)</li>
+  <li>Architecture (designing the various components of a DWH, including ETL flows and error-handling, etc)</li>
+  <li>Implementation (actually building the DWH)</li>
+</ul>
+
+<p>Frankly, Inmon’s books can be ignored. Although Bill Inmon was a pioneer in this topic and is regarded as “the father of data warehousing”, I found the books almost unreadable - very vague in a lot of important places, and simply too out-of-date. The Data Vault book covers a lot of the same ideas, so little is lost by skipping the Inmon books.</p>
+
+<p>Ralph Kimball has been highly influential in this topic for decades, founded “The Kimball Group”, and the first of his books listed above is extremely well written - comprehensive, clear, well-reasoned. In particular, the explanation of dimensional modelling is extremely good.</p>
+
+<p>The Data Vault method created by Dan Linstedt is relatively new, but has received significant adoption in the industry already. The book does not cover project-management or dimensional modelling as well as Kimball does, but the vault modelling approach is definitely worth learning about.</p>
+
+<p>Sadly, none of the above, nor any internet article I can find, provides a good overview of “best practice” and of the similarities/differences of the respective approaches. This article is intended to do that.</p>
+
+<h1 id="what-is-a-data-warehouse">What is a Data Warehouse?</h1>
+
+<p>The first databases were used for <em>operational purposes</em> - they were effectively persistent storage for applications, and the expected way to interact with data was via the application. Such applications read and write small groups of records as part of specific business processes, and data is stored in the database to optimise this usecase. The standard solution is to use a relational database and structure tables in 3rd or 4th normal form. These normal forms (table schemas):</p>
+
+<ul>
+  <li>minimise redundant data (ie store each value or relation just once)</li>
+  <li>maximise validatable foreign key references</li>
+  <li>maximise null-constraint checks (ie tables avoid columns that are mandatory for some purposes but optional for others)</li>
+</ul>
+
+<p>The above features are excellent for operations - when data is being updated regularly, then redundant data (duplication) is evil; it can lead to data being modified in one place but not in another resulting in inconsistent data. Having a layer that validates inter-record references is also very helpful; it prevents “orphan records” (records no longer referenced from anywhere) and “dangling references” (references to data that no longer exists). And minimising nullable fields makes code that later processes data much easier to write.</p>
+
+<p>There is a price to pay for 3rd/4th normal form: joins are needed at runtime. However when retrieving just a few records, that slows each business process only a little. Similarly there is a price to pay for the various sanity-checks that normal form make possible (key-constraints, null-constraints). However for operational systems that regularly update data, the benefits of normal forms are higher than the price.</p>
+
+<p>Once operational systems existed, however, it did not take long for management to realize that there was another use for the data gathered by operational systems: decision-support/business-intelligence/reporting/data-mining - called <em>analytics</em>.</p>
+
+<p>Initially, such analysis was done directly on the same datastores the operational systems were using - but there are a number of problems with that:</p>
+
+<ul>
+  <li>Analytics reads data in bulk (which operational systems do not do)</li>
+  <li>Analytics does not update data (ie does not benefit from some of the performance-sapping insert/update checks that are desirable for an operational system)</li>
+  <li>Operational databases often have limited storage capacity (eg only a few terabytes), leading to them retaining only limited history (eg last 3 months).</li>
+  <li>Operational schemas are not optimised for analytics purposes (particularly historical data) - ie even when they do retain history, it is not easily analysable</li>
+  <li>Operational database implementations are not optimised for analytics purposes (see “column-oriented” later)</li>
+  <li>The performance impact of analytics tasks often interferes with operational performance</li>
+  <li>Operational data is continually changing, making analytics tricky</li>
+  <li>Analytics often wants to compare data in different operational systems - something very difficult and with poor performance</li>
+</ul>
+
+<p>It is therefore common for a separate database to be set up for analytics, and for data from operational systems to be regularly imported into it - either via batch updates (usual) or real-time-streaming (rare). This second database is called a “data warehouse” (DWH); when it contains data from multiple independent upstream databases then it is sometimes called an “enterprise data warehouse” (EDW).</p>
+
+<p>The data warehouse can use database technologies optimised for analytics - eg database types that provide higher scaleability for performance and storage (distributed systems) but drop support for ACID transactions and foreign-key constraints. These unsupported features (transactions, constraints) have a high value in a read/write operational database, but are far less important in a mostly-read-only (batch updated) analytics system. Analytics databases also often use <a href="/bigdata/columndbs">column-oriented storage</a>; something that speeds up operations common in analytics while slowing down operations common in operational DBs.</p>
+
+<p>And the data warehouse can use different table schemas than the operational one. In particular:</p>
+
+<ul>
+  <li>it can represent historical data in a way that is appropriate for querying</li>
+  <li>it can denormalize data for performance</li>
+</ul>
+
+<p>Denormalized data (ie duplicating data and thereby breaking the 3rd and 4th normal form rules) is usually a bad idea in operational systems. However given that analytical systems are read-only except for replication from upstream systems, it is not so critical. And it can make queries much easier to write, and much faster to execute.</p>
+
+<p>Datastores used for operational purposes are often called OLTP (Online Transaction Processing) systems. Datastores used for analytical purposes are often called <a href="https://en.wikipedia.org/wiki/Online_analytical_processing">OLAP (Online Analytic Processing)</a> systems - but be careful with this term as it is used by different people to mean different things; it can mean either just a db for analytical purposes or specifically a multidimensional database (see later). For clarity, the terms <em>operational</em> and <em>analytical</em> are therefore used in this article.</p>
+
+<h1 id="what-is-a-data-lake">What is a Data Lake?</h1>
+
+<p>The term “data lake” is becoming more frequently used. There is no clear definition as far as I can tell. My definition is:</p>
+
+<ul>
+  <li>a data lake holds all the data that doesn’t fit into a data warehouse</li>
+</ul>
+
+<p>The data might be in some raw format that needs to be processed before loading into a data warehouse for analysis, and where there are reasons to keep that raw data even after processing. Examples include images and videos; they may be processed using appropriate tools and the extracted information uploaded into a data warehouse for analysis - but there may still be reasons for retaining the originals after processing (eg in case processing algorithms are improved later, or for legal reasons).</p>
+
+<p>The data might be too vast to be loaded into a traditional data warehouse, yet the raw data is too valuable to throw away. In this case, the original data can be kept in a data lake, and summarized (aggregate) values imported into the data warehouse. This gives the option to recompute the aggregations in the future if this is necessary.</p>
+
+<p>The data might be kept <em>for loading into the data warehouse in future</em>. Loading data into a data warehouse can require complicated ETL; sometimes there just isn’t enough staff to implement every ETL process immediately. A data lake can provide a place to hold such data until the ETL can be implemented. Alternatively, it might not yet be clear whether the data has enough value to be worth loading into the data warehouse - it can be kept in the data lake “just in case”.</p>
+
+<p>The data might not be useful for analysis at all, but is still required (eg for legal reasons). Example: images of legal contracts between a company and its customers - might require a lot of storage, but no analysis other than being able to retrieve that document up to 7 years in the past.</p>
+
+<p>A data lake is <em>not</em> a platform for traditional data analysis; that is the role of a data warehouse. Of course, once data is in a data lake then programs can be run to process it - and thus analysis is technically possible. However the point is that a data lake does not provide <em>easy</em> access to the meaning of the stored data, due to the lack of structure that a data warehouse provides.</p>
+
+<h1 id="database-technologies-for-analytics">Database Technologies for Analytics</h1>
+
+<p>Relational databases have ruled the OLTP world for a long time, though some NoSQL alternatives (document databases in particular) are challenging them.</p>
+
+<p>In data warehousing, two technologies are dominant:</p>
+
+<ul>
+  <li>relational systems</li>
+  <li>multidimensional systems</li>
+</ul>
+
+<p>None of the NoSQL databases seem to be at all applicable to analytics:</p>
+
+<ul>
+  <li>Key/value datastores are obviously of no use in analytics.</li>
+  <li>Document databases are also of little use - an operation like “give me the sum of attribute X for all entities where attribute Y = Z” is simply not something that document databases are structured to handle.</li>
+  <li>Graph databases also do not seem applicable (though interestingly, Data Vault’s intermediate “raw vault” format has some features in common with graph systems)</li>
+</ul>
+
+<p>One possible exception are the NoSQL systems Elasticsearch and SOLR. These have the ability to compute aggregations over all entities in the database in an efficient way, and are therefore often used for real-time dashboards which have some analytics-like uses. However users are very limited in the types of queries they can run across these databases.</p>
+
+<h2 id="using-relational-datastores-rdbs-for-analytics">Using Relational Datastores (RDBs) for Analytics</h2>
+
+<p>Data warehouses can model data in a relational database as tables using the following approaches:</p>
+
+<ul>
+  <li>3rd/4th normal form, just like operational</li>
+  <li>dimensional model in “star” or “snowflake” form</li>
+  <li>data-vault model</li>
+</ul>
+
+<p>All three of these models are relational (tables and columns, joins and projections). However the way data is represented in tables and columns (the “shape” of the data) differ.  Standard analytics/reporting tools all have support for normal forms, and most have inbuilt support dimensional models (aka MDA: Multi Dimensional Analytics) too - the concept has been around since the 80s. Reporting tools that directly understand the data-vault format are not common - but data-vault is usually used as an intermediate format anyway (see later).</p>
+
+<h2 id="using-multidimensional-datastores-mddbs-for-analytics">Using Multidimensional Datastores (MDDBs) for Analytics</h2>
+
+<p>Multidimensional data models are quite a different way of thinking about data. First, the concepts of dimensional modelling are used (see later) to divide data into “dimensions” and “facts”.  The resulting data can then be queried using dedicated multidimensional query languages which are not SQL (eg <a href="https://en.wikipedia.org/wiki/MultiDimensional_eXpressions">MDX</a>) or are extended versions of SQL. The data can also be queried using graphical tools; in all cases the conceptual operations applied to data in this form include <em>slice</em>, <em>dice</em>, <em>pivot</em>, <em>roll up</em>, and <em>drill down</em>. Data analysts often find it easier to use multidimensional concepts than create SQL queries. In addition, when data is stored in MOLAP or HOLAP form, queries can be extremely fast - ie interactive data exploration is much more pleasant than querying relational systems.</p>
+
+<p>The term “OLAP” was in fact invented by E.F. Codd, one of the original pioneers of relational databases. <a href="http://olap.com/learn-bi-olap/codds-paper/">He defined</a> a set of features that he considered important for providing data analysts with access to data. This list effectively defines the concept of a <em>multidimensional database</em> - and not just the concept of <em>analytics in general</em> - perhaps because the acronym OLTP was actually created later.</p>
+
+<p>There is more information on OLAP multidimensional datastores later in this article.</p>
+
+<h1 id="enterprise-data-warehousing-data-marts-data-standardization-and-master-data-management">Enterprise Data Warehousing, Data Marts, Data Standardization and Master Data Management</h1>
+
+<p>One of the main reasons for building a data warehouse is for a company to do analysis of data across existing databases - and in particular, across systems dedicated to specific departments or regions. However such analysis only works when the data being compared is - well, comparable. Tables need to represent similar concepts, columns meant to represent the same logical data need to use comparable data-types, the same representation (eg for gender or country), and need to be semantically compatible too (eg have the same fiscal closing date for reporting).</p>
+
+<p>A database containing data from multiple systems is usually called an <em>enterprise data warehouse</em>, although <em>data warehouse</em> should actually be sufficient on its own.</p>
+
+<p>One of the big points of an EDW (enterprise data warehouse) is to make it possible to write queries that merge or compare data from multiple sources (eg sales, marketing, production and logistics). But writing such queries is really difficult if there is no consistency in</p>
+
+<ul>
+  <li>table and column names</li>
+  <li>data formats (eg dates, booleans)</li>
+  <li>complex data representations (eg addresses)</li>
+  <li>reference data keys (eg company branch ids)</li>
+</ul>
+
+<p>When a data warehouse holds data from multiple upstream systems, then such inconsistencies often occur. Sometimes when an EDW is set up, management support an effort to standardize such things; in other cases, the ETL process must just map data as it comes in to the EDW.</p>
+
+<p>The most significant issue is the last one above: using different ids for the same concepts, eg for company branches or for product-defect type codes. Master data management is the concept of storing specific lookup tables just once in the company, and then replicating it out to all departments so that there are consistent ids; often the management of these central standardized tables is made the responsibility of the data warehouse team. This is perhaps odd, as normally data warehousing is about replicating in the other direction (operational data =&gt; warehouse), but on the other hand the EDW team are also about providing “a central store of all data”.</p>
+
+<p>All of the above has assumed that relational database are used (including variants which drop some traditional features in return for better scalability). Other data storage systems exist, including document-databases, object-databases, graph databases, and key-value stores. However “data warehousing” does not make use of any of these; relational systems are king for analytics tasks. One possible exception is search-optimised systems such as Elasticsearch/SOLR which can be useful for specific kinds of analytics; however these are not addressed in this article.</p>
+
+<p>Note that an EDW may not be a single database, but instead a set of independent database instances. This is particularly common when using a traditional relational database to hold the EDW; these have size limits (unlike natively distributed NoSQL systems such as Hive, Kudu or Cassandra). In this case, tables holding reference data (“dimensions”) are often replicated in each database, while event-based tables (“facts”) are not.</p>
+
+<p>When a single database instance holds a “data warehouse” for a subset of the company, it is often called a “data mart”. An EDW can be built as a “federation” of data marts, as long as strict architectural control over the data marts ensures that their dimensions and other datawarehouse-related attributes are consistent (“conformed”) so that queries which cross “data marts” are feasible.</p>
+
+<p>Ensuring that multiple organisational units deliver data at all is difficult. Ensuring that the data is complete and consistent is an extremely political affair. Setting up an enterprise data warehouse is therefore as much a business task as a technical one - something that Ralph Kimball talks about in detail. This article does not address these political/management problems at all..</p>
+
+<h1 id="the-inmon-approach-to-data-warehousing-aka-dw-20">The Inmon Approach to Data Warehousing (aka DW 2.0)</h1>
+
+<p>Two of Bill Inmon’s books were used as sources for preparing this article. As already noted, I didn’t find them very helpful; they tend to list lots of problems without offering many solutions. However a few notes are worthwhile.</p>
+
+<p>The name “Data Warehouse 2.0” is actually trademarked by Inmon (or related entity), and is used to promote his ideas. The book “DW 2.0: The Architecture for the Next Generation of Data Warehousing” replaces his earlier “Corporate Information Factory” (CIF) methodology.</p>
+
+<p>In the Inmon/DW-2.0 approach, a central large database holds “the data warehouse core”. Data at this layer is stored in “Data Item Set” form - not properly defined, but apparently pretty close to 3rd normal form. An ETL component process feeds this database - and may itself contain one or more relational databases used to prepare the data for import into the core data warehouse. The ETL area of course draws data from source systems in various ways. The data in the warehouse core is then periodically exported to external database called “data marts”.</p>
+
+<p>These data marts contain subsets of data intended for use by specific groups of users, or intended to solve specific use-cases. The data mart databases are usually relational databases, and usually hold their data in <em>dimensional star schemas</em> (see later). They often contain only <em>aggregated</em> data from the core - ie only the amount of detail actually needed by the target audience. Data marts which contain not only aggregate data do take up unnecessary disk-space (ie duplicate data in the DWH core) - but not as bad as all the “mini data warehouses” that will be built without a properly designed enterprise data warehouse.</p>
+
+<p>Metadata should be held about the tables and columns in the DB - where the data came from, how long it is valid, etc. Metadata should also be used to manage the ETL flows, so it is clear what ETL processes are running when. Quite how this metadata is kept is not defined.</p>
+
+<h1 id="the-kimball-approach-to-data-warehousing">The Kimball Approach to Data Warehousing</h1>
+
+<p>As noted already, Kimball’s books are excellent. The author(s) clearly have successfully built many data warehouses, and their experience is documented in the books.</p>
+
+<p>There is significant information about the political and project-management aspects of a successful data warehouse project; this article looks only at the recommended technical solution/architecture.</p>
+
+<p>A Kimball-style data warehouse consists of:</p>
+
+<ul>
+  <li>an ETL “back room” area which is responsible for moving data from upstream systems into the data warehouse</li>
+  <li>one or more databases called “data marts” holding data in relational tables that use dimensional modelling schemas</li>
+</ul>
+
+<p>where the data-marts are also the long-term “master” storage.</p>
+
+<p>Dimensional modelling goes back to the 1970s, and is one of the core concepts in the Kimball approach. Dimensional modelling was originally a somewhat controversial approach, and Kimball had to spend considerable time explaining and promoting its advantages.</p>
+
+<p>As noted earlier, dimensional modelling is also recommended in DW-2.0 (Inmon-style) databases - but only as the final presentation layer to users (data marts); the “master” copy of EDW data is held in a different form. The Data Vault approach works similarly to DW-2.0; data marts use dimensional modelling but the “master” copy of data in a different format. Kimball-style databases have only data marts, and therefore the “master” is directly in dimensional form.</p>
+
+<h2 id="dimensional-modelling-in-kimball-data-warehouses">Dimensional Modelling in Kimball Data Warehouses</h2>
+
+<p>Dimensional modelling is based on the observation that data can be divided into two categories:</p>
+
+<ul>
+  <li>bounded reference data (“dimensions”)</li>
+  <li>unbounded transactional (event-related) data (“facts” or “measurements”)</li>
+</ul>
+
+<p>Dimensions represent “entities” that have a clear identity, and potentially a change-history. They usually fall into one of the following categories: who, what, where, when, why, or how. Exmaples are locations, products, customers. They are relatively stable (“bounded”) in that inserts or updates in such tables do not happen at a rapid rate, and in general the concept of “counting” or “enumerating” the instances of a particular dimension makes sense.</p>
+
+<p>Facts represent events, ie a moment in time at which a set of entities (dimensions) have a specific relation to each other.</p>
+
+<p>Each different type of fact (event) record is stored in its own table, and has a strict layout. The fact record consists of either:</p>
+
+<ul>
+  <li>a reference to a dimension record (ie foreign key of a specific record in a specific dimensional table)</li>
+  <li>or a (quantity, dimension) pair</li>
+  <li>or a “degenerate dimension key” (special case)</li>
+</ul>
+
+<p>A fact record is also considered a “measurement”, in the scientific sense of measuring the state of a system at a particular point in time.</p>
+
+<p>Fact tables are expected to be “append-only” tables. Because they represent “events” in the external world, they are naturally immutable - once something happens, it cannot “unhappen” and history does not change (ie the set of properties associated with that event do not change later). Dimension tables, in contrast, represent entities whose attributes can change over time; there are various ways of dealing with such changes including simple overwrites (no history) to approaches in which dimension records are also immutable and new state is represented as new “overriding” records.</p>
+
+<p>Fact tables never contain foreign keys to other fact tables. In a dimensional-style database, that is one easy way to identify fact tables - any table which is not referenced by any foreign keys is almost certainly a fact table. Each dimension table will be referenced from at least one fact table - otherwise it has no reason to exist. In practice, a naming convention is usually used to indicate if a table holds facts or a dimension.</p>
+
+<p>A dimensional model is built in response to a measurement process in an upstream system. Tables are not “designed for a specific report”, but instead model the upstream business.</p>
+
+<p>Dimension tables can be represented in two forms: “snowflake” or “star”. A <em>snowflake schema</em> is basically a 3rd-normal form approach; a “primary” dimension record contains foreign keys to child/parent/associated records. A <em>star schema</em> instead flattens/denormalizes dimension tables so that they have few or no foreign keys; this requires duplicating data from those referenced tables into the referencing table. As noted earlier, denormalization is considered very bad in operational systems - but can be very useful in analytic systems.</p>
+
+<p>Dimensions in star form provide a nice interface to users of the data warehouse - dimensions are effectively the “things” that can be queried - customers, products, date-ranges. Because “star” schemas have only flattened dimensions, they are easy for users to browse and understand. This is why “dimension-schema-aware” business intelligence tools are useful - they know that:</p>
+
+<ul>
+  <li>dimension tables are useful for browsing, grouping and filtering;</li>
+  <li>fact table columns are not used for grouping and filtering - but are candidates for aggregate operations such as sum, avg, min/max.</li>
+</ul>
+
+<p>and can provide drag-and-drop interfaces to build queries against a fact table, filtered or grouped by columns of the referenced dimension tables.</p>
+
+<p>A traditional normal-form data representation does not have these nice properties - flattened dimensions, clear line between dimensions (group/filter) and fact(aggregate). A traditional ERM diagram is much more intimidating to non-technical users than two simple lists: dimension-tables and fact-tables. Kimball convincingly argues that most of the potential users of a data warehouse (business experts) are not familiar with the concepts of a “join”, and that dimensional modelling makes a data warehouse useable for these users.</p>
+
+<p>The flattened (denormalized) <em>star</em> schema also brings significant performance benefits; far fewer joins are required. This is particularly useful for users who are interactively exploring the data warehouse. ETL is potentially a little slower, but ETL is never interactive (latency-sensitive).</p>
+
+<p>It is possible to store dimensional tables physically in snowflake format, but define a set of database views which present the data as if it were in “flat” star format. This gives users their ease-of-use benefits while data is not duplicated at database level. There is, however, a performance penalty compared to “materialized” star schemas.</p>
+
+<p>In general, reports are executed against fact tables, not against dimension tables - reports want to summarize the events in a system, not the reference data.</p>
+
+<p>Ralph Kimball puts it this way:</p>
+
+<blockquote>
+  <p>Dimensional modeling addresses two requirements:</p>
+
+  <ul>
+    <li>Deliver data that’s understandable to the business users</li>
+    <li>Deliver fast query performance</li>
+  </ul>
+</blockquote>
+
+<p>Mapping from the upstream “operational” model to a dimensional model is often non-trivial, but never impossible.</p>
+
+<p>More information can be found in <a href="/programming/dwh-dimensional">my article on dimensional modelling</a>.</p>
+
+<h2 id="an-edw-as-a-federation-of-data-marts">An EDW as a Federation of Data Marts</h2>
+
+<p>A Data Mart is a subset of the overall available data, selected for a specific user-group or purpose.</p>
+
+<p>DW-2.0/DataVault architectures store the “master data” in a single database (at least logically); data marts are then exports (or views) onto the main store. If specific tables need to be compared, and no data mart has all necessary tables, then a new data mart may need to be defined and the relevant data exported from the master copy into the new data mart.</p>
+
+<p>A Kimball-style EDW is instead a federation of data marts. Each dimension-table and fact-table must be stored in at least one data mart, but no data mart will have all tables. A query that wants to combine different data in an unexpected way may therefore perform a “cross-data-mart” query, known as a “drill across” operation. No single SQL query can cross databases; instead a query is executed against each database and the results combined. There are various DWH query tools that have inbuilt support for these queries.</p>
+
+<p>In a Kimball EDW, the same reference data (dimension) table is often found in multiple data marts; any time a fact table exists in a data mart then all dimension tables that are referenced from the fact table need to be “local” in order for foreign-key reference constraints to be valid, and queries to work. However each fact table is usually found in only one data mart. In other words, data marts are centered around one or more fact tables, together with their supporting dimension (reference) data. Given that fact tables are unbounded (large) sets of events, while dimension tables are bounded (relatively small) reference data, the duplication of dimension data is not as significant as it at first sounds.</p>
+
+<p>Regardless of whether a query is “drill across”, or within a data mart, the dimension data to be compared needs to be compatible. If a query wants to sum the sales of shoes in the second financial quarter over different “sales event” (fact tables) from four different countries, then the fact table in each data-mart needs to have a column for “product type” that references a dimension table that has a specific code for shoes. The Kimball method goes into great detail about the process of creating “conformed dimensions” so that the data mart for each country can have its own country-specific product dimension data while being consistent enough for such cross-mart queries to work.</p>
+
+<p>Inmon/DataVault warehouses instead typically solve the problem by having a single identical list of products over the whole company. This is simpler, but either:</p>
+
+<ul>
+  <li>a politically challenging thing to force upstream data providers to comply with, or</li>
+  <li>a technically challenging (potentially impossible) mapping to apply during ETL</li>
+</ul>
+
+<h2 id="conformed-dimensions-and-facts">Conformed Dimensions and Facts</h2>
+
+<p>The Kimball books spend a considerable amount of time talking about “conformed dimensions”. According to Kimball:</p>
+
+<blockquote>
+  <p>Two dimensions are conformed if they contain one or more common fields whose contents are drawn from the same domains.</p>
+</blockquote>
+
+<p>and:</p>
+
+<blockquote>
+  <p>Conformed facts are simply numeric measures that have the same business and mathematical interpretations so that they may be compared and computed against each other consistently.</p>
+</blockquote>
+
+<p>A conformed dimension is simply a dimension table where multiple copies exist, either in the same mart or in different marts. This happens often across marts (different marts have different fact tables which may reference the same dimensional data), but even within a mart there may be multiple fact tables which reference different copies of data representing the same dimensional concept. The different dimensional table definitions do not have to be completely identical; some may have additional columns or rows relevant to the specific fact tables that reference them. However columns that represent the same concept should have the same name and consistent values. This consistency makes queries simpler and more accurate to write and, most importantly, allows queries that combine data from multiple fact tables while filtering/grouping using the shared dimensional concept. Confirmed dimensions can be created when two different upstream departments export data that is effectively the same; however “effectively” sometimes includes differences that make it non-trivial to create a shared dimension that can be shared between the fact-tables from both upstream departments.</p>
+
+<p>The “one or more common fields” part of the quote above means that two different upstream sources can still have their own additional distinct attributes for the dimension; these can be represented as a secondary dimension. This still allows grouping/filtering on the dimension shared between two fact tables.</p>
+
+<p>If you are lucky, the “conformed dimension” is managed as “master data” in a single place, and replicated to external systems for their use - thus guaranteeing consistency when data is imported into the EDW.</p>
+
+<p>Examples of data that is commonly a “conformed dimension” (referenced from multiple fact tabels) are: customer, product, service, location.</p>
+
+<p>The most tricky issue with conforming dimensions is when different data suppliers just don’t provide compatible data. One might record geographic locations by “state” while another might record them by timezone. Mapping is therefore at best approximate - which might not be good enough. The only solution for this is going back to one (or both) upstream data providers and getting them to change their data collection process.</p>
+
+<p>When two upstream suppliers have not-completely-compatible definitions of a dimension (eg both have the concept of Customer, but not all fields are identical) then the best approach is to create a minimal customer dimension with the fields that <em>are</em> common - even if it is just one. The remaining fields become separate <code>customer_src1</code> and <code>customer_src2</code> dimensions. Then slowly try to bring other properties that would be helpful to standardize together, via changes to the upstream systems.</p>
+
+<h1 id="the-data-vault-approach-to-data-warehousing">The Data Vault Approach to Data Warehousing</h1>
+
+<p>The Data Vault methodology was invented by Dan Lindstedt, and is described in a book:</p>
+
+<ul>
+  <li>Building a Scalable Data Warehouse with Data Vault 2.0, Linstedt, Olschimke, publisher: Morgan Kaufmann 2015  (649 pages)</li>
+</ul>
+
+<p>Data warehousing is a complex business - not only is the book large, but its bibliography contains hundreds of references to further sources. Reading all such references would be a year’s work.</p>
+
+<p>This article provides only a very brief summary of Data Vault; I have <a href="/programming/dwh-datavault">a longer article on Data Vault</a> if you wish to know more. Data vault also uses dimensional modelling (in its data marts); I also have <a href="/programming/dwh-dimensional">an article on dimensional modelling</a> if you need additional info on that.</p>
+
+<h2 id="the-data-vault-book">The Data Vault Book</h2>
+
+<p>The Data Vault book cover similar topics to Kimballs book:</p>
+
+<ul>
+  <li>Data Vault Project Management Methodology</li>
+  <li>Data Vault Modeling</li>
+  <li>Data Vault Architecture</li>
+  <li>Data Vault Implementation</li>
+</ul>
+
+<p>The book formatting is unfortunately poor - this appears to be a common problem with Morgan Kaufmann books. The initial “overview” chapter is rather waffly/imprecise. In addition, the book uses MS products (year 2014) extensively for examples - a little annoying if you are not intending to use microsoft products. In particular, chapter 11 and 12 are half full of MS product screenshots - a significant waste of space.</p>
+
+<p>The content related to project management is far inferior to that from Kimball - how to determine if one is actually needed, how to obtain political support, how to set expectations, etc. Many of the management-related “support arguments” for Data Vault are trite and not well argued.</p>
+
+<p>In short, the book itself is not nearly of the same quality as Kimball’s books. However the actual data structures used are very well thought out, as are the processes of moving data into and out of the central Vault format.</p>
+
+<p>Data Vault 2.0 is an update on the original design; it contains changes specifically intended to address issues related to NoSQL systems and to improve scalability of ETL processes.</p>
+
+<h2 id="the-raw-vault-and-data-marts">The Raw Vault and Data Marts</h2>
+
+<p>Like Inmon/DW-2.0 and Kimball data warehouses, data is presented to end users as a set of “data marts”. Each data mart holds a subset of the available data, selected for a particular user-group or set of use-cases. The data marts contain data in <em>dimensional modelling</em> form, ie tables containing either dimensions or facts.</p>
+
+<p>Like the Inmon/DW-2.0 approach (and unlike Kimball), the “master copy” of data is not in the data marts; instead there is a central store of data that is not in dimensional form, and not expected to be directly queried by end users. Data is exported from this central store into one or more data marts, where it <em>is</em> presented in dimensional form for reporting purposes. A data mart can therefore be deleted and recreated if needed.</p>
+
+<p>The central store (called the “raw vault”) is expected to be relational (ie consist of tables with columns). However unlike DW-2.0, the central data store is not third-normal-form but instead uses an interesting “vault” design pattern that is suited for addressing common problems with importing data from multiple upstream systems into a single data warehouse:</p>
+
+<ul>
+  <li>storing different versions of the same entity over time</li>
+  <li>storing data about the same entity provided by multiple separate systems</li>
+  <li>handling schema changes in upstream systems</li>
+  <li>handling invalid data provided by upstream systems</li>
+</ul>
+
+<p>Data imported into the <em>raw vault</em> is transformed as little as possible. To quote:</p>
+
+<blockquote>
+  <p>The goal of Data Vault 2.0 loads is to cover all data, regardless of its quality (“the good, the bad, and the ugly”).</p>
+</blockquote>
+
+<p>There are thus two phases to loading data:</p>
+
+<ul>
+  <li>obtain data from upstream sources, load into <em>raw vault</em> (traditional ETL) - with as little transformation and filtering as possible</li>
+  <li>export data from raw vault into data marts</li>
+</ul>
+
+<p>Splitting the transform from source to mart into two phases allows data transforms to be split into two categories:</p>
+
+<ul>
+  <li>normalization applied during initial import to raw vault (“hard business rules”)</li>
+  <li>normalization applied during export to data mart (“soft business rules”)</li>
+</ul>
+
+<p>Hard business rules should be minimised; this reduces the amount of data that simply cannot be imported at all. Such data is really hard to deal with.</p>
+
+<p>Moving transformations to soft business rules means that:</p>
+
+<ul>
+  <li>the logic can be changed later if needed, and the affected data marts regenerated</li>
+  <li>or different data marts can be created using different sets of soft business rules</li>
+</ul>
+
+<p>Linstedt describes the benefits of storing raw data clearly:</p>
+
+<blockquote>
+  <p>Business users expect that the data warehouse will present correct information of high quality. However, data quality is a subjective concept. Data that is correct for one business user might be wrong for another with different requirements or another understanding of the business view. There is no “golden copy” or “single version of the truth” in data warehousing. Just consider the business user who wants to compare reports from the data warehouse with the reports from an operational system, including all the calculations, which might differ. In many cases, data warehouse projects divert from the calculations and aggregations in operational systems due to enterprise alignment or to overcome errors in the source system. This is not a desired solution, but is reality grounded in the fact that the data warehouse often fixes issues that should have been fixed in the source system or the business processes. In any case, the data warehouse should provide both “versions of the truth.” That’s why Data Vault 2.0 focuses on the “single version of the facts.”</p>
+</blockquote>
+
+<p>Storing real/raw data is also important for auditing/compliance.</p>
+
+<h2 id="the-vault-schema-design-pattern">The Vault Schema Design Pattern</h2>
+
+<p>The Raw Data Vault stores data in three kinds of structures: hubs, links, and satellites. These can be relational tables, but other options are possible. In general, for each “data type” represented in the incoming data (eg customer) there is:</p>
+
+<ul>
+  <li>a hub table for that data-type containing one significant column: the “business key”. Each instance of that data-type has one row in the corresponding hub table.</li>
+  <li>link tables join hubs together, ie represent relations between entities. A link refers to two or more hubs.</li>
+  <li>one or more satellite tables; each table provides a set of attributes associated with a hub entity or a link entity.</li>
+</ul>
+
+<p>There is a separate satellite table for each data-source that provides information about instances of that hub or link. If a source changes its data-format in a non-backwards-compatible way, then that also results in a new satellite table. Each satellite table has appropriate columns to hold data coming from its upstream source - plus a foreign key to the corresponding hub or link entry.</p>
+
+<p>This data model makes it very easy to import data about the same entity from multiple upstream sources - there are no “column conflicts” because each source has a table customised to hold whatever data that source provides. The hub entry ties together data from different sources related to the same instance of a particular type. Because the data has very few transformations applied to it (just char-set conversions, date conversions, etc) there is no danger of data-loss due to incorrect (or changing) transformation rules. It is also a representation suitable for auditing.</p>
+
+<p>Interestingly, this data model looks something like a graph database, with nodes (hubs), edges (links) and attributes (satellites).</p>
+
+<p>All data about a specific entity (eg a customer) should be linked together as a single “thing” in the data warehouse, even when different upstream applications manage different subsets of customer data. Hubs achieve this, without forcing standardisation on the satellites.</p>
+
+<h2 id="data-vault-benefits">Data Vault Benefits</h2>
+
+<p>Data Vault simplifies the process of integrating data from multiple upstream sources into a single database, due to supporting multiple satellite tables associated with the same entity (hub). It is also good at recording data history (each new version of an entity is just a new row in a satellite table).</p>
+
+<p>ETL is a reasonably simple process, as raw vault format holds just about anything the upstream systems can provide. This minimises problems with “rejected” records. It also provides excellent traceability, and the option to change the “data cleansing” logic and regenerate data marts.</p>
+
+<p>The data vault data model is not good for querying/reporting. However it is not intended for this; instead derived data marts provide all the benefits of dimensional modelling or OLAP multidimensional cubes.</p>
+
+<h2 id="concerns-about-data-vault">Concerns about Data Vault</h2>
+
+<p>The DataVault book assumes the use of Microsoft database products. It also assumes that the Raw Data Vault fits onto a single SqlServer instance (with multiple disks). There are assertions in the book that “this design can scale”, but no details. It also assumes that traditional database backup strategies can be used. IMO, these assumptions are not valid for modern businesses - data no longer fits on a single server in most cases. Note that it does assume “data marts” (aka information marts) are physically separate.</p>
+
+<h1 id="inmon-vs-kimball">Inmon vs Kimball</h1>
+
+<p>Bill Inmon has regularly criticised the Kimball methodology - and in fact so regularly that Kimball has written several articles to rebut the criticism. Personally, I find Kimball’s answers convincing, though of course you should come to your own conclusions. Here are just a few major points in the disagreements between them.</p>
+
+<p>Inmon criticises Kimball’s concept of a DWH built as a “federation of data marts” as “inconsistent”. However he is considering the situation where each data-mart is built by a different group of developers independently, with their own data model and own ETL processes. Kimball recommends (AFAICT) separate physical databases, potentially owned/managed by different groups but where</p>
+
+<ul>
+  <li>ETL is done in a central point</li>
+  <li>the data model of each data-mart is developed under supervision of the DWH team (to ensure “conformed dimensions”)</li>
+  <li>a dimension shared with other data-marts can be extended with custom attributes, but the core attributes must be present and used consistently</li>
+  <li>“master data management” is used for significant dimensions, ie centrally controlled and replicated to each data-mart</li>
+</ul>
+
+<p>Inmon claims that relational models are “more expressive” than dimensional models, while Kimball argues that relational and dimensional models have the same expressibility and that data can be mapped back and forth without data loss. While Kimball’s argument is true, I also see Inmon’s point here - parent/child relations are somewhat hidden in dimensional star schemas.</p>
+
+<p>Inmon claims (in DW-2.0) that data warehouses that consist of a collection of star schemas tend to be “brittle”:</p>
+
+<blockquote>
+  <p>The truth is that star schemas are designed for a given set of requirements and only that given set of requirements.
+Star schemas are optimized for the use of one audience.</p>
+</blockquote>
+
+<p>Kimball rebuts this completely, and states that a correctly designed dimensional model is based on the “measurement events” from upstream systems, and not on the needs of a specific report.</p>
+
+<p>Kimball’s approach to standardising DWH contents via a focus on upstream providers appears to be politically tricky (may be seen by upstream data providers as interference with their processes, or as supervision over their solutions). However Inmon’s solution also appears politically sensitive (“take what we give you”). And IMO Kimball’s approach is more scaleable.</p>
+
+<p>Because Inmon requires a single central DB rather than federated DBs, and isn’t assuming “big data” tech, he needs to carefully limit the amount of data present - thus the DW-2.0 book describes “near-line and archive sectors”, with the associated (and not technically defined) tools for moving data between active and archived states (“data monitor”, “activity monitor”, “Cross-media storage manager (CMSM)”, “SQL scanners”, etc). In addition, he recommends (in extreme cases) storing only summary data in the DWH. It seems that Kimball’s approach (federated data marts) avoids all this complexity.</p>
+
+<h1 id="multidimensional-models">Multidimensional Models</h1>
+
+<p>Warning: the following information is particularly unreliable; I have no personal experience of OLAP cubes.</p>
+
+<p>Consider two datastructures in a typesafe programming-language such as C or Java:</p>
+
+<pre><code>// Dimensions
+enum Product {Shoes, Shirts, Hats}
+enum City {Rome, Milan, Shanghai}
+enum Month {Jan, Feb, Mar}
+
+class MyMeasure {
+  float m1;
+  int m2;
+}
+
+// Fact
+class MyFact {
+  Product prod;
+  City city;
+  Month mon;
+
+  MyMeasure m;
+}
+</code></pre>
+
+<p>The types Product/City/Month are all <em>enumerable types</em>, ie have a fixed number of possible values.</p>
+
+<p>Now consider a sequence of MyFact instances - this could obviously be expressed as a simple relational table. But alternately this could be represented as a matrix or an N-dimensional cube.  Consider a Rubik’s cube, where:</p>
+
+<ul>
+  <li>the x-axis is labelled with the different values of Product</li>
+  <li>the y-axis is labelled with the different values of City</li>
+  <li>the z-axis is labelled with the different values of Month</li>
+</ul>
+
+<p>For each instance of MyFact, it would be possible to use (prod,city,mon) to locate a specific block within the overall cube, and then “insert” the measure <code>m</code> into that block. Obviously, if Product has more than 3 possible values, then the cube would have to be wider than a traditional Rubik’s cube. Similarly for City and Month. There is no constraint that the discrete options of these dimensions is identical, ie the “multidimensional representation” does not have to be a cube in the traditional sense. In addition, there might not be just 3 dimension values involved; when more are present then the result is a “hypercube”; the analogy to a Rubik’s cube (or any physical object) gets somewhat vague at this point but the principles are the same.</p>
+
+<p>Maybe a more straightforward comparison for computer programmers is a multi-dimensional array. A type <code>MyCube: Set&lt;MyMeasure&gt;[x][y][z]</code> works in a similar manner (where x is the number of possible values for type Product, etc).</p>
+
+<p>What makes an OLAP cube somewhat different from these Rubik’s cube or array examples is that it is possible to “slice” the array, by specifying a particular value for one of the dimensions. This is equivalent to a SQL expression like “<code>where prod=Shoes</code>”. This results in a new “cube” with one less dimension than the original. A “dice” operation is similar to slice, except that a set of values is specified instead of just one, equivalent to “<code>where prod in [Shoes, Hats]</code>”. In this case, the new cube has the same number of dimensions - it is is just “narrower” (ie not as wide) in the specified dimension,. In both slice and dice, no aggregation operations are performed - data from the original cube is just “excluded”.</p>
+
+<p>Dimensions can optionally have a “hierarchy”, ie a dimensional value may belong to a parent dimension value. An example is country -&gt; state -&gt; city or year -&gt; month -&gt; day. For a dimension with this kind of hierarchy, the user can “drill up”; this aggregates values for all child elements. A “drill down” operation reverses the process. In our example, the data might be rolled-up on dimension <code>city</code> to the “country” level. A rollup produces a new cube that has the same number of dimensions but is “narrower” along that particular axis (fewer distinct values). The MyMeasure elements will be aggregated appropriately (eg summed by country).</p>
+
+<p>Roll-up operations instead perform a kind of “group by” operation that removes one or more dimensions of the cube by “squashing” (aggregating) all values along the removed dimensions. In our example, a “roll up on city” removes the city dimension. Examining the data at any specific (product, month) coordinate returns the combined values over all cities.</p>
+
+<p>The pivot operation is (AFAICT) just a visual (presentation-time) concept, telling any user interface through which the cube is viewed which values to present along which axis.</p>
+
+<p>Because a dimension always has a fixed set of values it is possible for a multi-dimensional database to precompute values for these slice, drill and rollup operations, making such operations much faster later. This is particularly useful for interactive exploration of the data.</p>
+
+<p>Most users actually use GUI tools to build queries rather than explicitly writing them in text form.</p>
+
+<p>Supposedly, the multidimensional model also allows security rules to be attached to dimensions, allowing access control to be configured in ways that are not possible with data accessed using the SQL model.</p>
+
+<p>Multidimensional models are variously referred to as “multidimensional OLAP cubes”, “OLAP cubes”, “multidimensional cubes” or just “OLAP”.</p>
+
+<p>A multidimensional model can be stored:</p>
+
+<ul>
+  <li>in a dedicated disk storage format (MOLAP)</li>
+  <li>using relational tables as storage (ROLAP)</li>
+  <li>in a hybrid of the above (HOLAP)</li>
+</ul>
+
+<p>There are dedicated multidimensional databases (MDDBs) which implement MOLAP; data is taken from some upstream source (often a relational database) and imported into the MDDB which then precomputes aggregates and stores the data in its own internal form (ie stores a copy of the original data). Queries on MDDBs are typically very fast - though due to the precomputed aggregations, the result can take quite a lot of disk-space. There are even some MOLAP tools which are designed to hold the entire result in memory - lightning fast queries, but very expensive hardware is needed. When copying data to build a MOLAP cube, the source is usually in relational dimensional form (star or snowflake schema) - see later.</p>
+
+<p>Alternatively, a traditional relational database - or even an external tool - can allow users to express their queries in a multidimensional way, and then map that query to standard SQL “on the fly” which is executed against a traditional dimensional model in the relational database. Users get the benefits of the multidimensional concepts which some find easier to deal with, while the database does not need to precompute anything, and does not need to duplicate any data. Queries on the “cubes” thus remain up-to-date (unlike the export-to-MDDB approach) and disk space is saved. However performance is significantly lower. Each ROLAP cube must first be “configured”, defining which tables in the relational database represent dimensions that should be used to defined the cube, etc. The underlying relational representation is usually a dimensional “star” or “snowflake” schema - see later for information on these.</p>
+
+<p>Some databases also support HOLAP, which is a hybrid of the two options: some data is precomputed and stored in a non-relational form while the underlying data remains in-place in the relational DB. Multidimensional queries may draw from precomputed values or execute SQL against the underlying data depending on the query.</p>
+
+<p>Multidimensional (cube) representations are not very “stable” with respect to changes in the underlying data. A MOLAP or HOLAP cube can be incrementally updated in some cases where the underlying data changes, but in many cases it is necessary to discard precomputed values and rebuild the cube. In practice, OLAP cubes are typically rebuilt every night, providing users with fast access to data from the business up to the end of the previous day. ROLAP representations are of course not affected by changing data, as no precomputation occurs.</p>
+
+<p>As usual, Wikipedia has some good information on <a href="https://en.wikipedia.org/wiki/Online_analytical_processing">multidimensional OLAP</a>, on <a href="https://en.wikipedia.org/wiki/OLAP_cube">OLAP Cubes</a>, and a <a href="https://en.wikipedia.org/wiki/Comparison_of_OLAP_servers">comparison of OLAP servers</a>; these articles are an example where the term OLAP is not being used in the generic sense of analytic processing, but instead is used to specifically mean multidimensional representation. See also these articles from Burleson on <a href="http://www.dba-oracle.com/data_warehouse/olap.htm">OLAP</a> and <a href="http://www.dba-oracle.com/data_warehouse/olap_rolap.htm">MOLAP/ROLAP</a>.</p>
+
+<p>Some multidimensional tools:</p>
+
+<ul>
+  <li>
+<a href="https://kylin.apache.org/">Apache Kylin</a> is a standalone MOLAP engine which reads its input data from the Hive big-data database (and happens to store its MOLAP data in HBase).</li>
+  <li>
+<a href="https://www.postgresql.org/about/news/909/">Analytic SQL Server for Postgres</a> appears to be a project to provide ROLAP support for Postgres</li>
+  <li>
+<a href="https://docs.oracle.com/cd/B28359_01/olap.111/b28124/toc.htm">Oracle Analytic Workspace</a> (Oracle 11g) appears to be a HOLAP-style solution in which relational and non-relational access to data is integrated. See also <a href="https://www.oracle.com/technetwork/database/options/olap/index.html">here</a>
+</li>
+  <li>
+<a href="https://support.sas.com/documentation/cdl/en/appdevgd/59506/HTML/default/viewer.htm#a001005712.htm">SAS/MDDB</a> is a MOLAP/HOLAP system for the SAS suite</li>
+  <li><a href="https://docs.microsoft.com/en-us/sql/analysis-services/multidimensional-models/olap-physical/understanding-microsoft-olap-architecture?view=sql-server-2017">Microsoft Analysis Services</a></li>
+</ul>
+
+<h1 id="the-data-island-problem">The Data Island Problem</h1>
+
+<p>One of the problems that an EDW is intended to solve is “data islands” in which some department has data useful for corporate decision making, but where that data is not accessible. One cause of data islands is simply where groups set up their own relational databases. Even worse is when the data is not directly accessible (eg only readable via a REST API), or is not in a relational DB at all (eg key/value store, document-db, or mainframe). Data may also (often) be in flat files - sometimes spreadsheets on a shared drive!</p>
+
+<p>An ETL process for a spreadsheet can be built - it must be submitted once per week or similar. For other system types, it is typical to arrange periodic “exports” of the internal content which is fed into the ETL process. As alternative, some systems can forward change-events in realtime to the ETL system. Or the system may offer an endpoint suitable for fetching data - though this then needs significant code in the ETL system to use.</p>
+
+<h1 id="data-quality">Data Quality</h1>
+
+<p>Ideally, upstream sources would provide perfect data. Next best option is for the data warehouse to detect when upstream sources are delivering bad
+data, and work with the business to get the problem fixed upstream (the consumers of the poor-quality data in the warehouse are the best people to
+estimate the costs of this problem and put pressure on upstream to fix it; the IT department can detect problems but neither estimate the financial
+impact nor apply pressure at business level).</p>
+
+<p>And the final option is to patch over the problem during data-warehouse ETL processes.</p>
+
+<p>A “data quality tool” can be used to define the rules that valid records must comply with, and what action to take when the rule is broken.  The tool may then generate necessary code to derive a “cleaned” table from the original.</p>
+
+<h1 id="etl">ETL</h1>
+
+<p>The process of importing data from external systems into the data warehouse is the messiest and least elegant part of any data warehouse.</p>
+
+<h2 id="overview-1">Overview</h2>
+
+<p>This process is usually called ETL (extract, transform and load).</p>
+
+<p>Extract means somehow getting data from an external system into the local system. Usually this is either:</p>
+
+<ul>
+  <li>getting a file (data export) from the upstream system, or</li>
+  <li>running a query against an upstream database, and either writing to a file within the datawarehouse ETL area, or to a temporary database.</li>
+</ul>
+
+<p>Transform means mapping the data into whatever the “master copy” form for the data warehouse is, and “load” just means writing the data to that master storage.</p>
+
+<p>Sometimes the anagram ELT (extract, load, transform) is used instead - particularly with respect to <em>data lakes</em>. What users of this expression are trying to point out is that a data lake primarily provides long-term storage for files - and typically in the original raw format provided from upstream. Unlike a traditional data warehouse, structuring of the imported data for easy reporting is something that can be done later - or might not even be appropriate for some data types (eg video). The expression ELT might also be appropriate for use with Data Vault, as the <em>raw vault</em> format stores data with as little transformation as possible. However personally, I think it is simplest to stick with the traditional term ETL for all data imports.</p>
+
+<p>The area into which incoming files are written (or where temporary databases are stored) is sometimes called “staging”. Some methodologies recommend storing all such files for a long period (possibly years):</p>
+
+<ul>
+  <li>to be able to repeat an import if needed</li>
+  <li>and for auditing/compliance/debugging purposes</li>
+</ul>
+
+<p>It is recommended that checksums be computed for any files that are to be stored long-term. In some business areas, a “chain of custody” is needed for data, in which case such checksums should be send to an independent third party or stored on write-once media; this makes it possible to prove that archived files from the staging area (ie data that was imported) has not been modified.</p>
+
+<p>The next step is to insert data into the master storage, which may mean doing things such as:</p>
+
+<ul>
+  <li>converting strings to a standard characterset</li>
+  <li>parsing strings into dates, or mapping dates from other non-string formats</li>
+  <li>converting decimal numbers to a standard form</li>
+  <li>splitting records, renaming fields, etc</li>
+  <li>potentially flattening nested/hierarchical data, if the upstream system is a NoSQL database and the master storage is relational</li>
+</ul>
+
+<p>Then export to the main warehouse as dimensional (Kimball) or some intermediate format (DW-2.0, DataVault). In a Kimball-style data warehouse, the master storage is the data marts; the same data may need to be loaded into multiple data marts (particularly dimension tables).  In DW-2.0/DataVault, there is a dedicated master storage area; data only needs to be loaded there once but processes to update the data marts from the master storage then need to be scheduled.</p>
+
+<p>Some percentage of imported data may be “bad”; this should be tracked and feedback given to the upstream system. Keep statistics to know whether upstream is getting better or not.</p>
+
+<h2 id="deltas-vs-dumps">Deltas vs Dumps</h2>
+
+<p>Data is usually provided from upstream systems in one of two forms:</p>
+
+<ul>
+  <li>a file containing relevant data, or</li>
+  <li>an online system which can be <em>queried</em> over the network, and returns relevant contents</li>
+</ul>
+
+<p>Imports are of course performed regularly (typically daily) from upstream systems into the data warehouse. Ideally, the upstream systems provide just “the changes since the last import” (a delta). However sometimes upstream systems cannot provide this and simply provide <em>all the data they have</em>.</p>
+
+<p>It is useful to remember the primary observation of <em>dimensional modelling</em> in mind: data is usually either bounded reference data (dimensions), or unbounded transactional/event data (facts).</p>
+
+<p>Events naturally have a timestamp associated with them, and therefore it is almost always the case that the upstream data can be obtained as a <em>delta</em> since the last import (whether data is obtained as a file or by a query). This is particularly important as fact-tables (ie events) are typically very large - you do not want to reload these from scratch.</p>
+
+<p>Dimensions do not naturally have a timestamp associated with them; if you are lucky then the upstream system tracks changes with a “<code>last_updated</code>” timestamp on changed records, or similar, and can thus provide only records which have changed since a specific datetime (the timestamp at which the previous batch of data was obtained). If you are not lucky, then you must either:</p>
+
+<ul>
+  <li>work together with the upstream system implementers to implement something that allows deltas to be provided</li>
+  <li>or simply accept dumps, and determine the actual delta (ie the set of records to be added to the data warehouse) during the ETL phase</li>
+  <li>or simply drop existing data in the data warehouse on each ETL run, and reimport the new data.</li>
+</ul>
+
+<p>The last option implies that the data warehouse never has any “history” beyond what the upstream system provides, which is rather unusual. The first two options are far more common.</p>
+
+<p>The Data Vault book provides some very concrete SQL queries which can be used to determine whether specific data already exists in the raw vault, or whether a new row needs to be inserted. This is possible because the <em>raw vault</em> is so near to the original data contents (rather than having been transformed). Other systems often keep a database holding “the previous state” in the staging area so that incoming records can be compared to the previous state and changes detected.</p>
+
+<p>Sometimes upstream systems set up “change detection” for relational databases by using triggers on tables to insert “changes” into special tables. Other tools exist which read the database-specific “transaction logs” that the database uses to implement ACID transactions, extracting the keys of records involved in “successful commits”. In either case, don’t forget to test special cases such as database-restore-from-backup or bulk-import where triggers or ACID transactions might be disabled while data is loaded.</p>
+
+<p>When a database tracks changes via a “<code>last_modified</code>” property on a record, then special handling is needed for the case where a record is actually deleted from the database.</p>
+
+<p>Sometimes it is useful to have a “cause” associated with a database change. Kimball recommends handling changes related to “fixing data errors” differently than “create new version” changes. This of course assumes that the ETL process can somehow determine why an upstream system changed a record.</p>
+
+<h2 id="other-issues">Other Issues</h2>
+
+<p>Late arrival of data is a significant ETL problem. All of the data warehousing books mentioned in this article discuss this issue and ways to deal with it.</p>
+
+<h2 id="real-time-imports">Real-time Imports</h2>
+
+<p>Occasionally, more technically advanced companies will want to implement real-time feeds into the data warehouse, providing changes over a message-bus or similar. Often these data-feeds are produced by tools monitoring database transaction logs. This article does not address this - it is just worth knowing that the possibility exists.</p>
+
+<h2 id="some-etl-tools">Some ETL Tools</h2>
+
+<p>Building ETL processes is complex. A number of firms offer solutions for this; here is a small selection of reasonably well-known ETL-related software.</p>
+
+<ul>
+  <li>IBM Infosphere DataStage</li>
+  <li>Informatica</li>
+  <li>Pentaho</li>
+  <li>InformationBuilders.com</li>
+  <li>Attunity</li>
+  <li>Boomi</li>
+  <li>Rocket AS</li>
+  <li><a href="http://ijcsit.com/docs/Volume%205/vol5issue02/ijcsit20140502167.pdf">Oracle Warehouse Builder</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/SQL_Server_Integration_Services">Microsoft SSIS (SQLServer Integration Services</a></li>
+  <li>Talend</li>
+</ul>
+
+<p>Attunity is an ETL software provider which seems to offer a somewhat more advanced solution than most in this field. Attunity provides “model driven datawarehousing”. You define models, and attunity creates ETL code. It:</p>
+
+<ul>
+  <li>supports central data warehouse in 3NF or DataVault layout</li>
+  <li>exports to multiple dimensional data marts</li>
+  <li>claims that informatica is more old-fashioned</li>
+</ul>
+
+<h1 id="integrated-enterprise-data-warehouse">Integrated Enterprise Data Warehouse</h1>
+
+<p>The term “Integrated Enterprise Data Warehouse” is sometimes mentioned in the literature. In brief, this means:</p>
+
+<ul>
+  <li>all tables within a DWH should use standardised values and codes for customers, products, locations, etc. Master Data Management (MDM) is the way to achieve this.</li>
+  <li>different tables should use identical names for identical concepts, and identical dimension/fact separations.</li>
+  <li>charactersets should be standardized</li>
+  <li>date representations and timezones should be standardized</li>
+  <li>currencies should be standardized</li>
+</ul>
+
+<p>The point is to be able to generate reports that combine data from multiple upstream systems; this kind of information is not possible when querying each upstream system individually. Also known as “drill-across” (compared to drill-down).</p>
+
+<h1 id="master-data-management">Master Data Management</h1>
+
+<p>Master Data Management (aka MDM) is the process of defining shared concepts and constants across a company, and pushing them out to each company department so that data which flows back into the EDW is consistent.</p>
+
+<p>Various companies offer tools to manage and distribute such centralised data.</p>
+
+<p>Often MDM includes version-control-like features to track who changed which record, and when. Some MDM tools include data-modelling tools to define/manage the schemas for managed data.</p>
+
+<h1 id="politics-and-planning">Politics and Planning</h1>
+
+<p>Kimball’s books go into great detail about the political and management aspects of setting up a data warehouse. The issue is addressed briefly in the “Data Warehouse Toolkit” book, and in more detail in a whole book dedicated to this topic. Here are a few brief notes, describing the sorts of things that need to be addressed.</p>
+
+<h2 id="project-initial-setup">Project Initial Setup</h2>
+
+<p>There are some political and planning decisions to make before setting up a DWH, or setting up a new ETL into a DWH.</p>
+
+<ul>
+  <li>
+    <p>what data does the business need to make decisions, ie what KPIs do they want to monitor via the data warehouse?  The answer to this question defines the datasets that need to be in the warehouse (assets). It is important not to forget that a data warehouse serves a <em>purpose</em> : decision support.</p>
+  </li>
+  <li>
+    <p>does the necessary data for the above KPIs actually exist within the business? If not, then setting up a data warehouse will not meet the needs of the business. ie is a data warehouse actually needed/useful?</p>
+  </li>
+  <li>
+    <p>is there sufficient senior support to get data to an appropriate quality for computing KPIs? This may require improvements in data gathering throughout the business, which can only be successful with sufficient support.</p>
+  </li>
+  <li>
+    <p>is the requirement for latency of data in the data warehouse clear (ie how stale may data be while still being useful for decision support purposes)? Are existing data providers capable of delivering data within the required latency, and if not, is there sufficient management support to make changes to those upstream systems?</p>
+  </li>
+  <li>
+    <p>what legal compliance constraints exist on the data to be imported?</p>
+  </li>
+  <li>
+    <p>what tools are end users going to be applying to the content of the data warehouse?</p>
+  </li>
+  <li>
+    <p>what backup and disaster-recovery processes are needed?</p>
+  </li>
+  <li>
+    <p>what constraints exist on data warehouse tools? Is reuse of existing technologies required?</p>
+  </li>
+  <li>
+    <p>what staff already exist, and what skills do they have?</p>
+  </li>
+</ul>
+
+<h2 id="managing-expectations">Managing Expectations</h2>
+
+<p>When a data warehouse project starts, various parties not directly involved in its implementation will nevertheless have expectations about what it will deliver and when. Among the issues that the data-warehouse implementation team need to be careful of are:</p>
+
+<ul>
+  <li>the data warehouse team probably does not have a lot of political leverage; be careful of promising to deliver data when you have no way of pressuring the upstream owners of that data to deliver it.</li>
+  <li>the data warehouse team does not have expertise in many business areas; delivering specific functions requires cooperation with departments and cannot be delivered by the DWH alone. Offer to support external integration projects rather than lead them.</li>
+  <li>be wary of producing business requirements; the DWH should <em>implement</em> requirements rather than being responsible for gathering them. In particular, choosing what reports to produce and what upstream systems to import from needs to be driven by the report consumers, not the DWH team. See lack of political leverage, and skill limits.</li>
+  <li>be wary of integrating with the “company general ledger” (accounting). The data structures used for dimensional modelling fit poorly with accounting structures. The DWH team also probably lacks the necessary accounting skills.</li>
+  <li>be wary of “allocating costs” to departments on the basis of data in the DWH. This is a political hot potato; the allocation rules should definitely be owned by someone else.</li>
+  <li>do not make any legally-sensitive decisions yourself; get input/approval from legal department.</li>
+  <li>ensure general IT does their part to support the DWH project - ie don’t get too involved in low-level machine details, storage systems, and authentication systems.</li>
+  <li>be wary of being the first team to try a new technology - you are then taking on two complex tasks at the same time: building the DWH and evaluating the new tech.</li>
+</ul>
+
+<p>In short: don’t promise anything that you don’t have the ability to deliver, either due to technical or political limitations.</p>
+
+<h2 id="gdpr">GDPR</h2>
+
+<p>One of the things that is not addressed in the standard data warehousing texts is the new emphasis on data privacy, particularly in the EU.</p>
+
+<p>A large data warehouse containing data from multiple upstream systems, and where many users can design their own queries across all data, is a very tricky thing to handle from a privacy aspect. In a dimensional model, both dimension and fact tables can have security issues.</p>
+
+<p>One possibility is to have a large central warehouse on which reports can NOT be executed; instead the central warehouse feeds “data marts” - smaller databases with subsets of the data intended for specific use-cases. Only data legally permitted for that specific use-case is exported to that data-mart, reducing data privacy issues. The central warehouse is of course a concern, but given the relative inaccessibility of the data (only operation allowed is export-to-data-mart) it may be more legally defendable.</p>
+
+<h1 id="general-notes">General Notes</h1>
+
+<p>Data warehouses can contain “ledger” and other financial data. A DWH should not be used as an “operational” financial reporting system - there are specialised systems for that. However a DWH can be used to provide more analytic and long-term-trend data.</p>
+
+<p>Some database vendors (eg BigQuery, Hive) use the term OLAP when discussing their analytics features. This is somewhat confusing, as they do not store data in “multidimensional” format but instead in traditional tabular form. They also do not support the OLAP-specific query languages (which are not SQL-like). However the scalability of these products does mean that some use-cases that previously required storing data in multidimensional format and using OLAP-specific query languages can be solved using tabular storage and SQL just by throwing more CPUs at the problem. In the end, if the user gets their data in the same amount of time, they are happy. OLAP tools may be less CPU-intensive (once the pre-computation has been done) but the software itself is not cheap - paying for extra CPU on a less efficient solution may be worth it. OLAP systems do, however, have some features that relational systems just cannot provide (including interesting security models constraining access to data).</p>
+
+<p>Commercial vendors of ERP, Financial, and HR software often provide a suitable data model for analytics, and sometimes an integrated OLAP system. If you are developing a DWH from scratch, you need to invent appropriate structures. However purchased ERP, Financial and HR packages are likely to use <em>different</em> models - and ones not customised for your business. Sometimes a dedicated DWH created specifically for a business is really needed, even if commercial packages are available or in use.</p>
+
+<p>Time series data is sometimes stored in databases optimised for it.</p>
+
+<p>Data in a DWH is organised by subject area, not by application/tool. All customer data is a single subject, even when different applications manage different subsets of customer data.</p>
+
+<h1 id="various-warehouse-related-projects">Various Warehouse-related Projects</h1>
+
+<p>Apache Kylin accelerates analytics queries against Hive data via OLAP. Hive holds the original data, either in star (dimensional) or snowflake (3rd normal) form. Kylin transforms this data into a MOLAP representation and stores it in a key/value database - HBase. SQL queries against Kylin are then satisfied from the MOLAP representation. As long as the SQL where-constraints and group-by constraints match the dimensions with which the cube has been built, responses are very fast. Among various use-cases, Kylin can be used to provide interactive data exploration, and to provide customer-specific statistics.</p>
+
+<h1 id="resources-and-further-reading">Resources and Further Reading</h1>
+
+<p>Overviews:</p>
+
+<ul>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Data_warehouse">Wikipedia: Data Warehouse</a> - a good overview of the topic</li>
+  <li>
+<a href="https://www.jamesserra.com/archive/2012/03/data-warehouse-architecture-kimball-and-inmon-methodologies">James Serra: Data Warehouse Architecture - Kimball and Inmon</a>  - a short but good starting point, with lots of references to further sources</li>
+  <li>
+<a href="https://intellipaat.com/tutorial/tutorial-data-warehouse-tutorial/data-warehouse-architecture/">Intellipaat: Data Warehouse Tutorial</a> - ok-ish overview of the basic concepts</li>
+  <li>
+<a href="https://www.ripublication.com/gjbmit/gjbmitv1n2_04.pdf">Research India: A Critical Review of Data Warehouse</a> - quick overview, moderate quality (PDF)</li>
+</ul>
+
+<p>Dimensional Modelling:</p>
+
+<ul>
+  <li>
+<a href="http://www.kimballgroup.com/wp-content/uploads/2013/08/2013.09-Kimball-Dimensional-Modeling-Techniques11.pdf">Kimball Group: Dimensional Modeling Techniques</a> - extract from the Kimball “Data Warehouse Toolkit” book related to modelling (PDF)</li>
+  <li><a href="https://docs.oracle.com/cd/B13789_01/olap.101/b10333/multimodel.htm">Oracle: Multidimensional Data Models</a></li>
+</ul>
+
+<p>Data Vault:</p>
+
+<ul>
+  <li>
+<a href="https://www.youtube.com/watch?v=QbBmYMaQFec">Renz/Weed: Data Vault Data Warehousing Architecture</a> - Video presentation</li>
+  <li><a href="https://www.healthcatalyst.com/database-vs-data-warehouse-a-comparative-review">Database vs Data Warehouse</a></li>
+  <li><a href="https://www.talend.com/blog/2015/03/27/what-is-the-data-vault-and-why-do-we-need-it">Talend: What is the Data Vault</a></li>
+</ul>
+
+<p>Other:</p>
+
+<ul>
+  <li>
+<a href="https://datamodelingzone.com">Data Modeling Zone</a> -  Annual conference for data warehouse professionals.</li>
+  <li>
+<a href="https://www.dwbi.org/">DWBI</a> - Certification program for business intelligence professionals</li>
+</ul>
+
+<p>Presentations:</p>
+
+<ul>
+  <li>
+<a href="/downloads/datawarehouse.odp">Intro to DWH</a> - a slide presentation (LibreOffice Impress) I created with similar (but abbreviated) content to this article</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/dwh-intro/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,244 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Java 9's Jigsaw Module Framework (JPMS)</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='post'>
+    <h1>Java 9's Jigsaw Module Framework (JPMS)</h1>
+    <aside>Posted on: July 1, 2017</aside>
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      
+<p>One of the big features for the upcoming Java version 9 is supposed to be the Jigsaw (aka Java Platform Modular System or JPMS) module framework. However it has been controversial over its whole development cycle - and now that the release is coming up, some non-Oracle groups on the advisory board are intending <a href="https://www.infoq.com/news/2017/05/no-jigsaw">to vote against</a> the release of Java 9 due to flaws in Jigsaw.</p>
+
+<!-- more -->
+
+<p>From the available info, it appears that Jigsaw has two different aims:</p>
+
+<ul>
+  <li>
+    <p>To allow Oracle to easily release subsets of the Java standard libraries for various purposes (a full JRE for desktops, a “headless” one for servers, a “minimal” one for phones and embedded purposes, etc).</p>
+  </li>
+  <li>
+    <p>To allow third-party library developers to use the same features to minimise conflicts between their code and other libraries in the classpath.</p>
+  </li>
+</ul>
+
+<p>As I understand it, the criticism is primarily that Oracle have succeeded on the first goal, but badly failed to handle the second. It appears that Jigsaw introduces a number of changes that potentially break existing software; a runtime param has been included so a JVM can be run with Jigsaw disabled so that existing code can be used but library authors are expected to release new jigsaw-compatible versions of absolutely everything so that eventually at some future time applications can be run with Jigsaw enabled. This rather reminds me of the Python2-to-Python3 migration - which just about everyone now agrees was a bad idea.</p>
+
+<p>In addition, there are serious questions about whether Jigsaw will actually work in the real world, even if every library author buys in to the new concept. After all, there is no <em>production experience</em> with Jigsaw - it is purely an invented-by-committee framework.</p>
+
+<p>In particular, the authors of frameworks such as JEE and OSGi are rather unhappy. The concerns of a combined group of experts are <a href="https://developer.jboss.org/blogs/scott.stark/2017/04/14/critical-deficiencies-in-jigsawjsr-376-java-platform-module-system-ec-member-concerns?_sscc=t">presented here</a> (as seen on slashdot).</p>
+
+<p>The <a href="http://mail.openjdk.java.net/pipermail/jpms-spec-experts/2017-May/000695.html">view of the Jigsaw team</a> appears to be that as a new module system is being introduced, it is a good chance to deliberately not support “poor design practices”; users of Jigsaw must follow proper design principles as they are seen by the Jigsaw team. That view <a href="https://www.theregister.co.uk/2017/05/12/oracle_loses_jpms_vote/">didn’t convince</a>.</p>
+
+<p>It will be interesting to see how this argument turns out…</p>
+
+<p>UPDATE: After some compromises, the <a href="http://www.infoworld.com/article/3203931/java/the-road-to-java-9-modular-java-finally-gets-okd.html">vote has passed</a>. Java9 will be coming, and will have JPMS (Jigsaw) in almost its original form - but the “backwards compatibility” mode will be enabled by default, so existing apps doing reflection won’t fail. The lead architect for the JPMS component is still convinced his “break the world” approach is right, and wants the flag to be turned on in Java 10. I wonder if he actually develops software in the real world…</p>
+
+<p>To summarize the linked articles (hopefully correctly): when JPMS (Java Platform Modular System) is enabled, the standard reflection APIs work differently than in previous releases. In particular, there are many operations that work with JPMS disabled, but return different results or simply throw an exception with JPMS enabled.</p>
+
+<p>This change means that a java application which has been working for years may successfully start on a JPMS-enabled JVM but then throw an exception at some later time when performing an operation which used to work. The “later time” might occur only in specific and potentially rare conditions. Particularly problematic code for JPMS are things like serialization/deserialization, object-relational mapping frameworks, proxying frameworks, dependency-injection, instantiation-via-reflection, supporting pluggable extensions, custom classloaders, use of the thread-context-classloader, the ServiceLoader feature, and anything else which relies heavily on reflection. That shows why the JEE teams in particular have concerns with JPMS - JEE does a lot of that sort of stuff.</p>
+
+<p>In my opinion, this change to runtime behaviour is just plain nasty. It’s not a guaranteed-failure-on-startup, where the user will immediately notice the problem and can restart the app with JPMS disabled, but instead a “maybe crash later” problem which may not be easily traceable back to having JPMS enabled.</p>
+
+<p>Given this, the original plan to have JPMS behaviour enabled by default in Java9 is IMO just unreasonable.</p>
+
+<p>The compromise made by the Oracle Java team to get the Java9 vote approved was primarily to make the new JPMS behaviour default to off, ie for “backwards compatibility mode” to be enabled by default. That at least allows the arguments over JPMS to continue in the background while we get access to some of the other Java9 features without breaking existing code. Thanks to RedHat, IBM and others who fought for this.</p>
+
+<p>The lead for the JPMS project is still clearly keen on his “break the world” approach and has stated he expects/wants JPMS behaviour to be enabled-by-default in the next Java release.  At least defaulting it to off for Java9 gives everyone  a year or so to actually get some experience with JPMS (via enabling it in <em>testing</em> environments) before the next version of Java comes out. Given that this is effectively a design-by-committee feature that has never been used in the real world (compared for example to migrating existing functionality from an external library into Java core), some real-world feedback seems like a really good idea.</p>
+
+<p>I’m still personally not convinced that the world will bother testing/updating every existing Java library to be JPMS-compatible, ie in 10 years time there will still be IMO many critical libs which are not useable under JPMS.  And as JPMS is a whole-jvm feature rather than a per-lib feature, ie no app can be used with JPMS enabled unless every lib that it uses is JPMS-compatible, that means that JPMS modular behaviour will not be usable in the real world for a <em>very very</em> long time, if ever.</p>
+
+<p>Note that Java’s SDK classes are now JPMS-compatible, ie all the standard tests for the Java SDK pass when JPMS is turned on. That allows the Java release team to be sure that there are no unexpected/hidden dependencies between different subsets of the SDK, and thus allows them to safely create SDK releases which are subsets of the full SDK without worrying about anything going boom at runtime. Whether JPMS is actually turned on at runtime or not is a different issue.</p>
+
+<p>I suspect history is repeating itself here. When the Java team decided to build a standard logging framework for the SDK, there were already existing successful libraries eg log4j and slf4j. However rather than just integrate proven code into the SDK, they invented their own solution - which is flawed and 10 years later is still not widely used.  For modularity, there is a proven solution with OSGi which I personally find very elegant. However again the Java maintainers are inventing their own solution. I expect the outcome will be the same again.</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="http://tutorials.jenkov.com/java/modules.html">Jenkov: Java Modules</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/posts/2017-07-01-java-jigsaw/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

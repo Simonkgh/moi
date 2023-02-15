@@ -1,0 +1,1057 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Threat Modelling with STRIDE</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Threat Modelling with STRIDE</h1>
+    <aside>First published on: July 18, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Security/'>Security</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>This article presents <em>my personal approach</em> to <em>threat modelling for software architects</em>. Threat modelling is also known as <em>software security assessment</em> and is related to <em>vulnerability assessment</em>. The following content describes a general process for finding and minimising security problems for software at both the architecture and implementation level, whether it is being developed (new), being modified (existing) or simply being audited (finally, on the principle of <em>better late than never</em>).</p>
+
+<p>The content here is not operating-system-specific, programming-language-specific or software-framework-specific. However the people who actually apply the suggested process will need to have deep technical knowledge.</p>
+
+<p>The topic of IT security is of course a huge one; many books have been written on various sub-topics. This article cannot go into depth in just a few pages - it is only a starting point (my starting point when discussing such issues with customers).</p>
+
+<p>It isn’t necessary to be an expert to develop a threat model, and it isn’t rocket science. Experience will help but common sense goes a long way and any model is better than none.</p>
+
+<h1 id="sources-and-motivations">Sources and Motivations</h1>
+
+<p>I’ve been a developer, team lead, and software architect for a long time now, and worked on many projects. Ensuring the resulting system is reasonably secure has been a part of many of these projects (though none of the projects involved critical, life-endangering features). I have therefore effectively been doing ad-hoc <em>threat modelling</em> for a long time - identifying security weaknesses in a design or implementation, and assessing the options to deal with each weakness.</p>
+
+<p>Recently I had motivation and time to research the current state of <em>threat modelling</em> and formalise my ideas into a basic process that I can apply to projects and recommend to customers. Interestingly, although there are many conferences on computer security there does not appear to be any standard approach. I did find two quite different books on the topic:</p>
+
+<ul>
+  <li>
+<a href="https://www.wiley.com/en-us/Threat+Modeling%3A+Designing+for+Security-p-9781118810057">Threat Modeling: Designing for Security</a>; Shostock 2014  (STRIDE methodology) – referred to later as “the STRIDE book”</li>
+  <li>
+<a href="https://www.wiley.com/en-us/Risk+Centric+Threat+Modeling%3A+Process+for+Attack+Simulation+and+Threat+Analysis-p-9781118988350">Risk Centric Threat Modeling: Process for Attack Simulation and Threat Analysis</a>; UcedaVelez and Morana (PASTA methodology) – referred to later as “the PASTA book”</li>
+</ul>
+
+<p>The first was very helpful, and the remainder of this article is a combination of the recommendations from that book and my personal experiences. It focuses on improving the software design and implementation without excessive time-wasting. I recommend reading the STRIDE book and drawing your own conclusions.</p>
+
+<p>The second was, in my opinion, a fine example of all that is wrong with the computer security industry - a bureaucratic approach that is likely to generate huge fees for consultants, consume vast amount of time in workshops, and generate large volumes of management reports - while almost ignoring the step of actually fixing problems.</p>
+
+<p>There are more detailed reviews of these two books towards the end of this article.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Computer_security">Wikipedia article on Computer Security</a> is quite a good overview of the field in general. SAFECode has <a href="https://safecode.org/wp-content/uploads/2017/05/SAFECode_TM_Whitepaper.pdf">a great introduction to threat-modelling</a> which recommends an approach similar to the one presented here.</p>
+
+<p>Note that my primary interests are back-end data processing systems. Sometimes client/server interactions. Not my focus: designing authentication systems (I delegate to existing systems), user interfaces, or deciding what data to gather (requirements). The discussion of threat-modelling below may be influenced somewhat by these interests.</p>
+
+<h1 id="exclusions">Exclusions</h1>
+
+<p>This article does not address <em>incident response</em>, ie the business planning needed to ensure that chaos does not break out <em>if</em> (when?) a security breach occurs.</p>
+
+<p>It does not address specific protections such as <em>intrusion detection tools</em> or similar; the point of threat modelling is to find the <em>weaknesses</em>; this already requires significant technical knowledge. Mitigations for these weaknesses can then be addressed at the appropriate level of detail.</p>
+
+<p>It does not discuss specific tools for probing systems (eg metasploit, nmap) or specific tools for protecting systems. When actually doing the <em>threat modelling</em>, having someone with knowledge of such tools is helpful (even knowledge that such tools exist will help).</p>
+
+<p>It also does not (directly) address:</p>
+
+<ul>
+  <li>“Social engineering” problems.</li>
+  <li>Protection of physical assets, except where relevant to an IT system</li>
+  <li>Specific techniques for dealing with specific problems (eg how to prevent buffer-overflow in C)</li>
+</ul>
+
+<p>All of the above are important, just not in scope.</p>
+
+<p>In short, this article looks at “system-wide” problems, and at how systematic issues can be found and recorded for fixes to be applied.</p>
+
+<p>I hope to write a separate article on the subject of IT security at the management level (ie how architects, developers, testers and operators can communicate security concerns to managers, and how managers can inform themselves about dealing with security issues).</p>
+
+<h1 id="what-is-threat-modelling-and-why-do-i-spell-it-with-two-ls">What is Threat Modelling (and why do I spell it with two “l”s?)</h1>
+
+<p>First: “modeling” is American english; “modelling” is British english. Both are correct. Celebrate diversity!</p>
+
+<p>The term <em>threat modelling</em> probably comes from the military: the concept of figuring out what an enemy might do to you, how much damage that might cause, and what precautions can be taken ahead of time. Obviously the same principle can be useful in software. However in my opinion the analogy between military defense and software security can be overextended - the problems are only superficially similar. A software system is stationary, only slowly changing, and properly-implemented defences are truly bullet-proof. The problem is that a software system can easily have thousands of different parts, and is only as strong as its weakest link. In addition, mounting an attack on a software system is cheap - in most cases, a single competent person and a one-thousand-dollar laptop is all that is needed. Military goals and attackers have quite different properties.</p>
+
+<p>The concept of applying <em>threat modelling</em> to software appears to have been first published in <em>Writing Secure Code, 2nd Edition (Microsoft Press, 2002) by Michael Howard and David Le Blanc.</em> It was later expanded and refined in <em>Threat Modeling (Microsoft Press, 2004) by Frank Swiderski and Window Snyder</em>. The STRIDE book is heavily influenced by Swiderski + Snyders work.</p>
+
+<p>Very briefly, the process proposed in this article is to use an architectural <em>data flow diagram</em> (DFD) of a system to study all the different components of a software system and their interactions, and create a <em>risk register</em> of plausible points at which unpleasant things might happen. Each risk can then be categorised as:</p>
+
+<ul>
+  <li>Adequately protected (with suitable documentation, and ideally unit or system tests to verify this and detect regressions)</li>
+  <li>To be mitigated (with issue in issue-tracker to be sure it is done)</li>
+  <li>To be documented and accepted as not significant enough</li>
+</ul>
+
+<p>For some risks, it might be necessary to <em>evaluate the risk</em> in order to decide between the last two options. This evaluation estimates the likelihood that someone can really use this theoretical vulnerability to misuse the system, and estimates the cost of damages if that does occur. Accepting a risk is perfectly acceptable - sometimes the cost of avoiding something is higher than dealing with the consequences, particularly if the likelihood is low. However such decisions should be made deliberately and clearly rather than ad-hoc.</p>
+
+<p>The word “mitigation” here means doing something to block a potential vulnerability, or at least to make it much harder to exploit. Incomplete mitigations should be further analysed and either documented as accepted, or further mitigations should be added (defense in depth) until the remaining risk can be accepted.</p>
+
+<p>Proposed mitigations can be labelled in the risk register entries as:</p>
+
+<ul>
+  <li>A = architectural mitigation</li>
+  <li>I = implementation mitigation (ie “feature” does not appear in an arch diagram or document)</li>
+  <li>O = operations mitigation (applied by sysadmins, eg firewall)</li>
+  <li>B = business-process mitigation (eg “background checks reqd for sysadmins”, “backups to be stored offline in locked room”)</li>
+</ul>
+
+<p>Note that a threat/risk does not necessarily mean a person with bad intent - natural catastrophes are also threats/risks.</p>
+
+<p>One additional output of threat modelling that is not quite captured in this summary is:</p>
+
+<ul>
+  <li>Ensure that the system has proper auditing and logging to detect cases where architectural or implementation protections have <em>not</em> been sufficient.</li>
+</ul>
+
+<p>I use <em>threat modelling</em> as a synonym for <em>security review</em> - though “modelling” is ideally done <em>by the development team</em> while the word “review” can potentially imply “external check” (which is far less effective).</p>
+
+<p>In general the proposed flow is to detect risks first, then decide how to deal with them. Sometimes an architect will throw a bunch of mitigations into their design “on a hunch”, eg encrypt this and hash that, add a firewall rule there. Often such hunches are correct but in my opinion it is still worth trying to think of a list of circumstances that mitigation actually protects against - features are never free, and it is good practice to ensure there really is a feasible threat. The identified risk can go into the risk register, and the proposed feature into the mitigations - this time with formal justification.</p>
+
+<p>There are also “mitigations” which are simply required by law or company rules, regardless of whether an actual risk can be identified. This is called <em>compliance</em> and is discussed later.</p>
+
+<p>As an architect and developer, I prefer code over reports, and coding over sitting in meetings. However doing a good job of finding security holes is really a job for a team - having different skillsets is important, as is knowledge of every component and every third-party framework. And teamwork does require some kind of organised process. My proposed process here is as light-weight as possible, I think.</p>
+
+<p>And just to be clear: most of the credit for the ideas here belongs to <a href="https://www.wiley.com/en-us/Threat+Modeling%3A+Designing+for+Security-p-9781118810057">Adam Shostock, his book, and those who inspired the ideas in it</a>. I can recommend it (particularly the first few chapters).</p>
+
+<p>The results of a security review will never be perfect - you can never know when it is <em>complete</em>. However <a href="https://en.wikipedia.org/wiki/Perfect_is_the_enemy_of_good">perfect is the enemy of good</a>; most security failures that land in the news are due to gross negligence rather than truly cunning attackers (though the CEOs of such companies always claim the opposite). Doing a reasonable job of threat modelling is better than not doing it at all. And is IMO also better than throwing a bunch of “standard mitigations” into a system without knowing exactly what scenarios they protect against. As a final thought: if things do go bad in production, having a nice risk register document to show a good effort was made could be very helpful; it makes it more plausible to claim the security problem occurred “because they were experts” rather than “because we were incompetent”.</p>
+
+<h1 id="when-can-threat-modelling-be-applied">When can Threat Modelling be Applied?</h1>
+
+<p>Threat modelling can be applied to a software architecture before it is built, to components as they are being built or modified, or to a system after it has been built. All are useful, though some are more useful than others:</p>
+
+<ul>
+  <li>Analysing early (ie checking the software design) is definitely the most cost-effective if possible. It does require a reasonably complete design - see comments on waterfall vs agile later.</li>
+  <li>Analysing component-by-component during build is possible, though care needs to be taken not to forget the “big picture”; security problems often occur <em>between</em> components</li>
+  <li>Analysing after build but before “going live” is better than nothing. Unfortunately, fixing problems can be difficult at this point. QA staff (testers) can be a very helpful part of threat modelling - but getting them involved earlier is even better.</li>
+  <li>Analysing after “going live” is probably still better than waiting for some external party (whether Journalist, “white hat” or “black hat”) to find problems.</li>
+</ul>
+
+<p>Any time the system is updated, a quick check should be made: has something been changed that might be security-relevant? if not, no need to set off alarms and organise meetings - I recommend basic common sense be used to limit the paperwork and meetings. But when the modifications look tricky, a short session focusing on just the changes may be needed - with a look at the existing risk register to see what is applicable.</p>
+
+<p>In any system which has been in development for a long time, a final review before “go live” would be advisable. In particular, it is important to ensure that all system components are represented on the Data Flow Diagrams used as input for threat modelling - ie that no components have been forgotten about during analysis.</p>
+
+<h1 id="who-should-threat-modelling-be-applied-by">Who should Threat Modelling be Applied by?</h1>
+
+<p>The analysis should be done by those who know the system best - the architects, developers, and testers. Operations staff can also be useful, particularly when looking at interactions with things like authentication servers, networks, firewalls, and fileservers. Having people with security experience is ideal - but everyone in the above roles should have knowledge of the common vulnerabilities - or will learn from their peers in the workshop.</p>
+
+<p>The “leader” of the threat modelling process should be someone with significant experience as a software developer and software architect. They (or at least some members of the team) should have good knowledge of programming, operating systems, networks/firewalls, network protocols, databases, hashing, encryption (symmetric and key-based), digital signatures, authentication protocols, and similar topics.</p>
+
+<h1 id="how-should-threat-modelling-be-applied">How should Threat Modelling be Applied?</h1>
+
+<p>I recommend running a sequence of short workshops (a few hours max, for concentration reasons), until the system has been completely covered. Regular short workshops are also often easier for people to fit around their schedules. As an extra bonus, questions raised during a workshop can be researched by one or more team members in preparation for the next session.</p>
+
+<p>As risks are identified, the cost of various mitigations needs to be compared to the probability and cost of a security leak. Some decisions will be easy, and can be made at the same time the risk is identified (keep it simple). In other cases, whether to mitigate or document-and-accept is something that may require involvement from business-level staff.</p>
+
+<p>The general process involves simple “brainstorming” - open discussions between the assembled team about where problems can occur. Using a DFD and stride-per-element (see later) adds some guided structure so the brainstorming sessions do not get too off-track, and so that good coverage of the overall system is achieved. A whiteboard is usually the most useful technical support device.</p>
+
+<h1 id="getting-management-support">Getting Management Support</h1>
+
+<p>Ideally, application security should be taken seriously in all projects, be properly funded, and be performed in a properly planned way to ensure good coverage of the whole applications. Sadly, that is seldom the case.</p>
+
+<p>One of the (few) positive points from <a href="https://www.wiley.com/en-us/Risk+Centric+Threat+Modeling%3A+Process+for+Attack+Simulation+and+Threat+Analysis-p-9781118988350">the PASTA book</a> is the emphasis on involving senior management, ensuring they feel part of the process, and giving them at least some information in a form they can understand. That is not one of my strong points, and this article proposes as outputs from the threat modelling process only:</p>
+
+<ul>
+  <li>A risk register (a spreadsheet of some sort)</li>
+  <li>Issues in an issue tracker, indicating things to fix or enhance</li>
+</ul>
+
+<p>Suggestions on how to make results more visible to management are welcome..</p>
+
+<h1 id="risk-evaluation">Risk Evaluation</h1>
+
+<p>When a plausible risk (potential vulnerability) has been identified, it needs to be evaluated:</p>
+
+<ul>
+  <li>What is the probability of attack?
+    <ul>
+      <li>Ease of attack (skills required)</li>
+      <li>Cost of attack (time)</li>
+      <li>Cost of attack (dollars)</li>
+      <li>Chance of getting caught</li>
+    </ul>
+  </li>
+  <li>What is the value of success to attacker?</li>
+</ul>
+
+<p>Action then needs to be taken:</p>
+
+<ul>
+  <li>Verify auditing (if it happens, is it logged?)</li>
+  <li>Decide how to resolve
+    <ul>
+      <li>Rearchitect</li>
+      <li>Mitigate (fix at implementation, operational, or business-process level)</li>
+      <li>Delegate (make someone else responsible!)</li>
+      <li>Document and accept (particularly as “too unlikely”)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Be pragmatic: if the resolution for a risk is obvious, don’t waste time doing a detailed risk evaluation. As example, if the risk can be removed via encryption, and it is obvious that this is the right solution, determining the cost of attack can be skipped.</p>
+
+<p>Don’t be drawn into too much detail; some threats are simply “out of scope”, eg the risk of attackers manipulating CPU designs can be ignored for most projects, as can attackers with sufficient resources to brute-force modern encryption.</p>
+
+<p>For each required fix, file an implementation issue in the usual issue tracker.  New issues in the issue-tracker (and changes in the design) are the real “deliverables” of a threat modelling workshop - ie the things that actually make the delivered system better.  All other documents (in particular, the risk-register) are just byproducts - useful for internal purposes, but not actual deliverables.</p>
+
+<p>For mitigations (fixes), don’t forget “secondary threats” - bypasses to the mitigation.</p>
+
+<p>And don’t ignore risks as “not possible” because there is one line of defense that prevents access. A good system provides “defense in depth” so that if the unexpected happens and one of the mitigations fails, additional protections exist - and ideally auditing reveals the failure in the first-line defense so it can be repaired. Even more ideal is when the audit information is automatically scanned to detect unexpected patterns (intrusion detection).</p>
+
+<h1 id="mitigations">Mitigations</h1>
+
+<p>Security holes can be opened by very small technical errors, even a single wrong character in a single line of code, or a typo in a firewall rule can sometimes cause a security hole, but:</p>
+
+<ul>
+  <li>Well-designed “defense in depth” ensures that failures in a single component expose only limited access
+    <ul>
+      <li>Apply principle of least privilege</li>
+      <li>Divide system into semi-isolated functional groups, eg with DMZ network configurations</li>
+    </ul>
+  </li>
+  <li>Proper “validation checks” can detect misconfiguration</li>
+  <li>Properly chosen libraries and appropriate languages can reduce the number of such flaws</li>
+  <li>Properly chosen development processes (eg code-review, testing) can reduce the number of such flaws that get into production</li>
+  <li>Well-defined test cases can detect problems (including regressions)</li>
+  <li>Properly designed auditing and logging allow the <em>exploitation</em> of a flaw to be detected
+    <ul>
+      <li>Rapid fix of the problem</li>
+      <li>Minimisation of damage</li>
+      <li>Redress through courts</li>
+      <li>Deterrence through likelihood of detection</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Threat modelling can help the architects and implementers of a system to put the above protections in place:</p>
+
+<ul>
+  <li>Find possible weaknesses</li>
+  <li>Assess the max amount of effort that is worth applying to make the weakpoint more robust (cost/benefit)</li>
+  <li>Design mitigations for those weaknesses (or at least register a task to design a suitable mitigation).</li>
+  <li>Repeat until no potential vulnerabilities are worth fixing</li>
+  <li>Document discovered weaknesses, cost/benefit assessments and mitigations‚</li>
+  <li>Regularly review software to see if new vulnerabilities are present, or the cost/benefit ratio of a known risk has changed</li>
+</ul>
+
+<p>A threat is something somebody might try. A vulnerability is a point where the threat might possibly be successful. It isn’t necessary for someone to actually prove a vulnerable point is exploitable (ie a “proof-of-concept for the vulnerability is not needed) in order to add an item to the risk register; if the team thinks “yeah, somebody clever might be able to do something nasty there” then that should be sufficient.</p>
+
+<p>Threat modelling is not intended to produce output like “line 35 of file Foo.java fails to check that the caller is authorized”, but rather things like “if a programmer forgets to check authorization in a request-handler, that might get into production without being detected”. The mitigation might be something like:</p>
+
+<ul>
+  <li>A report-generator which runs nightly and produces a list of all request-handlers which do not have an “authorization annotation”, or</li>
+  <li>Automated integration tests which call all request-handlers without authentication credentials, and fail if an “auth required” error is not returned, or</li>
+  <li>Authorization framework alterations so that all requests are rejected unless code/annotations explicitly <em>enable</em> access for some role, or</li>
+  <li>An item on the code-review checklist to ensure auth-checks are appropriate, or</li>
+  <li>Ensuring that systems invoked from the request-handler also check credentials (thus providing “defense in depth” against this particular issue), or</li>
+  <li>Register a task to schedule “security training” on the issue for all developers, or</li>
+  <li>Registering a task for the team to review all existing code for missing authorization checks, or</li>
+  <li>Externalize checks in a proxy-server driven by configuration, or</li>
+  <li>Multiple items from above</li>
+</ul>
+
+<p>These mitigations are “generic”, but not abstract. They address “classes of vulnerabilities”. Some of the above mitigations are architectural, some are implementation-level, some are business-process-based. Some fall between categories, but that doesn’t matter; labelling them is not as important as getting them fixed.</p>
+
+<h1 id="waterfall-vs-agile">Waterfall vs Agile</h1>
+
+<p>As noted in “when to apply threat modelling” above, the most cost-efficient time to do the first pass is when the architecture is complete but implementation has not yet begun. This sounds a lot like waterfall, and indeed it would fit well in a waterfall model.</p>
+
+<p>Threat modelling fits naturally into waterfall-like designs; once the system has been designed it gets security-reviewed. However it is also possible to perform threat-modelling in an agile project. In some ways, threat discovery can be applied like test-driven-development - you think about what tests the feature-to-be-built needs to pass before building it. Similarly, you can think about the threats the feature may be exposed to, and the necessary mitigations, before building it. There will need to be some “overall system view” at some time, but that is also useful for the overall architecture even in an agile project.</p>
+
+<p>One of the things I argue about often when discussing “agile” is the common opinion that in an “agile project” coding can start as soon as funding is available. I won’t get into details of my opinions here, but recommend that basic requirements-analysis and architectural design be done on <em>any</em> project. For an agile project these documents don’t need to be as formal, don’t need “signoff” from various heads-of-department, and will change as the project progresses. And not every part in the design has to be built - that is still decided at the sprint level. However every team needs a general idea of where they are going, why, and some shared opinion about how. This initial architectural doc can still form a basis for <em>threat modelling</em>. As features are planned for development, it would seem a good idea to do “mini modelling” around that specific feature, and occasionally a “wider pass” to ensure no problems have been created due to interactions between features.</p>
+
+<h1 id="the-stride-methodology">The STRIDE Methodology</h1>
+
+<p>Shostock’s book presents the STRIDE methodology which was primarily developed within Microsoft for improving the security of their own software products. Various forums and blogs related to the STRIDE methodology developed useful content over time, and Shostock was an active participant/leader in this area. As far as I am aware, the book is strongly influenced by the practical experience and feedback from applying this approach to multiple projects and the related forum discussions.</p>
+
+<p>To (rather brutally) summarize a book in a few lines: Shostock recommends starting with a “data flow diagram” (DFD) of the system being analysed, and a set of high-level threats (vulnerability types). Then either:</p>
+
+<ul>
+  <li>For each threat, look for all matching weaknesses within the system, or</li>
+  <li>For each component and dataflow (connection) in the system, look for matching weaknesses (“stride per element”)</li>
+</ul>
+
+<p>In a large project, DFDs for parts of the application appear as a single block on high-level diagrams.</p>
+
+<p>The second approach appeals to me more. Stride-per-element seems easier to apply than per-threat due to the ability to draw just the relevant people into a meeting looking at specific components. The “find vulnerability X in the whole system” requires experts on the whole system to be available. The “whole system” approach can be handled by having “nested components” - ie a DFD whose blocks are expanded in separate DFDs. The “whole system” analysis is then done at the top-level and each nested level - but at the cost of some duplicated work. With per-element, the only synchronization needed between different workshops is to ensure they don’t file identical risks multiple times.</p>
+
+<p>Importantly, the “set of high level vulnerability types” is not a huge catalog of all software bugs known to humankind. Instead, STRIDE includes only about 60 general-purpose vulnerability types, as triggers/hints for the team doing the threat modelling. This does require more knowledge, creativity and improvisation from the team doing the analysis, but in my opinion is far more productive than dryly and boringly going through lists of things which mostly do not apply.</p>
+
+<p>The vulnerability “hints” are divided into 6 categories:</p>
+
+<ul>
+  <li>S: Spoofing    (pretenting to be something without valid credentials, eg faking servers, services, or users)</li>
+  <li>T: Tampering   (modifying data at-rest or in-transit without permission)</li>
+  <li>R: Repudiation (performing operations while hiding identity)</li>
+  <li>I: Information Disclosure (copying data without permission)</li>
+  <li>D: Denial of Service (making services unavailable to real users)</li>
+  <li>E: Escalation of Privilege (executing commands as another user)</li>
+</ul>
+
+<p>The STRIDE book then gives about 10 examples of each category; some more detail is present later in the article.</p>
+
+<p>What I like most about this approach is the creativity it stimulates in the team, debating and brainstorming what kind of links there might be between the hints and the actual system being analysed. Also nice is the low amount of paperwork needed - no reference books or tables, just a whiteboard and concentrated thinking about the problem. And importantly, applying STRIDE against a diagram of the system means any identified problems can be linked reasonably directly to possible solutions.</p>
+
+<p>Possibly the most important part of STRIDE is the R. Repudiation means that the system performs an action, and cannot prove who initiated that action. This is somewhat linked to authentication, but that is already covered under Spoofing. The “R” hint really means ensuring that any action is linkable back to an authenticated initiator. Mechanisms include signatures, audit-trails, and logging in general. A threat modelling session should include careful thought about how each component records data coming in and out, and how this information could be used later to identify the cause of changes in the system. No system will ever be perfect; you have to assume that a security hole will be found and exploited - at which point audit-trails and logging become critical. When a vulnerability is exploited at some later time, and no information is available about who, when or how the unwanted change occurred, then fixing the system can be extremely difficult; systems may need to be taken offline for long periods of time while the investigation occurs. With sufficient logs, the hole can at least be plugged within a reasonable amount of time and the system restored to availability. Financial losses may also be reclaimable through the courts - something impossible if evidence is not available.</p>
+
+<p>As mentioned in the “Who” section, the results of analysis depend on the skills of those involved. The STRIDE items are just hints; team members should have reasonable background knowledge on concepts such as SQL-injection, cross-site-scripting, MITM attacks, and DNS poisoning.</p>
+
+<p>Some might claim that the STRIDE list is simply not detailed enough, and vulnerabilities may be missed. There are various “attack libraries” available with great detail, eg <a href="https://capec.mitre.org">Mitre CAPEC</a>. If you and your team have time to go through an entire “attack library” and evaluate each possibility against your system, good for you. In most cases, it is important to not get too detailed - deal with the obvious first, and ensure logging/auditing is present to detect other attacks if they happen. Perfect is the enemy of good..</p>
+
+<p>Microsoft provide <a href="https://download.microsoft.com/download/9/3/5/935520EC-D9E2-413E-BEA7-0B865A79B18C/Introduction_to_Threat_Modeling.ppsx">a powerpoint presentation which is an excellent summary of STRIDE</a>.</p>
+
+<h1 id="less-useful-approaches">Less Useful Approaches</h1>
+
+<p>Above, I recommend stride-per-element. Some methodologies emphasis different approaches; while I don’t see these as particularly effective, they are briefly summarized here.</p>
+
+<h2 id="asset-based-approach">Asset-based Approach</h2>
+
+<p>STRIDE uses a system diagram as the basis for analysis, ie focuses on the software itself. Some alternate threat-modelling methodologies instead recommend basing analysis around the <em>assets to be protected</em>, for example the PASTA book which recommends asset lists be compiled with valuations and security-impact-assessments, and each asset be linked to lists of “attacker types” who might be interested in such assets.</p>
+
+<p>At first glance, this seems plausible. A bank might first think about what they want to protect (the money) rather than about their system (the doors, cameras, sensors, alarms, guards). However the STRIDE book provides a number of good arguments why this approach is not particularly productive. The most convincing is that we want to <em>stop unauthorized people getting in</em>. That means reinforcing doors, adding cameras and sensors, etc. Focusing on the asset does not directly lead to finding the <em>vulnerabilities</em> and <em>relevant mitigations</em>.</p>
+
+<p>I would nevertheless recommend spending a <em>short amount of time</em> making a list of the assets to be protected. It is important to have a general feel for how much effort (ie money) should be spent to protect an asset (must the solution be bullet-proof, or simply script-kiddie-proof?).  It may also lead to simple and radical solutions:</p>
+
+<ul>
+  <li>Is the asset really worth protecting at all?</li>
+  <li>Can the asset be deleted, or moved offline?</li>
+</ul>
+
+<p>Classifying data assets as “public/internal/confidential/restricted” might be useful in some cases. However in general only public vs other is relevant for security at the architecture or implementation level (operations might define additional roles), and that distinction is obvious for anyone competent enough to be part of a threat modelling workshop.</p>
+
+<p>Identifying specific assets (specific databases, filesystems, etc) can be helpful to ensure nothing critical has been left off the DFD. However knowing an asset like “customer address info” exists is not really helpful - <em>where</em> it exists is important. And in fact what info exists is usually more naturally derived from “what datastores do we have, and what is in them” than from the abstract question “what data do we have?”.  Generating a list of assets and APIs as an <em>output</em> from the DFD-based STRIDE analysis could be a nice idea; it should be a natural byproduct.  Having that list would be a good cross-check on coverage of the system review.</p>
+
+<p>Examples of tangible assets a system might have:</p>
+
+<ul>
+  <li>Machines (CPU time, network bandwidth)
+    <ul>
+      <li>Value for attacker
+        <ul>
+          <li>Bitcoin-mining</li>
+          <li>Spam generation</li>
+          <li>Malware hosting</li>
+        </ul>
+      </li>
+      <li>Cost for owner
+        <ul>
+          <li>Power and network costs</li>
+          <li>Loss of resources for intended goals</li>
+          <li>Cleanup costs</li>
+          <li>Loss of reputation</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Company and customer data
+    <ul>
+      <li>Value for attacker
+        <ul>
+          <li>Sale of private info (eg credit card numbers)</li>
+          <li>Data for phishing attacks</li>
+          <li>Blackmail</li>
+          <li>Reputation damage (competitors)</li>
+          <li>Revenge</li>
+        </ul>
+      </li>
+      <li>Cost for owner
+        <ul>
+          <li>Reputation damage</li>
+          <li>Reparation costs to customer</li>
+          <li>Legal fines and fees</li>
+          <li>Cleanup costs</li>
+          <li>Potentially, termination of business (for severe cases)</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>System availability
+    <ul>
+      <li>Value for attacker
+        <ul>
+          <li>Reputation damage</li>
+          <li>Possibly other benefits, depending on system functionality</li>
+        </ul>
+      </li>
+      <li>Cost for owner
+        <ul>
+          <li>Reputation damage</li>
+          <li>Financial loss due to downtime</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>Examples of intangible assets in a system:</p>
+
+<ul>
+  <li>Reputation (external) as service or product provider (for customers/sales)
+    <ul>
+      <li>Value for attacker:
+        <ul>
+          <li>Revenge</li>
+          <li>Competitive advantage (competitors)</li>
+          <li>Blackmail</li>
+        </ul>
+      </li>
+      <li>Cost for owner
+        <ul>
+          <li>Lost sales</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Reputation as employer (for recruiting) and company morale (internal)
+    <ul>
+      <li>Value for attacker:
+        <ul>
+          <li>Revenge</li>
+          <li>Competitive advantage (competitors)</li>
+          <li>Blackmail</li>
+        </ul>
+      </li>
+      <li>Cost for owner
+        <ul>
+          <li>Recruitment difficulties</li>
+          <li>Retention difficulties</li>
+          <li>Loss of productivity/motivation</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="attacker-based-approach">Attacker-based Approach</h2>
+
+<p>Attacker motivation is useful as part of “risk estimation” - ie once a vulnerability has been found, and its “cost” is being estimated to determine the priority and effort to assign to its remediation. Finding a plausible attacker type is useful - if none can be found, then the priority of the mitigation can be set low. However starting with attacker type and motivation is not helpful.</p>
+
+<h2 id="attack-trees">Attack Trees</h2>
+
+<p>An <em>attack tree</em> is a graphical or text representation of a single high-level threat, with child nodes (and their child nodes) becoming more and more concreate/detailed until actual vulnerabilities are revealed. Some more information on attack trees is included in an appendix at the end of this article.</p>
+
+<p>I’m not convinced that attack trees are a productive way to spend the limited amount of time available for security analysis. It might be something that a well-organised attacker might do, which initially does seem appealing (“think like an attacker”). However if you have a DFD of the system (something an attacker probably will not have), then it seems more effective to use that instead. Creating an attack tree can be a lot of work, with much of that not actually contributing to improving the security of the current architecture or implementation.</p>
+
+<p>If you cannot build a DFD of the system being analysed then an attack tree might be useful.</p>
+
+<p>Various books recommend developing an attack tree <em>in consultation</em> with the DFD, ie expanding nodes in the tree only where they seem “applicable” to the DFD. While this is better than a full abstract attack tree, I’m still not convinced. To expand a node into its children, you need full knowledge of the entire system - which makes for workshops with lots of people (per/component allows more focused workshops).</p>
+
+<p>Child nodes of a parent node in the attack tree may be “or-nodes” or “and-nodes”, ie the vulnerability described in the parent node might be possible if <em>any</em> of the child-node vulnerabilities can be exploited, or only if <em>all</em> of the child-node vulnerabilities can be exploited. There are various proposed syntaxes for drawing this; when drawing a tree in a graphical manner, I find the most elegant soluton is to assume OR, and to join “anded” child nodes with an arc between the lines from those nodes to their parent.</p>
+
+<p>A risk-register is basically a list of the leaf nodes of an attack tree.</p>
+
+<p>Picking the root nodes for attack trees can be difficult (a tree per identified asset is not very effective or complete). A per-component evaluation has no such problem.</p>
+
+<p>Attack trees and attacker modelling might be useful for finding non-technical vulnerabilities, eg social engineering based attacks.</p>
+
+<h2 id="attack-libraries">Attack Libraries</h2>
+
+<p>There are existing “libraries of attack patterns” which can be useful; read the patterns and decide which apply to the system being analysed and how. However such sets of patterns are at different levels of abstraction.</p>
+
+<p>The most detailed libraries are “checklists” - you just tick off whether your system implements that or not.</p>
+
+<p>More abstract libraries provide starting points for thinking about the security of the target system, eg <a href="https://www.owasp.org/index.php/Category:OWASP_Top_Ten_Project">OWASP Top 10</a> or <a href="https://capec.mitre.org">CAPEC</a> (Common Attack Pattern Enumeration and Classifiation)</p>
+
+<p>One kind of “attack library” often forgotten is the list of security problems for similar systems. Did they have flaws that should be avoided?</p>
+
+<h2 id="use-case-analysis">Use-case analysis</h2>
+
+<p>Some books recommend using the requirements use-cases to do security analysis, ie walking through each use-case and seeing if some unexpected variant of the use-case could trigger unusual system behaviour. I think this is likely to take significant amounts of time. Maybe useful where some components on the DFD have very complex APIs (particularly when those APIs are not well documented).</p>
+
+<h1 id="data-flow-diagrams-dfds">Data Flow Diagrams (DFDs)</h1>
+
+<h2 id="dfd-components">DFD Components</h2>
+
+<p>The components of a data flow diagram (DFD) are:</p>
+
+<ul>
+  <li>Data stores (databases, filesystems, etc)</li>
+  <li>Software components (modules) which process (transform) data</li>
+  <li>External systems and users which interact with the system being analysed</li>
+  <li>And the connections between all of the above over which data is transferred</li>
+</ul>
+
+<p>A DFD should only be a single easily-readable page. A single box on a DFD can be a reference to a separate more detailed DFD if needed.</p>
+
+<p>The DFD does not need to go into huge detail - only security-relevant details are needed. It is therefore best to start with a single high-level diagram, and create/retrieve more detailed diagrams only when threat modelling discussions require them.</p>
+
+<p>Traditionally the symbols used on a DFD are:</p>
+
+<ul>
+  <li>Rectangles for external entities outside of system control</li>
+  <li>Rounded rectangles (recommended) or circles for processes (transformatinos) within the system, labelled with the transformation they apply (use verbs)</li>
+  <li>Something else for data stores (label using nouns)</li>
+  <li>Lines with arrows for flow of information between components, labelled with the data that is flowing (use nouns)</li>
+  <li>Dotted lines for trust boundaries</li>
+</ul>
+
+<p>Other diagram types that can be useful are:</p>
+
+<ul>
+  <li>Swim-lane aka interaction diagrams</li>
+  <li>State diagrams</li>
+</ul>
+
+<p>Only model things that help to identify vulnerabilities. Too much detail is not helpful. Use sub-diagrams where appropriate.</p>
+
+<p>Like the risk registry, any diagrams should be kept for reuse the next time the system is assessed.</p>
+
+<h2 id="dfd-trust-boundaries">DFD Trust Boundaries</h2>
+
+<p>Methodologies that recommend DFDs for security analysis also recommend drawing “trust boundaries” on the DFD, and then asking “what can go wrong as data crosses this boundary”?</p>
+
+<p>I have troubles with this personally; in most systems, I find it almost impossible to draw reasonable trust boundaries.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Trust_boundary">Wikipedia defines</a> a <em>trust boundary</em> as a “boundary within which a system trusts all sub-systems”.</p>
+
+<p>In the traditional three-tier architecture (client, business-tier, database-tier), the business tier usually runs all SQL statements against the database as a single user (via a pool of connections). In this case there is clearly a “trust boundary” between the business and database tiers; the database has no concept of the original user whose request triggered the database operation. And there is definitely also a trust boundary between client and business tiers; nothing in the business tier should “trust” the client.</p>
+
+<p>However within the business tier, there are likely to be multiple places where client credentials are verified. Therefore a complex “trust boundary” should also be drawn through the middle of the business-tier application. And in fact, within the database the pooled user-id that the business tier is using is not <em>fully trusted</em> by the database (ie is not usually the DB “admin” account). So shouldn’t there be a complex boundary line through the middle of the database too?</p>
+
+<p>Because of these complexities, I don’t really see “trust boundary lines” as particularly useful; the reality is just too complex for a few simple lines to capture. Therefore, feel free to draw such lines if you wish but I would recommend against spending too much time or arguing too long about exactly where the lines should be. Instead, focus on the components - what authorization-checks are applied to the incoming request?</p>
+
+<p>The <a href="https://download.microsoft.com/download/9/3/5/935520EC-D9E2-413E-BEA7-0B865A79B18C/Introduction_to_Threat_Modeling.ppsx">Microsoft presentation on STRIDE</a> (referenced earlier) states that they consider a “trust boundary” to be present between any two components that communicate over a network, ie that components are only within the same trust boundary when part of the same process, or local processes communicating on the same host. Microsoft use STRIDE to analyse complex monolithic applications, while this article is talking about applying it to distributed systems. This may explain why I find the concept of a “trust boundary” difficult to apply and generally not helpful.</p>
+
+<h1 id="stride-in-detail">Stride in Detail</h1>
+
+<h2 id="overview-1">Overview</h2>
+
+<p>The following sections look at the different STRIDE hint categories, and some suggested items to discuss for each category. These points are not exclusive lists, but instead ideas to start relevant discussion.</p>
+
+<p>The STRIDE book has even more items in each category - or see the “Elevation of Privilege Game” card deck.</p>
+
+<h2 id="spoofing">Spoofing</h2>
+
+<p>This hint encourages the analysis team to think about whether an attacker can pretend to be:</p>
+
+<ul>
+  <li>an unauthenticated user</li>
+  <li>an authenticated user</li>
+  <li>a trusted partner system</li>
+  <li>another component of the system</li>
+  <li>a database or filesystem relied on by the system</li>
+  <li>etc</li>
+</ul>
+
+<p>Of course, anyone can pretend to be an “unauthenticated user” - the question here is more “are unauthenticated users correctly limited?”.</p>
+
+<p>This topic is tightly linked to the concept of <em>authentication</em> - how does the system know who is interacting with it?</p>
+
+<p>Example questions include:</p>
+
+<ul>
+  <li>Does the component being evaluated read or write files? If so, is the identity of that filesystem verified?</li>
+  <li>Does the component read config settings on startup? If so, is the identity of that data provider verified?</li>
+  <li>Does the component listen on a network connection? If so:
+    <ul>
+      <li>How does the system ensure that no other application opens a connection on that same port first?</li>
+      <li>Can an attacker redirect the DNS name for the system to their own address (spoof that component)?</li>
+    </ul>
+  </li>
+  <li>Does the component provide a server-side certificate? If so, is it properly signed (trustable by clients)?</li>
+  <li>Does the component open network sockets to external services (including local ones)? If so, how does it validate that the target is trustworthy?</li>
+  <li>Does the component accept requests from other components? If so:
+    <ul>
+      <li>How does it verify the identity of the sender of each request?</li>
+      <li>Is that verification vulnerable to programmer errors (eg requires code in every rest endpoint)?</li>
+      <li>Are multiple kinds of authentication supported? If so, are all equally secure?</li>
+      <li>Are there “bypasses” to authentication (eg account-recovery, “authenticated by callcenter”, etc)?</li>
+      <li>Are credentials persisted client-side? If so, is that appropriate and are users aware of their responsibilities?</li>
+      <li>Are requests accepted on alternate ports with different authentication rules?</li>
+      <li>Is there any rate-limit to attempts to present different credentials?</li>
+    </ul>
+  </li>
+  <li>Does the component support remote administration? If so, are remote administrator credentials properly verified?</li>
+</ul>
+
+<p>Where a risk of implementation error is identified, the mitigation should not be just “fix line 17 of file X” or “be more careful”, but instead define a method that prevents or catches the problems. Examples include using a framework where authentication is “verified by default” so that every new entrypoint added during implementation automatically gets maximum protection (possibly to the point of being useless); where less protection is needed then the developer must actively enable that. Automated report generation and automated security tests are also good solutions.</p>
+
+<h2 id="tampering">Tampering</h2>
+
+<p>This hint encourages the analysis team to think about whether an attacker can modify data or bypass authorization:</p>
+
+<ul>
+  <li>Does the component being evaluated read files? If so, is access to that filesystem properly controlled?</li>
+  <li>Does the component being evaluated write files? If so, can they be modified by something else after writing?</li>
+  <li>Does the component read config settings on startup? If so, is access to that info properly controlled?</li>
+  <li>Can data in a database be modified directly, bypassing the system checks?</li>
+  <li>Is the system relying on data in the client which can be modified?</li>
+  <li>Where encryption is used, are standard algorithms used and is the implementer or reviewer suitably qualified?</li>
+  <li>Is the mapping from authentication info (id) to authentication info (rights) secure and reliable?</li>
+  <li>Does the implementation consistently check authorization? Is the approach vulnerable to programmer errors (eg requires
+code in every rest endpoint)?</li>
+  <li>Can URL parameters be modified by clients with unexpected results?</li>
+  <li>Are “replay attacks” possible, eg an encrypted or signed message from an authenticated user be intercepted and sent again?</li>
+  <li>Can data be modified after validation but before use?</li>
+</ul>
+
+<p>If running this system in the cloud, then you might also need to think about which other users might be running software on the same physical host, and whether that raises tampering (or info-disclosure or denial-of-service) risks.</p>
+
+<h2 id="repudiation">Repudiation</h2>
+
+<p>This hint encourages the analysis team to think about whether an attacker can perform an operation untraceably. As noted earlier, this is tightly linked to authentication:</p>
+
+<ul>
+  <li>Are there any important operations which are accessible to anonymous users?</li>
+  <li>Are all important operations logged, with the requester’s id?</li>
+  <li>Will requests still be processed when logs cannot be written (eg due to out-of-disk-space)?</li>
+  <li>Can logging be truncated by forcing too many log messages to be output in a short time?</li>
+  <li>Can logging be corrupted by passing weird strings which end up in log messages?</li>
+  <li>Is the logged information sufficient to describe exactly what operation the (identified) user performed?</li>
+  <li>Can you tell if a logfile has been deleted?</li>
+  <li>Can you tell if a logfile has been altered?</li>
+</ul>
+
+<h2 id="information-disclosure">Information Disclosure</h2>
+
+<p>This hint encourages the analysis team to think about what information an attacker may be able to obtain which was not intended:</p>
+
+<ul>
+  <li>Is network traffic encrypted where appropriate?</li>
+  <li>Are man-in-the-middle attacks blocked?</li>
+  <li>Are files written by the component? If so:
+    <ul>
+      <li>Is access to that filesystem properly controlled?</li>
+      <li>Are digital signatures used to detect modification?</li>
+    </ul>
+  </li>
+  <li>Are backups properly secured?</li>
+  <li>Do URLs include sensitive data useful for an observer?</li>
+  <li>Do error messages include sensitive data?</li>
+  <li>Do file-listings or similar results reveal information about the <em>existence</em> of other data, even when the content is not available?</li>
+  <li>Do logfiles (or logservers) reveal sensitive information?</li>
+  <li>Where encryption is used, are standard algorithms used and is the implementer or reviewer suitably qualified?</li>
+  <li>Do responses to requests leak information in any circumstances?</li>
+</ul>
+
+<p>A somewhat related topic is “reconnaissance protection”, ie ensuring all components exposed to attackers reveal as little info as possible. While security-through-obscurity is not a good approach, it is nevertheless useful to deny attackers easy access to information about the system being protected. Thought should be given to removing product-version-strings from standard responses, using firewalls to block port-mapping, etc.</p>
+
+<h2 id="denial-of-service">Denial of Service</h2>
+
+<p>This hint encourages the analysis team to think about the business value of “uptime” for the system, and what an attacker might possibly do to reduce system uptime:</p>
+
+<ul>
+  <li>Can filesystems or databases be filled up via malicious requests?</li>
+  <li>Are there specific requests that will take large amounts of time to process? If so, are there limits on the number of such requests?</li>
+  <li>Can an attacker register a DNS name to interfere with the system?</li>
+  <li>Does the system rely on external servers which are more vulnerable than the system being analysed?</li>
+  <li>Can a user be “locked out” by deliberately making requests with incorrect authentication information?</li>
+  <li>And the usual “flood the network” attacks of course (if relevant) - including whether logging is sufficient to identify the source</li>
+</ul>
+
+<p>This hint is also a good point to think about various natural disasters, from floods and earthquakes to cleaners unplugging servers by accident.</p>
+
+<h2 id="escalation-of-privilege">Escalation of Privilege</h2>
+
+<p>This hint encourages the analysis team to think about whether an attacker might be able to provide their own logic which is executed with rights associated with some other user.</p>
+
+<ul>
+  <li>Does the system include third-party executable content in its responses, leading client to process third-party content with the trust associated with the system being analysed (eg cross-site-scripting (XSS) attacks)?</li>
+  <li>If the implementation uses an interpreted language such as Python, Perl or PHP, then what development processes are in place to ensure that developers do not use “<code>eval</code>” or similar methods?</li>
+  <li>Do requests include <em>references</em> to data in external stores? If so, can an attacker modify the referenced data and thus execute requests as the original user but with data controlled by them?</li>
+  <li>Can the component’s code (including required libraries) be modified or substituted?</li>
+</ul>
+
+<h1 id="rich-apis-and-attack-surfaces">Rich APIs and attack surfaces</h1>
+
+<p>Threat modelling against components with rich APIs is challenging; eg when a component is a webserver then “info disclosure through insufficient validation of url parameters” is something that needs very detailed code analysis to check. That’s ok - the risk goes into the risk-register, and an issue can be raised in the issue-tracker to verify that threat. An automated test suite would be be the best way to close that issue - ie close once tests exist to verify that such a vulnerability does not exist. Verifying that an architectural decision in the system (eg a standard framework for handling such params) exists would also be sufficient. A code-audit would also do, but is of course susceptible to regression. All these lower-level security checks can be done by the dev-team rather than in the workshop.</p>
+
+<p>The “data flow diagram” used for stride is related to the “system attack surface” - the set of interfaces through which an attack can occur. A “list of assets” is not associated with a “system attack surface” and thus harder to identify mechanisms and mitigations with.</p>
+
+<p>During threat modelling, it is probably not practical, and not necessary, to evaluate each endpoint and parameter in a component offering a “rich API”. Risks can be identified at a slightly abstract level (authentication not enforced, sql statements include user-provided data), and then general mitigations can be identified (see first paragraph in this section).</p>
+
+<h1 id="involving-qa-in-threat-modelling">Involving QA in Threat Modelling</h1>
+
+<p>A good QA team will look for security holes as part of their testing, in a manner similar to threat modelling approach stride-per-element: look at each component and each interface and see if something unexpected can be triggered. However:</p>
+
+<ul>
+  <li>QA is always under time-pressure, as it is the stage that blocks “product release”</li>
+  <li>QA is often “feature-focused” rather than “security focused” - particularly managers (same problem as with dev)</li>
+  <li>QA is not always properly staffed with experts in the area</li>
+  <li>QA working alone (even with good security experience) does not have the product knowledge available to the members of a threat-modelling workshop.</li>
+  <li>QA is done only at the end of the project (or after each feature is complete), while at least the first pass of threat modelling should be done at the start.</li>
+</ul>
+
+<p>If the project has good QA staff, it can be helpful to include them in the threat modelling workshops. As noted above, this work should be somewhat familiar to them. Where risks are identified, having automated QA tests which verify that the implementation is robust can be very useful - particularly to perform the same tests against large numbers of API endpoints, and to detect regressions at future times.</p>
+
+<p>Threat modelling can also be an interesting basis for <em>system testing</em>. A QA/test team can use threat modelling to find interesting test scenarios. However such tests alone do not result in a “defense in depth”; such tests will be blocked by the first successful line of defense without indicating whether any further lines of defense exist.</p>
+
+<h1 id="hunch-based-security">Hunch-based Security</h1>
+
+<p>One common approach to security is mitigation-first; leap to the assumption that “we need encryption somewhere”. Often these gut-feelings are correct, but not always - it pays to identify the actual threats for which this mitigation is the fix, and see if they really are valid threats for the system being analysed, and whether the effort to implement the fix is in proportion to the risk/cost associated with the threat. Worse, there is sometimes an assumption that “we have provided the N most common mitigation technologies in at least one place in our app, therefore security is done”. That tech might need to be applied in a few other places, or might need to be applied differently, or other types of mitigations might be needed too - and threat modelling is the best way to figure that out.</p>
+
+<p>Actually, every decently secure system has had “threat modelling” done for it - just sometimes it was informal and the architect/devs/testers doing it didn’t realize that was what they were doing.  “this problem just occurred to me ..” is the same thing that someone in a threat-mod workshop would say, except that in the workshop people are <em>concentrating on</em> looking for such things, and are doing it as a team so they can inspire each other, and are using some helper tools (lists of components, lists of threats) to stimulate the imagination.</p>
+
+<h1 id="compliance">Compliance</h1>
+
+<p>While the above section was critical of “hunch-based security”, there is one case where it is unavoidable: compliance.</p>
+
+<p>When national laws or company rules require specific security features, despite their being no credible risk, there’s no point in fighting it.</p>
+
+<h1 id="references">References</h1>
+
+<p>Some of the following documents are also linked to in the article text above.</p>
+
+<ul>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Computer_security">Wikipedia: Computer Security</a> – an excellent short overview on IT security issues in general</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Threat_model">Wikipedia: Threat Model</a> – overview of IT Threat Modelling</li>
+  <li>
+<a href="https://safecode.org/wp-content/uploads/2017/05/SAFECode_TM_Whitepaper.pdf">SAFECode Whitepaper on Threat Modelling</a> – an excellent introduction to threat modelling</li>
+  <li>
+<a href="https://blogs.msdn.microsoft.com/microsoft_press/2016/04/19/free-ebook-the-security-development-lifecycle/">Microsoft Press: The Security Development Lifecycle: SDL: A Process for Developing Demonstrably More Secure Software</a> - free ebook from Microsoft Press - from 2006, but still interesting. Chapter 9 addresses threat modelling.</li>
+  <li>
+<a href="https://www.sans.org/reading-room/whitepapers/auditing/overview-threat-risk-assessment-76">SANS Threat Risk Analysis</a> - a graduate student paper presenting “An Overview of Threat and Risk Assessment”</li>
+  <li><a href="https://www.owasp.org/index.php/Application_Threat_Modeling">OWASP: Application Threat Modelling</a></li>
+  <li><a href="https://www.owasp.org/index.php/Category:Threat_Modeling">OWASP: Threat Modelling</a></li>
+  <li><a href="https://www.owasp.org/index.php/Threat_Modeling_Cheat_Sheet">OWASP: Threat Modelling Cheat Sheet</a></li>
+  <li>
+<a href="https://capec.mitre.org">MITRE CAPEC Attack Library</a> – useful reading for a security professional; lists many different kinds of software attacks.</li>
+  <li>
+<a href="https://websec.io/2013/08/27/Core-Concepts-Trust-Boundaries.html">Websec: Trust Boundaries</a> - good intro to DFDs</li>
+  <li><a href="https://www.microsoft.com/en-us/SDL/adopt/eop.aspx">Microsoft: The Elevation of Privilege Game</a></li>
+  <li><a href="https://s3.amazonaws.com/download.thegamecrafter.com/1531748209/EoP_Whitepaper.pdf">Microsoft: Elevation of Privilege Game Whitepaper</a></li>
+  <li><a href="https://www.microsoft.com/en-us/download/details.aspx?id=20303">Microsoft: Elevation of Privilege Game - Download</a></li>
+  <li><a href="https://cloudblogs.microsoft.com/microsoftsecure/2015/10/07/whats-new-with-microsoft-threat-modeling-tool-2016/">Microsoft: Threat Modelling Tool for STRIDE</a></li>
+  <li>
+<a href="https://github.com/OVVL-HSO/OVVL-Server">OVVL: An Open Source Threat Modelling Tool</a> - an application that provides a web-based interface through which a DFD can be drawn and threats registered</li>
+  <li><a href="https://www.comparitech.com/net-admin/threat-modeling-guide">Comparitech: Thread Modeling Guide</a></li>
+</ul>
+
+<h1 id="appendix-a-book-reviews">Appendix A: Book Reviews</h1>
+
+<p>This site has a <a href="/security/threat-book-review">review of two books on threat modelling</a>.</p>
+
+<h1 id="appendix-b-attack-trees-in-detail">Appendix B: Attack Trees in Detail</h1>
+
+<p>While attack trees were briefly discussed earlier, with my personal conclusion that they are not particularly helpful in most cases, they are moderately popular in the literature - and just cool. Here is my quick summary of attack trees.</p>
+
+<p>See: <a href="https://www.schneier.com/academic/archives/1999/12/attack_trees.html">attack trees (Bruce Schneier 1999)</a></p>
+
+<p>Usually, an <em>attack tree</em> is created for each <em>goal</em> an attacker may wish to achieve. Usually, that means such things as:</p>
+
+<ul>
+  <li>obtaining a copy of a specific dataset</li>
+  <li>obtaining control over a specific machie</li>
+</ul>
+
+<p>That goal is the root node of the attack tree. Its direct child nodes are high-level things that could provide a path to the goal. Each new level of child nodes makes its parent more concrete, until eventually leaf nodes are reached which are technical in nature rather than abstract, and potentially feasible.</p>
+
+<p>The main benefit of such a tree is that achieving a goal is often only possible via a number of intermediate “stepping stones”.  It can be hard to see a chain of successful steps leading to the goal; the attack tree instead work backwards by starting with the goal.</p>
+
+<p>The child nodes of a parent node are usually “or” options - any one of the child nodes will lead to the parent goal. However child nodes can also be “and” options - the parent is achieved only if all of the child nodes are achievable.</p>
+
+<p>There are various ways to write a tree down; a graphical representation is easiest to read. However a text representation is generally easier to write, and to include in a document. Representing AND and OR qualifiers is tricky in either representation, and not really standardized.</p>
+
+<p>A brief example from the physical world:</p>
+
+<ul>
+  <li>access room (goal)
+    <ul>
+      <li>go through a door
+        <ul>
+          <li>case door unlocked
+            <ul>
+              <li>enter</li>
+            </ul>
+          </li>
+          <li>case door locked
+            <ul>
+              <li>pick lock</li>
+              <li>use key
+                <ul>
+                  <li>find key (standard hiding location?)</li>
+                  <li>steal key</li>
+                  <li>reproduce key
+                    <ul>
+                      <li>from photo</li>
+                      <li>from impression</li>
+                    </ul>
+                  </li>
+                  <li>borrow key (social engineering)</li>
+                </ul>
+              </li>
+              <li>have someone else open it
+                <ul>
+                  <li>follow someone in
+                    <ul>
+                      <li>make friends</li>
+                      <li>act busy</li>
+                      <li>appear official (eg reflective vest)</li>
+                      <li>get lucky (just try)</li>
+                    </ul>
+                  </li>
+                  <li>spoof credentials
+                    <ul>
+                      <li>employee</li>
+                      <li>supplier</li>
+                      <li>maintenance staff</li>
+                      <li>emergency services (gas, fire, etc)</li>
+                      <li>official inspector</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>go through a window
+        <ul>
+          <li>..</li>
+        </ul>
+      </li>
+      <li>go through a wall
+        <ul>
+          <li>..</li>
+        </ul>
+      </li>
+      <li>go via roof
+        <ul>
+          <li>..</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>A brief software example:</p>
+
+<ul>
+  <li>Goal: obtain admin rights on server X
+    <ul>
+      <li>attack people
+        <ul>
+          <li>subvert somebody with access</li>
+        </ul>
+      </li>
+      <li>attack business process
+        <ul>
+          <li>attack hardware supply chain</li>
+          <li>attack software supply chain</li>
+        </ul>
+      </li>
+      <li>attack technology
+        <ul>
+          <li>get physical access</li>
+          <li>modify software</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>One of the most widely-known published attack trees is one created for <a href="https://www.eac.gov/documents/2017/03/15/elections-operations-assessment-summarization-voting-systems-voting-technology/">analysing an electronic voting system</a>.</p>
+
+<ul>
+  <li>Goal: manipulate election via voting equipment
+    <ul>
+      <li>AND
+        <ul>
+          <li>gather knowledge
+            <ul>
+              <li>OR
+                <ul>
+                  <li>from insider</li>
+                  <li>from component analysis</li>
+                </ul>
+              </li>
+              <li>gain insider access
+                <ul>
+                  <li>OR
+                    <ul>
+                      <li>at vendor before shipment</li>
+                      <li>at polling site</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/security/threat-modelling/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

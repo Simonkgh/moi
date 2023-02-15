@@ -1,0 +1,334 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Thoughts on the Equifax Data Breach</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Thoughts on the Equifax Data Breach</h1>
+    <aside>First published on: December 10, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Security/'>Security</a></p>
+      
+<p>In 2017, a large amount of data was stolen from Equifax, a US-based company specializing in online creditworthiness checks. In September 2018, a report on the issue from the US Goverment Accountability Office (GAO) was finally released.</p>
+
+<p>One good news article on the subject is <a href="https://www.theregister.co.uk/2018/09/17/gao_report_equifax_mega_breach/">from The Register</a>. It is typical in that the emphasis is placed on two issues:</p>
+
+<ul>
+  <li>The failure of a system-monitoring tool to detect unusual behaviour within the company network, due to an expired SSL cert.</li>
+  <li>The failure of internal processes intended to detect software packages with known security holes (Struts in this case)</li>
+</ul>
+
+<p>However in my opinion, there are more significant issues.</p>
+
+<p>If I have read the GAO report correctly (see pdf page 15 and 16):</p>
+
+<ul>
+  <li>The “disputes portal” was not registered in the central software registry as something with a dependency on struts - and thus the people responsible for updating struts code did not know about it</li>
+  <li>The sysadmins responsible for the portal were not on the appropriate email list - a communications screwup</li>
+  <li>The disputes portal was not in a DMZ; apparently once the attackers got a shell on the portal servers, they could access all sorts of servers. That’s a real sysops <a href="https://en.wiktionary.org/wiki/WTF">WTF</a>.</li>
+  <li>
+    <p>Equifax had a database which “contained unencrypted credentials for accessing additional databases”. That’s a real design WTF - having a central DB of credentials makes any system breach into a major one.</p>
+  </li>
+  <li>A scanning tool that was intended to detect struts-based services did not detect this one - that’s probably just bad luck.</li>
+  <li>Some kind of IDS system wasn’t working correctly. It isn’t clear if this was looking for odd system logs on the portal server, or working at the network level.</li>
+  <li>There was no rate-limiting on database queries from the portal to the database. Interesting - I had not previously considered query-rate-limitings as a security measure. Might make some sense, but could also backfire.</li>
+</ul>
+
+<p>Question: was the DB account used by the portal to (legitimately) access its backing DB properly limited to just the tables it needed to access? Once an attacker is on the system, there is no easy way to prevent the attacker from getting the configured creds for the app on that system - but those creds should be appropriately limited. Given that the attackers could access this “database of credentials”, the answer is perhaps not - which would be a WTF.</p>
+
+<p>The GAO report states:</p>
+
+<blockquote>
+  <p>The company’s investigation was facilitated by the use of electronic logs that had not been damaged or erased by attackers on the affected systems.</p>
+</blockquote>
+
+<p>It is not clear whether these logs were inaccessible to users (eg shipped in real-time to another system), whether the attackers were unable to affect the logs (eg they were not able to gain root privileges), or whether the attackers just didn’t bother to modify the logs.</p>
+
+<p>The register article states that:</p>
+
+<blockquote>
+  <p>Equifax did get lucky on one score: had the attackers erased some of the logs, …</p>
+</blockquote>
+
+<p>but it is not clear whether that was indeed “luck” or actually good design (storing logs remotely). In either case, ensuring robust logs is obviously an important step..</p>
+
+<p>My guess is that the struts flaw allowed attackers to load up their own code onto the portal server, giving them shell access through which they uploaded and ran tools like nmap. But they probably never got root on the box (or any box); the data they extracted simply came from local-network-accessible databases, including critically the database containing credentials for other databases. And probably the struts-based app itself contained a config-file with credentials for that database.</p>
+
+<p>So in my opinion, this shows:</p>
+
+<ul>
+  <li>1 big <a href="https://en.wiktionary.org/wiki/WTF">WTF</a> from the design team - whoever set up this “database of credentials” must have been smoking something</li>
+  <li>1 big WTF from the ops team (no network segmentation aka DMZ) - a DMZ has been “best practice” since the last millenium.</li>
+  <li>3 smaller WTFs:
+    <ul>
+      <li>software registry portal not correctly holding lists of dependencies (bad, but such registries can be tricky to get right and keep up-to-date)</li>
+      <li>sysadmins not on right email lists (oops, but can happen)</li>
+      <li>IDS system not working correctly (an important screwup, but one that is easy to make and hard to detect)</li>
+    </ul>
+  </li>
+  <li>Two unknowns:
+    <ul>
+      <li>were the DB credentials for the portal correctly limited?</li>
+      <li>were logs being correctly shipped off-server, or were they just lucky?</li>
+    </ul>
+  </li>
+  <li>One dose of bad luck
+    <ul>
+      <li>struts detection tool did not fire on this site</li>
+    </ul>
+  </li>
+  <li>And something that would have been a good idea:
+    <ul>
+      <li>rate limiting of the portal DB connection</li>
+    </ul>
+  </li>
+</ul>
+
+<p>And overall, most of these issues would be detected by a competent <a href="/security/threat-modelling">threat modelling process</a>.</p>
+
+<p>There is of course yet a higher layer of security management that should be providing “meta-policies” that ensure that a company has proper security guidelines for projects, that these are reviewed regularly, and that projects are checked for compliance with policies. That has clearly also failed - a regular internal audit would have detected that either no sensible security policies were present, or that this project was not compliant with them.</p>
+
+<p>Interesting that most of the press articles on this issue have focused on what I described as “one dose of bad luck” - the failure to detect the struts library automatically. I guess that counts as successful <a href="https://en.wikipedia.org/wiki/Spin_(propaganda)">PR spin</a> on the part of Equifax!</p>
+
+<h1 id="update-house-report">Update: House Report</h1>
+
+<p>In Dec 2018, the US House of Representatives Oversight and Government Reform Committee <a href="https://thehill.com/policy/technology/420582-house-panel-issues-scathing-report-on-entirely-preventable-equifax-data">released a report</a> on the Equifax breach with more details than the GAO report, including:</p>
+
+<ul>
+  <li>Attacks appear to have originated from Chinese IP addresses</li>
+  <li>Equifax had allowed over 300 security certificates to expire, including 79 certificates for monitoring business critical domains</li>
+  <li>Equifax did not have file integrity monitoring enabled on the (vulnerable) system</li>
+  <li>Equifax had a massive internal legacy-code problem</li>
+  <li>The application that had the Struts-related issue was also later found to have two additional unrelated but severe security issues (SQL injection, Insecure Direct Object Reference)</li>
+  <li>There is no indication that the attackers gained root access on the vulnerable servers</li>
+  <li>An August 2016 report by the financial index provider MSCI Inc.  assigned Equifax ’s data security efforts a rating of zero out of ten.</li>
+  <li>There was “a lack of accountability and no clear lines of authority in Equifax’s IT management structure”</li>
+  <li>3 senior managers “took early retirement” or left the company; one middle manager was fired.</li>
+  <li>Legal action by Government agencies against Equifax is being considered</li>
+</ul>
+
+<p>Interestingly, the explanation of why the automated scan failed to detect the use of Struts is complete nonsense (the scan was executed “on the root directory, not the subdirectory where Apache Struts was listed”). This explanation apparently came from the Equifax Interim CSO; clearly, basic IT competence was not a requirement for this position - or for being on the House review board. See p29 of the report. And directly afterwards, comes the statement that “attackers ran the <code>whoami</code> command to discover other potentially vulnerable servers”;  did nobody review this review for basic sense? Later statements claiming “a database of credentials was accessible via a mounted filesystem” is of dubious believability - was this a file or a database? Equally dubious is the claim that an expired SSL certificate “made encrypted data unreadable” - maybe they meant out-of-date in the sense that the primary certificate had been rolled over?</p>
+
+<p>The report is worth reading in full - with either a notepad or a bowl of popcorn, depending on whether you are responsible for such systems or not.</p>
+
+<h1 id="update-2-senate-report">Update 2: Senate Report</h1>
+
+<p>In Feb 2019, the United States Senate Permanent Subcommittee on Investigations/ Committee on Homeland Security and Governmental Affairs (phew, what a title!) has released a report:</p>
+
+<ul>
+  <li>
+<a href="https://www.carper.senate.gov/public/_cache/files/5/0/508a6447-853f-4f41-85e8-1927641557f3/D5CFA4A0FC19997FF41FB3A5CE9EB6F7.equifax-report-3.6.19.pdf">HOW EQUIFAX NEGLECTED CYBERSECURITY AND SUFFERED A DEVASTATING DATA BREACH</a> – pdf</li>
+</ul>
+
+<p>The content is mostly waffle; there is a big focus on “patch management” which is important but IMO less important than good layered design. Patches are almost always <em>running behind the bad guys</em>, fixing things only after exploits have been detected in the wild and thus while applying them is better than not doing so, designs that protect systems <em>even in the presence of vulnerabilities</em> are better.</p>
+
+<p>This report includes a lot of content also present in the House Report above. However there are a few gems.</p>
+
+<p>Regarding credentials for other systems:</p>
+
+<blockquote>
+  <p>hackers could access credentials for certain other databases and applications because some Equifax employees saved those credentials on a file share.</p>
+</blockquote>
+
+<p>Ah, so at least a “database of credentials” was not part of the design.</p>
+
+<p>Saving such credentials in a file is dumb, but it is not easy to control what staff do sometimes. Two questions spring out, however:</p>
+
+<ul>
+  <li>presumably not all Equifax staff are idiots, and some knew this was a bad idea - so is the company lacking any way for its staff to raise security concerns internally?</li>
+  <li>and why would the vulnerable webserver have access to a “file share” at all, let alone one on which users also store their data?</li>
+</ul>
+
+<p>Regarding network segmentation:</p>
+
+<blockquote>
+  <p>Second, once the hackers gained access, they could access certain databases because of a lack of network segmentation within the relevant environment.346 Such network segmentation restricts unnecessary access to other systems once a user is inside a particular environment, such as the dispute portal.347 The lack of segmentation was a conscious decision by Equifax to support efficient business operations and functionality over security protocols.</p>
+</blockquote>
+
+<p>I’m speechless. A conscious decision not to use firewalls on a server exposed to the internet??!</p>
+
+<p>The scathing title of the report appears to be well deserved..</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/security/equifax/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

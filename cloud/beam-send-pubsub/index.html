@@ -1,0 +1,277 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Beam Code for sending a Pubsub Message after Write</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Beam Code for sending a Pubsub Message after Write</h1>
+    <aside>First published on: April 15, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>Sometimes it is useful to run a Beam application to process data, and then send a Google Pubsub message <em>after</em> that data has been written to Google Cloud Storage or to BigQuery. This allows “further processing” of the data to be triggered. The following code fragments show one way to achieve this.</p>
+
+<p>Although this is technically a Beam-related article, it is probably only relevant when developing in the Google environment (in which case the Beam code is probably going to be run on Google Dataflow).</p>
+
+<h1 id="sending-a-pubsub-message-after-file-write">Sending a Pubsub Message After File Write</h1>
+
+<p>Example code:</p>
+
+<pre><code>
+public class .... {
+    /** Map filename to PubsubMessage object holding that filename as an attribute. */
+    private static PubsubMessage buildMessageForFile(String filename) {
+        // When processing Pubsub messages in a cloud-function, param "event" provides the message. Property "event.data" returns the data field
+        // given here while "event.attributes.somekey" returns the values from the attributes map used here.
+        //
+        // Here, we pass the filename in an event attribute, "event.attributes.filename".
+        Map&lt;String, String&gt; attrs = Collections.singletonMap("filename", filename);
+        return new PubsubMessage(null, attrs);
+    }
+
+    public static void main(String[] args) {
+        ....
+        someCollection.apply(TextIO.write().to(options.getOutput()).withoutSharding().withOutputFilenames()) //
+                            .getPerDestinationOutputFilenames() //
+                            .apply(MapElements.into(TypeDescriptors.of(PubsubMessage.class)).via(f -&gt; buildMessageForFile(f.getValue())))
+                            .apply(PubsubIO.writeMessages().to(options.getTopicName()));
+        ....
+    }
+}
+</code></pre>
+
+<p>The target topic must be created before writing to it; this can be done with the gcloud commandline tool:</p>
+
+<ul>
+  <li><code>gcloud pubsub subscriptions create {subname} --topic {topicname}</code></li>
+</ul>
+
+<p>The contents of the topic can be viewed (ie to test whether the above code actually worked) via:</p>
+
+<ul>
+  <li><code>gcloud pubsub subscriptions pull {subname}</code></li>
+</ul>
+
+<h1 id="sending-a-pubsub-message-after-bigquery-write">Sending a Pubsub Message after BigQuery Write</h1>
+
+<p>This is somewhat trickier than the file case. The TextIO.write() transform produces a collection of the names of files that were created, and the presence of a filename indicates that the file has been written. The BigQueryIO.write() instead generates a WriteResult object as its output-type; this is not a PCollection, ie it does not (directly) represent a single stream of output values, and so apply cannot be invoked directly on it. The WriteResult object currently has only a single property:</p>
+
+<ul>
+  <li>failedInserts: a collection of records which “failed to be inserted”.</li>
+</ul>
+
+<p>We really want to trigger sending of the message when all data in the window (global for batch processing) has been written, regardless of whether failures were present. And we only want it sent once, whether zero or multiple failed messages are present.</p>
+
+<p>There are two possible approaches to this:</p>
+
+<ul>
+  <li>use <code>Wait.on()</code>  (which I have tested)</li>
+  <li>use the failure-list as a “side input” (seems theoretically possible but not tested)</li>
+</ul>
+
+<p>The <code>Wait.on</code> transform (since Beam 2.3.0) is designed for exactly this scenario - block processing on one collection until the window for another collection has completed. The message to send is presumably generated from some summary of the collection of records sent to BigQuery, eg min/max record ids. <code>Wait.on</code> can be used to “block” the transform that sends this data to pubsub until the write-transform has completed.</p>
+
+<p>Alternatively, a transform which uses some collection as a “side input” will wait until that side-input is complete. The failure-list could therefore be transformed into a count of failed messages (or some other guaranteed-small collection), and then this (small) collection converted to a PCollectionView and used as a side-input to the transform that sends the pubsub message.</p>
+
+<p>There is one further problem: when using <code>BiqQueryIO.write().withMethod(Method.STREAMING_INSERTS)</code> this works fine. However in Beam 2.3.0, when using <code>Method.FILE_LOADS</code>, the WriteResult.failures is actually a “dummy” collection which is immediately “complete” even before the file-loading is executed. An enhancement-request has been filed to fix this, but until that happens <code>STREAMING_INSERTS</code> must be used if it is necessary to delay sending of the pubsub message (or whatever other processing you require) until after loading into BigQuery has completed.</p>
+
+<h1 id="bugreports">Bugreports</h1>
+
+<p>The following bugreports may be relevant to the topic of send-after-write:</p>
+
+<ul>
+  <li><a href="https://issues.apache.org/jira/projects/BEAM/issues/BEAM-3268">getPerDestinationOutputFilenames can provide names before files are written</a></li>
+  <li><a href="https://issues.apache.org/jira/projects/BEAM/issues/BEAM-2058">BigQuery load job id allocation is static</a></li>
+  <li>
+<a href="https://issues.apache.org/jira/browse/BEAM-4096">BigQuery should support ValueProvider for Method</a> - currently, selecting <code>FILE_LOADS</code> or <code>STREAMING_INSERTS</code> as the method for loading data into BigQuery can only be done “statically” at the time a dataflow template is deployed. See also <a href="https://issues.apache.org/jira/browse/BEAM-3916">this issue</a>
+</li>
+  <li><a href="https://issues.apache.org/jira/browse/BEAM-3433">Dataflow must run in same project as target BigQuery table</a></li>
+  <li><a href="https://issues.apache.org/jira/browse/BEAM-3376">Quota error message needs improving</a></li>
+  <li><a href="https://issues.apache.org/jira/browse/BEAM-3061">Support “done notification” for Bigtable</a></li>
+  <li><a href="https://issues.apache.org/jira/browse/BEAM-384">Streaming BigQueryIO should support user-provided IDs (inefficient implementation of “retry dedup”)</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/beam-send-pubsub/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

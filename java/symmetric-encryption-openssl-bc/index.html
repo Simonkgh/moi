@@ -1,0 +1,231 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Symmetric Encryption in Java - OpenSSL-with-bouncycastle Example</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        <p>(<a href="/java/symmetric-encryption">back to article</a>)</p>
+
+<h1 id="decrypt-data-that-has-previously-been-encrypted-via-openssl-using-a-password">Decrypt data that has previously been encrypted via OpenSSL using a password</h1>
+
+<p>This example uses the BouncyCastle native APIs directly. The standard Java distribution does not support the slightly non-standard OpenSSL approach to mapping (password,salt) into (key,IV) so using BouncyCastle is necessary anyway. It is possible to use BouncyCastle via the standard java Cipher API, but why bother? Using the BC apis directly also gives access to 256-bit keylengths.</p>
+
+<pre><code>  import org.bouncycastle.crypto.*;
+  ...
+
+  public class OpenSSLAesDecrypter {
+    private static final int AES_NIVBITS = 128; // CBC Initialization Vector (same as cipher block size) [16 bytes]
+
+    private final int keyLenBits;
+
+    public OpenSSLAesDecrypter(int nKeyBits) {
+      this.keyLenBits = nKeyBits;
+    }
+
+    public byte[] decipher(byte[] pwd, byte[] src) {
+        // openssl non-standard extension: salt embedded at start of encrypted file
+        byte[] salt = Arrays.copyOfRange(src, 8, 16); // 0..7 is "SALTED__", 8..15 is the salt
+
+        try {
+            // Encryption algorithm. Note that the "strength" (bitsize) is controlled by the key object that is used.
+            // Note that PKCS5 padding and PKCS7 padding are identical.
+            BlockCipherPadding padding = new PKCS7Padding();
+            BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()), padding);
+
+            CipherParameters params = getCipherParameters(pwd, salt);
+            cipher.reset();
+            cipher.init(false, params);
+
+            int buflen = cipher.getOutputSize(src.length - 16);
+            byte[] workingBuffer = new byte[buflen];
+            int len = cipher.processBytes(src, 16, src.length - 16, workingBuffer, 0);
+            len += cipher.doFinal(workingBuffer, len);
+
+            // Note that getOutputSize returns a number which includes space for "padding" bytes to be stored in.
+            // However we don't want these padding bytes; the "len" variable contains the length of the *real* data
+            // (which is always less than the return value of getOutputSize.
+            byte[] bytesDec = new byte[len];
+            System.arraycopy(workingBuffer, 0, bytesDec, 0, len);
+            return bytesDec;
+        } catch (InvalidCipherTextException e) {
+            logger.error("Decryption failed");
+            return null;
+        } catch (RuntimeException e) {
+            logger.error("Decryption failed");
+            return null;
+        }
+    }
+    
+    private CipherParameters getCipherParameters(byte[] pwd, byte[] salt) {
+        // Use bouncycastle implementation of openssl non-standard (pwd,salt)-&gt;(key,iv) algorithm.
+        // Note that if a "CBC" cipher is selected, then an IV is required as well as a key. When using a password, Openssl
+        // *derives* the IV from the (pwd,salt) pair at the same time as it derives the key.
+        //
+        // * PBE = Password Based Encryption
+        // * CBC = Cipher Block Chaining (ie IV is needed)
+        //
+        // Note also that when the IV is derived from (pwd, salt) the salt **must** be different for each message; this is
+        // the default for openssl - just make sure to NOT explicitly provide a salt, or encryption security is badly affected.
+        OpenSSLPBEParametersGenerator gen = new OpenSSLPBEParametersGenerator();
+        gen.init(pwd, salt);
+        CipherParameters cp = gen.generateDerivedParameters(keyLenBits, AES_NIVBITS);
+        return cp;
+    }
+  }
+</code></pre>
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>

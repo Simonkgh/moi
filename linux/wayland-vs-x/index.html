@@ -1,0 +1,257 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Wayland versus X - a quick summary</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Wayland versus X - a quick summary</h1>
+    <aside>First published on: October 5, 2014</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <p>A new display server has been developed to compete with the traditional X Window System - Wayland <sup id="fnref:waylandapi" role="doc-noteref"><a href="#fn:waylandapi" class="footnote" rel="footnote">1</a></sup>. There appears to be a lot of confusion around about what Wayland does, and how it compares to X.</p>
+
+<h1 id="overview">Overview</h1>
+
+<p>A <em>display server</em> acts as an intermediary between applications and physical input or output devices, allowing multiple applications to share use of common mouse/keyboard and graphics cards. Typically, sharing of input devices means that ‘the application with focus’ receives input events, and typically sharing of graphics is done by allocating to each application one or more ‘windows’ (graphics areas which are subsets of the actual screen).</p>
+
+<p>Wayland and X both provide their own API that applications can use to receive input events and tell the server what output to display. However most desktop applications don’t interact with a display server directly, instead using <em>widgets</em> from some toolkit such as GTK or QT; the implementation of these widgets (ie toolkit code) interacts with the display server but apps just configure the widgets to generate the desired output, and receive input via ‘events’ from the widgets. The applications therefore interact with the toolkit and not the display server, and don’t actually care which display server is in use. Unfortunately there are some less common operations that toolkits don’t cover, requiring the app to interact directly with the display server; examples are screensavers and screenshot-capturing apps - ie the kind of apps provided as part of a Desktop Environment (DE) such as Gnome or KDE.</p>
+
+<p>Wayland really is a system that focuses exclusively on device handling, while X does that and a lot more. It is therefore reasonable to think of Wayland as an extraction (factoring out) of the lowest layers of X. In fact, the Wayland project also provides an application named XWayland which is basically the “high level” part of X that remains after the low-level stuff has been factored out - and that can then run on top of Wayland to provide exactly the same functionality that the full X implementation previously did.</p>
+
+<p>So what is the point of splitting X into two and then rewriting the lower layer? There are many benefits including the following:</p>
+
+<ul>
+  <li>The rewrite really is significant, ie Wayland’s handling of input and output devices is much improved over the original X implementation.</li>
+  <li>Systems (particularly embedded ones) can choose to just run Wayland without XWayland for reduced code-size and memory usage.</li>
+  <li>Graphics libraries such as QT and GTK can optionally connect directly to Wayland rather than use the X11 protocol; this can provide better performance, smoother window dragging, etc. The disadvantage is that apps running against a toolkit configured in this mode cannot use the traditional X remoting protocols to send the output to some other server.</li>
+  <li>Handling devices requires elevated system privileges, so at least parts of X must be run with these privileges, and it was very regular for bugs to be uncovered in X which allowed supposedly non-privileged X client applications to misuse X to get access to these higher privileges. Wayland is much smaller, so security problems are expected to be fewer, and XWayland runs as a layer on top of Wayland rather than integrated into it so privilege escalation bugs are much less likely to occur.</li>
+</ul>
+
+<h1 id="more-background">More Background</h1>
+
+<p>An X Server (the server component of the overall X Window System) is an application that runs on a computer with a graphics card. A graphical application can then use X <em>client</em> libraries to send drawing commands over the network to an X server, eg “draw a line”, “draw a box”, “display this bitmap”, “display this string in font zzz”. Note that the concept of “client” and “server” are the reverse of perhaps more familiar examples such as database client/database server - the X server runs on your desktop, the client can run somewhere in a datacenter. Think about apps processing major datasets and then generating some output…makes sense then for the graphical “client” (data analyser) to be on the larger computer. And as always, multiple clients (apps) can connect to a single server (the system with a screen attached).</p>
+
+<p>The problem with X is that the whole design no longer matches what client apps want to do - eg interact with 3d-capable GPUs, use exactly the fonts they want (rather than asking the X server to use the font with a specific name, and hoping the server has that font available). And even when running X client and server on the same host, communication still goes over a network socket; some optimisations are made but this nevertheless adds latency. And the set of commands that X supports is now so large that the server is huge - making it buggy, full of security holes, and difficult to maintain.</p>
+
+<p>To resolve some of the limitations of X with regards to hardware graphics acceleration (using 3d-capable GPUs etc), an X extension was created which allows a client application to ask X to allocate a “window buffer”, directly tell the GPU to render graphics into this buffer, and then ask X to display that buffer’s content on the screen. While very popular, this extension does not work well across networks - it really requires the X client application to be running on the same computer that the screen is attached to - which bypasses one of the greatest advantages X has over simpler protocols.</p>
+
+<p>Wayland defines only a very simple API for clients : it accepts bitmaps only, no “draw a line” stuff, ie very similar to the way X can perform local rendering. And Wayland provides no network support - clients are local only. Client apps can then code directly against the Wayland APIs (ie pass bitmaps, often generated by interacting directly with a GPU to render 3d graphics into a buffer). Fast, simple. Or clients can code against the original X API, and then communicate in the traditional way with the XWayland application (or equivalent)  which which executes the commands and passes the resulting buffer to the local Wayland server.</p>
+
+<p>In practice of course, most apps will code to the GTK or QT apis, and it is GTK/QT which is responsible for interacting with Wayland or X.</p>
+
+<p>Note that there is significant overhead imposed by the X client-&gt;network-&gt;server separation that <em>many</em> people never need. Wayland turns this around - it assumes client/server are on same host, and supports over-the-network communication as an extra layer on top by having some “proxy client” handle network traffic and then act as a normal local client to the Wayland server. XWayland is just one possible ‘proxy’ application.</p>
+
+<h1 id="remoting-with-wayland">Remoting with Wayland</h1>
+
+<p>Nowadays most desktop users only run apps locally on the desktop, ie the client/server are on the same machine. But I’m old enough to remember the “thin client” wave, where the latest coolest thing for businesses was to have a low-powered desktop system that was just screen/keyboard/operating-system/X11, and all the apps were run on servers. The networking ability of X made this possible. And even now, sysadmins often appreciate the ability to run some admin-type apps remotely.</p>
+
+<p>The easiest way to run client applications on a different host than the screen is attached to is simply to use the traditional X protocol on the client, and an X implementation running on top of Wayland on the server (eg XWayland). Or more likely, just ensure that an app that uses GTK or QT is running with the GTK or QT library configured to make calls to the X client libraries - and thus generate X-format output. This mode will be supported for a long time.</p>
+
+<p>The alternative is to run an app against a GTK or QT library which is configured to use native Wayland calls as its <em>back end</em>. And then provide a “proxying” wayland library which provides the standard Wayland API (ie appears to the app to be a normal Wayland server). However this proxy compresses the bitmaps it receives from the application and sends them over the network to a corresponding proxy on the target host which uncompresses the bitmaps and passes them to a real Wayland display server for output. Events generated by input devices are passed back in the equivalent manner. The elegance of this solution is that (a) the client app uses the same API, whether talking to a local Wayland display server or a local proxy, and (b) there are no special hooks in the Wayland display server implementation needed to implement this proxying; the network protocol has been cleanly layered on top. Work on the first implementation of this approach is currently in progress.</p>
+
+<p>There is some debate about how efficient this “wayland proxying” approach is going to be. Some people say that transferring images is inherently inefficient compared to the X approach of transferring drawing commands. Others say that it will actually be more efficient. What is certain is that existing tools such as Citrix and RDP are very popular in the Windows world as ways to achieve exactly what X builds in (remote graphical applications) - and use this approach of sending images over the network rather than graphics commands.</p>
+
+<p>Note that having a wayland proxy transfer images is very much a per-window remoting approach, rather than a full “remote desktop” solution.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://en.wikipedia.org/wiki/Display_server">http://en.wikipedia.org/wiki/Display_server</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/X_Window_System">http://en.wikipedia.org/wiki/X_Window_System</a></li>
+  <li><a href="http://bobthegnome.blogspot.de/2014/03/why-display-server-doesnt-matter.html">http://bobthegnome.blogspot.de/2014/03/why-display-server-doesnt-matter.html</a></li>
+  <li><a href="http://aseigo.blogspot.de/2014/03/more-on-why-display-server-does-matter.html">http://aseigo.blogspot.de/2014/03/more-on-why-display-server-does-matter.html</a></li>
+  <li><a href="https://fosdem.org/2016/schedule/event/enlightenment_of_wayland/attachments/slides/1233/export/events/attachments/enlightenment_of_wayland/slides/1233/Tizen_E_Wayland.pdf">https://fosdem.org/2016/schedule/event/enlightenment_of_wayland/attachments/slides/1233/export/events/attachments/enlightenment_of_wayland/slides/1233/Tizen_E_Wayland.pdf</a></li>
+</ul>
+
+<h1 id="footnotes">Footnotes</h1>
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:waylandapi" role="doc-endnote">
+      <p>Actually, Wayland is just an abstract API that can have multiple implementations. The term ‘Wayland’ is used above to mean either the API or some compatible implementation depending on context. For the purposes of this article, the distinction isn’t particularly important. <a href="#fnref:waylandapi" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/wayland-vs-x/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

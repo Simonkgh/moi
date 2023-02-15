@@ -1,0 +1,928 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Linux Wireless Stack Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Linux Wireless Stack Overview</h1>
+    <aside>First published on: September 2, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="intro">Intro</h1>
+
+<p>This article gives a brief overview of how wireless networking works on Linux (as a client), and in particular which userspace applications communicate with the kernel in which way.</p>
+
+<p>Only the typical client-&gt;access-point (ie “AP mode” or “infrastructure mode”) connectivity is discussed here, where some central device (often a router) acts as the hub of a wireless network, and devices (eg laptops) connect to it as clients.</p>
+
+<p>For information on rarer setups such as a Linux server <em>being</em> an access-point, or ad-hoc networks, you’ll have to look elsewhere..</p>
+
+<h1 id="the-components">The Components</h1>
+
+<p>A rough diagram of the general architecture (see later text for more detail):</p>
+
+<!--img src="/linux/wireless-stack-png.png" width="951" height="1345"/-->
+<p><img src="/linux/wireless-stack-png.png" width="600" height="800"></p>
+
+<p>A wireless driver plugs in to the network stack like wired drivers do - a source and sink of layer-2 network packets.</p>
+
+<p>The “state” of the wireless link (bringing it up) is managed outside of the wireless stack. Selecting which base-station to connect to, and negotiating connection parameters (in particular, encryption keys) is done by the userspace wpa_supplicant application. Allocating an address dynamically is done by a dhcp client (mostly same as with fixed networks, with a few quirks).</p>
+
+<p>There is usually another layer over wpa_supplicant and the dhcp client which manages “policy” for connections, ie which connection to choose when (wpa_cli, systemd-networkd, NetworkManager, Wicd, etc).</p>
+
+<p>User interaction (eg prompting for a password) is done by yet another layer.</p>
+
+<p>The ifupdown tools and related scripts are discussed, but are rarely used for managing wireless connections these days.</p>
+
+<h1 id="device-drivers">Device Drivers</h1>
+
+<p>The kernel scans the PCI bus on startup, will detect wireless devices (even on-board ones will be accessible via the PCI bus), and will create sysfs entries for them. Normally, udev will then load the relevant drivers automatically, those drivers will load any necessary firmware, and the drivers will register the “physical network interfaces” with the network stack. However these interfaces will be in a “down” state until userspace takes relevant action to activate them.</p>
+
+<p>The following device-drivers are needed for wireless:</p>
+
+<ul>
+  <li>mac80211 - provides a common framework for wireless drivers - ie used by the device-specific driver, and provides file <code>/proc/net/wireless</code>
+</li>
+  <li>cfg80211 - provides generic configuration API for wireless drivers; see nl80211/cfg80211 later in this document.</li>
+  <li>device-specific drivers, eg for modern intel wireless chips, <code>iwlwifi</code> and <code>iwlmvm</code>.</li>
+</ul>
+
+<p>Once all device-drivers have been correctly initialised:</p>
+
+<ul>
+  <li>file <code>/proc/net/wireless</code> will have an entry for the interface</li>
+  <li>file <code>/proc/net/dev</code> will have an entry for the interface</li>
+  <li>command <code>ifconfig --all</code> will show the available interfaces</li>
+</ul>
+
+<p>There are two main APIs used by userspace to communicate with wifi drivers: nl80211/cfg80211 (new) and wext (old). Most actively-maintained drivers support nl80211/cfg80211; most <em>also</em> support the older wext API.</p>
+
+<p>The nl80211/cfg80211 interface is based around passing messages over a netlink socket (thus the ‘nl’ prefix). The advantage of a netlink-based design is that it is well suited for streaming a sequence of events from kernel to userspace. Userspace can also send messages in the other direction to perform configuration operations. See <code>/usr/include/linux/nl80211.h</code> for more details.</p>
+
+<p>The older wext (“wireless extensions”) interface is based on ioctl operations on a network socket filedescriptor. The socket state doesn’t matter much, and is usually never bound to anything or otherwise used; it is just a handle which causes the ioctl operations to be forwarded to the kernel network stack. The datastructure passed to the ioctl normally specifies the name of the interface which the operation is to be applied to. Unlike the nl80211 API, there is no easy way to “subscribe” to events from the kernel. The wext interface has fewer features than the nl80211 interface, and is effectively deprecated.</p>
+
+<p>Userspace tools (eg wpa_supplicant) then use these APIs to talk to compliant device-drivers.</p>
+
+<p>The physical radio-handling circuitry of a wifi network device is often referred to as a “PHY”.</p>
+
+<p>One important part of wireless driver management is “regulation compliance” which ensures that the frequencies and broadcast strengths used by the driver comply with the laws of the location in which the device currently is.</p>
+
+<h1 id="ssids-and-bssids-and-other-networking-details">SSIDs and BSSIDs and other networking details</h1>
+
+<p>Before we go further, here’s some quick background/definition-of-terms for important wireless terminology.</p>
+
+<p>An SSID is a “logical network name”. Multiple access points (APs) can provide the same logical SSID, but each AP will have a unique BSSID address. Normally, a client attaches to an <em>SSID</em> and the wireless software automatically chooses the strongest signal (ie the best BSSID).</p>
+
+<p>A <a href="https://en.wikipedia.org/wiki/Station_%28networking%29">station</a> is any device capable of performing wifi operations (whether as client or server).</p>
+
+<p>Wireless networks are usually based around access points which act as “servers” that client devices connect to; this is also called “infrastructure mode”. In this setup, each <em>access point</em> is the hub for multiple clients, and the access point normally has a wired connection over which it forwards data to the internet. Each access-point has a unique MAC address. An access-point periodically sends out <a href="https://en.wikipedia.org/wiki/Beacon_frame">beacon frames</a> which announce its existence to other nearby devices (clients); these frames are sent on on the channel (frequency) that the access-point uses for its network. Clients are expected to listen for a short period on each channel in turn, in order to detect these beacon frames. Clients can also “actively probe”, ie send out a “probe request” without having seen a beacon frame, and the access-point will respond if there.</p>
+
+<p>A beacon frame includes the BSSID (aka MAC address) of the access-point and the SSID (logical network name) that it offers.</p>
+
+<p>An access-point can be configured with a “hidden” SSID, in which case the beacon frames are sent with an empty SSID field. Any client device which wishes to connect to a hidden network must look for beacon frames without SSIDs and then perform a <em>connection attempt</em> to each one, until it finds the right access-point. During the connection-attempt, the SSID is sent by the client in plain-text, thus revealing its existence; as a result hidden SSIDs are <a href="https://en.wikipedia.org/wiki/Network_cloaking">not very effective</a>.</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="http://www.juniper.net/documentation/en_US/network-director1.5/topics/concept/wireless-ssid-bssid-essid.html">Juniper: wireless terminology</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Service_set_%28802.11_network%29">Wikipedia: SSID</a></li>
+</ul>
+
+<h1 id="the-kernel-ip-network-stack">The Kernel IP Network Stack</h1>
+
+<p>The Linux kernel has a large subsystem dedicated to managing MAC-based and IP-based network traffic. Describing this layer is out-of-scope for this document, except to mention that:</p>
+
+<ul>
+  <li>it exists</li>
+  <li>drivers for network devices register with it</li>
+  <li>it provides a number of files in sysfs that provide information about the network state</li>
+  <li>opening a “network socket” causes the network stack to return a file-descriptor</li>
+  <li>syscalls which operate on a network-related file-descriptor are forwarded to the networking code</li>
+  <li>it provides asynchronous notifications of some interface changes via netlink sockets</li>
+</ul>
+
+<p>In general, drivers take care of “layer 2” details (MAC layer), and leave the responsibility of building or parsing layer-3 packets to the networking stack.</p>
+
+<p>The network stack maintains a set of “state flags” for each interface which userspace can query via ioctl or sysfs/procfs (see headerfile linux/if.h):</p>
+
+<ul>
+  <li>IFF_UP : the “administrative status”, ie whether the system/sysadmin <em>wants</em> the interface to be active</li>
+  <li>IFF_LOWER_UP : physical layer active, sometimes referred to as “carrier present”</li>
+  <li>IFF_RUNNING; the “operative status”, ie actual interface state - whether it is correctly initialised (when IFF_UP is false, this should be false too).</li>
+  <li>IFF_MULTICAST, IFF_BROADCAST</li>
+</ul>
+
+<p>Tools may set/clear IFF_UP. Flag IFF_LOWER_UP is read-only. I’m still not sure about IFF_RUNNING..</p>
+
+<p>The current flags for an interface can be seen in the output of <code>/sbin/ifconfig -a</code>.</p>
+
+<p>TODO: can DHCP only be done on interfaces with IFF_MULTICAST?</p>
+
+<p>See: <a href="https://www.kernel.org/doc/Documentation/networking/operstates.txt">Kernel docs: networking operstates</a></p>
+
+<h1 id="udev">udev</h1>
+
+<p>Udev is responsible for loading the correct wireless drivers for the available hardware, <a href="/linux/udev-overview">as usual</a>.</p>
+
+<p>Udev also has rules to assign “stable” names to interfaces; it (somehow) allocates names like <code>sit0</code> (wired) or <code>wlp3s0</code> (wireless) to the interfaces, where these names are based on which physical location the devices are attached to the PCI bus at, rather than the order that they happened to be registered with (as was the case with the old <code>eth*</code> and <code>wlan*</code> style names). Prefix “wl” stands for “wireless lan”; “p” identifies the PCI bus, and “3s0” is the address on the bus (try “lspci”). Prefix “ww” is for wireless wan (not very common). Within a container, virtual (“veth”) interfaces are named <code>ve*</code>.</p>
+
+<p>The old-style names can, however, be restored (stably) by defining relevant (per-machine) udev rules which map the stable names assigned above to any desired strings (eg sit0-&gt;eth0 and wlp3s0-&gt;wlan0). Alternatively, “.link” files can be created under <code>/etc/systemd/network</code> on any udev-based system (doesn’t require systemd-init) which can assign a name based on many criteria including pci-path and/or mac-address; see “man systemd.link”.</p>
+
+<p>Udev does <em>not</em> create any device-nodes in <code>/dev</code> (or anywhere elsewhere) for network drivers; userspace interacts with network interfaces via the socket call, the bind/listen/etc calls, ioctl calls and netlink sockets.</p>
+
+<p>If certain network interfaces require parameters to be set which other tools (eg wpa_supplicant or dhcp-client) don’t set themselves, then a custom udev rule can be written; the rule runs when the interface is first registered by the kernel and can use tools like ifconfig to push any desired settings into the interface/driver.</p>
+
+<h1 id="network-related-syscalls">Network-related Syscalls</h1>
+
+<p>The <code>socket</code> systemcall allows connections to many different kernel components. When the “domain” parameter is AF_INET, then the file-descriptor returned is associated with the IP network stack. Later invocations of socket-related syscalls such as bind, accept, listen, read or write on that file-descriptor will be forwarded to the network stack for handling.</p>
+
+<p>Applications using the socket calls to send or receive data over a network don’t need to be aware of the fact that the network is carried over a wireless link.</p>
+
+<p>Note that applications do <em>not</em> interact with the wireless driver via a device-node; instead they use the socket-related system calls. Neither the <code>udev</code> daemon nor any other tool creates any device-nodes for wired or wireless network interfaces.</p>
+
+<p>The ioctl systemcall can be applied to any filedescriptor, and specifies the “type of request” as an integer that is interpreted by whichever subsystem is associated with that filedescriptor. When the file-descriptor is associated with the networking subsystem then there is a large number of possible request-types, including operations to set the IP address and network mask, to set the interface “state flags”, etc.</p>
+
+<p>A userspace application can get asynchronous <em>notifications</em> of changes to interfaces by creating a netlink socket; first create a filedescriptor with <code>socket(PF_NETLINK, SOCK_RAW, NETLINK_ROUTE)</code> then subscribe to notifications via <code>bind(sock, struct sockaddr, size)</code> where the sockaddr has family=AF_NETLINK and groups=RTMGRP_LINK. In particular, change of link state from !IFF_UP to IFF_UP triggers a notification message. A userspace app can also <em>update</em> some driver properties by <em>sending</em> netlink messages to the kernel. AFAICT, this is done to set the IFF_RUNNING flag. See the following references for more detail:</p>
+
+<ul>
+  <li><a href="http://linux.die.net/man/7/netlink">netlink manpage</a></li>
+  <li><a href="http://man7.org/linux/man-pages/man7/rtnetlink.7.html">rtnetlink manpage</a></li>
+</ul>
+
+<h1 id="wifi-scanning">Wifi Scanning</h1>
+
+<p>To connect to an access point, it is first necessary to find it.</p>
+
+<p>As noted, access points periodically send out “beacon frames” with a BSSID (ie MAC address) and SSID (logical network identifier); the interval is typically 100msecs. A wireless driver can <em>passively</em> scan by listening for a short period (100msec or so) on each channel (frequency) the physical radio circuits support. A wireless driver can also <em>actively</em> scan by sending out <em>probe frames</em> on each channel; the probe can contain an SSID in which case just <em>that</em> access-point will respond or can include an empty SSID in which case <em>every</em> access-point on that frequency will respond (“wildcard scan”).</p>
+
+<p>When performing an <em>active scan</em>, the driver needs to be given a list of SSIDs to probe for (marked as scan_ssid=1 in wpa_supplicant.conf, see later). There is a (driver-specific) maximum number of such SSIDs that can be specified per scan.</p>
+
+<p>As noted, a beacon frame for a hidden network will have an empty SSID, which isn’t much use. To find hidden networks, an <em>active scan</em> must be used rather than a passive one, ie send out probes for specific SSIDs.</p>
+
+<p>Scanning (passive or active) can be triggered over the nl80211 API via netlink messages NL80211_CMD_TRIGGER_SCAN or NL80211_START_SCHED_SCAN; the SSIDs to actively probe for can be specified with optional nested NL80211_ATTR_SCAN_SSIDS values.</p>
+
+<p>Scanning can be triggered over the wext interface via an ioctl, but the nl80211 API is more flexible/featureful.</p>
+
+<p>TODO: it is a common case for a hidden network to be provided by just a single device/BSSID (home router scenario). In this case, it would be nice to probe for that SSID only if a passive-scan reveals that the BSSID is present (to avoid probing for that SSID when it is not in range). I wonder if this is supported by wpa_supplicant…</p>
+
+<h1 id="activating-an-interface">Activating an Interface</h1>
+
+<p>Making a wireless interface “active” involves a careful dance of ifconfig, iwconfig and scripts (often managed via ifup).</p>
+
+<h2 id="ifconfig">ifconfig</h2>
+
+<p>This command comes from the ‘inetutils’ package, and is maintained by the GNU foundation.</p>
+
+<p>The ifconfig uses procfs (<code>/proc/net/dev</code> and <code>/proc/net/wireless</code>) to view the state of the network stack, eg which interfaces exist and which are “up”.</p>
+
+<p><code>ifconfig</code> can also be used to configure properties associated with an interface, eg:</p>
+
+<ul>
+  <li>mark an interface as “up”; this just sets a <em>flag</em> in the kernel network stack to indicate the system <em>wants the interface to be active</em>
+</li>
+  <li>assign static IP addresses to interfaces: <code>ifconfig eth0 127.0.0.2</code> will initialise eth0 (and implicitly mark it “up”). Other address-types can be specified too, by providing an “aftype” parameter.</li>
+  <li>many other properties</li>
+</ul>
+
+<p>The ifconfig program uses ioctl syscalls of form <code>ioctl(int sfd, SIOCSIF*, struct ifreq)</code> to update the driver parameters. The “struct ifreq” is reused multiple times, but one thing it always has set is the <code>-&gt;name</code> field which is the network interface name. The “sfd” value is an arbitrary AF_INET socket filedescriptor.</p>
+
+<p>Calling “ifconfig someiface up” triggers an ioctl call with SIOCSIFFLAGS, passing a “struct ifreq” containing the interface-name and the new set of flags including IFF_UP. Calling <code>ifconfig someiface 10.2.3.4</code> triggers an ioctl with SIOCSIFADDR, passing a “struct ifreq” containing the interface-name and the new IP address for that interface. The file-descriptor used in that ioctl call must be associated with the networking stack (ie be a network socket filedescriptor) but doesn’t need to be “bound” to anything.</p>
+
+<p>Marking an interface as “up” doesn’t actually achieve much. The network stack won’t let the interface be <em>used</em> unless it is marked “up”, but marking an interface as “up” isn’t enough to make it usable - it must also have appropriate configuration parameters set, have an IP address, and in the case of wireless have a valid encrypted “session”.</p>
+
+<p>Interestingly, on some systems the “loopback” interface (normally called “lo”) is configured on startup via: <code>ifconfig lo 127.0.0.1 up</code></p>
+
+<h2 id="ifup-and-ifdown">ifup and ifdown</h2>
+
+<p>The “ifupdown” package provides applications named ifup,ifdown,ifquery (these are all actually symlinks to the same executable).  These applications purely manage invocation of a set of “hook scripts”; they do not communicate with the kernel in any way, do not interact with device-nodes, etc. - though the scripts they execute might. Usually, some script will invoke “ifconfig someiface up” to actually enable an interface.</p>
+
+<p>NOTE: ifupdown is not widely used in modern desktop or mobile systems (replaced by NetworkManager, ConnMan, Wicd, etc); in particular it does not work very well with wireless. It might be useful in some servers. It is interesting background but if your interest is primarily on wireless-for-laptops then you can skip this section (and ignore future references to ifupdown) if you wish.</p>
+
+<p>The file <code>/etc/network/interfaces</code> defines the set of interfaces that ifup and family will manage, and the associated parameters.</p>
+
+<p>The ifupdown commands are always passed <em>physical</em> interface names on the commandline; the config file can have entries of form “mapping {phys_iface_name}” which allows a <em>user-defined script</em> to be specified which can map a physical interface name to a logical name. If no “mapping” entry matches the physical interface specified on the commandline, then logical-name=physical-name.</p>
+
+<p>Each “iface {logical-name} {addrfamily} {method}” entry is followed by zero or more lines holding a (key,value) pair. These define “options” that will be passed to scripts as environment-variables. Each line gets transformed to an environment variable of form “IF_key=value”. However if the option-name matches a <em>phase</em> (see below) then it must instead have a value which is the name of a <em>script to run</em>.</p>
+
+<p>ifupdown defines the following “phases” at which scripts are run: “pre-up”, “up”, “post-up”, “pre-down”, “down”, “post-down”.  When a command like “ifup eth0” is run:</p>
+
+<ul>
+  <li>the ifupdown “state cache file” <code>/run/network/ifstate</code> is checked to see whether the interface is currently up (if no entry is there, then it is down).</li>
+  <li>the <em>mappings</em> from the config-file are applied to convert physical name eth0 to a logical name (if none, logical=physical)</li>
+  <li>the <code>iface</code> entry for that logical name is located, and the keywords on the same line plus the following list of “options” are read</li>
+  <li>for each “phase” (in this case “pre-up”, “up”, “post-up”), invoke every script under <code>/etc/network/if-{phase}.d</code>, passing it the following environment variables:
+    <ul>
+      <li>IFACE: the physical interface name</li>
+      <li>LOGICAL: the logical interface name</li>
+      <li>ADDRFAM: the address family (usually “inet”)</li>
+      <li>METHOD: how to allocate a network address: “dhcp” or “manual”</li>
+      <li>MODE: “start”</li>
+      <li>PHASE: the phase</li>
+      <li>some other standard parameters including VERBOSITY,PATH</li>
+      <li>the “options” from the iface definition in the config-file (with key prefixed with IF, eg IF_ADDRESS)</li>
+    </ul>
+  </li>
+  <li>finally, a new entry is added to <code>/run/network/ifstate</code> of form “phys_iface_name=logical_iface_name”, to mark that the interface is “up”.</li>
+</ul>
+
+<p>If extra “option” parameters are passed on the commandline (eg “-o FOO=bar”) then those are treated just as if they were in the config-file, ie converted to environment-vars of form “IF_FOO=bar” - unless the key is one of the magic “run a script” names.</p>
+
+<p>Running ifdown is similar; the mode is “stop” and the phases are (“pre-down”,”down”,”post-down”). At the end, the corresponding line is removed from <code>/run/network/ifstate</code>.</p>
+
+<p>When invoked as “ifup -a”, the above process will be applied to every “iface” definition in the config file which is marked as “auto”. The standard boot process invokes (or used to invoke?) “ifup -a”. This is similar to auto-mount entries in <code>/etc/fstab</code>.</p>
+
+<p>Note that <code>/run/network/ifstate</code> can potentially get out-of-sync with the <em>real</em> state of the network interface (as reported by ifconfig which really queries the kernel). I don’t know why ifupdown bothers to keep its own cache of interface state when it is so easy to query the real thing…</p>
+
+<p>Note that although ifupdown supports the METHOD parameter (“dhcp” or “manual”), it doesn’t <em>itself</em> do anything with it; that is just a string that some script might be able to do something with.</p>
+
+<p>NetworkManager replaces the ifupdown tools, but does runs some of the ifupdown scripts (at least partially); see section on NetworkManager for more details.</p>
+
+<p>See “man interfaces” for more information.</p>
+
+<h2 id="wireless-extensions-aka-wireless-tools">Wireless Extensions (aka “wireless-tools”)</h2>
+
+<p>There is a software package called <a href="https://en.wikipedia.org/wiki/Wireless_tools_for_Linux">wireless extensions for Linux</a> which provides programs named iwconfig, iwspy, etc. This is <em>partly</em> related to the “wext api” used to communicate with wifi drivers: the applications included in this package use the wext ioctl operations. However other tools also use that API (and the api deprecated anyway, in favour of nl80211).</p>
+
+<p>As with ifupdown, this software is not usually used on modern desktop systems, so this section can be skipped if you are interested in wireless-on-laptops.</p>
+
+<p>This package also provides some ifup/ifdown scripts related to wireless, which depend on iwconfig, ifconfig. These scripts get installed under <code>/etc/network/if-{phase}.d</code>.  On “ifup” these scripts execute the following during phase “pre-up”:</p>
+
+<ul>
+  <li>check whether the specified interface is wireless; if not it does nothing</li>
+  <li>set driver parameters using iwconfig</li>
+  <li>tell the kernel to enable the interface via “ifconfig iface up”  (which, as mentioned earlier, performs an ioctl with request-type SIOCSIFFLAGS to update the “flags” associated with the specified interface).</li>
+</ul>
+
+<p>Here’s a nice comment from the script “/etc/network/if-pre-up.d/wireless-tools” on my debian system:</p>
+
+<pre><code># The wireless driver madness:
+#
+# - Some drivers want everything to be configured
+#   before bringing the interface up
+# - Some drivers want everything to be configured
+#   after bringing the interface up
+# - Some drivers want some parameters before, other
+#   parameters after bringing the interface up
+#
+# So, we try to set every parameter when the interface is still down,
+# and remember which ones failed to be configured properly.
+# If some failed, we bring the interface up, and try the failed ones again.
+</code></pre>
+
+<p>That script then uses <code>iwconfig</code> to set parameters, <code>ifconfig up</code> to activate the interface, then <code>iwconfig</code> to set all parameters again.</p>
+
+<p>All the parameters necessary for the wireless driver (eg WIRELESS_MODE, WIRELESS_RATE, WIRELESS_CHANNEL) can be specified in the “iface” block in file <code>/etc/network/interfaces</code>; they will be passed to the wireless-extensions script as environment variables and the script passes them on to the driver. Alternatively, such “static” settings can often be performed from a udev rule when the interface is first registered.</p>
+
+<p>Note that this step doesn’t actually select a “base station” to connect to, ie the network interface is “up” but not yet connected to anything. That is the job of wpa_supplicant..</p>
+
+<p>If a fixed IP-address is desired for the wireless interface, then that address should simply be defined in the <code>/etc/network/interfaces</code> file, and the wireless-tools script will pass those values through to the network stack via iwconfig/ifconfig. However in most cases, DHCP is desired for wireless networks, in which case a later layer needs to take care of that.</p>
+
+<h1 id="wpasupplicant">wpa_supplicant</h1>
+
+<p>wpa_supplicant handles <em>choosing</em> and <em>signing in</em> to a wireless access-point. Once this process is complete, wpa_supplicant sets the IFF_RUNNING flag on the interface state then sits “dormant” (ie the wireless driver does the actual encryption/decryption) unless something significant happens such as loss of connection to the access-point.</p>
+
+<p>wpa_supplicant has a number of other interesting features that will not be discussed further in this article:</p>
+
+<ul>
+  <li>
+    <p>it can manage the <em>server side</em> of a wireless connection, ie be the <em>access point</em> that other wireless devices connect to. This requires wpa_supplicant to be compiled with the CONFIG_AP option. The functionality is limited (more featureful tools such as hostapd are recommended by the wpa_supplicant documentation), but it is apparently sufficient to support using a normal Linux PC as a wireless access point.</p>
+  </li>
+  <li>
+    <p>it can set up ad-hoc/peer-to-peer/mesh wireless networks in which a group of stations network themselves without needing a “master access point”. This is particularly interesting for devices like mobile phones and tablets.</p>
+  </li>
+  <li>
+    <p>it can be used to perform EAP (Extensible Authentication Protocol) over a wired network; EAP was originally invented for wired networks. The documentation mentions the special configuration settings needed for this, in particular “ap_scan=0”.</p>
+  </li>
+</ul>
+
+<p>AFAIK, there are no competing open-source projects to wpa_supplicant. It is used in systems based on ifup/ifdown, spawned by dhcp-clients, and used by NetworkManager/Wicd/etc. It has a very clearly-delimited role (connect to access-point, encrypt, login) and every higher-level network connection tool relies on it for this role. It is therefore important to understand it.</p>
+
+<p>The authors of this software explicitly intend it to be portable across many operating systems (including Windows); it therefore has some features that feel slightly odd in a Linux environment.</p>
+
+<p>This software package includes the main “wpa_supplicant” application, a couple of helpers, and some scripts for use by ifup/ifdown.  The scripts are installed into <code>/etc/wpa_supplicant</code> and some symlinks to those scripts into <code>/etc/network/if-{phase}.d</code> such that they get executed immediately after the “wireless extensions” scripts when “ifup” is executed. When a wireless interface is “started” (ifup), the wpa_supplicant-related script does the following during phase “pre-up” (but after wireless-tools has run, so the interface <em>is</em> actually marked up):</p>
+
+<ul>
+  <li>starts a new (background) instance of wpa_supplicant to manage that interface (see later)</li>
+  <li>if ACTION_SCRIPT is defined then starts a new (background) instance of wpa_cli to manage the “policy” part of roaming (choosing a new network to connect to after disconnect)</li>
+</ul>
+
+<p>In other words, an instance of this application is created when a wireless interface becomes active, and remains running in the background until the interface terminates.</p>
+
+<p>The running wpa_supplicant instance which is managing an interface can be communicated with via a local socket; client applications use this to send commands and reconfigure it. The concept is somewhat like dbus, but app-specific as wpa_supplicant is cross-platform. This socket is dynamically created in the directory specified by commandline option “-C”, or by entry “ctrl_interface” in the wpa_supplicant configuration file. By default, this inter-process-communication socket is named <code>/run/wpa_supplicant/{ifacename}</code>. Multiple “client apps” may connect to a wpa_supplicant instance via its socket concurrently.</p>
+
+<p>An alternative approach is to run wpa_supplicant (usually as a daemon) without specifying any interfaces; it will then auto-detect and manage all available wireless interfaces which have been set to “up” (something the man-page doesn’t make very clear). In this case, a netlink socket is used to get notifications from the kernel when new interfaces appear, or existing ones are marked up (eg via “ifconfig iface up”). When a single wpa_supplicant process is managing multiple interfaces, it creates a separate “ctrl interface” socket for each network interface it is currently managing. Optionally, it can create a “global control socket”, but this isn’t the default.</p>
+
+<p>When compiled on a platform that has DBUS, wpa_supplicant also provides a dbus-based interface for queries and commands. See commandline option <code>-u</code>.</p>
+
+<p>wpa_supplicant can be given the location of a <em>configuration file</em> on its commandline; the standard location is <code>/etc/wpa_supplicant.conf</code>. The configuration-file specifies the “ctrl_interface” directory in which the comms sockets are created. It also has a <code>network{..}</code> block for each  wireless network SSID of interest, holding the credentials associated with each one (a password in the simplest case).</p>
+
+<p>When authenticating via password (ie using WPA_PSK), command <code>wpa_passphrase</code> can be used to encrypt the original plaintext password and generate a suitable wpa_supplicant configuration file.</p>
+
+<p>The daemon does its work of scanning radio frequencies, negotiating keys, submitting passwords, etc. via a set of “pluggable back ends” (which it calls “drivers”) so that the same software can work on multiple operating-systems. The backends used on Linux are “wext” (old) and “nl80211” (new). As described earlier, nl80211 is based around sending/receiving packets over a netlink socket while wext is based around ioctl syscalls. See “main event loop” later in this section.</p>
+
+<p>If wpa_supplicant is started with the explicit name of an interface, then it automatically sets interface flag IFF_UP (“up”) - clearly the system “wants” the interface up. When started without any interface names (“autodetect mode”), it does not set interfaces to up automatically; something else must mark them as “up” before they will be managed.</p>
+
+<p>To configure an interface once it has been marked “up”, wpa_supplicant selects an SSID (possibly scanning all radio-frequencies first), tells the driver to connect to that SSID, sets up encryption, authenticates, and finally sets the interface state to IFF_RUNNING (“running”).  When wpa_supplicant has completed its job, the wireless interface has a functioning layer-2 connection to a specific base-station, with an authenticated (and encrypted) session. However it does not yet have an IP (layer-3) address.</p>
+
+<p>If the wireless connection should have a <em>fixed</em> IP address (rare) then the settings can be been defined in <code>/etc/network/interfaces</code> in which case the wireless-tools ifup script will already have passed those values through to the network stack. Alternatively the address (and netmask) can be assigned via “<code>ifconfig iface address ...</code>”. Tools systemd-networkd, NetworkManager, etc have their own ways of achieving the same goal. If a dynamically-allocated address (DHCP) is desired, then see the section on dhcp clients below.</p>
+
+<p>wpa_supplicant handles switching between access-points that provide the same SSID, ie when one access-point goes out of range it can switch to another. The config-file also allows “priorities” to be assigned to networks, to cover the case where multiple known networks are available at the same time. However its configuration-file is not capable of expressing higher-level policy decisions; tools such as wpa_cli, systemd-networkd, NetworkManager/Wicd/ConnMan/etc can be used to perform that role. Of course if a system uses wireless but is always in the same location with the same networks available then those higher-level tools are not necessary.</p>
+
+<p>As described earlier, the “backends” use a combination of ioctl operations (eg SIOCSIFLAGS), a subscription to NETLINK_ROUTE netlink messages (to detect iface state changes), and sending NETLINK_ROUTE messages (eg IF_OPER_UP to set IFF_RUNNING) to manage the interface state within the kernel.  wpa_supplicant has a “main event loop” in which it blocks on a set of sockets until one of them has data available (select). The set of sockets includes the “ctrl interface” socket and the <em>netlink</em> socket subscribed to RTNETLINK events, ie changes in the status of kernel interfaces.</p>
+
+<p>The wpa_supplicant configuration file has a number of options:</p>
+
+<pre><code>
+# path to directory in which to create "ctrl interface" sockets
+ctrl_interface=/run/wpa_supplicant
+
+# Should wpa_supplicant modify this file?
+#
+# Optional. Boolean (0|1), default=0 (ie false).
+#
+# When a running wpa_supplicant process receives a command via its
+# "ctrl interface socket" which modifies the configuration, should
+# it write that change back to this file?
+update_config=1
+
+# Specifies how to choose from the available networks
+#
+# Optional (default recommended). Integer(0..2), default=1
+#
+#   1: wpa_supplicant requests scan results from the driver then chooses the
+#      "best match" from the list of network entries below. Note: works with
+#      hidden SSIDs too (as long as they are marked scan_ssid=1)
+#   0: Let driver choose the network to connect to. Used mostly for encryption
+#      over a wired network - where the driver doesn't scan at all.
+#   2: Just try connecting to the networks below in order until one succeeds
+#      (no scanning). Not recommended with nl80211.
+ap_scan=1
+
+# Which version of the EAP authentication protocol should be used?
+# EAPOL = Extensible Authentication Protocol Over LAN (aka IEEE802.1X),
+# originally designed for wired networks but later applied to wireless.
+#
+# Optional (default recommended). Integer(1..2), default=2
+#
+#   1:  use old eapol for backwards compatibility with old devices
+#   2:  use current eapol version 
+eapol_version=2
+
+# define a known network that might be available
+network={
+        # Specifies the order in which scanned networks should be used when
+        # multiple match; higher is better. For ties (multiple entries with
+        # the same priority) network is chosen based on security-policy and
+        # signal strength.
+        #
+        # Optional. Integer.
+        #
+        # Ignored when ap_scan=2; instead entries are tried in the order they
+        # are defined in the config-file.
+        priority=99
+
+        # The logical network to connect to.
+        # Mandatory.
+	ssid="&lt;text&gt;"
+
+        # Specify exact access-point device.
+        #
+        # Optional (not normally needed).
+        #
+        # Specifies which physical device to connect to, in case multiple devices
+        # provide access to the same ssid. Of course this means that connection
+        # to the SSID may fail if there is an access-point for that SSID within
+        # range but it is not the one specified here.
+	bssid=&lt;M.A.C. of Access Point&gt;
+
+        # A whitespace-separated list of acceptable authentication protocols;
+        # client selects a protocol that it and the server both accept.
+        # If the server supports none of the listed protocols then the client
+        # will not connect (a safety measure).
+        #
+        # For each protocol specified here, corresponding entries containing the
+        # related credentials must also be specified. When "WPA-PSK" is
+        # specified, there must be a "psk=" line. For other protocol types,
+        # other types of credentials are needed.
+        #
+        # Mandatory: one of the supported protocols (see docs)
+	key_mgmt=WPA-PSK
+
+        # The PSK password (may be encrypted via wpa_passphrase or unencrypted).
+        #
+        # May be a hex string (unquoted) or a plaintext string (quoted)
+	psk=string
+
+        # Whitespace-separated list of acceptable encryption protocols; client
+        # selects a protocol that it and the server both accept. If the server
+        # supports none of the listed protocols then the client will not connect
+        # (a safety measure). Defaults to all protocols known to the client.
+        #
+        # Optional but recommended (for safety)
+	proto=WPA2
+
+        # Whether to "actively probe" for this SSID. Not needed for broadcast
+        # SSIDs (though they can also be found this way); mandatory for hidden
+        # SSIDs.
+        #
+        # Optional: boolean(0|1): default=0
+	scan_ssid=1
+
+        # Specifies the kind of wireless connection to establish. Should always
+        # be left at the default (0) unless you really know what you are doing!
+        #
+        # Optional (default recommended). Integer(0..3).
+        #  0: connect to an access-point (managed mode)
+        #  1: set up adhoc network (peer-to-peer)
+        #  2: be an access-point
+        #  3: be a p2p group owner
+	mode=0
+
+        # More encryption protocol settings. Rarely needed.
+        # Optional. Whitespace-separated list of acceptable protocols. 
+	# pairwise=CCMP TKIP
+	# group=CCMP TKIP
+}
+</code></pre>
+
+<p>The primary source of the above information was files “config_ssid.h” and “config.h” from wpa_supplicant source-code.</p>
+
+<p>The “ap_scan” and “scan_ssid” fields are not well described in the wpa_supplicant man-pages, and there appears to be a lot of bad advice on internet forums; a brief summary may therefore be useful.</p>
+
+<p>As described earlier, a driver may perform a passive scan or an active scan. When ap_scan=1 and there are no networks with scan_ssid, then a passive scan is all that is necessary - ie the driver just needs to tune in to the different channels in sequence and listen long enough to receive the beacon-frames which access-points regularly transmit (normally every 100msecs or so); the frames contain both BSSID and SSID values. If an access-point has a hidden SSID, then the SSID in the beacon frame is blank. Alternatively, the driver may be given a list of SSIDs to scan for, in which case it switches to “active scanning” and for each channel it supports it sends out a “probe” for each SSID on the list; each access-point supporting that SSID will send a response (there may be multiple, each with a different BSSID) - even if the SSID is a hidden one. Note that the SSID is in “plain text” because every access-point needs to be able to read it to determine if the probe is for it. The list of SSIDs may contain an empty string, in which case a “wildcard probe” is sent which triggers a response from every access-point - but not for hidden networks.</p>
+
+<p>wpa_supplicant retrieves the results of the scan, chooses a BSSID and tells the driver to connect to it. The choice is guided by the “priority” field in the network-definitions from its configuration file, the signal strength, the encryption protocols available, etc.</p>
+
+<p>The above explains why a <code>network{..}</code> block describing a hidden SSID must use “scan_ssid=1”; it needs to turn on active scanning in order to see whether any access-points serving that SSID are in range.</p>
+
+<p>It also explains why a “hidden network” is not so hidden; probes for that SSID are sent in plain text.</p>
+
+<p>TODO: I can imagine several ways in which a connection to a hidden network could be made more efficient. None of these ideas are complicated, so I presume there are good reasons why they are <em>not</em> implemented but would very much like to know why:</p>
+
+<ul>
+  <li>
+    <p>When the BSSID for the hidden network is known (common in the case of a home-router, where there is only one BSSID for that SSID), passively scan for frames with that BSSID and only connect if that is present (prevents probing for hidden networks that aren’t there, thus revealing their existence when they are out-of-range)</p>
+  </li>
+  <li>
+    <p>Scan all beacons to find all BSSIDs where the SSID is hidden, then send a connection request to each one in turn. The beacon frame should be able to provide an encryption key that can hide the SSID used in the connection request.</p>
+  </li>
+</ul>
+
+<p>Option ap_scan=0 tells the driver to “connect to a network” and lets the driver do the rest. This assumes the driver has been pre-configured with all the necessary details. Used mostly with <em>wired</em> connections where the driver isn’t actually connecting to anything. Option ap_scan=2 tells wpa_supplicant to iterate over all networks defined in the config file, telling the driver “try connecting to this SSID”. There is no control over which BSSID is chosen. Mode ap_scan=2 was really designed to support the few devices/drivers which cannot handle “active scanning” with a list of SSIDs; however these are considered “broken” and the nl80211 protocol does not (currently) support the ap_scan=2 mode.</p>
+
+<p>If wpa_supplicant reports an error, eg “denied association (code=n)”, then the code-definitions can be found in the Linux kernel source, under <code>/include/linux/ieee80211.h</code>. In particular, leaving out the “key_mgmt” entry leads to “denied association (code=43)”.</p>
+
+<p>It can be interesting to try running wpa_supplicant manually. Shut down the wireless interface, ensure that no other app is managing it (eg kill any background wpa_supplicant or dhcpcd instances), write a wpa_supplicant config-file, then run:</p>
+
+<pre><code>ifconfig -a
+
+# -d or -dd gives more output
+# the -D is optional if only one "back-end" has been compiled-in, or the desired
+# backend happens to be the first one (see wpa_supplicant --help).
+w(pa_supplicant -i someiface -c /path/to/config/file -Dwext 
+</code></pre>
+
+<p>and in another window run /sbin/ifconfig; the interface should be UP and RUNNING with a MAC address but no IP address.</p>
+
+<p>The easiest way to shut down a wpa_supplicant instance is via <code>wpa_cli -i {iface} terminate</code>. Command <code>killall wpa_supplicant</code> also works fine (and does a clean shutdown).</p>
+
+<p>If using systemd, you may need to do the following (stop isn’t sufficient as the service could just be triggered again):</p>
+
+<pre><code>systemctl --runtime disable systemd-networkd.service
+systemctl stop systemd-networkd.service
+systemctl --runtime disable wpa_supplicant.service
+systemctl stop wpa_supplicant.service
+</code></pre>
+
+<p>Notes on systemd: wpa_supplicant may be run in two different ways:</p>
+
+<ul>
+  <li>as unit “wpa_supplicant.service” which starts one global daemon instance at boottime to manage all interfaces;</li>
+  <li>by creating an interface-specific service which starts an wpa_supplicant instance for that interface.</li>
+</ul>
+
+<p>The “global daemon” approach is the common case (and possibly is required when using NetworkManager). A global daemon ignores all interfaces until they have been (somehow) marked as “up” (which means system-wants-this-interface-up). On systems using dhcpcd, the dhcpcd hook-scripts can start wpa_supplicant - but that step is skipped if an wpa_supplicant instance is already active for that interface (eg the interface has been marked up and so the global daemon is managing it).</p>
+
+<p>The “interface-specific” services can be created using the “wpa_supplicant@.service” template, ie via:</p>
+
+<pre><code>systemctl disable wpa_supplicant.service
+systemctl stop wpa_supplicant.service
+systemctl enable wpa_supplicant@wlan0.service
+systemctl start wpa_supplicant@wlan0.service
+</code></pre>
+
+<p>This creates a symlink “wpa_supplicant@wlan0.service” which points at the “wpa_supplicant@.service” file. At runtime the file will be invoked with “wlan0” as a parameter, which the template-file then uses. Alternatively, a real “wpa_supplicant@wlan0.service” file can be created by hand, and tuned as desired. Note that the global daemon has been disabled; there have been reports that having the global service <em>and</em> interface-specific services running at the same time causes problems.</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="http://linux.die.net/man/8/wpa_supplicant">manpage for wpa_supplicant</a></li>
+  <li><a href="http://linux.die.net/man/5/wpa_supplicant.conf">manpage for wpa_supplicant.conf</a></li>
+</ul>
+
+<h1 id="dhcp-clients">dhcp clients</h1>
+
+<p>There are two commonly-used tools for allocating IP addresses from a remote DHCP server: <code>dhclient</code> and <code>dhcpcd</code>. Both do the same job. In fact, writing dhcp-clients seems to be a widespread hobby; there are quite a few implementations to choose from.</p>
+
+<p>All DHCP clients will <em>create</em> or <em>overwrite</em> file <code>/etc/resolv.conf</code> as soon as they receive network config parameters from a remote DHCP server - unless the <code>resolvconf</code> daemon is running, in which case they send a message to that daemon instead. The glibc functions which look up addresses all use <code>/etc/resolv.conf</code>.</p>
+
+<p>One of the easiest ways of getting wireless up and running with DHCP is to use dhcpcd as described at the end of that section below.</p>
+
+<h2 id="dhcpcd">dhcpcd</h2>
+
+<p>dhcpcd must be started with the name of the interface it is to configure. It then runs in the background, managing the address of that interface.</p>
+
+<p>dhcpcd has its own “event scripts” system, similar to ifupdown. It provides some that integrate with wpa_supplicant:</p>
+
+<ul>
+  <li>when dhcpcd starts, the script tries to start wpa_supplicant if an instance isn’t already managing that interface (ie if no “ctrl interface” socket exists for that interface)</li>
+  <li>when dhcpcd exits, the script stops wpa_supplicant</li>
+  <li>when the address changes, the script sends a “reconfigure” message to wpa_supplicant</li>
+</ul>
+
+<p>At least in the “standard” dhcpcd download, the software package does not include any scripts to hook it into the ifupdown system (so that “ifup” on an interface also runs dhcpcd, which seems desirable). Maybe in the distro-specific versions? However for most people this is not important as there are better ways of managing wireless interfaces than through ifupdown.</p>
+
+<p>After running its hook-scripts on startup, dhcpcd waits until the specified interface reaches RUNNING state. This is normally the responsibility of wpa_supplicant - either the interface-specific instance which a hook-script just started, or an already-running background daemon. In the case where a background-daemon exists, the interface needs to be somehow set to “up” first (eg via <code>ifconfig {iface} up</code>) so that wpa_supplicant will start managing it. When no background daemon exists, then the dhcpcd hook-script starts an instance which will <em>automatically</em> set the interface to up then try to manage it (select an access-point, etc).</p>
+
+<p>WARNING: Having a background-daemon active, then running dhcpcd <em>before</em> the interface has been marked as up seems to cause problems. At that point, there is no wpa_supplicant “ctrl interface” socket for that particular interface (a wpa_supplicant daemon only creates that after the interface has been marked up), so dhcpcd spawns a new wpa_supplicant instance. But there are now <em>two</em> instances, which doesn’t seem to work well.</p>
+
+<p>If environment variable <code>$wpa_supplicant_conf</code> is defined before running dhcpcd, then the new wpa_supplicant instance is started with that file. Otherwise dhcpcd looks for wpa_supplicant files in the following places and starts wpa_supplicant with the first file found:</p>
+
+<ul>
+  <li>/etc/wpa_supplicant/wpa_supplicant-$interface.conf</li>
+  <li>/etc/wpa_supplicant/wpa_supplicant.conf</li>
+  <li>/etc/wpa_supplicant-$interface.conf</li>
+  <li>/etc/wpa_supplicant.conf</li>
+</ul>
+
+<p>dhcpcd has a very small amount of wireless-specific code in it; it uses an ioctl to fetches the SSID of the base-station the interface is connected to. This ssid is then used when selecting an appropriate “profile” from the dhcpcd config-file - ie this allows different settings to be used depending on which base-stations the interface has connected to.</p>
+
+<p>dhcpcd uses ioctl calls for the following purposes:</p>
+
+<ul>
+  <li>detecting if the interface exists at all (if_carrier)</li>
+  <li>reading the “FLAGS” field of the interface</li>
+  <li>setting the IFF_UP flag of the interface (once dhcp detects that “carrier” is available)</li>
+  <li>reading the wireless SSID that the interface is connected to</li>
+  <li>to get or set the “maximum data frame size” (MTU)</li>
+  <li>to set the IP address once one has been obtained from the dhcp-server</li>
+</ul>
+
+<p>Note that running dhcpcd on an interface implies that you want the interface up, ie <code>ifconfig {iface} up</code> is not necessary - unless a “global wpa_supplicant daemon” exists.</p>
+
+<p>The DHCP IPv4 protocol involves sending IP datagram messages with source address of 0.0.0.0 and destination of 255.255.255.255 - but this is done before the kernel interface is initialised with an IP address which is tricky. dhcpcd opens sockets of type AF_PACKET and uses the <code>packet</code> syscall to send manually-built IP datapackets across the network.</p>
+
+<p>As noted earlier, dhcpcd waits for the interface to reach state IFF_RUNNING before attempting to contact a DHCP server. The waiting is done by blocking on the NETROUTE netlink socket, ie waiting for the kernel to notify dhcpcd of a change to the interface (see “main event loop”). A wired interface will go to IFF_RUNNING all by itself, while a wireless interface needs wpa_supplicant to complete its job then set the interface state to show that it is done.</p>
+
+<p>dhcpcd has a “main event loop” in which it blocks waiting for activity on a set of sockets (select). The sockets include the netlink socket. see function <code>eloop_event_add(ctx, fd, fn, data)</code> where a socket is added to the list of sockets to wait on, and “fn” is a function-pointer that should be invoked to handle data present on that socket.</p>
+
+<p>dhcpcd and wpa_supplicant together are sufficient to manage wireless networking on a simple system - ie “higher levels” of software are not absolutely necessary. All that is necessary is:</p>
+
+<ul>
+  <li>create a suitable wpa_supplicant config-file and save it as <code>/etc/wpa_supplicant/wpa_supplicant-{iface}.conf</code>
+</li>
+  <li>run <code>dhcpcd {iface}</code>
+</li>
+</ul>
+
+<p>You should first ensure nothing else is messing with interface, eg run all of the relevant steps below (as root):</p>
+
+<pre><code># for systemd
+systemctl stop systemd-networkd.service
+systemctl stop wpa_supplicant.service
+
+ifconfig {iface} down
+killall wpa_supplicant
+</code></pre>
+
+<h2 id="dhclient">dhclient</h2>
+
+<p>dhclient is similar to dhcpcd. However it supports a <em>list</em> of interfaces to manage, ie a single instance can manage multiple interfaces. And if no interfaces are listed on the commandline, dhclient will try to <em>autodetect</em> the list of interfaces.</p>
+
+<h1 id="wpacli">wpa_cli</h1>
+
+<p>The <code>wpa_cli</code> application is part of the wpa_supplicant package. It has three quite different “modes” of operation:</p>
+
+<ul>
+  <li>a CLI tool which sends a command or query to a running wpa_supplicant instance then exits;</li>
+  <li>an interactive tool for configuring or querying a running wpa_supplicant instance (ie it accepts a sequence of commands from the user and doesn’t exit until the user tells it to).</li>
+  <li>a background daemon that executes an “action script” when the state of a wireless interface changes;</li>
+</ul>
+
+<p>The first two modes are reasonably obvious; the third is more interesting. As noted in the section on wpa_supplicant, basic disconnect/reconnect is handled but the wpa_supplicant config-file doesn’t provide any way for the sysadmin or end-user to encode more complex “policy” about which networks to connect to when. The “action script” which is invoked when network connection is lost gives a place for a sysadmin to encode any logic they like, to influence the choice of network.</p>
+
+<p>When <code>/etc/network/interfaces</code> includes a variable WPA_ROAM in the <code>network {..}</code> section for a wireless interface, then the wpa_supplicant ifup script will:</p>
+
+<ul>
+  <li>use the file pointed to by WPA_ROAM as the wpa_supplicant config file; and also</li>
+  <li>start an instance of <code>wpa_cli</code> <em>as a daemon process</em> with <code>/sbin/wpa_action</code> as its “action-file”.</li>
+</ul>
+
+<p>In all cases, <code>wpa_cli</code> connects to the wpa_supplicant instance via its “ctrl interface” socket, which is usually named <code>/run/wpa_supplicant/{ifacename}</code>.</p>
+
+<p>If a wireless interface “goes down”, eg the driver loses connectivity to the base-station, then wpa_supplicant will send a DISCONNECTED message over its “ctrl interface” socket. A wpa_cli instance which has been started with “-a some-action-file” will then <em>execute</em> the specified scriptfile, passing some parameters. Similarly, when wpa_supplicant detects that the driver has restored connectivity to a base-station, it sends a CONNECTED message, and the connected wpa_cli daemon (if any) will invoke its “action script”.</p>
+
+<p>Interestingly, the standard <code>/sbin/wpa_action</code> action-script responds to CONNECTED by:</p>
+
+<ul>
+  <li>invoking <code>ifup someiface</code>!</li>
+  <li>and on ifup-failure, invoking <code>wpa_cli -i someiface reassociate</code> - ie using wpa_cli in “run once” mode to send a message to the wpa_supplicant instance!</li>
+</ul>
+
+<p>I’m still not entirely clear on the details of wpa_cli and its action-script - but I don’t care all that much as most modern systems instead use NetworkManager, ConnMan, Wicd or similar to manage networks rather than this rather complex approach.</p>
+
+<p>Question: if I understand the scripts correctly, WPA_ROAM is only supported when the <code>iface</code> definition in <code>/etc/network/interfaces</code> specifies METHOD (ie ip-allocation method) to be “manual”. I presume that means that something in the wpa_cli/action-script environment will trigger dhcp-based address allocation (instead of the usual ifupdown scripts, ie METHOD=manual disables normal dhcp processing). However I can’t find anything in the action-script or elsewhere that runs a dhcp-client. The wpa_supplicant program certainly does not do it.</p>
+
+<h1 id="systemd-networkd">systemd-networkd</h1>
+
+<p>This is the most recent of the higher-level network management daemons.  The primary motivation for its creation was to have a simple method of getting wired networking configured in a container. However it can be useful in other environments too, as long as the networking is not too complex.</p>
+
+<p>A container has its own independent user-space, but shares the kernel with the host. Nevertheless, a Linux kernel <em>network namespace</em> is normally used so that a container does not see the standard network interfaces defined in the host. Instead it sees only one (or more) interfaces which are actually “veth” interfaces which effectively act as a network card connected to a virtual network switch in the host. All a container needs to do is set this interface “up”, and send DHCP requests over this interface to allocate an IP address (the host will provide a simple DHCP server at the other end). Containers should be lightweight and quick to start, so bypassing things like ifupdown or even NetworkManager is a good idea.</p>
+
+<p>If systemd-networkd is running, and an interface appears or changes then it consults configuration files under <code>/etc/systemd/network/</code> and <code>/lib/systemd/network/</code>. When such a network interface appears in the kernel, networkd iterates over all files named “<code>*.network</code>” (by convention, the files’ base name is the interface-name). When any file whose <code>[match]</code> block matches the interface, then the interface is marked “up” (ie systems-wants-it-up) and the rest of the file is applied; the most common matching-term is the interface name. The “body” of the configuration can set static network address/netmask, gateways, etc. Or it can specify “DHCP=yes”. When a wpa_supplicant global daemon is running, then marking the interface up will get its attention; the wpa_supplicant configuration file will be used to determine which access-point to connect to (with or without scanning), and on success the interface will be moved to state RUNNING at which point an address can be assigned via DHCP. Alternatively, when a wpa_suppplicant@someiface.service exists, then an interface-specific wpa_supplicant instance will be started as the specified iface is registered (without needing it to be moved to “up” first).</p>
+
+<p>systemd-networkd has its own internal DHCP client (and DHCP server too, for use in a host to configure containers, but that is irrelevant here). See file “src/libsystemd-network/sd-dhcp-client.c” within the systemd sourcecode.</p>
+
+<p>AFAIK, there is no nice GUI interface for configuring systemd-networkd. The <code>*.network</code> files need to be written by hand, and for wireless support the wpa_supplicant.conf file also needs to be written by hand. So for “normal users”, one of the friendlier tools such as NetworkManager are better. However for servers and containers this is efficient and appropriate.</p>
+
+<p>Special <code>systemd/network/*.link</code>” files can be used to define properties to be set as soon as an interface is registered by the kernel, and are basically an alterative to writing custom udev rules for interfaces. They are structured like .network files, with a match section first; there are several options including by-mac-address and by-pci-path. These “link files” are not often needed. A single udev rule which specifies “net_setup_link” causes these rules to be executed, ie they are (indirectly) executed as part of udev processing, not systemd-networkd. Note that udev does not run in containers, so this functionality won’t work there - though networkd still does.</p>
+
+<p>networkd has a number of other features which are not relevant to wireless-networking.</p>
+
+<p>Using networkd is not absolutely necessary, even in a systemd-based system; wpa_supplicant + dhcpcd do the job fine. Nevertheless, the systemd-networkd approach is fairly minimal while still being powerful.</p>
+
+<p>To temporarily stop systemd-networkd etc (so you can play with dhcpcd and wpa_supplicant manually):</p>
+
+<pre><code>systemctl stop systemd-networkd.service
+systemctl stop wpa_supplicant.service
+</code></pre>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="http://beaveris.me/systemd-networkd-with-roaming/">http://beaveris.me/systemd-networkd-with-roaming/</a></li>
+  <li><a href="http://blog.volcanis.me/2014/06/01/systemd-networkd/">http://blog.volcanis.me/2014/06/01/systemd-networkd/</a></li>
+  <li><a href="https://wiki.archlinux.org/index.php/Systemd-networkd">https://wiki.archlinux.org/index.php/Systemd-networkd</a></li>
+  <li><a href="http://dabase.com/blog/Good_riddance_netctl/">http://dabase.com/blog/Good_riddance_netctl/</a></li>
+</ul>
+
+<h1 id="networkmanager">NetworkManager</h1>
+
+<p>Most modern desktop systems use the <a href="https://en.wikipedia.org/wiki/NetworkManager">NetworkManager</a> daemon to manage network interfaces. This application runs in the background (as root), trying to keep all relevant interfaces working based on the set of configuration files in <code>/etc/NetworkManager/system-connections</code> (which are similar to systemd-networkd “.network” files, and similar in purpose to ifup’s <code>/etc/network/interface</code>). NetworkManager does not directly provide a user-interface or commandline interface; it provides a DBUS interface which allows external commandline or GUI tools to talk to it.</p>
+
+<p>As noted in the wpa_supplicant section, wpa_supplicant handles basic disconnect/reconnects when roaming but doesn’t support “policy” decisions. NetworkManager tries to provide “sensible heuristics” which connect the machine to the network that the user is most likely to want - eg:</p>
+
+<ul>
+  <li>when a wired interface is available, it doesn’t bother to bring up wireless too</li>
+  <li>when it brings up a wireless interface, it tries to connect to the interface you were most recently connected to</li>
+  <li>when many wireless networks are available, it tries those you have previously logged into first</li>
+</ul>
+
+<p>It also emits dbus messages which allow user interfaces to pop up and prompt for network passwords when needed. However dbus is not mandatory; when dbus is not available then NetworkManager can still manage networks based on the information in its configuration files. TODO: I’m not quite sure how it communicates with wpa_supplicant in this case.</p>
+
+<p>There are two commonly-used commandline clients (nmcli and cnetworkmanager), and several GUI clients (including a gnome and two kde interfaces), all of which talk to NetworkManager over dbus.</p>
+
+<p>NetworkManager executes scripts on interface state-change, in a manner very similar to ifupdown - except that the scripts are in <code>/etc/NetworkManager/dispatcher.d</code>. The process is very well documented in the NetworkManager man-page. Note in particular that scripts don’t get put into separate “if-{phase}” directories, but instead into a single directory; scripts should check the phase and just exit (successfully) if the phase doesn’t interest them. This facility isn’t widely used, and not needed for simple wireless-on-the-desktop.</p>
+
+<p>By default, there is exactly one script in the NetworkManager dispatcher.d directory: one that emulates ifup/ifdown by executing the scripts under <code>/etc/network/if-{phase}.d</code>. However the emulation is only partial; in particular it only executes ifupdown scripts for phases “post-up” and “post-down”. The wirelesstools scripts hook into the “pre-up” phase, and the wpa_supplicant scripts hook into the “up” phase so NetworkManager doesn’t actually run either of those scripts even if they are installed. NetworkManager also fails to pass many of the environment-variables that ifupdown would pass, so the up/down scripts that test for these variables will behave somewhat differently (eg the wpa_supplicant script runs on post-up, but just exits because IF_WPA_CONF is not defined). This integration is actually pretty useless, and can mostly be ignored.</p>
+
+<p>When a GUI or commandline tool sends a DBUS message to the daemon to “add a network”, the daemon saves the details in a file under <code>/etc/NetworkManager/system-connections</code>. Such files can also be created by hand. For WIFI connections, the file includes the authentication password (in plain text, but the conf-files are only readable by root).</p>
+
+<p>General NetworkManager settings are stored in <code>/var/lib/NetworkManager/NetworkManager.state</code>.</p>
+
+<p>When network-manager decides to “bring up” a wireless interface, it starts an instance of wpa_supplicant to manage the connection. All necessary parameters are passed to wpa_supplicant on its commandline, ie in this situation wpa_supplicant does not use a configuration-file (and therefore there is no need to write such files by hand). NetworkManager can talk to wpa_supplicant after it is started via the application’s dedicated communications socket.</p>
+
+<p>When NetworkManager is managing networks, the ifup/ifdown commands should not be used.</p>
+
+<p>NetworkManager “plugins” allow it to read different formats of configuration-files. The default “keyfile” plugin reads ini-style configuration files from /etc/NetworkManager/system-connections; these files define which interfaces should be managed and how. There is a plugin to read traditional redhat network config files, and one that parses <code>/etc/network/interfaces</code> (the equivalent definition used by ifupdown scripts).</p>
+
+<p>NetworkManager was originally created, and is mostly maintained, by RedHat. It is implemented in C.</p>
+
+<p>NetworkManager performs DHCP configuration by executing either <code>dhclient</code> or <code>dhcpcd</code> as a separate process. Unfortunately I cannot find any documentation on this, and the code is completely uncommented so exactly how this integration works is not clear. It’s also glib-based code, so where/if processes are getting spawned is not clear to a non-gnome developer like myself.</p>
+
+<p>NetworkManager relies on wpa_supplicant for setting up wireless interfaces, but as with DHCP it is not clear whether NetworkManager spawns instances of it or not.  Probably best to have a global wpa_supplicant daemon running - though it is still unclear how network-manager passes the wireless details (ssid, authentication, etc) to a global instance - and particularly in the case where dbus is not running (which NetworkManager claims to support).</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="https://wiki.gnome.org/Projects/NetworkManager">https://wiki.gnome.org/Projects/NetworkManager</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/NetworkManager">https://en.wikipedia.org/wiki/NetworkManager</a></li>
+  <li><a href="https://www.redhat.com/magazine/003jan05/features/networkmanager/">https://www.redhat.com/magazine/003jan05/features/networkmanager/</a></li>
+</ul>
+
+<h1 id="wicd">WICD</h1>
+
+<p>According to the <a href="https://en.wikipedia.org/wiki/Wicd">wikipedia article on wicd</a>, it performs the same tasks as NetworkManager, and has a similar architecture (daemon &lt;-&gt; dbus &lt;-&gt; client). And AFAICT, it also depends on wpa_supplicant.</p>
+
+<p>It seems to be actively maintained, and is apparently implemented in Python.</p>
+
+<h1 id="connman">ConnMan</h1>
+
+<p>The ConnMan application is also similar to NetworkManager and WICD. It was originally written by Intel, and is used primarily in mobile devices (SailfishOS, Jolla, etc).</p>
+
+<p>The architecture of ConnMan is also similar to NetworkManager/WICD (daemon&lt;-&gt;dbus&lt;-&gt;client + wpa_supplicant). Apparently the prime motiviations for creating ConnMan were related to the code-structure, extensibility, and some of the libraries that NetworkManager depends on (particularly in a small mobile device).</p>
+
+<p>Pesonally, having seen the glib-style code in NetworkManager, and the lack of comments/documentation, I can see some justification for the creation of ConnMan.</p>
+
+<p>See <a href="http://arstechnica.com/information-technology/2009/06/intels-linux-connman-examining-the-pros-and-conns/">connman pros and cons</a>.</p>
+
+<h1 id="other-comments">Other Comments</h1>
+
+<p>The primary difference between WPA2-personal vs WPA2-enterprise  authentication is that for the “personal” authentication there is a single password <em>per network</em> while the enterprise version supports a password <em>per user</em>. However administering “per user” passwords is obviously more complex; in most cases it requires setting up a separate RADIUS authentication server that the access-point consults.</p>
+
+<p>I’m a little surprised that nobody has created a dhcp-client-library that apps can use rather than excuting an external process. Systemd does include such functionality in the libsystemd-network library, but that dhcp-client is reasonably limited in features and that is probably not a general-purpose library. wpa_supplicant runs as a <em>system service</em> (ie global daemon) which is reasonable; other apps can then communicate with the already-running daemon. However dhclient/dhcpcd are neither system services nor libraries, making them IMO awkward to integrate with. For example, I can imagine NetworkManager would be improved by using a <em>library</em> rather than executing/communicating-with an external process.</p>
+
+<p>Now for a little personal rant! Why don’t open-source projects provide better documentation and comment their code? As a professional software developer, the projects I work on almost always have a document describing the overall architecture, and then the code is heavily commented to describe what it is doing and why. Neither of these appear to be common in most projects I looked at. One of the mottos of open-source is that “many eyes make bugs shallow” but thousands of lines of complex source-code without <em>any</em> comments at all, and no guide to the general design of the application, does not make it easy to review or contribute patches!</p>
+
+<h1 id="references">References</h1>
+
+<p>See links within individual sections.</p>
+
+<p>Other useful pages:</p>
+
+<ul>
+  <li><a href="http://www.wi-fiplanet.com/tutorials">Wifi Planet Tutorials</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/wireless-stack/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

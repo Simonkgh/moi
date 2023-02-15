@@ -1,0 +1,250 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Terraform Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Terraform Overview</h1>
+    <aside>First published on: December 5, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a>, <a href='/category/Infrastructure/'>Infrastructure</a></p>
+      
+<h1 id="terraform-for-iaas">Terraform for IaaS</h1>
+
+<p><a href="https://www.terraform.io/">Terraform</a> is a tool for configuring Infrastructure-as-a-Service (IaaS) cloud environments. The core of Terraform is open-source; its primary developer (Hashicorp) also offers proprietary components on top but the core (free) components are useful on their own.</p>
+
+<p>A recent article here discussed <a href="/cloud/what-is-a-cloud">what is a cloud</a>, and described how an IaaS cloud environment provides a REST API for managing resources such as networks, storage volumes and virtual machines. As well as the API, a cloud provider usually also provides a web-based GUI for managing resources. However defining large numbers of such resources interactively over a UI is slow, error-prone, and not repeatable; it is better to automate such work via the cloud-provider’s API.</p>
+
+<p>I just recently attended a presentation on Terraform (thanks Eric), and this is a brief summary of what I learned from that presentation. Obviously I am no expert - this is just an overview.</p>
+
+<p>Terraform is a simple application which is run manually on a laptop or server, or executed from a CI tool like Jenkins. When executed, it:</p>
+
+<ul>
+  <li>reads an “infrastructure definition” file which defines what resources (VMs, volumes, and networks should exist);</li>
+  <li>makes calls to a cloud provider API in order to determine what resources already exist;</li>
+  <li>generates a human-readable “plan” describing the changes it intends to apply in order to bring the existing cloud configuration “in-sync” with the definition;</li>
+  <li>optionally waits for the “plan” to be approved by an operator; then</li>
+  <li>makes calls to the cloud provider API to make the modifications described in the plan (ie creates/deletes/modifies resources as needed).</li>
+</ul>
+
+<p>The result is that the cloud resources are brought into the state described by the input infrastructure definition. These definitions can (and should) be stored in a version-control system. A basic JSON syntax is supported, and a more advanced syntax supporting multiple files, templates, and other useful features.</p>
+
+<p>Unfortunately, there are many different cloud-management APIs - Google GCP, Amazon AWS, OpenStack, CloudStack, and more. Terraform is therefore divided into a “core” module, and an adapter (called a “provider” by terraform) per <a href="https://www.terraform.io/docs/providers/">supported API</a>.</p>
+
+<p>Obviously, different cloud providers also have different <em>features</em>. Terraform’s config syntax does not attempt to standardize definitions of features that are common across multiple cloud providers; they are apparently just too different. However because the principles behind the engine are the same, porting a configuration definition for one cloud provider to another is less work than moving from one cloud-specific server provisioning framework to another.</p>
+
+<p>Note that it it <em>not</em> part of Terraform’s feature-set to install software on virtual machines; it simply <em>defines</em> virtual machines (referencing an existing VM image file) and starts/stops them. While slightly off-topic, good options for building VM images are <a href="https://www.packer.io/">packer</a> (also from Hashicorp), Chef and Puppet.</p>
+
+<h1 id="terraform-state">Terraform State</h1>
+
+<p>For each “environment” (terraform config file), Terraform maintains a database of the resources it is managing. Resources include VMs, disks, network definitions, and many other possibilities. Each resource effectively has two keys: the name it is known as in the Terraform config file, and the id allocated to the resource by the cloud provider. Terraform <em>fetches</em> the state of each resource registered in its database from the cloud before making updates, ie it can handle changes made in the cloud such as deletion or modification of resources. It does not detect resources added to the cloud, or rather does not care - it only manages those resources in its database. An “import” operation can register an existing resource from the cloud in the state if desired, but this is only useful as a preparatory step to adding an entry in the config-file - or in preparation for deleting all known resources.</p>
+
+<p>State is stored by default in a local file. This obviously has implications for reliability (losing the file is bad), and for infrastructure managed by multiple people. State can therefore also be stored in a distributed filesystem, a distributed config-system such as consul, or in Terraform’s commercial admin manager.</p>
+
+<h1 id="terraform-for-non-iaas-environments">Terraform for non-IaaS environments</h1>
+
+<p>As can be seen from the <a href="https://www.terraform.io/docs/providers/">list of providers</a>, Terraform can also be used to automate configuration of things other than IaaS clouds. In fact, anything that offers a management API for creating/deleting resources can be “automated” via Terraform. Interesting examples are:</p>
+
+<ul>
+  <li>a provider for Docker (local) and Docker-Swarm (distributed); logical as Docker is in some respects similar to an IaaS cloud.</li>
+  <li>a provider for Kubernetes (similar to Docker case)</li>
+  <li>a provider for Heroku (Platform-as-a-Service ie PaaS),</li>
+  <li>providers for Bitbucket/GitHub/GitLab (Git repository hosting) which allows Terraform to define git repositories, webhooks, and assign default reviewers for commits.</li>
+  <li>a provider for Chef Server (OS configuration management) which pushes configuration-data (variable-definitions) from Terraform into Chef, allowing Chef to then use these values when pushing software configuration into VM images.</li>
+  <li>a provider for Cloudflare (Content Distribution Network) to push configuration data into Cloudflare</li>
+  <li>a provider for DNS (Domain Name Service) which allows domain-name records to be pushed to a domain name server.</li>
+  <li>a provider for Graphana, allowing Terraform to configure Graphana “dashboards” in an automated way</li>
+  <li>providers for MySQL and Postgres (SQL database), allowing Terraform to define databases, users and permissions.</li>
+</ul>
+
+<h1 id="further-reading">Further Reading</h1>
+
+<ul>
+  <li><a href="https://blog.gruntwork.io/why-we-use-terraform-and-not-chef-puppet-ansible-saltstack-or-cloudformation-7989dad2865c">Gruntwork: Why we use Terraform</a></li>
+  <li>
+<a href="https://www.terraform.io/docs/state/remote.html">Hashicorp: Terraform Remote State</a> - how to store terraform state in a central location</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/terraform-overview/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

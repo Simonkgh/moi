@@ -1,0 +1,417 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Apache Hive Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Apache Hive Overview</h1>
+    <aside>First published on: June 28, 2016</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>The <a href="/bigdata/datastorage">big data storage article</a> on this site briefly describes <a href="http://hive.apache.org">Apache Hive</a> in the context of many other storage technologies. This article addresses Hive specifically.</p>
+
+<h1 id="what-is-hive">What is Hive</h1>
+
+<p>Hive is primarily a “query language compiler” which converts HiveQL statements (similar to SQL) into programs which can then be executed on a YARN cluster (via MapReduce, Tez or Spark). The end result is the ability to execute SQL-like queries in parallel against large datasets stored in a range of different formats.</p>
+
+<p>Hive allows data stored in various file-formats to be queried as if it were in a traditional database table. Any format can be supported as long as the necessary driver for that format exists; standard file-formats include plain comma-separated-values, the slightly more sophisticated SequenceFile format, or advanced file formats such as AVRO, Parquet and ORCFile. There are also adapters for some datastores which work by sending network requests to the relevant datastore servers.</p>
+
+<p>Hive also supports insert and update operations as long as the driver for the relevant format supports those operations. Hive isn’t suitable for many small updates (eg OLTP-style workloads); the insert/update functionality is primarily used to “derive” tables from others (similar to “materialized views”) for use during analysis, or to batch-import data from other systems.</p>
+
+<p>To provide an SQL-compatible representation of its datasource, Hive requires the format (column names and types, ie a schema) of each input “table” to be declared. These schemas are <em>independent</em> (separate) from the actual datasource, and are stored in a <em>hive metastore</em>. The separation of schema and data does of course expose the danger that the two do not match. Some file-formats (eg AVRO) are fully self-describing, allowing the declared schema (which was used to compile the query) to be validated against the actual input data. The <a href="https://cwiki.apache.org/confluence/display/Hive/HCatalog+UsingHCat">HCatalog</a> component of Hive provides access to the Hive metastore (ie the set of declared schemas) from other tools.</p>
+
+<p>It could be said that Hive is a “deconstructed” database that separates the query-engine from the storage layout.</p>
+
+<p>Hive can be very effective at OLAP-style workloads, in which long-running queries are performed against very large sets of data. Hive’s ability to analyse data directly from files without a performance-intensive “import” step is also very useful. Due to the latency of compiling queries and executing them on a YARN cluster, it is not suitable for “quick interactive queries” (though the LLAP project is working on that), nor is it suitable for OLTP-style workloads (lots of queries each retrieving a few records).</p>
+
+<p>Logfile analysis provides a good example of the ability of Hive to apply an external schema to an existing file, and then perform queries against the original (unmodified) data. Given a typical application logfile in csv format or similar, and a corresponding schema definition, HiveQL (SQL-like) queries can be used to extract data out of these logfiles in a much more elegant way than using grep/awk. Given huge logfiles stored in HDFS, such analyses can be executed in parallel using a cluster which is rather hard to do with grep…</p>
+
+<p>With some storage formats (eg ORCFile), Hive also supports SQL insert/update/delete operations. However Hive isn’t really designed for heavy update loads; it is more focused on read/analysis usecases.</p>
+
+<p>To quote from the <a href="https://cwiki.apache.org/confluence/display/Hive/Home">hive wiki page</a>:</p>
+
+<blockquote>
+  <p>Hive is not designed for OLTP workloads and does not offer real-time queries or row-level updates. It is best used for batch jobs over large sets of append-only data (like web logs). What Hive values most are scalability (scale out with more machines added dynamically to the Hadoop cluster), extensibility (with MapReduce framework and UDF/UDAF/UDTF), fault-tolerance, and loose-coupling with its input formats.</p>
+</blockquote>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://www.semantikoz.com/blog/the-free-apache-hive-book/">The Free Hive Book</a></li>
+</ul>
+
+<h1 id="supported-data-sources">Supported Data Sources</h1>
+
+<p>Having “support” for a file format in Hive actually means having support for that format from an HMapReduce/Tez/Spark java program. The Hive project defines interface <code>org.apache.hadoop.hive.serde2.SerDe</code> and some related classes; the HMapReduce/Tez/Spark code that Hive generates then reads/writes data via this interface. Implementation of this interface for a specific file format is called a <a href="http://blog.cloudera.com/blog/2012/12/how-to-use-a-serde-in-apache-hive/">SerDe</a>, and they exist for many file formats with the following being the most commonly used with Hive:</p>
+
+<ul>
+  <li>TEXTFILE (sequence of linefeed-terminated lines, each line being a record in csv, tab-separated, or similar format)</li>
+  <li>SEQUENCEFILE (sequence of serialized java objects)</li>
+  <li>
+<a href="https://cwiki.apache.org/confluence/display/Hive/LanguageManual+ORC">ORC</a> - Optimised Row Columnar format for storing relational tables</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/RCFile">RCFILE</a> - predecessor of ORC</li>
+</ul>
+
+<p>Note that the Hive SerDe implementations for various formats can also be used by hand-written code if desired.</p>
+
+<p>Hive can also generate code to access data via the more general <a href="https://cwiki.apache.org/confluence/display/Hive/StorageHandlers">StorageHandler</a> interface, which allows access to data from non-file sources, particularly:</p>
+
+<ul>
+  <li>
+<a href="/bigdata/hbase">HBase</a> - the <a href="https://cwiki.apache.org/confluence/display/Hive/HBaseIntegration">HBase Storage Handler</a> makes GET/SCAN calls to HBase servers over a network, and exposes <em>data location information</em> so Hive’s generated HMapReduce/Tez/Spark application can efficiently place its tasks near the data to be processed.</li>
+</ul>
+
+<p>Access from Hive to data in <a href="/bigdata/cassandra">Cassandra</a> currently appears to be less well supported than for HBase. The Cassandra project does provide code for accessing Cassandra from HMapReduce programs, but this code does not implement the Hive SerDe interface, and therefore cannot be used with Hive. There are several Hive/Cassandra projects on GitHub, including <a href="https://github.com/edwardcapriolo/hive-cassandra-ng">Edward Capriolo’s hive-cassandra-ng</a>. The Cassandra project (and the DataStax company behind much Cassandra development) has switched back and forth between supporting Hive and HMapReduce, and removing such support, several times over past years. Currently, it seems that their policy is to support only Spark, although <a href="http://www.datastax.com/dev/blog/cql3-table-support-in-hadoop-pig-and-hive">this datastax blog entry is interesting</a>.</p>
+
+<h1 id="embedded-vs-server-mode">Embedded vs Server Mode</h1>
+
+<p>Hive can be used as a library from a standard java application. In this mode, HiveQL statements are <em>compiled</em> within the client application, producing an HMapReduce/Tez/Spark-based “master application” which is then submitted to the cluster (eg YARN) for execution.</p>
+
+<p>The Hive project also provides a stand-alone server (“hiveserver2”). HiveQL statements can be sent to this server via REST or Thrift; a JDBC driver is provided which uses Thrift to forward statements. Multiple instances of this server can be run if desired; they don’t “manage” the underlying data in any real sense, so don’t need to cluster or communicate between themselves in any way.</p>
+
+<p>In both cases, the metadata that specifies table format and table-partition-files needs to be stored in a central location. HCatalog provides this functionality.</p>
+
+<p>With the “embedded” approach, the client application needs direct access to the YARN resource manager in order to submit the application, and access to the HCatalog instance (or metastore database directly). Executing queries via hiveserver2 makes network access configuration simpler: the client application needs only access to a hiveserver2 instance. Executing a query via hiveserver2 does require an extra network “hop”, but as Hive queries are not “low latency”, this is not usually a problem.</p>
+
+<h1 id="loading-data-into-hive">Loading Data into Hive</h1>
+
+<p>Data can simply be written into a distributed filesystem using some format that Hive supports (and there are many) - including simple formats such as a sequence of lines with comma-separated-values. HiveQL commands can be used to tell Hive how to interpret the data in the file as rows/columns (“create table”); this data is stored in a central metadata repository. Finally, Hive commands can be used to tell Hive which files belong to the table (“add partition”). Queries can now be executed against the data “in place”, ie with no further “load” step. For tasks such as analysing webserver logfiles, this can be a major simplification over somehow importing the data (in relational-form) into a database in order to perform analysis.</p>
+
+<p>Alternatively, data can be <em>inserted</em> into tables managed by Hive - as long as the chosen format is one that supports inserts. Declare the table in Hive (“create table”), then perform insert-statements which Hive passes along to the format “adapter” class, which writes the data to the filesystem. This approach is similar to loading data into a relational system.</p>
+
+<h1 id="multiple-back-ends">Multiple Back-ends</h1>
+
+<p>The standard Hive distribution comes with support for compiling to HMapReduce, Tez or Spark. The hive configuration files specify which is the default, but any client application can choose which back-end to use by simply sending a “use {engine}” command, eg “use spark;”. That command specifies the target engine for the current session.</p>
+
+<p>Of course, the hive configuration must also provide the necessary contact details for the target environment, eg spark-specific settings must be defined in order for “use spark” to work correctly.</p>
+
+<h1 id="the-hive-metastore-and-hcatalog">The Hive Metastore and HCatalog</h1>
+
+<p>In order to properly apply SQL statements to data in formats such as a textfile holding lines consisting of comma-separated-values, Hive needs to know which column names and types to associate with data in input records. This information is provided via a HiveQL “create table” statement, and this information is stored in a <em>metastore</em>.</p>
+
+<p>The term “metastore” really refers to a software module within Hive, which other Hive code uses to write and read such metadata. Somewhat ironically, the metastore code currently persists metadata in a <em>relational database</em> (eg Postgres or MySQL), although Hive 2.0 (released 2016) includes support for storing it within an HBase database instead.</p>
+
+<p>Because the metadata is stored in an external database, multiple Hive instances (whether “embedded” or HiveServer processes) can share a common metastore database. However there are disadvantages to having multiple Hive instances simply accessing metadata by directly reading/writing a database, including:</p>
+
+<ul>
+  <li>no shared caching between metadata users</li>
+  <li>direct network access to the database instance needed</li>
+  <li>database login credentials needed</li>
+  <li>potential issues when different clients have different release versions</li>
+</ul>
+
+<p>A more elegant solution to managing metadata is therefore to run an HCatalog server which acts as a “front end” to the metadata database. The “metastore module” within Hive applications then communicates with the HCatalog server using a purpose-designed network protocol rather than performing direct SQL against the underlying database. HCatalog offers a Thrift-based interface (performant), and a REST-based interface (flexible) for querying and updating table-related metadata. This approach also allows non-hive applications to query the same metadata, for example Apache Pig scripts can reuse the schema declarations defined via Hive.</p>
+
+<p>HCatalog server instances are still just “front ends” for the underlying database (whether relational or HBase), and therefore it is possible to run multiple HCatalog instances simultaneously if desired; they do not need to share any state (other than that in the common database) and thus need no special clustering support.</p>
+
+<h1 id="the-orcfile-format">The ORCFile Format</h1>
+
+<p>The most sophisticated and flexible of all the currently supported Hive file-based storage formats is ORCFile. This uses a <a href="/bigdata/columndbs">column-store</a> layout for efficient querying.</p>
+
+<p>ORCFile supports inserts and updates by creating new files in the usual SSTable/log-structured-merge-tree approach. This is efficient for batch-mode inserts and updates; records should <em>not</em> be inserted one-by-one as this leads to very large numbers of store-files (there is no long-lived “mem-store” as with HBase or Cassandra).</p>
+
+<p>Reference:</p>
+
+<ul>
+  <li><a href="https://cwiki.apache.org/confluence/display/Hive/LanguageManual+ORC">ORCFile Documentation</a></li>
+</ul>
+
+<h1 id="custom-functions">Custom Functions</h1>
+
+<p>Hive supports “UDFs”, User Defined Functions. This allows a developer to write some java code, and then call it from within a HiveQL query. Hive takes care of the compilation of the query to efficient code, and distribution of the work over a cluster, and the custom java code then gets called when appropriate. Common uses for UDFs are custom comparisons and field formatting.</p>
+
+<h1 id="fault-tolerance-and-scalability">Fault-Tolerance and Scalability</h1>
+
+<p>Because Hive uses HMapReduce/Tez/Spark to execute queries, it inherits the fault-tolerance of these systems. All these back-ends track the status of the individual tasks that make up the overall “application”, and restart any tasks that fail. This means that a long-running Hive query will not fail just because a single node crashes or a single network connection fails - particularly important when running analysis queries over large data volumes which may take hours to complete.</p>
+
+<p>The use of these technologies also means that data storage capacity and processing capacity are delegated to the underlying distributed fileystem and cluster. HDFS and YARN can build storage and processing clusters consisting of thousands of nodes, as can alternative technologies, and Hive queries can take advantage of that.</p>
+
+<h1 id="querying-nested-data">Querying Nested Data</h1>
+
+<p>Some data storage formats, including AVRO and Parquet, support “nested” data, ie records where some fields are themselves records.</p>
+
+<p>HiveQL (unlike standard SQL, eg that supported by Drill) supports querying nested data. However referencing <em>very</em> deeply nested data is still somewhat awkward - languages such as XQuery are more elegant for this usecase.</p>
+
+<h1 id="indexes">Indexes</h1>
+
+<p>To quote from the relevant <a href="https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Indexing">Hive Wiki page</a>:</p>
+
+<blockquote>
+  <p>The goal of Hive indexing is to improve the speed of query lookup on certain columns of a table. Without an index, queries with predicates like ‘WHERE tab1.col1 = 10’ load the entire table or partition and process all the rows. But if an index exists for col1, then only a portion of the file needs to be loaded and processed.</p>
+</blockquote>
+
+<blockquote>
+  <p>The improvement in query speed that an index can provide comes at the cost of additional processing to create the index and disk space to store the index.</p>
+</blockquote>
+
+<p>Index data is stored “per table partition”. When table-partitioning changes, it is necesary to run “alter index .. rebuild” to update the index too.</p>
+
+<p>Building/rebuilding an index executes a mapreduce job to generate the index-file. This implies that this feature helps only for queries that <em>exclusively</em> use the indexed fields - ie for “covered” queries. So is actually equivalent to executing a query that generates a completely separate table, and writing queries against that table.</p>
+
+<p>Indexing is particularly useful when searching for <em>relatively rare records</em></p>
+
+<p>For formats like ORCFile, a “compact” index points to the HDFS block holding the data, and to the record-block within that HDFS block, but not to the exact record - a scan is then used to find all matching records in that record-block. This is useful for things like looking up a webserver-log by session-id: within a short time-period (a few adjacent blocks) there may be multiple matching records.</p>
+
+<p>Bitmap indexes work similar, except that there is also a bitmap with one bit per record in the block (eg blocks of 1024 records have a 1024-bit bitmap), indicating which records match the index. This makes count(…) very efficient. The bitmap can be compressed with run-length-encoding, significantly reducing space when many or few records match the index.</p>
+
+<h1 id="access-control">Access Control</h1>
+
+<p>Hive provides two kinds of access-control:</p>
+
+<ul>
+  <li>SQL-based: defining roles in Hive itself, and associating roles with tables;</li>
+  <li>storage-based: delegating to HDFS</li>
+</ul>
+
+<p>The SQL-based approach is familiar to anyone who has used a relational database. However it is applied by Hive only for operations that are performed through Hive; Hive is just a tool for querying files in HDFS and when other tools exist or direct access to the underlying files in HDFS is possible then these checks are ineffective.</p>
+
+<p>In the storage-based approach, Hive allows a user to query a table if-and-only-if that user has read access (at the HDFS level) to the datafile that the table refers to. Access-control is less fine-grained than the SQL-based approach, but is often easier to manage and harder to bypass. Combined with tools like Ranger which provide sophisticated access-control for HDFS files, this can be an effective solution.</p>
+
+<h1 id="bucketing">Bucketing</h1>
+
+<p>HiveQL offers a feature named “bucketing”. This is effectively equivalent to “group by hash(column) % N” where N is the “number of buckets”.</p>
+
+<p>Each “group” therefore has a random and roughly-equal subset of the rows, where all records with column.value=Z are guaranteed to be in the same group. The usefulness for joins is obvious.</p>
+
+<p>Additionally, the records within a bucket (group) may be sorted by the column, making joins even more effective (merge-sort).</p>
+
+<h1 id="transform-scripts">Transform Scripts</h1>
+
+<p>Hive generates MapReduce programs for SQL commands. Because Hive knows the location of datafiles associated with specific “tables”, it can also be convenient to give a MapReduce program (as a script) to Hive and ask Hive to execute it. The TRANSFORM statement within hive-ql runs a user-provided script as a map or reduce command - without complicated map/reduce boilerplate.</p>
+
+<p>For each input record, the columns are converted to a single textline containing a tab-separated list of strings. The line is then written to the STDIN of the specified transform script. The script can write lines in the same format to STDOUT. The statement can give “names” to the output values via a following “AS col1,col2,..”; if that is not present then the first col is named “key”, and <em>all following text</em> is named “value”.</p>
+
+<p>Map and reduce operations are identical - both simply a stream of input records and a stream of output records. The only difference is <em>which</em> records: the “map” stage is given a random subset of records, while the “reduce” is given the full set of records for a specific “key partition (distributeBy)” - and records are guaranteed to be sorted.</p>
+
+<h1 id="views">Views</h1>
+
+<p>Hive supports “views” similarly to relational databases - a kind of “select macro”. Writing a select referencing the “view definition” as the source-table generates an “expanded” select which merges the original view-definition with any other terms added by the caller.  Views are read-only.</p>
+
+<h1 id="impala">Impala</h1>
+
+<p>Impala is an attempt to build a “faster Apache Hive”, at least for simpler queries. It is open-source (github.com), but mostly sponsored by Cloudera which is a 1000+ employee, USA-based company with a co-creator of Hadoop as its Chief Architect and various ex-facebook/yahoo/google/oracle managers. It appears to be reasonably open-source-friendly and earns income via consulting and training.</p>
+
+<p>As describled in <a href="http://impala.io/overview.html">the Impala overview</a>, Impala is intended to execute queries with <em>less latency</em> than Hive. For current versions of Hive, each query is compiled into a MapReduce or Spark application, which is then executed in a YARN cluster. For long-running queries (those that process large amounts of data and take minutes or hours to complete), the compilation and scheduling steps are not significant. However there are use-cases where users wish to perform queries against small amounts of data (for prototyping, interactive exploration of datasets, etc) - either via small databases, or by using appropriate limiting operations in the query such as selecting single data partitions.</p>
+
+<p>Impala optimises for the interactive case by starting a number of long-running daemons to execute queries, rather than starting processes on demand. These processes can also interpret the submitted query reasonably directly, rather than require it to be compiled to MapReduce or similar form, also saving some startup time for each query.</p>
+
+<p>From the documentation, “Impala SQL is a subset of HiveQL”.</p>
+
+<p>From other entries in the FAQ, it appears that Impala is not a 100% replacement for Hive, and is actually <em>complementary</em>. Quick/real-time queries can be done in Impala while trickier cases not supported by Impala must be done via Hive. The FAQ also recommends that “batch processing” be done via Hive.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://www.cidrdb.org/cidr2015/Papers/CIDR15_Paper28.pdf">Impala: A Modern Open-Source SQL Engine for Hadoop</a></li>
+</ul>
+
+<h1 id="drill">Drill</h1>
+
+<p>Apache Drill is yet another project which competes directly with Apache Hive. Drill supports a superset of standard SQL, and can execute queries against many different datasources.</p>
+
+<h1 id="hive-and-oracle">Hive and Oracle</h1>
+
+<p>The <a href="https://docs.oracle.com/cd/E54130_01/doc.26/e54142/toc.htm">Oracle Big Data Connectors for Hadoop</a> component from Oracle provide a few small tools to assist in dealing with Hive-managed data in an Oracle environment:</p>
+
+<ul>
+  <li>Oracle SQL Connector for HDFS: can define an “external table” in Oracle which maps to data in HDFS.</li>
+  <li>Oracle Loader for Hadoop: fast import of data from hadoop into a normal Oracle table (commandline tool)</li>
+  <li>Oracle Data Integrator Application Adapter for Hadoop: import data from hadoop into oracle (gui tool)</li>
+  <li>Oracle XQuery for Hadoop: compile an xquery-format query into HMapReduce jobs.</li>
+  <li>Oracle R Advanced Analytics for Hadoop: Program in R, compiles to HMapReduce.</li>
+</ul>
+
+<h1 id="further-reading">Further Reading</h1>
+
+<ul>
+  <li><a href="https://hortonworks.com/apache/hive/">Hortonworks: Hive</a></li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/hive/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,270 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Google Cloud Storage Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Google Cloud Storage Overview</h1>
+    <aside>First published on: April 23, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a>, <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>This article talks (fairly briefly) about Google Cloud Storage (a service where files can be stored “in the cloud”) and about how to move files between on-premise storage and google cloud storage.</p>
+
+<p>This article is short because cloud storage is probably the simplest of all the GCP services, and <a href="https://cloud.google.com/storage/">the official documentation</a> does a pretty good job of describing what google-cloud-storage is.</p>
+
+<h1 id="cloud-storage-overview">Cloud Storage Overview</h1>
+
+<p>Google cloud storage works somewhat like a “shared file server”, and somewhat like a key/value database which supports really large “value objects”. Technically, cloud storage is an <a href="https://en.wikipedia.org/wiki/Object_storage">object store</a>. Cloud storage does not offer a POSIX-conformant API, nor can it be accessed via standard protocols such as SAMBA or NFS; it offers a REST-API <sup id="fnref:gcp-apis" role="doc-noteref"><a href="#fn:gcp-apis" class="footnote" rel="footnote">1</a></sup> (which is rather complex) which is wrapped in a more developer-friendly API via Google client libraries for many different languages. Symbolic-links and hard-links are not supported.</p>
+
+<p>The top-level object in cloud storage is the “bucket” (somewhat like a “filesystem instance”). A bucket belongs to a project.</p>
+
+<p>A bucket has an associated <em>location</em> which <a href="https://cloud.google.com/storage/docs/bucket-locations">specifies where the data is stored geographically</a> (often a legal or business requirement).</p>
+
+<p>Each file in cloud storage has an associated <em>storage class</em>, which is inherited from a default setting on the bucket if not specified when the file is written. The <em>storage class</em> defines how fast it can be accessed - and affects the price for data storage. The <em>location</em> specified for a bucket can limit the types of <em>storage class</em> permitted for objects within that bucket (in particular, a <em>regional bucket</em> cannot contain objects with storage-class set to <em>multi-regional</em> and vice versa).</p>
+
+<p>Each file in a bucket has its own set of access-rights which control who can access it. Files may be completely public (useful for distributing files and hosting websites), or may be limited to specific groups or users. A bucket has a default set of access-rights which are inherited by each new file created in the bucket unless explicit permissions are provided.</p>
+
+<p>Basic versioning can be enabled for a bucket (off by default). When enabled, then older versions of files which have been overwritten or deleted can still be retrieved. The downside is that the storage needed to retain these files is charged to the project.</p>
+
+<p>The Object Lifecycle Management component allows “rules” to be defined which Cloud Storage applies automatically. These rules can delete or move files with certain properties (eg those older than a specified age), etc.</p>
+
+<p>Each “file” is limited to 5TB, but a bucket itself has unlimited capacity. A file has a set of metadata attributes associated with it; some are used by cloud storage itself but custom attributes can also be stored.</p>
+
+<p>Files in cloud storage are <em>immutable</em>; a file can only be <em>replaced</em> by a new version - though the API provides some useful ways to effectively create a new file from an existing file and a “set of changes”. Objects can be overwritten no more than once per second</p>
+
+<h1 id="transferring-files-to-and-from-storage">Transferring Files to and from Storage</h1>
+
+<p>It is a commonly-needed task to upload files from a corporate datacenter into Google storage in order to then process it with Dataflow, import it directly into BigQuery, etc.</p>
+
+<p>The best options are:</p>
+
+<ul>
+  <li>use the gsutil commandline application (which is available as part of the GCloud SDK or a standalone download)</li>
+  <li>write a program that uses the Google cloud libraries to interact with Cloud Storage (libs available for Python, Java, and many other languages)</li>
+</ul>
+
+<p>While Cloud Storage does provide a REST API, it is rather complex to use correctly - and authentication is also complex. It therefore is really not a good idea to try to implement something new; just use the libraries.</p>
+
+<p>The <code>gsutil</code> application is simply a Python program that wraps the GCloud SDK in a commandline-parser, so anything that <code>gsutil</code> does can also be done programmatically.</p>
+
+<p>Command <code>gsutil rsync ..</code> works similarly to the well-known <code>rsync</code> tool, and can be used to ensure that all files in a specific local directory are mirrored to cloud storage (or vice versa).</p>
+
+<p>There are commercial ETL tools that work with the Google environment, but they address really complex issues and presumably have very high price-tags. I am not aware of a simple “sync files to cloud storage” application other than <code>gsutil rsync</code>.</p>
+
+<h2 id="atomic-uploads">Atomic Uploads</h2>
+
+<p>Even on non-cloud systems, it is common for one application to write files to disk and for another application to poll a filesystem directory to detect new files. In such cases, the writing and/or reading application needs to take precautions to ensure that the reader does not:</p>
+
+<ul>
+  <li>start reading a file before the writer has completely written it, or</li>
+  <li>read a file that will never be complete because the writer crashed part-way-through</li>
+</ul>
+
+<p>A common solution is for the writer to write to a temporary directory on the target filesystem, or to use a temporary filename (eg starting with a dot, starting with “tmp”, or ending with “.tmp”) and then to atomically rename the temporary file to its final name only after all data has been written. The reading app just has to ensure that it ignores such temporary files - and then partial files are ignored, as desired. A crash leaves a file permanently with a temporary name; this needs to be “cleaned up” at some time, but that is not a complicated task.</p>
+
+<p>Fortunately, uploads to Google cloud storage effectively implement the above pattern automatically; any call to the cloud-storage APIs to upload data first writes the data “invisibly” to disk and becomes visible only when the sequence of http requests is properly terminated. The <code>gsutil</code> application works in the same way.</p>
+
+<h1 id="triggering-processing-on-upload">Triggering Processing on Upload</h1>
+
+<p>When a file is uploaded to cloud storage, that “bucket” can be configured to send a Pubsub message with a reference to the new file. This can be used to trigger automated processing of new files - a very convenient feature. See <a href="/cloud/google-cloud-functions-overview/">this vonos article</a> and <a href="https://cloudplatform.googleblog.com/2017/04/Cloud-Storage-introduces-Cloud-Pub-Sub-notifications.html">the Google documentation</a> for more information.</p>
+
+<h1 id="hosting-a-static-website">Hosting a Static Website</h1>
+
+<p>One interesting feature of cloud storage is that you can use it to <a href="https://cloud.google.com/storage/docs/hosting-static-website">host a complete static website</a>. Cloud storage is able to serve up index-pages (ie treat “http://domain/foo” as a request for “http://domain/foo/index.html”), and to deliver customised “file not found” error messages. Metadata attributes can also be set on files to affect the http-headers returned for urls matching that file (in particular, <code>cache-control</code>).</p>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:gcp-apis" role="doc-endnote">
+      <p>Most GCP services actually support two APIs: json-over-http (“rest”) and protobufs-over-http (<a href="https://grpc.io/">gRPC</a>). Some older services also support the legacy xml-over-http protocol. <a href="#fnref:gcp-apis" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/google-cloud-storage-overview/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

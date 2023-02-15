@@ -1,0 +1,485 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - In Defence of Java Checked Exceptions</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>In Defence of Java Checked Exceptions</h1>
+    <aside>First published on: March 30, 2021</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>Java has had checked exceptions (ones that must be declared) since its very early days. Java’s initial design was generally not a “ground-breaking” project, mostly adopting patterns from existing languages. However its concept of <em>checked</em> exceptions was new.</p>
+
+<p>There is plenty of debate on the internet about whether having checked exceptions in Java was a bad idea. At my current workplace, one colleague in particular has claimed “it has already been decided that checked exceptions are bad”. I don’t agree. In particular I think that simply replacing checked exceptions 1:1 with unchecked exception is a dangerous idea. Using the pattern of having methods return errors as objects works well in other languages, but is somewhat inelegant to deal with in Java - and migrating existing code to do this is a very large amount of work. Therefore IMO checked exceptions still have an important role to play in Java code; they just need to be used correctly.</p>
+
+<p>This article assumes you’re familiar with Java and its exception-handling abilities.</p>
+
+<p>Clearly good software can be built in languages which support exceptions but don’t support checked exceptions. I’m not arguing for modifying Kotlin or C#, just arguing that:</p>
+
+<ul>
+  <li>checked exceptions <em>do have a number of positive aspects</em>, and</li>
+  <li>proper error-handling of exceptions (whether checked or unchecked) requires applying appropriate design patterns.</li>
+</ul>
+
+<p>Note that while I have worked on software components of all sizes, the majority of my work has been on libraries, and on framework-like code at the center of large applications. This of course biases my personal preferences towards highly-reliable, highly-maintainable software, hard-to-misuse APIs, and (preferably) self-documenting code.</p>
+
+<h1 id="other-languages">Other Languages</h1>
+
+<p>First, let’s look at how some other languages do this.</p>
+
+<h2 id="c">C</h2>
+
+<p>The classic “C” programming language doesn’t have exceptions; functions which can fail must return a status-code. As returning multiple objects from a function isn’t supported, three different strategies are used:</p>
+
+<ul>
+  <li>function returns status, with actual computed values returned via “output parameters” - somewhat clumsy, but it works.</li>
+  <li>function returns the computed value, with status returned via an “output parameter” or via the static “errno” variable or similar - also clumsy.</li>
+  <li>when the (successful) result has some subset of values that are not “valid”, these invalid entries are used to indicate function status - eg functions which return an int which is (on success) never negative can use negative numbers to indicate failures. Such “combined” output values is efficient but really ugly and somewhat error-prone.</li>
+</ul>
+
+<p>One problem with the lack of exceptions in C is that some problems are so rare that in practice almost no application handles them correctly - eg out-of-memory. Functions that directly allocate memory get an appropriate error-code, but to propagate that problem up to the caller in a sensible manner is difficult. Applications that must be truly robust (eg control systems) will invest the effort to do this properly, but most other applications (and even libraries) just don’t bother. Exceptions are quite useful for rare-and-serious conditions such as memory-allocation-failure (and Java uses unchecked exceptions for these kinds of problem).</p>
+
+<h2 id="rust">Rust</h2>
+
+<p>Rust is one of the cool new kids on the block. <a href="https://doc.rust-lang.org/book/ch09-00-error-handling.html">Rust’s error handling</a> primarily involves functions which can fail using a Result instance as its return-type - ie something representing <code>(error-value | output-value)</code>. This is relatively similar to C’s approach but due to the use of a dedicated type, it is far harder for code to “forget to handle errors” than in C. Rust also provides a convenient syntax (the “?” operator) for passing an error from a called function up to the caller - which in some ways is what an exception is doing.</p>
+
+<p>Rust does have a kind of exception - the <code>panic</code> keyword. Unlike Java, however, it is meant only for very serious situations - something like Java’s “assert”. There is a compile-time option (panic=abort) which causes the application to just terminate immediately if a panic occurs. The alternative behaviour is to do “stack unwinding” (as with Java exceptions) which allows destructors in various objects to be called appropriately. And it is <a href="https://doc.rust-lang.org/edition-guide/rust-2018/error-handling-and-panics/controlling-panics-with-std-panic.html">possible to “catch” a panic</a>, but <a href="https://doc.rust-lang.org/book/ch09-03-to-panic-or-not-to-panic.html#to-panic-or-not-to-panic">this a fairly rare thing to do</a> as the vast majority of functions report errors via return-values not panics. In other words, a panic condition indicates something pretty serious has happened, from which recovery is not likely to be trivial. Of course, panics are not “checked”, because they are so rare. Note that while function <code>panic</code> takes only a string-parameter, function <code>panic_any</code> can accept an arbitrary object which can be retrieved higher in the stack - ie somewhat “exception-like”. Using this extensively isn’t “good Rust practice” though.</p>
+
+<h2 id="go">Go</h2>
+
+<p>Is Go still one of the “cool new kids”? Regardless, it is newer than most widely-spread languages. Go does have “panics” - ie <a href="https://dave.cheney.net/2012/01/18/why-go-gets-exceptions-right">unchecked exceptions that are really only for truly exceptional circumstances</a>, and it <em>is possible</em> to “recover from” a panic. However in general Go functions are expected to return an <code>(error-value, output-value)</code> tuple (where the output-value generally should be ignored if the error-value is not nil).</p>
+
+<h2 id="c-1">C++</h2>
+
+<p>The C++ language does support exceptions, and they are always unchecked - ie there is no language syntax to indicate whether a function throws an exception. However given its heritance from C, many standard functions return error-codes rather than throwing exceptions; I think it’s fair to say that C++ code uses exceptions far less than Java code. While I have worked often in C++ in the past, it is not recent enough for me to be able to say whether “typical” C++ error-handling style is closer to Rust, or Java.</p>
+
+<h1 id="kotlin">Kotlin</h1>
+
+<p>Kotlin has exceptions, and they are unchecked.</p>
+
+<p>The Kotlin standard library <em>does not</em> include classes for the functional-language-centric error handling approach (Either/Maybe/etc), and therefore many Kotlin libraries do throw unchecked exceptions. Given Kotlin’s good support for functional programming principles, however, there are many libraries and examples of error-handling without exceptions, eg:</p>
+
+<ul>
+  <li><a href="https://arrow-kt.io/docs/patterns/error_handling/">Arrow Core: error handling</a></li>
+  <li><a href="https://betterprogramming.pub/do-you-even-try-functional-error-handling-in-kotlin-ad562b3b394f">Do You Even Try?</a></li>
+  <li><a href="https://kotlin.christmas/2019/17">Typesafe Error Handling in Kotlin</a></li>
+  <li><a href="http://www.douevencode.com/articles/2018-09/kotlin-error-handling/">DoUEvenCode: Kotlin Error Handling</a></li>
+</ul>
+
+<p>I certainly wouldn’t recommend fighting against a language’s design principles. However in Kotlin it might be worth trying to adopt a more returned-result-centric programming style (ie traditional functional programming style) than continuing to use exceptions as Java does while just eliminating the checks (compile-time support). The fact that Kotlin makes this <em>possible</em>, and even <em>easy</em> does not mean extensive use of unchecked exceptions is the correct approach to error-handling.</p>
+
+<p>In fact, Kotlin’s libraries do this: many standard Java functions that throw exceptions have Kotlin equivalents which return an error-status. As an example, Java’s <code>String.toInt(str)</code> throws an exception if the string isn’t a number. Kotlin provides an additional method <code>String.toIntOrNull(str)</code> which returns null for non-numeric input instead of throwing an exception.</p>
+
+<p>And in turn, this means that “Kotlin uses unchecked exceptions everywhere, so Java should too” is not a valid argument; Kotlin code does <em>not have to</em> “use unchecked exceptions everywhere”; it can - and the core libraries do - rely on functions that return errors as values.</p>
+
+<h2 id="haskell">Haskell</h2>
+
+<p>Haskell does have exceptions, and they are unchecked. However “catching” an exception requires using the IO monad which effectively forces exception-handling to be done at a “high level” in the application. Exceptions therefore cannot be used for “local flow control” as they are in Java; instead functions return an <code>(error-value | output-value)</code> type in the typical functional-language style.</p>
+
+<p>Errors are caused by one of three things:</p>
+
+<ul>
+  <li>the input-parameters to a function,</li>
+  <li>the application state, or</li>
+  <li>the environment (including external processes and remote services)</li>
+</ul>
+
+<p>Only the first kind of error can occur in a pure function; they do not reference state or environment. Problems such as assertion failures can occur, but these are classic “unchecked exceptions” that should only be handled in very high-level code (which is almost always already an IO monad), if at all.</p>
+
+<p>And in Haskell, the second two points are covered by the IO monad. It therefore makes sense for functions to return errors, not throw exceptions, and for all exception-handling (eg problems related to missing files or uncontactable external services) to be done in an IO monad.</p>
+
+<h2 id="others">Others</h2>
+
+<p>Python of course does have exceptions, and they are unchecked only - but that’s no surprise given Python’s dynamic type approach.</p>
+
+<p>Scala runs on the JVM but has only unchecked exceptions. However its standard library includes standard functional types <code>Either</code> and <code>Maybe</code> as a way to return an <code>(error-value | output-value)</code> type and <a href="https://nrinaudo.github.io/scala-best-practices/referential_transparency/avoid_throwing_exceptions.html">at least some sources recommend this over throwing exceptions</a>.</p>
+
+<p>C# has exceptions, and they are unchecked - as with Kotlin. I don’t use C# and so cannot say what is considered “best practice” for this environment.</p>
+
+<p>Erlang and Elixir (two languages for the BEAM VM) have only unchecked exceptions. However <a href="https://elixir-lang.org/getting-started/try-catch-and-rescue.html">as noted in the Elixir guide</a>:</p>
+
+<blockquote>
+  <p>In practice, however, Elixir developers rarely use the try/rescue construct.</p>
+</blockquote>
+
+<h1 id="functional-programming-principles-and-exceptions">Functional Programming Principles and Exceptions</h1>
+
+<p>In functional programming, exceptions are not traditional; functions instead return an <code>(error, output)</code> type as an instance of a type named <code>Either</code> or similar. Some references include:</p>
+
+<ul>
+  <li><a href="https://livebook.manning.com/book/functional-programming-in-c-sharp/chapter-6/1">Manning: Functional Programming in C#, Chapter 6: Functional Error Handling</a></li>
+  <li><a href="https://belief-driven-design.com/functional-programming-with-java-exception-handling-e69997c11d3/">Belief-driven-design: Functional Programming with Java Exception Handling</a></li>
+  <li><a href="https://softwareengineering.stackexchange.com/questions/420872/how-functional-programming-achieves-no-runtime-exceptions">StackOverflow: How functional programming achieves “No runtime exceptions”</a></li>
+</ul>
+
+<h1 id="my-opinion">My Opinion</h1>
+
+<p>Before we dive into other people’s opinions about Java’s checked and unchecked exceptions, I’d like to state mine first.</p>
+
+<h2 id="basics">Basics</h2>
+
+<p>I don’t think there is any debate about using unchecked exceptions for <em>truly exceptional</em> cases such as out-of-memory. Scattering code to handle these kinds of problems throughout a code-base clutters it with little benefit. But Java code often uses exceptions for reporting errors that could reasonably be expected, eg FileNotFound; whether these should be checked or unchecked is the debate here.</p>
+
+<p>I like the functional approach, as seen in Rust/Haskell/Scala/Go and functional languages in general (and also found in non-functional language C) - in general, failures should be returned from functions as values. Exceptions should be used only for <em>truly exceptional</em> situations, ie ones that are rare and difficult to recover from - and in that case, they can be unchecked.</p>
+
+<p>Callers of a function which can fail should be required to explicitly deal with that failure - which may mean reporting failure to the caller but with a different “context”.</p>
+
+<p>However C’s “cram error-status into the return value in an ad-hoc way” is just not elegant, while its “return status in output parameter” approach is (a) not much nicer, and (b) doesn’t work well in Java which always passes parameters by-value rather than by-reference. C therefore cannot be a “role model” for how to do error-handling in Java.</p>
+
+<p>It has always been possible to return <code>null</code> from a Java function to indicate it has failed; this is the equivalent of C’s use of “invalid result values” to indicate failure. Of course while it can indicate failure, it cannot provide the caller with any “reason”. Standard-lib class <code>Optional</code> is slightly more elegant than null, and also provides this “success or failure-without-reason” behaviour.</p>
+
+<p>In early versions of Java, performance was a high priority; Java was designed for embedded system use where resources are limited, and the early garbage-collectors were primitive. It is therefore no surprise that the language designers chose exceptions as an error-signalling mechanism rather than returning wrapper objects such as Result/Either; that requires a heap-allocation for each method, and code to unpack the result object. The exception approach creates no such garbage in the common success-path. My assumption is that the language designers recognised the drawback of this approach (far more use of exceptions than in other languages) and invented the checked exception to compensate for this problem (ie provide compile-type support to manage the more frequent exception-throwing).</p>
+
+<p>In the modern Java world, though, the balance has swung more towards supporting efficient development and robust code, rather than optimum efficiency; the systems we run code on are <em>vastly</em> more performant, we often scale horizontally rather than vertically, and the garbage collector implementation has also improved. IMO it is therefore preferable in modern code to follow functional-programming styles, ie return something like Result/Either instead of using (checked) exceptions to signal errors (with unchecked exceptions reserved for rare and serious problems). And for simple cases, use Java’s built-in <code>Optional</code> type. Returning <code>null</code> is not a great choice, as it is easy for the caller to forget to check it (the null-is-error pattern is more acceptable in Kotlin where nullability is part of the type-system).</p>
+
+<p>This raises the question: how can such return-types be elegantly processed? We don’t want to clutter our programs with lots of code related to unpacking result objects, testing their status, etc.</p>
+
+<p>Java unfortunately currently lacks any decent built-in syntax for dealing with result-like objects, making dealing with such return-types ugly in imperative-style Java code. Hopefully the current work on supporting <em>value types</em> and <em>pattern matching</em> in Java (see <a href="https://openjdk.java.net/projects/valhalla/">project Valhalla</a>) should make it possible to return equivalents of these types and to unpack them efficiently in the calling code. That’s just speculation at the moment though.</p>
+
+<p>Fortunately functional programming has already solved the problem of elegantly dealing with functions returning Result/Either. There are a few libraries which provide support for this in Java; the most well-known is <a href="https://www.vavr.io">vavr</a> (formerly Javaslang). While elegant, this does have the drawback that code looks rather different from traditional Java code.</p>
+
+<p>If you’re not willing/able to use the functional-error approach, then I would recommend just sticking with checked exceptions as error-handling methods with the following style guidelines.</p>
+
+<h2 id="exception-guidelines">Exception Guidelines</h2>
+
+<p>Code calling any function which uses exceptions as a “side-band to return failures which are not truly rare and hard-to-handle” should <em>not let such exceptions propagate far</em>.</p>
+
+<p>So what should code do when it calls a function that throws a checked exception? In my opinion, it should catch any such exceptions and return a suitable value representing the error - ie convert the exception into a return-value (functional style). If it can’t reasonably do that, then it should throw a new checked exception which represents the failure <em>in terms meaningful to the caller of the function</em>. Where a set of functions are tightly coupled, it might be acceptable to let an exception propagate up a few frames in the call-stack (a “non-local return”) but letting it cross any kind of module/domain boundary is exposing external code to internal details that it cannot, and should not, understand.</p>
+
+<p>The checked exceptions declared on any method should <em>make sense in terms of the method name and parameters</em>. Any exception-types that don’t follow this rule are exposing implementation details and failing to correctly isolate. As a user of a library, if a function takes a <code>File</code> or <code>filename</code> parameter then ok, a <code>FileNotFound</code> error is a reasonable thing for it to return - or for a Java method to throw. However if the function parameters <em>do not explicitly deal in files</em> then such an exception is just unfair, surprising, and dangerous. What the calling function should do is map that error internally into some type that makes sense in terms of the API (parameters) which that function offers to its callers. This applies both to functions that return errors and ones that throw exceptions.</p>
+
+<p>Checked exceptions strongly encourage the implementer of any function to follow the above conventions. Unchecked exceptions do not, tempting developers to leak internal details about a function’s implementation to code higher on the stack. And such leaks are <em>unstable</em>, with the application behaviour potentially changing without warning when a function’s internal implementation changes.</p>
+
+<p>It therefore seems to me that code which extensively uses unchecked exceptions is <em>more error-prone</em> and <em>less maintainable over the long term</em> due to the lack of any kind of encouragement for developers to <em>correctly handle errors</em>.</p>
+
+<p>When “mapping” exceptions, of course preserve the original cause. The stack-trace part of an exception is IMO the primary advantage over “error objects” - although an “error object” can be an exception-object. I’m also not suggesting that every function should have a matching set of exception-types; not only would that require a large number of types but mapping repeatedly would also generate very deep cause-chains. I suggest one or two general exception types per “module/layer” in the code, maybe one for “invalid input” and another for “other errors” - although errors related to things other than “invalid input” sometimes fall into the category of “exceptional problems”, ie can be unchecked exceptions. Of course subtypes of these exception types can be declared as needed, ie if a function thinks it would be useful to report a problem in more detail. But if the type of checked exception reported by a called function is also appropriate for the calling function to throw, then it can just be allowed to propagate through (ie the calling function can declare the same checked exception type).</p>
+
+<p>I believe that <em>libraries</em> should definitely use checked exceptions, in order to clearly document their error-handling behaviour. What errors an API can return (whether via an explicit return-object or via an exception) should be very explicit. An application which uses such libraries can then choose whether to map those exceptions to unchecked exceptions or not. I also believe that <em>layers</em> or <em>modules</em> within a large code-base should follow the same guidelines.</p>
+
+<p>As has been proven with C#, Kotlin, and other languages that don’t have checked exceptions, it is still possible to create quality software without them. However implementing code in a language that <em>supports</em> unchecked exceptions doesn’t mean they should be used everywhere; a function should <em>document its behaviour properly</em> and the kinds of errors it can return is part of that. In particular, just because you’re using Kotlin, which doesn’t support checked exceptions, doesn’t mean that the correct approach to error-handling is to use unchecked exceptions which propagate through multiple layers of the application.</p>
+
+<p>When working in a language that regularly uses exceptions for non-critical failures (eg Java), correctly handling an error which was triggered multiple levels deeper in a call-stack can be done in two ways:</p>
+
+<ul>
+  <li>via error-handling which doesn’t really care what the cause of the error was, or</li>
+  <li>by inspecting the exact cause and taking appropriate action</li>
+</ul>
+
+<p>In the first case, unchecked exceptions might be appropriate. However the error-handling code still needs to know things like:</p>
+
+<ul>
+  <li>whether the error was due to invalid input data (in which case that input should be rejected)</li>
+  <li>whether the error was a coding error (in which case the input which triggered that case should probably be skipped at least for now)</li>
+  <li>or whether the error was a temporary system problem (in which case retries could be attempted)</li>
+</ul>
+
+<p>Such decisions generally require appropriate <em>context</em> associated with the exception. IMO this means that almost any function should catch exceptions from the functions it calls and throw a different exception which is meaningful with respect to the API that function offers and with appropriate context. This pattern can be seen in the spring-jdbc library for example where SQL exceptions from the underlying database driver are transformed into exceptions that relate to the database operation that the spring-jdbc library was requested to perform.</p>
+
+<p>Code-checking tools such as Sonar even detect functions which <em>do</em> return status values and point out failures to handle those (eg the boolean return-value of <code>File.delete</code>). It seems somewhat inconsistent to require functions to handle such cases, but allow status returned in the form of an exception to be ignored. Yes, these are not quite the same as exceptions do propagate to the caller - but without appropriate context information.</p>
+
+<p>I could also sum up my opinion as simply being in agreement with Joshua Bloch in his book “Effective Java”:</p>
+
+<ul>
+  <li>Use Exceptions only for exceptional scenarios</li>
+  <li>Use checked exceptions for recoverable conditions</li>
+  <li>Throw exceptions appropriate to the abstraction</li>
+  <li>Don’t ignore exceptions</li>
+</ul>
+
+<p>What is an “exceptional scenario”? That’s a grey area. A SQL exception indicating that the provided SQL command is synactically incorrect is probably an exceptional scenario; it indicates a programming error that will almost certainly be detected during application testing. It is also a problem that a program cannot “recover from” except at a very high level, eg returning a “500 internal error” status from a REST call. It therefore seems reasonable to treat this as an unchecked exception, in order to avoid cluttering code with error-handling conditions which simply propagate an error upwards. On the other hand, the stack-trace for such an error is important for resolving the problem - and the original exception probably lacks a lot of context that intermediate layers could add. I would therefore suggest that each module/layer/domain of the application should define an unchecked exception type representing “unrecoverable error”, and should map checked or unchecked exceptions representing unrecoverable errors into that type - while adding additional context as needed. Is a SQL exception representing “field too large” also an “exceptional scenario”? That isn’t so clear, I think. It does indicate that the program has failed to validate input correctly (programmer error), but the error is also triggered by specific user input. There is a balance to be found between simplifying code and properly handling errors, and some cases lie near the boundary…</p>
+
+<h2 id="what-about-lambdas">What About Lambdas?</h2>
+
+<p>Java supports Lambda Expressions (since v1.8). While the lambda functionality itself works fine with exceptions, unfortunately many of the standard interfaces do not, eg in <code>someCollection.stream().map(..)</code>, the map method is defined to accept an instance of interface <code>Function</code> with a method <code>apply</code> which does not throw any exceptions.</p>
+
+<p>I don’t personally see that moving to use unchecked exceptions extensively throughout a code-base is “solving” this problem. If you want to map a collection using some function declaring a checked exception then the point is that function signature is trying to tell you something; it can fail and you need to handle that case. And this isn’t representing a “rare and hard-to-handle” kind of failure (otherwise it would be using an unchecked exception).</p>
+
+<p>In my opinion, the best solution here is to use the functional programming approach: ensure your mapping function returns something equivalent to <code>Either&lt;T,V&gt;</code>.</p>
+
+<p>But if this isn’t an option, then “tunnel” the exception through the map call, ie use unchecked exceptions only over a clearly bounded set of stack frames. I have <a href="/java/exception-tunnel">a separate article on this topic</a>. Yes, this is a little more verbose. It is also less likely to go <em>boom</em> at runtime than having unchecked (undeclared) exceptions propagating through your callstack.</p>
+
+<h1 id="arguments-in-favour-of-unchecked-exceptions">Arguments In Favour of Unchecked Exceptions</h1>
+
+<p>Yes it is true that:</p>
+
+<ul>
+  <li>there are many articles on the internet promoting unchecked exceptions</li>
+  <li>and Kotlin (a “better Java”) does not support checked exceptions</li>
+</ul>
+
+<p>Before looking at some articles in detail, I think it is important to consider the context for the arguments they put forward. If you are writing a prototype or a small internal tool with low reliability requirements, then yes proper error-handling (including checked exceptions) can get in the way of productivity. But if you are working on a large business-centric application with rapid change, poor documentation, insufficient test coverage, and regularly changing developers (as I regularly do), you need all the compile-time support you can get.</p>
+
+<p>Of course complex apps have also been developed in Kotlin - including IDEA. So yes it clearly is possible to build large software systems without checked exceptions. However has anyone checked how deep through the callstack such exceptions propagate? Maybe they apply some of the functional-error-handling principles above, and strictly limit their use of unchecked exceptions for “non-exceptional” circumstances. In addition, is the code-base and developer-base really comparable to your situation? I’ve got no specific contact with the IDEA team for example, but wouldn’t be surprised if the code development team was small, stable, and highly skilled, and automated code test coverage was high. All those things reduce the need for compile-time (static) help with error-handling.</p>
+
+<p>Here are some specific reasons given in favour of unchecked exceptions:</p>
+
+<h2 id="modifying-existing-code-by-adding-a-call-which-has-new-checked-exceptions-causes-signature-changes-in-a-whole-call-stack">Modifying existing code by adding a call which has new checked exceptions causes signature-changes in a whole call-stack</h2>
+
+<p>Well, if the failure can be dealt with locally (the function making the new call), then no there is no additional exception to be propagated.</p>
+
+<p>If it cannot be dealt with locally, but the existing functions already have some way of communicating to their callers that “a failure occurred” which is appropriately dealt with at a higher level, then the new exception can be mapped into the existing one, with appropriate context info, and no method signature changes are required.</p>
+
+<p>If it cannot be dealt with locally, and this new checked exception represents a kind of error that is significantly different from any kind of error the function previously reported to its callers, then there is a <em>real problem</em> that needs to be solved. Callers clearly need to know about this kind of error, and there is no way to communicate that, so the API (return-type or checked-exception-list) does need to change - ideally in a way that allows similar problems to be reported in future without an API change.  The existence of checked exceptions just made sure that it <em>does</em> get dealt with rather than being a nice runtime surprise.</p>
+
+<h2 id="checked-exception-types-expose-implementation-details">Checked exception types expose implementation details</h2>
+
+<p>Well, only if you don’t define proper exception types. Yes, if you expose IOException because that’s what your current implementation throws, and then change the method implementation in a way that can throw other exceptions you have a problem. The cause is not checked exceptions, but instead that IOException was never the right representation for a failure of your method.</p>
+
+<h1 id="addressing-specific-articles-criticising-checked-exceptions">Addressing Specific Articles Criticising Checked Exceptions</h1>
+
+<h2 id="you-have-to-go">You Have To Go</h2>
+
+<p>In <a href="https://testing.googleblog.com/2009/09/checked-exceptions-i-love-you-but-you.html">Checked exceptions, I love you but you have to go</a>, the author claims that most catch-blocks “rethrow or print error”. If code is just logging exceptions and ignoring them, then there are definitely problems, so I’m not sure what the point is here. For rethrowing - yes, I would expect that. As I mentioned above, IMO a function should report errors that are understandable in terms of the API that function offers; if it doesn’t take filenames as parameters then it really has no business throwing file-related exceptions. Within a small group of tightly-coupled functions, some slack can be allowed here to save typing. But quality code does require more lines than a “slap it together” solution. Maybe for throwaway tools there is some justification for converting all exceptions to unchecked exceptions - but hey, we can write a helper method for that..</p>
+
+<p>I’m not convinced it is easy to accidentally “eat an exception”; just don’t write empty catch-clauses.</p>
+
+<p>There are a few fair points there: some error-handling is not just “error remapping”, and it can be a little harder to see these cases among simpler error-remapping code. And yes, some catch-clauses can be hard/pointless to reach with unit tests.</p>
+
+<p>I agree that sometimes when prototyping the necessary checked-exception clauses can be a little annoying; it can be nice to get the overall flow done without error-handling first and add that later but Java can get in the way here. However there’s a price to pay for having support to ensure the program is robust in the production phase.</p>
+
+<p>The point about “checked exceptions don’t work well with callback methods such as the visitor pattern” has been covered above with the talk about lambdas. If a function can fail, just hiding that isn’t a good solution. Remapping the exception to a return-value is one solution; “tunnelling” via a runtime exception is also ok, as long as the exception is guaranteed to travel only a small number of stack-frames.</p>
+
+<p>The “loss of fidelity” argument (due to intermediate layers remapping exceptions) doesn’t really persuade me. If you are not bothered by strong coupling between your code’s upper layers and its lower layers then, yes, avoiding such “remapping” can give more control. That’s not a solution that scales well though. Here my background in larger systems might be biasing my opinion a bit though; when working on codebases built by 20+ developers over 5+ years of coding, such coupling is just not advisable and the slight loss of detailed control is well worth trading for a properly layered architecture.</p>
+
+<h2 id="why-you-should-ignore-exceptions-in-java">Why you should ignore exceptions in Java</h2>
+
+<p>In <a href="https://www.freecodecamp.org/news/why-you-should-ignore-exceptions-in-java-and-how-to-do-it-correctly-8e95e5775e58/">this codecamp article</a>, the first point is that “there are many scenarios where the application cannot continue to run and needs to stop”. I’m rather surprised by this argument; I haven’t worked on too many systems where just terminating is a good option. Yes, Erlang follows the “just let it crash” philosophy, but it has surrounding runtime support for process restarts, retries with delays, and various other things. I would also say that in a large application, it is only the top level of code which is able to make such a decision; reusable code in libraries cannot assume that its callers will be working in that mode. But if you are working on an “I don’t care if it crashes on invalid input or unexpected environment” then yes I can see that checked exceptions would be less than optimal. May I suggest Python for such use-cases?</p>
+
+<h2 id="checked-exceptions-are-evil">Checked Exceptions are Evil</h2>
+
+<p>Philipp Hauer argues that <a href="https://phauer.com/2015/checked-exceptions-are-evil/">Checked Exceptions are Evil</a>.</p>
+
+<p>He gives an example where simply redeclaring an IOException ends up “polluting” the signature of methods higher in the stack. My answer is: declaring IOException is appropriate in methods <code>UserRepository.getContent</code> and <code>UserRepository.getUsers</code> as their API explicitly deals with type <code>Path</code>. However <code>AddUserAction.execute</code> should be remapping that exception to something relevant to its API:</p>
+
+<ul>
+  <li>when it calls <code>UserRepository.getUsers</code> in a way that is really not expected to trigger an <code>IOException</code> then an unchecked exception may be appropriate</li>
+  <li>but when the IOException is something that could reasonably be expected here (eg user-provided data should refer to an existing file) then the method should somehow encode errors into its return-value or should throw a checked exception related to “unable to execute user action”.</li>
+</ul>
+
+<p>With this approach, if later changes to AddUserAction end up calling other methods that throw different types of checked exceptions, there is now a mechanism for reporting “unable to execute user action” so the signature may not need to change again.</p>
+
+<p>The author makes the point that in some circumstances a function may declare a checked exception, but be invoked in a way/environment that can never trigger that exception. In that case, yes I agree that it should be caught and rethrown as an unchecked exception; it becomes an “exceptional situation” in this context instead of a “recoverable error”. But only in that context.</p>
+
+<p>The statement that (rephrased) “the client doesn’t care which type of failure occurred” isn’t valid in my opinion. That is the caller’s decision, not the callee’s. Where a set of functions are tightly coupled, it might be acceptable to let caller’s requirements leak into called functions - but care should be taken not to take this too far. It certainly should not happen over any “domain boundary” (module/layer boundary) or the result is hard-to-maintain and unreusable code.</p>
+
+<p>And again (a common point in anti-checked-exception arguments) it is stated that catch-clauses often simply swallow exceptions. I really hope not; in the places I work in there are code-reviews, and such code won’t pass any kind of review.</p>
+
+<p>The remaining points are sufficiently covered elsewhere.</p>
+
+<h2 id="ignore-checked-exceptions-all-the-cool-kids-are-doing-it">Ignore Checked Exceptions, All the Cool Kids are Doing It</h2>
+
+<p>On OverOps, <a href="https://www.overops.com/blog/ignore-checked-exceptions-all-the-cool-devs-are-doing-it-based-on-600000-java-projects/">Alex Zhitnitsky looks at some academic analysis of various Java code-bases</a> which shows that most of the catch-clauses were - well, garbage.</p>
+
+<p>Actually, this article isn’t either for or against checked exceptions; it just points that in practice error-handling is very poorly done and having checked exceptions still can’t force developers to do it right. All I can say is: <em>code reviews, people!</em>.</p>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>Logging libraries often truncate cause-chains for logged exceptions, losing the actual original point of failure. This is IMO a problem with the logging libraries; the exception-cause-chain is correct when passed to the library, and if the library thinks it best to discard some data from the cause chain, it should not discard the last (deepest, original) cause.</p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>Can we live without checked exceptions? Yes, of course. However I am firmly of the opinion that checked exceptions in <em>library APIs</em> are a massive contribution to robust software. Whether an application (ie code which is <em>not</em> a library) needs checked exceptions depends upon its size and complexity. For larger applications (anything which has “modules”), I believe those internal modules should be treated just like library APIs - ie the errors that the API reports should be explicit, either as return-values or checked exceptions. Anything else will lead to one or more of:</p>
+
+<ul>
+  <li>deep coupling between higher and lower layers of the software stack,</li>
+  <li>poor context available in logged exceptions,</li>
+  <li>failed opportunities to recover from errors.</li>
+</ul>
+
+<p>It should not be forgotten that whether to do error-handling “properly” or not can be a business decision. My proposal/opinion above produces (in my opinion) robust and maintainable code. However that might not be the most cost-effective solution; sometimes lower quality software may be acceptable in return for lower costs/faster development, even in systems which are not prototypes. In this case, extending the use of unchecked exceptions, and just living with the occasional unexpected failure in production, or unclear codepath, might be an option. It should be a deliberate choice though, not an accidental side-effect of a coding style. At least libraries and other reusable code should be using checked exceptions, so the user of that code can <em>choose</em> whether to implement robust or cheap.</p>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<ul>
+  <li>
+<a href="https://devblogs.microsoft.com/oldnewthing/20040422-00/?p=39683">Raymond (Microsoft dev blog): Cleaner, more elegant, and wrong</a> - “Just because you can’t see the error path doesn’t mean it doesn’t exist.”</li>
+  <li>
+<a href="https://www.vavr.io">VAVR (formerly JavaSlang)</a> - A functional library for Java, including error-handling support</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/exception-checking/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+
