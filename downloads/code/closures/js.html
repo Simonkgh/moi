@@ -1,0 +1,45 @@
+<html>
+<head>
+<script>
+  var baseStrings = ["Day", "Month", "Year"]
+  var postfix = ".";
+
+  function makeStringTransformer(prefix) {
+    // return a closure that "captures" the prefix and postfix values
+    return function(s) {
+      return prefix + s + postfix;
+    }
+  }
+
+  function map(src, closure) {
+    var out = [];
+    for(index in src) {
+      out[out.length] = closure(src[index]);
+    }
+    return out;
+  }
+
+  function showList(src) {
+    document.write("<p>");
+    for(o in src) {
+      document.write(src[o]);
+      document.write(" &nbsp; ");
+    }
+    document.writeln("</p>");
+  }
+
+  var closure1 = makeStringTransformer("Previous ");
+  var closure2 = makeStringTransformer("Next ");
+
+  var mapped1 = map(baseStrings, closure1);
+  showList(mapped1);
+
+  var mapped2 = map(baseStrings, closure2);
+  showList(mapped2);
+
+  postfix = "!";
+  var mapped3 = map(baseStrings, closure2);
+  showList(mapped3);
+</script>
+</head>
+</html>

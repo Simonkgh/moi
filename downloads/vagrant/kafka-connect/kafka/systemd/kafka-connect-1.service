@@ -1,0 +1,26 @@
+[Unit]
+Description=Apache Kafka Connect server (node 1)
+Documentation=http://kafka.apache.org/documentation.html
+Requires=network.target remote-fs.target kafka.service
+After=network.target remote-fs.target kafka.service
+
+[Service]
+Type=simple
+User=kafka
+Group=nogroup
+
+Environment=CLASSPATH=/opt/kafka/plugins/*
+Environment=LOG_DIR=/var/log/kafka-connect
+Environment=KAFKA_LOG4J_OPTS=-Dlog4j.configuration=file:/opt/kafka/config/connect-log4j.properties
+
+# Hack: sleep for a while to ensure kafka broker has started (not needed in production)
+ExecStartPre=/bin/sleep 10
+ExecStart=/opt/kafka/current/bin/connect-distributed.sh /opt/kafka/config/connect-distributed-1.properties
+ExecStop=
+
+SuccessExitStatus=143
+Restart=on-failure
+SyslogIdentifier=kafka-connect-1
+
+[Install]
+WantedBy=multi-user.target
