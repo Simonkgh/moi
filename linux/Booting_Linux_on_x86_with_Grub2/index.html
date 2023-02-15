@@ -1,0 +1,1346 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Grub2</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Grub2</h1>
+    <aside>First published on: April 1, 2010</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 class="no_toc" id="booting-linux-on-x86-using-grub2">Booting Linux on x86 using Grub2</h1>
+
+<p>Updated 2010-04-18. Thanks to Seth, Vladimir for corrections.</p>
+
+<p>Updated 2010-06-07. Thanks to Tom H. for information about <code>load_env</code> and <code>save_env</code>.
+ Also added information about installing <code>core.img</code> into unformatted partitions, inspired
+ by a question from Tom Coles.</p>
+
+<h2 id="intro" class="no_toc">Introduction</h2>
+
+<p>There is a lot of information on the web about how to <em>use</em> Grub2. The Grub2 site also has some very detailed
+info about how it works. However there appears to be no decent 15-minute overview of how an x86 PC
+boots a Linux kernel using Grub2; this article aims to provide that.</p>
+
+<p>Like any other overview, there are many details that have been left out; a complete description of Grub2
+would result in a textbook, not a quick introduction. For further information, please see the Grub2 site.</p>
+
+<p>This article is NOT a how-to or reference manual for Grub2; it is for people who have read those docs
+and asked “but why does that work?”.</p>
+
+<p>I hope you find this useful; all feedback welcome via <a href="/site/welcome">email</a>.</p>
+
+<h2 class="no_toc" id="table-of-contents">Table of Contents</h2>
+
+<ul id="markdown-toc">
+  <li><a href="#intended-audience" id="markdown-toc-intended-audience">Intended Audience</a></li>
+  <li><a href="#environment-and-assumptions" id="markdown-toc-environment-and-assumptions">Environment and Assumptions</a></li>
+  <li><a href="#article-flow" id="markdown-toc-article-flow">Article Flow</a></li>
+  <li><a href="#installing-grub" id="markdown-toc-installing-grub">Installing Grub</a></li>
+  <li><a href="#booting-the-computer" id="markdown-toc-booting-the-computer">Booting the Computer</a></li>
+  <li>
+<a href="#module-loading" id="markdown-toc-module-loading">Module Loading</a>    <ul>
+      <li><a href="#initialization" id="markdown-toc-initialization">Initialization</a></li>
+      <li><a href="#linking" id="markdown-toc-linking">Linking</a></li>
+      <li><a href="#dependency-handling" id="markdown-toc-dependency-handling">Dependency Handling</a></li>
+      <li><a href="#loading" id="markdown-toc-loading">Loading</a></li>
+    </ul>
+  </li>
+  <li><a href="#generating-a-grub-config-file" id="markdown-toc-generating-a-grub-config-file">Generating A Grub Config File</a></li>
+  <li><a href="#referencing-drive-partitions-from-grubcfg" id="markdown-toc-referencing-drive-partitions-from-grubcfg">Referencing drive partitions from grub.cfg</a></li>
+  <li>
+<a href="#the-linux-module" id="markdown-toc-the-linux-module">The “linux” module</a>    <ul>
+      <li><a href="#the-linux-command" id="markdown-toc-the-linux-command">The “linux” command</a></li>
+      <li><a href="#initrd" id="markdown-toc-initrd">The “initrd” command</a></li>
+      <li><a href="#hint-1" id="markdown-toc-hint-1">Hint 1</a></li>
+      <li><a href="#hint-2" id="markdown-toc-hint-2">Hint 2</a></li>
+    </ul>
+  </li>
+  <li><a href="#multiboot-kernels" id="markdown-toc-multiboot-kernels">Multiboot kernels</a></li>
+  <li><a href="#using-gpt-partition-tables" id="markdown-toc-using-gpt-partition-tables">Using GPT partition tables</a></li>
+  <li><a href="#backgrounds-and-fancy-graphics" id="markdown-toc-backgrounds-and-fancy-graphics">Backgrounds and Fancy Graphics</a></li>
+  <li>
+<a href="#miscellaneous" id="markdown-toc-miscellaneous">Miscellaneous Topics</a>    <ul>
+      <li><a href="#rescue-mode" id="markdown-toc-rescue-mode">Rescue Mode</a></li>
+      <li><a href="#the-grub-emulator" id="markdown-toc-the-grub-emulator">The Grub Emulator</a></li>
+      <li><a href="#the-devicemap-file" id="markdown-toc-the-devicemap-file">The device.map File</a></li>
+      <li><a href="#pxe-boot" id="markdown-toc-pxe-boot">PXE Boot</a></li>
+      <li><a href="#the-grubenv-file-and-the-saveenvloadenv-commands" id="markdown-toc-the-grubenv-file-and-the-saveenvloadenv-commands">The grubenv file and the <code>save_env</code>/<code>load_env</code> commands</a></li>
+    </ul>
+  </li>
+  <li><a href="#references" id="markdown-toc-references">References</a></li>
+  <li><a href="#working-notes" id="markdown-toc-working-notes">Working notes</a></li>
+  <li><a href="#outstanding-questions" id="markdown-toc-outstanding-questions">Outstanding questions</a></li>
+  <li><a href="#footnotes" id="markdown-toc-footnotes">Footnotes</a></li>
+</ul>
+
+<h2 id="intended-audience">Intended Audience</h2>
+
+<p>This article is for:</p>
+
+<ul>
+  <li>
+    <p>People who want to understand the general principles of Grub2, so the commands needed to configure
+booting then make sense, rather than being simply magic.</p>
+  </li>
+  <li>
+    <p>People wanting to get into Grub2 development, as a first step before diving into the code <sup id="fnref:note-development" role="doc-noteref"><a href="#fn:note-development" class="footnote" rel="footnote">1</a></sup>.</p>
+  </li>
+</ul>
+
+<p>This article is not for:</p>
+
+<ul>
+  <li>People who want to solve problem X as fast as possible, and just want some instructions to follow.
+This is not a reference manual on Grub commands, nor a problem-solving FAQ.</li>
+</ul>
+
+<p>It is expected that:</p>
+
+<ul>
+  <li>The reader is comfortable using the command-line to administer their computer, and knows
+what partitions and filesystems are.</li>
+</ul>
+
+<p>It is not expected that:</p>
+
+<ul>
+  <li>The reader is a programmer.</li>
+</ul>
+
+<h2 id="environment-and-assumptions">Environment and Assumptions</h2>
+
+<p>This information is based on Grub version 1.98, and Ubuntu 10.04 beta-1.
+It should apply to most versions of Grub around 2.x, and most Linux operating systems.</p>
+
+<p>It is assumed that:</p>
+
+<ul>
+  <li>
+    <p>The computer is an x86 pc. For other computer types, maybe 50% of the information below will still be relevant.</p>
+  </li>
+  <li>
+    <p>The computer has a traditional BIOS. For systems with coreboot firmware rather than BIOS the early stages are
+different but maybe 80% of the information below will still be relevant. For systems with EFI firmware, again
+the early stages are different but the remainder is still relevant.</p>
+  </li>
+  <li>
+    <p>The boot media is a local hard-drive. This article does not cover network booting, ie where the Grub code is
+itself on a network filesystem.</p>
+  </li>
+  <li>
+    <p>The boot disk has been formatted with an MBR Partition Table, ie the traditional format inherited from DOS days.</p>
+
+    <p>Systems whose ROM supports EFI will have a GPT Partition table, and will use a somewhat different
+approach for the early parts of booting. Later parts (after <code>core.img</code> has been loaded) should be the same.</p>
+
+    <p>See the <a href="http://en.wikipedia.org/wiki/Master_Boot_Record">Wikipedia Master Boot Record</a> article.</p>
+
+    <p>It is possible to use GRUB to boot a BIOS-based x86 PC with a GPT formatted hard-drive;
+this is briefly discussed later.</p>
+  </li>
+  <li>
+    <p>Grub’s files are installed on the same partition as the root filesystem of
+the Linux installation being booted, under directory <code>/boot</code>.</p>
+
+    <p>It is also quite common for Grub’s files to be put on their own partition, and this makes only a
+small difference to the process described below. However in the name of simplicity, this article
+always writes <code>/boot/grub</code> and those who have a separate partition will have to mentally replace
+this with <code>/grub</code> while reading.</p>
+  </li>
+  <li>
+    <p>The operating system being booted is Linux. Actually, this article should be applicable to booting
+just about any OS, as it stops at the point where control is handed over to the target OS kernel.</p>
+  </li>
+</ul>
+
+<h2 id="article-flow">Article Flow</h2>
+
+<p>The remainder of this article is broken into the following sections:</p>
+
+<ul>
+  <li>What happens when Grub is installed</li>
+  <li>What happens when the host computer boots</li>
+  <li>More about loadable Grub modules (chunks of executable code).</li>
+  <li>What happens when the “grub-mkconfig”, aka “update-grub” script is run
+(ie how <code>grub.cfg</code> gets generated)</li>
+  <li>Assorted other issues</li>
+</ul>
+
+<h2 id="installing-grub">Installing Grub</h2>
+
+<p>The Grub utilities provide a command “grub-install” which creates the files
+in <code>/boot/grub</code> and writes a program to a disk’s Master Boot Record (MBR).</p>
+
+<p>When grub-install is run, the following occurs:</p>
+
+<ul>
+  <li>
+    <p>Script grub-install copies module (<code>*.mod</code>) files from some base location into <code>/boot/grub</code> <sup id="fnref:note-filecopy" role="doc-noteref"><a href="#fn:note-filecopy" class="footnote" rel="footnote">2</a></sup>.
+The base location is usually <code>/usr/lib/grub/i386</code>. See the grub-install script for further information.</p>
+  </li>
+  <li>
+    <p>Various <code>*.lst</code> files are also copied literally from the base location into <code>/boot/grub</code>:</p>
+
+    <ul>
+      <li>
+        <p><code>moddep.lst</code> contains a list of the modules that each module depends on. When a module
+is loaded, the dependent modules are also automatically loaded.</p>
+      </li>
+      <li>
+        <p><code>fs.lst</code> indicates which modules implements drivers for which filesystem-types.</p>
+      </li>
+      <li>
+        <p><code>command.lst</code> indicates which modules implement which “commands” that can be invoked from
+the Grub command-line or Grub shell scripts (eg <code>grub.cfg</code>).</p>
+      </li>
+      <li>
+        <p><code>handler.lst</code> indicates which modules provide which “parsers” (ie different
+Grub shell interpreters). The parser named “parser.grub” is the default parser.</p>
+      </li>
+      <li>
+        <p><code>crypto.lst</code> indicates which modules provide which encryption algorithms.</p>
+      </li>
+      <li>
+        <p><code>partmap.lst</code> indicates which modules provide support for which disk partition schemes.
+The support is read-only, ie just being able to determine what partitions exist, what
+the (start, size) values are for each partition, etc. Tools for modifying partitions can
+be found in the modules listed in file <code>parttool.lst</code>.</p>
+      </li>
+      <li>
+        <p><code>video.lst</code> indicates which modules provide a graphics driver. When using gfxterm or gfxmenu,
+the video.mod module is loaded, and it then tries each module in video.lst in turn until 
+one of them returns “success”, ie detects that it can handle the graphics on this computer.</p>
+      </li>
+      <li>
+        <p><code>parttool.lst</code> indicates which modules provide tools for modifying disk partitions, eg
+marking partitions as bootable/hidden.</p>
+      </li>
+      <li>
+        <p><code>terminal.lst</code> indicates which modules provide “terminal” implementations, ie code that can
+display text and read input from the user.</p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>A <code>core.img</code> file is dynamically generated <sup id="fnref:note-coreimg" role="doc-noteref"><a href="#fn:note-coreimg" class="footnote" rel="footnote">3</a></sup>. The generated file contains the basic
+Grub code, plus one or more linked-in modules, including the filesystem driver module needed to
+read the filesystem on which the Grub files are stored (<code>/boot/grub</code>) <sup id="fnref:note-ext4" role="doc-noteref"><a href="#fn:note-ext4" class="footnote" rel="footnote">4</a></sup>. Note that these
+built-in modules are also available in <code>/boot/grub</code>, under their normal names (eg “ext2.mod”).</p>
+  </li>
+  <li>
+    <p>Application grub-setup (invoked by grub-install) copies the contents of the core.img file to the sectors
+immediately following the MBR on the target disk, also known as “the post-MBR gap”. Installing in this
+way is named <em>embedding</em> in GRUB terminology.</p>
+
+    <p>In most linux systems, hard drives get partitioned so that the first 32kb following the MBR are not
+part of any partition; this space is termed the “post-MBR gap”. Presumably other unixish OSes do this too 
+(windows is a little different <sup id="fnref:windows_format" role="doc-noteref"><a href="#fn:windows_format" class="footnote" rel="footnote">5</a></sup>). This “unmanaged” space is exactly the right sort of
+disk-space to put boot code that must be loaded by MBR startup code that has no support for filesystems.</p>
+
+    <p>The grub-setup app will look for a post-MBR gap by default; if the gap is not there then grub-setup
+will issue a warning. Alternatively, grub-setup can be pointed at a normal hard-disk partition with a null
+“type” field; this is also “unmanaged” space that is suitable for boot code. This is particularly
+useful if the target hard-drive already has data on it, and doesn’t have a post-MBR gap; in this
+case any free space on the disk can be used. It also allows any size <code>core.img</code> file to be supported
+(ie files bigger than the traditional 32kb post-MBR gap size). See the options for the grub-setup
+application for further details.</p>
+
+    <p>Note: To manually check if the necessary gap is there, just use parted or gparted on Linux to inspect the
+partition table of any disk; the “start address” of partition 1 should be at 32Kb, ie there is a “missing”
+area not in any partition.</p>
+
+    <p>Before writing to disk, <code>core.img</code> is modified to insert hard-wired values for the disk# and partition# of the
+filesystem on which <code>/boot/grub</code> exists, ie which it should mount using the linked-in filesystem driver.
+Hard-wiring these values can be bad if storage devices are added to, or removed from, the system.
+This hard-wiring can be avoided by linking in the “search” module and a “config file”, making it
+possible to locate <em>at boot time</em> the partition to mount via label or UUID <sup id="fnref:note-coreconfig" role="doc-noteref"><a href="#fn:note-coreconfig" class="footnote" rel="footnote">6</a></sup>.</p>
+
+    <p>File <code>core.img</code> is also modified so that its first sector (512 bytes) contains the addresses of all the
+other blocks of the file. This allows the Master Boot Record code to read this single sector and
+then load the rest of the file with simple direct read operations (no filesystem understanding
+needed).</p>
+
+    <p>The alternative to “embedding” the <code>core.img</code> (ie copying it to space outside any filesystem) is using
+“blocklists” to load it from the original stored within a filesystem. As described above, the <code>core.img</code>
+file is modified so its first sector holds the raw addresses of the disk blocks containing the 
+rest of the file <sup id="fnref:note-mkblocklist" role="doc-noteref"><a href="#fn:note-mkblocklist" class="footnote" rel="footnote">7</a></sup>. However the file is not copied; instead, it is left in its original
+position. To the Master Boot Record code, the effect is the same. However this approach is not recommended
+as it is much more vulnerable to breakage; GRUB will fail to boot if the original file
+gets moved (eg if a “defrag” is done, or restore-from-backup done, or the file is made larger, or
+even simply modified in the case of log-structured filesystems).</p>
+  </li>
+  <li>
+    <p>An MBR image is generated (aka <code>boot.img</code>), and grub-setup writes it to the MBR area of the
+computer’s boot device. This generated image contains code to load a single hard-wired sector
+from disk, which itself contains an array of (sector,len) address ranges. The MBR code then
+iterates over this array loading all those sector ranges into memory. The single sector to load
+is the address of the first block in the <code>core.img</code> file, effectively loading file <code>core.img</code> from disk.
+This MBR code is very architecture-specific; the PC one is written in assembly and invokes BIOS operations to
+load the specified blocks. Note that the MBR code does not need to understand the filesystem it is loading the
+blocks from; they are simply at fixed addresses <sup id="fnref:note-coremove" role="doc-noteref"><a href="#fn:note-coremove" class="footnote" rel="footnote">8</a></sup>. Note also that the MBR is a
+fixed size: just 512 bytes on PCs - and it must include the disk partition table too!</p>
+
+    <p>The MBR can also contain “bios params” between offsets 0x03 and 0x5a, is about 30% of this space,
+further reducing the space for program code.</p>
+
+    <p>A copy of the partition table entries from the old MBR are inserted into the new MBR before it is
+written, so the disk partition information is not lost.</p>
+
+    <p>See: <a href="http://en.wikipedia.org/wiki/Master_Boot_Record">Wikipedia Master Boot Record</a></p>
+
+    <p>It is possible to install Grub’s MBR code to the first sector of a partition (rather than the first sector
+of the entire disk); many bootloaders support “chain loading” where the boot code in the disk MBR forwards
+to code in the first sector of a partition. However in order for this to work, the filesystem on that partition
+must not <em>use</em> this first sector! Many filesystems do explicitly skip the first sector for just this reason;
+for example, fat, ntfs, and ext2 all leave the first sector free. When installing into a partition
+(eg hd0,1 rather than hd0), Grub checks the filesystem type in that partition; if the type is not one that is
+known to leave the first sector free then a warning will be displayed and grub-setup will exit. Even if the first
+sector is free, the necessary space to “embed” <code>core.img</code> will not be available, so a blocklist must be used to load
+<code>core.img</code> from its “in-place” location, which can be fragile.</p>
+  </li>
+</ul>
+
+<p>As part of installing Grub, a <code>/boot/grub/grub.cfg</code> file is also needed. See section “Generating A Grub Config File”.</p>
+
+<h2 id="booting-the-computer">Booting the Computer</h2>
+
+<p>When power is turned on, the following happens:</p>
+
+<ul>
+  <li>
+    <p>The hardware initialises, sets the CPU to <em>real mode</em> (no virtual memory)
+and jumps to fixed location 0xFFFF0 (hardwired in the CPU circuits)</p>
+  </li>
+  <li>
+    <p>BIOS code stored in a ROM or flash-memory mapped to that location is therefore executed.</p>
+  </li>
+  <li>
+    <p>The BIOS code looks at the BIOS config data to see which is the boot device. This BIOS config data can usually
+be edited by pressing some special key-sequence just after turning the power on, causing the BIOS
+configuration program to run. Among other things, the boot device can usually be selected here.</p>
+  </li>
+  <li>
+    <p>The BIOS code loads the MBR of the boot device into RAM. Remember that an MBR is just 512 bytes!
+The loaded data is of course the program &amp; data that grub-install dynamically created and wrote
+there when the grub-install program was executed.</p>
+  </li>
+  <li>
+    <p>The BIOS code jumps to the start address of the loaded MBR (ie Grub code executes for the first
+time since power-on).</p>
+  </li>
+  <li>
+    <p>Grub’s MBR code loads a single sector whose address is hard-wired into the MBR block. It then loops over the 
+(address,len) pairs in that sector loading all that data from the disk into memory (ie loads
+the contents of file <code>/boot/grub/core.img</code>, or its “embedded” copy). The MBR code then jumps to
+the loaded code, ie “executes” the program in core.img.</p>
+
+    <p>As described in the “Installing Grub” section, this trick of embedding the raw disk block addresses
+makes it possible to store <code>core.img</code> in space that is not in a partition, and that has never been
+formatted as a filesystem at all (“embedding”). And in this case, if <code>core.img</code> is modified, as long
+as the new version is “embedded” at the same location, the MBR code does not need to be updated.</p>
+
+    <p>Alternatively, it is possible for the core.img to be inside a real filesystem, and for Grub to read
+the core.img file contents without having a driver for that filesystem. However in this case, if
+core.img is modified then the first block of the file may well be given a new address on disk; if
+this happens then the MBR must be updated to point to this new location. Nevertheless, as core.img
+is usually updated by running grub-install, this is not usually a problem.</p>
+
+    <p>Note that theoretically, if core.img is on a different device than the MBR, and new hardware is added then
+the Grub-generated MBR record might not be able to correctly load the core.img file; the device-id on which
+the first sector of core.img is to be found is hard-wired into the MBR, not searched for. However there is
+no solution for this; there is no way to embed the equivalent of the Grub “search” command into the 512-byte
+MBR. This problem is not likely though; normally the core.img is embedded on the same device as the MBR. And
+once core.img has been loaded it can use search.mod to find all further <code>/boot/grub</code> files, and is therefore
+immune to hardware rearrangements.</p>
+  </li>
+  <li>
+    <p>The executed core.img code now initialises all the modules that are built into it
+(linked into core.img); one of these modules will be a filesystem driver capable
+of reading the filesystem on which directory /boot/grub lives.</p>
+
+    <p>It also registers a set of built-in commands: set, unset, ls, insmod.</p>
+  </li>
+  <li>
+    <p>If a “config file” has been linked into core.img, this is then passed to a very simple build-in script
+parser for processing. Scripting commands in the config file can only invoke built-in or linked-in commands.
+Simple scenarios (eg booting a typical desktop computer from a local drive) need no config file; this facility
+is used for things like booting via pxe, remote nfs or when <code>/boot/grub</code> is on an LVM device.</p>
+  </li>
+  <li>
+    <p>Core.img now loads file “/boot/grub/normal.mod” dynamically from disk, and jumps to its entry function.
+Note that this step requires the appropriate filesystem driver to be set up (ie built-in).</p>
+
+    <p>The process of dynamically loading modules is discussed in the next section.</p>
+  </li>
+  <li>
+    <p>The normal.mod module:</p>
+
+    <ol>
+      <li>Registers command “menuentry” for use by scripts <sup id="fnref:note-menuentry" role="doc-noteref"><a href="#fn:note-menuentry" class="footnote" rel="footnote">9</a></sup>.</li>
+      <li>Loads a script parser (aka an “interpreter”) named “parser.grub”. The handler.lst file is
+used to determine the name of the <code>*.mod</code> file to actually load (normally “sh.mod”).</li>
+      <li>Loads file /boot/grub/grub.cfg and passes the contents to the script parser for execution.</li>
+      <li>Puts up a menu on the screen showing an entry for each time the script parser had encountered
+a <code>menuentry{...}</code> block in the script (if no menuentry blocks exist in the script, then it just
+displays an interactive commandline).</li>
+      <li>Lets the user select an option.</li>
+      <li>Passes the contents of the <code>{...}</code> block for that menu-entry to the script parser again.</li>
+      <li>Invokes the “boot” command from the boot.mod module.</li>
+    </ol>
+  </li>
+</ul>
+
+<p>The standard script parser implementation is named “parser.grub” and can be found in file /boot/grub/sh.mod.
+This implementation provides features very similar to a standard posix shell. Therefore grub.cfg’s syntax is
+very similar to a standard Unix shell script:</p>
+
+<ul>
+  <li>Environment variables are accessed via <code>$name</code> or <code>${name}</code>.</li>
+  <li>Any of the commands provided by the <code>*.mod</code> files can be invoked like a shell script would invoke an external
+app or built-in command (eg “ps” or “ls”). If a command is issued which is not provided by a currently-loaded
+module, then file “command.lst” is used to determine which <code>*.mod</code> file provides that command, and that module
+is then loaded. See the following section for more details.</li>
+  <li>If/then/else/fi is supported as in normal shell scripts.</li>
+  <li>Script functions can be defined and invoked as in normal shell scripts.</li>
+  <li>Variables can be defined as in normal shell scripts.</li>
+  <li>Additional modules can be explicitly loaded via “insmod” commands, eg “insmod sleep.mod”.
+This is not necessary to access “commands”, as they are automatically loaded (see above). However insmod is
+needed to load modules providing filesystem drivers, parsers, crypto implementations, etc.</li>
+</ul>
+
+<p>Module normal.mod also provides an interactive command-line with gnu readline support. Each
+line read from the keyboard is passed to the current script-parser for processing. The
+result is that Grub can provide an environment very similar to a standard unix interactive
+shell, where the commands that can be invoked are anything provided in the available modules.
+This is useful for diagnosing and fixing boot problems.</p>
+
+<p>The list of available commands is documented on the Grub website. Any of these
+can be invoked from grub.cfg as long as the associated module has been loaded first,
+or if there is an entry in file command.lst for it.</p>
+
+<p>The commands most useful to call from grub.cfg are:</p>
+
+<table style="margin-left:30px;margin-bottom:50px">
+  <thead>
+    <tr>
+      <th>command</th>
+      <th>description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>search</td>
+      <td>find (hdx,y) value for a filesystem with specific label, UUID, etc</td>
+    </tr>
+    <tr>
+      <td>terminal</td>
+      <td>configure a textmode terminal</td>
+    </tr>
+    <tr>
+      <td>gfxterm</td>
+      <td>configure a graphical terminal</td>
+    </tr>
+    <tr>
+      <td>recordfail</td>
+      <td>save state for next boot</td>
+    </tr>
+    <tr>
+      <td>echo</td>
+      <td>write to terminal</td>
+    </tr>
+    <tr>
+      <td>test</td>
+      <td>interprets [ … ] expressions</td>
+    </tr>
+    <tr>
+      <td>linux</td>
+      <td>sets up Grub data-structures so that later execution of the “boot” command will boot into a specified Linux kernel.</td>
+    </tr>
+    <tr>
+      <td>chainloader</td>
+      <td>load and jump to the MBR of a different disk partition</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Some commands useful to call from an interactive commandline are:</p>
+
+<ul>
+  <li>ls, cat, echo, hexdump, parttool, tar, reboot</li>
+</ul>
+
+<h2 id="module-loading">Module Loading</h2>
+
+<p>Grub modules have some similarity to linux kernel modules, and in fact the commands to load and
+unload them into Grub are “insmod” and “rmmod” just as for linux modules. However in many respects
+they are more like “plugins” for an IDE or editor. It is this modular architecture, together with
+a built-in scripting syntax for invoking module functions, that makes Grub so flexible and extendable.</p>
+
+<h3 id="initialization">Initialization</h3>
+
+<p>When a module is loaded (from a <code>*.mod</code> file), or a linked-in module is initialised, the module
+can register commands, variables, parsers, filesystem drivers and cryptographic algorithm implementations.</p>
+
+<p>A command is simply a mapping from a name to a function; Grub scripts can then invoke that function
+by name (eg “ls”, “boot”, “linux”). Often the command name has the same name as the .mod file
+(eg “search.mod” registers command “search”). However this is not always the case; for example
+module “loadenv.mod” registers both <code>load_env</code> and <code>save_env</code> commands. If a script uses a command
+that is not yet registered, then file commands.lst is used to determine which module to load.</p>
+
+<p>A variable is a mapping from a name to a variable defined in the module; scripts can then access the
+variable as $name. Optionally, a module can ensure it gets a callback when a script <em>assigns</em> to 
+that variable.</p>
+
+<p>A module can register a “parser” to support additional non-standard script syntaxes
+(eg lua). If any script (eg <code>grub.cfg</code> or something loaded from <code>grub.cfg</code>) starts
+with “#!parserid” then the specified parser function will be used to process that script.
+If there is no parser function registered with that id, then normal.mod looks in handler.lst
+for a line mapping key “parser.someparserid” to the name of a .mod file to load, ie autoloading
+works for parsers as well as commands.</p>
+
+<p>A module can register filesystem drivers (eg ext2, reiserfs, befs, ntfs). Note that
+at least one filesystem driver module is embedded in core.img so the files in directory
+/boot/grub can be read. Filesystem drivers cannot be auto-loaded; the “insmod” command must
+be used to explicitly load the necessary modules. The filesystem driver modules for Grub
+support reading only; Grub does not need to write data back to the filesystem during boot, and
+skipping write support makes the modules a lot smaller and easier to implement.</p>
+
+<p>A module can also register cryptographic algorithms. As for filesystem drivers, they must be
+explicitly loaded via insmod before being available.</p>
+
+<h3 id="linking">Linking</h3>
+
+<p>Module (.mod) files are actually ELF format files; core.img contains the necessary code to parse
+the ELF headers, load the code and do dynamic-linking (ie resolve calls to functions
+and variables exported by the core.img for use by modules). The core.img exports
+lots of things to modules including functions for manipulating strings, iterating
+over disks, registering themselves, etc.</p>
+
+<h3 id="dependency-handling">Dependency Handling</h3>
+
+<p>File “/boot/grub/moddep.lst” contains a list of inter-module dependencies; when a module
+is loaded, its dependencies are also automatically loaded.</p>
+
+<p>Note that module “normal.mod” has dependencies, as declared in moddep.lst. Therefore
+when core.img loads normal.mod during startup those declared dependencies are also
+automatically loaded. One of the more significant ones is “boot.mod”, which provides
+the “boot” command that is automatically executed after a <code>menuentry{...}</code> block has
+been selected by the user, or ctrl-x has been pressed after editing a menuentry.</p>
+
+<h3 id="loading">Loading</h3>
+
+<p>A module can be:</p>
+
+<ul>
+  <li>built-in to core.img (see grub-mkimage <sup id="fnref:note-mkimage" role="doc-noteref"><a href="#fn:note-mkimage" class="footnote" rel="footnote">10</a></sup>, called from grub-install),</li>
+  <li>dynamically loaded using “insmod” from a script,</li>
+  <li>loaded because a module that depends on it was loaded (as declared in moddep.lst)</li>
+</ul>
+
+<p>Module “normal.mod” is a special exception and is automatically dynamically loaded by
+core.img. Module “sh.mod” is also a special exception, and is automatically dynamically
+loaded by “normal.mod” (via the mapping for parser-id “parser.grub” in file handler.lst).</p>
+
+<h2 id="generating-a-grub-config-file">Generating A Grub Config File</h2>
+
+<p>Normally, during boot Grub will load a file <code>/boot/grub/grub.cfg</code> which is a shell-script-like file that
+then configures the standard Grub boot menus.</p>
+
+<p>This file can be written by hand if desired; the syntax is fairly easy for anyone familiar with shell
+scripts. However Grub also comes with a convenient shell script called “grub-mkconfig” which uses a
+set of helper scripts and templates to create a suitable grub.cfg file automatically.  As most Linux
+distributions automatically invoke grub-mkconfig after updating kernel versions etc, causing any
+hand-written config file to be overwritten, it is generally better to customise the “templates” rather
+than modify grub.cfg directly.</p>
+
+<p>On some Linux distros (eg Ubuntu) the name “update-grub” is used as an alias for grub-mkconfig.</p>
+
+<p>Note that grub-mkconfig simply regenerates the /boot/grub/grub.cfg shell script that Grub
+interprets on boot. It does <strong>nothing else</strong>, as the MBR + core.img + modules are enough to get the
+interpreter up and running scripts out of normal filesystem files.</p>
+
+<p>Script “grub-mkconfig” reads all files in /etc/grub.d, executing each in order. Each should be a shell script whose
+output ends up in the grub.cfg file. To add a custom entry just modify file <code>/etc/grub.d/40_custom</code> which is
+explicitly designed as a template for custom entries. And if you want your custom entries to appear <em>before</em> the
+standard boot entries in the list, then rename file <code>40_custom</code> to <code>08_custom</code> or similar.</p>
+
+<p>You may not even need to customize anything; Grub’s default scripts automatically create menu entries for each
+<code>vmlinuz-*</code> file that exists in /boot.</p>
+
+<p>All of the functionality of grub-mkconfig (aka update-grub) is implemented in shell script,
+so the best reference for this topic is the script files themselves. In addition, this
+configuration process is fairly well-documented elsewhere, so there is no need to repeat
+that information here.</p>
+
+<h2 id="referencing-drive-partitions-from-grubcfg">Referencing drive partitions from grub.cfg</h2>
+
+<p>Grub understands only ‘(hdx,y)’ type expressions natively, where x is the physical disk
+device (0..n), and y is the partition. In Grub 1.98, y is just a number in range (1..n);
+in later versions of Grub, it also specifies the partition type, eg ‘(hd0,msdos1)’. And
+in complicated configurations, it can even look like ‘(hd0,msdos2,sunpc2)’, which specifies
+a particular solaris ‘slice’ embedded in msdos partition #2 on drive #0. As this article
+is specifically about Grub 1.98, the rest of this article will use the ‘(hd0,1)’ format in
+examples.</p>
+
+<p>Files can be referenced via paths like “(hd0,1)/boot/mykernel”. If no device-id is present
+on the front, then “magic” shell variable $root is used by default.</p>
+
+<p>The ‘search’ module can be used to search all partitions for a filesystem that matches
+a certain criteria, and setting a shell variable to the matching ‘hdx,y’ value. That
+variable can then be used later to reference the matched filesystem. Using the search command
+is not necessary if you are happy to reference filesystems by their raw ‘(hdx,y)’ descriptions.</p>
+
+<p>By default, the “search” command stores its result in environment variable $root, ie it
+is intended for searching for the device on which <code>/boot/grub/*.mod</code> files live.</p>
+
+<p>It can be used to search for devices for other purposes, but in these cases an alternative
+environment variable should always be specified, eg
+&gt;   search.label mylabel MYDEV</p>
+
+<p>The “search” command can invoke any of the more specific <code>search.*</code> commands, so this command
+is equivalent to the one above:
+&gt;   search –set=MYDEV –label mylabel</p>
+
+<p>The returned value is of form ‘hdx,y’. Note that there are no parentheses; if you wish to later
+use this value as part of a file-path, then you need to add the parentheses, eg:
+&gt; somecommand ($MYDEV)…</p>
+
+<p>Note that if you set $root to point to something other than the device on which Grub’s <code>*.mod</code>
+files live, then Grub will no longer be able to load any modules.</p>
+
+<p>Note also that $root has absolutely nothing to do with the “root=” value passed to a Linux
+kernel. However the kernel’s image file (first parameter to the “linux” command) will be
+looked for on the $root device by default, ie</p>
+
+<blockquote>
+  <p>linux /mykernel root=xyz</p>
+</blockquote>
+
+<p>means</p>
+
+<blockquote>
+  <p>linux ($root)/mykernel root=xyz</p>
+</blockquote>
+
+<p>which means something like</p>
+
+<blockquote>
+  <p>linux (hd0,1)/mykernel root=xyz</p>
+</blockquote>
+
+<h2 id="the-linux-module">The “linux” module</h2>
+
+<p>This module loads a kernel into memory and sets up Grub data-structures so that a later call to
+the “boot” command will jump to the loaded kernel.</p>
+
+<p>The module registers two commands that can be called from scripts:</p>
+
+<ul>
+  <li>linux</li>
+  <li>initrd</li>
+</ul>
+
+<h3 id="the-linux-command">The “linux” command</h3>
+
+<ul>
+  <li>Expects its first argument to be the path to the kernel image itself.</li>
+  <li>Simply passes all other arguments through to the invoked kernel.</li>
+  <li>The specified kernel is loaded into memory by this command.</li>
+</ul>
+
+<p>Example:</p>
+
+<pre><code>linux /bzImage-custom root=/dev/sda5 
+   rootfstype=ext4 ro 
+   crashkernel=384M-2G:64M,2G-:128M 
+   quiet splash
+</code></pre>
+
+<h3 id="initrd">The “initrd” command</h3>
+
+<ul>
+  <li>Optional if the kernel image to boot does not need any modules, ie if it has been compiled with
+the necessary modules for bootup compiled-in.</li>
+  <li>Otherwise, has one param that is the name of the disk image to use as an initial root filesystem.
+the specified file is loaded into memory at a suitable address, and the previously loaded kernel
+image is modified to set the address of the loaded disk image.</li>
+</ul>
+
+<h3 id="hint-1">Hint 1</h3>
+
+<p>If your root filesystem is ext4, then you need rootfstype to be specified, as Linux itself will try
+to “guess” the filesystem, and will try ext3 first which will recognise the filesystem as ext3 and
+then fail to mount it with message “unsupported features”.</p>
+
+<h3 id="hint-2">Hint 2</h3>
+
+<p>If no initrd is specified, then the “root” param to the linux command must not use
+the “root=LABEL=xxxx” or “root=UUID=xxxx” format. Those need udev up and running for the kernel
+to correctly map the label or UUID to a filesystem (udev creates directories /dev/disk/by-uuid
+and /dev/disk/by-label), but udev is not available if there is no initrd.</p>
+
+<p>The solution is to just use a device-id like “linux root=/dev/sda5 …” <sup id="fnref:note-rootparam" role="doc-noteref"><a href="#fn:note-rootparam" class="footnote" rel="footnote">11</a></sup>.</p>
+
+<h2 id="multiboot-kernels">Multiboot kernels</h2>
+
+<p>Grub2 boots kernels by invoking an appropriate module. There are several operating-system-specific
+modules (eg “linux”, “xnu”, “bsd”). There is also a “multiboot” module that is able to boot any
+multiboot-compliant operating system.</p>
+
+<p>The original multiboot specification has some problems; at the current date work is in progress on
+a new multiboot design specification.</p>
+
+<h2 id="using-gpt-partition-tables">Using GPT partition tables</h2>
+
+<p>The traditional way of handling disk partitions on x86 pcs is the “msdos partition table”.
+The first sector of a disk (ie first 512 bytes) contains a “master boot record”, and the
+end of the MBR contains 4 “partition descriptors” of 16 bytes each. These specify the 
+start and end of up to 4 “primary partitions”. One primary partition can actually be an
+“extended” partition, in which case it starts with the first record of a linked-list
+of “extended boot records” which can be used to define any number of
+additional “logical partitions”.</p>
+
+<p>The old partition table design has many flaws, particularly that the start/size fields are specified
+in a way that limits the values to 2TB.</p>
+
+<p>A new partition format called GPT has been defined which solves the msdos partition table problems. It
+is supported in the firmware of most non-PC architectures already (eg Apple), and by very modern
+x86 architectures that have “EFI” firmware rather than BIOS.</p>
+
+<p>In EFI-enabled systems, booting with GPT disks is “normal”, and Grub works fine. There is
+no MBR code in such systems; the firmware itself is capable of mounting a specified
+partition which is in a FAT32-like format, reading a bootable image out of that filesystem
+and executing it. The same partition can of course be mounted from the booted OS in order
+to modify boot code, so the whole “stage 1” <sup id="fnref:note-stage1" role="doc-noteref"><a href="#fn:note-stage1" class="footnote" rel="footnote">12</a></sup> problem goes away.</p>
+
+<p>In BIOS-based systems it is still possible to boot a GPT-formatted disk, but there are a few minor quirks.</p>
+
+<p>One quirk is that this magic “32kb gap” between sector 1 and the first partition that
+is created <em>by convention</em> for msdos-partitioned disks does not exist in GPT. The
+solution is to create a specific partition to hold the “embedded” copy of core.img;
+this partition must have type <code>BIOS_BOOT</code>. The “grub-setup” utility (called by grub-install)
+searches the GPT for the first partition of that type and writes core.img there.</p>
+
+<p>The GPT specification does reserve the first sector of each disk for backwards compatibility, so we can still
+write a standard GRUB “stage 1” MBR into this sector, and a standard BIOS will still read this sector
+into memory and execute it. And the core.img file can still have its first block dynamically generated to
+hold the addresses of all blocks in the file … well, one (address, len) pair. The Grub MBR code will then
+loop using the BIOS int13 API to load that first core.img block, then use that to load the rest of the
+core.img file, and then execute the loaded data. At this point, both the EFI and BIOS booting processes have
+accomplished the same task (loading core.img), and booting continues in the same way. The EFI
+approach is simpler, however, in that the special setup processes needed to create the MBR code, to
+write core.img as “raw data” to the disk, and to prefix core.img with a “blocklist” are not needed. Of
+course the EFI firmware is correspondingly more complex.</p>
+
+<p>Of course the <strong>booted operating system</strong> must also understand the GPT partitioning scheme,
+or it will not be able to mount any filesystems. Linux has understood these for many
+years (<code>CONFIG_EFI_PARTITION</code> is enabled by default). Windows 64-bit versions also do,
+but Windows 32-bit versions do not, so you cannot dual-boot win32 on a disk that
+uses GPT. You can start up win32 as a virtual machine under Linux however; VMs do
+not see real disks, just virtual ones that are really standard files in the host
+operating system’s filesystem. These “fake disks” have their own partition tables which
+can be formatted in the traditional style.</p>
+
+<p>Gnu parted 1.8.8 (and gparted) is only partially GPT-enabled. It can create GPT partition tables,
+and partitions within it. However it still asks for “primary/extended/logical” as
+a type, which makes no sense for GPT. And it does not allow setting of GPT partition
+names, or display their GUID values. The “gdisk” tool should be used instead.</p>
+
+<p>As with msdos partitions, the partition-type field indicates the format of data
+within that partition (but in GPT, the type field is a GUID, not an 8-bit value).
+The GUID for “EFI System” tells EFI firmware that it can mount that partition as
+a FAT filesystem (which it has built-in firmware for), and that there should be
+a file with a magic name that it can load and execute to boot the system. Note
+that this means that the core.img file cannot be on the filesystem of the kernel
+to be booted (as no-one sane would put a whole OS on a FAT filesystem!). Instead,
+either core.img goes into a partition on its own (lonely), or core.img plus
+<code>*.mod</code>, <code>*.lst</code>, and possibly grub.cfg go into the EFI partition.</p>
+
+<h2 id="backgrounds-and-fancy-graphics">Backgrounds and Fancy Graphics</h2>
+
+<p>The vbe.mod file provides drivers for standard VESA BIOS Extentions 2.0 graphics;
+other graphics cards can potentially have their own .mod files.</p>
+
+<p>The video.mod file finds and manages one graphics driver.</p>
+
+<p>The gfxterm module:</p>
+
+<ul>
+  <li>Registers itself as a “terminal handler” on load</li>
+  <li>Registers one command <code>background_image</code> for use by scripts.</li>
+  <li>Looks for shell variable $gfxmode to determine the resolution to use</li>
+  <li>Uses module video.mod to set the screen to that resolution; this in turn
+probes all loaded video modules until a suitable one is found (which will
+be vbe.mod on most PC systems).</li>
+  <li>Loads a font (“/boot/grub/unicode.pf2” is currently the only one).</li>
+</ul>
+
+<p>After this process is finished, any text that is displayed by Grub will be handled
+by gfxterm (as the current “terminal handler”), and rendered in the specified
+resolution with the loaded font.</p>
+
+<p>The grub.cfg script can optionally invoke command <code>background_image</code> to set a graphics file
+to use as the background for the Grub menu. This command takes one option and one argument;
+the argument is the filename. The option is:
+&gt; -m (stretch|normal)</p>
+
+<p>The graphics file formats are (surprisingly) not defined in modules, but instead built in
+to the gfxterm module. Supported formats are .tga, .png, .jpg.</p>
+
+<p>As an alternative to gfxterm, the gfxmenu module can display the same grub.cfg
+menu content in prettier form. It is not quite ready for production use yet though.</p>
+
+<h2 id="miscellaneous">Miscellaneous Topics</h2>
+
+<h3 id="rescue-mode">Rescue Mode</h3>
+
+<p>Grub has a “rescue” mode, where core.img starts up, but “normal.mod” is <em>not</em> loaded.
+In this case, there is a commandline and a <em>very</em> primitive parser available.</p>
+
+<p>About the only thing the parser can do is ‘insmod’ and execute loaded commands.
+To mimic the normal boot process from here:</p>
+
+<pre><code>set prefix=(hdx,y)/boot/grub
+insmod normal
+normal
+</code></pre>
+
+<h3 id="the-grub-emulator">The Grub Emulator</h3>
+
+<p>There is something called “grub-emu” which is <em>not</em> used in booting. It is a tool that can be run after
+booting Linux; it emulates the behaviour of the commandline that you get when booting and going into a
+Grub interactive shell.</p>
+
+<p>It allows you to experiment in order to see what kinds of Grub commands you might want to put
+into a grub.cfg file. Note that this is an <em>emulator</em>, and therefore does not do things
+100% the same as a “real” Grub environment.</p>
+
+<p>It can also be used for development/testing purposes.</p>
+
+<h3 id="the-devicemap-file">The device.map File</h3>
+
+<p>The “/boot/grub/device.map” file specifies a mapping from BIOS device ide (hdx,y) and Linux device names
+(/dev/sdx). This file is usually auto-generated by grub-install, with the Linux device names being taken
+from the OS on which grub-install was run. However users can provide a hand-written one if Grub’s guesses
+are not correct. This file is used in the following situations:</p>
+
+<ul>
+  <li>by “the grub shell”, ie the interactive Grub emulation environment (which is <em>not used</em>
+for booting a computer).</li>
+  <li>by grub-setup (which is called from grub-install)</li>
+  <li>?? when running grub-mkconfig, ie creating the grub.cfg file?</li>
+</ul>
+
+<p>Note that because the mappings are appropriate only from the OS on which grub-install was run, this file of
+course cannot be used <em>during</em> booting; it is only used to figure out what (hdx,y) values to write into
+grub.cfg in order to reference files accessed by the grub-install script on /dev/sdx…</p>
+
+<h3 id="pxe-boot">PXE Boot</h3>
+
+<p>Sometimes it is useful for a computer to boot off a disk available on a network rather than a local one.
+Most modern BIOSes support this; on start they just send out a “boot request” message, get back a
+suitable address, download a single file and execute it.</p>
+
+<p>This downloaded file is the equivalent of the “core.img” file used for local booting. In fact it is
+built just like a core.img is for local booting, with file “pxeboot.img” inserted on the front, then
+deployed onto a suitable tftp server.</p>
+
+<p>The pxe code effectively replaces the MBR’s process of loading core.img from a “blocklist”; everything
+else works as described elsewhere in this article for a local boot. Of course if core.img has been
+loaded from a remote system, then probably the rest of the /boot/grub files will also be loaded from
+that remote server, so core.img needs a network driver linked in (“pxe.mod”). This module then
+provides a “filesystem driver” (like insmod ext2) except that the retrieved data comes from a tftpserver
+rather than a local harddrive.</p>
+
+<h3 id="the-grubenv-file-and-the-saveenvloadenv-commands">The grubenv file and the <code>save_env</code>/<code>load_env</code> commands</h3>
+
+<p>A file “grubenv” is created during the normal grub install process. This is a fixed-size file of exactly
+one disk block.</p>
+
+<p>The <code>save_env</code> command can then be used from a grub.cfg script to write the value of a grub script
+variable into this file. Because the file is fixed-size and only one block, no filesystem support
+is needed to write data into it; the plain BIOS facilities are sufficient.</p>
+
+<p>The <code>load_env</code> command can be used to read data back out of it into grub script variables.</p>
+
+<p>The main purpose of this facility is for grub scripts to be able to record the user’s most recent
+menu option choice, so on next boot the same menu option can be executed as the default (ie the one
+run when no user input occurs). This feature is currently disabled by default; to enable, edit
+/etc/default/grub and set the <code>GRUB_DEFAULT</code> variable to “saved” and regenerate the grub.cfg file.
+The new grub.cfg file will then call <code>save_env</code> at appropriate times.</p>
+
+<p>An alternate use is to support the “grub-reboot” command. This writes data into the grubenv file, and
+the standard grub.cfg script will then see this data after reboot and automatically run the specified
+menu option. Try this:</p>
+
+<pre><code>  cat /boot/grub/grubenv
+  grub-reboot testing
+  cat /boot/grub/grubenv
+</code></pre>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li><a href="http://www.gnu.org/software/grub/manual/">http://www.gnu.org/software/grub/manual/</a></li>
+  <li><a href="http://www.gnu.org/software/grub/grub-2.en.html">http://www.gnu.org/software/grub/grub-2.en.html</a></li>
+  <li><a href="http://grub.enbug.org/Manual">http://grub.enbug.org/Manual</a></li>
+  <li><a href="http://members.iinet.net/~herman546/p20.html">http://members.iinet.net/~herman546/p20.html</a></li>
+  <li><a href="http://kubuntuforums.net/forums/index.php?topic=3106368.0">http://kubuntuforums.net/forums/index.php?topic=3106368.0</a></li>
+  <li><a href="https://help.ubuntu.com/community/Grub2">https://help.ubuntu.com/community/Grub2</a></li>
+  <li><a href="http://www.ibm.com/developerworks/library/l-linuxboot/index.html">http://www.ibm.com/developerworks/library/l-linuxboot/index.html</a></li>
+</ul>
+
+<h2 id="working-notes">Working notes</h2>
+
+<ul>
+  <li>
+    <p>minor bugs in <code>/etc/grub.d/10_linux</code></p>
+
+    <ol>
+      <li>
+        <p>“loading initial ramdisk” echoed even when no initrd will be loaded</p>
+      </li>
+      <li>
+        <p>for some reason, “Loading Linux “ message does not end up in grub.cfg. Maybe a
+syntax error in the $(printf “…” command? or no gettext translation?</p>
+      </li>
+      <li>
+        <p>looks only for vmlinux or vmlinuz, not for <code>bzImage-*</code></p>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p>the “search” command before the “linux somekernel” command is always output, but not
+always needed. Yes it is needed if the kernel is not on the same partition as /boot/grub,
+but otherwise we do a by-UUID search for no purpose. On the other hand, the search is
+probably just using cached data about the existing disks…</p>
+
+    <p>Perhaps search might also be needed if some other command has modified $root?</p>
+  </li>
+</ul>
+
+<h2 id="outstanding-questions">Outstanding questions</h2>
+
+<p>Here are some things I am still trying to figure out…</p>
+
+<ul>
+  <li>
+    <p>what do <code>load_env</code> and <code>save_env</code> do? I think they access that funny fixed-size “/boot/grub/grubenv”
+file. But why would you want to save stuff in there?</p>
+  </li>
+  <li>
+    <p>what is grldr.img?</p>
+  </li>
+  <li>
+    <p>are there <em>device drivers</em> designed to do wear-levelling on flash at the OS level (ie
+manage block remapping inside the driver)? If so, these devices would be a bad place
+to put Grub’s core.img!</p>
+  </li>
+  <li>
+    <p>how does Grub localisation work?</p>
+  </li>
+  <li>
+    <p>what does linux kernel config option <code>CONFIG_EDD</code> do?</p>
+  </li>
+</ul>
+
+<h2 id="footnotes">Footnotes</h2>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:note-development" role="doc-endnote">
+
+      <p>Grub’s code is not too scary to work on. It is well structured (very modular), not very large,
+and 99.5% standard “c”. Yes, it does run in “real” mode, which is something a little unusual
+for Unix developers, but so was every DOS program ever written. Debugging may be trickier
+than usual, but for many tasks the new code can be run in an “emulated” Grub environment
+as a normal unix process (grub-emu). The qemu environment can also be used. And the whole
+of Grub is single-threaded, so there are no synchronization issues or races to worry about. <a href="#fnref:note-development" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:note-filecopy" role="doc-endnote">
+
+      <p>On general-purpose distros, everything is copied to /boot/grub to give the user
+the most flexibility in configuring grub.cfg or using the Grub shell interactively.
+However this is not necessary; if a very small /boot/grub dir is desired for embedded
+systems or similar then just the modules actually needed can be copied. <a href="#fnref:note-filecopy" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:note-coreimg" role="doc-endnote">
+
+      <p>The grub-mkimage binary app is what dynamically creates core.img. The command-line args
+to grub-mkimage list the modules to build in to core.img (together with the “core” Grub code).
+For example:</p>
+
+      <blockquote>
+        <pre><code>   grub-mkimage -o myimg.img search
+</code></pre>
+      </blockquote>
+
+      <p>will build the “search.mod” module into the generated myimg.img file - plus all
+the modules that search has dependencies on. Usually grub-mkimage is invoked by 
+the “grub-install” script which is responsible for figuring out what modules are needed
+for the current environment.</p>
+
+      <p>It is important that core.img not be too large; when embedding it into the traditional
+“post-MBR” gap between sector 1 (the MBR) of a disk and the start of the first partition.
+Most partitioning tools (including Windows and Linux) leave 32kb space here, so that is the max size
+for core.img in a “traditional” installation.</p>
+
+      <p>There are potential workarounds if a larger core.img is absolutely necessary. For example, a
+raw (unformatted) partition can be created to hold core.img; the grub-setup tool just needs to
+be given the id of that partition as its target. An alternative is to leave the core.img file
+within the real filesystem that also holds /boot/grub; however this is more fragile than the
+   “embedding” approach, as the file might accidentally get moved on disk, with ugly consequences! <a href="#fnref:note-coreimg" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:note-ext4" role="doc-endnote">
+
+      <p>An ext4 filesystem can generally be mounted as a read-only ext2 filesystem.
+So to boot off an ext4 filesystem, only an (enhanced) ext2 driver is needed, as the
+boot partition is read-only (except possibly for the save-env command, but that writes
+only to a single block in a pre-allocated file). <a href="#fnref:note-ext4" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:windows_format" role="doc-endnote">
+
+      <p>WARNING: the following info is best-guess only; I’m no expert on Windows!</p>
+
+      <p>MS-Windows <em>without</em> EFI (ie pre windows-8) doesn’t support the “post-MBR gap” approach.
+Instead, it has the concept of a “system partition” and a “boot partition”. A “system
+partition” has its own MBR-like structure in the first sector or the partition; the
+remainder of the partition is formatted as a filesystem. The assembly code present in
+the master MBR of a disk normally scans the disk partition-table to find a partition marked
+as ‘active’ then loads sector 0 of that partition and jumps to it. The code in that sector
+presumably loads the windows bootloader from the same (formatted) partition using a system
+similar to Grub’s <code>blocklists</code> (as the MBR code’ 512 bytes of assembly-code can’t possibly
+understand a filesystem). The bootloader then scans
+all partitions looking for one marked with the ‘boot’ flag; such partitions are expected
+to contain a windows kernel that the bootloader can load &amp; execute. It is possible for the
+“system partition” and “boot partition” to be the same, ie for the bootloader to be stored
+on the same partition as the windows kernel.</p>
+
+      <p>Grub can “chain load” windows by simply loading the contents of the first sector
+of the windows “system partition” and executing it. <a href="#fnref:windows_format" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:note-coreconfig" role="doc-endnote">
+
+      <p>When the core.img file is created, it is possible to embed a config-file within core.img. If this
+has been done, then before the first module is dynamically loaded, the text (script) in this config
+file is passed to a primitive built-in script parser. This script can then configure modules needed
+to access the /boot/grub directory. In the simplest cases, nothing is needed (ie no config file is
+necessary); just the right filesystem driver needs to be linked in and the drive/partition ids are
+hard-wired into the core.img. However if the /boot/grub filesystem should be identified via UUID or
+label then a script is needed which invokes a linked-in “search” command. And if /boot/grub is on an
+LVM drive, or mounted over NFS or other exotic combinations then other commands can be provided to
+set things up appropriately. Note that only linked-in modules can be referenced from this config-file,
+as /boot/grub is not accessable at this point. <a href="#fnref:note-coreconfig" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:note-mkblocklist" role="doc-endnote">
+
+      <p>Creating blocklists for a file is an interesting process; normal OS filesystems do not expose info on the
+raw disk addresses of the blocks on which a file is stored. So Grub instead uses its own filesystem modules
+to read the same file directly via the raw partition device, while the OS also has that partition mounted.
+For safety, it checks that what it gets from its filesystem driver is byte-for-byte identical to what it
+gets from the OS-level read call on that same file. And Grub’s filesystem modules <em>do</em> have an option to
+return blocklists. <a href="#fnref:note-mkblocklist" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:note-coremove" role="doc-endnote">
+
+      <p>This means that the core.img file must not be moved! When the standard “embedding” mode is used for
+core.img this is not a problem, and this is why embedding (copying core.img into a location outside
+of any filesystem) is strongly recommended.</p>
+
+      <p>However even when the alternative is used (a blocklist pointing to a file inside a real filesystem),
+there is not <em>usually</em> a problem; on most filesystems files do not get moved unless they are modified.
+Doing a “defrag” operation would be bad … but posix filesystems do not generally support (or need) defrag.
+Log-structured filesystems do move blocks, but only when the file is modified, and core.img should not be
+modified without also rewriting the MBR. Solid-state hard-drives can move blocks around internally
+(“wear levelling”) even when they have not been modified, but this is invisible to the outside world; they
+provide a mapping from logical-to-physical blocks internally and therefore this causes no problems.</p>
+
+      <p>There are a few filesystems designed explicitly to write directly to flash, and these can do wear-levelling
+at the OS level. Presumably it would be a very bad idea to use one of these filesystems to store core.img on!
+However perhaps such filesystems provide a way to prevent wear-levelling per-inode, or per-partition. <a href="#fnref:note-coremove" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:note-menuentry" role="doc-endnote">
+
+      <p>A “menuentry” entry in grub.cfg can be thought of as similar to a function
+definition. The code in a function is not executed until someone calls the function;
+similarly the code in a menuentry block is not executed until normal.mod decides to -
+ie a user has selected that menu option for booting.</p>
+
+      <p>Alternatively, “menuentry” can be thought of as a “command” like “ls” or “search” which
+calls the associated function registered by normal.mod, with the last function parameter
+being a lambda expression (a reference to an anonymous function) which is the code in
+the <code>{...}</code> block. The implementation just adds this data to a list for later display
+(and execution if it is selected). <a href="#fnref:note-menuentry" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:note-mkimage" role="doc-endnote">
+
+      <p>The grub-mkimage tool concatenates the following files:</p>
+
+      <ul>
+        <li>diskboot.img  (derived from diskboot.exec)</li>
+        <li>kernel.img (derived from kernel.exec)</li>
+        <li>all the modules listed on the commandline</li>
+        <li>a memdisk file (if any)</li>
+        <li>a font file (if any)</li>
+        <li>a config file (if any)</li>
+      </ul>
+
+      <p>It then applies lzma compression to the file (skipping the first 1kb or so), so the result is usually
+smaller than the original kernel.img file on its own.</p>
+
+      <p>The result is then usually called “core.img”. <a href="#fnref:note-mkimage" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:note-rootparam" role="doc-endnote">
+
+      <p>There are currently three ways to specify the root filesystem to a Linux kernel:</p>
+
+      <ul>
+        <li>
+          <p>root=MAJOR:MINOR, eg “root=8:5”.</p>
+
+          <p>The minor number is just the partition#. The major is dynamically assigned, ie will change
+as devices are inserted into or removed from the machine.</p>
+        </li>
+        <li>
+          <p>root=devnumber, eg “root=0x0805”.</p>
+
+          <p>The low N bits of this number are the device MINOR number, and the high bits are the MAJOR
+number; see above.</p>
+        </li>
+        <li>
+          <p>Via a path like “root=/dev/sda”.</p>
+        </li>
+      </ul>
+
+      <p>Note that the kernel allows this <em>although there is no “/dev” directory yet (there is no root
+filesystem at all!)</em>. Linux contains some hard-coded hackery that computes a “default name” for
+each device it has detected, although there is no absolute guarantee that after a /dev filesystem
+exists the device will in fact have that name. And this hackery is based on device enumeration order,
+so again the path will change as devices are added/removed.</p>
+
+      <p>When a kernel has an initrd, then the root= param is actually completely ignored during booting;
+the initrd holds the root filesystem. User-space code in the initrd eventually peeks at the
+kernel’s original command-line params and extracts the root= argument, then mounts this filesystem
+and uses <code>pivot_root</code> to replace itself with the “real” root filesystem. This allows tricky things
+like “root=UUID=” or “root=LABEL=” or using network-mounted or lvm filesystems. However without an
+initrd, just options 1..3 above are supported.</p>
+
+      <p>Unfortunately (AFAIK) because of the above, the Grub “search” command cannot be used to figure out
+the root= parameter for Linux. It can correctly find the desired device by uuid/label/etc, but only
+returns that data in “hdx,y” form, and Linux does not accept identifiers of that form for its
+root= parameter. Grub cannot map an (hdx,y) into a “/dev/sd?” form because it just does not know
+what naming Linux will use when it enumerates the attached devices in the system; for example Linux
+code might get changed to enumerate buses in reverse order, thus making sda the device with 
+the “highest” address rather than the “lowest”. And Linux cannot be enhanced to accept (hdx,y) forms
+because there is no 100%-reliable way of deciding what the BIOS would have called any specific
+physical device - and adding code to support a specific bootloader would probably be controversial.</p>
+
+      <p>Using Grub’s “device.map” file to map (hdx,y) into /dev/sd? form is initially tempting, but 
+unfortunately is not practical. The whole point of <em>searching</em> for the rootfs by some id (eg UUID or label)
+is that the hardware may get rearranged; therefore using a static text file which maps (hdx,y) to
+/dev/sd? is rather pointless; it will be wrong if the device order changes, or the Linux code changes
+device enumeration order. The (hdx,y) value will
+change in sync with the hardware changes, but the fixed mapping will not. In addition, this
+file can become “stale”; it obviously was correct at the time that Grub was installed (else
+Grub would not have installed correctly), but device.map is not actually used during the boot
+process, so might become obsolete. It may also be incomplete; device.map has to correctly identify
+the devices on which Grub installed its core.img and MBR, but other entries are not used, so
+if the kernel’s rootfs is on some other device then this may be incorrect.</p>
+
+      <p>An approach that might work is to enhance Grub’s search command to optionally output some device “key”,
+like the PCI path to the device, rather than the (hdx,y) format. Then enhance Linux to accept a
+root= parameter that identifies the device by that key (eg bus path). However at the current time,
+neither feature exists. And “bus path” certainly would not work, as Grub does not bother enumerating
+devices by bus on x86; it just relies on the BIOS apis to access the drives. Similarly with “io port”
+or “config register address”; these are unique for each device, but Grub2 does not know these values
+as it just uses (hd0, sector) parameters to the BIOS.</p>
+
+      <p>When using the GPT partition table format, each partition is assigned a unique identifier, dynamically
+generated when the partition is created. This <em>could</em> be the basis of a good solution; it just
+needs a Grub “map (hdx,y) to GUID” command, plus enhancement to Linux to accept a GPT GUID as the
+key for locating the corresponding device object. There probably would not be major complaints about
+supporting this in Linux. However you can not dual-boot any OS that does not support GPT natively
+(including all 32-bit Windows including windows7); you can boot non-GPT oses as virtual machines
+though. Another issue: a GUID is 16 bytes, which is quite a lot for a Linux kernel commandline. Hey,
+but root=UUID=n is used to support filesystem UUIDs now (via udev). <a href="#fnref:note-rootparam" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:note-stage1" role="doc-endnote">
+
+      <p>In all PC-based systems, the BIOS firmware knows nothing about filesystems, and provides less than 512
+bytes of space in the Master Boot Record (MBR) for boot code, which is far too small to implement support for
+a filesystem. Therefore the “first stage” of booting must be able to load the next step without filesystem
+support. The solution in all bootloaders for BIOS systems is to have the MBR code simply load a raw list
+of disk blocks by address.</p>
+
+      <p>Non-PC systems often have more sophisticated firmware which can directly access some filesystem types, and
+therefore have no equivalent of the “stage 1” process on BIOS-based systems. <a href="#fnref:note-stage1" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

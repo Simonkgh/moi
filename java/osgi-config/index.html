@@ -1,0 +1,250 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - OSGi Configuration</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>OSGi Configuration</h1>
+    <aside>First published on: March 4, 2013</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/OSGi/'>OSGi</a></p>
+      <p><a href="/java/osgi-intro">(back to Osgi Introduction)</a></p>
+
+<h1 id="about-this-article--osgi-configuration">About This Article : OSGi Configuration</h1>
+
+<p>OSGi is a Java-specific framework that improves the way that Java classes interact within a single JVM. It provides the following features:</p>
+
+<ol>
+  <li>a modified Java classloader which provides fine-grained control over symbolic linking with other code in the same JVM;</li>
+  <li>a central service registry for decoupling callers of an interface from the interface implementation;</li>
+  <li>an enhanced version of the java.lang.SecurityManager (ConditionalPermissionAdmin);</li>
+  <li>a large set of standardized optional services for things like loading configuration-files, publishing events, exposing Java servlets, etc.</li>
+</ol>
+
+<p>This article provides some details about how the OSGi configuration system (part of item (4)) can be used. Unlike some of the other articles in this series on OSGi, this addresses just some “how to” topics rather than diving into the implementation.</p>
+
+<p>For further information about OSGi in general, see:</p>
+
+<ul>
+  <li><a href="http://www.osgi.org/Technology/WhyOSGi">http://www.osgi.org/Technology/WhyOSGi</a></li>
+  <li><a href="http://www.osgi.org/Technology/WhatIsOSGi">http://www.osgi.org/Technology/WhatIsOSGi</a></li>
+</ul>
+
+<h1 id="the-configurationadmin-service">The ConfigurationAdmin Service</h1>
+
+<p>This OSGi service simply manages a map of (property-name, property-value) pairs for each OSGi service. As each service is started up the ConfigurationAdmin service provides it with the matching configuration data; if the configuration data for a service changes while the application is running it can also notify the service of these changes. There are two different ways that this data can be exposed to a service; see below for further details.</p>
+
+<p>The simplest source (persistent store) of configuration data is a file on disk; as each service is started up it the ConfigurationAdmin service provides it with the configuration data retrieved from the appropriate file. However configuration data could theoretically come from LDAP, a database table, or any other source.</p>
+
+<p>A service can explicitly update the configuration of some other service by using methods on the ConfigurationAdmin service directly. This can be usefully triggered from user interface actions, eg users clicking buttons or moving sliders may cause code to be executed which updates the configuration settings of some other service via the ConfigurationAdmin services’ API.</p>
+
+<p>It is also possible to <em>create</em> configuration entries via the API. Services can be configured (eg via Declarative Services) to sit in an “inactive” state until a suitable configuration object exists, ie creating configuration data via the ConfigurationAdmin API can indirectly trigger the instantiation and startup of OSGi services.</p>
+
+<h1 id="obtaining-configuration-data-via-injection">Obtaining Configuration Data via Injection</h1>
+
+<p>If any object published as a service via OSGi specifies an interface-type of ManagedService then the ConfigurationAdmin service will detect it (the Whiteboard pattern) and pass the current configuration data to it via methods defined on that interface. This is definitely the easiest way for a service to get access to service-specific configuration data.</p>
+
+<h1 id="obtaining-configuration-data-via-lookup">Obtaining Configuration Data via Lookup</h1>
+
+<p>Obtaining the ConfigurationAdmin service can be done in the standard manner for any OSGi service, ie use the BundleContext to get a ServiceReference, and then obtain the actual service - or use one of the declarative services approaches to inject a reference to the service. Methods on the ConfigurationAdmin interface can then be used to explicitly fetch the configuration settings.</p>
+
+<h1 id="reading-configuration-files-from-disk">Reading Configuration Files from Disk</h1>
+
+<p>The OSGi specification does not address <em>where</em> the ConfigurationAdmin service might get its configuration data from; that is considered an implementation-specific detail. In Apache ServiceMix configuration data is simply read from <code>*.properties</code> files in the <code>${servicemix}/etc</code> directory. If configuration data is updated via an OSGi console tool or via application code invoking the ConfigurationAdmin APIs then these properties files are automatically modified.</p>
+
+<p>Other OSGi environments are likely to have similar systems for initialising configuration from files on disk.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+    <p><a href="http://wiki.osgi.org/wiki/Main_Page">OSGi Wiki</a></p>
+  </li>
+  <li>
+    <p><a href="http://www.osgi.org/javadoc/r4v42/">The OSGi core r4.2 javadocs</a></p>
+  </li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/osgi-config/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

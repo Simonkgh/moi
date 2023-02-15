@@ -1,0 +1,440 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Gradle Build Tool</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Gradle Build Tool</h1>
+    <aside>First published on: February 26, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Java/'>Java</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>This article gives an introduction to the Java build-tool <a href="https://gradle.org/">Gradle</a>, primarily for developers already familiar with Java and Maven.</p>
+
+<p>I prefer to understand the <em>underlying principles</em> of the tools I use, rather than treat them as a “black box” and learn the available features “by rote”. In this case, it means looking at Gradle as a <em>Groovy library</em>, Gradle build-scripts as <em>programs</em> which define and manipulate a runtime <em>project model</em>, and <em>build tasks</em> as closures attached to the <em>project model</em>.</p>
+
+<p>The information below is a somewhat rough collection of notes, and are certainly not a <em>tutorial</em> on Gradle. On the other hand, these are the things I wish I had known before using Gradle for the first time, and after grasping these principles the standard Gradle tutorials made far more sense to me. Hopefully these notes are useful for you too.</p>
+
+<p>I’ve been a Maven user for many years, and my first encounter with Gradle was a moderately steep learning curve. However I came to like Gradle a lot - it is well worth learning.</p>
+
+<h1 id="maven-ant-gradle">Maven, Ant, Gradle</h1>
+
+<p>Maven is an application which processes a declarative “project model”. Well, not quite, as there are hooks for triggering standard or custom processing logic at various “phases”, but the majority is declarative. The declarative project model allows other tools to at least partially “understand” a project model without executing maven.</p>
+
+<p>Ant is a procedural programming language (in an inconvenient XML syntax) with a set of standard libraries that provide standard functionality needed for a build-tool; “programs” in the ant language can therefore build applications when executed.</p>
+
+<p><a href="http://www.groovy-lang.org/">Groovy</a> is a general-purpose object-oriented programming language with a nice syntax which runs in a Java Virtual Machine. The syntax has been carefully designed so that, when using appropriately-designed libraries, a program can look almost declarative (ie like a “configuration file) - ie supports defining a <a href="http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html">domain-specific-language (DSL)</a>.  Gradle is a set of libraries for the Groovy language which provide features useful for compiling Java applications - and the libraries take advantage of Groovy’s DSL support. The result is that a Gradle file is actually a Groovy program which compiles (and otherwise processes artifacts of) some other Java program while looking more like a declarative “build/configuration file” than a program.</p>
+
+<p>The combination of a readable build-specification with the power of a full programming language is very pleasant to use. Maven provides readable declarations (poms), but is difficult to extend (requires writing custom plugins).</p>
+
+<p>Maven is build around the concept of a “project model” which defines dependencies and processing steps. Gradle also has such a structure - but one that is <em>built by code</em>. Of course the Maven one is also “built by code” - it is just that the code is hidden within the maven program rather than the build-script actually <em>being</em> the code.</p>
+
+<p>A maven commandline usually consists of a target <em>phase</em> or list of phases. Tasks (plugin goals) are associated with phases, thus a maven build results in a graph of tasks to be executed.</p>
+
+<p>A gradle commandline directly specifies a target <em>task</em> (function) or list of tasks - a more natural concept for programmers. Tasks can have pre-tasks and post-tasks associated with them, and thus also results in a graph of tasks being executed. Gradle tasks are simply Groovy closures, so defining custom tasks is natural and easy and can be done from within the build-file itself.</p>
+
+<h1 id="groovy-dsl-related-syntax">Groovy DSL-related Syntax</h1>
+
+<p>One of the interesting things about the Groovy language is that it has been specifically <a href="http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html">designed to create readable DSLs</a>
+A function can be separated from its parameter-list by a <em>space</em> rather than having to use a pair of parentheses. The parameter-list may be a single value, or a comma-separated list. In addition, a function-call followed by a function-call are chained together; the second function is assumed to be a <em>method</em> of the object returned by the first call. This means:</p>
+
+<ul>
+  <li>
+<code>foo p</code> is equivalent to <code>foo(p)</code>
+</li>
+  <li>
+<code>foo p,q</code> is equivalent to <code>foo(p,q)</code>
+</li>
+  <li>
+<code>foo p1 bar p2, p3</code> is equivalent to <code>foo(p1).bar(p2, p3)</code>
+</li>
+</ul>
+
+<p>Note that a <em>linefeed</em> stops the sequence (unless within a closure), ie</p>
+
+<pre><code>   foo p1 bar p2   // foo(p1).bar(p2);
+</code></pre>
+
+<p>is very different from:</p>
+
+<pre><code>   foo p1
+   bar p2  
+   // foo(p1); bar(p2);
+</code></pre>
+
+<p>Groovy supports “named parameters” (allowing other params to take default values), meaning:</p>
+
+<ul>
+  <li>
+<code>foo p:1 bar name:"me"</code> is equivalent to <code>foo(p:1).bar(name:"me")</code> ie method foo has parameter p set to 1, etc.</li>
+</ul>
+
+<p>Another feature allows a call to a method which takes a closure as its last parameter to specify the closure inside <em>or</em> outside the parentheses, supporting:</p>
+
+<ul>
+  <li>
+<code>foo {...}</code> // equivalent to <code>foo(someClosure)</code> where the closure is the part in braces</li>
+  <li>
+<code>foo("p1", {....})</code>   // method foo is passed two parameters: String and closure`</li>
+  <li>
+<code>foo("p1") {...}</code>     // as above, but somewhat cleaner layout, particularly for multiline closures`</li>
+  <li><code>foo "p1", {...}</code></li>
+</ul>
+
+<p>but not</p>
+
+<ul>
+  <li>
+<code>foo "p1" {...}</code> // items in a parameter-list must be comma-separated</li>
+</ul>
+
+<p>Groovy also supports basing “operator overloading”; specific symbols such as “«” are mapped to method-names (“leftshift” in this case).</p>
+
+<ul>
+  <li>
+<code>task compile &lt;&lt; {...}</code> is eqivalent to <code>task(compile).leftshift(closure)</code>
+</li>
+  <li>
+<code>task test(...) &lt;&lt; {...}</code> is equivalent to <code>task(test(...)).leftshift(closure)</code>
+</li>
+</ul>
+
+<p>And yet another feature is that any closure can be assigned a “delegate object” before it is executed; any calls to <em>functions</em> in the closure become calls to methods on the delegate object. In other words, the caller of the closure can “intercept” any top-level function calls made in the closure by calling <code>closure.delegate=someObj</code> before the closure is executed. A framework that is passed closures (eg groovy) can therefore provide a “context-sensitive” library of functions that the passed-in closures can reference.</p>
+
+<p>Together, these features of Groovy allows Gradle files to look like declarative documents while actually being <em>programs</em>. This allows great expressivity/extensivity. On the negative side, syntax errors in the config file don’t always result in optimal error messages.</p>
+
+<h1 id="dependency-modelling">Dependency Modelling</h1>
+
+<p>Gradle uses a very similar dependency system to Maven, ie (group, artifact, version, scope). A gradle project defines “resolver objects” for dependencies, and all dependencies are obtained (including possibly triggering download) via the defined set of resolvers.</p>
+
+<p>The Gradle standard library includes a maven-resolver which can fetch artifacts from a standard Maven artifact repository. This resolver also handles Maven transitive dependencies, ie when a Gradle project depends on an artifact which is retrieved from a Maven repository then any dependencies in the associated Maven pom are also added as transitive dependencies to the Gradle project.</p>
+
+<p>Alternate resolvers are available for fetching artifacts from Ivy repositories, etc.</p>
+
+<h1 id="running-gradle">Running Gradle</h1>
+
+<p>By default, gradle uses file “build.gradle” as its input. If a “settings.gradle” file is present, then this is used to defined “sub-projects”.</p>
+
+<p>Gradle has two phases:</p>
+
+<ul>
+  <li>first it “runs” the build.gradle file to build its datastructures; code normally has no side-effects at this point other than to update variables in the “project model” - and in particular, to register <em>closures</em> that will be invoked when appropriate.</li>
+  <li>second (after the project model has been built) it executes the relevant tasks (triggering any relevant closures attached to them).</li>
+</ul>
+
+<p>To prove that build.gradle is actually a <em>program</em>, simply add “System.out.println(‘hello,world!’)” somewhere in the build.gradle file, then run a command like “gradle help”..</p>
+
+<p>The entire build.gradle file is executed by Gradle as a <em>closure</em> with an associated “delegate object” to which all top-level method-calls in the closure are applied. This delegate-object provides the “project model”, including:</p>
+
+<ul>
+  <li>an initial list of tasks</li>
+  <li>a project artifact-name, version, etc</li>
+  <li>a list of dependencies</li>
+</ul>
+
+<p>There are a number of built-in tasks (try “gradle tasks”), including clean, build, test, run, dependencies. File <code>build.gradle</code> can define additional tasks, and optionally attach them as pre-processing or post-processing steps of other tasks. Tasks can be accessed via the “task” method on the “delegate object” (ie via a call to <code>task(taskid)</code> from build.gradle). Each task is also exposed as a top-level method on the delegate-object, eg <code>task(foo)</code> is also available directly as <code>foo</code>.</p>
+
+<p>The project-specific properties such as name, version and dependencies are initially empty, and are populated by parts of the <code>build.gradle</code> file, then read/processed by other parts of <code>build.gradle</code>.</p>
+
+<p>The gradle docs start with some very generic advice. Eventually they move on to more concrete examples at:</p>
+
+<ul>
+  <li><a href="https://docs.gradle.org/current/userguide/tutorial_using_tasks.html">https://docs.gradle.org/current/userguide/tutorial_using_tasks.html</a></li>
+</ul>
+
+<h1 id="important-top-level-methods">Important Top-level Methods</h1>
+
+<p>The following methods are provided by the Gradle libraries as standard methods/properties on the “delegate object” - which are therefore directly callable from <code>build.gradle</code>.</p>
+
+<h2 id="property-assignment-and-retrieval">Property Assignment and Retrieval</h2>
+
+<p>Any top-level “assignment” like:</p>
+
+<ul>
+  <li><code>mainClassName = "...."</code></li>
+  <li><code>group = "..."</code></li>
+</ul>
+
+<p>stores that value as a project “attribute”. Some attributes have special meaning to certain plugins; all attributes can later be referenced via <code>${name}</code>.</p>
+
+<p>There are a whole bunch of “predefined” attributes set up by Gradle itself, such as <code>${baseName}</code>.</p>
+
+<p>Standard attributes the build.gradle file should set itself include:</p>
+
+<ul>
+  <li>
+<code>group</code>: sets artifact group</li>
+  <li>
+<code>mainClassName</code>: defines what should be written into the MANIFEST.MF as the class to execute when <code>java -jar ..</code> is executed.</li>
+</ul>
+
+<h2 id="buildscript-plugin-management">buildscript (plugin management)</h2>
+
+<p>A gradle project supports “plugins”; these can be explicitly defined in a <code>build.gradle</code> file, and will be downloaded from an artifact repository (as Maven plugins are).</p>
+
+<p>As a plugin loads, it makes calls to the <code>delegate object</code> to register specific tasks  and properties, just like code in <code>build.gradle</code> can.</p>
+
+<p>Gradle has separate “environments” for the actual code being built and the plugins used to build it (as Maven does). The “buildscript” config clause defines the custom build-plugins to apply and the repositories to download them from (via nested versions of the standard “repositories” and “apply plugin:” commands).</p>
+
+<h2 id="repositories">repositories</h2>
+
+<p>This instantiates specific “artifact resolvers”, defines their configuration, and attaches them to the current project-model. In other words, it defines where to fetch artifacts (dependencies) from.</p>
+
+<h2 id="apply-plugin">apply plugin</h2>
+
+<p>Enables a standard plugin or one loaded via a “buildscript” section.</p>
+
+<h2 id="apply-from">apply from</h2>
+
+<p>Takes a filename, and executes it (effectively merging its contents into the current context). If the “to:” parameter is defined, then it specifies the “context” to which the file’s contents is applied, ie acts as if the file was merged into the specified block.</p>
+
+<h2 id="dependencies">dependencies</h2>
+
+<p>Like maven dependencies: scope, artifactId, exclusions (though Gradle calls a scope a “dependency configuration”).</p>
+
+<h2 id="configurations">configurations</h2>
+
+<p>Allows specific artifacts to be excluded from certain dependency scopes.</p>
+
+<h2 id="sourcesets">sourceSets</h2>
+
+<p>The directories in which sourcecode can be found.</p>
+
+<h2 id="jar">jar</h2>
+
+<p>Defines how the classes are turned into a jarfile.</p>
+
+<h2 id="artifacts">artifacts</h2>
+
+<p>Defines the set of artifacts generated by a build.</p>
+
+<h2 id="task">task</h2>
+
+<p>Retrieves a reference to an existing task, or creates (and registers) a new task.</p>
+
+<p>Syntax like</p>
+
+<ul>
+  <li><code>task foo(type: Jar) { ... }</code></li>
+</ul>
+
+<p>invokes <code>foo(type, closure)</code> which returns an object which is then passed to the “task” function, which registers it. The returned objects’s “type” property indicates what category of output artifact it generates. The custom task will only appear in the output of commandline command “gradle tasks” if it has a <em>group</em> property which points to one of the standard Gradle task-groups (eg “build”).</p>
+
+<p>As each task is defined, Gradle makes it available as a property in the current context, eg after task foo is defined, <code>foo.bar()</code> will invoke method bar of task foo.</p>
+
+<p>Syntax like</p>
+
+<ul>
+  <li><code>task compile &lt;&lt; {...}</code></li>
+</ul>
+
+<p>invokes <code>task(compile)</code> which returns the existing task with id=compile, and then calls method <code>leftshift</code> on that task object, passing the closure object. The implementation of method <code>task.leftshift</code> attaches the closure to the task as a “before task”; if task “compile” is triggered later, then the closure will be executed before the standard “compile” logic.</p>
+
+<p>A task object has a fixed set of properties. However the property named “ext” is a simple map in which any desired values can be stored - ie for use by the build-script writer.</p>
+
+<h2 id="allprojects">allprojects</h2>
+
+<p>Any of the above elements; will be applied both to the current project and inherited by subprojects.</p>
+
+<h2 id="subprojects">subprojects</h2>
+
+<p>Any of the above elements; will be applied to (inherited by) all subprojects, but not applied to the current project.</p>
+
+<h1 id="gradle-wrapper">Gradle Wrapper</h1>
+
+<p>Gradle can generate a “wrapper script” which can be checked in along with your source-code. This “wrapper script” comes in flavours for Windows and Unix; on Unix, this is a standard shell-script ie can be executed on just about any system. Executing the script will dynamically download the appropriate Gradle version, store it under <code>~/.gradle/wrapper/dists</code>, then use that downloaded version to compile the sourcecode. This ensures that the system is buildable without requiring the user to manually download/install gradle. It also ensures the project is built with the version of Gradle it was designed for.</p>
+
+<p>The security-sensitive should ensure that the wrapper points to a version of Gradle hosted on local resources, as otherwise the script will be downloading and installing a binary from the internet. As alternative, the checksum of the binary can be added to the wrapper properties; a modified binary will then be rejected.</p>
+
+<h1 id="gradle-and-intellij">Gradle and Intellij</h1>
+
+<p>Gradle can download artifacts from the main Maven repos. However instead of writiing the downloaded artifacts into <code>~/.m2/repository</code>, it keeps its own cache in <code>~/.gradle/modules-2</code>. This non-standard location can cause problems with some IDEs, including Intellij.</p>
+
+<p>Gradle will try to download sources along with the binary jars. However if the gradle “repositories” section points first to a <code>~/.m2/repository</code> (eg to make manually-installed jarfiles available), and that repo does not contain a source-jar, then Gradle will assume that no source-jar is available for that artifact. The fix is for the gradle buildfile to refer to the local repo only <em>after</em> the core maven repo, and then to delete <code>~/.gradle/modules-2</code> and rebuild, so artifacts get downloaded again.</p>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/gradle/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

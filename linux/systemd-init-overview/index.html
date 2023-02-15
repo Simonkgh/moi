@@ -1,0 +1,1184 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - systemd-init Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>systemd-init Overview</h1>
+    <aside>First published on: October 1, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>This article briefly covers the functionality of systemd-init, and compares it to traditional sysv-style init systems and occasionally upstart. I’m not familiar with alternatives such as openrc or runit, so don’t address that.</p>
+
+<p>This article is about the <code>systemd-init</code> application in particular, and only refers to other systemd-related applications briefly.</p>
+
+<p>I’m not an expert in this area; these are really notes-to-myself that might possibly be useful to others. In fact, this article is primarily my investigation into whether <em>I</em> want to run systemd-init on my desktop, whether I would recommend it for use in work production systems, and what fun and interesting things can I do with it. The info below is generally meant to be an impartial comparison, ie I’m not trying to <em>sell</em> one solution over the other - just investigate the issues. However I don’t hide my opinions where I like one solution over the other - and as you’ll see below, I generally came to the conclusion that I do like systemd-init.  It is not a <em>perfect</em> solution, but fine for everything I wish to use it for.</p>
+
+<p>I welcome all constructive feedback on this article. However this topic has already been extensively discussed over the past few years, and there probably isn’t much to say that hasn’t already been said elsewhere. This topic does seem to draw over-emotional responses from some people, and as this is <em>my</em> site I will remove any comments that I consider inappropriate.</p>
+
+<p>There is a reasonable amount of documentation on systemd-init out there; you probably want to read these resources rather than the page below! In particular, the first link contains sections with many links to systemd documentation:</p>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Init">Wikipedia: init</a></li>
+  <li><a href="http://blog.darknedgy.net/technology/2015/09/05/0/">A history of modern init systems</a></li>
+  <li>
+<a href="https://n0where.net/understanding-systemd/">n0where.net: understanding systemd</a> - an excellent tutorial/guide</li>
+  <li>
+<a href="http://www.freedesktop.org/wiki/Software/systemd/">freedesktop.org systemd page</a> – written by systemd developers</li>
+  <li>
+<a href="http://0pointer.de/public/systemd-man/systemd.html">systemd manpage</a> – more than just a listing of commandline options!</li>
+  <li>
+<a href="http://0pointer.de/blog/projects/systemd.html">Rethinking PID1</a> – the original blog posting, written by systemd developers</li>
+  <li>
+<a href="http://www.h-online.com/open/features/Control-Centre-The-systemd-Linux-init-system-1565543.html">h-online systemd linux init system</a> – written by systemd developers</li>
+  <li><a href="http://www.freedesktop.org/wiki/Software/systemd/InterfacePortabilityAndStabilityChart/">list of systemd interfaces</a></li>
+  <li>
+<a href="http://0pointer.de/blog/projects/socket-activation.html">socket activation</a> - details on socket activation</li>
+  <li><a href="http://www.freedesktop.org/software/systemd/man/systemd.unit.html">Manpage: systemd unit file syntax</a></li>
+  <li>
+<a href="http://www.freedesktop.org/software/systemd/man/systemd.service.html">Manpage: systemd.service</a> - documents the options available within a systemd-init unit file of type “service”</li>
+</ul>
+
+<p>The <a href="https://wiki.debian.org/Debate/initsystem">debian init-system debate</a> is probably the best source for pros/cons of various solutions.</p>
+
+<p>There is also a list of references to criticism of systemd-init and systemd in general towards the end of this article.</p>
+
+<p>Systemd-init documentation openly acknowledges Solaris SMF as a source of inspiration for systemd-init, and indeed reading the <a href="https://docs.oracle.com/cd/E23824_01/html/821-1451/hbrunlevels-25516.html">SMF documentation</a> shows a significant number of similarities. As SMF has been used in serious commercial environments for a significant amount of time, this is encouraging for the future of systemd-init.</p>
+
+<h1 id="services-daemons-pids-and-orphan-processes">Services, Daemons, PIDs and Orphan Processes</h1>
+
+<p>First, some quick background on process-management on Unix systems.</p>
+
+<p>Every process on a Unix system has a single parent and zero or more child processes; this means that processes form a <em>tree</em>. The only exception to this rule is the process with ID=1 (aka PID1), which has no parent and acts as the “root” of the process tree. The PID1 process never exits; the system kernel shuts down (“panics”) if this ever happens.</p>
+
+<p>When a process terminates, the kernel notifies its parent process via a signal, primarily so the parent can retrieve the <em>exit status</em> of the child process. Until a process’ exit-status has been collected, the kernel needs to keep the relevant information around (only a small amount of memory is required), and cannot reuse that process-id.</p>
+
+<p>When a process terminates, the <em>child processes</em> of that process lose their parent and need to be assigned a new parent. Unix does <em>not</em> make the “grandparent” process responsible for this; instead those “orphaned” child processes are assigned PID1 as their parent. The PID1 process should always handle signals from the kernel indicating that a child process has died, and collect its exit-status information so that the kernel can then forget about the process.</p>
+
+<p>Unfortunately, when the kernel “reparents” an orphaned process, it does not tell pid1 what the original parent’s PID was; this means that even pid1 cannot tell whether a specific process is “descended from” some other process - and in particular, whether it was started by some specific “service”.</p>
+
+<p>Processes acting as “system services” aka “daemons” traditionally disconnect from any console (“run in the background”) and have PID1 as their parent. They achieve this by deliberately becoming “orphans” on startup: a temporary process is started which simply starts the real daemon process and then deliberately exits. The daemon process then gets adopted by PID1. One (deliberate) effect is that the daemon process is no longer associated with any “login session” or “terminal”. This is not always the case; some applications intended for use as systems services have a commandline option that controls whether they “daemonize” or not, and some init-systems require them to “daemonize” while others do not.</p>
+
+<p>Note: although process with PID=1 should never exit, it can use the <code>exec</code> systemcall to change the binary file that is being run (while keeping the same process-id). This is often done when a system is booted from an initramfs; the original PID1 is from the initramfs and it then execs the one on the real rootfs. Both sysv-init and systemd-init can “reinit” themselves by saving their current state, executing their original binary again, and reloading the state. This can be used to clean up any memory-leaks or other problems.</p>
+
+<h1 id="the-role-of-the-init-system-and-service-management">The Role of the Init System and Service Management</h1>
+
+<p>The basic role of the init application (pid1) in unix is to:</p>
+
+<ul>
+  <li>on startup: initialise service-management</li>
+  <li>while running:
+    <ul>
+      <li>start new getty processes (when a user logs out, the getty for the associated terminal ends; a new one is needed)</li>
+      <li>collect and discard the exit-status of orphaned processes</li>
+      <li>simply exist in order to act as the root of the tree of processes</li>
+    </ul>
+  </li>
+  <li>on shutdown: cleanly terminate service-management</li>
+</ul>
+
+<p>All systems also need a “service manager” of some sort which:</p>
+
+<ul>
+  <li>sets up the system console parameters (particularly important for a real serial terminal)</li>
+  <li>starts an instance of the getty application for each “terminal”</li>
+  <li>triggers initialisation of the networking system</li>
+  <li>mounts filesystems other than the rootfs (the rootfs is mounted by the kernel or the initramfs)</li>
+  <li>starts other system services (eg http-servers, mailservers, display-managers)</li>
+</ul>
+
+<p>Often the “service management” functionality is integrated into the PID1 process, or at least partially.</p>
+
+<p>As noted earlier, the process with pid=1 must never exit (terminate).</p>
+
+<p>Normally, unix-like operating-systems also provide the following features:</p>
+
+<ul>
+  <li>Some way of starting services “on demand”, in particular when something connects to a particular network port (traditional implementation: “inetd”)</li>
+  <li>Some way of running processes on a configurable time-based schedule (traditional implementation: “cron”)</li>
+</ul>
+
+<p>It is possible to get a <a href="http://lwn.net/Articles/157150/">feed of information</a> about fork/exit events from the kernel via netlink. <a href="http://bewareofgeek.livejournal.com/2945.html">This data</a> could possibly be used to track processes without being pid1. However the systemd-init developers have stated that this approach is <a href="http://0pointer.de/blog/projects/systemd.html">not reliable</a>; search for “netlink connector” to see the comment about “ugly and not scalable”. I don’t know if using inotify on the entries in the <code>/proc</code> filesystem could be used for a similar purpose; presumably not as neither systemd-init nor upstart does that.</p>
+
+<p>As noted earlier, pid1 must not <em>exit</em>, but may <em>exec</em> a different application (ie run different code while retaining the same pid). And as noted in this section, the init-process has three clear phases: startup, running, shutdown. Some init-systems are therefore written as three separate applications covering startup/running/shutdown functionality where each stage <code>execs</code> the next at the appropriate time. This is particularly common when the stages are written as <em>shell scripts</em>, although even systemd provided a separate “systemd-shutdown” executable for a while.  When an os based on systemd-init is started from an initrd, it is common for an initial systemd-init to be executed from the initramfs, for this to then exec the real one from the rootfs, and eventually the one on the initramfs to be execed again to handle shutdown; among other things this ensures that the rootfs can be cleanly unmounted on shutdown. Iinit processes normally remount the rootfs as readonly on shutdown, which allows clean unmount, but there are corner-cases where that fails - primarily when a file on the filesystem has been unlinked but a filedescriptor is still open, eg when a system update has replaced <code>/sbin/init</code>!.</p>
+
+<h1 id="the-systemd-suite-of-applications">The Systemd Suite of Applications</h1>
+
+<p>There is a distinction between the systemd project and systemd-init.</p>
+
+<p>Systemd is a project which develops a suite of applications related to Linux startup and system daemons. Only one of these applications is the systemd-init “init process and service manager”, although that is probably the most important and high-profile application in the suite.</p>
+
+<p>All code maintained by the systemd project is stored in a single Git repository, and releases of all the applications happens at the same time. The systemd “release tarball” contains sourcecode for all applications in thesuite. However the build-process can be configured to build or not build various parts of the systemd suite of applications.</p>
+
+<p>In almost all cases different tools communicate at runtime using <em>dbus</em> messages, meaning that any one of them can theoretically be replaced by another application which provides the same dbus API.  Nevertheless, some sets of tools should be considered as a group that work together, and it probably doesn’t make much sense to replace just one tool in that group. For example, systemd-init and systemctl are tightly coupled and it is not reasonable to replace just one of them with an alternate implementation.</p>
+
+<p>There are some core systemd libraries that many systemd applications link to. However a <em>replacement</em> for any of the applications can be built (ie an alternate provider of the same dbus APIs) without needing to link to these libraries.</p>
+
+<p>Unfortunately, <code>systemd-init</code> was the first tool in the suite to be developed, and the executable (which implements the “service and init manager”) is installed as <code>/lib/systemd/systemd</code> (with a symlink to it from <code>/sbin/init</code> in most cases). Much of the systemd-init documentation and many articles refer to “systemd” when they mean only the “service and init manager” application. To avoid confusion between the “service and init manager” and the rest of the systemd project, this article will refer to this particular executable as <code>systemd-init</code>.</p>
+
+<p>There are a few things that do make it somewhat difficult to “mix and match” some applications from the systemd suite with alternate (eg traditional) implementations:</p>
+
+<ul>
+  <li>
+    <p>Many systemd apis are <a href="http://www.freedesktop.org/wiki/Software/systemd/InterfaceStabilityPromise/">stable</a>, but not all - ie some interfaces may change between releases. That doesn’t bother any systemd applications as the whole suite is released together, but external apps implementing the same API might need to work hard to keep compatibility. On the other hand, an interface that is not declared stable probably means that the apps using that interface should be considered as a group that should be replaced as a whole set rather than individually.</p>
+  </li>
+  <li>
+    <p>The systemd development team make no effort to support non-linux operating systems; they do not accept <code>#ifdefs</code> and other mechanisms for compiling on alterative kernels and use Linux-specific APIs wherever that gives a benefit. The code is of course open-source so could be ported to other operating systems by any willing developers - but the systemd team aren’t interested in hosting any such code within their own codebase nor to they refrain from adding features which may be difficult/impossible to support on non-linux-based systems.</p>
+  </li>
+</ul>
+
+<p>The <code>logind</code> application maintained as part of the systemd suite appears to be particularly controversial. It provides a non-trivial DBUS api which Gnome uses, has a non-trivial internal implementation, and was once independent of systemd-init but later gained a hard dependency on it (see v205). The dbus API isn’t <em>huge</em>, and seems sane, ie an alternative implementation providing that same API is feasable (and has been done, at least partially) but distros wanting to package Gnome but not systemd-init have (IMO quite reasonably) complained about the necessary effort.</p>
+
+<h1 id="the-traditional-sysv-init-system-and-alternatives">The Traditional Sysv-init System and Alternatives</h1>
+
+<p>There have been <a href="http://blog.darknedgy.net/technology/2015/09/05/0/">many</a> init systems invented over the last 20 years. However very few of them are still actively developed; this section looks at how sysv-init works, compares it to systemd-init and briefly to some of the most actively used/maintained alternative init-systems. More detail on some init-systems is provided in separate sections towards the end of this document.</p>
+
+<p>On sysv-init-style (ie traditional) distros, the following applications are responsible for the above:</p>
+
+<ul>
+  <li>immortal root of the process tree and parent of orphaned processes: sysv-init</li>
+  <li>managing system services: sysv-rc</li>
+  <li>starting services “on demand”: inetd</li>
+  <li>time-based scheduling: cron</li>
+</ul>
+
+<p>The sysv-init pid1 process tracks “the current runlevel”, allows other tools (eg telinit) to tell it to change that value, and processes file <code>/etc/inittab</code>.  Sysv-init can do basic service management itself; entries in file /etc/inittab not only specify which processes to start on which runlevel, but can specify “respawn” in which case sysv-init will restart the process if it dies. However sysv-init is rarely used in this manner; instead it is traditionally configured to run “<code>/etc/rc.sysinit</code>” aka “sysv-rc” which then starts other services. In this mode, sysv-init does not pass on information about child process termination to sysv-rc and therefore sysv-rc has no reliable way of knowing when a service has died and cannot directly support “respawning” (but see runsv and daemontools below).</p>
+
+<p>Sysv-init also has special code for receiving “power state” events, and running the appropriate command as configured in <code>/etc/inittab</code>. However on most linux systems, such things are handled through udev instead.</p>
+
+<p>Sysv-init also supports a “command fifo” through which other applications can send it commands. This is a custom protocol of course.</p>
+
+<p>Sysv-rc is a pure “service manager” which is better suited to large numbers of services than the basic inittab functionality built-in to sysv-init; as mentioned sysv-init is normally configured to just invoke sysv-rc with few or no other entries in /etc/inittab.  This implies that sysv-init actually has significant amounts of code that is not used in most distributions.  Of course sysv-rc therefore does not run as pid1. sysv-rc relies on inetd for on-demand services, and on cron for time-based scheduling.</p>
+
+<p>Openrc is also a pure “service manager”, effectively replacing sysv-rc while also depending on sysv-init. As with sysv-rc, much of the functionality in sysv-init goes unused when sysv-init is coupled with openrc. And as with sysv-rc, openrc does not get notified by sysv-init of the termination of orphaned processes which makes it difficult to track processes associated with services in order to provide respawning.</p>
+
+<p>Runit provides three applications: “runit”, “runsvdir” and “runsv”. The runit app is an extremely small pid1, ie a sysv-init replacement - but using the original sysv-init is also supported. Runsvdir is a long-running process which effectively monitors the service configuration-files and handles requests from users to start/stop services. An instance of runsv is spawned for each service started (to monitor just that one service). Runit is inspired by daemontools which provides similar behaviour, as does S6.</p>
+
+<p>Upstart runs directly as pid1, integrating basic init functionality and service management all in one. For some reason, despite being pid1 upstart tries to use the ptrace systemcall on all services it started, in order to intercept later calls to <code>fork</code> and <code>exit</code>. Unfortunately this approach had some nasty corner-cases.</p>
+
+<p>Systemd-init runs directly as pid1, implementing not just the basic init functionality but also a powerful and complex service manager, all in one. This resolves the problem with tracking termination of orphan processes; systemd-init is therefore immediately aware whenever a “normal child” (ie a service started directly) or a “daemonized” (deliberately orphaned) process terminates.</p>
+
+<p>Alternatively, systemd-init can also be used as a “pure service manager” similar to the behaviour of sysv-rc etc: it starts/stops daemons as the “runlevel” (systemd-init “target”) changes. It will run quite happily in <em>parallel</em> with sysv-rc if desired, as long as configured correctly. systemd-init can also be used like inetd, ie “launch a service on demand”.  There is <em>very basic</em> timer-based functionality via “timer units” in systemd-init; more advanced use-cases are handled by running <code>cron</code> or a compatible tool as a service.</p>
+
+<p>The sysv-init-related tools include init, telinit, runlevel, reboot, shutdown, poweroff, halt. The systemd-init executable replaces init; systemctl can handle all the others (it runs in compatibility mode when executed as the sysv name ie via a symlink).</p>
+
+<p>As can be seen from above, sysv-init is small but still far from minimal. Smaller alternatives include:</p>
+
+<ul>
+  <li>the “runit” init process which is 300 lines of C source-code</li>
+  <li>busybox contains code to allow it to act as an “init”</li>
+  <li>
+<a href="http://www.landley.net/hg/aboriginal/file/3e7bf55b1bfb/sources/toys/oneit.c">Aboriginal Linux init</a> which can be execed from a <a href="http://landley.net/hg/aboriginal/file/1722/sources/root-filesystem/sbin/init.sh">suitable script</a>
+</li>
+  <li>
+<a href="http://www.linux.it/~rubini/docs/init/init.html">Rubini’s init</a> - another tiny init implemented as a shell-script.</li>
+</ul>
+
+<p>Some tools (eg “runsv”, used by runit) rely on services <em>not</em> daemonizing; the starting process therefore can know when the “main service process” dies because it remains the parent of that process. This does mean that only services which can run in “non-daemon mode” are supported - but the vast majority of services can do that. It does have problems with losing child processes if the main service should unexpectedly terminate; handling that correctly requires either cgroups or integration with PID1 (which becomes the parent of such orphaned processes). Systemd-init <em>recommends</em> that services be started without “daemonizing”, but can handle either case.</p>
+
+<p>One other task of the init-system is to keep entries in <code>/var/run/utmp</code> up-to-date. This file contains a list of binary records containing information about processes. In particular, it records when init started (ie when the system was most recently booted), and what the current <em>runlevel</em> is. The runlevel information is necessary in an init-based system as there is no other way to query that. The utmp file is also updated by the getty processes when a user logs in or logs out; the program to query this table is therefore called “<code>who</code>”, as it is most often used to list all logged-in users.</p>
+
+<p>Both sysv-rc and openrc are executed when sysv-init changes run-level; the code does its work to start/stop services and then terminates - ie there is no long-running “service manager” application. Both Upstart and systemd-init instead have a long-running pid1 process that manages services too. Both upstart and systemd-init can therefore <em>respond</em> to events from sources such as udev, can respond to termination of service process, and support <em>requests</em> from other applications. Scripts started via sysv-rc or openrc can potentially start a long-running “service supervisor” process to manage services; see daemontools for example. Systems using sysv-rc or openrc can potentially react to udev events by having custom udev-rules which execute the appropriate scripts, but this looks rather complicated to set up and administer.</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="http://comments.gmane.org/gmane.linux.toybox/1824">Rob Landley: Init comment</a></li>
+  <li><a href="http://troglobit.github.io/finit.html">finit</a></li>
+</ul>
+
+<h1 id="systemd-init-resource-requirements-and-security">Systemd-init Resource Requirements and Security</h1>
+
+<p>The systemd team explicitly want to support cloud/container use-cases, in which small footprint and quick startup are important. It is therefore unlikely that “poorly performing code” will be added to systemd applications.</p>
+
+<p>It is however true that systemd-init is much larger than the sysv-init executable traditionally used as pid1.  The original sysv init app from debian is 46kb bytes unstripped, and 37kb stripped (no compile optimisations applied). The systemd-init executable is 1,309kb (stripped) which <em>is</em> much larger (30x). This <em>is</em> a significant difference, particularly on systems that don’t use swap-space, ie the entire executable needs to be kept in memory at all times.</p>
+
+<p>Nevertheless in modern terms this is not particularly large. systemd-init is probably not appropriate for truly tiny systems (eg sensors, simple cameras) but for smartphones, routers, and anything larger, 1.3mb of ram in exchange for a full dynamic service management system is IMO not unreasonable - given the ability to restart failed services automatically, to boot faster, etc. See also the list of memory-related issues below. In comparison, the systemd-init executable is smaller than wpa_supplicant (wifi encryption negotiation), similar to NetworkManager, a little larger than bash, half the size of xorg, and half the size of Apache2. Of course what really matters is the runtime memory footprint; it does dynamically link to a number of other libraries and presumably holds a moderate amount of data in-memory which the old-style init would not.</p>
+
+<p>To make a fair comparison, it is important to remember that systemd-init will <em>save</em> memory over sysv-init/sysv-rc in the following ways:</p>
+
+<ul>
+  <li>normally, no shell-scripts are executed, ie bash or busybox do not need to be loaded during startup - or perhaps <em>ever</em> on some embedded systems. As noted above, bash is approximately the same size as systemd-init.</li>
+  <li>the libraries that systemd-init dynamically links to (libc, libpthread, libpam) are mostly common libraries likely to be used by other apps too.</li>
+  <li>it is possible (indeed, common) to set up systemd-init to start services on-demand, ie they don’t consume memory unless actually needed. Setting this up with sysv-rc is difficult, and not normally done - except possibly via inetd, in which case the size of inetd must be added to sysv-init/sysv-rc.</li>
+</ul>
+
+<p>One issue related to the size of the executable is its stability - the more code is present in a process, the more likely it is to have bugs that lead to crashes or security issues. However systemd-init has a good track-record for stability; it has been in wide use for several years now, and crashes do not seem to be a problem.</p>
+
+<p>Interestingly for such a core process, systemd-init does not have a large security attack-surface; it never processes data from network sockets and very little from local sockets (just the “notify socket”, and the private comms channel used by the systemctl commandline tool). The “system” instance only reads config-files owned by root, ie triggering problems via manipulated config files is difficult. The <a href="http://www.freedesktop.org/wiki/Software/systemd/dbus/">DBUS interface to systemd-init</a> is possibly the largest issue, and IMO a reasonable concern (non-root processes can only perform <em>queries</em>).</p>
+
+<p>Systemd-init has been reviewed by the RedHat Enterprise product security team, providing some reassurance on the security aspects.</p>
+
+<h1 id="a-comparison-of-the-service-dependency-models">A Comparison of the Service Dependency Models</h1>
+
+<p>Sysv-init itself supports just a simple flat list of services in /etc/inittab; there is no dependency-management at all.</p>
+
+<p>Sysv-rc is basically imperative: “run all startup scripts in this directory in alphabetical order”. Simple, but hard to run steps in parallel. However system service init-scripts can include declarative-style “LSB headers” that can be processed by the <code>insserv</code> tool; see later. As noted earlier, sysv-rc does not receive information from sysv-init about termination of orphan (daemonized) processes. Actually, sysv-rc provides no long-running application itself, but is instead something that is executed each time the “runlevel” changes, and then terminates after it has executed all relevant scripts. There is therefore nothing in sysv-rc itself that could provide “respawning” or other kinds of service-monitoring behaviour, although scripts can potentially use additional tools to do that if desired (see “monit” for example).</p>
+
+<p>Init-scripts intended for use with sysv-rc can optionally include special headers which specify which other services are prerequisites, and the “insserv” tool can then be used during <em>installation</em> of such scripts to analyse the full set of all installed services, determine an optimal ordering, then <em>generate</em> appropriate symlinks in order to start services in the correct order - and potentially even in parallel.</p>
+
+<p>runit’s runsvdir application has no concept of dependencies at all. Each runlevel is simply a directory full of symlinks to other “per-service” directories, and runsvdir simply tries to start everything associated with the current runlevel. The “run script” for a service is expected to <em>test</em> whether its desired dependencies are currently running, and if not then exit. The runsvdir tool will notice that the service exited, and will retry it a short time later - at which point hopefully its prerequisites are available.</p>
+
+<p>The upstart model is basically reactive: config files specify “when this event occurs, do these steps and trigger these additional events”. This provides more fine-grained triggers of behaviour than a simple set of runlevels. Upstart’s event-triggering concept means that dependencies are generally declared in a <em>forward</em> manner: when “service A becomes available, start service B”. Comments from both the debian and systemd forums have stated that this “forward dependency” model is difficult to work with, and in particular tends to start <em>too many</em> services, ie starts things that aren’t actually wanted.</p>
+
+<p>systemd-init has the concept of “wants” (or “requires”), which is effectively the upstart-model reversed: “service B wants service A”. When something tries to start B, then systemd-init starts service A as well (either first, or in parallel depending upon other constraints). The systemd-init approach therefore starts the <em>minimum</em> number of services that are needed. Alternatively, systemd-init supports <em>implicit</em> dependencies via its “socket activation”; all installed services which can be socket-activated are registered but not started, and their corresponding sockets are created and monitored by systemd-init. If some service B happens to open the socket for service A during its startup, then service A is started at that point - ie the dependency embedded in the sourcecode for B is “auto-discovered” when B is started. Similar behaviour is (indirectly) supported for DBUS; if B tries to send a DBUS message to service A then service A is started at that point. The sysv-rc/insserv headers are similar to “wants” requirements, except that sysv-rc only applies that information when switching runlevel; running “/etc/init.d/foo start” or “service foo start” does not start the prerequisites.</p>
+
+<p>The systemd-init model also supports “events” in a way similar to upstart. In particular, udev events (eg attaching or removing a specific USB device) can trigger the start or termination of services.</p>
+
+<p>The systemd-init “wants” approach also makes it possible to determine which services should be <em>stopped</em>. When a new “target” (roughly equivalent to a runlevel) is selected, systemd-init starts with the list of units belonging to the target, and adds all the “wanted” dependencies (recursively) to get the full set of desired units. Anything not on this list does not belong to the current “target” and can potentially be stopped (though this is not the default behaviour; see the “isolate” operation). Obtaining similar behaviour with sysv-rc is possible but nontrivial; the <code>S*</code> (start) and <code>K*</code> (kill) scripts in the <code>rc{N}.d</code> directories must be carefully balanced, and the start scripts must check whether the service is already running (doing nothing in this case). The “insserv” tool for sysv-rc does assist in setting up the sysv-rc symlinks correctly.</p>
+
+<p>Systemd-init “requires” dependencies (similar to want, but mandatory) are also applied to stop services whenever their dependencies become unavailable. If a service <em>depends</em> on some device, and the device is removed, then systemd-init will detect that the mandatory dependency is no longer available and stop the service which requires it. Upstart can also do this; as far as I know no other init-system has this ability.</p>
+
+<p>Note that systemd-init is far from the first system to support complex service-dependences. However for some reason none of the others ever achieved widespread use in OSS systems; as noted here runit has no concept of deps, sysv-rc and openrc use them only at install-time, BSD’s rc.d only at runlevel-change, and upstart has a weird “forward” dependency model. Solaris SMF is probably the best-known system that has a model similar to systemd-init, and the systemd-init project openly acknowledges it as a source of inspiration.</p>
+
+<h1 id="init-and-service-use-cases">Init and Service Use Cases</h1>
+
+<p>Now that the basic functionality of init has been discussed, and in particular the way that different init-systems handle <em>dynamic</em> environments, this is perhaps a good point at which to consider which features are likely to be needed in which environments.</p>
+
+<p>Some people have stated that systemd-init’s “dynamic” nature is most useful on a desktop system, and has little role in server environments. On the other hand, RedHat uses systemd-init extensively and is mostly focused on large-scale server installations and datacentres.</p>
+
+<p>Interestingly, Solaris SMF has a complicated and dynamic dependency system, and is primarily focused on server environments.</p>
+
+<p>I haven’t found any clear information on the internet regarding this issue, so what follows is just my best-guess.</p>
+
+<ul>
+  <li>containers
+    <ul>
+      <li>being able to run a normal distro with unmodified init and unmodified service config is useful;</li>
+      <li>fast boot is also useful when starting containers (or even full VMs)</li>
+    </ul>
+  </li>
+  <li>servers
+    <ul>
+      <li>being able to “servicectl enable someservice” and have the relevant dependencies be handled automatically is useful (though insserv can do this too)</li>
+      <li>good diagnostics reporting <em>why</em> a service could not be started on request (eg indicating which mandatory requirement could not be satisfied)</li>
+      <li>use of hardware watchdogs to reboot the server if anything hangs is nice</li>
+      <li>automatic restarting of services if they fail is important</li>
+      <li>handling networks appearing and disappearing is important; it won’t happen often in a server environment but failover between multiple network interfaces should be handled correctly</li>
+      <li>reliable logging services are critical (including logging STDOUT/STDERR output from services)</li>
+      <li>resilience to hardware failures, eg terminating webserver service when an associated filesystem becomes unavailable (better than leaving it active in a cluster!)</li>
+    </ul>
+  </li>
+  <li>desktops
+    <ul>
+      <li>handling device hotplugging is important</li>
+      <li>handling networks appearing and disappearing is important</li>
+    </ul>
+  </li>
+  <li>embedded
+    <ul>
+      <li>fast boot!</li>
+      <li>support for starting services “on-demand”, to avoid wasting memory on unused code (embedded systems don’t often have swap-partitions).</li>
+      <li>automatic restarting of services if they fail is important</li>
+      <li>handling device hotplugging is important for some categories (eg phones, tablets, devices with debugging ports)</li>
+      <li>handling networks appearing and disappearing is important for some categires (eg phones, wifi-enabled sensors)</li>
+    </ul>
+  </li>
+  <li>all of the above
+    <ul>
+      <li>reliable service startup, without any race-conditions which occasionally cause startup to fail due to missing requirements. Possibly less important for interactive systems (eg desktop), but for all others it is very important that services intended to start <em>actually do so</em>.</li>
+      <li>starting rarely-used services “on-demand” is moderately useful. As pointed out earlier, on systems with swap-space, having “sleeping” services hanging around is no big deal. However boot-performance is improved by never starting them at all. For embedded, this <em>is</em> more important</li>
+      <li>cleanly terminating all processes related to a service when it stops. This is related to being able to <em>restart</em> a service; one which did not cleanly shut down may have problems on restart.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Having the same init-system on desktop and server is quite useful. Code is almost always developed on a desktop, and first tested there; having a <em>different</em> init-system on the QA/production systems isn’t helpful.</p>
+
+<p>Any further points are welcome.</p>
+
+<h1 id="systemd-init-as-a-constraint-solver">Systemd-init as a Constraint Solver</h1>
+
+<p>At its core, systemd-init is a <em>constraint solver</em>. On startup, it reads a bunch of configuration files which define <em>objects</em> (services, sockets, mounts, etc) and the constraints between them. Operations like starting a specific service, or selecting a target (a set of services) then requires it to solve the constraints. The result is an ordered graph of operations to perform (services to start, or sometimes to stop).</p>
+
+<p>Of course, systemd-init also has logic to actually <em>perform</em> those operations (starting/stopping services, etc).</p>
+
+<p>Events arriving from udev etc can also trigger the “constraint solving” process; a prerequisite device disappearing can trigger the termination of related services. Similarly, some process opening the socket associated with a not-currently-running service also triggers the “constraint solving” process (see ‘.socket’ units later). As does the simple creation of a file in a monitored directory (see <code>.path</code> units later), etc.</p>
+
+<p>The insserv tool (used by sysv-rc and openrc) is also a constraint-solver, but is only used at application install-time. The <code>*BSD</code> init system (“rc.d”) is a constraint-solver that runs every time the runlevel changes - but it doesn’t do this on other events such as udev or monitored sockets/files. runit has no concept of dependencies at all, hence no constraint-solving ability.</p>
+
+<h1 id="why-systemd-init-merges-functionality-into-pid1">Why systemd-init merges functionality into pid1</h1>
+
+<p>As noted above, the sysv-init process does less than systemd-init, ie its code is smaller (and some other inits are smaller than sysv-init). Smaller always means more reliable, and given that the init process must <em>never exit</em>, small and reliable are good. On that point, the larger size and greater functionality of systemd-init is a drawback. Openrc works with sysv-init, runit has a tiny init; both do the majority of their work in other processes.</p>
+
+<p>However systemd-init puts all its logic into a single <em>relatively large</em> application that runs as pid1 (and upstart did similar). The size of the systemd-init pid1 process is one of the most controversial aspects, and separating out the code into two or more processes would certainly have reduced the amount of discussion.</p>
+
+<p>I’ve been searching for more information on this topic, and unfortunately cannot find anything concrete.  As far as I can see, it would be <em>possible</em> to split systemd-init and I wonder why it was not done. Below are my “best guesses” on this topic; more information welcome…</p>
+
+<ol>
+  <li>pid1 is the only process that gets informed about the termination of orphan processes, and this information is important for “service supervision”</li>
+  <li>having the “service supervisor” process crash is just as bad as having pid1 crash, so splitting the two brings no effective improvement in reliability</li>
+  <li>something to do with cgroup management</li>
+  <li>it complicates shutdown</li>
+  <li>the kernel protects pid1 against being killed</li>
+  <li>??</li>
+</ol>
+
+<p>Re (1): first, I’m not sure it is true that this info is needed. A service supervisor definitely needs to know when the “primary service process” terminates, and needs to be able to then kill all its children. However there are potentially other ways to track the termination of the primary service (eg inotify on the <code>/proc/{pid}</code> node of that process, and cgroups make it possible to find/terminate all children. Even if the info <em>is</em> required, it would probably be possible to get a stream of “terminated process ids” in other ways; if necessary by adding an extra NETLINK protocol into the kernel. And as a last resort, init could just write this info to a pipe.</p>
+
+<p>Re (2): true, a failed service supervisor is pretty much as bad as a failed init; restarting one is probably not feasable due to the amount of lost “state” information and so at that point it is probably best to just reboot. However AFAICT implementing such a separation doesn’t make anything <em>worse</em> either. systemd-init can use a hardware “watchdog” to supervise itself - ie ensure the system gets rebooted if systemd-init hangs. Separating out the supervisor code means that systemd-init would need to supervise the supervisor (ie the supervisor would need to periodically send “heartbeats” to systemd-init). This would be a minor nuisance, but presumably just a few dozen lines of code.</p>
+
+<p>Re (3): when systemd-init spawns service processes, it immediately puts each service into a dedicated cgroup - for good reasons. Such logic does need to be integrated with service-management, ie I agree that cgroup management should not be separated from service-management, but I cannot see why cgroup management needs to be done by pid1.</p>
+
+<p>Re (4): yes, such separation would complicate shutdown slightly. The pid1 process is responsible for managing clean shutdown, and with a separate service-manager it would therefore need to <em>ask</em> that service-manager to first cleanly shut down services before init can do the last critical things. A slight complication, but not huge AFAICT.</p>
+
+<p>Re (5): yes, the kernel has some special-case handling for pid1, particularly related to signals. It is therefore less likely that a careless command from the sysadmin (or a script running as root) will bring down the critical pid1 process. However that’s not a <em>very</em> likely scenario, and if rogue scripts (or rogue sysadmins) are killing random processes then the system has other significant problems…</p>
+
+<p>So in summary, I’m not sure why systemd-init isn’t separated into at least two parts. It would probably not bring much advantage, but would also not be particularly complicated. My best guess is that the integrated solution is <em>slightly</em> less complicated, no less reliable, and the systemd-init team are purists who won’t make their code even <em>slightly</em> more complicated in order to silence what they see as “unfounded” criticisms.</p>
+
+<p>From my personal viewpoint, systemd-init has been in use for several years and there is no indication that it is unreliable. The fact that it is one integrated pid1 rather than distinct init/servicemgr tools is therefore of concern but currently only a theoretical issue.</p>
+
+<p>Later in this article is a section which speculates about how/whether systemd-init could be implemented without a large pid1, and the corresponding tradeoffs.</p>
+
+<h1 id="a-quick-note-on-sockets">A Quick Note on Sockets</h1>
+
+<p>The normal “client lifecycle” for a stream-based socket is:</p>
+
+<ul>
+  <li><code>socket(domain, SOCK_STREAM, ..) // domain usually AF_UNIX or AF_INET</code></li>
+  <li><code>connect(remote-addr,...)</code></li>
+  <li><code>write(..) // send some message (optional)</code></li>
+  <li><code>read(..)  // read reply or other data (optional)</code></li>
+</ul>
+
+<p>The normal “server lifecycle” for a stream-based socket is:</p>
+
+<ul>
+  <li><code>socket(domain, SOCK_STREAM, ..)</code></li>
+  <li><code>bind(local-addr)</code></li>
+  <li><code>listen(..)</code></li>
+  <li><code>accept(..)</code></li>
+  <li><code>read(..)</code></li>
+  <li><code>write(..)</code></li>
+</ul>
+
+<p>For <code>AF_UNIX</code> (ie local) sockets, local-addr/remote-addr are a path on the local filesystem, and the “bind” step actually creates a “file” in the local filesystem. The client call to <code>connect</code> will block until the server calls accept to “complete” the connection.</p>
+
+<p>When using a datagram-based socket, eg <code>socket(AF_UNIX, SOCK_DGRAM, ..)</code> then the <code>connect</code> step never blocks; it simply “labels” the filedescriptor with a destination address. And in fact, the connect step is optional; the “sendto” function takes the address as a parameter and works even when connect has not been called (send/sendmsg do require connect to have been called). Sent datagrams are queued in a kernel buffer until some process reads them - though send/sendto/sendmsg will block if the buffer becomes full.</p>
+
+<p>The normal “client lifecycle” for a datagram-based socket (also known as a “connectionless socket”) is simpler:</p>
+
+<ul>
+  <li><code>socket(AF_UNIX, SOCK_DGRAM, ..)</code></li>
+  <li><code>sendto(data,addr) // repeat as often as needed</code></li>
+</ul>
+
+<p>and the “server lifecycle” is just:</p>
+
+<ul>
+  <li><code>socket(AF_UNIX, SOCK_DGRAM, ..)</code></li>
+  <li><code>bind(local-addr)</code></li>
+  <li><code>recv(..) // repeat as often as needed</code></li>
+</ul>
+
+<p>Note in particular that with a datagram socket, the sender can send (without blocking) even before anything is “listening” on the socket.</p>
+
+<p>If some common code can first create the socket-filedescriptors and <em>pass</em> them to the client and server, then the simpler “socketpair” function can be used; the socket needs no name in the filesystem (is “anonymous”) and the connect/bind/listen/accept functions are all unneeded - simply read and write immediately. However AFAIK, systemd-init does not use this.</p>
+
+<h1 id="systemd-init-configuration-files">Systemd-init Configuration Files</h1>
+
+<p>This article is meant to be an investigation of systemd-init architecture and design, rather than a tutorial on its use. However a brief intro to the most important config files and concepts follows. See the resources referenced from the first section of this article for further details.</p>
+
+<h2 id="systemd-init-file-locations">systemd-init file locations</h2>
+
+<p>The primary files for systemd-init are found under <code>/lib/systemd</code> - including executables such as “systemd” itself which is then linked to from <code>/sbin/init</code>. This does look weird - but is a consequence of some (IMO) stupidity in the Linux Standards Base (LSB) Filesystem Hierararchy standard. According to that document, no subdirectories are allowed under <code>/bin</code> or <code>/sbin</code>. And <code>/etc</code> is considered to be a place for “host-specific” configuration files, but a bad place for files that can be shared across multiple hosts (eg network-mounted) or multiple containers. Sadly, the lib directory was therefore the only place not directly in contradiction with the LSB filesystem hierarchy spec.</p>
+
+<p>Systemd uses the term “unit” for objects which can have dependencies or be the dependency of some other object. In general, there is a single configuration file that defines each such unit.</p>
+
+<p>Directory <code>/lib/systemd/system</code> holds the standard “unit files” which define the various units (targets, services, sockets, mountpoints, and other items). This directory should be managed only by the packaging system (dpkg/rpm/etc). The sysadmin can override these files by creating alternatives under <code>/etc/systemd/system</code> - though that is not often necessary. If the changes are only meant to be temporary, then the files can be created in <code>/run/systemd/system</code>. Using the <code>systemctl</code> tool to explicitly enable or disable services causes entries to be created under <code>/etc/systemd/system</code> or <code>/run/systemd/system</code>.</p>
+
+<p>Use “man 5 systemd.unit” for more information on unit-files and search-paths.</p>
+
+<h2 id="types-of-unit-file">Types of Unit File</h2>
+
+<p>Systemd unit files represent executable programs. The most important are:</p>
+
+<ul>
+  <li>”<code>*.target</code>” files which list a set of other units to activate</li>
+  <li>”<code>*.service</code>” to specify the name and properties of an executable that can be started “per connection” or as a “long term background process” aka daemon</li>
+  <li>”<code>*.socket</code>” to tell systemd-init to create a socket (usually in the local filesystem) which will trigger a service when some process connects to it</li>
+  <li>”<code>*.path</code>” to tell systemd-init to monitor a directory and trigger a service when the directory exists, or files are created in it</li>
+  <li>”<code>*.mount</code>” to tell systemd-init to mount a filesystems on specific events (eg the creation of a /dev node by udev, ie the availability of the underlying storage, or the availability of a network interface for a network-mounted filesystem)</li>
+</ul>
+
+<p>A transient “device” unit is created automatically for each device registered by udev; these are present so that .service and .target files can reference them as dependencies.</p>
+
+<p>See the systemd-init documentation, or the excellent tutorial linked from the first section of this article, for full details.</p>
+
+<h2 id="target-unit-files">Target Unit Files</h2>
+
+<p>Each systemd-init “target” is a simple file; they mostly contain a description of the purpose of the target, and a list of other units to start (ie “Wants” constraints). The other units can be <em>service units</em>, <em>socket units</em>, other <em>target units</em>, and in fact any other kind of unit.</p>
+
+<p>For each file <code>foo.target</code> there can also be a corresponding <code>foo.target.wants</code> directory containing a set of symlinks to units (usually services) which should be started together with that target. A symlink in “foo.target.wants” is equivalent to a “Wants=” entry in file “foo.target”. Similarly, if directory foo.target.requires exists then symlinks there are equivalent to “Requires=” entries in the main target file. This symlink approach makes it easy to add/remove dependencies without messing around modifying a file.</p>
+
+<p>These targets are similar to the traditional <em>runlevel</em> directories named <code>/etc/rc{N}.d</code> where <code>{N}</code> is the runlevel. The unit files are roughly equivalent to the scripts under <code>/etc/init.d</code>. And the symlinks from the systemd-init “foo.target.wants” directories to other unit-files are similar in concept to the way symlinks are created from <code>/etc/rc{N}.d</code> directories to the real scripts under <code>/etc/init.d</code>.</p>
+
+<p>Often a target file is a “stub” with just a description in it, and exists only so that symlinks can be defined in the corresponding wants/requires directory.</p>
+
+<h2 id="socket-unit-files">Socket Unit Files</h2>
+
+<p>The systemd-init “<code>*.socket</code>” unit files declare <em>named sockets</em>; systemd-init processes such units by creating the socket using socket/bind/listen calls - but not accept; that is done by the server itself. Note however that <em>datagrams</em> can be sent to a socket without needing to connect, ie before the server invokes “listen” or “accept” - or before any server actually exists. Such datagrams are queued by the kernel.</p>
+
+<p>Each “<code>*.socket</code>” unit file should have a corresponding “<code>*.service</code>” file. Socket units implement inetd-style “on demand” services; when the socket unit is part of a target then the socket is created on disk but the service not initially started. systemd-init monitors the socket, and if something tries to connect to the socket then the corresponding service is started. However most of the socket-units will be marked as “local”, ie using the AF_UNIX domain, not AF_INET (network).</p>
+
+<p>The “<code>.service</code>” files which have a “<code>.socket</code>” file usually have a corresponding “wants” dependency from the <code>.service</code> file to the <code>.socket</code> file. This ensures that if the service is directly part of a target (ie should be eagerly started rather than lazily started via its socket), then the socket is also created (ie is also part of the same target).</p>
+
+<p>Messages from any program to the system “log service” (syslogd/journald/etc) are normally sent as datagrams via a socket at a well-known location (the libc <code>syslog()</code> function uses <code>/dev/log</code>). As noted earlier, this means that, as long as the socket file exists, applications can start sending messages to the log service socket before the log service has started; those messages will just be queued within the kernel. This wouldn’t work for stream-based messages - the connect() call would block the sender until the service is ready to accept connections; that would also work but would not give so much parallelism. See standard library function <code>syslog</code> for more details.</p>
+
+<h2 id="service-unit-files">Service Unit Files</h2>
+
+<p>A service unit defines a command to run. Normally, the executed application remains running long-term, and systemd will track its status and can report on it. Optionally the service unit can specify that the service should be automatically restarted if it crashes. Occasionally a “service” is a one-off command, ie something that does not run long-term.</p>
+
+<p>If a target refers to a service unit directly, then starting the target will cause the service to be “eagerly” started.</p>
+
+<p>If the service expects client-apps to connect to it via a socket, then the target can refer to the service directly (eager start), or can point to the socket-unit in which case the <em>socket</em> will be eagerly created but the service will be started only when/if some application connects to that socket.</p>
+
+<p>Similarly, if a service processes files from a specific directory (eg a print-spooler service), then a <em>path unit</em> can be defined, and the target can point to that unit. Only when/if the directory exists and/or contains files will the service be started.</p>
+
+<p>Command “<code>systemctl enable {service}</code>” creates symlinks from the relevant “target.wants” directories to the “.service” file; which targets are “relevant” is specified in the <code>[install]</code> section of the service-unit-file. It is perfectly valid to manually create symlinks from other target.wants directories to a service, ie a service unit’s install-section is not considered the “exclusive” list of targets that might want that service, just a “recommended” set.</p>
+
+<p>There are many many options available to a service unit; see later in this article for some discussion of the options. See the resources referenced from the first section of this article for further details.</p>
+
+<p>This use of the <code>[install]</code> section of a service-unit-file does impose a standard set of target names. I’m personally not convinced this coupling of service-names to “standard target names” is a great design decision, but it is not critical to the functioning of systemd-init. If you wish to rename all the targets, you’d just have to manually create the necessary symlinks rather than relying on the convenience of the “systemctl enable” command. Anyway, sysv-rc scripts with LSB headers always indicated which “runlevels” they should be active in, so the service-unit <code>[install]</code> sections can be said to follow this tradition.</p>
+
+<h2 id="snapshot-units">Snapshot Units</h2>
+
+<p>A “snapshot unit” is something like a dynamically-generated target; creating a snapshot captures the list of all currently-active units. It is then possible to switch to some other target, and then switch back to the snapshot. There is no “configuration file” corresponding to a snapshot; it is a “virtual” unit that is only ever created interactively.</p>
+
+<h2 id="generated-units">Generated Units</h2>
+
+<p>Directory <code>/lib/systemd/system-generators</code> holds a number of programs/scripts which can process “traditional” files and literally <a href="http://www.freedesktop.org/software/systemd/man/systemd.generator.html">generate temporary equivalent “units”</a>. The created files are stored under <code>/run/systemd</code> - and are thus discarded on shutdown.</p>
+
+<p>This is used to handle files such as <code>/etc/fstab</code>, <code>/etc/inittab</code>, and the contents of <code>/etc/rc{N}.d</code></p>
+
+<h2 id="template-units">Template Units</h2>
+
+<p>Any unit file with an “@” in the name is a template, rather than an actual unit. It cannot be used directly; instead it must be “instantiated”.</p>
+
+<p>Normally a template is “instantiated” by creating a symlink from some “foo.target.wants” directory to that template; the command “systemctl enable foo@bar.service” will create such a symlink named “foo@bar.service” pointing to the foo@.service template. Such links can also be created manually.</p>
+
+<p>Within the template, various variables are available. In particular, %i refers to the part of the original symlink after the @-symbol, ie “bar” in the above example.</p>
+
+<p>One concrete example is the standard “getty@.service” which is “instantiated” with the id of the terminal which the getty process should attach to. A template can of course be instantiated multiple times.</p>
+
+<h1 id="transactional-behaviour">Transactional Behaviour</h1>
+
+<p>When a change to the set of services is requested (eg by setting a new target), systemd-init consults the set of wants/requires/conflicts-with/etc constraints to see if the new configuration is <em>allowed</em>. If there is an unresolvable problem, then it refuses the entire change. The system therefore never results in part of the requested set of changes being applied but not others.</p>
+
+<p>This of course doesn’t guarantee that starting/stopping of services actually succeeds; it merely verifies that the requested change is consistent with the declared constraints on the relevant units. However it is nice to know that systemd-init will at least <em>try</em> not to leave the system in an indeterminate state.</p>
+
+<h1 id="service-activation-on-demand">Service Activation on Demand</h1>
+
+<p>The sysv-init-style distros usually offer the “inetd” daemon as a way to activate a service “on demand”. A background inetd process is started on boot, reads the list of possible services and listens on the full set of ports that all specified services use. If a connection is made to any of those ports then the corresponding service is spawned (either once or once-per-connection depending on config).</p>
+
+<p>systemd-init supports this feature on either internet or local sockets. However there are many other reasonable ways in which a service might be triggered “on demand”, and inetd does not support those. They include:</p>
+
+<ul>
+  <li>start a service when a dbus message is sent to a (not yet running) service</li>
+  <li>start a service when a particular device gets registered</li>
+  <li>start a service when a file is created in a specific directory</li>
+</ul>
+
+<p>In addition, there are other similar-type operations:</p>
+
+<ul>
+  <li>execute a command to mount a filesystem when somebody tries to access the mount-point (automount)</li>
+</ul>
+
+<p>And the obvious one:</p>
+
+<ul>
+  <li>start a service when the “run level” changes - and particularly on <em>boot</em> (when runlevel is first set)</li>
+</ul>
+
+<p>All of these are so similar that it seems reasonable to integrate such handling into a single tool, rather than have:</p>
+
+<ul>
+  <li>inetd for “start on socket connect”;</li>
+  <li>a separate sysv-rc tool for managing processes when run-level changes; and</li>
+  <li>no tool at all for starting services based on dbus messages; and</li>
+  <li>yet another tool for handling automounts.</li>
+</ul>
+
+<p>In addition, processes spawned “on demand” should probably have the same monitoring that provides “restart on crash” which systemd-init offers to services triggered via targets (“run levels”). This is yet another reason to merge all the similar types of service-handling into a single consistent tool. One tool also makes life easier for the sysadmin, rather than learning different config-syntaxes for all the above use-cases.</p>
+
+<p>The ability to start services on so many “triggers” is helpful. The sysv-rc approach was instead to start all possible services when the appropriate runlevel was enabled, and have many of those services hang around doing nothing. Because systemd-init can trigger services based upon the registration of devices, creation of files, or sending of dbus messages, those services don’t need to run until (unless) the trigger occurs - like inetd on steroids.</p>
+
+<p>Many services have had builtin support for execution from inetd for a long time, ie support being “passed” the socket to use. Systemd-init provides backwards-compatibility for such servers, meaning they need no changes to support systemd-init-like socket-based activation on-demand. There is an alternative, pretty simple, protocol that systemd-init can use to pass sockets to services; to add “native systemd-init socket activation” (rather than relying on inetd-style support), the systemd suite provides a “.c/.h” file pair that can simply be dropped into the source-code tree of any project. This code provides a few functions (eg sd_listen_fds) which will detect whether the service was started from systemd-init, and if so provide access to the relevant file-descriptors. The same steps could be implemented by-hand (it really is a simple protocol), but the “drop-in” files remove that work. They are files rather than libraries to make integration easier. Such integration should of course be done <em>in addition to</em> the existing ways of starting the server; no need for the service to become systemd-init-specific. See <a href="http://0pointer.de/blog/projects/socket-activation.html">this article</a> for details.</p>
+
+<p>Socket-based and path-based activation work similarly; in both cases, a “unit” exists that defines the trigger, and the unit configuration specifies the service-unit to execute (by default, the service with the same name as the socket/path unit). systemd-init watches for the “trigger” then starts the service.</p>
+
+<p>When a socket unit file has Accept=false (the default) then there must be a corresponding service unit file (by default with same name as the socket unit) which starts a background daemon; that process is passed the socket and is expected to use accept() to accept multiple connections to the socket - ie just <em>one</em> service instance is started. When Accept=true then there must be a corresponding service@ unit file; the specified binary is started <em>for each connection</em>, and passed the <em>connected socket</em> filedescriptor; it is expected to exit when the filedescriptor is closed.</p>
+
+<p>Unfortunately udev-based and dbus-based service activation have different underlying mechanisms, which is a little ugly.</p>
+
+<h1 id="udev-based-activation">udev-based activation</h1>
+
+<p>When udev executes a rule which creates a new device, it broadcasts an event that any app can listen for (and systemd-init does). The udev rule needs to have “TAG+=systemd” which tells systemd not to ignore it. The udev rule can also attach arbitrary “environment variables” to the broadcast event; the rule should ensure a variable named SYSTEMD_WANTS is attached which lists the systemd-init service units that should be started to handle this device. Systemd-init will create a transient (in-memory-only) unit of type “device” to represent this device, and will then try to “start” that unit - which will then start all the “wanted” services.</p>
+
+<p>It appears that the previously-recommended way was to update the udev rule with “<code>RUN+="/usr/bin/systemctl --no-block start foo.service"</code>”. This approach can still be used to respond to udev events which don’t correspond to insertion of a device.</p>
+
+<p>While this nicely reuses the generic “constraint satisfaction” logic, it is somewhat unfortunate that the service dependency configuration is so <em>separate</em> from the rest of the systemd-init configuration.</p>
+
+<p>See <a href="http://0pointer.de/blog/projects/socket-activation2.html">here</a> for an example of setting up device-based service activation. See “man systemd.device” for further info.</p>
+
+<h1 id="dbus-based-activation">dbus-based activation</h1>
+
+<p>Activating services via dbus is somewhat similar to udev.</p>
+
+<p>There is usually a single “system” dbus daemon instance running (as used “messagebus”), and a separate “session” dbus daemon instance per login session (running as the logged-in user).</p>
+
+<p>The <a href="http://dbus.freedesktop.org/doc/system-activation.txt">dbus activation protocol</a> has existed for a long time, ie predates systemd-init.</p>
+
+<p>When dbus-daemon is started with option “<code>--system</code>”, its default config-file is <code>/etc/dbus-1/system.conf</code>; this file is in XML format.  It will normally contain entry “<code>&lt;standard_system_servicedirs/&gt;</code>” which means that directory “<code>/usr/share/dbus/system-services</code>” will be searched for “<code>*.service</code>” files; each such file defines a service that can be bus-activated. This “system” config-file also normally contains an entry “<code>&lt;servicehelper&gt;</code>” which points to a SUID executable that is used to start the service. This helper is needed as the “system” dbus-daemon instance normally runs as the user “messagebus”, but may need to execute services as user “root”.</p>
+
+<p>When dbus-daemon is started with option “<code>--session</code>”, its default config-file is <code>/etc/dbus-1/session.conf</code> which normally contains entry “<code>&lt;standard_session_servicedirs&gt;</code>”, causing it to scan <code>/usr/share/dbus/services</code> instead. There is normally no “<code>&lt;servicehelper&gt;</code>” needed, as a “session” daemon instance runs as the logged-in user, and the “services” it starts should also run as that user. The Gnome desktop environment uses dbus activation of applications extensively; just about every gnome desktop application has a corresponding dbus service file in the “session services” directory. A dbus “session” instance will also scan for service-files within the appropriate XDG subdirectory within the user’s home-directory, allowing per-user customisation.</p>
+
+<p>Note that a dbus “service” does not necessarily correspond to other meanings of the word - particularly for “session services”.</p>
+
+<p>Strangely, although dbus primary config-files are in XML, the dbus “<code>*.service</code>” files are in ini-format.  A service file usually contains just a “Name=” entry which specifies the dbus “busname” that activates the service, and an “Exec=” entry which gives the executable to start. As noted, the “system” instance normally starts the app indirectly; it passes the “service name” to the SUID helper which then locates the service-file again, parses out the Exec= entry and executes it.</p>
+
+<p>Of course, this approach was not designed to integrate with systemd-init - or any other init-system. It starts the service directly, rather than requesting the init-system to do so. As a result, the service-monitoring, service-tracking, cgroup-management, dependency-management, custom logging, etc which systemd-init applies to its services are all skipped. This isn’t such a big deal in a sysv-init-based system.</p>
+
+<p>The obvious approach to integrate with systemd-init is to update each dbus file <code>foo.service</code> to have “<code>Exec=systemctl start foo.service</code>”. However this approach has not been taken (perhaps because such a file would then be unusable with other init-systems). The other obvious approach would be to install an alternate “servicehelper” which invokes systemd’s systemctl - but that hasn’t been chosen either (presumably there is a good reason, but I don’t know it).</p>
+
+<p>Instead, dbus-daemon must be started with option “<code>--systemd-activation</code>” - ie the code has been modified to be aware of systemd-init (yecch). Each file must then have a “SystemdService=” entry which simply gives the name of a systemd-init service unit. By convention, the service-unit names in the dbus files are of form “dbus-foo.service”, and the systemd-init config dir include a “foo.service” file which defines “dbus-foo.service” as an <em>alias</em> for itself. This convention is intended to make it clear when a service was triggered directly from systemd-init, and when via dbus-activation.</p>
+
+<p>Triggering a dbus service file with “SystemdService=” will cause dbus to send a dbus <em>signal</em> to “org.freedesktop.systemd1.Activator/ActivationRequest”. Systemd-init sends no reply; instead it starts the service which then registers itself with dbus using the triggering name, which is enough to let dbus know that all is well.</p>
+
+<p>Sometimes a dbus service file which has a SystemdService entry will also have “Exec=/bin/false”. This is intended to avoid conflicts in systems which use sysv-rc rather than systemd-init, where the service is normally started via a sysv-rc script and therefore should not be started by dbus.  Note: I thought that it possible to run sysv-rc and systemd-init in parallel, but this hack won’t work in that case! Not so important; that kind of setup is asking for trouble anyway :-)</p>
+
+<p>As with the “udev” activation, I find it somewhat ugly that service activation configuration is done <em>outside</em> of systemd-init, and that the dbus-service and systemd-init-service config files must be carefully kept in-sync. I wonder why all the necessary information for dbus activation could not be in the systemd-init service file, and for systemd-init to <em>send</em> this information to dbus, ie provide dbus with a list of “triggerable” busnames, and then wait for dbus to inform it when one of those names has been used. That would centralize config and be a <em>generic</em> interface, rather than a systemd-init-specific one. Even choosing more generic names than “SystemdService” and “org.freedesktop.systemd1..” would have been helpful, as in the end this <em>is</em> a generic “request activation over dbus” mechanism. See dbus sourceode file “activation.c” for more details.</p>
+
+<p>Interestingly, the systemd sourcecode includes a file “dbus1-generator.c” which appears to <em>generate</em> systemd-init service unit files <em>from</em> dbus service files. However I can find no trace of this generator, or such generated files, on my debian-based system.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://www.freedesktop.org/wiki/IntroductionToDBus/">Introduction to DBus</a></li>
+</ul>
+
+<h1 id="handling-startup-order-dependency-based-bootup">Handling Startup Order (Dependency Based Bootup)</h1>
+
+<p>It is very common for services started as part of a “target” (equivalent of “runlevel”) to depend on other services, or on such things as having a specific filesystem mounted.</p>
+
+<p>The full set of services to be started is known in all cases; what is difficult to determine is which services <em>depend</em> on others, ie which service startup must be blocked until which other service has “fully initialised” - and how is it possible to <em>know</em> when that other service has fully initialised?</p>
+
+<p>Sysv-init handles this by simply starting all services in a fixed order, and being careful what the order is so that dependencies are started before the services that depend on them. A sysv-rc init-script is not supposed to exit until the service it is starting is <em>functional</em> - though in practice it is likely that many scripts don’t do this correctly.</p>
+
+<p>As services usually communicate via a socket, systemd-init handles this by creating the <em>communication sockets</em> for all services within a target immediately, and then starting all services in parallel.  When a service needs to communicate with a “dependency”, it connects to the socket - which already exists. If the client wants to send <em>datagrams</em>, then it can do so without blocking (until the kernel buffer fills). However for stream-oriented communication, the socket won’t “accept” the connection until the service <em>listening</em> on that socket is properly initialised, resulting in the client blocking for a while. That is normally ok as code connecting to a socket usually has a reasonable timeout set - ie the “client” will just naturally wait until the service it needs is ready to service it.</p>
+
+<p>This architecture does require services to be implemented in a way where they are <em>passed</em> the sockets to listen on as startup parameters, rather than explicitly opening the sockets themselves.</p>
+
+<p>The socket created by systemd-init can even be handed out to multiple applications. Logging is handled this way, where for “early logging” a temporary log service is started and passed a descriptor for the <code>/dev/log</code> socket. Later, that temporary log service is terminated and the same socket is handed to the “proper” log service instead. Service restarts are similarly handled; the socket is never <em>closed</em> at any time; instead when the current service exits (or crashes), systemd-init can pass the same socket to a new instance of the service. Client apps using that socket might not be aware than anything unusual has happened (depends on the service protocol).</p>
+
+<p>The “socket unit files” actually support unix-sockets (stream or datagram), IP4 (stream or datagram), IP6 (stream or datagram), FIFO, Pipe, netlink sockets, posix messagequeues, and char-devices.</p>
+
+<p>In general, if a service uses some other service via a socket, then an explicit “Wants” dependency should not be declared on a specific service. Instead, declare a dependency on the socket unit (so that systemd-init will create that socket in the filesystem); the socket unit will then start the service when used. Alternatively, don’t specify any dependency at all, and just assume that the socket is already part of the generic “sockets.target” target - most services that can be socket-activated do automatically add themselves to that target, as it costs systemd-init almost nothing to create and monitor the socket.  If the local sysadmin decides a service is so often used that it should always run rather than be socket-activated on demand, they can always add it to the appropriate target, eg “multi-user.target”. Similarly, when a service uses another via dbus then the dependency should normally not be specified; instead let the service be triggered if needed (though a dependency on the dbus socket unit could be added).</p>
+
+<p>Alas, sometimes there is a dependency that can’t be handled by parallel-starting and communication via sockets or dbus. In this case, a service can use the “Before=” and “After=” constraints.  Supporting these constraints means that systemd-init needs to know when a unit is “completely started”. Exactly how this is determined is configurable in the service unit. Options include assuming success when daemonisation (double-forking) has completed and the intermediate process has exited, or when a specified dbus servicename is registered. See also the <a href="http://0pointer.de/public/systemd-man/sd_notify.html">sd_notify</a> functions and the <code>systemd-notify</code> helper application.  See <a href="http://www.freedesktop.org/software/systemd/man/systemd.service.html">the service config file documentation</a> for the various ways systemd can determine that a service has “started”.</p>
+
+<p>Note that Before/After and Requires/Wants are <em>orthogonal</em>. Before=foo simply means that <em>if</em> foo is going to be started as part of the current “transaction”, then this service must <em>completely start</em> first. However if foo is not going to be started as part of this transaction, then the before-constraint has no effect. The After constraint works similarly.</p>
+
+<p>An After= constraint can specify a <em>target unit</em>, meaning that the unit will not be started until after everything in the specified target has completely started. This is sometimes referred to in systemd-init documentation as a “syncpoint”, and a few of the standard targets use this. This should not be used too often, as it does prevent the “start everything in parallel” approach that is generally preferred by systemd-init.</p>
+
+<p>A “Conflicts=” dependency in a service or target means that in order to start that unit, the conflicting unit must be stopped.</p>
+
+<p>A “Wants=” dependency is a <em>recommendation</em>, not a requirement. If the specified service is not available, or declares a Conflicts= constraint with another service that is already running, then systemd-init will just ignore that “wants” requirement.  A “Requires=” dependency is stronger; if a required dependency is not available at service startup (eg the software isn’t installed) then systemd-init will refuse to try to start the requiring service. However after a service is started, no action is taken if the required dependency becomes unavailable. If necessary, the BindsTo= constraint can be used; in that case when the referenced dependency disappears then the binding service is terminated too.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://0pointer.de/blog/projects/socket-activation.html">Socket Activation</a></li>
+</ul>
+
+<h1 id="mounting-filesystems">Mounting Filesystems</h1>
+
+<p>While services can have dependencies on other services which are mostly resolvable by using the “create socket first” approach described above, services can also have dependencies on <em>filesystems</em>.</p>
+
+<p>The simplest related systemd-init unit is a “mount unit” (ie a “<code>*.mount</code>” file), which defines a filesystem and a mount-point. systemd-init automatically adds a “requires” dependency from a mount-unit on any other mount-unit whose mount-point is a <em>prefix</em> (ie a dependency on the filesystem providing the mount-point). The traditional <code>/etc/fstab</code> file is converted to a set of “mount units” at boot. A target can then refer to mount units in order to trigger actual mounting. A service can also declare a “requires=” dependency on a mount-unit, in which case the mount will be guaranteed before the service is started - and the service will be terminated if the mount is removed.</p>
+
+<p>Normally, a service which depends on a mount-point would need an After= constraint, to ensure the filesystem is mounted. However that introduces a delay in service startup, as the service cannot even <em>begin</em> to initialise before mounting is complete. A mount-unit can therefore have an optional “automount unit” (ie “<code>*.automount</code> config file). When a target or a service references an automount-unit, then systemd-init mounts an “autofs” filesystem at that mount-point. When/if any application tries to open a file on that autofs filesystem (ie access anything below the mount-point) then that triggers mounting of the real filesystem; the original app’s file operation blocks until mounting is complete.</p>
+
+<p>The automount behaviour for filesystem-mounts is similar to the “socket activation” functionality for services.</p>
+
+<p>In sysv-rc, all filesystems are simply mounted first, and no services are started until all filesystems are ready (which can take quite a long time, eg when running fsck on <code>/home</code>). No other option is possible, as the filesystems that a service accesses depend upon the config-files of the service, ie sysv-rc startup scripts can’t tell which filesystems are required by which services.</p>
+
+<p>The systemd-init approach also means that at least some services can be started even when a subset of filesystems cannot be mounted. With sysv-rc, having a mount fail is trickier to handle - no services at all will be started until mounting is considered to have failed.</p>
+
+<p>Mount units are often specified in the “Wants=” clause of <em>device units</em> created via udev. When a storage device is attached, udev runs the rule which triggers systemd-init into creating a device-unit with a Wants= constraint specifying the mount-unit, and thus the filesystem on that storage device gets immediately mounted.</p>
+
+<h1 id="terminating-services">Terminating Services</h1>
+
+<p>When systemd-init starts a service, it always places that process into a dedicated control-group. When the user requests that the service be terminated, then systemd-init can easily find and terminate all processes within that control-group. This is particularly important for services which spawn children for scalability (eg httpd which creates a pool of worker processes), or which spawn children for security (eg some sshd implementations use a separate process to do the authentication/encryption).</p>
+
+<p>sysv-rc relies on the service startup scripts writing the PID of the service process into a file in a suitable location, so the script can later send a signal to the process. It also relies on the “original process” for the service correctly terminating all its child processes. If the original process should ever crash, then its “orphan” child processes become children of init; I’m not sure how a sysv startup script would figure out which processes to terminate in that case.</p>
+
+<p>The control-groups also give the sysadmin an easy way to configure resources such as CPU allocations for a particular service. By default, systemd-init uses the CPU cgroup controller to ensure that each “service” gets an equal share of the CPU, even when one service spawns many child processes. This behaviour is customisable.</p>
+
+<p>When switching targets, systemd-init can compute the exact set of services involved in the new target. However by default it does not terminate existing services which are not in the set, ie the new target is “in addition” to the existing services - except in the case where a service in the “new” set specifies a Conflicts= constraint. Command “<code>systemctl isolate {target}</code>” will terminate those unspecified services. A service unit can also specify “StopWhenUnneeded” in which case it will be stopped as long as it is not part of the new target. The BindsTo= constraint can also be used to ensure that a service is stopped when some other unit it requires disappears (a Requires= or Wants= dependency will not stop a unit if the specified dependency goes away).</p>
+
+<h1 id="session-managers">Session Managers</h1>
+
+<p>When logging in to a GUI desktop session, a number of things need to be done which are quite similar to the system-wide startup process. A set of processes need to be started, ideally some should be restarted automatically if they crash. On logoff, all processes associated with that session should be terminated. Therefore systemd-init is also designed to be used as a login-session-manager. All processes associated with a login session are placed within a single cgroup to ensure they can be cleanly terminated. This also allows automatic fair balancing of resources (particularly CPU time) between user logins on a multi-user system.</p>
+
+<p>systemd-init can be run as a “normal user” rather than as the root user; it will then look for unit-files in the dirs specified via the XDG base directory specification (ie usually in <code>$HOME/.config</code>).</p>
+
+<h1 id="tweakability">Tweakability</h1>
+
+<p>One of the major complaints about systemd-init from those who prefer sysv-rc systems is that because services are “config files” and not shell-scripts it is not possible to add debugging or customise the startup behaviour.</p>
+
+<p>Systemd does have a number of options for enabling <em>logging</em> of its operations so that problems with services can be diagnosed.</p>
+
+<p>Every service unit file also has ExecStartPre/ExecStartPost/ExecStopPost options which can point to shell-scripts if desired, in order to do arbitrary things (eg loading modules, writing to sysfs, cleaning directories - or just logging). In fact, given that sysv-rc scripts (usually) have declarative headers at the start, a systemd-init service unit file can be considered as representing that declarative part, and then the Exec* entries in the service unit can point to files containing the rest of the original sysv-rc script if desired.</p>
+
+<h1 id="magic-targets">Magic Targets</h1>
+
+<p>Systemd-init has a bunch of “special” targets that get magically added as prerequisites and dependencies to other units. This is a little ugly; IMO it would be nice to have less “policy” embedded into systemd-init in this way, but it is definitely convenient.</p>
+
+<p>They include:</p>
+
+<ul>
+  <li>sysinit.target : added as Requires= and Before= constraints to socket and service units, so they don’t start up until everything in “sysinit.target” has completed.</li>
+  <li>shutdown.target : added as Conflicts= constraint to socket and service units, which forces sockets and services to terminate when shutdown is initiated</li>
+  <li>dbus.socket : any service with Type=dbus automatically gets a dependency on this unit</li>
+</ul>
+
+<p>The sysinit target primarily mounts local filesystems and enables the swap device.</p>
+
+<p>See <a href="http://www.freedesktop.org/software/systemd/man/systemd.special.html">this manpage</a> for the full list of “special” targets.</p>
+
+<h1 id="security">Security</h1>
+
+<p>systemd-init <a href="http://0pointer.de/blog/projects/security.html">suports various security options</a> such as:</p>
+
+<ul>
+  <li>InaccessableDirectories=  : prevents a service from reading the specified filesystem (eg /home)</li>
+  <li>ReadOnlyDirectories=   : prevents a service from modifying files under the specified path</li>
+  <li>PrivateTmp= : prevents a service from peeking at temp-files created by other processes</li>
+  <li>RootDirectory=  : sets up a chroot() environment (though the above items are usually a better choice)</li>
+  <li>PrivateNetwork=yes: ensures the service cannot perform any network operations</li>
+  <li>reducing capabilities</li>
+  <li>selinux stuff</li>
+</ul>
+
+<p>Theoretically this is all doable with sysv-rc scripts, but in practice it is simply <em>too complicated</em>, so AFAIK nobody does it. By making it simple, systemd-init makes it practical.</p>
+
+<h1 id="pid1-and-signals">PID1 and Signals</h1>
+
+<p>This section provides some background information on how <em>signals</em> work on unix-like systems, and implications for the init process.</p>
+
+<p>The kernel can deliver a <em>signal</em> to a process under some circumstances. These may be directly from the kernel in response to actions that the process makes (eg SIGSEGV when the process accesses an invalid memory address), or may be delivered due to a request from another process. If the process has <em>masked</em> that signal, then it is ignored. Otherwise, if the process has a <em>signal handler</em> defined, then the kernel causes that function to be invoked. Otherwise (not masked, no handler) the kernel terminates the process. Some signals are masked by default when a process starts, while others are enabled. The kernel checks for pending signals only when a process <em>resumes</em> after having made a systemcall or having been preempted. The SIGKILL signal is a special case: it cannot be masked, nor can a handler be installed.</p>
+
+<p>Process #1 (ie init) <em>in the root pid namespace</em> is a special case: all signals are ignored unless the process has a signal-handler installed; this includes SIGKILL - ie SIGKILL is effectively masked for init.</p>
+
+<p>Normally, when a process terminates (whether via signal or otherwise), some <a href="https://en.wikipedia.org/wiki/Child_process">basic information about the process</a> is retained until the parent process queries the kernel for the process’ exit status; this query is sometimes called “reaping the child process” (a pun on “the grim reaper”). The parent process is also sent a SIGCHLD <em>signal</em> to tell it that a child process has exited. A process which has not yet “been reaped” is visible in the output of the “ps” command, and is sometimes referred to as a “<a href="https://en.wikipedia.org/wiki/Zombie_process">zombie process</a>” or “defunct process”. In the case of init, there is no parent process to collect its exit status, so when the “init process” exits it remains in a “zombie state” forever.</p>
+
+<p>There is some conflicting information on the internet about exactly what happens when the pid1 process does exit. Some sites say that the system remains usable - at least partially. However from my reading of the kernel source-code, this does not appear to be the case.  Kernel file <code>kernel/exit.c</code> has code which handles exiting processes by trying to find the parent to which the SIGCHLD signal should be sent; when it detects that the dead process is pid1 then it reports “Attempted to kill init” (a somewhat misleading message), and then invokes <code>panic()</code>.</p>
+
+<p>On <a href="http://lxr.free-electrons.com/source/kernel/panic.c">panic</a>, linux:</p>
+
+<ul>
+  <li>disables interrupts on the local CPU</li>
+  <li>calls crash_kexec, which might load a new kernel and jump into it (never returning)</li>
+  <li>calls smp_send_stop, which causes all CPUs except the one executing the panic() call to execute the HALT instruction - ie really stop</li>
+  <li>runs all registered “panic notifiers”</li>
+  <li>calls kmsg_dump</li>
+  <li>optionally triggers a reboot, depending on value of panic_timeout (0 means no reboot)</li>
+  <li>reenables interrupts on the local CPU</li>
+  <li>enters an infinite loop, calling mdelay (which on x86-64 eventually calls cpu_relax which is implemented as “asm volatile(“rep; nop”)” which I presume is a power-friendly way of doing nothing).</li>
+</ul>
+
+<p>The infinite loop of course applies to just <em>the thread which called panic</em>. Because this thread <em>never returns</em>, the scheduling logic does not get invoked directly, ie no other thread will be allocated to this CPU. However interrupts are enabled, so <em>maybe</em> “preemption” still works and thus scheduling works via that mechanism (I haven’t tried it). However even if this is true, whenever the current process (the one that invoked the panic) gets scheduled, it will use its full timeslice spinning on NOPs, so a system is not sanely useful after panic (eg after init exits). Particularly, as smp_send_stop causes cpu_halt to be invoked on all other CPUs in a multi-cpu system!</p>
+
+<p>Note that systemd-init normally installs signal-handlers which enter an eternal idle-loop when something truly unexpected happens (eg SIGSEGV), rather than exiting. A kernel panic is therefore <em>not</em> triggered.</p>
+
+<h1 id="the-insserv-tool">The insserv tool</h1>
+
+<p>The insserv tool is part of the LSB specification. Sysv-style init-scripts can have a magic header which declares inter-service dependencies, and the insserv tool can read such headers.</p>
+
+<p>The idea is that a service provides a suitable init-script with the appropriate header, and then insserv decides which symlinks to create in <code>/etc/rc*.d</code>, and which <em>names</em> to give those symlinks (which determines the order in which service scripts are invoked).</p>
+
+<p>In particular, the “Required-Start:” header would seem to be equivalent to a systemd-init “Wants=” declaration, while “Starts-Before:” would seem to be equivalent to a systemd-init “Before=” declaration.</p>
+
+<p>Insserv can use the headers to determine when two services have no inter-dependencies, and arranges the symlinks so that they are started in parallel.</p>
+
+<h2 id="the-openrc-init-system">The Openrc init system</h2>
+
+<p>Some info obtained from the <a href="https://wiki.debian.org/Debate/initsystem/openrc">debian debate page for OpenRC</a>..</p>
+
+<p>OpenRC replaces the sysv-rc functionality for starting/managing services, but uses exactly the same “tiny” sysv-init application.</p>
+
+<p>OpenRC uses shellscripts as sysv-rc does, but the scripts have a custom shebang line (“#!/sbin/runscript”) rather than “#!/bin/sh”. The scripts automatically import a standard set of script-functions, and have a standard form in which they are expected to:</p>
+
+<ul>
+  <li>declare a set of standard variables such as “name” and “command”;</li>
+  <li>implement zero or more standard functions such as “depend()” which openrc will invoke. The depend function typically calls other standard functions such as “need” (equivalent to systemd-init’s Wants declaration).</li>
+</ul>
+
+<p>Apparently, openrc has higher backwards-compatibility with sysv-rc scripts than systemd-init. The implementers are more interested in cross-system-compatibility than the systemd team.</p>
+
+<p>Openrc optionally uses cgroups to ensure that all processes related to a “service” can be killed. However it does not modify sysv-init, and therefore never gets notifications of daemon service termination.</p>
+
+<p>As far as I can tell, openrc:</p>
+
+<ul>
+  <li>doesn’t manage services triggered via dbus</li>
+  <li>doesn’t (yet) handle socket-triggered services - and thus cannot start dependencies in parallel.</li>
+  <li>can’t start services on udev events such as plugging-in a USB device</li>
+  <li>can’t start services based on the creation of a file or directory (eg as CUPS is often done under systemd-init)</li>
+  <li>can’t manage services and devices on “session switching” (multiseat support)</li>
+</ul>
+
+<p>But it:</p>
+
+<ul>
+  <li>can group services using cgroups</li>
+  <li>is itself portable</li>
+  <li>usually has portable init-scripts, ie the openrc script could be provided by upstream source</li>
+  <li>has nicely-named “targets” (better than the old 0..6 runlevels)</li>
+</ul>
+
+<p>And the following are unknown to me at the moment:</p>
+
+<ul>
+  <li>whether it can provide security features like readonly mounts, private network namespaces</li>
+  <li>whether it can apply ulimits to the cgroups it starts services in</li>
+  <li>whether there is an elegant system for the local sysadmin to override init-scripts provided by the upstream source or distro</li>
+  <li>whether it can restart services which crash</li>
+  <li>whether clients of a restarted service lose connectivity or not</li>
+  <li>whether openrc can be run within a container</li>
+  <li>whether there is a programmatic API that apps can use to query the state of services (rather than execing a tool and parsing its output)</li>
+  <li>whether there is a command that shows <em>what dependencies</em> (including transitive dependencies) a service has, or in reverse which services depend on a specific service.</li>
+</ul>
+
+<p>Note that because openrc config files are full shellscript files, it is not possible to <em>reliably</em> analyse them with external tools. Because they have <em>strong conventions</em>, such analysis will usually work, but there is no guarantee. Systemd-init config files are true declarative config-files and can therefore be processed by external tools (eg to draw dependency graphs).</p>
+
+<h1 id="the-bsd-init-system-rcd">The BSD Init System (“rc.d”)</h1>
+
+<p>The BSDs <a href="https://utcc.utoronto.ca/~cks/space/blog/unix/ModernBSDInitSurprise">currently have</a> an init system called “rc.d” (first adopted by NetBSD around 2000, and later by the others).</p>
+
+<p>This system is “configured” via a set of init-scripts all placed in a common directory. While these files <em>are</em> shell-scripts, they also have magic “headers” embedded in them which declare requirements/interdependencies in the same way that sysv-rc LSB headers do. However unlike sysv-rc where “insserv” processes these headers at install-time, the “rc.d” init system parses these headers at <em>runtime</em>, and then computes the necessary startup order.</p>
+
+<p>In addition, while the script-files can contain any desired logic, rc.d provides some standard conventions which makes these files quite terse.</p>
+
+<p>I have never used BSD, so can’t give much more info. However AIUI, there is still no long-term “service management” process running, and therefore interaction with udev, monitoring of files, etc. are not available.</p>
+
+<h1 id="the-critics">The Critics</h1>
+
+<p>There are a number of articles/sites with systemd criticism. In fact, an astounding number; for some reason this topic has caused great controversy and sometimes very intense emotional responses.  The most interesting articles (ie those with some actual concrete arguments) are:</p>
+
+<ul>
+  <li>
+    <p><a href="http://uselessd.darknedgy.net/ProSystemdAntiSystemd/">uselessd: pro-systemd, anti-systemd</a> – actually quite a reasonable discussion, despite the domain name. This article discusses the <em>debate around systemd</em> more than the technical details, but does contain a nice review of other init systems. The same author has also written an excellent <a href="http://blog.darknedgy.net/technology/2015/09/05/0/">history of init systems</a>. Note that the <a href="http://uselessd.darknedgy.net/">uselessd project itself</a> which tried to produce a simplified and portable version of systemd-init is dead.</p>
+  </li>
+  <li>
+    <p><a href="http://judecnelson.blogspot.co.at/2014/09/systemd-biggest-fallacies.html">Jude Nelson: systemd biggest falacies</a> - this article uses “systemd” to mean either the “systemd suite” or “systemd-init” interchangeably, ie each comment must be carefully read to see which is meant.</p>
+  </li>
+  <li>
+    <p><a href="http://ewontfix.com/14/">EWONTFIX: Broken By Design</a> - commonly linked to by anti-systemd comments</p>
+  </li>
+  <li>
+    <p><a href="http://monolight.cc/2011/05/the-systemd-fallacy/">monolight: The Systemd Fallacy</a> - also commonly referenced by anti-systemd comments</p>
+  </li>
+  <li>
+    <p><a href="http://without-systemd.org/wiki/index.php/Arguments_against_systemd">Without Systemd: Arguments Against Systemd</a> - a wiki with a vast bag of comments</p>
+  </li>
+</ul>
+
+<p>Interesting that some people care so much that they buy a whole domain to complain about it :-)</p>
+
+<p>Some replies to the above have been posted; the ones I think are most relevant are:</p>
+
+<ul>
+  <li><a href="https://tim.siosm.fr/blog/2014/02/10/ewontfix-ecouldfix-systemd/">Tim Ravier (siosm): ewontfix-couldfix</a></li>
+</ul>
+
+<p>To summarise the (IMO) primary issues presented:</p>
+
+<ul>
+  <li>
+    <p>systemd-init is too large to be stable.</p>
+
+    <p>Fair point: it is large, and that is a concern for such a critical process (PID1). However I’m not aware of problems in practice. And as I note elsewhere, if an alternative solution has its logic in some other process, but a crash in that separate process is “not recoverable” then there is little difference in practice.</p>
+  </li>
+  <li>
+    <p>systemd-init is too large to be secure</p>
+
+    <p>Fair point: it has a much larger attack-surface than the simpler sysv-init process. Of course a fair comparison would have to add the attack-surface of sysv-rc, inetd, etc.  On the positive side, systemd-init makes it easy to boost the security of services themselves via a number of mechanisms (selinux, readonly filesystems, etc). See also section “Resource Requirements and Security” of this article.</p>
+  </li>
+  <li>
+    <p>must reboot to upgrade</p>
+
+    <p>Not true AFAIK. Systemd-init does have a special “upgrade” target unit which makes it easy for an OS to arrange for special upgrade-related code to be run immediately after boot, and RedHat uses this mode to perform some upgrades. However that’s not intrusive and entirely optional. Systemd-init also supports exec’ing another init-process (including a new version of itself) while preserving system state; this can be used to upgrade a running systemd-init instance if you really wish. On RedHat systems, this “handover” logic is used on each boot as the initramfs contains a copy of systemd-init which then hands over to (execs) the version on the rootfs.</p>
+  </li>
+  <li>
+    <p>systemd APIs somehow lead to “lock-in” due to support in other tools.</p>
+
+    <p>A complicated issue. See below.</p>
+  </li>
+  <li>
+    <p>it is possible to achieve the same effects with shell-scripts.</p>
+
+    <p>No, not really. Shell-scripts are a generic programming language so any effect can be implemented. However I’m not aware of redhat, debian, etc. shipping sysv-rc scripts that auto-restart daemons, start processes in cgroups, or such practices. And responding to dbus/udev events is really tricky in this mode. Reliably reporting state to the user is also hard.</p>
+  </li>
+  <li>
+    <p>it is monolithic/it leads to lock-in</p>
+
+    <p>Whether the label “monolithic” can be hung on systemd-init (or the whole suite) is really irrelevant; it’s just a label. What is important is whether it is possible to use alternate solutions (ie how much it affects software outside of systems), and how easy it is to <em>evolve</em> the solution. Unix in general, and Linux in particular, is a system that improves via evolution (replacing small parts) rather than revolution (replacing large sections). This topic is complicated, and is addressed in a following section named “The Lockin Issue”.</p>
+  </li>
+</ul>
+
+<p>Jude Nelson makes a good point regarding “socket activation”: on a system with swap-space enabled, it isn’t a big deal to have a process sitting idle in the background waiting for a connection.  Suspend/resume isn’t a big deal - the process is already in swap storage, and I presume suspend/resume handles that intelligently.  However there <em>is</em> a price to pay during boot (again, not a big deal with desktop systems or servers that don’t get booted often). For systems without swap-space, for embedded systems (where boot time is important), and for containers (where boot time can also be important), having socket-activation probably is a measurable benefit.</p>
+
+<p>For my <em>personal</em> opinion on these major issues, see below.</p>
+
+<p>UPDATE:  A new and very lengthy article criticising systemd-init has been posted on the “darknedgy” website. As the article raises some interesting points, I have <a href="/linux/systemd-init-critic2">a reply here</a>.</p>
+
+<h2 id="the-size-and-security-issues">The Size and Security Issues</h2>
+
+<p>The ewontfix article proposes that PID1 should be very simple, and “service management” should be in a different process. I’m sure systemd-init could be refactored in this way, and am sure the systemd-init developers are aware of this. However this architecture would not change the total size of the init processes (actually, make it slightly worse): both parts would now be needed for a functional system. It also wouldn’t reduce the security attack surface: the “helper” process would also run with full privileges. Given that PID1 can catch signals and restart itself on critical failure, there seems little benefit to such a split. Maybe if some thread went into a permanent loop - but that can also be handled via “watchdog” style programming, and trigger a pid1 restart (reexec). One comment suggested that by partioning systemd-init (or equivalent) into multiple processes, some could be run with reduced system privileges; true but that’s a lot of pain for probably not a whole lot of gain - and though svsv-init is decades old, I have never heard of anybody trying to run sysv-rc scripts in “reduced privilege” modes for security purposes. In short: I’m not convinced the proposed “split” design offers anything, and the systemd-init developers (who are cleverer than I) appear to think the same.</p>
+
+<p>Some commentators (particularly the monolight article) argue that a number of features in systemd-init could be left out. That’s worth considering seriously. However thre are benefits to a <em>single</em> init-system being usable across a wide range of use-cases, eg desktop/server/embedded. One tool to learn, one set of config-files for upstream to ship, etc. However that approach implies that the single tool needs to support all use-cases. An alternative approach is to push such functionality into “helper” applications. However that has the price that every service gets configured differently - and in practice we can see that although sysv-rc has existed for over a decade, very few init-scripts use such helpers to perform auto-respawn, etc. Using a set of optional “helpers” also makes it difficult to perform <em>analysis</em> of a system, in the way that systemd-init config files can be analysed. In summary, although this is an argument worth considering, there is also a good case for a single “all-in-one” tool that supports a wide range of use-cases directly, even at the cost of some complexity in that tool.</p>
+
+<p>See also the section titled “Resource Requirements and Security” early in this article, and the section “Deconstructing Systemd-init” below.</p>
+
+<h2 id="the-lockin-issue">The Lockin Issue</h2>
+
+<p>There are concerns that some applications are gaining a dependency on apps from the systemd suite, making it difficult/impossible to use those applications on systems not using those apps. As far as I can tell, these dependencies can be:</p>
+
+<ul>
+  <li>services which use the systemd-init-specific way of passing sockets (file-descriptors) to the service on startup</li>
+  <li>applications which use DBUS apis provided by systemd tools (not necessarily systemd-init)</li>
+</ul>
+
+<p>Yes, systemd-init does have its own special way of passing file-descriptors to the services it starts. However this is a <em>very simple</em> protocol, and it is trivial for a service to be implemented in a way that supports systemd-init-style startup <em>in addition to</em> any other desired style. The <a href="http://www.freedesktop.org/wiki/Software/systemd/InterfacePortabilityAndStabilityChart/">systemd interfaces page</a> shows that a number of GNOME desktop apps use session-management and power-management DBUS apis provided by systemd, and this has caused some problems for distros such as Debian in the past. However these are all reasonably simple DBUS apis, ie could be implemented by alternative tools. I don’t see any other documented dependencies that are likely to cause issues.</p>
+
+<p>Somebody got Gnome running on BSD by <a href="http://darknedgy.net/files/systembsd.pdf">reimplementing the relevant dbus APIs</a>. They were:</p>
+
+<ul>
+  <li>those APIs provided by hostnamed - trivial</li>
+  <li>those APIs provided by localed - trivial</li>
+  <li>those APIs provided by timedated - trivial</li>
+  <li>those APIs provided by logind - <a href="http://www.freedesktop.org/wiki/Software/systemd/logind/">significant</a>
+</li>
+</ul>
+
+<p>Unfortunately that link provides little information about <em>how</em> much code was needed to implement the subset of logind needed for Gnome. It then drifts off into a general discussion of systemd-init, which isn’t relevant. A separate <a href="http://undeadly.org/cgi?action=article&amp;sid=20140915064856">project page</a> provides a little more information.</p>
+
+<p>The <code>logind</code> application (maintained as part of the systemd suite) appears to be particularly controversial. It provides a non-trivial DBUS api which Gnome uses, has a non-trivial internal implementation, and was once independent of systemd-init but later gained a hard dependency on it (see v205). The dbus API isn’t <em>huge</em>, and seems sane, ie an alternative implementation providing that same API is feasable (and has been done, at least partially) but distros wanting to package Gnome but not systemd-init have (IMO quite reasonably) complained about the necessary effort.</p>
+
+<p>One additional thing logind does is ensure via PAM that the XDG environment variables are correctly set for the user’s login session.</p>
+
+<h2 id="the-udev-controversy">The udev Controversy</h2>
+
+<p>One issue that gets referenced by many systemd critics is <a href="http://lists.freedesktop.org/archives/systemd-devel/2014-May/019657.html">an email</a> which has been interpreted as (paraphrased) “in the future udev will require systemd”.</p>
+
+<p>Note however the difference between <em>systemd</em> and <em>systemd-init</em>; the quoted email is stating that the current plan is for udev to depend on the <em>kdbus</em> library from systemd, when (if) the relevant kernel-side code has been merged. This implies that kdbus will somehow need to be initialised early during boot.</p>
+
+<p>There is a kernel module that adds a netlink protocol named NETLINK_KOBJECT_UEVENT, and this module currently has a kind of primitive “topic” system, where each event is tagged as “kernel” or “udev”, and a userspace application can subscribe to either type. The “kernel” events are raw events generated by the kernel (no surprise), and it is expected that only the udev daemon itself will subscribe to these. The udev daemon then sends higher-level (“cooked”) events with the “udev” label back to the kernel on the same netlink socket, and the kernel forwards these to all userspace apps “subscribed” to the “udev” event types. This allows apps to use netlink to receive a stream of these udev events via netlink. The overall effect is that there is a custom “userspace-to-userspace” channel from the udev daemon to other userspace apps. Client apps should use the libudev function ‘udev_monitor_new_from_netlink’ rather than mess with netlink filedescriptors directly.</p>
+
+<p>There is no channel for client apps to <em>send</em> data to the udev daemon via this mechanism; it is a one-way event-stream only.</p>
+
+<p>The long-term plan of the udev developers (part of the systemd team) appears to be to send this event-stream over kdbus rather than the netlink socket. It does seem a more generic approach; the netlink-based solution is very udev-specific while dbus is designed to be a generic userspace-to-userspace communication mechanism. In particular, using dbus messages allows the usual dbus debugging tools to log such messages, etc. It also makes the udev event stream more accessable from non-c languages (eg python) as all that is needed is generic support for dbus.</p>
+
+<p>However using dbus requires the local system to be running a dbus daemon, which not all systems want to; udev therefore currently does not use dbus at all. There might also be performance implications for using dbus (though udev doesn’t create a large number of events). Probably more important is that udev wants to send events very early during startup; requiring a userspace dbus daemon to be up would be tricky. When (if) kdbus is part of the kernel then all those problems go away, and dbus support can be simply <em>assumed</em> to always be available.</p>
+
+<p>Introducing kdbus as a dependency on udev does mean that kdbus <em>configuration</em> needs to be initialised early. The dbus userspace daemon configures itself on startup but with kdbus some other process will need to configure the bus early in the boot sequence. AIUI, systemd-init will gain the necessary code to init kdbus; if any other init system wants to use kdbus (and it will, if it wants to use udev) then that other system will have to find its own  way to init kdbus early in boot. The systemd developers won’t provide such a tool as they already have one that works for them (systemd-init), but I expect that writing a separate tool to do that (for execution from sysv-rc scripts for example) wouldn’t be hard.</p>
+
+<p>I have found no indication that udev will ever depend on systemd-init itself.</p>
+
+<p><a href="https://mail.gnome.org/archives/desktop-devel-list/2014-January/msg00079.html">This email</a> from Lennart describes how systemd-init can configure kdbus on boot; obviously, non-systemd-init systems will need an alternative.</p>
+
+<h2 id="the-binary-journal">The Binary Journal</h2>
+
+<p>Many people are not happy with the journald service, and in particular the fact that its storage format is binary (so it can include an index and various other data not easily represented as text).</p>
+
+<p>systemd-init does require that the journald service be running. However journald will happily <em>forward</em> the textual part of each logged message to a traditional syslog daemon (or compatible service) - ie the old-style text-only logs can be retained. The size of journald’s storage can also be configured; if you don’t want them then just set the storage size small. In fact, journald holds messages in a ring-buffer in memory, and writes them to disk when possible (so it works even before the target filesystem is available). Persistent (ie on-disk) storage for the journald logs is completely optional, and can simply be disabled if you really don’t want it.</p>
+
+<p>It isn’t a <em>perfect</em> solution; with this setup an extra journald process is running that isn’t actually doing anything useful (except early in the boot sequence). However that is not critical, and certainly means that journald is not a sufficient reason to reject systemd-init completely.</p>
+
+<h1 id="handling-serious-internal-errors-in-pid1">Handling Serious Internal Errors in PID1</h1>
+
+<p>It seems to me that systemd-init <em>could</em> catch serious signals such as SIGSEGV, and restart itself (reexec). However this hasn’t been done; currently if systemd-init gets such a signal then it can switch to a separate virtual terminal. If this is not configured, then it just (deliberately) hangs in an “idle loop”.</p>
+
+<p>Systemd-init does support <a href="http://0pointer.de/blog/projects/watchdog.html">hardware watchdogs</a> so that in embedded systems or servers this “hang” will trigger a system reboot.</p>
+
+<p>See <code>src/core/main.c:install_crash_handler()</code> which uses <code>sigaction_many(..)</code> to point to the function crash(). Function install_crash_handler is invoked from the main() method in the same file, ie is set up when systemd-init starts up.</p>
+
+<h1 id="deconstructing-systemd-init">Deconstructing systemd-init</h1>
+
+<p>One thing that many critics refer to, and which I am sympathetic to, is that systemd-init has a <em>lot</em> of code in it.  It seems reasonable to consider whether systemd-init could instead be split into multiple cooperating parts.  The candidate parts would be:</p>
+
+<ol>
+  <li>a simple init-process (PID1, ie parent of all processes)</li>
+  <li>a service manager</li>
+  <li>a cgroup manager (for the “unified cgroup hierarchy:”)</li>
+  <li>a unit-file-parsing app (read unit files, pass corresponding “data structures” to part 2)</li>
+</ol>
+
+<p><a href="http://lwn.net/Articles/575793/">This comment by Lennart</a> explains why service-management and cgroup-management are done together. Note that this comment is explicitly addressing service-management and cgroup management; IMO he uses the expression “PID1” where he really means service manager (init-process and service-manager are both the same in the case of systemd). I have yet to find a <em>big</em> reason why init-process and service-manager should be combined. As noted earlier, splitting them doesn’t provide a <em>whole</em> lot of gain, in that losing the service-manager but not the init still results in an unstable system. Possibly the service-manager could store its <em>state</em> in some shared memory provided by PID1 so that the service manager can be restarted - but if that state is corrupted then restarting the service manager won’t help. And this split adds complexity: a comms channel between 1 and 2, and 1 must “supervise” 2 (start it, stop it, maybe restart it on crash). Given that <em>in practice</em> systemd-init doesn’t crash, it seems that merging them was the right choice but it could also be done otherwise - and that would probably have caused much less controversy.</p>
+
+<p>One reason for having the service-management code in pid1 rather than a separate process is that pid1 gets information about orphaned processes. However there is a netlink socket that provides information about fork/exit operations, or alternatively pid1 could write such data to a simple pipe (as done by Aboriginal Linux for example), or even maintain data in a shared memory block. Such an architecture would also need some mechanism for starting the service-manager on boot, and restarting it if it crashes (perhaps - or maybe reboot is the right solution there). The result might not be <em>very</em> much stabler - a crashing service-manager would lose any in-memory state which could make recovery tricky. On the other hand, a comment in the original systemd-init blog stated that the cgroups tree had much of the information necessary to reinit the service manager.</p>
+
+<p>One large chunk of code is related to parsing configuration files. The Solaris SMF init system maintains a “binary registry” of services, and changes can be uploaded into this registry with a command. So maybe systemd-init could have a <em>binary file</em> that contains a “parsed” version of the text config files? On startup, it would just need to mmap() this file into memory. A separate tool could parse config-files and upload them into the registry. On the negative side, the current way of overriding default files by simply placing custom version in <code>/etc/systemd</code> would not work without executing some additional command.</p>
+
+<p>Any such “split” components would be so “special purpose” and tightly-integrated that it would not be reasonable to expect multiple implementations. Moving file-parsing out into a separate process might reduce memory-footprint for some usecases. Other changes are purely for <em>stability</em> - which simply leads to the question: is systemd-init already stable enough as it is? Empirical evidence suggests it is.</p>
+
+<h1 id="some-brief-comments-on-logind">Some Brief Comments on logind</h1>
+
+<p>The logind program is one of the applications maintained as part of the systemd “suite”. It isn’t itself <em>part</em> of systemd-init, but does (since v205) have a hard dependency on it, ie cannot be used in a system with a different init-system. This does cause some problems which have already been discussed above in the section titled “The Lockin Issue”. As the role of logind is therefore somewhat entangled with systemd-init it seems useful for this section to expand a little more on what it does.</p>
+
+<p>The <a href="http://www.freedesktop.org/software/systemd/man/systemd-logind.service.html">logind</a> program documentation describes its purpose as:</p>
+
+<ul>
+  <li>
+<em>Keeping track of users and sessions, their processes and their idle state</em>. Tracking users is done via integration wtith the pam system.</li>
+  <li>
+<em>Device access management for users</em>. This allows a single “session controller” process for a user session (running as that user) to access device-files which are otherwise not accessable to that user. In particular, it allows a display-manager to open a device-file that communicates with the kernel graphics driver via DRM (<code>/dev/dri/card*</code>) and device-drivers which provide input from keyboard/mouse/etc. This allows a display-manager to run as non-root.</li>
+  <li>
+<em>Providing PolicyKit-based access for users to operations such as system shutdown or sleep</em>. Such operations are system-wide, but it is convenient to be able to invoke them from a user-specific desktop running as a normal user account (at least for some user accounts).</li>
+  <li>
+<em>Automatic spawning of text logins (gettys) on virtual console activation</em>. This intercepts keyboard strokes, and on <code>ctrl-alt-F{n}</code> ensuring that an instance of the getty process is created for the specified virtual console.</li>
+</ul>
+
+<p>The logind documentation has good links to further information on most of these topics.</p>
+
+<p>The loginctl commandline application provides interactive access to the data managed by systemd-logind.</p>
+
+<p>As noted in section “The Lockin Issue”, other applications interact with logind via DBUS messages. Any desktop component that uses these messages will run quite happily with a different process that provides the same API. The API seems mostly init-system-agnostic, and appear to be either reasonable to implement in some other way (ie independent of systemd-init) or to be stubbed out (just return an error, an empty list, etc). A few very systemd-specific operations do appear to have crept in; the systemd team really should remove these. It isn’t immediately obvious what the impact would be if stubs for these systemd-specific APIs just returned errors - ie which apps rely on these calls. I would presume that very few do so, as it should be clear to a gnome/kde/etc developer that these are not portable.</p>
+
+<p>Of course maintaining a fork of logind with an alternate implementation would be significant work - but that’s not the systemd team’s problem, and they can hardly be blamed for failing to maintain “cross-platform” code for which they have no use.</p>
+
+<h1 id="other-stuff">Other Stuff</h1>
+
+<p>Systemd automatically forwards the stderr output of a service to the system log (syslogd or journald).</p>
+
+<p>Upstart was created before cgroups; it achieved the same goal of tracking the children of each service that it started (even when they fork multiple times, parents die, etc) by using ptrace() to intercept calls to fork/exec. However it is generally agreed that ptrace is the wrong tool for this.</p>
+
+<p>AFAICT, libudev does not currently use dbus in any manner. However I believe the long-term plan is for “cooked” events to be streamed over kdbus rather than over the netlink socket.</p>
+
+<p>inetd/xinetd allow singleton-style services (though the documentation is not good). When wait=no, then inetd itself calls <code>accept()</code> on the socket, and passes the resulting filedescriptor to the new process as STDIN/STDOUT. However when wait=yes then inetd simply passes the listening socket to the new process as STDIN, and the process may call <code>accept()</code> as many times as it wishes (ie handle multiple clients); inetd ignores the socket as long as the process is still alive. If/when the process exits then inetd resumes handling of the socket. For the UDP protocol, where accept is not required, it is even simpler to implement a “singleton” service: just set wait=yes in the inetd config (so inetd stops spawning new instances for each message), and then repeatedly invoke recvmsg on STDIN.</p>
+
+<p>One problem with the “unified cgroups” stuff is that it hsa been decided that within some “domain” (a set of cgroups), a single process should manage those cgroups, and other processes should <em>communicate</em> with the manager to create groups and move processes around. However the communication mechanism hasn’t been standardised; systemd-init provides one API for this purpose and cgmanager provides a different one. Therefore an app which wants to do stuff with cgroups needs to use one API or the other, depending on which init-system the operating system is using - not optimal.</p>
+
+<h1 id="additional-references">Additional References</h1>
+
+<p>Many of the important documents related to systemd-init are referenced from the very first section of this article. Here are some less-important references:</p>
+
+<ul>
+  <li>
+<a href="http://0pointer.de/blog/projects/why.html">Why systemd</a> - from one of the primary authors of systemd-init</li>
+  <li>
+<a href="https://www.youtube.com/watch?v=o_AIw9bGogo">Benno Rice: The Tragedy of Systemd</a> - an excellent video presentation of the reasons that systemd is important and better than sysv-init. Also makes interesting point that systemd supports “user level services” - ie processes that run using the identity of an interactive user rather than root or a system-user - something discussed in more detail in <a href="https://www.youtube.com/watch?v=pdwi3NWAW7I">Lane and Berg: Managing GNOME Sessions with Systemd</a>
+</li>
+  <li>
+<a href="http://0pointer.de/blog/projects/the-new-configuration-files">systemd admin blog: config files</a> – includes an interesting list of the steps that need to be performed at boot-time</li>
+  <li>
+<a href="https://ma.ttias.be/learning-systemd/">Learning systemd</a> – a collection of useful links</li>
+  <li><a href="https://www.linux.com/learn/tutorials/788613-understanding-and-using-systemd">linux.com: understanding and using systemd</a></li>
+  <li><a href="http://www.freedesktop.org/software/systemd/man/bootup.html">Bootup process with systemd</a></li>
+  <li><a href="https://lwn.net/Articles/657345/">LWN: How Debian managed the systemd transition</a></li>
+  <li><a href="https://lwn.net/Articles/578210/">Russ Albery: systemd-init vs upstart</a></li>
+  <li><a href="http://jtimberman.housepub.org/blog/2012/12/29/process-supervision-solved-problem/">Timberman: process supervision</a></li>
+  <li><a href="http://skarnet.org/software/s6/why.html">Skarnet: Why S6</a></li>
+  <li>
+<a href="http://smarden.org/runit/">runit</a> – provides a tiny init plus <code>runsvdir</code> which is a long-running process that acts as a “service manager”</li>
+  <li><a href="http://cr.yp.to/daemontools.html">daemontools</a></li>
+  <li><a href="http://skarnet.org/software/s6/index.html">The S6 init system</a></li>
+  <li>
+<a href="http://arxiv.org/abs/0706.2748">Royon/Frenot: A survey of Unit Init Schemes</a> - from 2007. Covers sysv, launchd, solaris SMF, runit, upstart, and others (see page 8)</li>
+  <li><a href="https://www.youtube.com/channel/UCvq_RgZp3kljp9X8Io9Z1DA/videos">Youtube: systemd conference 2015</a></li>
+</ul>
+
+<p><a href="http://lwn.net/Articles/576271/">Here is</a> a discussion on a “manager process” for unified-cgroups-hierarchy. It appears from one comment that systemd-init does provide a “generic cgroups API” over dbus (or at least tries to), but that cgmanager has invented a different one. Logind provides some DBUS apis for allocating “scopes”, which is related. See also <a href="http://lwn.net/Articles/575912/">this comment</a>.</p>
+
+<p><a href="http://lwn.net/Articles/575803/">This comment</a> describes why configuring cgroups is non-trivial: some cgroup-controllers require device-specific setup. For example, if a specific process has been configured with bandwidth limitations for a particular device, then its cgroup’s attributes need to be initialised with the device-ids for that device.</p>
+
+<p>And <a href="http://lwn.net/Articles/575855/">this comment</a> finally talks about the relevant APIs for cgroup management. However they really seem systemd-init-specific; the DBUS object is named “systemd1” and methods like “StartTransientUnit” need to be invoked on it - very systemd-specific terminology. Rather unfortunate.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/systemd-init-overview/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

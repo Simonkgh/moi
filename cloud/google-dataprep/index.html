@@ -1,0 +1,323 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Google Cloud Dataprep Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Google Cloud Dataprep Overview</h1>
+    <aside>First published on: May 13, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>This article looks briefly at the Google Cloud Platform component <em>Cloud Dataprep</em>, which is useful for <em>cleaning</em> and <em>structuring</em> data being imported into Google BigQuery. This is part of a series of articles on the Google Cloud Platform (GCP); start <a href="/cloud/google-resources">here for an overview</a>.</p>
+
+<p>Disclaimer: unlike most of the GCP technologies I have written about recently, I haven’t used actually Dataprep - just reviewed the documentation to see whether it could be useful as part of an architecture I am currently designing (the answer is probably no).</p>
+
+<p>The best source of information I found about Dataprep was <a href="https://www.youtube.com/watch?v=Q5GuTIgmt98">this YouTube Video</a>. There is of course <a href="https://cloud.google.com/dataprep/docs/">additional information from Google</a>.</p>
+
+<h1 id="what-dataprep-does">What Dataprep Does</h1>
+
+<p>Dataprep (or “cloud dataprep” to give its full name) assumes you have data in one or more sources (files in a <a href="https://cloud.google.com/dataprep/docs/html/Supported-File-Formats_57344528">supported format</a>, BigQuery tables, etc). It then helps with:</p>
+
+<ul>
+  <li>determining what the <em>schema</em> should look like for the output;</li>
+  <li>extracting the relevant bits of data from each input record (and discarding the irrelevant bits);</li>
+  <li>typecasting fields into suitable types (ie the types in the schema);</li>
+  <li>clipping fields to suitable ranges of values;</li>
+  <li>discarding weird values, or replacing them with default values;</li>
+  <li>joining data from one table or file against the “matching” records from another source;</li>
+  <li>and other typical “data preparation” tasks.</li>
+</ul>
+
+<p>The above steps are applied to just a sample of the input data, for performance reasons. The steps taken to prepare the data are then used to generate a <a href="/cloud/beam-dataflow-overview">GCP DataFlow Application</a> which can be applied in a scalable way to the full dataset (this is supposed to be <em>big data</em> after all!). This dataflow takes the inputs, transforms it to solve the above issues, and outputs the data (typically to BigQuery tables, or to files).</p>
+
+<p>The process is interactive and graphical; the Dataprep user needs good business domain knowledge and reasonable data-science or data-modelling knowledge, but little knowledge of programming or the GCP platform.</p>
+
+<h1 id="data-preparation-requirements">Data Preparation Requirements</h1>
+
+<p>Often the input data has things like:</p>
+
+<ul>
+  <li>nulls where you really want some non-null default value</li>
+  <li>an integer column that is usually in some range (x,y) but where a few records have screwy values like -1 or 9999.
+Here, you might want to <em>clip</em> values to (x,y) - or just drop records with bad values.</li>
+  <li>a column which is mostly integers, but with the occasional non-integer value.</li>
+  <li>nested data (eg JSON with objects within objects) when you want a “flatter” relational-like view.</li>
+  <li>data in multiple tables, when you want one joined table as output</li>
+</ul>
+
+<p>And often you don’t know much about your data, for example:</p>
+
+<ul>
+  <li>how many distinct values does a column have?</li>
+  <li>what is the (x,y) range in which 99% of the values for a column falls?</li>
+  <li>which columns are actually irrelevant, and can be dropped?</li>
+  <li>which columns are foreign keys referencing records from a different input file</li>
+</ul>
+
+<h1 id="dataprep-functionality-in-detail">Dataprep Functionality in Detail</h1>
+
+<p>Dataprep was not actually created by Google; it is an application from <em>Trifecta</em> which has been integrated transparently into the GCP environment. It has been generally available in <em>beta state</em> since March 2017 (note that GCP services often stay in Beta for very long periods of time). The user-interface through which the user interacts with it is actually at <a href="https://clouddataprep.com/">https://clouddataprep.com/</a>, not at a Google domain.</p>
+
+<p>Dataprep provides a graphical drag-and-drop web interface for building dataflows which read from various sources and write to BigQuery or cloud-storage.</p>
+
+<p>I won’t attempt to review the interface here, or the feature set which is <a href="https://cloud.google.com/dataprep/docs/">well documented</a>; this article is just intended to indicate which projects might find it useful.</p>
+
+<p>It is a <em>fully hosted service</em>, ie <em>SaaS</em>. There is no need to “create an instance” or create a set of VMs to run the product on; the user is simply charged when executing the transformations defined in the user interface (see <em>pricing</em> later).</p>
+
+<p>Designing the necessary transformations (ie Dataflow) is done using an “example-based” approach, which can be easier to deal with than “logic based”. After each transform, you see a sample of output that would produce.</p>
+
+<p>Dataprep helps with joining records from different sources, eg suggesting columns from multiple tables that appear to have shared values, and thus potentially can be joined on. Theoretically a user can deal with related data without knowing the details of SQL joins.</p>
+
+<p>And the resulting “recipe” for transforming input into output is “human readable” - english descriptions rather than code. This recipe can then be mapped to a Google Dataflow application and executed efficiently against very large input datasets.</p>
+
+<p>Supported <a href="https://cloud.google.com/dataprep/docs/html/Supported-File-Formats_57344528">input formats</a> include:</p>
+
+<ul>
+  <li>BigQuery tables</li>
+  <li>Files in Google Cloud Storage, in the following formats:
+    <ul>
+      <li>CSV with single-char separators, no embedded linefeeds in columns</li>
+      <li>linefeed-separated JSON objects</li>
+      <li>avro</li>
+      <li>Excel spreadsheets</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Dataprep initially treats input fields as a string; Dataprep then uses heuristics to suggest suitable data-types and transformations for fields.</p>
+
+<p>The supported output formats, ie destinations that transformed input data can be written to, are pretty much the same as the input formats.</p>
+
+<p>The most common combination is for the input-format to be files (in CSV or JSON format) and the output to be BigQuery tables. Further transformations, analysis and reporting can then be applied to the data in BigQuery.</p>
+
+<h1 id="pricing">Pricing</h1>
+
+<p>Using the interactive web interface to inspect input data and define transformations to apply when importing the data into BigQuery is free. The generated “recipies” can be saved for later use.</p>
+
+<p>When the “recipe” generated via the interface is actually applied to a full input file (rather than just the sampled subset that the UI uses) then (to quote <a href="https://cloud.google.com/dataprep/pricing">the official docs</a>) this is</p>
+
+<blockquote>
+  <p>billed as a multiple of the execution cost (Cloud Dataprep Units) of the Cloud Dataflow job that performs the data</p>
+</blockquote>
+
+<p>This multiplier is currently just 1.16, making Dataprep a very reasonable solution for one-off imports.</p>
+
+<h1 id="alternatives">Alternatives</h1>
+
+<p>Data preparation can also be done in Google Data Studio.</p>
+
+<p>The generated dataflow gathers data statistics as it runs, and reports them back to Dataprep; the “job results” page in dataprep shows this info as nice graphs/histograms.</p>
+
+<h1 id="summary-and-opinion">Summary and Opinion</h1>
+
+<p>As a programmer, I am often less than impressed by graphical tools that promise to achieve tasks “without programming”. There are several issues with such tools:</p>
+
+<ul>
+  <li>the user does not need to learn general-purpose programming - but does need to learn this specific tool;</li>
+  <li>the results usually cannot be version-controlled, reviewed, or “rolled out” to QA and production environments;</li>
+  <li>automated testing is often not possible;</li>
+  <li>error-handling and dealing with unusual cases is often ignored;</li>
+  <li>and various other issues.</li>
+</ul>
+
+<p>In the case of Dataprep, some of the steps demonstrated in the video to extract sub-fields of text strings felt ugly and unstable - a properly thought-through solution using standard code would be more stable. How versioning and reviewing of the solution, and migrating the solution between environments, is to be done is also not clear from the documentation.</p>
+
+<p>However these concerns might not be critical for some use-cases; it depends upon the task. In particular, one-off imports may well benefit from the Dataprep approach. In other cases, it might be helpful for a domain expert to define an initial import, and for this to then be reimplemented as code for production use. That would also reduce concerns about the costs of using Dataprep-generated dataflow applications long-term.</p>
+
+<p>The way that Dataprep works on a sample of data, and provides very quick feedback on transformations of that sample, does look very helpful. The pricing also seems very reasonable.</p>
+
+<p>I will definitely discuss use of Dataprep with my DataScience colleagues next time a complex data import needs to be implemented - whether one-off or a regular production task.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://www.youtube.com/watch?v=Q5GuTIgmt98">YouTube: Dataprep</a></li>
+  <li><a href="https://cloud.google.com/dataprep/docs/">Google Official Documentation</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/google-dataprep/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

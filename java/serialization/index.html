@@ -1,0 +1,337 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Java Serialization and the serialVersionUID Property</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Java Serialization and the serialVersionUID Property</h1>
+    <aside>First published on: October 22, 2013</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      <p>(<a href="/2013/10/serialVersionUID">back to main post</a>)</p>
+
+<p>(<a href="/java/serialization-synthetic">update regarding synthetic methods, 2014-03-07</a>)</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>The Eclipse IDE by default displays a warning for any class which implements Serializable but does not define a serialVersionUID field. This has to be the most stupid default setting ever; here’s why.</p>
+
+<p>Java’s serialization feature is meant to make it easy for:</p>
+
+<ol>
+  <li>two applications that each have a copy of the same java class to transfer <em>instances</em> of that class; and</li>
+  <li>for an application to save an instance to persistent storage, and read it back later.</li>
+</ol>
+
+<p>Once you’ve decided to make a class Serializable, the first question you need to ask now is: how will instances of this class be used?</p>
+
+<p>There are the following different use-cases:</p>
+
+<ol>
+  <li>the object is just being stored in-memory and will be read back in by the same process that wrote it out;</li>
+  <li>the object is being passed across the network to another java application, and the two applications are <em>always released in sync</em> with each other;</li>
+  <li>the object is being saved to disk for later retrieval - possibly by a different version of the application</li>
+  <li>the object is being passed across the network to another java application which may have a different release-cycle - ie the two communicating
+    java applications may have different versions of the same serializable class.</li>
+</ol>
+
+<p>If an object is just serialized into a memory buffer, then <em>you do not need an explicit serialVersionUID</em> - it is absolutely impossible for the writer and reader of the data to be different versions. An example of this kind of usage is a database cache which stores previously-read objects in their serialized form - which can be compressed to save memory.</p>
+
+<p>If they are passed between a client and server application, but the client and server are always intended to be the same version (ie are released together) then <em>you do not need an explicit serialVersionUID</em>. This is common in web-based systems where the web-tier and business-tier are always updated together.</p>
+
+<p>So, assuming your use-case is one of the first two above, do NOT explicitly specify serialVersionUID for the class in question. Does setting an explicit serialVersionUID do any harm? Well in the first in-memory-only case, no (and actually is slightly more efficient). But in the second, if you ever <em>do</em> get a mismatch of code, then rather than get a deserialization failure you may just get weird behaviour instead, due to Java “forcing” old data into a new class or vice-versa. Best to just avoid this by not defining serialVersionUID explicitly. For the details of how things can go wrong, see below.</p>
+
+<p>For the third and fourth items, I recommend you reconsider your requirements. Making multiple versions of the same class serialization-compatible is really hard work. For a small project with a small team of experienced developers, it’s doable - with sufficient investment in design, reviewing and testing. For a large project with a pool of developers of different skill levels, and (as always) time pressure, there is almost a 100% chance that you’ll get bugs in production software releases related to serialization. There are a couple of other design options to consider, like never changing an API : instead add features by providing a <em>new</em> api with new serializable classes and deprecate the old API over time. Or serializing objects using XML/JSON/etc rather than native Java serialization. Or at least using the Externalizable approach rather than Serializable (see later).</p>
+
+<p>Note that on the internet you’ll find articles recommending setting serialVersionUID. In many cases, these are written by developers working on small projects; for example Java guru Joshua Bloch discusses serialization in the java.util collection classes. The collection library is a prime example of a complicated but small project (a few dozen classes) written by a small team (1 or 2 people) of very skilled developers who can afford to spend considerable resources on design and testing. If that description also matches your project then congratulations. However it doesn’t describe the software that many of us work on from day to day - and therefore the tradeoffs between flexibility (correct serialization) and safety (don’t allow common mistakes to produce strange behaviour) are different.</p>
+
+<h1 id="how-javaioserializable-works">How java.io.Serializable Works</h1>
+
+<p>The standard serialization logic for a class actually writes out a brief summary of the class structure to the output stream : an instance of java.io.ObjectStreamClass. This contains:</p>
+
+<ul>
+  <li>the class name</li>
+  <li>the serialVersionUID</li>
+  <li>the names of all fields</li>
+</ul>
+
+<p>This class descriptor is only written once to the stream for each type; each <em>instance</em> of the type written to the stream is then prefixed with a reference to the relevant class descriptor. The ObjectOutputStream keeps track of what class descriptors have already been written.</p>
+
+<p>On the receiving side, when InputStream.readObject() is called, the deserialization code reads a “type id” from the stream, looks up the appropriate ObjectStreamClass (previously in the stream) and uses the class-name to find the local type with the same name. It then checks the serialVersionUID and fails if they don’t match (throws InvalidClassException).</p>
+
+<p>If serialVersionUID does match, then it creates an empty instance of the target type <em>without calling any constructor</em>, and <em>without executing any field initialisations</em>. It then checks for a readObject method on the receiver and if present passes the remaining data to it; sadly there is no way for a readObject method to get hold of the ObjectStreamClass object that describes the data it is reading. If there is no readObject, or the readObject method calls in.defaultReadObject(), then the ObjectStreamClass is used to match up incoming values with the correspondingly-named field of the class (field values are present in the input stream in the same order that the fields are listed in the class descriptor). The result is that the default deserialization can simply <em>ignore</em> any fields received from the source object which do not exist on the target object. The default behaviour also simply ignores any fields on the target for which no data was provided by the source - ie these fields are left at whatever the native value for that type is.</p>
+
+<p>It is therefore technically possible to make some kinds of changes to a class while keeping the serialVersionUID fixed and still have things work (without needing any custom readObject or similar methods):</p>
+
+<ul>
+  <li>to delete no-longer-needed fields</li>
+  <li>to add new fields (as long as the native default is acceptable - null for references, zero for integers, false for booleans, etc).</li>
+</ul>
+
+<p>A custom readObject method can be useful to first call in.defaultReadObject and then do validation/cleanup logic. However it can’t do extensive backwards-compatibility for a Serializable object because it doesn’t know what class version the source data is from; it is limited to checking whether specific fields have been initialized or not (there is a trick that somewhat mitigates this issue - see later).</p>
+
+<p>Handling cross-version compatibility in this way is quite tricky to get right. Every single change to a Serializable class that has a serialVersionUID must be very carefully double-checked to make sure things work correctly when deserializing from older versions. This problem also occurs when changing a Serializable class that only has an implicit serialVersionUID but the effects at runtime are different: in one case a cautious InvalidClassException, in the other the code keeps running but with a possibly invalid object. I know which I’d prefer to debug…</p>
+
+<p>Remember also that serialization can be <em>bi-directional</em> - the “new” version might be at the sending end or the receiving end. Because there is only a single serialVersionUID value for both ends, it isn’t possible to just allow old-&gt;new (though your application deployment strategy might mean only one happens in practice). When the newer class is sending, then fields added to that class will simply be silently discarded at the receiving end - ie fields can only be added if they are optional for the receiver.</p>
+
+<p>And simply <em>renaming</em> an existing field has radical effect - it is treated as a new field. So even the names of <em>private</em> fields become important.</p>
+
+<p>One partial workaround for the lack of information about the sending class version is to add a field “private int version = 1”. When an old version of the class is deserialized, this field (not being present in the datastream) will be set to zero. When a new version is serialized/deserialized, the field will be set to 1. This version-field can therefore be used to customise the readObject method behaviour, even if the original release of the class didn’t have a version field in it.</p>
+
+<h1 id="using-externalizable-instead">Using Externalizable instead</h1>
+
+<p>One of the problems with the Serializable interface is that it hides some magic; it looks at first glance like fields can be added/removed without needing to think deeply. And if all testing is done with matching sender/receiver applications then everything <em>will</em> appear to work - until compatibility against other versions is tried.</p>
+
+<p>Using the Externalizable approach requires more code to be written. However even junior programmers can see exactly what is happening - and are more likely to do the right thing, or at least call for help. An Externalizable class simply writes out its data field-by-field. There is no “class descriptor” in the datastream, and none of this “match fields by name” magic. And the issues described in the section “Designing the Serialized Form” below are more obvious in an Externalizable class - ie developers are more likely to do the right thing automatically. The default constructor of the class is also run, and any “field initialisations” are executed - both of these steps are far more natural than the Serialization approach of magically creating an object instance without running any constructor.</p>
+
+<p>If using Externalizable, then consider writing a “version#” field as the first value in the output stream, so that future versions of the class can apply backwards-compatibility logic based on the version-number. It does make the class (and its serialized form) slightly larger but the benefits are probably worth-while.</p>
+
+<p>It is unfortunately not possible to use Externalizable to read in the data from a class created with Serializable. So once the Serializable approach has been used, there is no switching.</p>
+
+<h1 id="generating-serialversionuid">Generating serialVersionUID</h1>
+
+<p>When a class is serialized and it does not have an explicit serialVersionUID value, then one is auto-generated. The algorithm used is very clearly defined by the Java specification and includes things like:</p>
+
+<ul>
+  <li>the name of the parent class</li>
+  <li>the name and type of each field in the class</li>
+  <li>the signature of each non-private method in the class</li>
+</ul>
+
+<p>The <em>implementation</em> of methods within a class can change without affecting the default serialVersionUID, but the set of fields that actually make up the <em>data</em> within the class cannot. And somewhat oddly, the names and parameters of methods on the class also affect the output.</p>
+
+<p>Note that the <em>standard behaviour</em> without any explicit serialVersionUID is what is often what is wanted by default - a nice cautious failure to transfer the data between incompatible applications.</p>
+
+<p>The Javadoc for the Serializable interface (version 1.7) and the serialization spec both have warnings that the auto-computed value may differ between JVMs. Interesting, as I can personally not see anything in the algorithm that is compiler-dependent in the hash; this may be due to some JVMs having a buggy implementation of the algorithm. I can’t imagine that any of the mainstream JVMs have this issue.</p>
+
+<p>UPDATE: the auto-computed serialVersionUID can vary between Java compilers due to differences in the names of <em>synthetic methods</em> added to a class by the compiler; see the link “update regarding synthetic methods” at the top of this article.</p>
+
+<h1 id="designing-the-serialized-form">Designing the Serialized Form</h1>
+
+<p>There are a number of serious limitations to Serialization which mean that planning is needed <em>before</em> releasing any class marked as Serializable; a mistake in the first release of the software may not be fixable without breaking serialization backwards compatibility. If you are not willing to think about these problems <em>before</em> shipping the first version of your software then you may as well not set a fixed serialVersionUID on the class because you probably can’t do compatibility later anyway - ie you really are limited to having matching (client,server) application pairs anyway.</p>
+
+<p>A serializable class can never be renamed or moved to another package without breaking backwards compatibility.
+None of the classes used as field types can be renamed or moved to another package without breaking backwards compatibility.</p>
+
+<p>You can never remove a field which has “relevant information” in it - data which cannot simply be ignored. It is possible for a custom readObject method to allow data to be deserialized into the “old” fieldname, and then to reprocess that data into another form and store that in a different field. However the original field needs to be there - and the relevant classes need to still exist.</p>
+
+<p>The default format in which a class is serialized is often bad for performance and bad for future flexibility. Joshua Bloch’s book has some excellent information on this; one example is a class with a member which points to the head of a linked list. The default behaviour is for this field to be serialized as a series of objects (the nodes in the list), each with a reference to the actual data object and the next list-node. Not only does this waste space and time, it also <em>locks</em> the original class into this representation of its data. A better approach would be to write out this data as a simple array of the actual data objects; the deserialization code can turn the array back into a linked-list if that is the desired runtime representation - or map it to whatever the current desired form is in future.</p>
+
+<p>To repeat: if you’re not prepared to invest time thinking about these issues now, and can’t rely on all developers on your team to understand the impact of changes to a Serialized class, then you should just accept that you won’t get compatibility between different versions, and should therefore at least rely on an auto-generated serialVersionUID to tell you when the versions are out-of-sync.</p>
+
+<h1 id="security-issues">Security Issues</h1>
+
+<p>While on the topic of deserialization, there are a few security issues worth mentioning.</p>
+
+<p>Sometimes a class prevents its users from setting specific fields directly. For example, there may be a field that should always be non-null; attempts to set it to null cause an exception. Or perhaps there are two boolean fields, and only one of them should be true at a time. Or two dates where one must always be after the other. Deserialization can bypass any checks performed by the normal class constructor or property setter methods; data provided from somewhere else (possibly an untrusted source) is pushed directly into fields. If a Serializable class has such “invariants”, then a readObject method should be defined which first calls in.defaultReadObject, then validates the object after deserialization has completed.</p>
+
+<p>An attacker who can provide a custom subclass of ObjectInputStream can possibly obtain references to mutable objects that the deserialized object thinks are private to it. An attacker who can gain access to the ObjectInputStream <em>after</em> a class has been deserialized from it can possibly also do the same. This is a less-likely attack vector, but paranoid code can block this by having the readObject method create a “defensive copy” of any objects read from the input stream.</p>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>The Java specification and javadocs state that it is necessary to define a serialVersionUID “for all versions except the first one”. What they actually mean by “versions” is “incompatible changes” - ie you must change the serialVersionUID value when a new version of the class cannot be compatible with the earlier one. The auto-generated ID does this automatically; for classes with an explicit serialVersionUID the number must be manually updated.</p>
+
+<h1 id="references">References</h1>
+
+<p>The following are good resources on the subject of serialization:</p>
+
+<ul>
+  <li>
+    <p><a href="http://docs.oracle.com/javase/7/docs/platform/serialization/spec/class.html">http://docs.oracle.com/javase/7/docs/platform/serialization/spec/class.html</a></p>
+  </li>
+  <li>
+    <p>Joshua Bloch, Effective Java (2nd Ed), Chapter 11 (highly recommended)</p>
+
+    <p>Note that he <em>does</em> recommend defining an explicit serialVersionUID. From the viewpoint of someone writing a small but complex library which will be maintained over decades by expert developers (eg the java.util collection library), he is right. For most real-world projects the balance of gain/pain is quite different.</p>
+  </li>
+  <li>
+    <p><a href="http://www.javaworld.com/javaworld/jw-02-2006/jw-0227-control.html?page=1">http://www.javaworld.com/javaworld/jw-02-2006/jw-0227-control.html?page=1</a></p>
+  </li>
+  <li>
+    <p><a href="http://github.com/eishay/jvm-serializers/wiki">Alternative Serialization Implementations</a></p>
+  </li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/serialization/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

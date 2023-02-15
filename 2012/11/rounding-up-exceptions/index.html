@@ -1,0 +1,278 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Rounding Up Exceptions</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='post'>
+    <h1>Rounding Up Exceptions</h1>
+    <aside>Posted on: November 13, 2012</aside>
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      <p>I stumbled upon a new technique today for dealing with java interfaces for interprocess communication. Whether it is a truly new idea I don’t know, but it is new to me. Part of the code already existed, but the “rounding up” concept is my own. This trick helps the client application in a client/server pair avoid deserialization exceptions when the server throws unknown exception types.</p>
+
+<!-- more -->
+
+<p>A java server may publish an interface like the following for client applications to use:</p>
+
+<pre><code>public interface SomeService {
+  SomeResultType doSomething(SomeParamType1 p1, SomeParamType p2) throws SomeException1, SomeException2;
+  ...
+}
+</code></pre>
+
+<p>The interface, together with all the referenced types (return-type, parameter types, exception types and all their transitive dependencies) is then bundled in a jarfile for clients to use. Both ends then use the shared types together with some implementation that does marshalling/transmission/unmarshalling of the specified types (eg Java RMI). Ideally, the tool providing network communication on the client side actually generates a proxy object implementing the interface, so client code can interact with the proxy almost the same way it would interact with a local implementation of the service.</p>
+
+<p>The client can expect that the server has a copy of all the specified types, and (more importantly) the server can presume that the client has a copy of all the needed types. When the client loads the interface class, then the JVM will immediately resolve all the needed types, and immediately throw a NoClassDefException if something is missing - making it very clear where the problem is.</p>
+
+<p>However there is a catch: the param/return/exception types only specify <em>upper bounds</em> for the types; unless these types are <em>final concrete classes</em>, then:</p>
+
+<ul>
+  <li>the parameters passed by the client to the server can be subclasses of the specified types (which could cause an error when unmarshalling the data on the server);</li>
+  <li>the server could return a subtype of the declared result type;</li>
+  <li>the server could throw an exception that is a subtype of one of the declared types;</li>
+  <li>the server could throw a RuntimeException</li>
+</ul>
+
+<p>The first is not a problem; if the client invents its own types then it is fairly obvious that the server won’t understand them.</p>
+
+<p>The second is an issue that can really only be solved by careful programming. However in client/server interfaces, both parameter and result objects are typically <em>data transfer objects</em> with little/no logic in them, and therefore subclassing is rare.</p>
+
+<p>The last two, however are very tricky. It is quite likely that the server will throw different exception types under different conditions. And on the server side, it is difficult to keep track of this; complex business logic in services can call dozens of helper objects to perform the service, any of which might throw exceptions, and the java compiler will happily compile code that throws a subtype of the declared exceptions. It is also possible that code maintenance years later may add new exception types - which the compiler will be happy about. Yet, if some rare condition occurs which causes this exception to be thrown, and the client does not have the thrown class in its classpath, then deserialization of the response fails.</p>
+
+<p>Declaring the thrown exceptions (SomeException1, SomeException2 in the example) as final will help with this - but at the expense of limiting the use of exceptions in the server. In addition, an exception can have a “cause” object of any type, which might not be known at the client end.</p>
+
+<p>An elegant solution is to add code on the server-side that <em>catches</em> all exceptions thrown by the service implementation, and replaces any exceptions <em>not explicitly declared in the interface</em> with the nearest ancestor type which <em>is declared</em> in the service interface (and therefore <em>must be</em> available to the client - or classloading at the client side would have failed). So in the example, if the service implementation throws SomeException1SubType, then this is replaced with an instance of SomeException1 instead. The client side can then be sure it can deserialize the exception, and can catch it using the base type (as usual), while the server side is free to subclass exceptions however it wishes without worrying if these can propagate to the client.</p>
+
+<p>RuntimeExceptions can potentially also be remapped to something that the client is known to support; in general, just ‘rounding up’ to one of a few known types is sufficient, as the client can’t be expected to handle many different runtime exception types.</p>
+
+<p>Catching/rewriting the exceptions can be done through an AOP interceptor, or through more manual means. The code to “round up” exception objects is only a dozen lines or so; it isn’t particularly fast as it needs to use reflection, but considering (a) this is only needed when the service fails, and (b) this is an inherently slow network-based call anyway, performance isn’t a significant concern here.</p>
+
+<p>Finding the right type can be done as follows:</p>
+
+<pre><code>  ...
+
+  // One way to determine the set of allowed exception types is to allow only those which this service method
+  // is declared to throw [which requires the interface to declare concrete exception types]. It is also
+  // possible to have a pool of allowed exception types (ie those that are known to be in the jarfile published
+  // for use by clients) and then select the subset which are subclasses of the exception types declared on this
+  // method).
+  Class&lt;?&gt; allowedTypes = method.getExceptionTypes();
+
+  Class&lt;?&gt; throwAs = getNearestAncestor(allowedTypes, thrownException.getClass());
+  Throwable replacementException = coerceExceptionTo(thrownException, throwAs); 
+  throw replacementException;
+}
+
+Class&lt;?&gt; getNearestAncestor(Class&lt;?&gt;[] types, Class&lt;?&gt; childType) {
+  Class&lt;?&gt; bestMatch = null;
+  for(Class&lt;?&gt; candidate : types) {
+    if (candidate == childType) {
+      bestMatch = candidate;
+      break;
+    }
+
+    if (candidate.isAssignableFrom(childType)) {
+      if ((bestMatch == null) || candidate.isAssignableFrom(bestMatch)) {
+        bestMatch = candidate;
+      }
+    }
+  }
+  return bestMatch;
+}
+
+Throwable coerceExceptionTo(Throwable t, Class&lt;?&gt; newType) {
+  if (t.getClass() == newType) {
+    return t;
+  }
+
+  // do some reflection here to create a new instance of newType and copy over the
+  // exception message and possibly stacktrace.
+}
+</code></pre>
+
+<p>Some care also has to be taken to deal with exception <em>cause</em> objects; they may be simply thrown away or replaced with some common type. Cause objects are not typically an important part of an interface intended for <em>remoting</em>.</p>
+
+<p>The most significant drawback is that the service interface has to declare <em>concrete exception types</em> rather than just interfaces. One solution for this (which also helps with the “create a new instance of newType” part above) is to require “difficult” exception types (eg abstract types, or ones with nonstandard constructors) to declare a method that clones all data in the exception other than the cause. An abstract base exception type can then choose to provide an implementation, or declare it abstract.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/posts/2012-11-13-rounding-up-exceptions/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

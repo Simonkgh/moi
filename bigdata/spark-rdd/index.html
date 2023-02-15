@@ -1,0 +1,423 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Spark RDD Random Notes</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Spark RDD Random Notes</h1>
+    <aside>First published on: September 1, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<p>As a quick extension to the discussion on RDDs from the <a href="/bigdata/spark">Spark Overview article</a>, here are some notes on a few of the operations that can be performed on an RDD.</p>
+
+<p>These notes are pretty rough - don’t rely on anything you read here :-)</p>
+
+<h1 id="what-is-an-rdd">What is an RDD</h1>
+
+<p>As described in the Spark Overview article, an RDD is a datastructure holding <em>metadata</em> about a dataset.</p>
+
+<p>An RDD may be an “initial RDD” in which case it holds metadata about some external source of data; these are created via methods on a SparkContext object.</p>
+
+<p>Otherwise an RDD is a “child RDD”, holding a reference to a parent RDD; the parent defines the input to the child RDD, and an operation to be applied to that input dataset to generate an output dataset. An RDD can also have multiple parent RDDs, eg an RDD performing a “join” of two input datasets.</p>
+
+<p>A Spark driver application uses methods on types <code>SparkContext</code> and <code>RDD</code> to build a graph of RDDs; invoking a “transformation” method on an RDD generates a child RDD. Invoking an “action” method on an RDD instead causes the RDD on which it is invoked to submit itself to the spark framework for execution. The spark framework transforms the RDD and its ancestors into a graph of <em>tasks</em>, serializes these tasks, and sends them over network connections to spark executor processes for execution.</p>
+
+<h1 id="creating-an-initial-rdd">Creating an Initial RDD</h1>
+
+<p>An RDD which does not have a parent RDD must instead reference some external source of data, such as an in-memory list, a local file, a file in a distributed filesystem such as HDFS, a Kafka topic, or similar.</p>
+
+<h2 id="an-initial-rdd-for-an-hdfs-file">An Initial RDD for an HDFS File</h2>
+
+<p>The following example defines an initial RDD whose source is a file in HDFS:</p>
+
+<pre><code>  // assume variable sc references a SparkContext object..
+  val lines = sc.textFile("hdfs://path/to/file.csv")
+</code></pre>
+
+<p>This method (and the other base methods on SparkContext which create an RDD) starts construction of a new “work graph” within the SparkContext; in effect these methods are “builder methods” for constructing a graph and the returned RDD object is another subbuilder object which offers methods for attaching yet more nodes into the graph. This initial node in the graph is a “create rdd” node wrapping the provided URL. When the graph is eventually executed, this node will make a metadata request to the HDFS namenode for the specified path, obtain information including:</p>
+
+<ul>
+  <li>the file size, in blocks</li>
+  <li>for each file block, the list of nodes on which the block is stored (replication)</li>
+</ul>
+
+<p>and then execute all child nodes of that RDD node.</p>
+
+<p>Every RDD in the graph of RDDs has explicit or implicit partitioning information, which is used to determine the number of tasks that are spawned, and whether the RDD node can be merged with its parent RDD (only possible if they use the same partitioning of the data).</p>
+
+<p>While it would be theoretically possible to decide from the initial RDD’s partitioning how many Spark Executors and VCores to allocate, this is not currently done: the executor/core values are instead specified as job configuration parameters. Spark dynamic mode (see later) can increase or reduce the number of executors/vcores but that is done based upon the number of tasks waiting to be executed, rather than the partitioning of the input data source. Allocating resources based on the initial RDD partitioning would only be of use in shallow processing pipelines, which is probably why this is not done.</p>
+
+<h2 id="an-initial-rdd-for-an-in-memory-list">An Initial RDD for an in-memory List</h2>
+
+<p><code>SparkContext.parallelize(s: Seq)</code> takes an arbitrary sequence object and returns an RDD for it. In this case, the RDD is not “metadata referencing the input data” but truly contains the data to be processed. The partitioning factor for such an RDD is arbitrary, and can be specified in the parallelize method. The RDD presumably holds an array of partition-descriptors (like it does with HDFS where each element describes a block), but with the parallelize method each element references a subrange of the in-memory sequence.</p>
+
+<p>When an action method is eventually invoked on some descendant of such an initial RDD, the generated tasks sent to the spark executor instances include a copy of the relevant subrange of the original sequence.</p>
+
+<h1 id="rdd-partitioning">RDD Partitioning</h1>
+
+<p>Each RDD has an explicit or implicit partition-descriptor. For an “initial RDD” representing a file in HDFS, the partitioning is simply the number of HDFS blocks. For an initial RDD representing a Kafka topic, it is the partitions in the input topic, etc. When a child RDD is generated from a parent RDD using a “map” transformation, the partitioning of the child RDD is identical to the parent RDD - the data is simply processed “in place” without any need to perform a shuffle. Similarly, filtering and grouping only transforms in-place. However a <em>reduce</em> operation needs to gather data from multiple upstream tasks, and rearranges the data (a shuffle); an RDD created from a parent RDD by performing a reduce therefore has a different partitioning descriptor.</p>
+
+<p>When the Spark framework executes an “action” RDD, it looks up the chain of parent RDDs and merges adjacent nodes which have the same partitioning, ie can generate one single task for multiple adjacent RDDs.</p>
+
+<p>This analysis/merging results in a “logical plan”. For each logical task, a separate instance is then queued for execution for each data <em>partition</em>. As an example:</p>
+
+<ul>
+  <li>an RDD references a file in HDFS which has 12 blocks</li>
+  <li>a child transformation RDD references the parent</li>
+  <li>another child transformation RDD references the above RDD</li>
+  <li>and then an action-method is invoked on the above RDD, ie spark must evaluate the graph</li>
+</ul>
+
+<p>None of the ancestors of the RDD on which the action was invoked have forced the data to be repartitioned (shuffled), so they can all be merged into one logical task. Twelve instances of that task are then scheduled, one for each HDFS block of the ancestor RDD. Each task instance reads/processes one block of the input HDFS file and then terminates. When all 12 task instances have completed, the spark job is complete.</p>
+
+<h1 id="rdds-and-closures">RDDs and Closures</h1>
+
+<p>When a “map” node is executed which has a “hdfs file rdd” as a parent, then spark creates a “task” object per file-block in the parent (ie input data partition) and then:</p>
+
+<ul>
+  <li>serializes the closure-param passed to the map method</li>
+  <li>for each task: choose a suitable worker node and send the serialized closure over the network to that node, where it is executed.</li>
+</ul>
+
+<p>The location where each task ran is tracked, and used for scheduling child nodes of the map node (eg reduce nodes).</p>
+
+<p>The “resilient” part of the RDD is that when a map task fails, the driver program which is executing the graph is notified, and it simply resubmits the serialized closure to another worker process. In the case of a map task which is reading from HDFS, the source data is still present. In the case where the task is a “downstream” one consuming the output of an earlier task then:</p>
+
+<ul>
+  <li>if the worker node is still available (ie the task has failed but not its host) then the task can be resubmitted to the same worker - presumably the input data is still there in memory or local disk</li>
+  <li>if the worker node has crashed (or fails repeatedly) then processing of the graph needs to be restarted from an earlier stage. As long as the transformations (closures) being applied do not have <em>side effects</em> this will be completely transparent.</li>
+</ul>
+
+<h1 id="rdd-methods">RDD Methods</h1>
+
+<h2 id="transformations-and-actions">Transformations and Actions</h2>
+
+<p>RDD methods are either “transformations” or “actions”. Transformations do not trigger execution of the current RDD graph; actions do. In general, anything that returns an RDD object is a transformation; anything else is an action. As an example, <code>RDD.foreach</code> returns Unit (aka void), so it must be an action!</p>
+
+<h2 id="transformations">Transformations</h2>
+
+<h3 id="map">Map</h3>
+
+<p>Invoking <code>RDD.map</code> on a parent RDD creates a child RDD object which references its parent and references a closure which is the mapping-logic to apply.</p>
+
+<p>Note that the mapping logic is not yet executed - it is just serialized to a byte-array and the new RDD holds a reference to it. When eventually some task that includes that map step is executed, the closure is sent along with the serialized task object to some Spark Executor instance where Spark deserializes the closure and then passes each record in the task’s allocated partition of the input dataset to that deserialized closure. The records returned by the closure are cached in a memory buffer, and spilled to disk if there is insufficient memory available.</p>
+
+<h3 id="filter">Filter</h3>
+
+<p>Like “map”, invoking <code>RDD.filter</code> creates a child RDD object which references its parent and references a closure which is the filtering-logic to apply.</p>
+
+<h3 id="keyby">keyBy</h3>
+
+<p>Operations which assign a key to an object can also be configured with the number of “buckets” to allocate their output to. Each <code>(key,value)</code> output is associated with bucket <code>(hash(key)%nbuckets)</code>.</p>
+
+<h3 id="cache">Cache</h3>
+
+<p><code>RDD.cache</code> simply associates a label with the cached output of the parent RDD. This does not alter the partitioning of data - when data processed by the parent RDD is split across N servers, then a following cache operation simply preserves the data already on those N servers without moving it anywhere. A “cache” RDD can therefore be merged with its parent node in exactly the same way as map RDDs can be.</p>
+
+<p>An RDD whose parent is a cache RDD runs with the same partitioning as its parent, and on the same servers.</p>
+
+<p>Normally, when RDDs can be merged, then data is simply streamed from one to another in a “pipeline” fashion, and the logic for both RDDs is performed in a single pass. Inserting a cache node instead forces the intermediate result to be written to in-memory or disk storage; RDDs which have the cache RDD as their parent then iterate over those cached values in a separate pass.</p>
+
+<h3 id="reduce">Reduce</h3>
+
+<p>The <code>reduce</code> family of methods can be divided into those which reduce by a <em>key</em> (most of them) and the few which do not. Those which do not reduce by key do not need to move data betwen servers, and do not change the current partitioning of data - the reduce is just run on whichever servers currently hold sections of the input dataset. However in general a reduce is applied to “all records with a specific key regardless of which server they are currently on” - ie data must be moved around.</p>
+
+<p>Such “shuffling” operations can be run on an arbitrary number of servers in parallel; there is no need to use the same number of tasks as the parent RDD used. Such RDD methods therefore take an optional “npartitions” parameter; when not specified then a default value is provided by the spark framework. The parent RDD is then modified to ensure it <em>buckets</em> its output to match the npartitions required by the downstream RDD.</p>
+
+<h3 id="distinct">Distinct</h3>
+
+<p>Method <code>RDD.distinct</code> has two parts. First it executes as a mapper-like function on each partition of the input dataset in its current location, finding the distinct keys within that local partition, and writing the results into N buckets. The result is a set of values on each server which are locally distinct but not globally distinct. Spark then starts N tasks on arbitrary spark executors which contact every spark executor used in the previous phase, and fetch the keys for one specific bucket; each instance can then filter out duplicates resulting in a globally distinct set of keys - though that result dataset of unique keys is now distributed over N servers.</p>
+
+<p>The first pass could be skipped, instead simply grouping all records by key, bucketing, doing the shuffle, then computing the distinct keys. However making a first “local” pass before performing a shuffle reduces the amount of network traffic immensely.</p>
+
+<p>Many of spark’s transformation methods internally generate such multi-phase processing.</p>
+
+<h2 id="actions">Actions</h2>
+
+<h3 id="foreach">foreach</h3>
+
+<p><code>RDD.foreach(..)</code> is probably the simplest of all actions. The RDD simply holds a serialized version of the closure to be applied. At runtime, a task is sent to each executor holding a partition of the input (parent) dataset, and the executor applies the closure to each record in that dataset in turn (in place, on that server).</p>
+
+<h3 id="count-action">Count Action</h3>
+
+<p>A simple count action can be performed on each existing data partition in parallel. These partial results are then returned to the driver as each task completes, and the driver sums them itself to produce an overall count.</p>
+
+<p>A count-by-key instead requires that the data be bucketed on the servers it is currently on, then N tasks be started which each fetch the records for one bucket from every other server on which the proceeding task ran. Each of these count tasks then has all the records it needs locally, and can return a map of <code>(key, count)</code> to the driver (a map is needed because a bucket can contain many distinct keys).</p>
+
+<p>When using the interactive shell, adding a “cache” operation to the graph immediately triggers execution of the graph. Adding a “reduce-like” operation to the graph also immediately triggers execution. Adding the original rdd, and adding map-like operations to the graph does not trigger execution; they are evaluated only when needed.</p>
+
+<h3 id="collect">Collect</h3>
+
+<p>Method <code>RDD.collect</code> returns an array with the output of each RDD partition as an element. The return-type is not an RDD, so it must be an action.</p>
+
+<p>As the “collect” operation does not need to repartition (shuffle) its input, the necessary logic can be merged into the same task as its parent RDD. As each task instance executes, the collect component simply captures all data flowing through it and pipes this back to the driver application. When data is partitioned N ways, then the driver will receive N responses (one for each tasks) containing the results generated by that task instance running against that specific partition of the input dataset.</p>
+
+<h1 id="tasks-as-pipelines">Tasks as Pipelines</h1>
+
+<pre><code>It has been already mentioned above how Spark code which looks like it is making multiple passes over the data is actually _merged_ into a single task - and pass. Here's an example:
+</code></pre>
+
+<pre><code>  val initialRdd = sparkContext.textFile("hdfs://path/to/file.csv") // returns a list of lines
+  val splitRdd = initialRdd.flatmap(line =&gt; line.split(",")  // returns a list of fields in a line
+  val filteredRdd = splitRdd.filter(field =&gt; field.size() &gt; 5)  // fields longer than 5 chars
+  val uppercased = filteredRdd.map(field =&gt; field.toUpperCase)
+  val results = filteredRdd.collect() // action
+</code></pre>
+
+<p>Here’s a more verbose description of what actually happens at runtime, within a SparkExecutor. The code is pretty ugly - but the point is to show that the processing above is done in just one pass:</p>
+
+<pre><code>  trait SimpleIterator {
+    def next(): String
+  }
+
+  class MyInitialRdd(source: InputStream, offsetFrom: Long, offsetTo: Long) extends SimpleIterator {
+    def next() = {
+      // return next line from input-stream over the subset of the file allocated to this particular task instance (the "partition")
+    }
+  }
+
+  class MySplitter(Iterator src) extends SimpleIterator {
+    var buffer = Array[String]()
+    var index = 0
+
+    // returns N values for each single value from upstream
+    def next() = {
+      if (index &lt; buffer.size()) {
+         return buffer(index++)
+      }
+
+      val line = src.next()
+      if (line == null) {
+        return null
+      } else {
+        buffer = line.split(",")
+        index = 0
+        return buffer(index++)
+      }
+    }
+  }
+
+  class MyFilter(Iterator src) extends SimpleIterator {
+    // pulls multiple values from upstream src until one matches, or EOF is reached
+    def next() = {
+      do {
+        val field = src.next()
+        if (field == null) {
+          null
+        } else if (field.size() &gt; 5) {
+          field
+        }
+        // else ignore value and fetch next
+      } while(true);
+    }
+  }
+
+  class MyUpperCaser(Iterator src) extends SimpleIterator {
+    // fairly obvious
+  }
+
+  val pipeline = new MyUpperCaser(new MyFilter(new MySplitter(new MyInitialRdd(src, offsetFrom, offsetTo))))
+  do {
+    val result = pipeline.next();
+    if (result == null) {
+      break;
+    }
+    sendToDriver(result) // collect
+  } while true;
+</code></pre>
+
+<p>Each call to <code>pipeline.next()</code> <em>pulls</em> data from the MyUpperCaser instance which pulls data from its upstream source, etc. The result is that data flows through all five processing stages but requires only one pass over the data, with no need to store intermediate results anywhere (except in memory in the case of the flatmap operation).</p>
+
+<p>Any developer familiar with Haskell’s lazy behaviour will find this very obvious - or with Scala’s lazy views, or even Python’s generators.</p>
+
+<p>To come back to the original Spark code above, Spark’s execution framework effectively transforms a sequence of operations on an RDD into a “pipeline” like the above. Such a pipeline obviously cannot be executed across a “shuffle” boundary, but for a sequence of RDDs each of which is a transform of its parent that does not alter the data partitioning, they can be elegantly expressed in source-code as separate operations but at runtime form an efficient processing pipeline instead.</p>
+
+<h1 id="notes-on-efficiency">Notes on Efficiency</h1>
+
+<p>For map phases where the input partitions are highly correlated with the output partitions, in-memory caching is very effective - the server which processed an input block X generates most/all of the members of output key Y, so running the reduce phase on key Y can be efficiently performed on the same server. When input partitions are not well correlated with the output partitions, then the reduce phase for key Y must fetch data over the network from just about every node on which the map phase ran, and so the in-memory caching saves nothing.</p>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/spark-rdd/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

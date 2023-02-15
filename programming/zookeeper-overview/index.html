@@ -1,0 +1,254 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Zookeeper Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Zookeeper Overview</h1>
+    <aside>First published on: May 19, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/BigData/'>BigData</a></p>
+      <h1 id="overview">Overview</h1>
+
+<p>The official zookeeper documentation is pretty good, but a few items are missing - and in particular, the “big picture” overview. This brief summary is intended to cover the information I had to piece together myself during a recent project.</p>
+
+<p><a href="http://zookeeper.apache.org/">Apache Zookeeper</a> is an application which runs as a server, allowing client applications to read or update a simple persistent tree of values. Somewhat like a remote filesystem, the key for retrieving, inserting, updating or deleting a value is a path, and the values themselves are arbitrary blocks of bytes. Unlike simple <a href="http://db-engines.com/en/article/Key-Value+Stores">key-value stores</a>, the use of a structured “path” as a key allows clients to also “watch” paths, ie request notifications when data at or below that path is modified. Zookeeper is intended to act as a coordinator for multiple processes, not a distributed database : the size of each value in the tree is expected to be small (a few tens of kilobytes at maximum) and the entire tree is kept in-memory.</p>
+
+<h1 id="clustering">Clustering</h1>
+
+<p>Multiple Zookeeper instances can optionally be clustered together to provide resilience against failure of a node or failure of network connectivity to a node, and to improve performance when reading data (at the cost of slower updates). The members of a cluster dynamically choose one node to be the <em>leader</em> of the cluster, and all updates performed by a client application against one of the zookeeper instances are forwarded immediately to the current leader which in turn notifies all other nodes of the cluster. On failure of the leader node, a new one is “elected”.</p>
+
+<p>Because data updates always flow from the node at which the change was first initiated up to the leader then down to other nodes, network traffic effectively forms a star network topology. However the process of <em>leader election</em>, and the fact that any node can potentially become the leader, requires that all nodes be able to directly access all other nodes.</p>
+
+<p>To avoid problems with <a href="http://en.wikipedia.org/wiki/Split-brain_%28computing%29">cluster “partitioning”</a>, each node in the cluster is aware of the maximum set of nodes in the cluster - ie is configured with info about even nodes that are not currently running. A cluster is only valid if at least 50% of the potential nodes are accessable; when a node starts it refuses to allow client applications to connect to it until it has verified connectivity to at least 50% of the potential nodes (reached <a href="http://en.wikipedia.org/wiki/Quorum_%28distributed_computing%29">a quorum</a>). This ensures that no client application can ever see out-of-date information by connecting to a zookeeper node which has somehow become disconnected from the cluster leader (ie disconnected from the majority of cluster nodes).</p>
+
+<p>Initially installing and configuring a cluster is done manually and is fairly static: after unpacking the zookeeper software on a node, it must be configured with a unique node id (an integer in range 1..255) and given a list of the network addresses (host:port) of all other nodes; when adding a new node to an existing cluster, all other nodes must of course have their list-of-node-addresses updated to include the new node and be restarted. Note that zookeeper servers do <em>not</em> use any kind of auto-discovery to find other nodes; configuring a cluster is done manually.</p>
+
+<p>Version 3.5 (currently in alpha state) adds a major feature : dynamic cluster reconfiguration in which the information about the set of nodes is itself distributed across the network. See:</p>
+
+<ul>
+  <li><a href="http://www.slideshare.net/Hadoop_Summit/dynamic-reconfiguration-of-zookeeper">Slideshow</a></li>
+  <li>
+<a href="https://issues.apache.org/jira/secure/attachment/12525379/zkreconfig-usenixatc-final.pdf">Original research paper</a> on Zookeeper dynamic reconfig</li>
+</ul>
+
+<h1 id="clients">Clients</h1>
+
+<p>ZooKeeper happens to be implemented in Java, but that’s not important as it is intended to be a standalone process. The same jarfile in which the server is implemented also contains <a href="http://zookeeper.apache.org/doc/r3.4.6/api/org/apache/zookeeper/ZooKeeper.html">a class</a> that java client applications can use to connect to a server node. There is a separate client library for C, and various other languages are supported via bindings to the C library.</p>
+
+<p>The <a href="http://curator.apache.org">Apache Curator</a> project provides additional Java client libraries for Zookeeper which are highly recommended. The Curator Framework library provides an alternate way of connecting as a client application to a zookeeper server, including auto-retry of read or update operations if the current server node fails during the operation. As with zookeeper’s inbuilt Java client, there is no auto-discovery of server nodes : the client needs to be given a list of available nodes that it may connect to.</p>
+
+<p>Zookeeper is sometimes used as a service-discovery mechanism for other communication protocols (eg remote osgi services); applications which publish services connect (statically) to a zookeeper server and create entries in the tree describing their address and services, and applications which wish to use services connect (statically) to a zookeeper server and search the tree for information about the services they wish to find. This does decouple the service publisher and consumer effectively, but client-&gt;zookeeper and zookeeper-&gt;zookeeper connections are always explicitly configured (not discovered).</p>
+
+<h1 id="additional-functionality">Additional Functionality</h1>
+
+<p>While the basic tree-store and clustering functionality of Zookeeper is itself useful for many applications, it is also possible to use this as a base on which to implement more sophisticated cluster synchronization operations such as distributed semaphores and counters. The Zookeeper website documents many of these basic algorithms, and the Curator project provides a <a href="http://curator.apache.org/curator-recipes/">Recipes</a> library that implements them for Java clients.</p>
+
+<h1 id="the-values-tree">The Values Tree</h1>
+
+<p>Each zookeeper node keeps all data from the tree of values in memory - thus the tree cannot be overly large. It is also very careful to write all changes to the filesystem; a change to the tree is not considered complete until it has been flushed to disk.</p>
+
+<p>However when a client application creates a node in the zookeeper tree (called a “znode”) it can be explicitly marked as ‘ephemeral’ in which case it will be removed as soon as the client which created it disconnects from the cluster. This is particularly useful for clients which ‘register services’ of some kind as nodes in the tree.</p>
+
+<p>Each znode has a <em>version number</em> associated with it, and this is incremented on each update. Normally client applications ignore this and simply add a ‘watch’ on a node to get a callback when the node changes, but direct access to a version-number can sometimes be useful.</p>
+
+<h1 id="embedding-a-zookeeper-server">Embedding a Zookeeper Server</h1>
+
+<p>The authors of the Zookeeper implementation intend it to be used as a standalone process; although it is implemented in Java and distributed as a plain java library (jar), it isn’t really intended to be run in the same JVM process as other java code. Nevertheless when building a clusterable application in Java it can be useful to “embed” zookeeper in this way, and with some effort it is possible; the FuseESB product does this and a colleague of mine has also achieved it. There are some quirks however, and you won’t get much help from the documentation or email lists.</p>
+
+<p>Even when a zookeeper instance has been successfully embedded, code in the same process must still connect to it via a network socket. Unlike libraries such as ActiveMQ, there is no protocol for in-process communication as the implementers did not intend it to be used that way.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://zookeeper.apache.org/">Zookeeper Official Site</a></li>
+  <li><a href="https://cwiki.apache.org/confluence/display/ZOOKEEPER/Index">Zookeeper Wiki</a></li>
+  <li><a href="http://zookeeper.apache.org/doc/trunk/zookeeperInternals.html">Zookeeper Internals : describes some of the fundamental zookeeper algorithms</a></li>
+  <li><a href="https://aphyr.com/posts/291-call-me-maybe-zookeeper">https://aphyr.com/posts/291-call-me-maybe-zookeeper</a></li>
+  <li><a href="http://www.knewton.com/tech/blog/2014/12/eureka-shouldnt-use-zookeeper-service-discovery/">http://www.knewton.com/tech/blog/2014/12/eureka-shouldnt-use-zookeeper-service-discovery/</a></li>
+  <li><a href="http://blog.akquinet.de/2009/09/23/introducing-dynamic-discovery-into-osgi-distributed-applications/">http://blog.akquinet.de/2009/09/23/introducing-dynamic-discovery-into-osgi-distributed-applications/</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/zookeeper-overview/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,1085 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Notes on Domain-Driven Design</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Notes on Domain-Driven Design</h1>
+    <aside>First published on: June 7, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a></p>
+      
+<h1 class="no_toc" id="overview">Overview</h1>
+
+<p>While I’ve been developing software for a long time, and have been generally aware of the concepts of Domain-Driven Design, I only recently read a couple of the classic/well-known books on this topic: <a href="https://www.pearson.com/en-us/subject-catalog/p/domain-driven-design-tackling-complexity-in-the-heart-of-software/P200000009375/9780321125217">Domain-Driven Design by Eric Evans</a> and <a href="https://www.pearson.com/en-us/subject-catalog/p/implementing-domain-driven-design/P200000009616/9780133039887">Implementing Domain-Driven Design by Vaughn Vernon</a>. This article is a series of things I found note-worthy from these texts.</p>
+
+<p>I wrote this article primarily to clear up some concepts for myself, and as notes to refer to in future years. It may be useful for you, but I make no promises..</p>
+
+<p>There are three possible audiences for a book on DDD:</p>
+
+<ul>
+  <li>a software-developer/modeller (and I include architects here too; Evans makes a very good argument that “ivory tower architecture” is dangerous and that anyone with the role architect should also be actively involved in modelling and development of the project too)</li>
+  <li>a business-expert/modeller</li>
+  <li>project managers</li>
+</ul>
+
+<p>This review is primarily from the perspective of the first audience. For the other cases, none of the books reviewed here are really appropriate; specific chapters (particularly the first few from Evans) might be partially helpful but a dedicated book would be best. Reviews of Vernon’s <a href="https://www.pearson.ch/Informatik/Addison-Wesley/EAN/9780134434421/Domain-Driven-Design-Distilled">DDD Distilled</a> suggest that perhaps that would be appropriate for the business/management view of DDD; I can’t confirm as I haven’t read it. A few alternate books (which I also haven’t read yet) are suggested in the Further Reading section at the end of this article.</p>
+
+<p>Unless text below is a direct quote from a book (indented text), or placed in quotes prefaced by “Evans says..” or “Vernon says..” then all statements below are my own opinion/view/interpretation and may very well be wrong or incorrectly interpreting the author’s intentions. Read the books and draw your own conclusions!</p>
+
+<h1 class="no_toc" id="contents">Contents</h1>
+
+<ul id="markdown-toc">
+  <li><a href="#about-the-books" id="markdown-toc-about-the-books">About The Books</a></li>
+  <li><a href="#book-structure" id="markdown-toc-book-structure">Book Structure</a></li>
+  <li><a href="#the-benefits-of-ddd" id="markdown-toc-the-benefits-of-ddd">The Benefits of DDD</a></li>
+  <li>
+<a href="#some-core-language-terms" id="markdown-toc-some-core-language-terms">Some Core Language Terms</a>    <ul>
+      <li><a href="#context-and-model" id="markdown-toc-context-and-model">Context and Model</a></li>
+      <li><a href="#domain-and-subdomain" id="markdown-toc-domain-and-subdomain">Domain and Subdomain</a></li>
+      <li><a href="#bounded-context-and-ubiquitous-language" id="markdown-toc-bounded-context-and-ubiquitous-language">Bounded Context and Ubiquitous Language</a></li>
+      <li><a href="#domain-model" id="markdown-toc-domain-model">Domain Model</a></li>
+      <li><a href="#context-maps-and-bounded-context-interactions" id="markdown-toc-context-maps-and-bounded-context-interactions">Context Maps and Bounded Context Interactions</a></li>
+      <li><a href="#core-domain" id="markdown-toc-core-domain">Core Domain</a></li>
+      <li><a href="#distillation-and-large-scale-structure" id="markdown-toc-distillation-and-large-scale-structure">Distillation and Large Scale Structure</a></li>
+      <li><a href="#physical-subsystem" id="markdown-toc-physical-subsystem">Physical Subsystem</a></li>
+      <li><a href="#entities-and--value-objects" id="markdown-toc-entities-and--value-objects">Entities and  Value Objects</a></li>
+      <li><a href="#aggregates-and-repositories" id="markdown-toc-aggregates-and-repositories">Aggregates and Repositories</a></li>
+      <li><a href="#services" id="markdown-toc-services">Services</a></li>
+      <li><a href="#domain-events" id="markdown-toc-domain-events">Domain Events</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#other-interesting-topics" id="markdown-toc-other-interesting-topics">Other Interesting Topics</a>    <ul>
+      <li><a href="#alternatives-to-object-orientation" id="markdown-toc-alternatives-to-object-orientation">Alternatives to Object Orientation</a></li>
+      <li><a href="#the-modelling-process" id="markdown-toc-the-modelling-process">The Modelling Process</a></li>
+      <li><a href="#development-processes-team-structures-and-human-interaction" id="markdown-toc-development-processes-team-structures-and-human-interaction">Development Processes, Team Structures, and Human Interaction</a></li>
+      <li><a href="#layered-architecture-aka-isolating-the-domain" id="markdown-toc-layered-architecture-aka-isolating-the-domain">Layered Architecture aka Isolating the Domain</a></li>
+      <li><a href="#the-application-layer" id="markdown-toc-the-application-layer">The Application Layer</a></li>
+      <li><a href="#persistence" id="markdown-toc-persistence">Persistence</a></li>
+      <li>
+<a href="#dependency-injection-into-domain-model-types" id="markdown-toc-dependency-injection-into-domain-model-types">Dependency Injection into Domain Model Types</a>        <ul>
+          <li><a href="#dependency-injection-for-entities-with-jpa-hibernate-or-jdo" id="markdown-toc-dependency-injection-for-entities-with-jpa-hibernate-or-jdo">Dependency Injection for Entities with JPA, Hibernate, or JDO</a></li>
+        </ul>
+      </li>
+      <li><a href="#ddd-distributed-systems-and-microservices" id="markdown-toc-ddd-distributed-systems-and-microservices">DDD, Distributed Systems, and Microservices</a></li>
+      <li><a href="#supple-design-concepts" id="markdown-toc-supple-design-concepts">Supple Design Concepts</a></li>
+      <li><a href="#evolving-order" id="markdown-toc-evolving-order">Evolving Order</a></li>
+      <li><a href="#handling-duplication-of-data-and-logic" id="markdown-toc-handling-duplication-of-data-and-logic">Handling Duplication of Data and Logic</a></li>
+      <li><a href="#the-entity-service-antipattern" id="markdown-toc-the-entity-service-antipattern">The Entity Service Antipattern</a></li>
+    </ul>
+  </li>
+  <li><a href="#nice-quotes-from-evans" id="markdown-toc-nice-quotes-from-evans">Nice Quotes from Evans</a></li>
+  <li><a href="#references-and-further-reading" id="markdown-toc-references-and-further-reading">References and Further Reading</a></li>
+</ul>
+
+<h1 id="about-the-books">About The Books</h1>
+
+<p>Evans’ book well deserves its reputation; it elegantly puts the case for DDD and defines many important concepts. Despite having been published in 2003, large parts of it are still very relevant. Evans argues that each problem domain needs its own language (vocabulary). Interestingly, DDD attacks the problem of software development by developing/defining a language related to exactly this problem-domain; terms include Entity, Service, Aggregate, Layered Archicture, Domain, Bounded Context, Context Map, and many more. This is a nice example of self-reference! Sadly, Evans fails to sufficiently define some of these terms. This is surprising given the book’s emphasis on the use of natural language. In particular, the later parts of the book which discuss dealing with larger projects and “strategic patterns” do not clearly define or consistently use words such as <em>domain</em>, <em>subdomain</em>, and <em>module</em>. Terminology in “modern DDD” also appears to interpret some words differently. This is discussed later in this article. This book provides no code-examples at all - which is good in that it applies to projects in any (object-oriented) language, and focuses on the ideas. However this often leads to very abstract descriptions whose possible concrete implementations are not clear.</p>
+
+<p>Vernon’s book is newer, having been published in 2013. It has some useful contributions in it, in particular clarifying some of the larger-scale concepts that are ambiguous in Evans. It also adds information on Domain Events - a concept that was developed after Evans was published. Sadly this book is extremely verbose, with excursions into many topics that aren’t really DDD-related such as generic unit-testing techniques, options for allocating unique IDs, or how to implement the “transactional inbox” pattern - things that are well documented elsewhere. Through its extensive code-examples, it does make clear how various concepts can be implemented - but also means the content has dated far faster than the Evans book. I also found the attempts at humour and the “chatty” style more annoying than entertaining, particularly given the amount of space they take up. This book is around the same size as Evans, so clearly with its examples and padding is not nearly as information-dense.</p>
+
+<p>There are also parts of Vernon which I simply disagree with - eg pages 100-108 which talks about open-host-services, rpc and rest. This is all a very strange diversion into architecture rather than design, and at the least very debatable content.</p>
+
+<p>In short, I’m still looking for a truly good book on DDD. Nevertheless I learned a lot from both Evans and Vernon.</p>
+
+<p>If you only have time to read one book, I would recommend Vernon. If you have time for both, I would recommend reading the first parts of Evans in detail, skimming the remainder (strategic patterns), then reading Vernon. Note that the books are of similar size (both around 500 pages) but there is far more padding in Vernon; the useful information density of Evans is higher.</p>
+
+<p>I can also highly recommend <a href="https://www.youtube.com/watch?v=U6CeaA-Phqo">this video presentation</a> which shows the importance of the concept of bounded contexts (though I’m not convinced by the final conclusion).</p>
+
+<h1 id="book-structure">Book Structure</h1>
+
+<p>Evans parts 1 and 2 describe what effect DDD can have on code of a smaller project, ie what the benefits of a model are. Part 3 talks about how to iteratively improve an initial model. Part 4 talks about how to apply DDD to larger projects.</p>
+
+<p>I have heard that Evans himself has expressed some regret about the structure of this book, and suggested that the concept of “bounded contexts” belongs first and foremost, with the entire set of tactical patterns moved to an appendix. From the view of a pure architect, the latter parts focused on bounded contexts and structuring the model of larger projects might indeed be of more interest. The strategic patterns certainly have more impact; low level code decisions be refactored far easier than large-scale structure. However as a “coding architect” I found the layout very appropriate; the first two parts shake a coder out of their traditional thought-processes with concrete advice. Later parts are more abstract; the book convinces first with practicality and encourages the (technical) reader to read further - a good idea IMO. There are so many development process books around, and many are vague and abstract; this motivated me at least (as a pragmatist) to commit attention and time to later parts.</p>
+
+<p>Vernon uses the alternative approach of starting with the high-level items and working down. The result is that the text is filled with “forward references” to concepts that are defined only later in the book. These are all nicely marked so you know when that is happening, but is still awkward - the reader really needs to read the book twice.</p>
+
+<h1 id="the-benefits-of-ddd">The Benefits of DDD</h1>
+
+<p>The core goal of DDD is to improve communication - between domain expert and developer, between developer and developer, between developer and tester, and between anyone else involved. The point of any project is to produce software that solves a problem - but without a shared understanding of what is being built, that won’t happen effectively. The developers need to know what the inputs are, what outputs are needed, and how to derive those outputs from the inputs. However the domain experts cannot provide that knowledge as <em>algorithms</em> - otherwise they would write the code themselves. And the domain experts cannot express the problem in their own language, as the developers won’t understand. An intermediate form is needed.</p>
+
+<p>That intermediate form is exactly what domain driven design is about.</p>
+
+<p>Or in other words, in any project with non-trivial business logic, the most important part is the communication between domain experts and software developers. Almost as important is the communication between developers, between developers and testers, and any other person involved. A decent model of the problem domain can also be useful for users, ie that model can also be represented in the user interface(s).</p>
+
+<p>DDD is also about choosing good models - finding out which concepts are the most important for each group of stake-holders and then putting those concepts at the center of their interactions with the software. A good model can even improve understanding of the problem domain at the business level, potentially revealing better ways to do business, and even additional features that could be offered. Evans refers to this as “refactoring for deeper understanding”. Good communication is the most important tool for discovering good models.</p>
+
+<p>None of this communication or model creation happens just once; it is an iterative process from the start of the project until release of the first version - and then continuing into the future as that software gets extended and improved. DDD is in agreement with Agile principles, including the expectation that the initial software requirements are never what is actually needed; what is needed gets discovered as users get their hands on software. It is also pointed out that <em>developers</em> can discover important concepts/insights/flaws related to the model, leading potentially to new features or a better user experience. Therefore feedback loops and a willingness to change in the presence of these discoveries are important.</p>
+
+<p>As the communication doesn’t happen just once, and isn’t uni-directional, a requirements or design specification which doesn’t map relatively directly to an implementation is difficult to handle. A <em>model</em> is a “collection of abstract ideas organised into some kind of structure” - ie a possible representation of the project requirements or design. Any problem can be modelled in multiple ways, and at least some of those ways can map relatively directly to software; these (and only these) support long-term communication between the parties involved. The foundation of this model is an <em>ubiquitous language</em> - a vocabulary of terms which allows people to talk about the problem concisely and without ambiguity. The language often adopts terminology used by domain experts, but additional concepts can be defined for the purpose of defining the problem to be solved. However some words may have different meanings when talking about different parts of the problem; each <em>bounded context</em> is a “namespace” in which terms can be associated with different meanings.</p>
+
+<p>From Evans page 49:</p>
+
+<blockquote>
+  <p>Model-driven design discards the dichotomy of analysis model and design to search out a single model that serves both purposes.</p>
+</blockquote>
+
+<p>The problem domain almost always consists of <em>things</em> or <em>people</em> which have <em>roles/responsibilities</em> ie perform <em>operations</em>. Occasionally experts will express themselves in the passive tense, eg “this output is produced from this input by application of this operation”; this could be added to the “requirements” as is, but can also relatively easily be mapped to the active tense - we humans do this very naturally.</p>
+
+<p>Evans points out that there are many different forms that a <em>model</em> can take; only a subset of these also make sense as code. If a project needs to solve a specific problem only once, and then it is done, then pretty much any form of model can be used to represent the problem, and developers can map this to just about any kind of code-style. However projects are seldom like this; instead:</p>
+
+<ul>
+  <li>the problem evolves as development continues ie the requirements get modified due to feedback from initial software versions</li>
+  <li>the initial problem is usually only “part 1” of a larger task</li>
+  <li>developers often need to understand the purpose of a piece of code (often years later) - ie “why is the code doing this?”</li>
+  <li>developers may run into problems implementing the domain-model as-is and need to propose changes ie “if we did this instead, would that make sense to you and still address the problem?”</li>
+  <li>developers also need to communicate with each other (agree on how to build the solution) and the model is a way to assist that</li>
+</ul>
+
+<p>In all of these cases, if the code is structured entirely differently from the initial problem model then such communication is hard; the developers and the domain experts have no shared language or model. This can lead to slow development, incorrect results, and simply inflexible software that cannot easily be extended in interesting ways in later phases. An implementable model is important, otherwise developers will implement something that does not correspond to the model.</p>
+
+<p>DDD provides a set of <em>patterns</em> for creating and managing models, and for creating code which works well with such models. The patterns are generally divided into two categories:</p>
+
+<ul>
+  <li>stragegic (large-scale) patterns - suggestions on how to manage abstract models, large models, and the interactions between multiple models</li>
+  <li>tactical (small-scale) patterns - low-level suggestions on how to model concepts that map very directly to code</li>
+</ul>
+
+<p>These patterns in turn apply to models useful at different levels; models representing strategic aspects of the overall project (I call these <em>strategic domain models</em>), and models addressing tactical aspects (I call these <em>tactical domain models</em>). Strategic domain models correspond in some ways to <em>architecture</em>, while tactical domain models map directly to sourcecode.</p>
+
+<p>A model can exist only in the heads of the relevant team and the corresponding source-code. It can also be a bunch of temporary notes and sketches. However in general, it is written down in a combination of diagrams and text.</p>
+
+<p>In DDD, the chosen models must make sense to domain experts (with someone technical as guide) while also being representable in software (with a reasonably straight-forward mapping).  A model is not a <em>complete representation</em> of the real world, but instead a <em>minimal</em> set of concepts needed to discuss and implement specific use-cases. However a well-designed model does reflect “reality” in some way; this makes it more likely to be applicable to not-yet-specified requirements.</p>
+
+<p>Modelling is the process of structuring information about the problem domain. Design is the process of structuring code. Domain-driven design happens when a <em>domain model</em> works simultaneously as a good representation of the problem domain <em>and</em> a good representation of the sourcecode.</p>
+
+<p>A system that has the needed functionality, but no meaningful abstractions, is the exact opposite of DDD, and is likely to be hard to maintain and extend.</p>
+
+<p>Each model is a work-in-progress. It is unlikely that the first version is correct; instead feedback is needed. In addition, it will evolve over time as new requirements are added. The models are therefore <em>iteratively improved</em> - driven often by developers <em>who also understand the domain</em> noticing opportunities for refactoring in the code. The fact that the model corresponds both to business concepts and code concepts helps this bi-directional iterative process.</p>
+
+<p>The concepts of <em>bounded contexts</em>, <em>ubiquitous languages</em>, <em>tactical domain models</em>, and <em>context maps</em> are pretty much the core of DDD; projects in which these are not central are probably not “doing DDD”. In addition, it is understood that all of these things are <em>aids to communication</em> and will <em>evolve</em> over the lifetime of a project - discovery of relevant requirements and appropriate models is an iterative process including lots of feedback based on experience. Just about everything else is optional; additional patterns are defined which can be applied to improve communication and make the requirements understandable - but should only be applied if they do that for the particular project.</p>
+
+<h1 id="some-core-language-terms">Some Core Language Terms</h1>
+
+<p>Before discussing DDD in detail, it is important to understand the meanings of the dozen or so terms that are very important to DDD. I’ll do that here for two reasons - first, to make this article self-standing, but more importantly because sadly both of the DDD books referenced above (Evans and Vernon) fail to completely define some of these core terms clearly - or define them differently. Here I do my best to combine available information on these terms into consistent definitions, show the relations between terms, and point out cases where the term has different meanings in different contexts. Of course this is just <em>my current understanding</em> of these concepts.</p>
+
+<p>The problems with definitions occur primarily in the “large scale” (strategic) concepts. A bounded-context is reasonably clear, and the “small scale (tactical) patterns applied within a context are reasonably obvious. The larger-scale patterns applied <em>across</em> contexts are unfortunately rather fuzzily defined - both in these books and in other DDD literature.</p>
+
+<p>Both Evans and Vernon have implemented multiple projects successfully using the approach documented in their books, so it must work out somehow. However some more official definitions of various terms would really be helpful. Maybe some day…</p>
+
+<p>Unfortunately it’s difficult to find an appropriate order for the definitions below; as a result there are quite a few “forward references” to things not yet defined. There is also some repeated information, eg <em>domain models</em> are discussed as part of defining <em>domains</em> and vice versa; this seems unavoidable.</p>
+
+<h2 id="context-and-model">Context and Model</h2>
+
+<p>Evans (page 336) states that a <em>model</em> is a collection of abstract ideas organised in some kind of structure, and is valid only in a specific <em>context</em>. A <em>context</em> can be a meeting, a throwaway prototype, a piece of example code. Many contexts, and thus models, are temporary ie useful only for a very short time.</p>
+
+<p>Or in other words, the meaning of anything can be <em>context dependent</em>, so the context should be specified at the start of any discussion, document, etc. And in particular, any model should define the context in which it applies.</p>
+
+<p>The context that we most often talk about is <em>a subset of business functionality</em> with a <em>self-consistent view of business concepts</em> which is implemented via <em>a piece of software</em>. In this case we talk about a <em>bounded context</em> with its <em>ubiquitous language</em> and associated <em>domain model</em>. The term <em>domain model</em> is defined nowhere as far as I can tell, but seems to mean “a model consisting of business concepts from the subject domain”. However the terms <em>context</em> and <em>model</em> are more general-purposes; a project may have many contexts and models of which only some are <em>bounded contexts</em> and <em>domain models</em>.</p>
+
+<p>The term “the model” is sometimes used to mean (roughly) “all the concepts associated with the whole project”, ie a collection of all the (bounded context) domain-models, the context-maps, the domain/subdomain definitions, the layer definitions, and everything else.</p>
+
+<p>Models (of any kind) can get large and hard to understand. There is a set of suggested techniques for dealing with this, including <em>modules</em>, <em>layering</em>, <em>generic domains</em>, <em>abstract core</em>, and more (see later notes on large-scale structure).</p>
+
+<h2 id="domain-and-subdomain">Domain and Subdomain</h2>
+
+<p>The words <em>domain</em> and <em>subdomain</em> have multiple meanings.</p>
+
+<p>Evans (page 2) states:</p>
+
+<blockquote>
+  <p>Every software program relates to some activity or interest of its user. That subject area to which the user applies the program is the domain of the software.</p>
+</blockquote>
+
+<p>Let’s call that the <em>domain of a system under design</em>.</p>
+
+<p>However an organisation typically has multiple domains (things the company does to earn money and things it needs to do to stay in business). Twitter has one primary domain - managing user messages. However it also manages advertising, and has internal systems for things such as payroll and property management. Let’s call these <em>organisational domains</em>. Given that each organisational domain is typically supported by software, the <em>domain of a system under design</em> is likely to be a part of an organisational domain.</p>
+
+<p>The DDD term <em>domain model</em> refers to a model that <em>represents business concepts</em> within some part of the <em>domain of the system under design</em>. However that can be on any scale; it might be a “tactical domain model” which is near to the code, or might be a “strategic domain model” in which the terms are high-level (ie deliberately vague and generic), giving an overview only. The term <em>domain model</em> by itself doesn’t imply that the model includes things such as <em>entities</em> or that it is appropriate to give to junior developers for implementation. Note that these terms “tactical domain model” and “strategic domain model” are my own invention; they aren’t used in either book. Instead both authors often use the term “domain model” or “the model” in ways that seem inconsistent with a domain model containing tactical concepts only; the only way I can see to make sense of this is to introduce the concept of a “high-level strategic domain model” with a high-level ubiquitous language; see later for more info on this.</p>
+
+<p>In some cases an <em>organisational domain</em> has obvious parts to it (from the business view). These are often called <em>subdomains</em>. However sometimes a subdomain can actually be found in multiple domains, ie is a shared concept. When a subdomain is “generic” (multipurpose) then Evans tends to just call it a <em>domain</em> - and does this even for quite small blocks of functionality (for example a “date handling domain” or a “currency handling domain”). In Vernon, it seems that a subdomain is simply “a supporting domain” in the context of a project, ie what may be a domain (ie <em>domain of a system under design</em>) for one team (because they develop it) is a subdomain for another team because they use it.</p>
+
+<p>The term <em>domain layer</em> refers to code that implements specific entities and related types defined by a <em>tactical domain model</em>. Within a deployable artifact that contains multiple bounded contexts, the <em>domain layer</em> is the union of all such code for all contained bounded contexts.</p>
+
+<p>Then there is the term <em>core domain</em>, which represents “the most important parts of the domain this software is primarily addressing” (ie the <em>domain of the system under design</em>). This is described as the part of the system that really generates “business value”. The “core domain” is also intended to be small enough to summarize the overall project.</p>
+
+<p>The interaction between <em>organisational domains</em> and <em>bounded contexts</em> isn’t entirely clear in Evans. Vernon explains it by saying that “domains are part of the problem space while bounded contexts are part of the solution space” although various other DDD experts aren’t convinced by this definition and I tend to agree; software is a solution to a problem, and so I don’t see why these “spaces” would be different.</p>
+
+<p>Vernon (page 57) states:</p>
+
+<blockquote>
+  <p>It is a desirable goal to align Subdomains one-to-one with Bounded Contexts. .. In practice this is not always possible.</p>
+</blockquote>
+
+<p>One possible interpretation is that the identified <em>bounded contexts</em> reveal the “real” subdomains and domains of the business, but that due to business inertia the “legacy” view of domains and subdomains cannot be modified - ie any failure for bounded contexts to nest cleanly within the identified subdomains/domains is solely due to “legacy thinking” within the business. Or in other words, perhaps <em>organisational domains and subdomains</em> represent blocks of functionality as business experts see them, while bounded contexts represent blocks of functionality as the code implements them. Given that bounded contexts are based on discussions between the developers and business experts, there is likely to be a strong correlation but they may not be identical; as a result occasionally a <em>bounded context</em> might end up implementing parts of multiple identified <em>subdomains</em>.</p>
+
+<p>Another way of seeing domains and subdomains might be that these are stable regardless of the IT systems that implement them, ie if a company has multiple overlapping systems that implement parts or all of domains, the domain/subdomain definitions remain stable, regardless of how the software components draw their boundaries.</p>
+
+<p>In the end, the concepts of domain and subdomain may not be all that important. What really matters is delivered code, and that code is based on bounded contexts and the interactions between bounded contexts. Domains and subdomains are useful at the start of a project for identifying bounded contexts; they do often nest into subdomains and business experts are typically good at describing the domains and subdomains of an existing business - but after the bounded contexts have been identified, the domain/subdomain definitions may not have a lot of other value. One effect to consider though is that domains and subdomains often also align with organisation management structures, ie lines of reporting, budgets, schedules, and employee-teams. Refactoring a codebase or a design is often easier than changing management structures, so pragmatically domain/subdomain boundaries might indeed influence how bounded contexts are defined.</p>
+
+<p>Evans states that well-written code <em>reveals the model</em> - ie there is a clear mapping of code types to business concepts. Here <em>model</em> presumably means <em>technical domain model</em>, ie low-level concepts belonging to a <em>concise bounded context</em>, and not <em>organisational domain</em>. Whether code can reveal anything about the identified <em>organisational domains</em> is not clear - perhaps that is represented only in external documentation?</p>
+
+<p>The relation between domains/subdomains/contexts and <em>modules</em> is currently unclear to me - and <a href="https://medium.com/nick-tune-tech-strategy-blog/domains-subdomain-problem-solution-space-in-ddd-clearly-defined-e0b49c7b586c">I don’t appear to be the only one</a></p>
+
+<h2 id="bounded-context-and-ubiquitous-language">Bounded Context and Ubiquitous Language</h2>
+
+<p>A <em>bounded context</em> is the context in which a specific model is valid. The context can include the “responsible team”, the “code repository”, the module within a monolithic code-base, etc. However in most cases a <em>bounded context</em> is a cohesive set of business functionality.</p>
+
+<p>An <em>ubiquitous language</em> is a set of words and expressions which have a consistent and specific meaning within a <em>bounded context</em>. More than just a “dictionary”, it is a tool for talking about the problem and the code, ie defines everything needed to talk about the bounded context’s behaviour. For each <em>bounded context</em> there is likely to be some document that acts as a dictionary/glossary, defining the meaning of specific nouns and verbs within that context as precisely as possible.</p>
+
+<p>A <em>bounded context</em> can also be defined by “listening to the ubiquitous language”; if a particular name represents two different things (different properties/operations/relations) then either the meanings need to be unified or there are actually two different bounded contexts here, each with a distinct language.</p>
+
+<p>Unfortunately Vernon states (page 25) that “there is one ubiquitous language per bounded context” while Evans appears to instead consider the whole <em>system under design</em> to have one <em>ubiquitous language</em> with each bounded context having its unique <em>dialect</em> of that language. It’s not a big deal in practice; just pick one interpretation for your project. However this inconsistency does make communication harder than it needs to be.</p>
+
+<p>Vernon’s usage appears to be common industry practice. However I can imagine that when a group of people work on multiple bounded contexts, a set of “shared terms” will naturally evolve - ie the <em>dialect</em> model seems to be more natural to me.</p>
+
+<p>One thing all definitions agree on is that a single set of meanings can never unambiguously capture all business concepts for an organisation or industry. There needs to be a “scope” for the language - a <em>bounded context</em>. Whether the resulting language is considered a <em>dialect</em> or a <em>separate language</em> is not important.</p>
+
+<p>And although an <em>ubiquitous language</em> is applicable to a <em>bounded context</em>, it isn’t intended to be used just when choosing names for things in the code-base; it is there to be used in all written and verbal discussions involving any combination of business experts, developers, testers, acceptance testers, etc. It’s how people express what the application should do, what it does do, and how it does it.</p>
+
+<p>Bounded contexts can have different levels of abstraction; the entire project can be considered a bounded context while something fine-grained such as “the currency-handling module” is also a bounded context; it’s just a matter of what is defined as being “in scope” for the context. A large-scoped bounded context must have a high-level ubiquitous language (otherwise definition conflicts will start to occur) and a generic model. At the largest scale, it is possible to have a single ubiquitous language for an entire project/domain (ie the <em>bounded context</em> is the whole project) as long as the language limits itself to high-level definitions; it can contain terms such as “customer” or “invoice” as long as they are defined generically. Of course high-level languages are not appropriate for actually writing code; only only more tightly-scoped bounded contexts will have a language precise enough to define a model which in turn is precise enough to be coded.</p>
+
+<p>Different bounded contexts are generally referred to as “<code>{name} context</code>”, eg “the booking context” or “the inventory context”.</p>
+
+<p>A <em>bounded context</em> usually corresponds to a particular set of domain experts (though some experts will contribute to multiple bounded contexts).</p>
+
+<p>A <em>bounded context</em> usually corresponds to a set of use-cases. Those use-cases are probably not duplicated elsewhere, ie the set of domain experts for one bounded context are usually talking about different operations than those for a different bounded context.</p>
+
+<p>A bounded context often supports “a set of workflows” - and it is not uncommon for a workflow to involve multiple deployed artifacts (aka physical subsystems) - particularly when some are “legacy” components.</p>
+
+<p>A bounded context can also be considered an “IT system”, with a project that consists of multiple contexts being equivalent to a set of different interacting systems. This doesn’t mean each context has to be implemented as an independently deployable artifact; multiple contexts/systems could be multiple artifacts deployed simultaneously or could be a single modular artifact. Thinking of contexts as systems also suggests the option of phased delivery, where the most important bounded contexts are implemented and released to production first.</p>
+
+<p>Because a bounded context can correspond to a distinct set of concepts (language and model), a distinct set of experts, a distinct set of usecases and a distinct set of workflows, each bounded context often also has a distinct set of users with their own view of how that software should work to make their lives easier. This also makes the case that a bounded context is an “IT system” dedicated to that set of users. Failing to separate these contexts/models/systems means creating a single system whose model is not appropriate for some (or maybe all) of its users.</p>
+
+<p>A bounded context should never be defined using <em>technical terms</em> (eg process, socket, database); use only business terms.</p>
+
+<p>Pre-existing systems (internal or external) might have a natural model (forming a bounded context) or might not - in which case it isn’t a bounded context.</p>
+
+<p>Although the language defines a maximum size for any bounded context, it may be possible to divide it further. Whether this is useful can depend upon the team and project. A small highly productive team might be able to handle a lot of types in a single model, while a project with more staff might need multiple contexts to avoid conflicts.</p>
+
+<p>Favouring larger bounded contexts:</p>
+
+<ul>
+  <li>Flow between user tasks is smoother when more is handled with a unified model</li>
+  <li>It is easier to understand one coherent model than two distinct ones plus mappings</li>
+  <li>Translation between two models can be difficult (sometimes impossible)</li>
+  <li>Shared language fosters clear team communications</li>
+</ul>
+
+<p>Favouring smaller bounded contexts:</p>
+
+<ul>
+  <li>Communication overhead between developers is reduced</li>
+  <li>Continuous integration is easier with smaller teams and code-bases</li>
+  <li>Larger contexts may call for more versatile abstract models</li>
+  <li>Different models can cater to special needs</li>
+</ul>
+
+<p>In general the recommendation is to size bounded contexts so they can be managed by a team of 10 people. Some bounded contexts are naturally smaller, with little coupling to other contexts (a small API) in which case smaller is ok.</p>
+
+<p>Oddly, Vernon seems to assume that each bounded context is a system process. In Chapter 13, “Integrating Bounded Contexts” he talks only about inter-process communication - as if the “modulith” concept did not exist. However it may be that he thinks “integrating contexts” in a single process is too trivial to mention, and is just being casual with his terminology.</p>
+
+<h2 id="domain-model">Domain Model</h2>
+
+<p>A <em>domain model</em> is a structured representation of the business concepts from a specific <em>bounded context</em> at a level of detail that corresponds to the level of the bounded context.</p>
+
+<p>A <em>bounded context</em> has an associated <em>ubiquitous language</em> and the names for things in the <em>domain model</em> are expected to be taken from that language.</p>
+
+<p>From Vernon (page 62):</p>
+
+<blockquote>
+  <p>A domain model expresses an Ubiquitous Language as a software model.</p>
+</blockquote>
+
+<p>However large-scoped bounded contexts and their associated generic ubiquitous languages produce only imprecise domain models - things that may be useful on their own, but are not precise enough to map to code. I have already dared to define a new term for this earlier: a <em>tactical domain model</em> is one in which the <em>bounded context</em> and its <em>ubiquitous language</em> are precise enough that the model contains items from the DDD <em>tactical patterns</em>. This is the level at which they can guide the production of executable code.</p>
+
+<p>A <em>tactical domain model</em> defines concepts relatively close to the code; typical items in such a model are <em>entities</em>, <em>value objects</em>, <em>services</em>, and <em>aggregates</em>, together with the operations these things support, the relations between them, and constraints on their state or behaviour.</p>
+
+<p>Of course the corresponding term <em>strategic domain model</em> can be used to specify the more abstract, high-level types of model which still represent business concepts.</p>
+
+<p>The term “context” is often used as a synonym for bounded context. The term “model” is often used as a synonym for domain model.</p>
+
+<p>Any time something within a <em>domain model</em> (eg a type or operation) cannot be given a clear and unambiguous name, then that suggests that the responsibilities of that thing perhaps needs to be factored into multiple parts and/or moved to a different <em>bounded context</em>/<em>domain model</em>. In fact, a <em>bounded context</em> can better be defined by what it <em>does not have</em> than what it does; it does not have any terms whose meaning is ambiguous or inconsistent. Any time that happens, that conflict is resolved by moving responsibilities to the model of a different <em>bounded context</em>.</p>
+
+<p>The appropriate size for a bounded context (and thus its <em>domain model</em>) depends very much on the circumstances. A bounded context has a clear upper limit: when conflicting definitions of the same approximate concept are encountered, one of them has to be pushed out into another context, together with the other terms that interact with it. A bounded context also has a clear lower limit: when a discussion of some term in the context’s language requires some other term, then that other term must also be defined within the language. However that leaves a lot of play in between; sometimes a term can be deliberately defined in an abstract way with the details of its internals pushed into another bounded context. And non-overlapping/non-interacting sets of terms can be included within a single bounded context or placed in separate contexts. The guiding principle here is: what is easiest to understand, and what contributes most to discussions? Obviously, a focused minimal bounded context makes understanding the context easier and helps discussions of the responsibilities of that context. In addition, changes to a <em>domain model</em> typically require agreement from the whole team maintaining that context - making smaller contexts beneficial. However “switching contexts” has its own price. So here some pragmatic aspects can be allowed.</p>
+
+<p>It is highly beneficial when a bounded context (with a <em>tactical domain model</em>) is limited in size to be manageable by a single team of developers, eg 10 people or so. It is also often useful for each bounded context to be a dedicated codebase with reasonable build and test times. However excessive numbers of codebases has its own cost, as does each “boundary crossing” between bounded contexts/codebases. Refactoring is also easier within a single context/team - and easier within a single code repository.</p>
+
+<p>A <em>tactical domain model</em> isn’t necessarily equal to a deployable artifact. An artifact can contain multiple bounded contexts (see modulith), or part of one (see fine-grained microservice). It can also be built from one (modularised) codebase/repository or from multiple codebases/repositories (via libraries). An artifact which contains parts of more than one bounded context is possible but dubious; it has the disadvantages of a modulith (team conflict, release cycles) with the disadvantages of a distributed architecture (complexity). One case where a context spans multiple components may be in integration with a legacy system, if the legacy system is well designed enough that its (tactical) domain model can be adopted by the calling bounded context.</p>
+
+<p><em>Modules</em> are a way to internally structure a model. In higher-level domain models, these are purely a way of making a complex model easier to understand. In a <em>techical domain model</em> modules can be reflected in the underlying language - eg Java packages or C++ namespaces, or even as distinct libraries.</p>
+
+<p>There are of course code concepts which don’t get reflected in a domain model, eg some aspects of error-handling.</p>
+
+<p>While there have been some attempts in the past to promote “model-driven code generation”, ie defining a model in some tool which then generates compilable code, this is generally considered an impractical/failed approach. While a <em>domain model</em> should map relatively directly to code (to promote long-term bidirectional communication), there are still significant technical aspects of behaviour which are needed in addition. The textual representation of code can also be considered as <em>the real model</em>, ie rather than “model generating the code”, we have “code revealing the model”; sometimes the best tool to use to define a domain model is in fact text/code - possibly with supplemental external diagrams.</p>
+
+<h2 id="context-maps-and-bounded-context-interactions">Context Maps and Bounded Context Interactions</h2>
+
+<p>When a <em>system under design</em> is decomposed into multiple <em>bounded contexts</em> then it can be hard to understand the whole.</p>
+
+<p>There are a number of suggested documents that can be created to resolve this. One is the <em>context map</em> which shows all the contexts and the nature of their interactions. This map may simply show the relation between the contexts, or might show the correspondence between particular types in different contexts.</p>
+
+<p>A <em>bounded context</em> usually has some kind of API, ie has a set of types and operations that will be used by other contexts which interact with it. Evans (and Vernon) define different ways in which that interaction can occur. Even when multiple bounded contexts are embedded within the same (monolithic) artifact, this <em>boundary</em> still exists and must be respected.</p>
+
+<p>Different kinds of inter-context relation imply different kinds of <em>team interaction</em> as well as different implications for <em>code update and release</em>. Having these documented clearly on a <em>context map</em> helps teams know who to involve in decision-making and time-planning. Collaboration patterns between contexts include:</p>
+
+<ul>
+  <li>
+<em>unified model</em> - a single bounded context with all developers/experts involved in defining and updating it</li>
+  <li>
+<em>shared kernel</em> - in which a shared context is extended by multiple other contexts</li>
+  <li>
+<em>customer/supplier</em> - in which one context defines types that another context relies on/extends</li>
+  <li>
+<em>conformist</em> - in which a “providing” context has a model good enough for a consuming context to just adopt as-is (and possibly extend)</li>
+  <li>
+<em>anticorruption layers</em> - in which a consuming context isolates itself from another context it must collaborate with by <em>mapping</em> model types</li>
+  <li>
+<em>published language</em> - a dedicated model just for the “api”</li>
+  <li>
+<em>separate ways</em> - no collaboration on model design, minimal links between them</li>
+</ul>
+
+<p>The list above is sorted from highly-cooperative to highly-decoupled.</p>
+
+<p>Of course the simplest solution is when the entire project has just one bounded context with a single associated domain model. Here, there are no cross-context issues and nothing needs to be done.</p>
+
+<p>Bounded contexts may have a <em>shared kernel</em>, in which the exchanged types are identical in both contexts - same meaning, same state. This should only be done if the <em>business meaning</em> of the types in that shared kernel really are identical in all “importing” bounded contexts. This relationship obviously has benefits for the implementation (simplified communication), but also has costs: any change to that shared kernel needs to be agreed-on by the owners of all bounded contexts that rely on that shared kernel - and all implementations of those contexts then need to be updated appropriately. Note that this doesn’t necessarily mean those shared concepts are shared code - there might be a “shared module” or “shared library” defining those types, but other options are possible including a shared <em>openapi</em> specification from which the (exchanged) types are generated, or simply separate but compatible implementations. The <em>context map</em> tells anyone considering changing a <em>shared kernel</em> who they need to collaborate with.</p>
+
+<p>Bounded contexts may alternatively have a <em>customer/supplier</em> relationship, in which case the “upstream” <em>domain model</em> belongs to one team, but changes are made in consultation with the “downstream” systems that rely on those definitions. Again, the context map tells the upstream team who to consult when they wish to change something, and tells the downstream team who they need to talk to if they want to <em>request</em> changes or new features.</p>
+
+<p>The <em>conformist</em> relationship type is simpler: “downstream” users of types from a bounded context have no influence, and simply need to accept the model as it is. The context map tells the upstream team who they should inform when they change their model, but this is typically a one-way communication. This doesn’t mean the upstream domain model owners can arbitrarily make “breaking changes”; they should consider the consequences on downstream systems and perhaps provide backwards-compatibility mechanisms. While this pattern sounds “weaker” than the more collaborative approach, it can save a lot of headaches related to inter-team collaboration - and sometimes there just isn’t an option anyway.</p>
+
+<p>In all of these kinds of inter-bounded-context relations, some types from an external context are “adopted” (more or less) into a different context. This doesn’t mean sharing code, just concepts and compatible implementations. In <em>domain model</em> diagrams, the “shared kernel” approach generally just means referencing the shared model documentation as “also part of this model”. For the others, that approach may be made or the relevant types could be copy/pasted into the downstream model’s documentation. Note that this isn’t just about <em>implementation</em>; relying on an external model is also a <em>conceptual</em> change that affects how a team talks about and thinks about the problems within their own bounded context.</p>
+
+<p>Where the implementations of two bounded contexts need to communicate, but a single model of the exchanged data just doesn’t work effectively for both, then an <em>anti-corruption layer</em> can be used. This is just a block on the <em>context map</em> but means quite a lot for the implementation of the “downstream” model; the downstream model defines (in both docs and code) whatever types it finds most appropriate to address its problem, and a potentially complex piece of code then is responsible for translating/mapping between the API which the other context offers, and the local representation. This <em>anti-corruption layer</em> is named because it <em>prevents corruption of the model concepts of the downstream domain</em>. The implementation is not part of the <em>domain model</em> itself; it is considered a “technical detail” even though this can be a significant amount of work.</p>
+
+<p>A <em>published language</em> is, as far as I can tell, a dedicated (and stable) domain model for an API. A system which exports data in a published language can <em>conform</em> to that language, ie can internally model data in the same way that the API represents it; alternatively it can use the <em>anti-corruption layer</em> pattern, ie have an internal model which it then <em>maps</em> to the API’s model when exporting that data. Similarly, a system which needs to <em>use</em> the API (consume that data) can <em>conform</em> (use the same model internally) or use an <em>anti-corruption layer</em> to map that API’s model to a form more appropriate for its internal use. The most important part is that regardless of which approach the implementation each context uses, and even if those implementations change their models over time, the API remains stable. Often <em>published languages</em> are <em>official standards</em>. The point of the pattern is really that design in this case is “api first”, with an appropriate model chosen, then the data producers and consumers can choose to adopt the same model or map it to a different internal model.</p>
+
+<p>The <em>separate ways</em> pattern tries to eliminate relations between two bounded contexts.</p>
+
+<p>All of these patterns apply even to “modulith” applications containing multiple domains, ie there might be an <em>anti-corruption layer</em> used when making direct in-memory function calls between code in separate bounded contexts. In a monolithic codebase, if code from one bounded context just reaches across programming-language-module boundaries to refer to types from a different context, then this effectively creates an informal and undocumented <em>shared kernel</em> between the contexts - something that should be an official decision, not an implementation detail.</p>
+
+<p>A unified model requires all team members to be “peers” designing a single model together. A shared kernel requires collaborating teams to act as peers <em>for the shared part</em> while developing the models of their own bounded contexts independently. Customer/supplier requires the supplier team to take change requests from the customer seriously; the supplier team owns its context’s model but needs to take others into account and the customer teams can then “import” the model of the supplying context into their context. Confirmist is used when the supplier team does not collaborate at all, but does provide a model that is useful to the consuming context; the relationship is “take it or leave it” and sometimes “take it” is an acceptable option. Anti-corruption is used when collaboration on model design is not occuring (as with conformist), <em>and</em> the supplier’s model is quite different from the desired representation in the customer; a (possibly complex) translation layer is created to isolate the consuming context from the providing context. In separate-ways, there is no data-flow/communication/dependency between the projects at all; each implements functionality and sources data independent of the other. Sometimes multiple disconnected systems are indeed better than one integrated one.</p>
+
+<p>Both Evans and Vernon also discuss a pattern called <em>open host service</em> but frankly I can make little sense of their descriptions. It seems initially as if they are assuming that a software component that provides an API creates a <em>separate api</em> for every other component that may interact with it - but why would anyone take such a labour-intensive approach, rather than create just a single general-purpose API? Perhaps they are also assuming some underlying technology such as EJBs which are not really “open” to clients using other technologies? Is this “api per consumer” pattern perhaps related to weaknesses in old coding approaches to authorization-management, using a different API per external system in order to be able to expose only operations that are permitted for that system, rather than using a generic API with fine-grained access-control? Any suggestions on what Evans and Vernon mean by this pattern would be very welcome..</p>
+
+<p>Note that models are object-oriented concepts, and in-memory APIs are (usually) also object-oriented, while remote APIs might not be. Rest APIs do have a somewhat OO flavour, as the request path typically specifies a <em>resource</em> which is equivalent to an <em>aggregate root</em> (a type and an id, eg <code>/users/123</code>). The operation of course is typically limited to GET/PUT/POST/etc rather than specifying a method-name. Other API types (eg gRPC, GraphQL, or async messages) have a non-OO style and therefore tend to have a somewhat different implicit model. However there is still typically a model “revealed” via an API.</p>
+
+<h2 id="core-domain">Core Domain</h2>
+
+<p>In some cases the label “core domain” is used to mark one or more of the domains of an organisation as “the most important ones” - at least for the purpose of this project. In other cases, it is a subset of the most important concepts from the most important domain (see Distillation).</p>
+
+<p>In either case, this is one of the things that anyone new to the project will consult to get an “overview” of the project as a whole.</p>
+
+<p>Vernon points out that which domain is “core” depends upon your viewpoint; different teams may see different domains as “core” depending on what they are working on - it is <em>context dependent</em>.</p>
+
+<p>It is suggested that a <em>vision statement</em> be written for the core domain of a project, as a guiding principle for design: what problem is actually being solved?</p>
+
+<h2 id="distillation-and-large-scale-structure">Distillation and Large Scale Structure</h2>
+
+<p>Interestingly, Evans dedicates a whole chapter to <em>distillation</em>, while Vernon doesn’t mention it at all.</p>
+
+<p>Evans defines this (page 512) as:</p>
+
+<blockquote>
+  <p>the abstraction of key elements in a model, or the partitioning of a larger system to bring the core domain to the fore.</p>
+</blockquote>
+
+<p>Complicated problems can lead to quite large and complicated models. Evans mentions one project which started by <em>licensing</em> an “industry standard” model from a consortium which was 200 pages long.</p>
+
+<p>DDD introduces two complementary approaches to make the overall design easier to grasp:</p>
+
+<ul>
+  <li><em>distilling</em></li>
+  <li><em>structure</em></li>
+</ul>
+
+<p>In <em>tactical domain models</em>, distillation can be used to simplify the model, discarding things not needed for the problems to be solved (eg Evans page 13).</p>
+
+<p>In <em>strategic domain models</em>, a different kind of distillation is applied, in which concepts of secondary importance are moved to subdomains or modules, thus making the most important concepts - the <em>core domain</em> and its <em>core model</em> - more obvious (Evans chapter 15). It is not about removing detail, but instead about making the important bits stand out. It can be as simple as marking specific types as important, but otherwise involves pushing less-relevant (but not useless) details into their own parts of the documentation/code so they don’t clutter the big picture.  A <em>domain vision statement</em> is helpful in defining the overall problem domain in a short way.</p>
+
+<p>When the process of distillation isn’t enough, ie the project is so complex that understanding the <em>core</em> and its relation to the other parts of the (overall) model is still hard, then Evans suggests a number of approaches to add <em>structure</em> to improve understandability.</p>
+
+<p>In both cases, the point is to allow people to talk about specific parts of the overall model without hand-waving, and to <em>find</em> parts of the model which are relevant for any particular discussion - or when implementing a new feature.</p>
+
+<p>Bounded contexts are obvious starting points; these typically have only a small number of commonalities with other parts of the model, so can be represented separately. A <em>context map</em> can then be used to make the links that do exist more understandable. However contexts are still part of the overall model.</p>
+
+<p>Types with high cohesion can be grouped into <em>modules</em>, and this is a building-block of both distillation and structure but is not in itself sufficient for larger projects. As I understand it, <em>modules</em> in <em>tactical domain models</em> are usually real programming language features (also called <em>packages</em> or <em>namespaces</em> in some languages) while modules in <em>strategic domain models</em> are simply a grouping mechanism. I suspect the word “subdomain” and “module in strategic domain model” are pretty close to the same thing.</p>
+
+<p>Structure can be applied <em>within</em> contexts and modules, or <em>over</em> them.</p>
+
+<p>Some domains naturally fall into <em>layers</em>, in which case it can be helpful to structure types or modules of types in this way. Sometimes layering applies just within a single bounded context, while in other cases the same layering context might apply to multiple (or all) bounded contexts in a domain. These layers are <em>domain</em> concepts and should not be confused with <em>technical</em> layers such as a presentation-layer or persistence-layer.</p>
+
+<p>A <em>system metaphor</em> can perhaps suggest an appropriate structure. We use the metaphor of a “desktop” for graphical UIs on personal PCs for example; if there is a suitable metaphor for the problem domain then defining modules according to this metaphor can make code discovery easier.</p>
+
+<p>There is quite a lot of interesting information on these topics, and no summary can do them justice. See the books!</p>
+
+<h2 id="physical-subsystem">Physical Subsystem</h2>
+
+<p>This is a term from Vernon rather than Evans, and means a “deployable artifact”, a running application.</p>
+
+<p>There is no direct relation between physical subsystems, bounded contexts, and domains/subdomains. A model of an existing system may draw boundaries that do not align with physical subsystems, and greenfield projects may choose to create physical subsystems that do not align with domain/subdomain/bounded-context boundaries. Nevertheless, as typically bounded-context == team, there might be some benefits to having a 1:1 relation between bounded context and physical subsystem (to simplify release processes) if that doesn’t conflict with other architectural goals.</p>
+
+<h2 id="entities-and--value-objects">Entities and  Value Objects</h2>
+
+<p>There are a number of concepts defined for use in <em>tactical domain models</em>; in general these are well known in DDD and are well defined in both books so I won’t spend too much effort on them here. However for completeness, here’s a quick recap.</p>
+
+<p>Entities and value-objects represent “things” in the problem domain, and have state (data) as well as behaviour. Entities have a concept of “identity” separate from their state, while value objects do not (two value objects with the same state are in every way <em>the same thing</em>).</p>
+
+<h2 id="aggregates-and-repositories">Aggregates and Repositories</h2>
+
+<p>An aggregate is a set of entities and value-objects consisting of a <em>root</em> and some associated “child” objects. Aggregates are used to define:</p>
+
+<ul>
+  <li>atomic units of update</li>
+  <li>collections of objects which may have inter-object <em>invariants</em>
+</li>
+  <li>units of in-memory navigation</li>
+</ul>
+
+<p>The root object can be referenced “by id” while other objects in the aggregate are only accessible via navigation (using normal features of the programming language) from the root.</p>
+
+<p>A <em>tactical domain model</em> groups entities and value-objects into <em>aggregates</em> to represent their time-centric transactional relationships (something otherwise hard to show on a diagram).</p>
+
+<p>A repository is a kind of service which provides persistence for an aggregate. It is generally considered inacceptable for entities and value-objects to perform persistence operations (ie access repository interfaces); the reasons for this are discussed in detail later. Repositories are sometimes accessed from <em>domain services</em> - eg business logic which is performing “bulk updates” or generating “data summaries”. However mostly repositories are used by <em>application services</em> to load appropriate <em>aggregates</em> which they then either pass to <em>domain services</em> or invoke methods on directly. Because repositories are sometimes accessed from <em>domain services</em>, their interfaces are considered part of the domain model. Their implementations, however, are not part of the domain model - and not even part of the domain layer.</p>
+
+<p>A <em>repository’s</em> API is intended to mimic an in-memory collection of objects: put, fetch-by-id, and fetch-by-criteria; other operations are generally not needed. Fetch methods only return <em>aggregate roots</em>. For testing, a <em>repository</em> can be replaced with a real in-memory collection. Repositories map very naturally to object-oriented databases (document stores), but can be mapped to relational databases via various frameworks (eg for Java: JPA or JDO implementations such as Hibernate or DataNucleus). Evans (page 114) briefly discusses the advantages of separating the <em>mechanism of persistence</em> from the <em>repository</em> domain model level concept; sadly Evans says only “I won’t go into solutions to that problem, but they do exist”. Presumably he meant technologies such as JPA.</p>
+
+<p>An aggregate is loaded and persisted as a single unit. When using a relational database this occurs in a “transaction”; when using a “document store” database, each aggregate is typically a single document which is by nature “atomic”.</p>
+
+<p>An aggregate is considered to be a “consistent set” of objects, potentially obeying invariants. The methods of the individual types making up the aggregate need to enforce this. It can be useful to implement instantiation of an aggregate in a <em>factory class</em> or <em>factory method</em> in order to properly ensure invariants without having to add lots of complicated code to constructors; stateful model types often have complicated enough behaviour without being cluttered with once-per-lifetime inialisation code.</p>
+
+<p>Factories might be represented as a “createFoo” operation on a domain model item, but are sometimes not relevant parts of the domain model. In either case, they are part of the <em>domain layer</em> in the code.</p>
+
+<p>Many articles about <em>domain modelling</em> state that there should be “rich relationships” between entities in the domain models. This is true on a logical level; if some entity is related to another entity then it is important to know and represent that. However such relationships should be defined only if they are <em>relevant for the problem being solved</em>, as such relationships can complicate code - and therefore shouldn’t be represented when not relevant. And more importantly, the existence of a relationship between type A and B doesn’t mean that the code for A has to provide a method that returns the associated instance(s) of B; that can have all sorts of complicated consequences. Often, simply storing the <em>id</em> of associated entities is sufficient.</p>
+
+<p>A general rule for aggregates is to make them as small as possible; each aggregate is updated as a <em>transaction</em> and so the smaller they are, the less likely update-conflicts will be. An aggregate is also loaded as a (logically) atomic unit, meaning that smaller aggregates result in less database traffic. When using an object-store database, each aggregate is typically a single “document”, so obviously smaller is better. When using a relational database, “lazy” relations can potentially allow parts of an aggregate to be loaded on-demand, but such loads still need to be within the same transaction in order to produce a consistent view of the aggregate state - and therefore has consequences for updates. Often an aggregate is just one type, ie the aggregate root is the entire aggregate.</p>
+
+<p>When modelling relationships, it is important to be as constrained as possible. If a relation does not have to be bi-directional in order to solve the problem being addressed, then it is helpful to specify that in the domain model. In fact, as the model is implemented, that is likely a point that the developers will bring up as question/feedback to the model, as bi-directional navigation is harder to implement. This applies to both inter-aggregate and intra-aggregate relations.</p>
+
+<p>Within an aggregate, references to other entities not belonging to the aggregate are stored only as IDs; this obviously makes loading of an aggregate from persistent storage reasonable. Types belonging to the aggregate may provide methods that return references to other objects within the same aggregate, but should not provide methods to return references to things outside of the aggregate; instead they just return the IDs and leave it up to the caller to map such IDs to objects if needed. This ensures that developers don’t accidentally write code that updates more than one aggregate at a time (by updating fields, then navigating via a reference to an object in a different aggregate and updating that too); each aggregate is a transactional unit so updating multiple aggregates always risks inconsistency (one transaction committing, the other failing).</p>
+
+<p>As each aggregate is updated in a transaction, the overally system should not offer APIs that require multiple aggregates to be updated simultaneously; it just isn’t possible. What is possible is to update one aggregate and post commands or events that trigger asynchronous updates to other aggregates (ie eventual consistency).</p>
+
+<p>Small aggregates also support distributed data storage; all objects belonging to an aggregate must be in the same database instance in order to support transactional update, but those referenced only by ID may be stored elsewhere.</p>
+
+<p>Navigation can trigger database access if a relation is lazy, but that is a side-effect that is invisible to the calling code; the interaction pattern from outside is still <em>navigation</em> and not <em>lookup</em>.</p>
+
+<p>From Evans (page 149):</p>
+
+<blockquote>
+  <p>Any object internal to an aggregate is prohibited from access except by traversal from the root.</p>
+</blockquote>
+
+<p>An aggregate may contain multiple entities (ie things with a unique database ID), but all IDs except for that on the aggregate root should be considered “for internal use only”. Other entities should only reference an external aggregate via the ID of an <em>aggregate root</em>. To remember this, just think of the case where storage is an object database (document store).</p>
+
+<p>To summarize: an aggregate should contain a small number of objects (ideally just one). Its members may reference others by ID, but should not hold in-memory references to external objects.</p>
+
+<h2 id="services">Services</h2>
+
+<p>The word “service” is sadly rather overloaded. It can mean:</p>
+
+<ul>
+  <li>part of the “application layer” which acts as a facade over domain model types to connect incoming requests to the domain logic</li>
+  <li>a technical service, eg an interface to an external SMTP server for the purpose of sending emails</li>
+  <li>a “stateless” piece of business logic</li>
+</ul>
+
+<p>Application-layer services are not part of a domain model. Technical services may be represented as an <em>interface definition</em> within the domain model, with the implementation done external to the domain model layer. Only the last type (stateless business logic) is considered fully part of a domain model, with both interface and implementation in the domain layer.</p>
+
+<p>A domain model needs to represent <em>operations</em> (in addition to data and relations) and the recommendation is to bind these tightly to entities and value-objects where possible, with (domain) services used only when no more appropriate place exists for the operation. This assists the discussions that the model exists in order to support.</p>
+
+<p>The three primary “nouns” found in a tactical domain model are: services, entities, and value objects. Domain services (holding domain logic) therefore have an important place in models - though generally secondary to entity or value objects.</p>
+
+<p>From Evans page 82:</p>
+
+<blockquote>
+  <p>[definition of entity and value object]. Then there are those aspects of the domain that are more clearly expressed as actions or operations, rather than as objects. Although it is a slight departure from object-oriented modelling tradition, it is often best to express these as <em>services</em> rather than forcing responsibility for an operation onto some <em>entity</em> or <em>value object</em>. A <em>service</em> is something that is done for a client on request. In the technical layers of the software, there are many <em>services</em>. They emerge in the domain also, when some activity is modeled that corresponds to something the software must do, but does not correspond with state.</p>
+</blockquote>
+
+<p>In addition, Evans’ book has a whole section dedicated to (domain) services (see pages 104 - 108). There is a lot of text that could be quoted; here are a few examples:</p>
+
+<blockquote>
+  <p>In some cases, the clearest and most pragmatic design includes operations that do not conceptually belong to any object. Rather than force the issue, we can .. include <em>services</em> explicitly in the model.</p>
+</blockquote>
+
+<blockquote>
+  <p>There are important domain operations that can’t find a natural home in an <em>entity</em> or <em>value object</em>. Some of these are intrinsically activities or actions, not things. [..] Now, the more common mistake is to give up too easily on fitting the behaviour into an appropriate object, gradually slipping towards procedural programming. But when we force an operation into an object .. the object loses its conceptual clarity and becomes hard to understand or refactor. Complex operations can easily swamp a simple object, obscuring its role. And because these operations often draw together many domain objects, coordinating them and putting them into action, the added responsibility will create dependencies on all those objects, tangling concepts that could be understood independently.</p>
+</blockquote>
+
+<blockquote>
+  <p>Some concepts from the domain aren’t natural to model as objects. forcing the required domain functionality to be the responsibility of an <em>entity</em> or <em>value object</em> either distorts the definition of a model-based object or adds meaningless artificial objects.</p>
+</blockquote>
+
+<blockquote>
+  <p>Services are a common pattern in technical frameworks, but they can also apply in the domain layer.</p>
+</blockquote>
+
+<blockquote>
+  <p>Fine-grained domain objects can contribute to knowledge leaks from the domain into the application layer, where the domain object’s behaviour is coordinated. The complexity of highly detailed interaction ends up being handled in the application layer, allowing domain knowledge to creep into the application or user inteface code, where it is lost from the domain layer.</p>
+</blockquote>
+
+<p>This use of services provides one mechanism for avoiding the blurring of application-services with domain logic; where the operations in an application service start to embody business rules, push them into a new service class and add that class to the domain model. It is at least now visible - and can perhaps then be given an appropriate name and become a useful concept. A useful guideline is to consider if a piece of code could usefully be discussed with business experts.</p>
+
+<p>The strategy pattern can be used to pass <em>policies</em> to methods on entity and value types; such <em>policies</em> can be represented as <em>domain services</em>.</p>
+
+<p>Suggestion from Evans: name services using verbs not nouns.</p>
+
+<h2 id="domain-events">Domain Events</h2>
+
+<p>Vernon spends quite a lot of time addressing the topic of <em>events</em> emitted by domain models. This isn’t mentioned in Evans and appears to be a subject that was created/invented in the interval between these books.</p>
+
+<p>As noted, an <em>aggregate</em> is the unit of transactional persistence. However business workflows often require multiple such aggregates to be updated, sometimes in the same system and database, and sometimes in different databases owned by different systems. These kinds of problems can potentially be solved by having aggregates emit <em>asynchronous events</em> as part of their updates, and having other systems listen and respond to these. See Vernon for more details on this.</p>
+
+<h1 id="other-interesting-topics">Other Interesting Topics</h1>
+
+<h2 id="alternatives-to-object-orientation">Alternatives to Object Orientation</h2>
+
+<p>Although the books, and most of the literature, on DDD is focused on object-oriented programming languages, the principles still seem useable with other programming styles.</p>
+
+<p>What is important is that the same model be useful for representing knowledge of the domain experts <em>and</em> representing significant features of the codebase that is developed to solve the problems. The model doesn’t need to map 1:1 to either (and particularly to code) but the mapping should be simple and obvious and navigable in either direction (given an item in the model identify the corresponding piece of code, or given a piece of code identify the corresponding item in the model).</p>
+
+<p>When the language used is Object Oriented, then the model is centered around entities, value-objects, and services. And in fact this seems to be the most natural shared model between domain-experts and developers. This is no surprise as object-oriented programming actually has its roots in system modelling; the language SIMULA-67 was designed exactly for that (eg modelling ships, cargo, and ports to optimise harbour management) and the ideas followed into SMALLTALK and then other OO languages such as Java/C#/Python which are commonly used to build business systems today. Note however that even in the presented OO-centric form, DDD doesn’t rely on polymorphism/virtual-dispatch or interface/implementation distinctions ie doesn’t really need an OO language, just an “OO-like” one (‘OO-ish”?). Evans discusses the dominance of OO (and the reasons for it) on page 116; as well as being a good common ground between experts and devs, the extensive community, resources, and tools for doing DDD in OO makes it a good choice - but it doesn’t seem the only one.</p>
+
+<p>Evans (page 119) does briefly mention the possibility of doing DDD using Prolog; presumably such domain models would look quite different (based on facts and rules) than the ones that are developed to support development in an OO language (based on entities and operations), but a “common ground” between experts and developers seems possible and therefore a single model can support both problem-description and code-description which is the important thing.</p>
+
+<p>Evans does spend quite a lot of time talking about the benefits of side-effect-free functions, ie is at least sold on the concept of “functional in the small, OO in the large” in the context of DDD - something that hybrid languages such as Kotlin or Scala support.</p>
+
+<p>A simple internet search shows that there is quite a lot of information (videos and books) on the subject of domain-driven-design in functional languages; I haven’t personally investigated yet but it seems entirely feasible to develop a model that works both for business and for functional code; see presentations from <a href="https://www.youtube.com/watch?v=56j8kLMdkyQ">Marco Emrich</a> or <a href="https://www.youtube.com/watch?v=2JB1_e5wZmU">Scott Wlaschin</a> for example.</p>
+
+<p>Although Evans seems convinced that “procedural languages” are not practical to use with the concepts of DDD, I’m not 100% convinced it is impossible. It’s probably a moot point, as it’s likely not a <em>good idea</em> to do it, but what DDD even in its traditional format (as presented in the book) relies on is:</p>
+
+<ul>
+  <li>types representing a set of properties</li>
+  <li>operations on the types - which could be methods or plain functions</li>
+  <li>modularity, ie some way of grouping types and operations together (<em>modules/namespaces</em>) - classes are only one type of module</li>
+  <li>a way of enforcing invariants on types (methods/property-accessors are only one way to do that)</li>
+</ul>
+
+<p>The primary benefit of OO, in the context of DDD, seems to be that classes provide “automatic” modularity, grouping sets of data and operations on that data together. This gives business and developers the opportunity to consider these “modules” as a concept (a user, an invoice, etc). As a secondary benefit, it provides a mechanism for enforcing invariants. However such modularity is available in non-OO languages in ways other than classes.</p>
+
+<p>It seems to me that even “C” could achieve this, with a moderate amount of discipline. Each entity in the domain could be an opaque type definition in a header file, and the associated operations can be function declarations in that header file taking that type as its first parameter. The associated implementation file then defines the fields of the type and the function implementations - ie provides data-hiding so that the fields remain private. Alternatively, the fields could be declared in the header-file, but code-check tools could ensure they are never directly referenced - ie “private” data is enforced by an external tool rather than the compiler. This approach seems to make a “model” feasible - though it does seem to be using C as “pseudo object oriented”. I’m not seriously proposing doing DDD in “C”, just pointing out that if “C” could do it, then probably other non-OO languages can do it better.</p>
+
+<p>In some places, Evans seems to use the expression “procedural” as a synonym for large functions that contain multiple concepts. This isn’t an intrinsic part of procedural programming though, or something that cannot happen in an OO method. Different tasks should be separated into different functions, and those functions should be assigned to appropriate modules, giving developers and domain-experts a chance to refer to them by name. That applies to all programming languages.</p>
+
+<p>As we are talking about problems with significant domain logic, the programming language used will typically need to fulfil these anyway:</p>
+
+<ul>
+  <li>mainstream acceptance</li>
+  <li>developer performance over runtime performance</li>
+  <li>debuggability over runtime performance</li>
+</ul>
+
+<p>In practice this probably means an OO language such as C#, Java, Kotlin, Python, or Javascript. However things such as the Lisp family would also theoretically be candidates; they seem to have the necessary features to also represent types, operators on those types, and modules. I have had a long discussion with someone doing DDD in F# and being very happy with it.</p>
+
+<h2 id="the-modelling-process">The Modelling Process</h2>
+
+<p>Much of Evans’ book (the later parts) talks about the process of finding/discovering/developing a good model. While there is lots of good info here, it’s hard to summarize.</p>
+
+<p>As an architect or developer:</p>
+
+<ul>
+  <li>Read the literature for the domain</li>
+  <li>Listen to the domain experts</li>
+  <li>Ask lots of questions</li>
+  <li>Look for places where descriptions of things in the model are controversial (not everyone agrees), confusing, or  vague.</li>
+  <li>Try to separate technical coordination from business logic; there may be things that can be “pushed down” into the model</li>
+</ul>
+
+<p>Note: “design” is the technical code, “modelling” is the business aspect. The design should “reveal” the model; the model should “map to” the design.</p>
+
+<p>Businesses used to be centered around paper forms before automation started. First a form would be filled out, with fields. A <em>workflow</em> would then be applied to this <em>immutable</em> form, in which the form flowed from department to department until reaching some end state. This suggests that “functional programming” is in some senses a better model for many businesses than object-oriented design. However it would be a poor idea to structure a domain model as a passive entity and a set of “department” objects each with a set of operations representing the workflows they can apply to a specific entity type. The reason is that departments are not stable; they regularly get re-organised. Workflows are far more stable than management structures, so instead consider creating modules consisting of the forms (entities) grouped together with the workflows that can be applied to those forms (operations). This is effectively equivalent to the OO representation: data grouped together with the operations that apply to that data. In other words, whether you are a fan of functional or OO programming, the domain-model representation is effectively the same. A model does not need to be mapped 1:1 to code; it just needs to be an <em>obvious and consistent transformation</em> (and one which can be followed in both directions). Data and associated operations need to be in some kind of module/namespace in order to be easily understood; a class is one kind of module/namespace but others are fine too.</p>
+
+<h2 id="development-processes-team-structures-and-human-interaction">Development Processes, Team Structures, and Human Interaction</h2>
+
+<p>Because a successful project needs a domain model and language which directly connects the domain experts and the developers, the role of “business analyst” (BA) becomes questionable. While traditional (non-coding) business analysts are good at helping domain experts develop a model, that model isn’t necessarily one that is helpful to the developers. Therefore either BAs need to become “coaches” to the model development process, or the developer representatives also needs to play the role of BA. Evans (page 48) goes into depth on the problems with a separated “analysis model”. To repeat a quote:</p>
+
+<blockquote>
+  <p>Model-driven design discards the dichotomy of analysis model and design to search out a single model that serves both purposes.</p>
+</blockquote>
+
+<p>Evans and Vernon talk a lot about models <em>evolving during development</em>, and rightly so. This means that everybody involved in the project is in some sense doing <em>analysis</em> ie <em>domain model refinement</em>. However every project needs to have at least a partial model before coding starts, ie there will be an initial phase with a smaller pool of experts and just a few representatives from the sofware development side. In general, these developer representatives probably have the job-title of <em>architect</em>. However whoever is doing this must be:</p>
+
+<ul>
+  <li>willing to learn at least the core concepts of the problem domain</li>
+  <li>competent in domain modelling</li>
+  <li>and able to represent the developers properly here, ie is still a competent developer.</li>
+</ul>
+
+<p>An architect who is an active developer is also helpful during the initial coding phase; even with a good model developed, there is still a potential communication gap between the model and the developers. Only a few domain experts were involved, and they had deep contact with the architect during creation of the model, ie no communication issues should remain there. But a larger pool of coders now need to try to map that model into code - and therefore may need help in understanding it. That help is best done by someone who truly speaks their language; and the help is often best provided via example code. It may also well be the case that the current model is <em>not</em> easily mappable to code, in which case the model needs to be revised. A “coding architect” is in the best place to tell whether implementation problems are due to coders misunderstanding the model, or an incorrect model.</p>
+
+<p>As noted, developers are also expected to be what Evans terms “hands-on modellers”; responsibility for design is shared and communication from implementers up to influence the model is not only allowed but critical for success. When developers truly understand the model, then factoring out of duplicate code results in new and helpful concepts (items in the model) and not just technical code reuse. Those new concepts can lead to “breakthroughs” in functionality and performance.</p>
+
+<p>Model development is iterative - particular in the case where a model must function both as a description of the problem domain and a skeleton for the code.</p>
+
+<p>Evans is no fan of generating code from diagrams; the diagrams are just not expressive enough. At the same time, they have too much detail for many uses. A single diagram of “the entire system” can be overwhelming. Instead, he tends to write documents with lots of embedded diagrams each describing an aspect of the system. And the code is the “complete spec”; documents exist to provide additional info and context for the code, and to prompt the common understanding of all participants already established through discussions.</p>
+
+<p>Having a ubiquitous language allows documents to be more concise; a single well-defined term can be used rather than a long vague reference.</p>
+
+<p>General advice to developer-modellers (Evans page 321) is to keep trying to improve the model while implementing. To achieve this:</p>
+
+<ul>
+  <li>Live in the domain</li>
+  <li>Keep looking at things in a different way</li>
+  <li>Maintain an unbroken dialog with domain experts</li>
+</ul>
+
+<p>Continuous integration (aka “trunk driven development”) is recommended in order to ensure that different developers don’t evolve the model in incompatible ways. Developers should merge their changes regularly (eg daily) into the “release branch” and then this branch should be built and all automated tests applied to it. Assuming that existing code has good unit tests that verify the desired behaviour, any change to the model that breaks an earlier developer’s assumptions will be detected at this point (if not earlier) and a discussion about the desired model behaviour can be had - first between developers and then if needed with domain experts. The result is either a correction of misunderstanding or an improved domain model.</p>
+
+<h2 id="layered-architecture-aka-isolating-the-domain">Layered Architecture aka Isolating the Domain</h2>
+
+<p>While developers and domain experts need to talk about business concepts, there is a lot of code in an application which is purely technical and doesn’t need to be discussed. It is therefore important to structure the code-base to separate this technical infrastructure part from the domain-related part. without this, “it’s hard to see the forest for the trees”. Automated tests also become awkward; business logic typically requires large numbers of tests and there really is no need to mock infrastructure components when doing this (as long as separation is present).</p>
+
+<p>Domain-driven design therefore often applies the <em>Hexagonal Architecture</em> (aka <em>Ports and Adapters</em>) pattern, or the similar <em>Onion Architecture</em> pattern. Both of these isolate the implementation of business logic from other concerns.</p>
+
+<h2 id="the-application-layer">The Application Layer</h2>
+
+<p>DDD makes a useful distinction between the <em>domain layer</em>, the <em>application layer</em>, and “non-domain code”.</p>
+
+<p>The application layer is where “use cases” are implemented by orchestrating domain layer operations. The domain layer is a kind of “toolbox” from which the use-cases are composed. Note however that the application layer methods should be simple and obvious - suggesting that complex use-cases should be seriously analysed to find logical operations which can then be pushed down into the domain layer. There does seem to be a fuzzy border between what is a “usecase in the application layer” and what should be a domain service.</p>
+
+<p>It’s also likely that use-cases will be discussed with business experts, yet the application layer is not considered a topic for discussion with business experts - only the domain model. So this seems somewhat inconsistent.</p>
+
+<p>In any case, “adapters” (in hex arch terms) such as embedded UI layers or remote service layers interact with the application layer and not the domain model directly. In particular, persistence transaction handling is part of the application layer meaning that at least all <em>commands</em> must go through the application layer.</p>
+
+<p>A use-case might also potentially require orchestrating operations from multiple bounded contexts, so use-case discussions are about more than just a single bounded context. Note however that the <em>aggregate</em> is the unit of transactionality, so requests typically should not <em>modify</em> objects in more than one context; see section on aggregates for more info.</p>
+
+<p>One of the points of <em>modelling</em> is to define a structure that is more representative of the problem domain than just a block-of-code-per-use-case. When developers are simply given a set of implementation tickets of form “given input X the system should return Y”, then the end result may be a system that fulfils exactly those requirements - but it will not be one with an elegant and minimal code-base, will be difficult to understand, and will not be easily adaptable to future requirements. In effect, the entire system will be implemented in the <em>application layer</em>. Software based upon a suitable <em>model</em> of the problem domain will be better in all these aspects - and that model needs to be kept separate from non-domain code.</p>
+
+<p>The term “transaction script” is sometimes used for this approach where each use-case is implemented directly, with few or no “model” concepts present. This can be useful for simple/trivial applications but doesn’t scale well to complex domains.</p>
+
+<h2 id="persistence">Persistence</h2>
+
+<p>This article has already talked about <em>aggregates</em> and <em>repositories</em> in terms of “what DDD recommends”; however how to actually implement that is a non-trivial topic.</p>
+
+<p>The whole of Evans chapter 6 is dedicated to “the lifecycle of a domain object”, including persistence issues.</p>
+
+<p>The most recommended pattern (as far as I can tell) is for all persistence-related operations to be performed at the <em>application service</em> layer before the domain model types are invoked. The expected code pattern is roughly:</p>
+
+<ul>
+  <li>a network-api-handler decodes incoming data into an appropriate data-structure then calls an <em>application service</em>
+</li>
+  <li>the <em>application service</em>
+    <ul>
+      <li>starts a database transaction</li>
+      <li>loads an aggregate-root by id (via a repository)</li>
+      <li>calls an operation on that object</li>
+      <li>commits the transaction</li>
+      <li>returns the result to the network-api handler</li>
+    </ul>
+  </li>
+  <li>the network-api-handler then converts that result into a suitable network-format response</li>
+</ul>
+
+<p>The api-handler, application service, and repository, are outside of the domain model, ie are not part of the domain model documentation and are not referred to in discussions with domain experts. They should therefore <em>do nothing business-relevant</em>; if they aren’t part of discussions with the experts then the reasons for that should be obvious.</p>
+
+<p>Sometimes application services need to load more than one aggregate, and sometimes they call a <em>domain service</em> rather than a method on an aggregate root. However these sections of code really must do nothing business-relevant. This also ensures that such methods have “consistent level of abstraction” ie don’t mix low-level and high-level concepts.</p>
+
+<p>In general, methods on aggregates only access other objects on the same aggregate, so the need for an aggregate to access other objects is rare. Where this is needed, they can generally be passed in by the application service as a parameter. Where the object is determined based on data, the application service can potentially pass in a “provider” object (a kind of special-purpose repository) that can return the relevant object on demand.</p>
+
+<p>The fact that this “application-level code” controls the database transaction is what gives it the alternative name “transaction script” - although that name typically refers to code that does all the work itself, whereas an <em>application service</em> instead delegates to the domain model.</p>
+
+<p>From Vernon page 266 (sadly no reason for this guideline is given here):</p>
+
+<blockquote>
+  <p>As a rule of thumb, we should try to avoid the use of Repositories from inside Aggregates.</p>
+</blockquote>
+
+<p>And from Vernon page 279:</p>
+
+<blockquote>
+  <p>A Service in the domain is welcome to use Repositories as needed</p>
+</blockquote>
+
+<p>Having entities access repositories is generally unnecessary and suggests a design problem as aggregates are “atomic units” which should be concerned only with their own state. An entity might possibly provide a “factory method” which returns a new entity (eg “cloning”) - in which case the caller (an application service or domain service) is responsible for registering that new object with the appropriate repository. Services might need more sophisticated access, eg methods which produce summaries/reports - those encode business logic but perform access across multiple entities. In this case, a Repository interface may provide suitable “bulk” operations which the <em>domain service</em> then invokes.</p>
+
+<p>Having entities access repositories is particularly difficult as they somehow need access to these “stateless” repository service(s); doing “dependency injection” into stateful types such as entities and value objects is difficult and generally not done. Passing repository references in to methods is possible, but ugly. Doing dependency injection on stateless <em>domain services</em> is, on the other hand, not a problem.</p>
+
+<p>It is generally assumed that entities do not “save” changes. With document-centric databases, the caller (a service) should know whether the invoked method mutates something, and if so will save the entity by just storing the whole aggregate (document). With a relational database it is assumed that some framework is used which does some kind of “change tracking” so that the appropriate fields which need writing back to the database can be determined automatically.</p>
+
+<p>It is of course possible to write arbitrary SQL statements that update data in a database directly, eg can insert a contact-phone-number for a customer without loading the customer object and its associated map of contact-phone-numbers. However comprehension and maintainability should override performance; load the aggregate (the customer profile), invoke methods on it, and persist it again rather than directly messing with its persistent state. This ensures the proper validation, logic, and invariants implemented by the model types are applied. Note: this is also more portable to an OO database if that is an option in the future; OO databases naturally persist aggregates and (unlike relational DBs) don’t allow random data to be updated.</p>
+
+<p>Interestingly, on page 160 Evans suggests that it may be worth making some compromises in the domain model to make the mapping to a database “transparent”. This doesn’t mean that model-to-tables needs be be 1:1; some transformation is acceptable but it should be an understandable and consistent one. Alternatively, it is acceptable to have quite different database and memory models - but that should be a deliberate choice. One issue to watch out for is that refactoring of code is easy, but schema updates are not.</p>
+
+<h2 id="dependency-injection-into-domain-model-types">Dependency Injection into Domain Model Types</h2>
+
+<p>Domain services may well need references to other services - including Repository implementations. As these stateless services are <em>singletons</em>, this is pretty easy to do - either just manually (pass the objects to the domain service constructors) or via a standard dependency injection framework.</p>
+
+<p>Stateful domain types (entities and value objects) should not need access to repositories (as explained earlier), but if they have complex logic in their methods then they might well need access to other domain services or to “infrastructure services” of various types. There are several options to deal with this:</p>
+
+<ol>
+  <li>pass the required services in as parameters to methods which need them</li>
+  <li>put logic requiring access to services only in other services, never in stateful types</li>
+  <li>perform dependency injection on entities and value-objects as they are instantiated</li>
+  <li>using global references to services (“lookup”)</li>
+</ol>
+
+<p>Option (1) can be appropriate in some cases. However it does force internal implementation details to be exposed via the model type’s APIs; the fact that a particular service is relied on might otherwise be an “implementation detail”. The necessary parameter could also sometimes need to be passed through multiple methods to where it is needed.</p>
+
+<p>Option (2) does move the domain model somewhat in the direction of an “anemic model”. The majority of methods can still be defined directly on the stateful types, but some things that might otherwise be on such types will be <em>domain services</em> instead - which might in turn require those stateful types to expose more of their internal state than they would otherwise do. This isn’t the end of the world in my opinion, ie can be appropriate in places.</p>
+
+<p>Option (3) seems tempting, but is actually rather hard to implement. It requires hooking some dependency injection framework into the persistence framework (to inject as objects are loaded via repositories) <em>and</em> requires every other place where instances of the type are created to also use the dependency injection framework (eg using a DI-framework-provided factory such as JPA’s suport for <code>Provider&lt;T&gt;</code>).</p>
+
+<p>Option (4) is one I find horrible. This is the pattern of <em>accessing services via global variables</em> - also known as “static fields” in some languages. The static singleton pattern, in which a type has a global/static method that returns the value of an (internal) global/static field, is just the same thing. This does allow any code to obtain a reference to any service at any time, but has a number of nasty consequences: it hides dependencies, it makes it impossible for different parts of the code to use different instances of a service, and it greatly complicates unit testing. Sadly it appears quite frequently in DDD examples (Evans even suggests applying this pattern on page 108). If this pattern is used, then I would recommend having just <em>one</em> global “service provider” object which in turn can return all the different services for which “lookup” is supported; this at least allows unit tests to configure just this one global field with an instance that provides only the services that the unit test is expected to need - and which fails on any attempt to fetch an unexpected service. Note that the static singleton pattern as originally described by the “gang of four” is fine; it’s only a problem when the instance is <em>set by something else</em>.</p>
+
+<p>Here’s the <a href="https://stackoverflow.com/questions/11638311/can-you-use-dependency-injection-in-persistent-entities">kind of question and answer that leads to anaemic domain models due to persistence issues</a> - if persistent model types are expected to have complex logic which relies on services (rich domain model), then it seems that dependency injection into entities would be helpful. Sadly as noted above, this just isn’t standard practice and in fact is hard enough to get right that despite such dependency injection feeling like the right solution (to me), options (1) and (2) are probably “less bad” given the lack of out-of-the-box injection support for entities. Certainly in the question referenced above, the developer fell back to option (2) when choosing option (1) would probably have been better.</p>
+
+<p>Interestingly, the Apache Causeway framework <a href="https://causeway.apache.org/userguide/2.0.0-RC1/fun/domain-entities-and-services.html#injecting-services">supports injection into entity types</a>. However it appears to use this to allow entity types to obtain <em>repository references</em> in order to do persistence operations - something that we discussed above and that DDD appears to discourage - so maybe this shouldn’t be taken as <em>best practice</em> for DDD.</p>
+
+<p>The following (sub) section looks at how option (3), ie dependency injection into entities, might be implemented in Java environments. This doesn’t mean it is recommended - in fact, I would personally suggest choosing either (1) or (2) on a case-by-case basis, whichever happens to be the “least worst” for that particular method.</p>
+
+<h3 id="dependency-injection-for-entities-with-jpa-hibernate-or-jdo">Dependency Injection for Entities with JPA, Hibernate, or JDO</h3>
+
+<p>The previous section looks at whether dependency injection for stateful types (DDD entities and value objects) is sensible. This sections looks at how this could be done (if you so choose). Note that I haven’t personally ever set up dependency injection for entities, just researched the possibility.</p>
+
+<p><a href="https://jakarta.ee/specifications/persistence/3.1/">JPA</a> has <a href="https://www.baeldung.com/jpa-entity-lifecycle-events">the concept of entity listeners</a> (since early days) and these are CDI-enabled (since 2.1), ie can themselves rely on dependency-injection, including the ability to inject the “dependency injection context” itself. Listener logic can be executed in phase PostLoad, ie cannot control the <em>instantiation</em> of an entity, but can at least do field-injection after the entity has been created and populated with attributes from the database. Entity classes can be annotated with the appropriate listener as shown below, or a “default entity listener” for the whole persistence context can be defined, ie the EntityListeners annotation is no longer required on entities.</p>
+
+<pre><code>@Entity
+@EntityListeners(DependencyInjectionListener.class)
+public class ...
+</code></pre>
+
+<p>When using EJBs or spring-boot, injection support for EntityListener classes is auto-enabled. In other cases, you may need to pass a property to the persistence-manager during setup. That property is <code>jakarta.persistence.bean.manager</code> (legacy name: <code>javax.persistence.bean.manager</code>) and the value must be a CDI BeanManager. Alternatively if using Hibernate then pass property <code>org.hibernate.resource.beans.container</code> referencing an object of type <code>org.hibernate.resource.beans.container.spi.ExtendedBeanManager</code>.</p>
+
+<p>Spring 5.1 added class <code>org.springframework.orm.hibernate5.SpringBeanContainer</code> which is the necessary implementation to support the above behaviour (in earlier versions you need to implement that yourself, though it isn’t a big job).  And recent versions of spring-boot include class <code>LocalContainerEntityManagerFactoryBean</code> which set this up automatically, meaning that entity classes have normal Spring lifecycles. This is all available since 2019.  It seems that spring-boot expects a bean of name “entityManagerFactory” of type LocalContainerEntityManagerFactoryBean, and wires this into the persistence-manager as it is being set up by spring-boot - ie the DI integration can be overridden by spring-boot reasonably easily by just providing a custom bean with this name.</p>
+
+<p>Further hints for JPA, Spring and Hibernate setups can be found <a href="https://stackoverflow.com/questions/47941717/spring-dependency-injection-into-jpa-entity-listener/55452014#55452014">here</a> (particularly last comment) and <a href="https://www.matez.de/index.php/2019/04/05/connecting-spring-and-hibernate-though-beancontainer">here</a>.</p>
+
+<p>If you wish to, or need to, hook into the Hibernate framework more directly, the Session type is created via a SessionFactory which is initialised via a <a href="https://docs.jboss.org/hibernate/orm/3.5/javadocs/org/hibernate/cfg/Configuration.html">Configuration</a> instance, and this supports <code>setInterceptor</code>. The Interceptor has a method <code>instantiate</code> which appears to be a good point at which to do field injection.</p>
+
+<p>Hibernate supports config option <code>hibernate.cdi.extensions</code> (<code>ALLOW_EXTENSIONS_IN_CDI</code>) which is documented as “create beans other than converters and listeners”. It isn’t clear what this means, and searching the internet provides no useful hits. If you wish to depenendy-inject entities, it might be worth looking into. See also <a href="https://github.com/hibernate/hibernate-orm/blob/main/hibernate-core/src/main/java/org/hibernate/cfg/AvailableSettings.java">Hibernate class AvailableSettings</a> for config options such as <code>JAKARTA_CDI_BEAN_MANAGER</code>, <code>BEAN_CONTAINER</code> and <code>ALLOW_EXTENSIONS_IN_CDI</code>.</p>
+
+<p>Note that even if creation of entities can be delegated to a DI framework, it still isn’t possible to create immutable entities with JPA; JPA insists on setting fields directly or calling setter-methods. Constructors taking the fields of the object are not supported. This means that fields cannot be marked final. It is of course possible to provide no setters, making the fields at least logically immutable.</p>
+
+<p>JDO also supports entity-lifecycle-listeners. And because JDO is more “api-driven”, there is an API for registering these listeners. It is therefore not necessary for the JDO framework as such to “support injection” into these types; just create them with the appropriate parameters (eg a reference to the DI context) and then pass them to <code>PersistenceManager.addInstanceLifecycleListener</code> (or PersistenceManagerFactory) on persistence startup. However if you wish, CDI integration in JDO can also be done by <a href="https://datanucleus.wordpress.com/2017/07/12/dn-v5-1-cdi-injected-attributeconverters-and-event-listeners">passing the CDI framework as a config-param</a>. Setup appears to be done via property <code>datanucleus.cdi.bean.manager</code> in <a href="https://www.datanucleus.org/products/accessplatform/jdo/persistence.html">the PersistenceManagerFactory properties</a>. The same disadvantages as listed for JPA above apply: the bean is created with <em>new</em> and then loaded, and then can be injected with dependencies - workable, but not the most elegant solution.</p>
+
+<p>There is of course always the manual approach: <a href="https://adambien.blog/roller/abien/entry/jpa_injection_shortcomings_and_possible">put a facade over the repository classes and do the injection there</a>. However this doesn’t work with lazy-loading; here no facade is used to load the entities and therefore no dependency injection will occur.</p>
+
+<p>Possibly <a href="https://www.baeldung.com/hibernate-custom-types">Hibernate custom UserType mappings</a> could be used to inject stuff, though it looks non-trivial.</p>
+
+<p>Here is an <a href="https://developer.jboss.org/thread/179152">interesting comment</a> by Gavin King, the primary inventor of Hibernate:</p>
+
+<blockquote>
+  <p>I really think you’re setting up a false dichotomy here. I’ve heard this same argument before from other people. It is claimed that:</p>
+
+  <ul>
+    <li>it is very much more OO to put business behavior with data, and</li>
+    <li>our entities hold most of the interesting data, so</li>
+    <li>therefore, we need dependency injection in our entities.</li>
+  </ul>
+
+  <p>But this argument is missing a couple of steps. First, you need to show that:</p>
+
+  <ul>
+    <li>the kind of interesting business behavior that makes sense to package with the persistent data is the same logic
+that we usually want to implement in injectable beans, and</li>
+    <li>there is no other natural way to get injectable beans into an entity other than injecting them directly.</li>
+  </ul>
+
+  <p>But I’m simply incredibly skeptical on both of these points. IMO, the kind of business logic that really belongs
+on your entities is the stuff that uses the entity, and other entities that are related to it by graph traversal,
+and not “random other stuff” that you get by injection. And if you really can find me some cases where you need 
+to use the random other stuff in an operation that truly does belong on an entity, I don’t see why you can’t just
+pass that stuff as method parameters from something else that you can inject into.</p>
+</blockquote>
+
+<p>I wouldn’t necessarily agree; DDD is primarily about business applications, and I’m not sure how much Gavin has worked with these. Note that we are talking about injecting <em>domain services</em> into entities, not <em>application services</em>; the DDD book makes the difference between these very clear. However Gavin’s view here makes it clear why Hibernate and JPA don’t (easily) support injection into entity beans. IMO it’s a big call for a library (such as Hibernate/JPA) to dictate to an application’s architect how their code will be structured, when adding support for instantiating entity classes via a DI framework is almost trivial.</p>
+
+<h2 id="ddd-distributed-systems-and-microservices">DDD, Distributed Systems, and Microservices</h2>
+
+<p>While Evans was clearly aware of the potential for DDD-based systems to be distributed, he appears to consider this mostly to be an architectural detail which is “out of scope” for DDD. There is a brief discussion of packaging software for deployment on page 387 but it doesn’t help much. Evans does mention (page 108) that a <em>service</em> may act as <em>facade</em> over a set of domain objects to represent an interaction point between systems, reducing the “chattiness” needed to interact with remote objects.</p>
+
+<p>Although written 10 years later, Vernon doesn’t spend much time talking about the interactions between DDD and distributed systems either - though the discussions on <em>domain events</em> sometimes lean in this direction. However there is a vast amount of information on DDD and microservices available on the internet - possibly too much.</p>
+
+<p>In Evans part 3 a lot of text is dedicated to the concept of <em>iteratively improving</em> the domain model. However this is most effective within a single code-base; if in the first phase of a project you divide a system into modules and create a microservice for each module, each with its own database, then this hinders such “model-level refactoring”. Moving code within a single code-base is relatively easy; moving data between tables is harder but doable. Moving code between repositories and changing component remote APIs is hard, and moving data between databases is harder still. This suggests:</p>
+
+<ol>
+  <li>
+    <p>start any project with a monolith, and move to microservices as late as reasonably possible. This gives you a chance to learn about the domain, ie you get a better shot at a good subdomain partitioning.</p>
+  </li>
+  <li>
+    <p>make the microservices as large as possible. This still gives you easy refactoring within each code-base.</p>
+  </li>
+</ol>
+
+<p>As soon as components are separated by a network and have different release-cycles, a lot of effort needs to be put into designing <em>stable</em> and <em>upgradable</em> interfaces between them. Postponing this as long as possible seems like a good idea.</p>
+
+<p>In my article on <em>distributed read models</em> I suggest passing “current state” messages between components using Kafka compacted topics. This does of course also complicate any model changes; these messages are <em>aggregates</em> (not events) and as recommended anyway by DDD, aggregates should be as small as reasonably possible. Given that the <em>transactional constraints</em> of a system are unlikely to change (are stable requirements), these messages should be reasonably stable as long as they truly are minimal sets of entities that need to be atomically updated.</p>
+
+<p>In the case where all system code is built into a modulith, it doesn’t matter too much whether bounded contexts represent “vertical” slices of a system or “horizontal” ones. Vertical slices typically cause lower coupling between the teams which own the contexts but that depends on the system under design. However if creating a distributed system then it is important that the artifacts (which are based on bounded contexts) provide vertical slices of user-facing functionality, and not horizontal slices. The horizontal approach will result in either deep synchronous call chains, or deployable artifacts containing fragments of multiple bounded contexts. Given that bounded context == team, and deployable artifact == team, that obviously is not consistent. DDD’s focus on “domain experts” doesn’t necessarily address that - it depends on whether these are experts on user-facing behaviour or “back office” behaviour.</p>
+
+<h2 id="supple-design-concepts">Supple Design Concepts</h2>
+
+<p>Evans dedicates a whole chapter (chapter 10) to the concept of “supple design”, ie making code nicely refactorable/recombinable/understandable. Below are a few “tactical” patterns related to supple design which I found particularly interesting.</p>
+
+<p>Intention-revealing interfaces (Evans page 246): Name classes and operations to describe their effect and purpose, not their implementation. Names should use the <em>ubiquitous language</em> so that readers can understand its meaning. In the public interfaces of the domain model, state relationships and rules, but not how they are enforced; describe actions and events but not how they are carried out; formulate the equation but not the algorithm.</p>
+
+<p>Side-effect-free-functions (Evans page 250): Use pure functions where possible. Keep concepts of commands and queries separate. Any functional-programming fan can tell you about the benefits of pure functions!</p>
+
+<p>Assertions (Evans page 255): Where side-effects occur, document the changes via assertions. They include pre-conditions, post-conditions (what side-effects are expected), and invariants (what is always true). Assertions may be part of the model (particularly for aggregates). They should be validated either via explicit checks in the code, or unit-tests.</p>
+
+<p>Evans documents several additional patterns which are all useful, but of less impact than the above.</p>
+
+<h2 id="evolving-order">Evolving Order</h2>
+
+<p>This term is used regularly through the later part of Evans’ book. The point being made is that nothing about the model, from its fine details (<em>entities</em> etc) through to its large-scale structure (eg <em>layers</em>), should be considered sacred and immutable. Creating an executable program is a process of <em>design and discovery</em> and not just mechanical implementation. No design will be correct on the first (or fifth) attempt. When problems are discovered, this needs to trigger re-evaluation of the model (which is equivalent to the code structure). Improvements in the model then need to trigger changes in the code structure (ie refactoring) and improvements in the code structure (refactoring) needs to trigger updates to any model documentation.  This is particularly important in the large-scale structure used to represent the model.</p>
+
+<p>This is actually why simply saying “the code is the model” is tempting in some ways. However this does make discussion with non-programmers more difficult. It can also be difficult to see the important parts and avoid the “clutter” when a model is simply “the code”.</p>
+
+<h2 id="handling-duplication-of-data-and-logic">Handling Duplication of Data and Logic</h2>
+
+<p>It is very important that each data item in a system has only one owner. Sadly this is something that Evans does not address at all; Vernon does do so implicitly (via discussions of domain events, CQRS, etc). Any time two different contexts have an entity with the same field, one of those fields needs to be marked as “owner” and the other(s) as “view-only”. The consequences of two different contexts thinking they have the right to modify that field are obvious - that can break invariants defined by the other entity, and cause race-conditions when using one database and divergence when using multiple.</p>
+
+<p>Repositories and Aggregates don’t seem to resolve this. Yes, a repository returns a specific Entity. However there seems no rule that prevents a different bounded context from defining a repository that loads/saves a different Entity that happens to have similar attributes which map to the same tables.</p>
+
+<p>Somewhat related, but less important, is duplication of operations. When some business rule is implemented separately in two different contexts, and that rule is changed, then what happens? In some senses, this can be considered acceptable: the rule might actually only be <em>coincidentally</em> the same in both contexts, and the fact that the rule in one context has evolved doesn’t necessarily mean it has evolved in the other.</p>
+
+<p>A bounded context corresponds to a set of use-cases, and to a set of domain experts. It is unlikely that use-cases are duplicated, ie experts generally know that “this case is handled over there”. In particular, updating particular data fields <em>hopefully</em> falls into a set of use-cases that naturally falls into a single bounded context so that conflict over data ownership (who can write) is not common.</p>
+
+<p>Nevertheless this suggests that fine-grained bounded contexts should be treated with care.</p>
+
+<h2 id="the-entity-service-antipattern">The Entity Service Antipattern</h2>
+
+<p>One danger waiting for people doing DDD is to think that a set of logical functionality automatically corresponds to a deployable artifact. For example, a large number of projects will have a concept of <em>invoices</em> and logic associated with issuing them and tracking payment for them. However mapping this directly to an <em>artifact</em> which provides APIs for creating and updating invoices may not be an optimal solution.</p>
+
+<p>In general, it is best to create systems which are <em>vertical slices</em> of functionality from the user’s point of view, with a single request handled with as few inter-process communication points as possible. However following DDD without careful thought can sometimes lead to a <em>horizontally sliced</em> system in which handling a user’s request requires making a chain of synchronous RPC calls through a set of <em>layered components</em>. This creates <em>single points of failure</em>, and causes implementation of new requests (user features) to <em>cross component boundaries</em> and thus involve multiple teams (assuming components belong to teams). This problem is sometimes called the <em>Entity Service Antipattern</em>.</p>
+
+<p>It may be possible to partially resolve the single-point-of-failure by making interactions with such components <em>asynchronous</em>, but that still doesn’t address the development-time coupling. It is therefore worth considering whether that central concept (g invoices) can actually be made domain-specific ie each domain (set of requests) may deal with that concept in its own way rather than rely on a central component. One possible approach is to design components (and possibly domains) around the concept of “value streams” or “customer journeys” (sets of customer-facing use-cases).</p>
+
+<h1 id="nice-quotes-from-evans">Nice Quotes from Evans</h1>
+
+<p>Evans has a very nice writing style, and the ability to create very effective statements. Here are a few that stood out for me..</p>
+
+<blockquote>
+  <p>This is a design book, but I believe that design and process are inextricable. Design concepts must be implemented successfully or else they will dry up into academic discussion. (Preface, xxii)</p>
+</blockquote>
+
+<blockquote>
+  <p>Continuous refactoring is a series of small redesigns; developers without solid design principles will produce a code base that is hard to understand or to change - the opposite of agility. And although fear of unanticipated requirements often leads to overengineering, the attempt to avoid overengineering can develop into another fear: a fear of doing any deep design thinking at all.</p>
+</blockquote>
+
+<blockquote>
+  <p>Every model represents some aspect of reality or an idea that is of interest. A model is a simplification. It is an interpretation of reality that abstracts the aspects relevant to solving the problem at hand and ignores extraneous detail.</p>
+</blockquote>
+
+<blockquote>
+  <p>A domain model is not a particular diagram; it is the idea that the diagram is intended to convey. It is not just the knowledge in a domain expert’s head; it is a rigorously organized and selective abstraction of that knowledge. A diagram can represent and communicate a model, as can carefully written code, as can an English sentence.</p>
+</blockquote>
+
+<blockquote>
+  <p>Domain modeling is not a matter of making as “realistic” a model as possible. It is more like moviemaking, loosely representing reality to a particular purpose.</p>
+</blockquote>
+
+<blockquote>
+  <p>A well-written implementation should be transparent, revealing the model underlying it.</p>
+</blockquote>
+
+<blockquote>
+  <p>If the (implemented) design, or some central part of it, does not map to the (analyst’s) domain model, that model is of little value, and the correctness of the software is suspect. At the same time, complex mappings between models and design functions are difficult to understand and, in practice, impossible to maintain as the design changes. A deadly divide opens between analysis and design so that insight gained in each of those activities does not feed into the other.</p>
+</blockquote>
+
+<blockquote>
+  <p>The natural course of events is for (context) boundaries to follow the contours of team organisation. People who work together closely will naturally share a model context. Most project managers intuitively recognise these factors and broadly organise teams around subsystems. (page 344)</p>
+</blockquote>
+
+<blockquote>
+  <p>Decisions about whether to expand (an existing model) or to partition (into) <em>bounded contexts</em> should be based on the cost-benefit trade-off between the value of independent team action and the value of direct and rich integration. In practice, political relationships (..) often determine how systems are integrated. (page 382)</p>
+</blockquote>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<p>Some potentially useful links..</p>
+
+<ul>
+  <li>
+<a href="https://www.youtube.com/watch?v=U6CeaA-Phqo">[video] Jimmy Bogard: Domain Driven Design: The Good Parts</a> - an excellent presentation of DDD in the real world, showing by example the importance of good bounded contexts and of choosing an appropriate model for each (even if I’m not convinced by the final conclusion).</li>
+  <li>
+<a href="https://pubs.opengroup.org/architecture/o-aa-standard/DDD-strategic-patterns.html">Open Group: DDD Strategic Patterns</a> - a glossary of DDD terms</li>
+  <li>
+<a href="http://www.cs.sjsu.edu/~pearce/modules/patterns/analysis2/PatternSummariesUnderCreativeCommons.htm">San Jose State University: Domain-driven Design Pattern Summaries</a> - a summary of DDD concepts</li>
+  <li><a href="https://robertbasic.com/blog/bounded-contexts-and-subdomains/">Robert Basic: Bounded Contexts and Subdomains</a></li>
+  <li>
+<a href="https://alok-mishra.com/2020/08/17/ddd-domains-bounded-contexts">Alok Mistra: Domains, Subdomains, Bounded Contexts</a> - points out that line-of-business aka business capability is a good choice for domain definition. For me, I like that this is about “service delivered to customer”. The alternative “feature-based” approach leads to layers of software (not layered software).</li>
+  <li><a href="https://antman-does-software.com/functional-domain-driven-design-simplified">Antman: Functional Domain Driven Design</a></li>
+  <li>
+<a href="https://dev.to/yakovlev_alexey/do-not-read-ddd-distilled-by-vaughn-vernon-1i80">Yakolev: Do not read DDD Distilled</a> - a useful list of DDD books as alternatives to the “mainstream” works by Evans and Vernon.</li>
+  <li>[Akyurek: Mastering DDD with “Learning DDD” Book)(https://medium.com/@seyhunak/mastering-domain-driven-design-ddd-with-learning-domain-driven-design-book-dc5d948aeb7b) - primarily a review of a DDD book by Vlad Khononov.</li>
+  <li>
+<a href="https://www.oreilly.com/library/view/patterns-principles-and/9781118714706/">Millett &amp; Tune: Patterns, Principles, and Practices of Domain-Driven Design</a> - another alternative DDD book.</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/domain-driven-design-notes/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

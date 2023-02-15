@@ -1,0 +1,615 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Elasticsearch Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Elasticsearch Overview</h1>
+    <aside>First published on: October 17, 2016</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="about-this-article">About This Article</h1>
+
+<p>Elasticsearch (aka ES) can be considered a NoSQL document database with excellent search functionality, particularly for documents including blocks of “natural language text”. However it is more commonly used as an “external search and analysis tool” for data whose “master copy” is held in a different database.</p>
+
+<p>There is an excellent <a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/index.html">free online book about Elasticsearch</a> that describes just about everything you need to know. If you <em>definitely</em> want to use Elasticsearch, and are willing to spend 1-2 days reading that book and trying out its examples, then the book is the right place to start.</p>
+
+<p>This reasonably short article takes a slightly different approach, hopefully providing enough information in 15 minutes to indicate whether Elasticsearch is appropriate for a particular project.</p>
+
+<p>At the time of writing, the current version of Elasticsearch is 5.1. Note that (due to project internal restructuring) ES version-numbers jumped from 2.3 to 5.0, and in fact the differences between 2.x and 5.x are not large.</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>Elasticsearch is a document database (a superset of key-value store). The primary features of Elasticsearch are:</p>
+
+<ul>
+  <li>native clustering and replication support large data volumes and high ingestion rates;</li>
+  <li>powerful search capabilities (much more advanced than relational select-statements);</li>
+  <li>ability to compute <em>aggregations</em> (grouping, sum/min/max/average/etc) on-the-fly using the same datastructures that support efficient search;</li>
+  <li>basic geographical-location search support.</li>
+</ul>
+
+<p>Elasticsearch does not provide the kinds of data-safety features that relational databases provide: no transactions, no foreign-key constraints, etc. And it does not handle updates of single fields particularly efficiently - ie it is not appropriate for OLTP workloads.</p>
+
+<p>Elasticsearch does not provide an SQL interface, or anything remotely like it. Searches are performed using Elasticsearch’s own query-language, and updates/deletes are generally “by id only”.</p>
+
+<p>For some purposes, Elasticsearch can be used to hold the “master copy” of data, but is also quite common for the “master copy” to be held in a relational database, and for relevant parts of the data to be replicated into a read-only Elasticsearch instance to support advanced searching.</p>
+
+<p>The <a href="https://www.elastic.co/products/logstash">Logstash</a> sibling project focuses on processing streams of time-based events (eg logmessages or clickstreams) - usually ending by writing the data into an Elasticsearch instance. The <a href="https://www.elastic.co/products/kibana">Kibana</a> sibling project provides a web-based console for exploring datasets held in Elasticsearch, including making interactive queries, generating reports, and generating graphs. Together, Elasticsearch + Logstash + Kibana are called the “ELK stack”. This article focuses only on the features of Elasticsearch itself.</p>
+
+<p>Elasticsearch (and its sibling projects) are all open-source, although the company that is primarily behind their development does sell proprietary plugins for some functionality - most importantly to support database <em>roles</em> and <em>https encryption of network traffic</em>.</p>
+
+<h1 id="apis">APIs</h1>
+
+<p>Elasticsearch provides access to all functionality via a REST interface, ie standard HTTP; each Elasticsearch node listens by default on port 9200. Input and output data are either encoded in the URL, or in the request/response body in JSON format.</p>
+
+<p>The REST API is pretty elegant and very well documented. There are client-libraries for many programming-languages that provide a “native language API” which simply makes REST calls to Elasticsearch.</p>
+
+<p>Elasticsearch also provides a “binary” API; each Elasticsearch node listens by default on port 9300 for such requests. The Elasticsearch libraries themselves provide an elegant native API for the Java programming language which uses this binary protocol; I am not sure whether there are also implementations for other languages. The binary API provides two modes: “transport client” and “node client”. The “transport client” mode works very much like the REST api, while the “node client” is more cluster-aware and in particular knows which nodes host which index-shards (see later). In either case, the functionality is identical to that available via REST; only the performance differs. One limitation of the binary API is that the client must use the same library version as that being used by the Elasticsearch nodes (the client is actually “part of the cluster” just like other nodes are).</p>
+
+<h1 id="security">Security</h1>
+
+<p>Elasticsearch only supports http, not https. It also has no authentication system, or concept of “users”. If data needs to be secured at either the application or network layer then currently the commercial “Shield” plugin is needed. Elasticsearch is certainly <em>not</em> designed to be exposed directly to the internet!</p>
+
+<h1 id="elasticsearch-basic-data-storage">Elasticsearch Basic Data Storage</h1>
+
+<p>Elasticsearch can be seen as a key-value store, or document database. Data is written to Elasticsearch as JSON; the basic unit of data is a single JSON object, ie a <em>document</em>.</p>
+
+<p>When a document is written to Elasticsearch, an ID may be specified. If a document with that ID already exists, it is replaced. If no ID is specified, then Elasticsearch allocates a unique ID and returns it.</p>
+
+<p>The document can later be retrieved by ID. The returned document is not <em>exactly</em> the same; it is parsed and stored in a compact form. However every field that was in the original is still there, and with the same contents - regardless of the associated <em>mapping</em> (see later).</p>
+
+<p>By the way - it is actually possible to disable storage of the “original copy” (known as the source) of stored documents. If this is done, then “get by id” is no longer useful. However the individual fields within the original document are also stored in various persistent “lookup structures” for the purpose of searching, and so the data still contributes results to various search-expressions. This is considered “advanced” use of Elasticsearch; disabling storage of the original document is not common.</p>
+
+<h1 id="indexes-and-mappings">Indexes and Mappings</h1>
+
+<p>Document databases store data in what is typically called “document collections”. Elasticsearch somewhat confusingly uses the term “index” for a document collection, ie a set of JSON objects. An ES “index” has nothing at all to do with the use of the term “index” in relational databases - an ES index is most similar to a relational <em>table</em>. In this article, I use the term “lookup-structure” for the persistent information that is used during searches (a relational index structure).</p>
+
+<p>Every JSON document written to Elasticsearch is stored in exactly one ES index. Deleting the index deletes all documents stored within it, and all the associated lookup-structures. The id of a document is unique within an index.</p>
+
+<p>Individual fields of a document in an index cannot be updated; the whole document must be replaced. Replacing a document is an atomic operation, ie searches/gets return either the old document or the new one but never a mix of the two. Note: ES does have an “update” REST api; internally this does get-doc/modify-doc/put-doc, ie it is just for convenience and performance.</p>
+
+<p>Each index has its own clustering and replication settings, defining how the documents stored within that index are distributed across the Elasticsearch cluster; see later for more information on this topic.</p>
+
+<p>Each document in the index has a “metadata” record associated with it, that looks something like this:</p>
+
+<ul>
+  <li>
+<code>_type</code>: the “document type”, ie the mapping through which it was written</li>
+  <li>
+<code>_id</code>: a unique identifier within a specific (index,type)</li>
+  <li>
+<code>_source</code>: the original text of the document</li>
+</ul>
+
+<p>Documents are not written directly to an index; an index has one or more <em>mappings</em> associated with it, and writes are always done via a mapping. The mapping through which a document is written is recorded in the “metadata record” as the “document type”. An index usually has only one mapping, but multiple can be useful on occasion.</p>
+
+<p>The tuple (index, type, id) is the full unique identifier of a single document in Elasticsearch. When using the REST api to get a document, exactly these three things are present in the URL, eg “<code>GET /someindex/sometype/someid?pretty</code>”. Searches are, however, not limited to a single index/document-type at a time; it is possible to search against all document-types within a mapping or even against multiple indexes. In the results for a search, each match (“hit”) includes the index/type/id of the relevant document.</p>
+
+<p>A mapping can be thought of as a relational “updateable view” on a table (the index). However it is also valid to think of an Elasticsearch index as a relational “tablespace” and each “mapping” as a table; the analogies are only approximate.</p>
+
+<p>Each mapping is effectively a <em>schema</em> which defines a set of (fieldname, fieldtype) pairs for the objects written via that mapping. By default, mappings are “dynamic” - when a document written via a mapping has some field that is not already defined in the mapping, then the field is simply added to the mapping with a fieldtype that is <em>guessed</em> by Elasticsearch using various heuristics. However each field in the new document that <em>is</em> already defined in the mapping must be consistent with the existing type - eg:</p>
+
+<ul>
+  <li>if the field is defined as numeric, then later documents must also have a number in this field</li>
+  <li>if the field is defined as date-time, then later documents must also have a string in this field which matches one of the acceptable date-time formats.</li>
+</ul>
+
+<p>Documents not consistent with the mapping schema are rejected, ie the write fails.</p>
+
+<p>There are various settings to control the type-guessing heuristics, for example the available datetime-formats can be specified.</p>
+
+<p>Mappings may also be declared explicitly before documents are added to an index, ie (fieldname, fieldtype) pairs may be explicitly set. And if desired, the “dynamic” behaviour of mappings can be completely disabled - ie all allowed fields must be predefined in the mapping (see keyword “strict”). This is most similar to the way relational schemas work.</p>
+
+<p>When there are multiple mappings defined for a single index, then the (fieldname, fieldtype) definitions must be consistent between mappings. It is possible for one mapping to define a field that is not present in another mapping, but it is not permitted for two different mappings to define different types for the same fieldname. Mappings <em>can</em> define “copy fields”, where the value in some field X is also stored under the name Y - and then it may be assigned a different type.</p>
+
+<p>There are restrictions on modifying existing mappings. New fields can be defined at any time. Certain attributes associated with an existing field-definition can be redefined, while others cannot. In particular, the datatype associated with a field (eg integer) cannot be changed; obviously, that would invalidate the existing lookup-structures for that field. Mappings cannot be deleted (except by deleting the entire index). If significant changes to a mapping are needed, the only solution is to define a new index with the desired mappings, and then <em>copy the contents of the existing index</em> into the new index (known as “reindexing”). This is possible because Elasticsearch retains the original of each document added to an index. Of course reindexing doubles the amount of storage-space required (at least until the original is deleted).</p>
+
+<p>Note that for the purposes of “guessing” the type of a new field, the heuristics treat a string containing a datetime-like string as a datetime. However by default they treat a string containing an integer-like or float-like value as a <em>string</em> - ie only unquoted numerical values are mapped to an integer or floating-point fieldtype. When adding a field whose type is <em>already defined</em> (explicitly or dynamically), then how quoted values are treated is controlled by a different config-option: by default, when trying to insert a string containing a number into a numeric field, the string is parsed/converted (aka “coerced”).</p>
+
+<h1 id="clustering-sharding-and-replication">Clustering (Sharding and Replication)</h1>
+
+<p>Elasticsearch uses “sharding” for storage scalability, partitioning the contents of a single index (ie document collection) across multiple nodes. It also uses replication of shards for availability and performance, storing duplicates of each shard on different nodes.</p>
+
+<p>For each document, the shard-number is computed as “<code>hash(routingkey) mod index.nshards</code>”. The routingkey is usually the document-id, though it can be configured to be some other document field or concatenation of fields if desired, in order to group specific documents from the same index on the same shard for performance.</p>
+
+<p>The shard-number is then used to look up the associated (primary-node, replica-nodes). For each shard, there is one active “primary node” at any time. However the shard contents are also replicated to other nodes (configurable per-index); any replica can become the “primary node” for the shard if the master fails. Replicas are also used when performing searches.</p>
+
+<p>The number of shards for an index is fixed when the index is defined. The only way to change the number of shards is to define a new index, copy the data from the old index to the new one (ie <em>reindex</em>), then delete the original. Of course this temporarily doubles the storage space required.</p>
+
+<p>A single shard must fit on a single cluster node. As an example, if each cluster node has a maximum of 1TB of storage, and an index may need to hold 100TB of data, then the index must be defined with <em>at least</em> 100 shards. It is, however, possible (and normal) for a single cluster node to hold multiple shards of the same index. As an extreme example, an index with 100 shards will still run fine on a cluster of two nodes; each node will be responsible for around 50 shards.</p>
+
+<p>There is a slight performance penalty for an excessive number of shards. However increasing the number of shards increases the parallelization of writes; a write is always processed by the primary shard so an index with 10 shards can handle 10x the write-throughput than an index with one shard (assuming no other bottlenecks such as network bandwidth). A query against an index with N shards is divided into N subqueries, and each subquery is dispatched to a node hosting the relevant shard (either the primary or a replica). The per-shard results are then merged and sorted before returning to the client. Reads therefore also scale proportional to the number of shards; they also scale proportional to the number of replicas but that should not be set too high as replicas increase storage requirements.</p>
+
+<p>Although the number of shards for an index is fixed, the shard-to-node mapping is not. Elasticsearch will automatically migrate shards (primary and replicas) from node to node to keep the cluster balanced. In particular, when new nodes are added to the cluster, shards will be migrated from the highest-loaded nodes onto the new ones.</p>
+
+<p>Changing the number of replicas for an index (ie the number of copies of each shard) can be done “online”.</p>
+
+<p>Looking up a document by ID is reasonably efficient. The request is sent to any “coordinating” node of the ES cluster (and by default, all nodes act as coordinating nodes); it computes the shard-number, looks up the (master-node, replica-nodes), and forwards the request to one of them. The result is returned to the intermediate node which returns it to the client and thus there is exactly one extra “hop” involved, no more and no less. All “coordinating” nodes within the Elasticsearch cluster are equivalent to the client application; any such node can answer any request. When a client application uses the Elasticsearch native Java API in “node client” mode, then it is actually a “coordinating node” (but not a “data node”), so can send requests directly to the relevant nodes, thus avoiding one hop for get-by-id operations and for writes. When using this mode, every other node in the Elasticsearch cluster must be reachable via the network, and some extra network traffic is involved for cluster-topology-updates.</p>
+
+<p>Another view of the sharding concept is to think of a shard as a “database” restricted to a single node, and an Elasticsearch index as a “union of shards”.</p>
+
+<h1 id="indexing-building-lookup-structures">Indexing (building lookup structures)</h1>
+
+<p>The set of “fields” supported by an Elasticsearch index (document collection) is effectively the union of all fields known to all mappings associated with that index.</p>
+
+<p>For each field, Elasticsearch maintains one or more “lookup structures” that it can use to support searching - ie to reverse-map from a field-value back to the documents that contain those values. Internally, the Lucene library is used to maintain these lookup structures.</p>
+
+<p>ES actually treats each field in one of the following ways:</p>
+
+<ul>
+  <li>not-indexed (mapping definition has “indexed”:”no”)</li>
+  <li>non-string-type</li>
+  <li>not-analyzed string (aka “keyword”)</li>
+  <li>analyzed string (aka “text”)</li>
+</ul>
+
+<p>When a field of a new document is “not indexed”, then any associated lookup-structures (if any exist) are unchanged. Searches on the field will not return the new document. This is appropriate for fields which are not expected to be searched-by, as it saves time and disk-space. When a document is retrieved by id, or via a search on other indexed fields then the entire original document is returned including the not-indexed fields.</p>
+
+<p>Fields declared (or guessed via heuristics) to be of non-string types such as integer, boolean or datetime are indexed appropriately, making searches with operations such as less-than and greater-than work as appropriate for that type.</p>
+
+<p>Fields which are of type “keyword” (ES5) or “string + not-analyzed” (ES2.x) are treated similarly to strings in a relational database; lookup-structures are built to allow efficient lookup by exact-match and by prefix. When searching such fields, wildcard-expressions can be used, but are efficient only when there is a reasonable amount of fixed “prefix” on the expression. A wildcard at the start of a match for such a field effectively causes a “table scan” to be performed.</p>
+
+<p>Fields which are of type “text” (ES5) or “string + analyzed” (ES2.x) are where Elasticsearch really shines, and provides features that other database types (including most NoSQL databases) cannot match. See the following sections on analyzing and search for more information on this topic.</p>
+
+<p>When using a “dynamic” mapping, the admin can at any time <em>fetch</em> the mapping-definition to see which field-specific entries have been defined by Elasticsearch.</p>
+
+<p>By default, a special field named “<code>_all</code>” is dynamically created for each added document by concatenating the string representation of every field, then applying an analyzer to it and storing it like other “analyzed” fields. Clients can perform a query against the “<code>_all</code>” field in order to find documents in which a specific token is present in any field of the document (except not-indexed fields). If desired, the mapping can specify which document fields are present in the “<code>_all</code>” field - or can disable it completely.</p>
+
+<p>WARNING: when a document is added to an index, the updating of lookup-structures is done <em>asynchronously</em>. This means that for a short period (a few seconds), searches against the index may fail to find the document (or may return the old version of the document). A simple get-by-id is not affected. This asynchronous update is not usually a problem, as the same process does not usually write data then immediately read it back again. It can, however, be a problem in automated integration-tests. Elasticsearch provides a “refresh-index” API that can be called if needed; it triggers an immediate update of all lookup-structures for the index, and does not return (ie blocks) until updating is complete.</p>
+
+<h1 id="analyzing">Analyzing</h1>
+
+<p>When a string-type field is marked as “text” (aka “analyzed”) then:</p>
+
+<ul>
+  <li>the content is split at whitespace and punctuation boundaries into a sequence of tokens</li>
+  <li>the associated “analyzer module” is applied to the content to filter and normalize the tokens, and to add <em>alias</em> tokens.</li>
+</ul>
+
+<p>The tokens returned by the analyzer-module are added to the lookup-structure for the field. In addition, extra tables that support things such as lookup-by-levenstein-distance are built.</p>
+
+<p>Elasticsearch provides several default analyzers. The default is the “standard analyzer” which:</p>
+
+<ul>
+  <li>discards all punctuation tokens, and</li>
+  <li>converts all letters to lowercase</li>
+</ul>
+
+<p>Language-specific analyzers (eg one for English) are also provided. When enabled, they:</p>
+
+<ul>
+  <li>discard “stop words” (short meaningless words such as “the”, “an”, “and”, “of”).</li>
+  <li>perform “stemming” - makes plural words singular (eg “dogs”-&gt;”dog”), and other language-specific normalizations</li>
+  <li>adds aliases for words, eg when input contains token “look” then token “search” is also added to the lookup-structure</li>
+</ul>
+
+<p>Obviously, only one analyzer can be associated with a field.</p>
+
+<h1 id="searching">Searching</h1>
+
+<h2 id="search-query-syntax">Search Query Syntax</h2>
+
+<p>Elasticsearch defines its own query-language. Actually, it has three:</p>
+
+<ul>
+  <li>query-string-query syntax (also known as “lightweight search”)</li>
+  <li>simple-query-syntax</li>
+  <li>the full, JSON-based syntax aka “full body search”</li>
+</ul>
+
+<p>Query-string-query syntax packs query-expressions into a single compact string that is suitable for passing as a url-query-parameter in REST calls. This syntax is particularly useful for interactive use, where a query can be written by hand just by editing a URL. However it has a number of disadvantages:</p>
+
+<ul>
+  <li>not all functionality can be expressed in this syntax;</li>
+  <li>the syntax for non-trivial cases can be hard-to-write and hard-to-read;</li>
+  <li>a simple typo can significantly alter the meaning of the search.</li>
+</ul>
+
+<p>Simple-query-syntax is also possible to pack into a url-query-parameter. In comparison to query-string-query syntax, it:</p>
+
+<ul>
+  <li>is much more readable for non-programmers;</li>
+  <li>is more forgiving of errors (more likely to get an error-message back than simply the wrong results);</li>
+  <li>but offers even less functionality than the query-string-query syntax</li>
+</ul>
+
+<p>The full syntax can only be used by including a JSON query description in the body of an HTTP request. This makes it less convenient for direct use from a browser. The syntax is also verbose; it is best generated from tools rather than typed in by hand. But it is very readable, and provides full access to all Elasticsearch search functionality.</p>
+
+<p>For applications using the “node client” API, there is a selection of query-builder classes that are equivalent to the full-body-search functionality, and a class equivalent to the query-string-query syntax.</p>
+
+<h2 id="filters-vs-queries">Filters vs Queries</h2>
+
+<p>In relational systems, a query (select-statement) either matches a row or it does not - ie matching is <em>boolean</em>. In the Elasticsearch world, this is called a “filter” or a “search in filter context”. The result of such a search is a <em>set</em> of results - the order is not really relevant. Of course the results can be <em>sorted</em> by field-values (default: sorted by documentid), but they are not <em>sorted by relevance</em>.</p>
+
+<p>When using the Google web search engine, or similar other sites, results are instead returned sorted by <em>relevance</em> aka “best match first”. Elasticsearch calls this simply a “query” or “search in query context”.</p>
+
+<p>The full-query-syntax is very explicit about which searches are “queries” and which are “filters”. Both can be combined in one operation, ie a set of documents with specific properties can be selected via filtering, and then ranked by relevance using a query.</p>
+
+<h2 id="matching-in-analyzed-text">Matching in Analyzed Text</h2>
+
+<p>When a search applies to a field which is an analyzed-string, then the text from the search-expression is transformed using the same analyzer as the target field - in particular, the input text needs to be split into tokens, each token must be converted to lowercase, and the same “stemming” needs to be applied. However this doesn’t work well for any token in the search-text which contains a wildcard.</p>
+
+<p>A <code>match</code> query for somefield:”foo bar” will increase a document’s score if either foo or bar is found, and a bonus if both are found - a kind of “or” query. A <code>match_phrase</code> query will only match if words “foo” and “bar” are next to each other.</p>
+
+<p>In the “query-string-query” syntax, a quoted string is a <code>match_phrase</code>, ie somefield:”foo bar” in a <em>full search</em> is an “or” search while in the <em>query string query</em> syntax it is a kind of “substring” search (well, adjacent tokens which is not quite the same). If an “or” is needed in query-string-query, it must be explicitly given: <code>somefield:(foo OR bar)</code>.</p>
+
+<p>There are dozens of options to fine-tune such searches - see the excellent official manual for the full details.</p>
+
+<h2 id="searching-multiple-indices-and-types">Searching multiple indices and types</h2>
+
+<p>In relational databases, a select-statement applies to only one table. Elasticsearch is far more flexible; a search can be applied to all indices, or a list of indices, or all indices matching a regular-expression, or all types within an index, or a subset of types, or any other desired combination. The result is an array of “hits”, where each hit specifies the (index, type, id) of the matched document.</p>
+
+<h2 id="highlighing-results">Highlighing Results</h2>
+
+<p>In many word-processing programs, performing a text-search causes all matching text in the document to be marked in a special colour (highlighted). Elasticsearch provides similar functionality; when enabled, a search against “analysed” string fields returns not only the matching documents, but also the locations within the relevant fields where the matches were found, and even html-snippets of the matched text and some surrounding context. Such snippets can be almost directly included in HTML pages returned to client applications.</p>
+
+<h2 id="autocomplete">Autocomplete</h2>
+
+<p>When correctly configured in an index mapping, Elasticsearch builds lookup-structures that can be used for “field autocomplete” functionality of the sort commonly found in some web-browsers. A client application accepts the first few keystrokes from a user, then makes an HTTP request to Elasticsearch (optionally restricting the search to specific documents and fields) and Elasticsearch returns a list of the “most likely full tokens” that match that initial text.</p>
+
+<h2 id="aggregations">Aggregations</h2>
+
+<p>Elastic-search queries can include “aggregation” clauses, allowing efficient on-the-fly computation of such things as the number of distinct terms in a specific field, the number of documents with that specific field, and averages over fields.</p>
+
+<p>Aggregation values are simply the result of two steps:</p>
+
+<ul>
+  <li>grouping data into a set of categories;</li>
+  <li>performing an operation such as count,sum,average,min,max over the members of each group/category.</li>
+</ul>
+
+<p>The result is a table of (category, value) pairs.  Interestingly, this is effectively a “map/reduce” algorithm, as used by many big-data systems (eg Hadoop).</p>
+
+<p>Data warehouse systems provide aggregations by precomputing them as “rollup tables”, but such systems are typically updated in “batches” (eg overnight). Elasticsearch instead efficiently computes aggregations using the same inverted-index lookup structures that it generates for the purpose of searching. The aggregations are therefore “live” or “real-time”. The Kibana project allows “dashboards” to be defined that display live-updated graphs of data from Elasticsearch - particularly useful when Elasticsearch is used to monitor industrial process data, computer system status (via logfiles), and similar.</p>
+
+<h2 id="geographic-search">Geographic Search</h2>
+
+<p>Elasticsearch datastructures allow efficient searching for fields containing integer or floating-point values which lie within a specified range, eg “all documents where field ‘weight’ is between 80 and 90”. Date-fields are represented simply as a millisecond-value, so the same infrastructure supports searches for dates within a specific (from, to) range.</p>
+
+<p>Geographic latitude and longitude values are represented internally as floating-point values, so exactly the same infrastructure allows searches for “all documents where field ‘lat’ is between A and B and field ‘long’ is between C and D”, ie all documents associated with a point that lies within a specific rectangular area. Related functions are available to find “documents representing an object within X meters of a specific point”, etc. Elasticsearch provides built-in conversion between latitude/longitute strings and floating-point values, and some suitably-named query types.</p>
+
+<p>Elasticsearch is certainly not a full Geographic Information System (GIS), but such basic support can be useful in combination with other more traditional criteria, eg “all restaurants with cuisine=italian and within 3 km of my current location”.</p>
+
+<h2 id="sorting">Sorting</h2>
+
+<p>By default, results are sorted by their relevance (score). When multiple hits have the same relevance, then the order is undefined - and may be different when the search is repeated (due to race-conditions between shards, or refresh/merge operations performed within a shard).</p>
+
+<p>This undefined behaviour is particularly problematic when using <em>filtering</em> - because every hit has exactly the same score.</p>
+
+<p>Stable sorting order is important when using “paging” (ie from/size parameters) for obvious reasons.</p>
+
+<p>The easiest solution is to sort by the “<code>_uid</code>” field. This is a normally-hidden value of form “<code>_type#_id</code>”. When a search specifies a sort-criteria, then each hit has a “sort” member which shows the computed value being sorted on, making the <code>_uid</code> then obvious. Interestingly, fields “<code>_type</code>” and “<code>_id</code>” are actually internally derived from “<code>_uid</code>” rather than being stored explicitly, ie <code>_uid</code> is the “more primitive” field to query. For some reason, sorting on “<code>_id</code>” does not work (at least in version 2.3.5); no error is reported but the “sort” member of each hit in the results is null and the records are not sorted as expected.</p>
+
+<p>Several sources (including the Elasticsearch documentation itself) recommend using “<code>_doc</code>” as the sort-criteria. However “<code>_doc</code>” is simply a small integer representing the raw “document offset” within a lucene index. Because it is a per-shard value, it does not guarantee consistent ordering of hits in cross-shard searches. And <code>_doc</code> values can change as a result of refresh/merge operations within a shard, making them also variable over time.</p>
+
+<h1 id="elasticsearch-vs-keyvalue-document-and-relational-databases">Elasticsearch vs KeyValue, Document, and Relational Databases</h1>
+
+<p>Elasticsearch does not actually make a good KeyValue datastore. It is possible to add data (receiving an ID in return), and later fetch the document by id. And the data is elegantly distributed (sharded and replicated). However:</p>
+
+<ul>
+  <li>data must be in the form of a JSON document (many KeyValue datastores support binary data, which can be convenient)</li>
+  <li>all the “indexing” features must be disabled, otherwise Elasticsearch will spend lots of time and space indexing fields for searching purposes which are never needed.</li>
+</ul>
+
+<p>Elasticsearch is a reasonable alternative to many document databases. To emulate the behaviour of document-databases, it is really only necessary to disable the “analysis” of string fields - ie ensure the default for String fields is “not analyzed”.</p>
+
+<p>Elasticsearch is certainly nothing like a relational database. It offers features that relational databases do not, and lacks many features that relational databases have. It is therefore often used <em>in partnership</em> with relational databases. Remember, NoSQL can mean “not only SQL”!</p>
+
+<h1 id="more-on-search-syntax">More on Search Syntax</h1>
+
+<p>A search consists of one or more clauses. Clauses are either:</p>
+
+<ul>
+  <li>“leaf clauses” which test fields for values; or</li>
+  <li>“compound clauses” which combine leaf clauses and other compound clauses.</li>
+</ul>
+
+<p>Available leaf clauses include:</p>
+
+<ul>
+  <li>
+<code>match_all</code> (trivial, always matches any value)</li>
+  <li>
+<code>missing</code>: field is not present (like “is null”)</li>
+  <li>
+<code>exists</code>: field is present (like “is not null”)</li>
+  <li>
+<code>term</code>: field is a specific value (the input value is not analyzed)</li>
+  <li>
+<code>terms</code>: field is any of a set of values, ie OR-clause</li>
+  <li>
+<code>prefix</code>: field starts with a specified string</li>
+  <li>
+<code>range</code>: field is between specified minimum and maximum values</li>
+  <li>
+<code>match</code>: for fields of type not-analyzed-string:same as term, for fields of type analyzed-string:the field contains any of the specified tokens</li>
+  <li>
+<code>multi_match</code>: search for same string in multiple fields.</li>
+  <li>
+<code>phrase_match</code>: field includes specific tokens in a specific order (see also: ‘slop’)</li>
+  <li>
+<code>fuzzy</code>: approximate matching</li>
+  <li>
+<code>geo_bounding_box</code>: latlong-field is within the specified geographical rectangle</li>
+  <li>
+<code>geo_distance</code>: latlong-field is within X meters of point Y</li>
+  <li>and others</li>
+</ul>
+
+<p>Compound clauses:</p>
+
+<ul>
+  <li>
+<code>constant_score</code>: apply the nested search in “filter context” ie without computing any “score” for the match</li>
+  <li>
+<code>bool</code>: combines mandatory (“<code>must</code>”), mandatory-negative (“<code>must_not</code>”), optional (“<code>should</code>”), and nonscoring (“<code>filter</code>”) components.</li>
+  <li>
+<code>dis_max</code>: score is the max score of the subqueries (ie score=the single highest-scoring subquery).</li>
+  <li>
+<code>multi_match</code>: apply same condition to multiple fields</li>
+</ul>
+
+<p>Special clauses:</p>
+
+<ul>
+  <li>
+<code>query_string</code>: body is compiled into the equivalent “full body search” clause.</li>
+</ul>
+
+<p>Filtering (without scoring) is more efficient than querying (with scoring), so use filtering where relevant. To execute a search in “filter context” (without computing a best-match-score for each document), the criteria must either be wrapped in a <code>constant_score</code> clause, or be placed in the <code>filter</code> component of a <code>bool</code> clause.</p>
+
+<p>Note also that for “term” queries, the value being searched <em>for</em> is never analyzed, even if the target field being tested is. For “match” queries, the value being searched for is analyzed if-and-only-if the field being queried is analyzed.</p>
+
+<p>Elasticsearch recommends presenting search to users as a form, in which they enter “must match”, “should match”, etc., and optionally field-names. This is safer than exposing the full power of search via the “query-string-query” language - that can be used to bring the DB to its knees.</p>
+
+<p>Note that any document field can be an <em>array</em> field, aka “multifield”. In this case, “matches” typically means “matches any of the available values”.</p>
+
+<h1 id="explicit-data-partitioning-via-multiple-indices">Explicit Data Partitioning via Multiple Indices</h1>
+
+<p>It is a reasonably common practice to manually partition datasets by storing them in multiple indices, eg a separate index per month or by country. Indices can be “dynamically created” when data is written to them - and templates can be defined to specify which configuration such indices should have.</p>
+
+<p>Deleting all data in a partition can then be done by simply deleting that index. An alias can be used to make all existing indices appear as one. Queries can also be run exclusively against a single index - although it is also possible to use routing to bind data to a specific shard, and then to query against just that shard. And new indices can potentially be given larger num-shards settings when data volume grows.</p>
+
+<h1 id="handling-relations">Handling Relations</h1>
+
+<p>As noted earlier, Elasticsearch does not have traditional foreign-key relations and joins. In general, the recommended solution is denormalization of data - particularly useful when the “master version” of the data is in some other system, and Elasticsearch content is derived from that.</p>
+
+<p>However Elasticsearch does support parent/child links between documents of different types - with some limitations. The mapping for the “child” table explicitly declares a parent (index,doctype), and whenever a document is inserted into the child index the associated parent-id (ie id of the parent document) must also be specified. This id is used as the <em>routing key</em> for the child (rather than the child document’s id), ensuring child documents are stored in a shard on the same physical host as the shard that holds the specified parent document. Each index can be queried independently, but searches against the parent index/doctype can also specify a “<code>has_child</code>” clause, effectively running a “subselect” against all child records that point to the associated parent document. Searches against the child index can also specify a “<code>has_parent</code>” clause that works similarly. Query performance is not great, however. Indexing performance is also a problem when there are many parent records; this solution is most appropriate when there are a small number of parent records and a large number of children (eg a company/employees relation).</p>
+
+<h1 id="schema-on-write-dynamic-mappings">Schema On Write (Dynamic Mappings)</h1>
+
+<p>Relational databases always have a strict schema for each table, and refuse to allow data to be inserted into a table if it is not compliant with the schema; this is sometimes called “schema on write”. Many NoSQL databases take a different approach: data is written into the database without validation, and a schema is then applied to the data to interpret the existing data when reading it (“schema on read”).</p>
+
+<p>The reason for the schema-on-read approach is that in some environments data comes in as a rapid stream, and if it isn’t stored <em>immediately</em> then it is lost without any chance to “try again later”. By storing all data regardless of format, it is possible for analysts to later figure out how to make sense of any parts that are not in the expected format - at least it is there. In addition, for high volumes of input data it may simply not be possible to perform time-intensive data validation.</p>
+
+<p>Elasticsearch is NOT one of these NoSQL databases that accept anything - the index mappings are enforced when data is written, and input that is not consistent with the mappings causes the insert to fail. This is to be expected if you consider what Elasticsearch does with that data - it (almost) immediately builds lookup-structures for the incoming data which are by their nature type-specific. If a field that is expected to be an integer instead holds a string in a submitted document, then the lookup-structure cannot be updated for that field.</p>
+
+<p>Elasticsearch does allow mappings to be defined “dynamically”, but that simply means that the (field, type) pairs that exist for a mapping are defined by heuristics applied when a submitted document contains an unknown field. Thereafter, the field-type is fixed exactly as if an explicit mapping had been defined. Subsequent documents which include that field with a value not compatible with the now-fixed field-type will be rejected. Dynamic mappings are therefore useful for “prototyping” but should not be used in production systems.</p>
+
+<h1 id="internals-how-a-shard-works-refresh-intervals-etc">Internals: How a Shard works, refresh-intervals, etc</h1>
+
+<p>A Lucene index is a set of documents each of which is a “flat” set of fields (no nesting). Each field may be a single value or an array of values. Lucene sees each value as a simple bytearray. An Elasticsearch index (actually each shard) corresponds to a Lucene index. An Elasticsearch “mapping” has no equivalent in Lucene; it is purely a “pre-processing” stage at the Elasticsearch level - including the analyzers. This “flattening” of fields is why different mappings cannot define conflicting types for the same field - and why fieldnames with a leading underscore are reserved for use by Elasticsearch.</p>
+
+<p>Actually, there is no “document with associated fields” - instead, there is an <em>inverted index</em> for each field, where field-values map to a list of document-ids. An “or” query against two fields (f1:foo or f2:bar) is then simply the union of two sets of document-ids. An “and” query is simply the intersection of two sets of document-ids. Elasticsearch then fetches the “_source” value for each matched documentId to include in the results.</p>
+
+<p>The inverted index does not just hold (fieldvalue-&gt;docid), but instead (fieldvalue-&gt;( stats, (docid-&gt;more_stats)). The stats (statistics) support lots of additional features such as scoring.</p>
+
+<p>Lucene stores data in a similar way to BigTable SSTables, or Log-structured-merge-trees. Existing index files on disk are immutable. As changes are applied, they are written immediately to a “transaction log” file (appending to a file and flushing it is quick). An in-memory buffer is then updated, and this is written to disk every <code>refreshInterval</code> - but no “flush” is done, ie the data might or might not be on disk after a crash. This is ok as the transaction-log is still there. Searches are applied to all index-files on disk (including the non-flushed ones) with data in newer files taking precedence over data in older files (note: the in-memory buffer is NOT used for searches). Deletion of records is done by writing “tombstone” records to newer files. Periodically a real disk flush is made, and then the transaction-log is cleared. A background task merges existing files into larger “consolidated” files.</p>
+
+<p>The result is that lookup-by-id always returns the latest data, but searches only see data up to the most-recent refresh-interval.</p>
+
+<p>For more information see:</p>
+
+<ul>
+  <li><a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/making-text-searchable.html">https://www.elastic.co/guide/en/elasticsearch/guide/current/making-text-searchable.html</a></li>
+  <li><a href="https://www.elastic.co/blog/frame-of-reference-and-roaring-bitmaps">https://www.elastic.co/blog/frame-of-reference-and-roaring-bitmaps</a></li>
+</ul>
+
+<h1 id="indices-and-aliases">Indices and Aliases</h1>
+
+<p>An <em>alias</em> can be defined for any index; queries against the alias are equivalent to a query against the associated index (somewhat like a relational view). Indexes cannot be renamed, so it is considered good practice by some Elasticsearch users to define an alias for each index, and read/write indexes only via the alias-name. Interestingly, an alias can actually point to multiple indices in which case a query is applied to each of the indices.</p>
+
+<p>An alias can also have an associated query-clause which is automatically merged with any searches that are executed against the alias - somewhat like a relational view. This can be useful for implementing things such as “multitenancy”.</p>
+
+<p>I have a <a href="/bigdata/elastic-aliases">separate article on Elasticsearch aliases</a> which discusses the benefits and limitations further.</p>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>Elasticsearch has no support for cross-document transactions, ie updating multiple documents as an atomic operation. It does have support for “optimistic locking” to avoid races when performing read/update/write on a single document; every document has a “version” field that can be checked during writes to detect concurrent updates since the document was read.</p>
+
+<p>An index can be <em>closed</em>, meaning that the Lucene engines which manage the shards of the index are stopped, saving CPU and memory. Obviously, no searches can be applied against a closed index, but the data remains on-disk and the index can be reopened when needed.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+<a href="http://elastic.co">Elasticsearch: the Definitive Guide</a> – the official book</li>
+  <li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html">Elasticsearch Reference</a></li>
+  <li><a href="https://www.elastic.co/blog">The Elasticsearch Blog</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/elasticsearch/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,492 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Closures</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Closures</h1>
+    <aside>First published on: October 1, 2012</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Java/'>Java</a></p>
+      <h1 id="closures-for-java-programmers">Closures For Java Programmers</h1>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>Closures are a code feature available in many languages, including:</p>
+
+<ul>
+  <li>c#</li>
+  <li>ruby</li>
+  <li>javascript</li>
+  <li>lisp, scheme</li>
+</ul>
+
+<p>And they are hopefully coming to Java in version 1.8.</p>
+
+<p>Understanding closures isn't hard, but the way that variables can be “captured” by a closure can be confusing at first. To demonstrate how this works, this article shows how something similar to a closure would appear if manually implemented in java code.</p>
+
+<p>What the examples below show is that a closure (ie some logic plus variables) can be stored, and invoked later. Unlike a simple function-pointer or callback object, variables other than local variables within the closure function/method are still accessable.</p>
+
+<p>Closures can get quite tricky in the details. There is an excellent (though rather long) description <a href="http://en.wikipedia.org/wiki/Closure_(computer_science)">on wikipedia</a>.</p>
+
+<h2 id="javascript-version">Javascript Version</h2>
+
+<p>Here is a simple closure example implemented in javascript.</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-javascript"><span class="tag">&lt;html&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+<span class="tag">&lt;script&gt;</span>
+<span class="inline">  <span class="keyword">var</span> baseStrings = [<span class="string"><span class="delimiter">"</span><span class="content">Day</span><span class="delimiter">"</span></span>, <span class="string"><span class="delimiter">"</span><span class="content">Month</span><span class="delimiter">"</span></span>, <span class="string"><span class="delimiter">"</span><span class="content">Year</span><span class="delimiter">"</span></span>]
+  <span class="keyword">var</span> postfix = <span class="string"><span class="delimiter">"</span><span class="content">.</span><span class="delimiter">"</span></span>;
+
+  <span class="keyword">function</span> <span class="function">makeStringTransformer</span>(prefix) {
+    <span class="comment">// return a closure that "captures" the prefix and postfix values</span>
+    <span class="keyword">return</span> <span class="keyword">function</span>(s) {
+      <span class="keyword">return</span> prefix + s + postfix;
+    }
+  }
+
+  <span class="keyword">function</span> <span class="function">map</span>(src, closure) {
+    <span class="keyword">var</span> out = [];
+    <span class="keyword">for</span>(index <span class="keyword">in</span> src) {
+      out[out.length] = closure(src[index]);
+    }
+    <span class="keyword">return</span> out;
+  }
+
+  <span class="keyword">function</span> <span class="function">showList</span>(src) {
+    document.write(<span class="string"><span class="delimiter">"</span><span class="content">&lt;p&gt;</span><span class="delimiter">"</span></span>);
+    <span class="keyword">for</span>(o <span class="keyword">in</span> src) {
+      document.write(src[o]);
+      document.write(<span class="string"><span class="delimiter">"</span><span class="content"> &amp;nbsp; </span><span class="delimiter">"</span></span>);
+    }
+    document.writeln(<span class="string"><span class="delimiter">"</span><span class="content">&lt;/p&gt;</span><span class="delimiter">"</span></span>);
+  }
+
+  <span class="keyword">var</span> closure1 = makeStringTransformer(<span class="string"><span class="delimiter">"</span><span class="content">Previous </span><span class="delimiter">"</span></span>);
+  <span class="keyword">var</span> closure2 = makeStringTransformer(<span class="string"><span class="delimiter">"</span><span class="content">Next </span><span class="delimiter">"</span></span>);
+
+  <span class="keyword">var</span> mapped1 = map(baseStrings, closure1);
+  showList(mapped1);
+
+  <span class="keyword">var</span> mapped2 = map(baseStrings, closure2);
+  showList(mapped2);
+
+  postfix = <span class="string"><span class="delimiter">"</span><span class="content">!</span><span class="delimiter">"</span></span>;
+  <span class="keyword">var</span> mapped3 = map(baseStrings, closure2);
+  showList(mapped3);</span>
+<span class="tag">&lt;/script&gt;</span>
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;/html&gt;</span></code>
+</pre></div></div>
+
+<h2 id="generated-output">Generated Output</h2>
+
+<pre><code>Previous Day.   Previous Month.   Previous Year.  
+Next Day.   Next Month.   Next Year.  
+Next Day!   Next Month!   Next Year!   
+</code></pre>
+
+<h2 id="closure-features">Closure Features</h2>
+
+<p>The magic in this little example is that the thing returned from the makeStringTransformer function is a closure - an anonymous function plus sufficient information for the function to access variables that are not local to the function. A closure can be stored as a variable, and executed at any later time - just a few lines later in this example, but in a real program they could be run in response to a user button-click or a timer expiring or similar events.</p>
+
+<p>At the time that the closures execute, the “prefix” value no longer exists as such - it disappeared (went out of lexical scope) as soon as the makeStringTransformer function returned.</p>
+
+<p>The postfix variable still exists, and the last line of output shows that the closure has a “live” reference to the variable, rather than having just cached its value when the closure was created.</p>
+
+<h2 id="java-equivalent---explicit-version">Java Equivalent - Explicit Version</h2>
+
+<p>A true closure has two parts:</p>
+
+<ol>
+  <li>It is just a method, not a class</li>
+  <li>It “captures” variables from enclosing scopes for use when invoked later</li>
+</ol>
+
+<p>In java it is currently impossible to emulate (1). The best we can do is to create an interface with a single method which works but lacks the elegance of a true closure.</p>
+
+<p>In java we can implement (2) reasonable effectively, although it takes a fair bit of boilerplate code. See later for
+a way to reduce the ugliness by using an anonymous class + final variables.</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="keyword">import</span> <span class="include">java.util.ArrayList</span>;
+<span class="keyword">import</span> <span class="include">java.util.Arrays</span>;
+<span class="keyword">import</span> <span class="include">java.util.Collections</span>;
+<span class="keyword">import</span> <span class="include">java.util.Date</span>;
+<span class="keyword">import</span> <span class="include">java.util.Calendar</span>;
+<span class="keyword">import</span> <span class="include">java.util.List</span>;
+<span class="keyword">import</span> <span class="include">java.text.SimpleDateFormat</span>;
+
+<span class="comment">// Define a "function object" that takes one param and returns one value.</span>
+<span class="comment">// Alas, a different interface type is needed for different #s of params.</span>
+<span class="type">interface</span> <span class="class">ClosureWith1Param</span>&lt;OUT, IN&gt; {
+  OUT invoke(IN param1);
+}
+
+<span class="type">class</span> <span class="class">StringTransformerClosure</span> <span class="directive">implements</span> ClosureWith1Param&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt; {
+  <span class="directive">private</span> <span class="predefined-type">String</span> prefix;
+  <span class="directive">private</span> <span class="predefined-type">StringBuilder</span> postfix;
+
+  StringTransformerClosure(<span class="predefined-type">String</span> prefix, <span class="predefined-type">StringBuilder</span> postfix) {
+    <span class="local-variable">this</span>.prefix = prefix;
+    <span class="local-variable">this</span>.postfix = postfix;
+  }
+
+  <span class="annotation">@Override</span>
+  <span class="directive">public</span> <span class="predefined-type">String</span> invoke(<span class="predefined-type">String</span> in) {
+    <span class="keyword">return</span> prefix + in + postfix;
+  }
+};
+
+<span class="directive">public</span> <span class="type">class</span> <span class="class">ClosureExample1</span> {
+  <span class="directive">private</span> <span class="directive">static</span> <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; baseStrings = <span class="predefined-type">Arrays</span>.asList(<span class="string"><span class="delimiter">"</span><span class="content">Day</span><span class="delimiter">"</span></span>, <span class="string"><span class="delimiter">"</span><span class="content">Month</span><span class="delimiter">"</span></span>,
+      <span class="string"><span class="delimiter">"</span><span class="content">Year</span><span class="delimiter">"</span></span>);
+  <span class="directive">private</span> <span class="directive">static</span> <span class="predefined-type">StringBuilder</span> postfix = <span class="keyword">new</span> <span class="predefined-type">StringBuilder</span>(<span class="string"><span class="delimiter">"</span><span class="content">.</span><span class="delimiter">"</span></span>); <span class="comment">// mutable</span>
+                                  <span class="comment">// string</span>
+
+  <span class="directive">private</span> <span class="directive">static</span> ClosureWith1Param&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt; makeStringTransformer(
+      <span class="predefined-type">String</span> prefix) {
+    <span class="comment">// return a "closure" that "captures" the prefix and postfix values</span>
+    <span class="keyword">return</span> <span class="keyword">new</span> StringTransformerClosure(prefix, postfix);
+  }
+
+  <span class="directive">public</span> <span class="directive">static</span> <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; map(<span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; src,
+      ClosureWith1Param&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt; closure) {
+    <span class="predefined-type">ArrayList</span>&lt;<span class="predefined-type">String</span>&gt; out = <span class="keyword">new</span> <span class="predefined-type">ArrayList</span>&lt;<span class="predefined-type">String</span>&gt;(src.size());
+    <span class="keyword">for</span> (<span class="predefined-type">String</span> str : src) {
+      out.add(closure.invoke(str));
+    }
+    <span class="keyword">return</span> out;
+  }
+
+  <span class="directive">private</span> <span class="directive">static</span> <span class="type">void</span> showList(<span class="predefined-type">List</span>&lt;?&gt; in) {
+    <span class="keyword">for</span> (<span class="predefined-type">Object</span> o : in) {
+      <span class="predefined-type">System</span>.out.print(o);
+      <span class="predefined-type">System</span>.out.print(<span class="string"><span class="delimiter">"</span><span class="content"> </span><span class="delimiter">"</span></span>);
+    }
+    <span class="predefined-type">System</span>.out.println();
+  }
+
+  <span class="directive">public</span> <span class="directive">static</span> <span class="type">void</span> main(<span class="predefined-type">String</span><span class="type">[]</span> args) <span class="directive">throws</span> <span class="exception">Exception</span> {
+    ClosureWith1Param&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt; closure1 = makeStringTransformer(<span class="string"><span class="delimiter">"</span><span class="content">Previous </span><span class="delimiter">"</span></span>);
+    ClosureWith1Param&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt; closure2 = makeStringTransformer(<span class="string"><span class="delimiter">"</span><span class="content">Next </span><span class="delimiter">"</span></span>);
+
+    <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; mapped1 = map(baseStrings, closure1);
+    showList(mapped1);
+
+    <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; mapped2 = map(baseStrings, closure2);
+    showList(mapped2);
+
+    postfix.setLength(<span class="integer">0</span>);
+    postfix.append(<span class="string"><span class="delimiter">"</span><span class="content">!</span><span class="delimiter">"</span></span>);
+    <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; mapped3 = map(baseStrings, closure2);
+    showList(mapped3);
+  }
+}</code>
+</pre></div></div>
+
+<p>As is clear from this, a “closure” is just a way of:</p>
+
+<ul>
+  <li>automatically creating a suitable interface class for the code to be invoked<sup id="fnref:invoking-closures" role="doc-noteref"><a href="#fn:invoking-closures" class="footnote" rel="footnote">1</a></sup>;</li>
+  <li>automatically figuring out what non-local variables are referenced from the closure’s code;</li>
+  <li>creating a concrete implementation that includes the desired code as a method, and has a constructor whch grabs copies of the non-local vars it references.</li>
+</ul>
+
+<h2 id="java-equivalent---inner-class-version">Java Equivalent - Inner Class Version</h2>
+
+<p>Java anonymous inner classes do have a feature that is not taken advantage of above: it <em>can</em> reference “final” variables. So we could rewrite the showBook method above as:</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="keyword">import</span> <span class="include">java.util.ArrayList</span>;
+<span class="keyword">import</span> <span class="include">java.util.Arrays</span>;
+<span class="keyword">import</span> <span class="include">java.util.Collections</span>;
+<span class="keyword">import</span> <span class="include">java.util.Date</span>;
+<span class="keyword">import</span> <span class="include">java.util.Calendar</span>;
+<span class="keyword">import</span> <span class="include">java.util.List</span>;
+<span class="keyword">import</span> <span class="include">java.text.SimpleDateFormat</span>;
+
+<span class="directive">public</span> <span class="type">class</span> <span class="class">ClosureExample2</span> {
+  <span class="directive">private</span> <span class="directive">static</span> <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; baseStrings = <span class="predefined-type">Arrays</span>.asList(<span class="string"><span class="delimiter">"</span><span class="content">Day</span><span class="delimiter">"</span></span>, <span class="string"><span class="delimiter">"</span><span class="content">Month</span><span class="delimiter">"</span></span>,
+      <span class="string"><span class="delimiter">"</span><span class="content">Year</span><span class="delimiter">"</span></span>);
+  <span class="directive">private</span> <span class="directive">static</span> <span class="directive">final</span> <span class="predefined-type">StringBuilder</span> postfix = <span class="keyword">new</span> <span class="predefined-type">StringBuilder</span>(<span class="string"><span class="delimiter">"</span><span class="content">.</span><span class="delimiter">"</span></span>); <span class="comment">// mutable</span>
+                                      <span class="comment">// string</span>
+
+  <span class="type">interface</span> <span class="class">ClosureWith1Param</span>&lt;OUT, IN&gt; {
+    OUT invoke(IN param1);
+  }
+
+  <span class="directive">private</span> <span class="directive">static</span> ClosureWith1Param&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt; makeStringTransformer(
+      <span class="directive">final</span> <span class="predefined-type">String</span> prefix) {
+    <span class="comment">// return a "closure" that "captures" the prefix and postfix values</span>
+    <span class="keyword">return</span> <span class="keyword">new</span> ClosureWith1Param&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt;() {
+      <span class="directive">public</span> <span class="predefined-type">String</span> invoke(<span class="predefined-type">String</span> in) {
+        <span class="keyword">return</span> prefix + in + postfix;
+      }
+    };
+  }
+
+  <span class="directive">public</span> <span class="directive">static</span> <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; map(<span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; src,
+      ClosureWith1Param&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt; closure) {
+    <span class="predefined-type">ArrayList</span>&lt;<span class="predefined-type">String</span>&gt; out = <span class="keyword">new</span> <span class="predefined-type">ArrayList</span>&lt;<span class="predefined-type">String</span>&gt;(src.size());
+    <span class="keyword">for</span> (<span class="predefined-type">String</span> str : src) {
+      out.add(closure.invoke(str));
+    }
+    <span class="keyword">return</span> out;
+  }
+
+  <span class="directive">private</span> <span class="directive">static</span> <span class="type">void</span> showList(<span class="predefined-type">List</span>&lt;?&gt; in) {
+    <span class="keyword">for</span> (<span class="predefined-type">Object</span> o : in) {
+      <span class="predefined-type">System</span>.out.print(o);
+      <span class="predefined-type">System</span>.out.print(<span class="string"><span class="delimiter">"</span><span class="content"> </span><span class="delimiter">"</span></span>);
+    }
+    <span class="predefined-type">System</span>.out.println();
+  }
+
+  <span class="directive">public</span> <span class="directive">static</span> <span class="type">void</span> main(<span class="predefined-type">String</span><span class="type">[]</span> args) <span class="directive">throws</span> <span class="exception">Exception</span> {
+
+    ClosureWith1Param&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt; closure1 = makeStringTransformer(<span class="string"><span class="delimiter">"</span><span class="content">Previous </span><span class="delimiter">"</span></span>);
+    ClosureWith1Param&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt; closure2 = makeStringTransformer(<span class="string"><span class="delimiter">"</span><span class="content">Next </span><span class="delimiter">"</span></span>);
+
+    <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; mapped1 = map(baseStrings, closure1);
+    showList(mapped1);
+
+    <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; mapped2 = map(baseStrings, closure2);
+    showList(mapped2);
+
+    postfix.setLength(<span class="integer">0</span>);
+    postfix.append(<span class="string"><span class="delimiter">"</span><span class="content">!</span><span class="delimiter">"</span></span>);
+    <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; mapped3 = map(baseStrings, closure2);
+    showList(mapped3);
+  }
+}</code>
+</pre></div></div>
+
+<p>This form would of course be the preferred form when writing this kind of callback code in java; it was not used in the first example because it isn’t so clear what is going on behind the scenes. In practice, the java compiler will generate the same code we manually in the first example.</p>
+
+<h2 id="referencing-immutable-and-primitive-objects-from-closures">Referencing Immutable and Primitive Objects From Closures</h2>
+
+<p>You will have noticed that in the Java version it was necessary to use a mutable StringBuilder object in order for the existing closure to see changes to the postfix value.</p>
+
+<p>For scripting languages like Javascript, this problem does not occur. Quite how this works is interesting; clearly what is being held by the closure is not a reference to the actual variable value because even in Javascript a String is immutable, yet we see the “postfix” value change. And what is held by the closure cannot be the “name” of the variable, because the closure can still access the “prefix” value even after that function has returned, ie those names are no longer valid in the context of the caller.</p>
+
+<p>In fact, a javascript function’s lexical context is simply a map of <code>(name-&gt;value)</code>, and every variable reference is effectively a lookup into the map by name. There is a chain of these context objects - one for each nested function call. When the closure is created, it simply stores a pointer to the current lexical context of the caller - ie the entire callstack. From the closure’s point of view it is as if the enclosing function had never returned. Most compiled languages do not do this sort of thing (not very efficient spacewise); they do not do variable lookup at runtime, and therefore act like the Java code examples.</p>
+
+<p>The fact that javascript closures capture the entire frame can easily be proved, by doing an “eval” inside a closure to look up a variable by name..</p>
+
+<h2 id="scopes-of-captured-variables">Scopes of Captured Variables</h2>
+
+<p>When a closure holds a reference to a variable, of course it would be very bad if that variable no longer existed at the time the closure ran. For Java this is never a problem, as all variables are allocated on the “heap”, and only removed via garbage collection when the number of references drops to zero, which won’t happen as long as the closure itself exists. Closures are also supported in some c-like languages, and in these cases there needs to be some mechanism to prevent or handle references to <em>on-stack</em> variables from closures.</p>
+
+<h2 id="memory-leak-issues">Memory Leak Issues</h2>
+
+<p>Beware that closures can be a source of memory leaks. Often closures are stored in collections or member fields for later use (eg a closure to run if a specific button is clicked). However the closure holds a reference to the entire context in which it was created, and if this contains references to objects that are no longer used, they still cannot be garbage-collected while the closure exists.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>While not super-complex, closures are extremely useful. In particular, the ability to create a small snippet of code that can be passed to some other object to run when needed is a very powerful tool. Java’s native inner class or anonymous inner class features just don’t quite go far enough; as you can see from the above, the amount of extra code needed to capture necessary variables and to create an appropriate interface makes this technique just too clumsy for frequent use.</p>
+
+<h3 id="footnotes">Footnotes</h3>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:invoking-closures" role="doc-endnote">
+
+      <p>Typically a closure is stored in a variable, eg:</p>
+
+      <blockquote>
+        <p>Closure m = (…some code …)</p>
+      </blockquote>
+
+      <p>In most languages that support closures, invoking the closure code is then simply something like <code>m(args);</code>. The java
+example in this article uses <code>closure.invoke(args)</code>, ie invokes the code via the name declared on an interface it
+implements, which is rather clumsy. <a href="#fnref:invoking-closures" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/closures/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

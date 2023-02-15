@@ -1,0 +1,366 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - An Elasticsearch5 Transport Client</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>An Elasticsearch5 Transport Client</h1>
+    <aside>First published on: March 11, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>Elasticsearch client applications implemented in Java can communicate with the Elasticsearch cluster via three different ways:</p>
+
+<ul>
+  <li>REST: send REST requests over http to one or more nodes;</li>
+  <li>Transport-client: send binary requests in round-robin order to one or more “coordinating” nodes of the cluster, but not integrate into the cluster; or</li>
+  <li>Node-client: become a “non-data-node” member of the cluster itself.</li>
+</ul>
+
+<p>The REST approach can be used from any language. The Elasticsearch project provides a Java-based client library for this mode; external projects provide alternate Java libraries and libraries for other languages. One of the major advantages of the REST approach is that the client is only loosely coupled with the Elasticsearch server version; the REST api is fairly stable even across major releases. Another is that it brings a minimum of dependencies (other libraries).</p>
+
+<p>Transport client mode is currently only possible for Java client applications, as it reuses code that Elasticsearch nodes themselves use - maintaining the same code in a different language would be significant work. This mode has a few limitations, including:</p>
+
+<ul>
+  <li>The client application either has a fixed set of nodes it talks to, or uses “sniffing” to determine the full set of “coordinating” nodes based on the initially configured set. The client must have network access to all the relevant nodes;</li>
+  <li>The client must use an Elasticsearch library version which is similar to the version of the cluster itself.</li>
+  <li>More dependencies - actually, code wanting to connect this way requires the entire Elasticsearch codebase in the classpath as the Elasticsearch team don’t provide a separate client library.</li>
+  <li>No security. Using REST over https allows gateways to enforce access rules.</li>
+  <li>No encryption - unless you set up IPSET or similar inter-host VPNs, or buy a licence for the Shield extension.</li>
+</ul>
+
+<p>Transport client mode does have several advantages including:</p>
+
+<ul>
+  <li>High performance (requests go directly to the relevant nodes without proxying, and the internal binary network protocol is used), and</li>
+  <li>High availability (the internal Elasticsearch code has robust failover handling, and clients inherit this implementation)</li>
+</ul>
+
+<p>Node client mode is also only possible for Java client applications. It has the same advantages and disadvantages as transport-client mode, but in addition:</p>
+
+<ul>
+  <li>Performance is even higher than transport-client mode as requests can be sent directly to non-coordinating nodes</li>
+  <li>Network traffic is higher (cluster topology changes are also propagated to the client node)</li>
+  <li>No security; Elasticsearch nodes trust each other and the client is acting like a node in the cluster.</li>
+  <li>Even higher availability (the client is notified of node failures and performs failover just like other nodes in the cluster).</li>
+</ul>
+
+<h1 id="using-transport-client-mode-in-es5">Using Transport Client Mode in ES5</h1>
+
+<p>In Elasticsearch 2.x, the standard ES libraries include a TransportClient class; there is plenty of documentation available on how to use this.</p>
+
+<p>In Elasticsearch 5.x this class has been moved into a separate library - and unfortunately this separate library sets up a lot more infrastructure than the old client does and thus has a bunch of transitive dependencies which were not present when using transport client mode in Elasticsearch 2.x.</p>
+
+<p>Fortunately, it is possible to write an ES5 client app without the full transport-client library, just by copying and lightly modifying two classes.</p>
+
+<p>Here is the transport-client itself:</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="comment">// Author: Simon Kitching</span>
+<span class="comment">// This code is in the public domain</span>
+<span class="keyword">package</span> <span class="namespace">net.vonos.elasticsearch</span>;
+
+<span class="keyword">import</span> <span class="include">io.netty.util.ThreadDeathWatcher</span>;
+<span class="keyword">import</span> <span class="include">io.netty.util.concurrent.GlobalEventExecutor</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.client.transport.TransportClient</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.common.network.NetworkModule</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.common.settings.Settings</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.transport.Netty4Plugin</span>;
+
+<span class="keyword">import</span> <span class="include">java.util.Collections</span>;
+<span class="keyword">import</span> <span class="include">java.util.concurrent.TimeUnit</span>;
+
+<span class="comment">/**
+ * An Elasticsearch Client implementation which communicates over TCP using the "node client" protocol.
+ * &lt;p&gt;
+ * This class is derived from org.elasticsearch.transport.client.PreBuiltTransportClient in artifact
+ * "org.elasticsearch.client:transport:5.1.1".
+ * &lt;/p&gt;
+ */</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">BasicTransportClient</span> <span class="directive">extends</span> TransportClient {
+
+    <span class="directive">public</span> BasicTransportClient(Settings settings) {
+        <span class="local-variable">super</span>(settings, Settings.EMPTY, addPlugins(<span class="predefined-type">Collections</span>.singletonList(Netty4Plugin.class)), <span class="predefined-constant">null</span>);
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="directive">public</span> <span class="type">void</span> close() {
+        <span class="local-variable">super</span>.close();
+        <span class="keyword">if</span> (NetworkModule.TRANSPORT_TYPE_SETTING.exists(settings) == <span class="predefined-constant">false</span>
+            || NetworkModule.TRANSPORT_TYPE_SETTING.get(settings).equals(Netty4Plugin.NETTY_TRANSPORT_NAME)) {
+            <span class="keyword">try</span> {
+                GlobalEventExecutor.INSTANCE.awaitInactivity(<span class="integer">5</span>, <span class="predefined-type">TimeUnit</span>.SECONDS);
+            } <span class="keyword">catch</span> (<span class="exception">InterruptedException</span> e) {
+                <span class="predefined-type">Thread</span>.currentThread().interrupt();
+            }
+            <span class="keyword">try</span> {
+                ThreadDeathWatcher.awaitInactivity(<span class="integer">5</span>, <span class="predefined-type">TimeUnit</span>.SECONDS);
+            } <span class="keyword">catch</span> (<span class="exception">InterruptedException</span> e) {
+                <span class="predefined-type">Thread</span>.currentThread().interrupt();
+            }
+        }
+    }
+}</code>
+</pre></div></div>
+
+<p>And here is a factory class for the BasicTransportClient; it is spring-specific but that can easily be removed or ported to other frameworks if needed:</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="comment">// Author: Simon Kitching</span>
+<span class="comment">// This code is in the public domain</span>
+<span class="keyword">package</span> <span class="namespace">net.vonos.elasticsearch</span>;
+
+<span class="keyword">import</span> <span class="include">org.elasticsearch.client.Client</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.client.transport.TransportClient</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.common.settings.Settings</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.common.transport.InetSocketTransportAddress</span>;
+<span class="keyword">import</span> <span class="include">org.slf4j.Logger</span>;
+<span class="keyword">import</span> <span class="include">org.slf4j.LoggerFactory</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.beans.factory.annotation.Value</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Bean</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Configuration</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Profile</span>;
+<span class="keyword">import</span> <span class="include">vwg.audi.tracestore.common.exception.CommonMessages</span>;
+
+<span class="keyword">import</span> <span class="include">java.net.InetAddress</span>;
+<span class="keyword">import</span> <span class="include">java.net.UnknownHostException</span>;
+
+<span class="comment">/**
+ * A factory for ElasticSearch TransportClient instances.
+ * &lt;p&gt;
+ * Normally, the getClient() method is called only once, during application startup.
+ * &lt;/p&gt;
+ */</span>
+<span class="annotation">@Configuration</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">ESTransportClientFactory</span> {
+    <span class="directive">private</span> <span class="directive">static</span> <span class="directive">final</span> <span class="predefined-type">Logger</span> LOG = LoggerFactory.getLogger(ESTransportClientFactory.class);
+
+    <span class="annotation">@Value</span>(<span class="string"><span class="delimiter">"</span><span class="content">${es.hostList}</span><span class="delimiter">"</span></span>)
+    <span class="directive">private</span> <span class="predefined-type">String</span><span class="type">[]</span> esHostList;
+
+    <span class="annotation">@Value</span>(<span class="string"><span class="delimiter">"</span><span class="content">${es.port}</span><span class="delimiter">"</span></span>)
+    <span class="directive">private</span> <span class="type">int</span> esPort;
+
+    <span class="annotation">@Value</span>(<span class="string"><span class="delimiter">"</span><span class="content">${es.clusterName}</span><span class="delimiter">"</span></span>)
+    <span class="directive">private</span> <span class="predefined-type">String</span> esClusterName;
+
+    <span class="annotation">@Value</span>(<span class="string"><span class="delimiter">"</span><span class="content">${es.sniff}</span><span class="delimiter">"</span></span>)
+    <span class="directive">private</span> <span class="type">boolean</span> esSniff;
+
+    <span class="comment">/**
+     * Return a singleton connection to elastic-search.
+     */</span>
+    <span class="annotation">@Bean</span>
+    <span class="directive">public</span> Client getClient() {
+        Settings settings = Settings.builder()
+            .put(<span class="string"><span class="delimiter">"</span><span class="content">cluster.name</span><span class="delimiter">"</span></span>, esClusterName)
+            .put(<span class="string"><span class="delimiter">"</span><span class="content">client.transport.sniff</span><span class="delimiter">"</span></span>, esSniff)
+            .build();
+        <span class="keyword">try</span> {
+            TransportClient client = <span class="keyword">new</span> BasicTransportClient(settings);
+            LOG.info(<span class="string"><span class="delimiter">"</span><span class="content">Created client instance '{}'</span><span class="delimiter">"</span></span>, <span class="predefined-type">System</span>.identityHashCode(client));
+            <span class="keyword">for</span> (<span class="predefined-type">String</span> host : esHostList) {
+                client.addTransportAddress(<span class="keyword">new</span> InetSocketTransportAddress(<span class="predefined-type">InetAddress</span>.getByName(host), esPort));
+            }
+            <span class="keyword">return</span> client;
+        } <span class="keyword">catch</span> (<span class="exception">UnknownHostException</span> uhe) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="exception">RuntimeException</span>(<span class="predefined-type">String</span>.format(CommonMessages.GENERIC_LOG_MSG_WITH_ORIG_EXC,
+                    CommonMessages.ES_UNKNOWN_HOST_ERR_CODE, CommonMessages
+                            .ES_UNKNOWN_HOST_ERR_MSG), uhe);
+        }
+    }
+}</code>
+</pre></div></div>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://www.elastic.co/blog/state-of-the-official-elasticsearch-java-clients">Official documentation on Elasticsearch client libraries</a></li>
+  <li><a href="/java/junit-rule-es">Unit-testing Applications Which Use Elasticsearch</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/elastic-txclient/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

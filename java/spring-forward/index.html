@@ -1,0 +1,422 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Fixing Spring CORS behind bad proxies</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Fixing Spring CORS behind bad proxies</h1>
+    <aside>First published on: December 6, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/Cloud/'>Cloud</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>The Java Spring framework includes a “security” module which adds support for validating http requests in various ways. Among the many features it includes is optional support for CORS (Cross-Origin Request Sharing) requests.</p>
+
+<p>When the spring-based application is running behind a proxy which terminates HTTPS and forwards requests to the app as plain HTTP, then Spring 4.3.12 CORS suport requires the proxy to add the following http headers:</p>
+
+<ul>
+  <li>X-Forwarded-Proto</li>
+  <li>X-Forwarded-Port</li>
+</ul>
+
+<p>There are unfortunately at least two widely-used proxies which fail to add the X-Forwarded-Port header to requests (in current versions):</p>
+
+<ul>
+  <li>Google Identity Aware Proxy (IAP)</li>
+  <li>Traefik</li>
+</ul>
+
+<p>The result is that CORS requests fail when they should succeed. To make the situation worse, the Chrome browser sets the “origin” http header on many requests which are technically not CORS requests, but Spring CORS support always runs its logic against any request with an origin header - and thus such requests fail when the user is using Chrome.</p>
+
+<p>Spring issue <a href="https://jira.spring.io/browse/SPR-16262">SPR-16262</a> is currently tracking this issue. Note however that it isn’t really a Spring bug - spring-web CORS support does work fine when the proxy in front of the app sets the appropriate headers. And it isn’t really a Chrome bug - setting the origin header is not unreasonable. It could possibly be called a bug in IAP/Traefik - but it is not surprising that the implementers of those proxies are not aware of the implications of the failing header. Really, it is just an unfortunate chain of circumstances.</p>
+
+<p>What is more unfortunate is that the cause of these failing requests is really difficult to determine. To those reading this article: I hope you found this before spending too much time tracking the problem down!</p>
+
+<h1 id="solving-the-problem">Solving the Problem</h1>
+
+<p>Hopefully, a future release of Spring will somehow deal with the problem better - and that future releases of IAP/Traefik set the headers.</p>
+
+<p>In the meantime, here is a workaround:</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="comment">// Copyright Simon Kitching 2017. Available under the Apache License 2.0</span>
+<span class="keyword">package</span> <span class="namespace">net.vonos.spring.security</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.boot.web.servlet.FilterRegistrationBean</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Bean</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Configuration</span>;
+
+<span class="keyword">import</span> <span class="include">javax.servlet</span>.*;
+<span class="keyword">import</span> <span class="include">javax.servlet.http.HttpServletRequest</span>;
+<span class="keyword">import</span> <span class="include">javax.servlet.http.HttpServletRequestWrapper</span>;
+<span class="keyword">import</span> <span class="include">java.io.IOException</span>;
+<span class="keyword">import</span> <span class="include">java.util.Collections</span>;
+<span class="keyword">import</span> <span class="include">java.util.Enumeration</span>;
+
+<span class="comment">/**
+ * Spring context configuration class which adds a servlet-filter to the servlet-engine filter chain in order to add http-header X-Forwarded-Port
+ * when needed.
+ * &lt;p&gt;
+ * When an incoming HTTPS connection is intercepted by an external loadbalancer (or similar), the https connection terminated there, and the
+ * request forwarded to this app as HTTP, then the intercepting proxy should set headers X-Forwarded-Proto=https and X-Forwarded-Port=443. Various
+ * code may depend on these headers - and in particular, checks done by the spring CorsFilter class does (indirectly via UriComponentBuilder).
+ * Sadly some proxies (including Google IAP and Traefik) set X-Forwarded-Proto only, thus causing problems with CorsFilter and potentially other code.
+ * This filter "patches" the incorrect request headers to add the missing header that the proxy _should_ have set.
+ * &lt;/p&gt;
+ * &lt;p&gt;
+ * See https://jira.spring.io/browse/SPR-16262 for more information on the spring-cors problem caused by the missing header.
+ * &lt;/p&gt;
+ */</span>
+<span class="annotation">@Configuration</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">ForwardedHeaderConfig</span> {
+    <span class="comment">/**
+     * A servlet-engine has an ordered list of Filter instances to apply to a request. However spring has invented type FilterChainProxy which looks
+     * to the servlet-engine like a single filter but internally is a list of filters to apply. Spring-security creates a single bean of name
+     * springSecurityFilterChain (type FilterChainProxy) which contains all the security-module-relevant filter objects. That chain object
+     * has an associated "order" value of -100 (where lower values are registered first in the "real" servlet-engine filter list). In order for
+     * the AddForwardPortFilter filter to be executed _before_ the CorsFilter (which is part of the securityFilterChain), it must be registered
+     * with an order less than -100.
+     */</span>
+    <span class="directive">private</span> <span class="directive">static</span> <span class="directive">final</span> <span class="type">int</span> ORDER_BEFORE_SECURITY = -<span class="integer">200</span>;
+
+    <span class="comment">/**
+     * Register a filter that adds in an X-Forwarded-Port http-header if desired.
+     * &lt;p&gt;
+     * It is not possible to dynamically decide whether to return a bean here or not - the return value must always be non-null. However
+     * it is possible to return a bean with property enabled=false (ie call setEnabled on the returned object), in which case the referenced
+     * filter object will not be registered.
+     * &lt;/p&gt;
+     */</span>
+    <span class="annotation">@Bean</span>
+    FilterRegistrationBean addForwardedPortHeader() {
+        <span class="predefined-type">Filter</span> filter = <span class="keyword">new</span> AddForwardPortFilter();
+        FilterRegistrationBean frb = <span class="keyword">new</span> FilterRegistrationBean(filter);
+        frb.setOrder(ORDER_BEFORE_SECURITY);
+        <span class="comment">// optionally call frb.setEnabled(false);</span>
+        <span class="keyword">return</span> frb;
+    }
+
+    <span class="comment">// =================================================================================================================================</span>
+
+    <span class="directive">private</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">AddForwardPortFilter</span> <span class="directive">implements</span> <span class="predefined-type">Filter</span> {
+        <span class="directive">private</span> <span class="directive">static</span> <span class="directive">final</span> <span class="predefined-type">String</span> HEADER_FORWARDED_PROTO = <span class="string"><span class="delimiter">"</span><span class="content">X-Forwarded-Proto</span><span class="delimiter">"</span></span>;
+        <span class="directive">private</span> <span class="directive">static</span> <span class="directive">final</span> <span class="predefined-type">String</span> HEADER_FORWARDED_PORT = <span class="string"><span class="delimiter">"</span><span class="content">X-Forwarded-Port</span><span class="delimiter">"</span></span>;
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">void</span> init(FilterConfig filterConfig) <span class="directive">throws</span> ServletException {
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">void</span> doFilter(ServletRequest request, ServletResponse response, FilterChain chain) <span class="directive">throws</span> <span class="exception">IOException</span>, ServletException {
+
+            <span class="comment">// If request has X-Forwarded-Proto of "https" but not "X-Forwarded-Port" then set the forwarded port to 443.</span>
+            <span class="comment">// The proxy which did the forwarding really should have set the -Port header - but we can do it for them here.</span>
+            HttpServletRequest req = (HttpServletRequest) request;
+            <span class="predefined-type">String</span> forwardedProto = req.getHeader(HEADER_FORWARDED_PROTO);
+            <span class="predefined-type">String</span> forwardedPort = req.getHeader(HEADER_FORWARDED_PORT);
+            <span class="keyword">if</span> (<span class="string"><span class="delimiter">"</span><span class="content">https</span><span class="delimiter">"</span></span>.equals(forwardedProto) &amp;&amp; (forwardedPort == <span class="predefined-constant">null</span>)) {
+                request = <span class="keyword">new</span> AddHeaderRequest(req, HEADER_FORWARDED_PORT, <span class="string"><span class="delimiter">"</span><span class="content">443</span><span class="delimiter">"</span></span>);
+            }
+
+            chain.doFilter(request, response);
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">void</span> destroy() {
+        }
+    }
+
+    <span class="comment">/**
+     * Trivial class to "set an http header" on an incoming request.
+     * &lt;p&gt;
+     * Type HttpServletRequest does not provide a "set header" method - headers are immutable. It is therefore necessary to wrap the
+     * original request and pass all calls through unaltered except for "getHeader"...
+     * &lt;/p&gt;
+     */</span>
+    <span class="directive">private</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">AddHeaderRequest</span> <span class="directive">extends</span> HttpServletRequestWrapper {
+        <span class="directive">private</span> <span class="directive">final</span> <span class="predefined-type">String</span> headerName;
+        <span class="directive">private</span> <span class="directive">final</span> <span class="predefined-type">String</span> headerValue;
+
+        AddHeaderRequest(HttpServletRequest req, <span class="predefined-type">String</span> headerName, <span class="predefined-type">String</span> headerValue) {
+            <span class="local-variable">super</span>(req);
+            <span class="local-variable">this</span>.headerName = headerName;
+            <span class="local-variable">this</span>.headerValue = headerValue;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="predefined-type">String</span> getHeader(<span class="predefined-type">String</span> name) {
+            <span class="keyword">if</span> (headerName.equals(name)) {
+                <span class="keyword">return</span> headerValue;
+            }
+
+            <span class="keyword">return</span> <span class="local-variable">super</span>.getHeader(name);
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="predefined-type">Enumeration</span>&lt;<span class="predefined-type">String</span>&gt; getHeaders(<span class="predefined-type">String</span> name) {
+            <span class="keyword">if</span> (headerName.equals(name)) {
+                <span class="keyword">return</span> <span class="predefined-type">Collections</span>.enumeration(<span class="predefined-type">Collections</span>.singletonList(headerValue));
+            }
+
+            <span class="keyword">return</span> <span class="local-variable">super</span>.getHeaders(name);
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="predefined-type">Enumeration</span>&lt;<span class="predefined-type">String</span>&gt; getHeaderNames() {
+            <span class="keyword">return</span> <span class="keyword">new</span> ChainedEnumeration&lt;<span class="predefined-type">String</span>&gt;(
+                    <span class="local-variable">super</span>.getHeaderNames(),
+                    <span class="predefined-type">Collections</span>.enumeration(<span class="predefined-type">Collections</span>.singletonList(headerName)));
+        }
+    }
+
+    <span class="comment">/**
+     * Trivial class to make a single enumeration return data from multiple collections.
+     */</span>
+    <span class="directive">private</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">ChainedEnumeration</span>&lt;T&gt; <span class="directive">implements</span> <span class="predefined-type">Enumeration</span>&lt;T&gt;  {
+        <span class="predefined-type">Enumeration</span>&lt;T&gt; first;
+        <span class="predefined-type">Enumeration</span>&lt;T&gt; second;
+        ChainedEnumeration(<span class="predefined-type">Enumeration</span>&lt;T&gt; first, <span class="predefined-type">Enumeration</span>&lt;T&gt; second) {
+            <span class="local-variable">this</span>.first = first;
+            <span class="local-variable">this</span>.second = second;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">boolean</span> hasMoreElements() {
+            <span class="keyword">return</span> first.hasMoreElements() || second.hasMoreElements();
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> T nextElement() {
+            <span class="keyword">if</span> (first.hasMoreElements()) {
+                <span class="keyword">return</span> first.nextElement();
+            } <span class="keyword">else</span> {
+                <span class="keyword">return</span> second.nextElement();
+            }
+        }
+    }
+}</code>
+</pre></div></div>
+
+<h1 id="how-it-works">How it Works</h1>
+
+<p>A Spring <code>@Configuration</code> class can be used to <a href="https://docs.spring.io/spring-security/site/docs/current/reference/html/jc.html">configure web security features</a> via the HttpSecurity object. If method <code>HttpSecurity.cors()</code> is invoked, then an instance of class <code>CorsFilter</code> is added to the <code>springSecurityFilterChain</code> bean, which manages a list of http-filter objects. The <code>CorsFilter</code> instance checks each request for header “origin”, and if present then verifies that the origin matches the current request’s URL (ie the address at which the current webapp is available) or that it is one of the “allowed” origins.</p>
+
+<p>CORS checks have two parts. Web-browsers are responsible for tracking the original location from which each html or javascript document has been loaded; when html or javascript wishes to submit a request to a remote server then:</p>
+
+<ul>
+  <li>if this is a “simple” request then it is just allowed, and the server is responsible for doing any checks</li>
+  <li>if this is a “complex” request then the browser applies a “same-origin” test: if the html/javascript initiating the request was loaded from the same host:port that the request is being sent to, allow. Otherwise send an OPTIONS http request to the target URL (called a “pre-flight request”), and use the returned info to decide whether to allow the request or block it in the browser itself.</li>
+</ul>
+
+<p>For either simple or complex requests, the browser should add an “origin” http header to the subsequent request, indicating the URL from which the html or javascript that initiated the request came from.</p>
+
+<p>Normally, applying security rules on the client side is a sign of design problems, but in this case the browser is protecting <em>its user</em> against bad code loaded from one site trying to perform operations on behalf of its user on another site. Client-side security checks are therefore appropriate here.</p>
+
+<p>However the particular problem we are talking about here is in verifying the “real” requests on the server-side, not dealing with the OPTIONS “pre-flight” request. And the problem is that after passing through an external proxy which transforms an HTTPS request into an HTTP one, the “origin” header and the incoming URL really do not match - it looks like an invalid cross-origin request. The solution of course is to include the <code>X-Forwarded-*</code> headers when comparing incoming URL with origin header - but this only works when the proxy sets them.</p>
+
+<p>The solution is simply to add a filter that runs <em>before</em> the spring CorsFilter, and which adds in an <code>X-Forwarded-Port</code> header if it is missing.</p>
+
+<p>There are two minor complications:</p>
+
+<ul>
+  <li>getting a filter to run before the CorsFilter is tricky, and</li>
+  <li>the HttpServletRequest class has getHeader methods, but not setHeader methods.</li>
+</ul>
+
+<p>Standard Java servlet engines have a concept of an ordered list of filters to apply. However Spring implements its own “filter chain” concept which to the servlet engine looks like a single filter, but is actually a list of filters. All of the security-related “filters” get added to this <code>springSecurityFilterChain</code> internal filter-chain object, which has an “ordering” value of -100. In order to get Spring to register our custom filter with the servlet-engine before the <code>springSecurityFilterChain</code> starts, it must therefore have an “order” property of <em>less than</em> -100.</p>
+
+<p>Adding headers is done through a slightly ugly but reasonably standard approach: wrapping the http-request object and intercepting calls to <code>getHeader</code> and related methods.</p>
+
+<h1 id="further-reading">Further Reading</h1>
+
+<p>More information on CORS:</p>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing">Wikipedia: CORS</a></li>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Mozilla-dev: CORS</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/spring-forward/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

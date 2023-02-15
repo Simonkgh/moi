@@ -1,0 +1,372 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Thoughts on the Role of Software Architect</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Thoughts on the Role of Software Architect</h1>
+    <aside>First published on: February 15, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a>, <a href='/category/Programming/'>Programming</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>For the last 3 years I’ve been working as a software architect in a smallish company (100 IT staff). I’d like to share what responsibilities this role includes in this company; the approach here is interesting and I would recommend it.</p>
+
+<p>This article may be of interest to software architects (or those interested in the role), senior developers, and IT managers in similar companies. I believe it’s also relevant for similar-sized departments of larger companies, and at least partly relevant for smaller companies.</p>
+
+<p>And I’m talking here about experiences in a company that produces a service via software - ie not a consultancy or a packaged-software-developer.</p>
+
+<p>Every (healthy) company has the same goal: maximise profit over the long term. And that consists of three parts:</p>
+
+<ul>
+  <li>maximise income</li>
+  <li>minimise costs</li>
+  <li>stay in business</li>
+</ul>
+
+<p>In this article, I’ll be talking about how the software development group (assuming there is one) can contribute to these goals - in particular the role of Software Architect and the slightly more general goal of <em>engineering productivity</em> (which architecture is considered here to be a part of).</p>
+
+<h1 id="the-goals">The Goals</h1>
+
+<p>To expand on the goals above:</p>
+
+<ul>
+  <li>Maximising income primarily means providing a desirable service to customers: the features they need, the performance they need, the reliability they need. Customers here can be external or internal to the company. A customer is not necessarily a user; it’s whoever is willing to give you money (for example: advertisers).</li>
+  <li>Minimising costs primarily means providing that desirable service with the minimum number of staff (assuming wages are the primary cost). That doesn’t mean overworking people; a good company will emphasise “work smarter” over “work harder”. It also means reducing staff turnover; recruiting is expensive but worse is the time it takes a new employee to be productive.</li>
+  <li>Staying in business means fulfilling legal obligations (tax returns, complying with data-privacy, and so forth) and not suffering disastrous issues such as major outages, data loss, data theft, or ransomware attacks.</li>
+</ul>
+
+<p>This applies to every department within a company; there’s nothing software-specific above. Each department contributes to the same goals in a different way.</p>
+
+<p>The software development group (a subsection of company IT) contributes in its specific way:</p>
+
+<ul>
+  <li>Software-centric services always seem to be evolving, so providing a desirable service means rapid delivery of new and improved software. Good development practices improve the rate at which software can be improved and reduce the frequency of bugs. Good architectural choices provide scalability and reliability.</li>
+  <li>Good practices also make developers individually more productive - ie the same productivity with fewer staff, or increased productivity with the same staff, depending on your viewpoint. In most cases, good practices also attract talented people - who are more productive. This all contributes to “work smarter, not harder”. And in general, good practices increase developer satisfaction, reducing turnover.</li>
+  <li>And finally, good software, infrastructure, and processes should be more robust against disasters.</li>
+</ul>
+
+<p>The last point is very much a collaboration between software development and surrounding teams. It is a product of good requirements from business experts, good decisions from the IT infrastructure team, and others. But software development processes have a part to play.</p>
+
+<p>And (at least at my current employer) the engineering productivity team (which includes the software architects) is deeply involved in delivering the above contributions. Success involves much collaboration, but at least a significant part of the motivation comes from the engineering productivity team and the architects.</p>
+
+<p>Engineering productivity needs to address two different aspects to deliver the desired outcomes:</p>
+
+<ul>
+  <li>the social parts - organisation, processes</li>
+  <li>the technical parts - tools, frameworks, technical decisions</li>
+</ul>
+
+<p>If you’re tempted to object that the first part isn’t the responsibility of software architects, then: who else will do it? There is some overlap here with IT management roles, and with the work of agile coaches, and their contributions to productivity are very important. However many decisions related to productivity have deeply technical motivations and consequences and so understanding of development processes and developer needs are critical - and that’s something that (in my experience) architects understand better than managers or agile coaches. And by the way, when I say “developer” I mean all involved in producing software including not only coders but also QA, database experts, sysadmins aka SREs (site reliability engineers), etc.</p>
+
+<p>Below I try to compress 3 years of experience in this role within one company, and many years in related roles in others, into a few thousand words on these topics.</p>
+
+<h1 id="company-organisation">Company Organisation</h1>
+
+<p>While the experiences I’ve had are hopefully useful in various contexts, I’d like to make clear the specific context that this article documents.</p>
+
+<p>The IT staff here are organised into multiple “tribes” which focus on developing, maintaining, and operating features, and several “supporting teams” who deal with non-feature-related work (this structure was itself an initiative from the engineering productivity team). Supporting teams do such things as:</p>
+
+<ul>
+  <li>provide the software platform on which things run (networks, VMs, kubernetes, databases, monitoring tools, access-control, and much more).</li>
+  <li>provide advice, support, and tools for software testing (though actual test definitions belong with the feature developers)</li>
+  <li>provide coaching and support in agile software development</li>
+  <li>provide security and data-governance support and oversight</li>
+</ul>
+
+<p>Each support team is as small as possible; the money is in the features.</p>
+
+<p>The engineering productivity team is another supporting team; it fluctuated between 3 and 5 members while I was there, and is responsible for looking at the “big picture” of how software is being developed now, and what can be done to make it as cost-effective as possible. Software architecture is a part of that work.</p>
+
+<p>I’d like to take this opportunity to thank (and give credit) to team lead and fellow architect Michael, from whom I have learned a lot over the last years - particularly regarding the social/”soft” aspects of improving IT productivity. I’d also like to give credit to an excellent management team, and some excellent colleagues - particularly those who contributed ideas and constructively challenged our proposals.</p>
+
+<h1 id="the-social-aspects-of-engineering-productivity">The Social Aspects of Engineering Productivity</h1>
+
+<p>Like those other supporting teams, we support the tribes who develop and maintain features, and recognise that they bring in the money (provide things that customers are willing to pay for) and we are there to help that happen. There are many good people in those tribes and they should in general have the right to decide how best to do their work. We also recognise that we are not, and cannot be, experts in every domain; often members of the tribes are experts who provide good ideas, and who we can consult for advice on specific topics. What the engineering productivity team can do to contribute to company profitability is:</p>
+
+<ul>
+  <li>listen for suggestions and complaints from the people actually doing the work of producing software - and get something done about those</li>
+  <li>look for processes and “standard ways of doing things” which are causing unnecessary friction - and fix them</li>
+  <li>encourage cross-tribe communication and documentation</li>
+  <li>build consensus on cross-tribe issues</li>
+  <li>look at where we want to go in the medium and long term (3-10 years) and introduce relevant changes incrementally (cost-effective change)</li>
+  <li>be aware of new tools and practices that may be relevant, and promote their use</li>
+  <li>make our company an attractive employer for IT staff (retain existing people, improve prospects for recruiting)</li>
+  <li>and deal with cross-team issues such as security, data-privacy, build-tools, and much more.</li>
+</ul>
+
+<p>It’s interesting that most books and articles about “software architecture” admit that it’s actually pretty hard to define exactly what that is; one famous definition is simply “the stuff that’s hard to change later”. However many of the above topics are included; it’s now generally acknowledged that software architects do (and need to do) more than just draw UML diagrams.</p>
+
+<p>What we (as software architects) need as a skillset is therefore:</p>
+
+<ul>
+  <li>a good understanding of software development from coding through deployment and maintenance</li>
+  <li>to still be able to code (not necessarily at “guru” level, but enough to participate actively where relevant)</li>
+  <li>to truly understand what a for-profit company is (something that needs to maximise profit!) - something developers often seem unaware of</li>
+  <li>the ability to listen - including accepting ideas from others</li>
+  <li>the ability to convince others to listen to us (and stop discussions going off-course) - experience and expertise help here</li>
+  <li>the ability to reach consensus - gather, organise, summarize, and document the core ideas of a discussion</li>
+  <li>the ability to communicate via written documents and presentations</li>
+  <li>the ability to share credit with others (architecture and engineering productivity is a collaborative process)</li>
+  <li>a wide knowledge of software practices, frameworks, tools - not always in detail, but enough to know what might be relevant to which use-case</li>
+  <li>the ability to do research</li>
+  <li>a good feel for the appropriate complexity needed to solve a particular problem (“feels too simple”/”feels about right”/”feels over-complicated”)</li>
+  <li>the courage to take risks</li>
+  <li>the ability to accept failures and learn from them</li>
+  <li>an understanding of how to use metrics to drive decisions, and to evaluate them</li>
+  <li>the ability to build/present a good business case for recommendations - including gathering and presenting data to support it (data driven decision making beats personal instinct). If you cannot prove a recommendation is a good one, then you’re running on instinct alone…</li>
+</ul>
+
+<p>It’s a somewhat intimidating list. And interestingly a long way from the skillsets taught in IT courses - at least when I studied. However fortunately it’s not necessary to do all of it alone; in particular for the social and business aspects help can be obtained from IT managers (if you’re lucky enough to work with good ones), and from agile coaches (with which there is some overlap here).</p>
+
+<p>What we as engineering productivity team members have, in contrast to the feature-team (tribe) members, is more flexibility in where we invest our time. Each tribe does have a (time) budget for non-feature work including upgrading libraries, rewriting old cruft, investigating and integrating new tools, etc. However this must always be balanced with the demands for new features and bugfixes; it’s difficult at that level to find time to deal with long-term planning or inter-team issues. That’s exactly where we can contribute. This doesn’t mean that ideas cannot come from the tribe members - in fact, one of the things we do is encourage exactly that. It’s also possible, if interest is there, for us to arrange time for someone with a good idea to follow that up as part of the engineering productivity budget; being “responsible” for something means making sure it gets done but not necessarily having to do it personally.</p>
+
+<p>Having more flexiblity in our allocation of time, ie not having a backlog of features to deal with, doesn’t mean we aren’t as overloaded as everyone else. That’s a good thing by the way; it’s always good to have a longer list of tasks to do than time to do them. Our tribes are always prioritising ideas from the business, with only the most beneficial ones making the cut for immediate implementation. We do the same; from the dozens of ideas we have in our backlog which could make our colleagues happier and more productive (which makes our business people and customers happy and the company accounts fat) we pick the ones where our limited time can make the most impact and the remainder must wait. It’s the agile way!</p>
+
+<p>Our limited time also ensures that we do respect the autonomy of other teams and tribes; we just don’t have the time to oversee everything and micro-manage. Many details of software development practice and process do not have company-wide impact, and can be decided (and potentially decided differently) per tribe. Employees (and IT staff in particular I think) appreciate the right to make decisions for themselves, or in cooperation with those colleagues they work with day-to-day (I know I do). And people are generally happier and more productive in an environment they have built themselves.</p>
+
+<p>There are of course things which have company-wide impact and here we as engineering productivity are responsible.</p>
+
+<p>In many cases this involves building consensus, ie it doesn’t matter too much which solution is chosen as long as it is consistent. While respecting the right for individuals and tribes to select their own tools and processes, too much variation is not productive for the company. Staff may be moved from team to team when workloads change, staff may be drawn from multiple teams for special projects, and recruiting should not require significantly different skillsets for the same role in different teams. We therefore watch out for excessive divergence from “the norm”, arrange discussions to reach some consensus on reasonable standardisation, contribute our own ideas, and finally document the conclusions and communicate the expectation to all relevant groups.</p>
+
+<p>In other cases, we may have a theory that a particular change will improve productivity. Sometimes that can be non-controversial; everyone agrees, just had no time or motivation to introduce that themselves. In other cases, it’s important to prove the change is worth investing in - or at least gather reasonable supporting evidence. If we want others to invest time (and therefore company money) in something then we really should have more than just instinct to back that up. Employee time is company money, time consumed impacts the number of features that could have been delivered or bugs fixed, and there’s also a “reputation cost” whenever we promote an idea which isn’t universally accepted. It is therefore important to explain how each change brings benefits - and to be relatively sure it will. It’s also beneficial to be humble and honest when introducing changes; when a change is introduced as “let’s try this, measure outcomes, and see what happens” then the reputation loss if it isn’t successful is much less than when an idea is introduced with full confidence as “my brilliant idea”. On the other hand, too much timidness can lead to projects being ignored. Gathering supporting data first, gathering political support, and proposing (with confidence) an experiment whose success can be measured, seems to be a productive approach.</p>
+
+<p>The emphasis on consensus doesn’t mean we as architects abandon our responsibilities. We are expected to be experienced and wide-read, and should have opinions (or the ability to research a topic and form new opinions). However simple assertions based on our official role should be avoided; if we’ve seen something that convinces us of the benefits of an idea, we should also be able to present that evidence to others and thus reach consensus by persuasion. If we can’t provide convincing evidence, it’s an indicator we may not have thought deeply enough about the problem ourselves, and instead leapt too quickly to a conclusion - time perhaps to think again. There are however occasions where changes we feel are necessary are just not getting consensus support (or attention) - and there the path leads via our head-of-IT. Hierarchies are fairly flat here, and in fact the engineering productivity team (and architects) don’t have the authority to give orders to tribes or developers. However the head-of-IT can issue such orders (politely but firmly) so we need to convince just one person. Again, evidence is useful. Often such topics are not a matter of yes or no, but rather of priority. Security and data-privacy have proven to be common sources of contention here; developers often agree in principle, but get praise/recognition for completing features rather than investing time in more secure code and therefore secure coding patterns and practices can be given insufficient (in our eyes) attention. Having “authority” only via persuasion or via escalation to head-of-IT is a nice balance, keeping us humble, honest, realistic, and data-driven.</p>
+
+<p>Regardless of whether a change intended to improve engineering productivity is an “experiment” or believed to be “non-controversial”, it needs to be communicated. What is important is that communication needs to be two-way; members of a tribe might sometimes not have “the big picture” (that’s our specialty) but they know what real impact specific practices and policies have, and what problems they may cause. In addition, they may simply have good ideas themselves.</p>
+
+<p>And when a change is introduced, as well as listening to feedback, it’s really helpful to actually <em>experience</em> the effects. A very effective way of doing this is to join a project as one of the development team for a reasonable period of time (a few weeks, maybe even a few months) to see how it actually works. This can be far more effective than waiting for someone to request a meeting and then trying to understand what the issue is. This does mean the “architect” requires reasonable competency in software development but it’s also a great way to keep skills from rusting, and the feeling of closing a series of “tickets” is often a very nice change from the more abstract work of architecture/engineering-productivity. It’s also a good way to build relationships; future changes are likely to be more easily accepted - or at least discussions are likely to be more friendly and productive - when you as architect are accepted as being “one of us”.</p>
+
+<p>And finally it’s time to say something about the traditional part of “software architecture” - actually looking at the software. Architecture can be done at many levels. Individual developers and their immediate colleagues make decisions about code structure within a single code-base every day: typenames, libraries, design-patterns. Then for larger codebases there can be discussions about modularity. Then there are decisions to be made about how different codebases communicate: library APIs, network APIs. And larger discussions about data distribution across networks, inter-process communication patterns, microservices, service-oriented-architectures, enterprise integration patterns, and more. Even in this mid-size company we’ve needed to address all of these. There is simply too much going on to get involved in decisions at each of these levels. Instead software architects need to concentrate on:</p>
+
+<ul>
+  <li>allocating responsibility for featuresets to appropriate teams (including <em>partitioning</em> large projects into smaller pieces)</li>
+  <li>assisting in prioritisation (particularly functional vs other work)</li>
+  <li>setting non-functional requirements for new and existing codebases</li>
+  <li>setting conventions for inter-process communication</li>
+  <li>setting security conventions/patterns - including consistent authentication/authorization</li>
+  <li>choosing standard CI/CD tools</li>
+  <li>setting expectations for testing</li>
+</ul>
+
+<p>These decisions are driven by the items listed earlier: looking for friction, looking for cross-tribe issues, looking into the future, etc.</p>
+
+<p>In all of these cases, decisions will have a major impact on the daily lives of developers. It’s therefore important to get personal experience of the effects if possible - see the comment elsewhere on the benefits of being “embedded” in a project for a reasonable time. And important to encourage feedback and listen to it. And important to make data-driven decisions where possible. And important to gather metrics to see whether a change actually had the desired effect.</p>
+
+<p>Above all, it is important to compare the costs of a change with the benefits. More paperwork and more procedures are not the goal; the goal is improved profit. Complicated processes and burying developers in rules/constraints do NOT increase profit. We therefore as engineering productivity aim NOT to produce documents with new rules and processes, but instead to collaborate with the tribes to change culture and conventions so that (new) best practices are “just normal”. We also set up systems that automatically guide new work into the desired paths - eg a “create new database” tool which not only reduces the effort needed for a new project, but sets things up following current best practice (which was previously decided on by consensus). Or work with the infrastructure/platform team to define network access constraints that make it impossible to break agreed-on security conventions (again, see consensus). Checklists and guideline-documents are sometimes unavoidable, but are considered a last resort.</p>
+
+<h1 id="metrics">Metrics</h1>
+
+<p>Metrics are often difficult. However in many cases it is possible to validate changes: measure a metric before a change, then afterwards, and see if the change really worked.</p>
+
+<p>As an example, I was recently at a presentation where a company described gathering a metric on how long it took a new developer to make their first 10 commits. Changes such as increasing documentation, increasing test coverage, automating the setup of developer environments, or using larger or smaller codebases, will all be reflected in the metric.  It will have a large error-bound, and can reasonably only be applied in larger companies (with large staff turnover) but it’s an interesting idea.</p>
+
+<p>We use the DORA (Accelerate) metrics heavily. I’m rather sceptical about being able to compare these across companies, as they are very sensitive to the details of how they are measured, but within a company they proved to be very useful in evaluating the effectiveness of changes we made - in developer processes, tools, and technical architecture.</p>
+
+<p>Note that metrics should never be used as a goal; reward people for achieving certain metrics and processes will get distorted in unhelpful ways. Instead, use them to measure the effects of experiments. Unfortunately, finding a good metric is often hard. In addition, some changes require months or years to be reflected in metrics, eg improvements in documentation are most useful long down the trail.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>I like how the role of “software architect” is interpreted at this company: as</p>
+
+<ul>
+  <li>a major contributor to the goal of <em>engineering productivity</em>
+</li>
+  <li>an organiser of collaboration and consensus</li>
+  <li>an originator and researcher of options which are then agreed on by consensus (in most cases)</li>
+  <li>a communicator of consensus</li>
+  <li>a builder of tools,examples, and other technical measures to <em>automatically guide</em> work into the agreed approaches - rather than the producer of documents and processes that developers are expected to read and follow</li>
+  <li>a changer of culture rather than writer of large documents</li>
+  <li>a listener and collaborator</li>
+  <li>and expected to <em>experience</em> the consequences of changes, rather than issuing proclamations and moving on to other topics</li>
+</ul>
+
+<p>And all of this in service to the primary goal: maximising company profit.</p>
+
+<p>Architect is a <em>role</em>, and not necessarily a job title. An employee may have many roles, of which “architect” is just one - and it might be the “primary” role, or a “secondary” one. Architecture is also context-dependent; someone can have “architectural responsibilities” for specific subsets of functionality or specific teams. And of course anyone can <em>contribute</em> to architecture; good ideas can come from anywhere.</p>
+
+<p>There isn’t anything really new or unique about this; I’ve seen similar recommendations from other sources. However this is a real account of the use of these principles in a real company (as interpreted by myself; this isn’t an “official role description”).</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/architect-role/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

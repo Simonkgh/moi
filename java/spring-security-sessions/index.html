@@ -1,0 +1,427 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Spring Security Session Management</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Spring Security Session Management</h1>
+    <aside>First published on: June 10, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p><a href="https://spring.io/projects/spring-security">Spring Security</a> is an excellent framework. However their advice on <a href="https://docs.spring.io/spring-security/site/docs/current/reference/html5/#concurrent-sessions">tracking authentication-sessions</a> is dangerously vague; it applies only when the application is a non-clustered presentation-tier app, and leaks memory otherwise. And <a href="https://www.keycloak.org/docs/latest/securing_apps/#_spring_security_adapter">Keycloak’s advice on spring setup</a> is actively wrong.</p>
+
+<p>Work colleagues discovered this recently while integrating Keycloak (OAuth2) support into our Spring-based applications.</p>
+
+<p>This article specifically looks at when to enable <code>RegisterSessionAuthenticationStrategy</code> or <code>NullAuthenticatedSessionStrategy</code>.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>For those just wanting the answer, it is:</p>
+
+<ul>
+  <li>when you are using stateless authorization (eg OAuth2 bearer tokens), use <code>NullAuthenticationSessionStrategy</code>
+</li>
+  <li>when using a servlet-engine session manager which does not support session-expiry callbacks, use <code>NullAuthenticatedSessionStrategy</code>
+</li>
+  <li>for other cases, you probably want <code>NullAuthenticatedSessionStrategy</code> anyway</li>
+</ul>
+
+<p>Use <code>RegisterSessionAuthenticationStrategy</code> only when:</p>
+
+<ul>
+  <li>you are running a single instance of your application (ie not clustered), AND</li>
+  <li>you need the features that Spring’s <code>SessionRegistryImpl</code> offers</li>
+</ul>
+
+<p>SessionRegistryImpl offers the following features (which IMO aren’t really that useful):</p>
+
+<ul>
+  <li>the ability to limit the number of concurrent logins (eg different PCs or private tabs) for a specific userid</li>
+  <li>the ability to build a “user admin page” where logged-in users can be listed and potentially force-logged-off</li>
+</ul>
+
+<p>The particular setup that we were using and which triggered a memory leak (before we switched to <code>NullAuthenticatedSessionStrategy</code>) was:</p>
+
+<ul>
+  <li>the Tomcat Servlet Engine</li>
+  <li>the <a href="https://github.com/magro/memcached-session-manager">memcached-session-manager for tomcat</a> - which actually supports both <code>memcached</code> and <code>Redis</code> as session stores</li>
+</ul>
+
+<p>However the problem is not limited to this specific servlet-engine or session-store.</p>
+
+<h1 id="keycloak-and-spring">Keycloak and Spring</h1>
+
+<p>The <a href="https://www.keycloak.org/docs/latest/securing_apps/#_spring_security_adapter">Keycloak docs</a> states:</p>
+
+<blockquote>
+  <p>You must provide a session authentication strategy bean which should be of type RegisterSessionAuthenticationStrategy for public or confidential applications and NullAuthenticatedSessionStrategy for bearer-only applications.</p>
+</blockquote>
+
+<p>While this is right for bearer-only applications, it is dangerously wrong otherwise. And while Spring’s config defaults to using neither of these strategies, the Keycloak extension <em>does</em> force a choice of <em>some</em> strategy and recommends only these two.</p>
+
+<h1 id="spring-security-config-and-sessionauthenticationstrategies">Spring Security Config and SessionAuthenticationStrategies</h1>
+
+<p>Normally a Spring application defines a subclass of <code>WebSecurityConfigurerAdapter</code> and overrides method <code>configure(HttpSecurity)</code> to set up its security rules.</p>
+
+<p>This HttpSecurity object has a method <code>sessionManagement</code> which returns an object which performs various actions when a user’s login is successful. One of the things it does is invoke its configured “authentication strategy”; there is a default but a Spring application can customise this. See <a href="https://docs.spring.io/spring-security/site/docs/current/reference/html5/#servlet-authentication-abstractprocessingfilter">this diagram of how the SessionAuthenticationStrategy fits into the overall login process</a>.</p>
+
+<p>The default SessionAuthenticationStrategy implementation is a CompositeSessionAuthenticationStrategy wrapping some other strategies. By default, this list contains just ChangeSessionIdAuthenticationStrategy, ie forces the sessionId cookie to be updated after successful login (see <code>SessionManagementConfigurer</code>).</p>
+
+<p>However if the subclass of WebSecurityConfigurerAdapter calls ancestor method <code>maximumSessions</code> then the <code>CompositeSessionAuthenticationStrategy</code> automatically includes <code>RegisterSessionAuthenticationStrategy</code> which leads to a memory-leak in many circumstances.</p>
+
+<p>The Keycloak library encourages customisation of the strategy; a keycloak-enabled Spring application should subclass KeycloakWebSecurityConfigurerAdapter instead of <code>WebSecurityConfigurerAdapter</code>, and this parent class defines an <em>abstract</em> method <code>sessionAuthenticationStrategy()</code> - thus <em>forcing</em> subclasses to explicitly choose a SessionAuthenticationStrategy to use. As noted, the Keycloak docs then provide bad advice which leads to a memory leak in many situations.</p>
+
+<h1 id="how-the-spring-sessionregistry-works">How the Spring SessionRegistry works.</h1>
+
+<p>As noted above, the SessionAuthenticationStrategy is notified on each successful login. Section <a href="https://docs.spring.io/spring-security/site/docs/current/reference/html5/#concurrent-sessions">Concurrency Control</a> then discusses management of “security sessions” and in passing mentions setting up <code>RegisterSessionAuthenticationStrategy</code>. That’s a little odd as the whole approach doesn’t work without it - so let’s look at</p>
+
+<p>Spring provides a class SessionRegistryImpl which keeps an in-memory map of <code>(userid -&gt; list of security-sessions)</code>. Class <code>RegisterSessionAuthenticationStrategy</code> ensures that on successful authentication, the user’s security-session is added to this map. Class HttpSessionEventPublisher ensures that on user logout (either explicit or via http-session-timeout) the corresponding map entry is cleared (necessary to avoid a memory leak).</p>
+
+<p>As mentioned in the Spring docs, there are two primary uses for the SessionRegistry:</p>
+
+<ul>
+  <li>Class ConcurrentSessionControlAuthenticationStrategy can use it to check whether a particular userid already has a session (on the same host) and if so potentially reject the login with reason “too many sessions”.</li>
+  <li>Code can use this to implement an admin-page that lists all users logged-in on a particular host (and potentially log them out).</li>
+</ul>
+
+<p>The login-limits can be used to:</p>
+
+<ul>
+  <li>enforce licensing limits</li>
+  <li>prevent users from sharing logins (at least, only N users at a time can use an account)</li>
+</ul>
+
+<h1 id="the-problems-with-the-spring-sessionregistry">The Problems with The Spring SessionRegistry</h1>
+
+<p>Provided things are correctly set up (in particular, session timeout detection), this works ok on a single web application instance.</p>
+
+<p>But if the system is clustered:</p>
+
+<ul>
+  <li>the SessionRegistry on any single host no longer makes sense</li>
+  <li>and entries in the SessionRegistry are likely to be leaked when http sessions time out</li>
+</ul>
+
+<p>The “list of logged-in users” that SessionRegistry offers doesn’t seem to make sense in a clustered system. The list will be only the users logged in <em>on that specific node</em>, so you as an admin-users you:</p>
+
+<ul>
+  <li>get different data from each node of your cluster;</li>
+  <li>need to somehow combine data from all nodes to get an “overall view” of your cluster;</li>
+  <li>and to force-logoff a specific user you need to find which node they are logged in on</li>
+</ul>
+
+<p>The above is assuming “sticky sessions” are being used. If you are not using sticky sessions, ie requests are being distributed evenly across the cluster, then you have some kind of central session store anyway - and the SessionRegistry makes even less sense as each node tracks data for users whose http-session was first created on that node. But the session-creation-node is not related to any other operations the user is performing.</p>
+
+<p>And depending on how the clustering system manages http sessions,  session deletion events (whether expiry or explicit delete) often don’t work or are triggered on a single node which might not be the node on which the session was created. This leads to incorrect results being reported by the SessionRegistry - and to a memory leak.</p>
+
+<h1 id="pure-rest-clients-and-the-spring-session-registry">Pure Rest Clients and the Spring Session Registry</h1>
+
+<p>When an application provides a rest endpoint, there are two kinds of callers:</p>
+
+<ul>
+  <li>callers which handle responses that include <code>set-cookie</code> headers by storing these and including the cookies in future responses</li>
+  <li>callers which expect rest endpoints to be stateless, and ignore any set-cookie headers in the response</li>
+</ul>
+
+<p>The second (cookie-ignoring) approach is the usual approach for “pure rest clients”. In particular, apps for mobile devices often don’t expect or support cookies.</p>
+
+<p>Unfortunately Spring’s <code>RegisterSessionAuthenticationStrategy</code> always creates a new http session when a request is authenticated - even when the authentication is due to an OAuth2 bearer-token. This means that <em>for each request</em> from a pure-rest-client to a secure endpoint using an OAuth2 bearer token, a new http session object is created and registered with the <code>SessionRegistryImpl</code> - objects that will never be used again. These session objects will eventually expire and the memory be recovered (assuming http session expiry is working) but that can take many minutes for each session.</p>
+
+<p>In addition, the features the SessionRegistry provides doesn’t make much sense for clients using OAuth2 bearer tokens; a list of “logged in users” or attempting to limit concurrent sessions for “a logged in user” doesn’t apply to such clients. And finally, “sticky sessions” don’t work with such clients (as they ignore the routing cookies) so calls are distributed across the cluster.</p>
+
+<p>Obviously <code>RegisterSessionAuthenticationStrategy</code> is a very bad choice for applications with such clients.</p>
+
+<h1 id="session-management-on-distributed-systems">Session Management on Distributed Systems</h1>
+
+<p>The following discussion applies only to applications which use http sessions - which is <em>not</em> usually the case for servers which only provide Rest endpoints.</p>
+
+<p>Managing “user session data” is relatively simple on a system with just one node. When a user request does not provide a session-cookie, then</p>
+
+<ul>
+  <li>a random session-id is allocated</li>
+  <li>an entry is added to a local in-memory map with the session-id as key and user-session-related data as value</li>
+  <li>the response includes a cookie that holds the value of the session-id</li>
+</ul>
+
+<p>Obviously, on later requests to the same node the cookie is provided and the existing map entry is used to retrieve user session data (state). The map entry needs to have a “last used” timestamp on it, and some background process is needed to periodically scan the map entries and delete entries which “have expired”; without this users who visit the site then just “go away” will continue to consume memory. A ServletEngine emits a “session deleted” event when a session is explicitly deleted or deleted during to timeout - see below.</p>
+
+<p>Normally code within the application which needs to store user-state just stores it into the value in the session-map. If for some reason the code wishes to store the data in its own map keyed by the same session-id then it must listen for “session deleted” events in order to free memory associated with the deleted session.</p>
+
+<p>Of course a server can store session data in a local file, or remote database, etc. rather than just store it in memory. However when storing sessions in a remote database, the behaviour of “session timeout” changes significantly.</p>
+
+<p>A single server has an upper limit to the load it can handle. Eventually scaling needs to be done by running multiple instances with a load-balancer distributing calls across the instances. The load-balancing can be done with “sticky sessions” in which each user is directed to the same back-end server instance, or by distributing requests evenly across the set of instances.</p>
+
+<p>With “sticky sessions” http-session-management can still be done with a simple in-memory or in-local-file storage, and where session deletion/timeout occurs on the node that the user is assigned to. However this does have the disadvantage that failure of that node causes loss of user session data; this is not only a problem for “crashes” but also a problem when rolling out new versions of software. In the “old days” software releases were done “out of business hours” and therefore session loss was not a problem. However modern software development processes recommend frequent releases, and performing these releases during normal business hours. Rollout strategies such as blue/green deployment, and rollouts on clusters such as Kubernetes do not install the “new version” on the same host as the old one, and often leave the old instance up until the new one is running properly. This means that “user session loss” becomes more common and even “store session in file” does not really help. In short: even when using “sticky sessions”, scalable and modern systems require that session data be stored in an external database. And that brings the “session timeout” issue into play.</p>
+
+<p>So when sessions are stored in an external database (often a key-value store such as Redis), how does “http session deletion” and “http session timeout” work? And particularly when “sticky sessions” are not used? This is discussed in the following sections.</p>
+
+<h1 id="apache-tomcats-session-management-options">Apache Tomcat’s Session Management Options</h1>
+
+<p>The applications I happen to be currently working on uses Apache Tomcat; the following information describes how session-management works there. However I expect other servlet engine implementations work similarly.</p>
+
+<p>Tomcat has support for “cluster management”, but the options are relatively limited. The “DeltaManager”:</p>
+
+<ul>
+  <li>relies on multicast networking which does not work in cloud environments</li>
+  <li>and replicates the session to every member of the cluster - ie is not highly scalable</li>
+</ul>
+
+<p>Tomcat also provides a “Backup Manager” which replicates each session to one other Tomcat node. This relies on sticky sessions to work, configured so that on unavailability of the “primary node”, the user is directed to the backup node. This does work better in cloud environments, and is more scalable. However sticky sessions are still somewhat undesirable. And this “push” approach to session distribution is just ugly and inelegant: a nicer architecture is to store session data in a central place, and for any server which needs that data to <em>pull it</em>.  This still supports sticky session routing (the server can pull each time, or just assume it has the latest data for any session it recognises), while also elegantly supporting failover (the new server just pulls the data when failover occurs) and non-sticky setups (the session is pulled on each request). This is described well in the memcached-session-manager wiki page.</p>
+
+<p>Note that the whole concept of “sessions” is not really applicable to REST servers. Yes, it is possible to implement “stateful rest apis”, but IMO this is an anti-pattern; if a server is providing REST apis then those APIs should be stateless:</p>
+
+<ul>
+  <li>they should not load data from a user-session, or store data in one</li>
+  <li>they should not set session-cookies</li>
+  <li>they should use stateless OAuth2 authentication rather than relying on having a session with “authentication state”.</li>
+</ul>
+
+<p>Unfortunately, it is quite tempting to write hybrid servers which return HTML from some URLs, and handle REST calls (return JSON) at other URLs. In this case, the HTML stuff will use session-based authentication. Ideally there would be 2 separate Spring security configs - one for the HTML (desktop) stuff and one for the rest. However that means that HTML served from the server needs to then obtain OAuth tokens in order to call the REST endpoints - an extra complication when the user is already logged-in via their session. The Keycloak docs assume your server is one or the other (“public” or “confidential” client):</p>
+
+<blockquote>
+  <p>You must provide a session authentication strategy bean which should be of type RegisterSessionAuthenticationStrategy for public or confidential applications and NullAuthenticatedSessionStrategy for bearer-only applications.</p>
+</blockquote>
+
+<p>It seems possible for one server node in the cluster to be responsible for periodically scanning the complete set of sessions in that remote DB and removing expired items. But there are some significant problems with this:</p>
+
+<ul>
+  <li>the set can be large</li>
+  <li>there needs to be some kind of “leader election” to determine who does the scanning (not impossible, but complex)</li>
+  <li>and the “session deletion notification event” will only be processed on that scanning node unless some additional complex
+system exists for notifying all elements in the cluster of the event</li>
+</ul>
+
+<p>Instead, the common solution is to have the database automatically expire data; Redis entries have an optional expiry-time field for this. And in this approach, “http session timeout” events are just not available at all, on any node.</p>
+
+<p>This in turn means that any code which relies on receiving “http session timeout” events in order to avoid memory leaks is broken in a clustered environment.</p>
+
+<p>Ant this brings us back to Spring’s SessionRegistryImpl; it keeps data about sessions in its own map which needs “cleanup” when sessions are deleted - and thus <em>the registry leaks memory in a distributed environment</em>.</p>
+
+<p>It might be possible for SessionRegistryImpl to implement its own “session timeout scanning” by tagging the entries in its map with a timestamp and removing entries that are “too old”. However such timestamps should be updated on each request so the timeout applies “from last request” - but in a system where requests are distributed across a cluster, that doesn’t work. Periodic scanning could check with the central session-store to see if each session held locally still exists or not - seems possible but rather network-intensive. And the current SessionRegistryImpl does not do this.</p>
+
+<h1 id="session-events">Session events</h1>
+
+<p><code>HttpSessionListener.sessionDestroyed</code> is called from tomcat <code>StandardSession.expire(boolean)</code> which is called from <code>StandardSession.isValid()</code>. That’s an odd decision - an “isFoo” method doesn’t normally have side-effects but that’s the way it currently works. The isValid check is done when a request is received which specifies that session - ie a callback will occur if the session is <em>used</em> between reaching expiry time and being discarded. However that’s not relevant here.</p>
+
+<p>Tomcat has interface org.apache.catalina.Store which allows sessions to be persisted externally - and this can help preserve sessions over server restarts. However it is not intended for clustering, ie sharing sessions between servers. In particular, expiry of sessions must be done by a tomcat instance which fetches all sessions, iterates over them, and triggers expiry.</p>
+
+<p>Tomcat method <code>ManagerBase.processExpires</code> iterates over all sessions, calling isValid on each one. To work, it needs an array of all sessions to be expired - which obviously does not scale well. This is called from method backgroundProcess which:</p>
+
+<p>in tomcat:
+* is called from StandardContext.backgroundProcess
+* which is called from StandardWrapper.backgroundProcess
+* which is called from ContainerBase.ContainerBackgroundProcessor.processChildren
+* which is called form COntainerBase.ContainerBackgroundProcessor.run
+* which is a thread started on tomcat startup</p>
+
+<p>Oddly, method MemcachedBackupSessionManager.backgroundProcess calls updateExpirationInMemcached which calls <code>_manager.findSessions()</code> which returns an array of all sessions. That doesn’t seem like something that memcached can do.</p>
+
+<p>This manager object is passed to the constructor of MemcachedSessionService and will be a MemcachedBackupSessionManager instance.</p>
+
+<h1 id="externalized-sessions">Externalized Sessions</h1>
+
+<p>When running a servlet engine in a cluster, http-sessions are <a href="https://github.com/magro/memcached-session-manager">typically stored in a central place such as <em>memcached</em></a>. Requests can then be distributed evenly across all servers; the session-id provided in the request is used to fetch the http-session from the central store on request begin, and it is written back out at request end if modified.</p>
+
+<p>Http session timeout is managed by the central store. This means that individual servlet engine instances do <em>not</em> get http-session-timeout events for such sessions. This leads directly to memory-leaks in classes such as SessionRegistryImpl which store user-related data related to login sessions.</p>
+
+<h1 id="summary-1">Summary</h1>
+
+<p>For a clustered system, the correct solution is therefore to use the NullAuthenticatedSessionStrategy instead. This is notified on each successful login, and does absolutely nothing. The SessionRegistryImpl map remains empty - meaning of course that the concurrent-login limits won’t work, but that’s no big loss.</p>
+
+<p>It might be possible to implement a cluster-aware SessionRegistry implementation, but none is provided by Spring as far as I know.</p>
+
+<p>In addition, if the application is a rest server using bearer-token authorization then NullAuthenticatedSessionStrategy is very important; RegisterSessionAuthenticationStrategy calls request.getSession() which in turn triggers creation of an http-session and embeds the session-id in a set-cookie command in the response, then stores the (userid, sessionid) pair. This is of course totally pointless when the request is a REST call authenticated via bearer-token, as the caller will likely ignore the set-cookie command - thus leading to a new session per request call and yet another memory leak.</p>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<ul>
+  <li><a href="https://stackoverflow.com/questions/51727429/spring-refreshablekeycloaksecuritycontext-leak-memory/51742200">Memory Leak with Spring and Keycloak</a></li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/spring-security-sessions/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

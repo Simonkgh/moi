@@ -1,0 +1,886 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Learning Prometheus and PromQL</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Learning Prometheus and PromQL</h1>
+    <aside>First published on: December 27, 2020</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Infrastructure/'>Infrastructure</a>, <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 class="no_toc" id="overview">Overview</h1>
+
+<p><a href="https://prometheus.io">Prometheus</a> is an open-source software application for gathering and storing statistics about infrastructure.</p>
+
+<p>This article is a brief overview, followed by some notes about how to write queries over statistics using the PromQL language.</p>
+
+<p>The official Prometheus documentation is reasonable. However the application has been developed by experts in statistical analysis, and sometimes the documentation lacks helpful background information - at least in the current version. This article provides info that I would have found helpful when first getting familiar with Prometheus.</p>
+
+<p>This is mostly notes-for-myself; there is no promise that they are useful to anyone else. The content here is mostly gathered from other sites, including the <a href="https://prometheus.io/docs/introduction/overview/">Prometheus official documentation</a>; I’ve just restructured it into a format that I find more convenient and added explanatory notes about things I found difficult to understand at first. See <a href="https://valyala.medium.com/promql-tutorial-for-beginners-9ab455142085">this promql tutorial</a> for an alternative introduction which focuses a bit more on the “how” and less on the “why”.</p>
+
+<p>When writing this article, I did consider pointing to the official docs rather than including content also available there. However that would make this article unreadable on its own; I have therefore tried to keep duplication to a minimum while making this article useful without constant reference to external resources.</p>
+
+<h1 class="no_toc" id="table-of-contents">Table of Contents</h1>
+
+<ul id="markdown-toc">
+  <li>
+<a href="#prometheus" id="markdown-toc-prometheus">Prometheus</a>    <ul>
+      <li><a href="#overview-1" id="markdown-toc-overview-1">Overview</a></li>
+      <li><a href="#purpose-of-prometheus" id="markdown-toc-purpose-of-prometheus">Purpose of Prometheus</a></li>
+      <li><a href="#scalability-of-prometheus" id="markdown-toc-scalability-of-prometheus">Scalability of Prometheus</a></li>
+      <li><a href="#gathering-statistics-scraping" id="markdown-toc-gathering-statistics-scraping">Gathering Statistics (“scraping”)</a></li>
+      <li><a href="#metric-types" id="markdown-toc-metric-types">Metric Types</a></li>
+      <li><a href="#time-series-definition" id="markdown-toc-time-series-definition">Time-series (definition)</a></li>
+      <li><a href="#label-cardinality" id="markdown-toc-label-cardinality">Label Cardinality</a></li>
+      <li><a href="#histograms-and-buckets" id="markdown-toc-histograms-and-buckets">Histograms and Buckets</a></li>
+      <li><a href="#metric-name-conventions" id="markdown-toc-metric-name-conventions">Metric Name Conventions</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#promql---the-prometheus-query-language" id="markdown-toc-promql---the-prometheus-query-language">PromQL - the Prometheus Query Language</a>    <ul>
+      <li><a href="#overview-2" id="markdown-toc-overview-2">Overview</a></li>
+      <li><a href="#time-intervals-in-promql" id="markdown-toc-time-intervals-in-promql">Time Intervals in PromQL</a></li>
+      <li><a href="#time-series-instant-vectors-and-range-vectors" id="markdown-toc-time-series-instant-vectors-and-range-vectors">Time Series, Instant Vectors and Range vectors</a></li>
+      <li><a href="#time-ranges-and-time-resolution" id="markdown-toc-time-ranges-and-time-resolution">Time Ranges and Time Resolution</a></li>
+      <li><a href="#selecting-a-dataset" id="markdown-toc-selecting-a-dataset">Selecting a Dataset</a></li>
+      <li><a href="#interlude-playing-around-with-time-series-in-the-prometheus-web-interface" id="markdown-toc-interlude-playing-around-with-time-series-in-the-prometheus-web-interface">Interlude: playing around with time series in the Prometheus web interface</a></li>
+      <li><a href="#operators" id="markdown-toc-operators">Operators</a></li>
+      <li><a href="#functions" id="markdown-toc-functions">Functions</a></li>
+      <li><a href="#handling-counter-resets" id="markdown-toc-handling-counter-resets">Handling Counter Resets</a></li>
+    </ul>
+  </li>
+  <li><a href="#grafana" id="markdown-toc-grafana">Grafana</a></li>
+</ul>
+
+<h1 id="prometheus">Prometheus</h1>
+
+<h2 id="overview-1">Overview</h2>
+
+<p>The core of Prometheus is a time-series database, ie a database specialized for storing and processing data of form <code>(set-of-attributes =&gt; list of (timestamp =&gt; numeric-value))</code>. Attributes are called <em>labels</em> in Prometheus terminology.</p>
+
+<p>PromQL is the query-language that the Prometheus database supports; it isn’t a relational database so doesn’t support standard SQL.</p>
+
+<p>The Prometheus server provides the following core features:</p>
+
+<ul>
+  <li>data storage</li>
+  <li>the ability to import data into the database (“scraping”)</li>
+  <li>the ability to generate alerts as new data is imported into the database</li>
+  <li>an endpoint for executing PromQL sent by external applications (eg Grafana)</li>
+  <li>a web interface for interactively making queries and viewing/graphing the results</li>
+</ul>
+
+<p>The Prometheus project also provides a few standalone tools which are described later.</p>
+
+<p>The primary alternatives to Prometheus (ie metric gathering) are:</p>
+
+<ul>
+  <li>OpenTSDB</li>
+  <li>InfluxDB</li>
+  <li>Graphite</li>
+</ul>
+
+<h2 id="purpose-of-prometheus">Purpose of Prometheus</h2>
+
+<p>When running software in production, it is important to know what is going on with your system. The tools to do that can be divided into three general categories:</p>
+
+<ul>
+  <li>component status monitoring (eg Nagios)</li>
+  <li>log output monitoring (eg ELK, Splunk)</li>
+  <li>metric monitoring (eg Prometheus+Grafana)</li>
+</ul>
+
+<p>These types of tools overlap somewhat in functionality, ie some important tasks can be done with more than one.</p>
+
+<p>Component status monitoring tools “ping” software components regularly to verify they are still running. This status can be displayed on a dashboard, and alerts can be generated for non-responding components. Only limited historical information is kept, and statistics are generally not provided.</p>
+
+<p>Log monitoring systems require that software components being monitored write “log information” when interesting events occur. These logs are then centralized and made easily searchable. Alerts can also be generated when a component emits a log-message matching a specific pattern.</p>
+
+<p>Metric-based systems require that software components being monitored gather statistical information. This information is then centralized and stored in a form that makes mathematical analysis over the dataset possible. Alerts can be generated when a statistic shows an unusual value (too high or low).</p>
+
+<p>Metric-based systems such as Prometheus have the following advantages:</p>
+
+<ul>
+  <li>they can provide “trend” information over time that is not available from other systems - useful for both business and operational planning</li>
+  <li>they can provide a “high level” view of system behaviour - useful for detecting system problems in near-real-time</li>
+  <li>they can support detailed “drill down” into historical behaviour - useful for IT problem analysis after the fact</li>
+</ul>
+
+<p>They also have the following disadvantages:</p>
+
+<ul>
+  <li>significant disk space is required for storage, and network bandwidth to transfer the data (more than status-monitoring but typically less than log-monitoring)</li>
+  <li>significant CPU resources are needed for query execution</li>
+  <li>metrics don’t provide “context” for alerts - eg they can indicate that the number of requests-per-second is unusually high or low, but won’t indicate why. When an unusual situation is detected, it is normally necessary to also search the application logs for clues as to the cause.</li>
+  <li>correlations between metrics is only approximate; it is possible to see whether two metrics generally increase or decrease together but is not possible to see whether an unusual value for metric X and an unusual value for metric Y are associated with the same request for example.</li>
+  <li>the “timestamp resolution” may not be high; in particular Prometheus typically fetches data from each application every 60 seconds or so - and that poll-interval is the maximum accuracy with which the occurrence of an event can be determined</li>
+  <li>correctly instrumenting applications with metrics is less natural to developers than providing good logging or good “health check” endpoints</li>
+</ul>
+
+<p>I have written “Prometheus+Grafana” above as an example of a metrics-based monitoring system because the Prometheus project itself provides only basic support for making graphs and dashboards. All the infrastructure is there, but with a very simple user interface. The Grafana project provides a web application that makes defining pretty graphs and dashboards (relatively) easy - and it supports multiple back-ends (sources of data) including Prometheus/PromQL. Like Prometheus, Grafana is open-source.</p>
+
+<p>Dashboards can be very helpful - and look very cool too. Put a few large-screen displays around the office showing Grafana dashboards with graphs of things like transaction-rates, error-rates, total-financial-sum, etc. and all will be very impressed. Temporary dashboards created to answer specific questions are also useful. Alerting can be configured in either Prometheus or Grafana. However Prometheus alerts are defined in files on the Prometheus host - ie are not easily configurable by arbitrary users. As the Prometheus documentation notes, alerts don’t support “summarization, rate-limiting, silencing and alert dependencies” among other things; Prometheus alerts are therefore typically fed into a separate “Alertmanager” process that provides these more advanced features.</p>
+
+<p>See also <a href="https://grafana.com/blog/2016/01/05/logs-and-metrics-and-graphs-oh-my/">Logs and Metrics and Graphs</a>.</p>
+
+<h2 id="scalability-of-prometheus">Scalability of Prometheus</h2>
+
+<p>Prometheus runs on a single server; it does not support clustering ie cannot be scaled horizontally. It is however possible to replicate data from one server instance to another (“federation”) so setting up a read-only clone can be one way to reduce load on the “primary” instance.</p>
+
+<p>When you have too many systems for a single Prometheus instance to monitor, it is possible to simply use multiple Prometheus instances each responsible for a subset of systems (ie do manual sharding). It is no longer possible to do PromQL queries that combine/compare time-series stored on different Prometheus instances - unless the data is replicated (federated) to a common system. Tools like Grafana can, however, provide a single dashboard with graphs from different Prometheus instances.</p>
+
+<p>See <a href="https://www.robustperception.io/scaling-and-federating-prometheus">this article</a> for more info on scaling Prometheus.</p>
+
+<p>All the core functionality of Prometheus is in one single process - the database, the “metric scraping” logic, the web interface, alert-detection, and other features.</p>
+
+<p>The Prometheus project does also provide a few additional tools, in particular:</p>
+
+<ul>
+  <li>the (optional) “push gateway” for recording metrics from short-lived applications</li>
+  <li>the (optional) “Alertmanager” which adds alert-management features on top of the raw alert-generation facilities in the server</li>
+  <li>the (optional) “node-exporter” which gathers system-level metrics about a Linux or Windows system</li>
+</ul>
+
+<p>See the diagram in the <a href="https://prometheus.io/docs/introduction/overview/">overview page of the official docs</a> for a idea of how pieces fit together.</p>
+
+<h2 id="gathering-statistics-scraping">Gathering Statistics (“scraping”)</h2>
+
+<p>Long-running applications gather statistics in memory and make them available at a specific HTTP url. Prometheus is then configured to regularly “scrape metrics” from the application, ie call this endpoint, collect the current values, and write them to its database. The poll interval is typically 15-60 seconds. This is also called “pull-based” data collection.</p>
+
+<p>Prometheus supports Kubernetes and similar cluster-enabling systems; when configured to monitor a <em>Kubernetes service</em> it auto-detects the set of ip-addresses it needs to poll via the appropriate Kubernetes endpoint. As service instances are started/stopped, Prometheus automatically adapts and “scrapes” (polls) the right endpoints.</p>
+
+<p>Short-running (batch) applications instead collect metrics in memory and then on shutdown must send these values to a “gateway” process. Prometheus then polls this gateway like any other long-running application. This is also called “push-based” data collection.</p>
+
+<p>The endpoint that an application must implement to support Prometheus scraping is simple, and it is possible to code this manually. However there are metrics libraries available for many different languages which offer an API for registering metrics as well as HTTP endpoints for exposing them to various metric-based monitoring systems including Prometheus. For Java applications, I have found the <code>micrometer</code> library to be a good choice.</p>
+
+<p>Spring-boot-based Java applications can register metrics about http-request-latency and various other useful information with just a few lines of configuration (by calling a supported metrics library such as micrometer).</p>
+
+<p>Prometheus can directly gather metrics from any Java application that provides JMX (Java Management Extensions), allowing values such as Java memory usage and thread-counts to be exposed automatically.</p>
+
+<p>As noted above, Prometheus provides a general-purpose <a href="https://prometheus.io/docs/guides/node-exporter/">node exporter</a> application that can be started on any host (physical or virtual) to expose system-wide metrics such as memory/cpu/network/disk usage.</p>
+
+<p>Because client-side metrics are stored only in memory, values which are gathered between the last Prometheus poll interval and application termination are lost when the application terminates. On restart, the in-memory metrics start again at zero. The mathematical functions that the PromQL query language provides handles these kinds of “resets” reasonably well.</p>
+
+<p>The configuration format for “scraping jobs” <a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/">can be found here</a>.</p>
+
+<p>The “job” which caused metrics to be saved to the Prometheus database is automatically added as a label to all imported data.</p>
+
+<h2 id="metric-types">Metric Types</h2>
+
+<p>Statistic values exported by an application can be any of the following:</p>
+
+<ul>
+  <li>counter</li>
+  <li>gauge</li>
+  <li>histogram</li>
+  <li>summary</li>
+</ul>
+
+<p>A counter is a monotonically increasing value. A value like “number of messages processed” is a counter whose value is always integer; a value like “total litres of liquid pumped” is a counter whose value is decimal. Prometheus always stores values in floating-point format - and thus handles both integer and decimal values. Using floating point values also ensures counter overflow is not a problem, even for applications which run for a long time. As noted earlier, restarting an application resets counters to zero(and that resetted value gets written to the prometheus database on later scrapes); Prometheus queries need to be written to handle this correctly.</p>
+
+<p>A gauge is an absolute measure of something at a specific point in time, eg <code>airplane_height=2000m</code>. Application restarts don’t make much difference to gauges as they are always a “current value” (snapshot).</p>
+
+<p>A histogram divides the (regularly measured) value of something into “buckets” (a value-range) and then counts the number of measurements in each bucket. In effect, a histogram is a set of counters (one for each bucket) where a measured value increments the counter associated with the corresponding bucket (value-range). A histogram supports answering queries such as:</p>
+
+<ul>
+  <li>how many http requests took longer than my agreed service-level-agreement threshold of N seconds? (could be a simple counter, but that would need to be configured client-side and would not support the query below)</li>
+  <li>what is the distribution of latencies for http requests? (ie shows not just the average, but also whether the distribution is bell-curve-like or not)</li>
+  <li>what is the distribution of the number of objects retrieved from a database by a specific query?</li>
+</ul>
+
+<p>To answer questions such as the above properly, it is important to choose the right set of buckets. This is discussed later.</p>
+
+<p>A summary is similar to a histogram, but does not support buckets on specific value-ranges. Instead the client side configuration specifies which “quantiles” should be measured (eg 95th quantile, 99th quantile) and these are exposed to Prometheus - ie how many measurements occurred for each quantile. Internally the client-side metrics library will need to count buckets, but it dynamically adjusts these in order to provide reasonable accuracy for the desired quantile measurements. The internal buckets are not reported to Prometheus, only the count for each quantile.</p>
+
+<p>If a histogram has appropriately-chosen buckets then the quantiles can also be computed on the server (Prometheus) side. Using server-side quantile calculation is more flexible, but requires careful choice of buckets, requires more memory and CPU, and <a href="https://linuxczar.net/blog/2017/06/15/prometheus-histogram-2/">potentially has less accuracy</a>.</p>
+
+<p>Some metrics libraries (eg micrometer) supports a “timer” metric, providing an API that looks like “start timer; stop timer” and storing the measured time-interval as a histogram. This is simply a different interface over a standard histogram metric.</p>
+
+<p>When monitoring host-level resources the majority of metrics are gauges (memory, cpu, etc). When monitoring the business-level behaviour of an application the majority of metrics are counters or histograms (number of requests handled, request latency, etc).</p>
+
+<p>When an application measures something for a gauge multiple times within the same poll-interval, only one value is reported to Prometheus. What that value is depends on the client-side metrics library, but is typically the most recently measured value. When a gauge is not measured at all during a poll-interval then the client-side library could report the most-recent value (from the previous interval) but probably just reports no value for that metric at all. Prometheus stores a list of <code>(timestamp, value)</code> pairs so has no problem with “skipped” datapoints in a metric.</p>
+
+<p>After application restart, a metrics library typically considers a counter as “non-existent” - ie does not export it to Prometheus at all. However assuming a counter exists but no events occur within a poll-interval, the previous (unchanged) value will be reported as counters are “monotonically increasing” (except on server restart).</p>
+
+<p>As far as I know, a client application also reports to Prometheus its start-time so that Prometheus can detect counter resets.</p>
+
+<p>See <a href="https://prometheus.io/docs/concepts/metric_types/">the Prometheus docs on metric types</a> for more information.</p>
+
+<h2 id="time-series-definition">Time-series (definition)</h2>
+
+<p>As noted above, Prometheus is a time-series database. A time-series is a sequence (vector) of (timestamp, numeric-value) pairs which “belong together”, ie measure the same thing over time.</p>
+
+<p>In Prometheus, each time-series has an identifier (key) which is a set of <em>labels</em>, ie a set of <code>(label-name:string, label-value:string)</code> pairs. This set defines exactly what the time-series is measuring.</p>
+
+<p>One label that is always defined for a time-series has the special name <code>__name__</code> aka “metric name”. This label can be used in a filter-expression like any other, but there is also a special syntax for filtering by “metric name” - just writing the metric-name literally. A set of time-series with the same name is called “a metric” and the labels define “dimensions of the metric”.</p>
+
+<p>When an application gathers metrics in memory, it stores them with the corresponding labels. The Prometheus configuration which tells it which addresses to poll also specifies labels to automatically add to all metrics gathered; this allows metrics to be labelled with things such as:</p>
+
+<ul>
+  <li>the “scraping job” which imported the data (eg “job=fetchservice1”)</li>
+  <li>the host they were fetched from (eg “instance=myhost1.example.com”)</li>
+  <li>the logical environment (eg “env=test”)</li>
+</ul>
+
+<p>Statistical analysis and graphing is always applied to <em>a set</em> of time-series; each member of the set has its distinct set of labels. When performing an analysis, the first step is to use a filter-expression to select the set of time-series values to process. The filter is applied to the <em>labels</em> of all time-series in the database. It is of course valid for the set to contain just one member. Filter-expressions are discussed later.</p>
+
+<p>Statistical analysis is applied to each member of the set separately; when graphing the result there is one line on the graph for each member. Multiple time-series can also can be merged, eg all values for the same (app/env) regardless of host, resulting in a smaller set. Combining time-series is done with “aggregation operators” such as <code>sum .. by (..)</code>, <code>max .. by (..)</code> etc. See later for more details.</p>
+
+<p>For long-running applications, the (timestamp, value) pairs that are stored in Prometheus specify the time at which Prometheus polled the application. The poll-rate therefore defines the highest resolution for data. There may of course also be “gaps” in time-series while an application is not running, or when no new events have been measured. Timestamps for different time-series are not necessarily “aligned” - the process of creating an “instant vector” from a time-series does this; see later for information on “instant vectors”.</p>
+
+<h2 id="label-cardinality">Label Cardinality</h2>
+
+<p>Each unique set of labels defines a new time-series. It is important not to have too many distinct time-series. Exactly how many can be supported depends of course on the size of the server that Prometheus is running on. However a general guideline is that a few hundred thousand time-series is fine, a few million is pushing the limits.</p>
+
+<p>Because datapoints within a time-series are just a <code>(long, float)</code> pair, the number of time-series is more significant for load than the number of datapoints.</p>
+
+<p>It is generally obvious that too many distinct label names will result in too many different time-series. However it is a common mistake to forget about the number of different values that a label’s value can take. Label values should be like the members of an enumerated type in a programming language - a limited set. This is also called “low cardinality”.</p>
+
+<p>As an example, when measuring latency for http requests it is common to use a label called “url” or similar which holds the http endpoint invoked. This allows analysing statistics per-endpoint, or combining them together to get latency for groups of endpoints. The number of endpoints that an application provides is limited (each one needs to be written by someone) so it initially seems that using a label <code>(labelname="url", labelvalue=$urlInvoked)</code> is acceptable. And it is - if <code>$urlInvoked</code> is actually a reasonably-sized set. However some applications use urls in which user-provided query parameters are embedded - eg “/userinfo/user1” (where user1 changes per user) or “/catalog/item123” (where item123 changes per item in the catalog). Such url-embedded params must be excluded from label-values; a common approach is to use label-values such as (literally) <code>/userinfo/{userid}</code> or <code>/catalog/$itemId</code>. Clearly, statistical analysis is then not possible on a per-user or per-catalog-item level - but that’s just not doable with a time-series database.</p>
+
+<h2 id="histograms-and-buckets">Histograms and Buckets</h2>
+
+<p>As a software developer recording metrics for use by Prometheus or similar, you typically use a metrics library API. In the case of micrometer, code to define a new histogram metric might look like:</p>
+
+<pre><code>long[] defaultSla = {50, 100, 150, 200, 500, 1000, 5000};
+
+DistributionSummary myMetricForBusinessUsers = DistributionSummary
+  .builder("my_metric") // sets label __name__ ie the "metric name"
+  .baseUnit("items") // appends "_items" to the metric name
+  .tag("userType", "business") // add a label; the value must be "low cardinality"
+  .sla(defaultSla)
+  .register(meterRegistry);
+
+// and then for each event
+myMetricForBusinessUsers.record(someMeasuredValue);
+</code></pre>
+
+<p>The call to <code>sla</code> defines the buckets that values are allocated into. The histogram drawn in Grafana or other tools then shows the number of “recorded values” which fell into each bucket. There is always an implicit bucket named “+Inf” which counts the number of measured values which were larger than any of the explicit SLA values.</p>
+
+<p>SLA stands for “service level agreement” and represents the different thresholds at which you wish to define your application’s performance. If you are promising that http requests will have a maximum latency of 3 seconds, then your SLA list should include that value in order to count values above and below that threshold. For metrics not related to external agreements, the SLA values should simply be “interesting threshold values”. A histogram is probably most useful with 5-10 buckets.</p>
+
+<p>As an alternative to <code>sla</code>, <code>publishPercentileHistogram</code> can be used instead; this automatically decides what bucket thresholds to use. When using this (micrometer) feature, <code>maximumExpectedValue</code> should also be set as this improves the chosen bucket boundaries. Values larger than the specified maximum fall into the “+Inf” bucket. The automatically-chosen bucket boundaries look somewhat odd on histograms ie the results are most useful for server-side quantile/percentile analysis.</p>
+
+<pre><code>DistributionSummary myMetricForBusinessUsers = DistributionSummary
+  .builder("my_metric")
+  .baseUnit("items")
+  .tag("userType", "business")
+  .publishPercentileHistogram()
+  .maximumExpectedValue(10000)
+  .register(meterRegistry);
+</code></pre>
+
+<p>While it is possible to use both explicit buckets (sla) and automatic buckets (publishPercentileHistogram), the result is a large set of buckets. This can make histograms clumsy - so avoid using both.</p>
+
+<p>Each “bucket” in a histogram is a new time-series with the same base set of labels plus an extra label “le=N” where N is the bucket threshold. Buckets always match any value <em>less than or equal to the specified threshold</em>; when using the example values above, a measured value of 120 would increment the counter for every bucket <em>except</em> those with thresholds 50 and 100. The (implicit) bucket with threshold “+Inf” therefore always counts the total number of values measured (as every measurement is less than infinity). The number of values that fell into the range between two thresholds can be computed simply by subtracting the counts for the corresponding buckets; for example the number of measured values which were between 100 and 150 is <code>my_metric{le=150} - my_metric{le=100}</code>.</p>
+
+<h2 id="metric-name-conventions">Metric Name Conventions</h2>
+
+<p>Prometheus metric names use underscores to separate name-parts. If you write code which uses <code>names.with.multiple.parts</code> then these are converted to <code>names_with_multiple_parts</code> before being sent to Prometheus.</p>
+
+<p>Metric names should include the “units” of the measure within the name, eg <code>request_duration_seconds</code> or <code>liquid_pumped_litres</code>. The units should be plural. Counter names often end in <code>_count</code>.</p>
+
+<p>The <code>micrometer</code> library API actually allows the units to be specified when defining a metric object, and this becomes part of the name.</p>
+
+<p>As mentioned above, a “distribution summary” aka histogram, is actually a set of time-series. They all share a common prefix for their metric-name (ie label <code>__name__</code>) but with additional suffixes or labels:</p>
+
+<ul>
+  <li>the total number of samples taken using label <code>__name__ = "${basename}_count"</code>
+</li>
+  <li>the total number of events using label <code>__name__ = "${basename}_sum"</code>
+</li>
+  <li>the count of events in each bucket using labels <code>(__name__ = "${basename}_bucket", le = "$val")</code> where <code>$val</code> is the maximum value that gets allocated to the bucket</li>
+</ul>
+
+<h1 id="promql---the-prometheus-query-language">PromQL - the Prometheus Query Language</h1>
+
+<h2 id="overview-2">Overview</h2>
+
+<p>The Prometheus time-series database is not a relational database, and therefore does not support standard SQL. Instead, it supports a query-language which contains statistical functions that are more powerful than available in SQL.</p>
+
+<p>The Prometheus web interface supports PromQL of course - and passes it to the database. A Grafana graph specifies which back-end data-source provides the data; when Prometheus is selected then the “query” field in Grafana must contain a PromQL expression which is passed to the database. Unfortunately Grafana provides relatively poor feedback on syntax errors in queries; it is often helpful to write queries in the Prometheus interface first then copy/paste them into Grafana.</p>
+
+<p>It is important to remember that PromQL is a <em>logical description</em> of what the database should do. In relational databases, SQL is taken apart and optimised - and what gets executed is usually nothing like the initial SQL. Prometheus works similarly; don’t worry about things that might look inefficient as Prometheus will take apart and restructure whatever query you give it into an optimal form. What is guaranteed is that the results are identical to what you would get if the query was executed literally.</p>
+
+<h2 id="time-intervals-in-promql">Time Intervals in PromQL</h2>
+
+<p>Because Prometheus is all about analysing data over time, PromQL expressions commonly include intervals of time. Examples:</p>
+
+<ul>
+  <li>10s = 10 seconds</li>
+  <li>5m = 5 minutes</li>
+  <li>3h = 3 hours</li>
+  <li>7d = 7 days</li>
+</ul>
+
+<p>Intervals can be combined:</p>
+
+<ul>
+  <li>3h15m = 3 hours and 15 minutes</li>
+  <li>2d4h = 2 days and 4 hours</li>
+</ul>
+
+<p>It is a strong convention that metric values which represent time use units of “seconds”; values are floating-point so fractions of a second can be represented.</p>
+
+<h2 id="time-series-instant-vectors-and-range-vectors">Time Series, Instant Vectors and Range vectors</h2>
+
+<p>While rather technical, these concepts are very important to understand as PromQL functions typically accept only one of these types as input, and return one of these types as output.</p>
+
+<p>A time-series is a list of <code>(timestamp, value)</code> pairs (keyed by a set of labels).</p>
+
+<p>An “instant vector” is a set of time-series whose timestamps have been aligned to some “interval step”. These can be created from an on-disk time-series by “resampling it”; this process is described in the following section.</p>
+
+<p>A “range vector” is what happens when you apply the (suffix) range-operator “<code>[interval]</code>” to an instant-vector, eg “<code>somemetric[5m]</code>”. Each datapoint (timestamp/value pair) T effectively becomes the set of datapoints between (T-interval) and T.</p>
+
+<p>As an example, assume a time-series T (within an instant vector) has the following values:</p>
+
+<ul>
+  <li><code>(07:05 =&gt; 105), (07:06 =&gt; 106), (07:07 =&gt; 107), (07:08 =&gt; 108), (07:09 =&gt; 109)</code></li>
+</ul>
+
+<p>then the expression <code>T[2m]</code> results in:</p>
+
+<ul>
+  <li><code>07:07 -&gt; ((07:05 =&gt; 105), (07:06 =&gt; 106), (07:07 =&gt; 107))</code></li>
+  <li><code>07:08 -&gt; ((07:06 =&gt; 106), (07:07 =&gt; 107), (07:08 =&gt; 108))</code></li>
+  <li><code>07:09 -&gt; ((07:07 =&gt; 107), (07:08 =&gt; 108), (07:09 =&gt; 109))</code></li>
+</ul>
+
+<p>Or to say it another way, the range-operator turns each single time-instant into a “window” of values covering <code>(T-interval, T)</code>.</p>
+
+<p>Each member of an instant-vector or range-vector (ie the nested time-series) still retains its associated set of labels.</p>
+
+<p>PromQL operators and functions take either an “instant vector” or a “range vector”, eg:</p>
+
+<ul>
+  <li>
+<code>sum</code> requires an instant-vector (set of normalized time-series) as input, and returns an instant-vector</li>
+  <li>
+<code>rate</code> requires a range-vector as input, and returns an instant-vector - each “window” in the input range-vector is reduced to a single (timestamp, rate) value</li>
+</ul>
+
+<p>For functions that reduce a range-vector to an instant-vector, exactly what the “window” means depends upon the function. See the docs for each one.</p>
+
+<p>The Prometheus web interface graphs can only display an instant vector - and produces one line on the graph per member of the set. Displaying an instant vector in the console (aka tabular) view shows only the latest value for each member of the set.</p>
+
+<p>The web interface console view <em>can</em> show range-vectors; expression <code>someMetricName[4m]</code> shows the “windowed” values associated with the <em>latest</em> value of each contained time-series (as a list of form “timestamp@value”).</p>
+
+<p>IMPORTANT: when writing a PromQL statement, you are describing in logical terms what the DB should do. When the statement is executed, this is optimised - so this description of creating a range-vector should not be taken literally.</p>
+
+<p>See <a href="https://utcc.utoronto.ca/~cks/space/blog/sysadmin/PrometheusQuerySteps">this article</a> for more information about how Prometheus actually executes queries in “steps”.</p>
+
+<h2 id="time-ranges-and-time-resolution">Time Ranges and Time Resolution</h2>
+
+<p>PromQL itself does not provide an operator or function for “select datapoints between date T1 and T2”; any PromQL expression is theoretically applied to all datapoints in a metric.  Similarly, PromQL does not support specifying a “time resolution” aka “step”.</p>
+
+<p>A Prometheus query actually consists of <code>(queryStatement, fromTimestamp, toTimestamp, step)</code>. When the queryStatement references a set of on-disk time-series (via <code>metricname{filter}</code>) the original data on disk is “resampled” to produce a set of datapoints which are within the specified (from, to) range and where the timestamps are a multiple of the step - ie an “instant vector”. Somewhat confusingly, these “resampled” time-series are also called time-series - and they have the same content as the value on disk, just slightly different timestamps. This resampling process is (currently) not well described in the Prometheus docs, but <a href="https://prometheus.io/docs/prometheus/latest/querying/basics/#staleness">is hinted at in the section on Staleness</a>.</p>
+
+<p>Due to this resampling, each time-series within an “instant vector” has format:</p>
+
+<ul>
+  <li><code>(to-timestamp =&gt; V0, to-timestamp - step*1 =&gt; V1, to-timestamp - step*2 =&gt; V2, ..)</code></li>
+</ul>
+
+<p>with each value being the latest value from the original time-series entry whose timestamp &lt; T.</p>
+
+<p>This “alignment” allows operations such as “sum” or the mathematical operators to successfully combine time-series.</p>
+
+<p>Actually, as the timestamps are identical across the time-series members of the instant-vector, there is the possibility to use a different data-structure to remove this duplication. This is possibly why the official Prometheus docs define an instant-vector as:</p>
+
+<blockquote>
+  <p>a set of time series and a single sample value for each at a given timestamp (instant):</p>
+</blockquote>
+
+<p>However values from the same time-series still need to be linked to their set-of-labels, and somehow “missing values” need to be represented (eg times when the providing application was not running or reported no data for that time-series). A simple array-of-arrays is therefore not sufficient to represent an instant-vector.</p>
+
+<p>Parameter <code>toTimestamp</code> used when executing a query can be set via the UI. In Grafana, the top-right-corner of each dashboard provides a field with options for:</p>
+
+<ul>
+  <li>“relative time range” (eg “30 minutes”) in which case <code>toTimestamp</code> is the current time and <code>fromTimestamp</code> is <code>toTimestamp - 30m</code>
+</li>
+  <li>“absolute time range” which is pretty obvious</li>
+</ul>
+
+<p>In the Prometheus web interface, the “Graph” tab shows obvious input fields for:</p>
+
+<ul>
+  <li>
+<code>toTimestamp</code> (aka “until”)</li>
+  <li>a “relative time range” from which to calculate the <code>fromTimestamp</code>
+</li>
+  <li>the step to use (“res”)</li>
+</ul>
+
+<p>The “Console” tab has no such fields; queries are always executed at “now” and only the last element is ever shown so “fromTimestamp” and “step” are not relevant.</p>
+
+<h2 id="selecting-a-dataset">Selecting a Dataset</h2>
+
+<p>In general, data to be processed or graphed can be selected via a filter-expression in curly-braces:</p>
+
+<ul>
+  <li><code>{label-name: match-expr, label-name: match-expr, ...}</code></li>
+</ul>
+
+<p>All conditions in the expression are ANDed together, ie data-points are selected only when all conditions are true.</p>
+
+<p>The result is an instant-vector, ie a set of resampled time-series - one for each distinct label-set that matches the conditions.</p>
+
+<p>The most important label-name is the “metric name”. This can be referenced using label-name <code>__name__</code> within a standard filter-expression but it is so commonly used that PromQL provides a special syntax for specifying the name:</p>
+
+<ul>
+  <li>
+<code>metric-name{...}</code> // equivalent to <code>{__name__ = 'metric-name', ....}</code>
+</li>
+</ul>
+
+<p>Note however that there are some use-cases where the <code>__name__</code> syntax is needed - eg selecting datapoints where the metric-name matches a regular-expression.</p>
+
+<p>Literal strings can be specified in filters with single or double quotes. Backticks can also be used (which disables char-escaping).</p>
+
+<p>Match-expressions include:</p>
+
+<ul>
+  <li><code>label = 'literal'</code></li>
+  <li><code>label != 'literal'</code></li>
+  <li>
+<code>label =~ 'regex1|regex2|regex3'</code>  – all time-series with a label that matches the regex</li>
+  <li>
+<code>label !~ 'regex1|regex2|regex3'</code>  – all time-series with no matching label</li>
+</ul>
+
+<p>All match-expressions are ANDed together; there is no support for “OR” - though the rexeg match-expr internally suports ‘or’ as shown above.</p>
+
+<p>Quite often you don’t care about some labels being different; use functions like <code>sum</code> or <code>max</code> together with <code>by</code> or <code>without</code> (see later). These take a set of time-series and return a smaller set (possibly of size 1).</p>
+
+<h2 id="interlude-playing-around-with-time-series-in-the-prometheus-web-interface">Interlude: playing around with time series in the Prometheus web interface</h2>
+
+<p>You now have enough info to briefly play with the Prometheus web interface..</p>
+
+<ul>
+  <li>Type in a counter metric-name and prefix and a pop-up will show possible completions.</li>
+  <li>Enter the full metric-name and hit execute to see some samples over time. This also shows the various “labels” that can be filtered for.</li>
+  <li>Click on the Graph tab and “zoom out” to see the value evolving over time.</li>
+</ul>
+
+<p>By default, each distinct time-series (set of labels) is drawn as a separate line on the graph. To combine values with different labels, try <code>sum(expression)</code> - see later for more info on combining metrics.</p>
+
+<p>Within a metric name, any dot is replaced with an underscore.</p>
+
+<p>Find metric names with <code>{__name__ =~ '.+'}</code> - or use a more precise regular expression to get a smaller set of matches. Note however that the full set of metric-names can be very large (my current system has more than 637,000 entries). It might be useful to wrap such expressions in <code>count(..)</code> to see exactly how many time-series are matched first.</p>
+
+<h2 id="operators">Operators</h2>
+
+<p>Operators are keywords that sometimes look like functions. However functions are reasonably simple - they take an instant-vector or a range-vector and return an instant-vector or range-vector with transformed values. Operators can do more significant restructing of data.</p>
+
+<p>See <a href="https://prometheus.io/docs/prometheus/latest/querying/operators/">the official operator docs</a> for the full details.</p>
+
+<h3 id="mathematical-operators">Mathematical Operators</h3>
+
+<p>The result of any expression (plain filter, or rate, or whatever) can be scaled to more convenient values with addition/subtraction/multiplication/division.</p>
+
+<p>Example:</p>
+
+<ul>
+  <li><code>rate(my_metric[5m]) * 100</code></li>
+</ul>
+
+<p>Multiple datasets can be combined with math-operators too, eg “<code>foo + bar</code>”. However the details are tricky:</p>
+
+<ul>
+  <li>each datapoint on the left is combined with a matching datapoint on the right which has exactly the same labels.</li>
+  <li>any datapoint which does not have a matching partner is dropped (is not included in the output set)</li>
+</ul>
+
+<p>For this multiple-dataset usage I can’t offer any better advice than to read <a href="https://prometheus.io/docs/prometheus/latest/querying/operators/">the official docs</a> carefully.</p>
+
+<h3 id="operator-offset">Operator <code>offset</code>
+</h3>
+
+<p>Syntax: <code>someTimeSeries offset {interval}</code></p>
+
+<p>This effectively adjusts the fromTimestamp and toTimestamp used when converting someTimeSeries into an instant-vector (without affecting other conversions in the same query). See the section on “Time Ranges and Time Resolution” and Instant Vectors for more details.</p>
+
+<p>For the specified metric, this should produce exactly the same results as if the query were executed in the past ie at <code>now - {interval}</code>.</p>
+
+<p>This is useful for overlaying a metric “over itself” to visually see what has happened since the specified interval.</p>
+
+<h3 id="aggregation-operators">Aggregation Operators</h3>
+
+<p>These allow a set of time-series to be converted into a smaller set of time-series by combining specific entries together - ie to “drop labels”. It is very common for metrics to have too may labels, eg to be labelled with <code>(application, instance)</code> when statistics are wanted just per-application regardless of instance. The aggregation operators can solve this.</p>
+
+<p>These aggregation operators support keywords “by” and “without” which indicate which of the elements of the input time-series-set should be combined. See the examples in section <code>sum</code> below for details.</p>
+
+<p>Although the aggregation operators return something similar to an <em>instant vector</em>, the grammar rules used for parsing a query refuse to let this result be passed directly to something expecting an instant-vector, eg <code>sum_over_time(sum (expr) by (labels))</code> will not compile. This means that aggregation operators have to be the “top-level” (outermost) operation in a PromQL expression.</p>
+
+<h4 id="aggregation-operator-sum">Aggregation Operator <code>sum</code>
+</h4>
+
+<p>The sum operator takes as input an instant-vector (ie set of time-series with aligned timestamps) and returns a new instant-vector containing a smaller set.</p>
+
+<p>Summing counters is very useful; summing gauges is usually nonsense.</p>
+
+<p>The general format is any of the following:</p>
+
+<ul>
+  <li><code>sum by (label-names) (instant-vector)</code></li>
+  <li><code>sum (instant-vector) by (label-names)</code></li>
+  <li><code>sum ignoring (label-names) (instant-vector)</code></li>
+  <li><code>sum (instant-vector) ignoring (label-names)</code></li>
+</ul>
+
+<p>The by/ignoring clauses specify which time-series in the input set should be combined together.  Specifying “by (names)” produces an output set of time-series which are keyed <em>only</em> by the specified label-names; all elements of the original set which have the same values for those named labels are combined. Specifying “ignoring (names)” instead combines all time-series whose labels are identical except for the ignored ones; this produces an output set which is keyed by all labels <em>except</em> the specified ones.</p>
+
+<p>The simplest expression <code>sum (instant-vector)</code> is equivalent to “by” with an empty set of label-names - producing an instant-vector containing just one member keyed by an empty set of labels.</p>
+
+<p>When applying multiple functions to the same data, operators with by/ignoring should be the last (outer-most) transformations invoked. The general principle is that transformations should be applied to the “finest-grained” data possible - ie to the largest set of time-series. Merging (aggregating) data reduces the number of sets being dealt with (coarser-grained data), so is done last. This is sometimes counter-intuitive; it feels natural to say “I don’t want label <code>instance</code>, so lets get rid of it early and then analyse the combined result” but that’s the wrong order.</p>
+
+<p>As an example, the <code>rate</code> function calculates “events per second” for a counter metric. The correct sequence for dropping an “instance” label is therefore:</p>
+
+<ul>
+  <li>
+<code>sum (rate(mymetric[5m])) ignoring (instance)</code> or</li>
+  <li><code>sum (rate(mymetric[5m])) by (application)</code></li>
+</ul>
+
+<p>and <em>not</em>:</p>
+
+<ul>
+  <li><code>rate((sum(mymetric) ignoring (instance))[5m])</code></li>
+</ul>
+
+<h4 id="aggregation-operator-max">Aggregation Operator <code>max</code>
+</h4>
+
+<p>Like <code>sum</code>, <code>max</code> combines multiple time-series together - ie takes an instant-vector (set of time-series) and returns an instant-vector containing a smaller set. And like <code>sum</code> it supports the “by” and “without” clauses to specify which time-series should be combined.</p>
+
+<p>However <code>max</code> can be applied to counters <em>and</em> gauges - unlike <code>sum</code> where applying it to a gauge seldom makes sense.</p>
+
+<p>The result of combining multiple timeseries is a new timeseries with the same timestamps as the originals but where the associated value is the maximum of any of the matching time-series at that timestamp.</p>
+
+<p>Prometheus also provides a <em>function</em> named <code>max_over_time</code> which calculates the max “over a window” - a quite different effect. This is described later.</p>
+
+<h3 id="operator-topk">Operator <code>topk</code>
+</h3>
+
+<p>This allows the “top N” values of a time-series to be displayed - eg the 10 highest latency values for a time-series holding http request durations.</p>
+
+<p>An example:</p>
+
+<pre><code># Given a "histogram" (aka distribution-summary) metric named "some_operation_duration"
+# where the name of different operations is stored in label "opname"
+# show the 10 operations which had the highest max run-time over the last day.
+# the displayed value is the max run-time in seconds
+topk(10, max(max_over_time(some_operation_duration_seconds_max[1d])) by (opname))
+</code></pre>
+
+<h2 id="functions">Functions</h2>
+
+<p>A few of the most important functions provided by PromQL are discussed below. This also gives the opportunity to mention a few behavours of PromQL that apply to many functions. The full set of functions provided by PromQL <a href="https://prometheus.io/docs/prometheus/latest/querying/functions/">are documented here</a>.</p>
+
+<p>Unlike the “aggregation operators”, functions always take a time-series set of size N as input and return a set of size N as output with the same transformation applied to each time-series in the set. Some functions require “instant vectors” as input while others require “range vectors”.</p>
+
+<h3 id="function-rate">Function <code>rate</code>
+</h3>
+
+<p>Monotonically increasing counters are generally not very useful to look at; what we are usually interested in is the change in the counter over a time period (eg “50 events per second”). This is done with</p>
+
+<ul>
+  <li><code>rate({filter-expression}[window-interval])</code></li>
+</ul>
+
+<p>eg</p>
+
+<ul>
+  <li><code>rate(my_metric[5m])</code></li>
+</ul>
+
+<p>The rate function only makes sense for counters; don’t use with guages.</p>
+
+<p>The input to <code>rate(...)</code> must be a range-vector, ie a set of time-series which have been restructured to group each datapoint with a “window” of values. The example above includes <code>[interval]</code> to transform an instant-vector into a range-vector.</p>
+
+<p>The output is unit-change-per-second, and is calculated by taking the “newest” value in each range, subtracting the “oldest” value in the same range, and dividing by the number of seconds difference in their timestamps. If that doesn’t make sense, take another look at the description of instant-vectors vs range-vectors above.</p>
+
+<p>It is common to want to combine counters from different servers (sum them) and then compute the overall rate. However sum/window/rate is the wrong order - you cannot apply <code>[interval]</code> to the output of sum. Instead, use the order window/rate/sum:</p>
+
+<ul>
+  <li><code>sum(rate(my_metric[window]))</code></li>
+</ul>
+
+<p>If time-series 1 has a rate of 5 units per second at a point in time, and time-series 2 has a rate of 3 units per second at the same point in time, then together they have a rate of 8 units per second at that moment so rate-followed-by-sum works fine. Also remember that Prometheus restructures PromQL queries to be efficient and to minimise rounding errors; this sum/rate expression describes what is wanted not how to calculate it.</p>
+
+<p>See the comments in the section on function <code>sum</code> for hints on how to remember the correct order when nesting functions - “finest grain first”.</p>
+
+<h3 id="function-irate">Function <code>irate</code>
+</h3>
+
+<p>As described above, the <code>rate</code> function takes a range-vector and for each datapoint computes <code>(newestValueInWindow - oldestValueInWindow)/intervalBetweenPoints</code>. The <code>irate</code> function is very similar but instead calculates <code>(newestValueInWindow - nextNewestValueInWindow)/intervalBetweenPoints</code>. Or in other words, it doesn’t “average” the rate over multiple data-points, but instead returns the rate at the end of the interval.</p>
+
+<p><a href="https://www.robustperception.io/irate-graphs-are-better-graphs">This article</a> describes when rate or irate should be used. The important points are:</p>
+
+<ul>
+  <li>the time interval specified should be short - around 2x the “scrape interval” used to fetch the data into Prometheus.</li>
+  <li>this is useful only for counters that change rapidly (ie events that are frequent)</li>
+  <li>using <code>rate</code> with a short interval also works similarly - but it is easy to misconfigure <code>rate</code> and get “averaging” over multiple points while <code>irate</code> never does this, even when the window actually covers more than 2 samples.</li>
+</ul>
+
+<p>I suspect also that when a rate is very uneven (sometimes very big jumps, sometimes very small ones) then the <code>rate</code> function will not show this uneven-ness; you get a possibly misleading smooth graph. The <code>irate</code> alternative will sometimes be misleading in a different way, showing no/little change when the change between samples in the window are mostly large but the last two are not or large change when samples are mostly similar except for the last two. However as some points will show low rates while other will show high rates, at least it should be clear that the underlying data is <em>not</em> smooth. This effect works even with larger time-intervals.</p>
+
+<h3 id="function-increase">Function <code>increase</code>
+</h3>
+
+<p>The increase function computes (for each timestamp) how much a counter has changed since <code>timestamp - {offset}</code>, eg:</p>
+
+<ul>
+  <li><code>increase(my_metric[5m])</code></li>
+</ul>
+
+<p>The input to <code>increase(...)</code> must be a range-vector, and is only useful with counters.</p>
+
+<p>This function simply takes the “newest” value in each range and subtracts the “oldest” value in the same range - ie is similar to “rate” but provides the absolute difference rather than dividing by the time-interval.</p>
+
+<p>Increase can be very useful with histograms. As described earlier, a histogram is effectively a set of counters, one for each “bucket” that the measured values have been allocated to. When displaying a histogram it is usual to display just the latest value of each counter (bucket); as they are counters this shows the total distribution over time. However it is common to want to display just the change since <code>now - someInterval</code>. This can be done by applying function <code>increase</code> to each of the buckets (time-series) with a window-size of the desired someInterval. The result is still a time-series, ie a series of datapoints over time but the histogram ignores this and uses the last element in the time-series - which is now the difference (count) since someInterval.</p>
+
+<p>Histograms <em>can</em> be used to show changes to a distribution over time; this is called a “heat map” but is something I haven’t used yet.</p>
+
+<p>There is a similar function <code>delta</code> - but <code>increase</code> is designed for counters and correctly detects when a counter gets reset (typically due to an application restarting) while <code>delta</code> does not. Therefore use <code>increase</code> for counters and <code>delta</code> for gauges.</p>
+
+<h3 id="function-maxovertime-and-other-overtime-functions">Function <code>max_over_time</code> (and other <code>_over_time</code> functions)</h3>
+
+<p>There are several functions with suffix <code>_over_time</code>. Each of them applies a specific operation to a <em>window</em> (range) of data-values, ie takes a range-vector as input.</p>
+
+<p>The difference between function <code>max_over_time</code> and the operator <code>max</code> is that:</p>
+
+<ul>
+  <li>operator max takes multiple time-series in instant-vector format and returns a single time-series where each data-point in the new time-series is the max value of all values at the same time-stamp over the set of time-series.</li>
+  <li>function max_over_time takes a single time-series in range-vector format and returns an instant-vector where each data-point is the max of the corresponding window.</li>
+</ul>
+
+<p>An example:</p>
+
+<pre><code># Given a "histogram" (aka distribution-summary) metric with base name "some_operation_duration"
+# where the name of different operations is stored in label "opname"
+# show the 20 operations which had the highest max run-time over the last day.
+# the displayed value is the max run-time in seconds
+topk(20, max(max_over_time(some_operation_duration_seconds_max[1d])) by (opname))
+</code></pre>
+
+<h2 id="handling-counter-resets">Handling Counter Resets</h2>
+
+<p>Prometheus itself (ie the scraper and database) does nothing special to handle counters being reset to zero by an application restart. However various PromQL operators and functions detect and deal with this situation.</p>
+
+<p>When simply graphing a counter’s raw value, and the server producing the metric gets reset then the graph simply shows the counter dropping to zero - ie the graph has a disconnect.</p>
+
+<p>However function <code>rate</code> detects changes and adjusts automatically.</p>
+
+<p>One place where resets do matter is when using the sum operator over counters where only one gets reset; the value is clearly wrong at this point - and although the sum operator can see that the counter is odd (drops) if you pass the output of sum to some other operator then the downstream values are wrong.</p>
+
+<p>This leads to the principle: apply sum last - and in particular, apply rate before sum. See info on the rate function for more details.</p>
+
+<h1 id="grafana">Grafana</h1>
+
+<p>Some tips for working with Grafana..</p>
+
+<p>Grafana is a powerful tool, but unfortunately its UI is just plain weird. Don’t be frustrated if you can’t get it to work immediately; that’s common.</p>
+
+<p>When creating/editing a widget, Grafana will try to execute the “query” field each time that field loses focus. If you are having trouble writing an expression, and frequently switch to viewing documentation or experimenting in the (simpler) Prometheus UI, this can be very annoying. In particular, poorly-constrained queries (because you’re not yet finished) can take tens of seconds to execute and thus effectively cause the UI to hang. Setting the “refresh interval” dropdown in the top-right-hand corner of the screen does not help because this is “execute on focus loss” not “timed refresh”. There is however a solution: just to the right of the query-entry-field there is an “eye” icon; click on this to disable execute-on-focus-loss. Or write the query in Prometheus and then copy/paste into Grafana.</p>
+
+<p>The “save” button in Grafana saves the current dashboard with a “history comment” which is overkill while the dashboard is being developed. The “apply” button should be used instead - this allows you to return to the main dashboard without losing changes on a specific widget. When the dashboard is as you wish, <em>then</em> use save.</p>
+
+<p><a href="https://linuxczar.net/blog/2017/06/15/prometheus-histogram-2/">Creating histogram diagrams</a> is <a href="https://linuxczar.net/blog/2019/10/28/prometheus-histograms-part-3-using-something-else/">tricky</a>. You need to:</p>
+
+<ul>
+  <li>in tab “panel” select panel-type = “bar gauge”</li>
+  <li>in tab “panel” select show=calculate and calculation=last (see discussion of function ‘Increase’ for why only the last value is relevant).</li>
+  <li>enter a PromQL query like <code>sum (mymetric) by (le)</code> - where <code>le</code> is the label that identifies buckets.</li>
+  <li>enter <code>{{le}}</code> as the “axis label” for the graph</li>
+  <li>select format=heatmap (not panel-type=heatmap)</li>
+</ul>
+
+<p>In Grafana, variables can be defined at dashboard level; a value-chooser then appears on the dashboard display. The variable can be an enumeration (presented as a drop-down list) or a text-input-field. These variables can then be referenced from PromQL queries in widgets on that dashboard. See the “dashboard settings” icon (cogged wheel)</p>
+
+<p>Queries in the Prometheus web interface console tab tend to run fast, as they only show the most recent value. In addition, the Prometheus web interface supports auto-complete for metric names which is very convenient. It is therefore often helpful to “prototype” a query in that interface first before creating a widget in Grafana.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/infrastructure/prometheus-ql/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,476 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Distributed Read Models (Part 1: Motivation)</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Distributed Read Models (Part 1: Motivation)</h1>
+    <aside>First published on: June 23, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>In a distributed system, how do different components get access to data that is needed by them, but not owned by them? At <a href="https://www.willhaben.at">willhaben</a> we do this by having data-owning components publish that data to <a href="https://kafka.apache.org/">Kafka</a> compacted topics, and having components which need a “read only” copy of that data listen to those topics and store the data locally. Martin Fowler calls this <a href="https://martinfowler.com/articles/201701-event-driven.html">Event Driven Architecture with Event-carried State Transfer</a> (quite a mouthful!); we call this a (Distributed) Read Model.</p>
+
+<p>This article discusses why we do this; <a href="/architecture/distributed-read-models-part2">part 2</a> includes the details of how it is done.</p>
+
+<p>Disclaimer: the architecture described here is relatively new for us. We do have all of this implemented in some form, but not yet consistently everywhere.</p>
+
+<p>Update: CodeOpinion has a great <a href="https://www.youtube.com/watch?v=IzBEbfSg0uY">overview video on this topic</a>.</p>
+
+<h1 id="the-problem-description">The Problem Description</h1>
+
+<p>Willhaben (as a site) deals with reasonably large volumes of data and has a quite complex set of functionality which evolves rapidly (multiple releases per day).</p>
+
+<p>Our software is therefore built as a “distributed system” — multiple applications cooperating to provide the single integrated system that users see. Our goal system architecture looks something like this:</p>
+
+<p><img src="/architecture/wh-goal-arch.png" height="512"></p>
+
+<p>We use the term “aggregator” and “aggregation layer” where others might use the term “integration layer”<sup id="fnref:integration-bus" role="doc-noteref"><a href="#fn:integration-bus" class="footnote" rel="footnote">1</a></sup>. It’s the same thing: a place for (small amounts of) code that interacts with multiple domains<sup id="fnref:graphql" role="doc-noteref"><a href="#fn:graphql" class="footnote" rel="footnote">2</a></sup>. Note the lack of persistent storage in this layer! Note also that too much logic here leads in the direction of an Enterprise Service Bus and Service Oriented Architecture<sup id="fnref:soa" role="doc-noteref"><a href="#fn:soa" class="footnote" rel="footnote">3</a></sup> - approaches that have a few advantages and many disadvantages; in general we prefer to keep this layer optional and (where used) thin.</p>
+
+<p>Each back-end (business tier) component corresponds to a DDD domain<sup id="fnref:domain-def" role="doc-noteref"><a href="#fn:domain-def" class="footnote" rel="footnote">4</a></sup>, and has its own database. Each item of data is owned by one specific domain/component (the “source of truth”), and can only be modified by that domain. These could also be called microservices.</p>
+
+<p>However components do sometimes need read-only access to data owned by other domains. It’s of course ideal to define bounded contexts in ways that avoid such shared data, but it isn’t always possible. In cases where data has one owner but multiple users there are basically three options:</p>
+
+<ul>
+  <li>require all necessary data to be provided in each request</li>
+  <li>make synchronous calls between back-end components</li>
+  <li>replicate the data</li>
+</ul>
+
+<p>The first option pushes the “cross-domain” integration up to the caller - a valid option sometimes, but not always applicable. The second is the obvious solution but has many many traps. We therefore prefer replication of data to synchronous calls; this article describes the benefits of this approach, how we do this, and what tradeoffs we made (because architecture always involves tradeoffs).</p>
+
+<p>This technical design is also linked to our organisational approach (supports and is supported by it); see <a href="/architecture/stosa">STOSA Architecture at willhaben</a>.</p>
+
+<h1 id="avoiding-a-distributed-monolith">Avoiding a Distributed Monolith</h1>
+
+<p>Monolithic applications are built around function-calls. However building a distributed application simply by turning some of those function-calls into remote-procedure-calls (in whatever technology) just doesn’t work — it ignores the <a href="https://ably.com/blog/8-fallacies-of-distributed-computing">8 fallacies of distributed computing</a>.</p>
+
+<p>It is possible to build a distributed application around remote-procedure-calls (RPC) if they are appropriately designed and implemented, but it’s still very hard. And everyone involved needs to understand exactly what “appropriate” means. Unless great care is taken, the application will suffer many of the problems which are described below: hard-to-understand, compatibility problems, performance issues, complicated failure modes, etc. Trivial systems may not encounter many problems, but systems with many components, many transactions, and a lot of data, will be unstable unless these issues are addressed.</p>
+
+<p>By following the data-replication principles presented here, it’s hard for developers to fall into these traps — no matter how much time pressure they are under. And, once the supporting infrastructure and patterns are present, we believe it doesn’t cost any more. In particular, we believe it costs less than doing an RPC-based system <em>correctly</em> (at the scale we develop software — not netflix, but also not trivial).</p>
+
+<p>In fact, in order to avoid the dangers of a distributed monolith, we are attempting to build a system without <em>any</em> synchronous inter-component calls at all - see the diagram above in which direct network connectivity between components in the “component layer” is actively blocked. We acknowledge that is a departure from many other micro-service and event-driven architectures. However we propose that any API which by its nature requires synchronous coordination by multiple components generally indicates an incorrectly-partitioned system. In the few cases where such operations are really needed, we push that coordination up into the <em>stateless</em> aggregation layer. This doesn’t mean that core business logic should be duplicated; any business rule that is truly system-wide should be implemented in only one place. A component should use replicated data to make decisions only where those decisions are truly the responsibility of its <em>bounded context</em>. We may discover in the future that certain processes do require inter-component calls - but haven’t found any such cases so far.</p>
+
+<h1 id="why-separate-databases">Why Separate Databases</h1>
+
+<p>Each back-end component has its own database for multiple very good reasons:</p>
+
+<ul>
+  <li>independent releases</li>
+  <li>predictable performance</li>
+  <li>security</li>
+</ul>
+
+<p>When one component reaches into another component’s database to read data, then this impacts the ability of each to make changes to the schema of that database. Meetings are required to agree on changes, and release-schedules potentially need to be synchronized. This brings back exactly the issues that STOSA tries to resolve.</p>
+
+<p>Having one component write into another’s database is worse; enforcing data consistency rules then becomes very difficult. See the <a href="https://martinfowler.com/bliki/IntegrationDatabase.html">Integration Database</a> anti-pattern for more info.</p>
+
+<p>Separating databases means that performance issues in one component (eg missing indices on a relational table) cannot affect the performance of a different component.</p>
+
+<p>And partitioning data across multiple databases increases security; a vulnerability in one component only exposes the data that that particular component has available — which is hopefully a small subset of the full dataset.</p>
+
+<h1 id="synchronous-calls-vs-replication">Synchronous Calls vs Replication</h1>
+
+<p>One problem that separation of databases brings is the need to access data owned by a different component/domain. There are two general solutions to this:</p>
+
+<ul>
+  <li>use synchronous calls between domains to obtain data as needed</li>
+  <li>replicate data asynchronously</li>
+</ul>
+
+<p>Both solutions are widely used by various companies — though the first is probably more common than the second. And each approach has its advantages and disadvantages.</p>
+
+<p>Systems based on synchronous calls between “microservices”:</p>
+
+<ul>
+  <li>are obvious to build (developers are familiar with such calls)</li>
+  <li>don’t need to deal with eventual consistency issues</li>
+  <li>have efficient data storage (each data item is stored only once)</li>
+  <li>can support very fine-grained microservices (due to point above about storage)</li>
+</ul>
+
+<p>However such systems also:</p>
+
+<ul>
+  <li>can have complex nets of synchronous calls which make it hard to understand dependencies</li>
+  <li>need to put lots of effort into interface compatibility</li>
+  <li>have complicated failure-modes</li>
+  <li>are IO-intensive</li>
+  <li>can have performance issues (“chatty APIs”)</li>
+  <li>have more potential security issues (each API can be abused, simple firewalling cannot be used between services)</li>
+  <li>are difficult to scale appropriately</li>
+  <li>can have startup ordering problems</li>
+  <li>can lead to development being “blocked” by missing APIs (one tribe’s work requires a new API from another tribe)</li>
+  <li>really need distributed-tracing support</li>
+  <li>are difficult to test (testing requires interactions with other systems)</li>
+</ul>
+
+<p>The “replication” approach has additional up-front complexity but resolves many of the above problems. Given the (relatively high) volume of traffic that willhaben carries, our relatively small number of back-end developers (50-ish), and our intention to be in business long-term, we are therefore currently applying the “replication” approach — ie we use Distributed Read Models. This approach does require relatively coarse-grained services - but as long as each service belongs exclusively to a single team, we’re happy with that.</p>
+
+<h1 id="passing-data-in">Passing Data In</h1>
+
+<p>In some cases, an API which depends upon access to read-only “reference” data can require the caller to provide that. Having the caller retrieve the data first via a synchronous call is quite different from having the called service make the same call because the caller is in a distinctly “higher layer”, ie is not a “business service”. It might be the end client itself (mobile app, desktop app, web-browser, or web-presentation-tier), or might be some “integration/aggregation” component that sits in a layer between clients and business services, but in all cases that component can potentially call service A to retrieve data before calling service B, providing data from A as part of the request.</p>
+
+<p>When that input data needs to be “trustworthy” then the integration/aggregation components can often be trusted (this is internal code), or the data can be <em>signed</em> by its provider (service A). While this option won’t be discussed further below, it can be very useful for specific use-cases.</p>
+
+<p>Obviously requests shouldn’t become excessively bloated, so there are limits to the amount of data transferred in that way.</p>
+
+<p>While this approach works for some APIs, there are many to which it does not apply - ie a decision between synchronous calls vs replication still needs to be made for the architecture as a whole.</p>
+
+<h1 id="benefits-of-replicated-data">Benefits of Replicated Data</h1>
+
+<h2 id="introduction-1">Introduction</h2>
+
+<p>To contrast with the “problems” listed above with synchronous-call-based distributed systems, here are the advantages of a system based on data replication.</p>
+
+<p>In particular, these benefits result when there are NO synchronous calls between back-end components.</p>
+
+<h2 id="simple-ordering-requirements-for-full-system-restart">Simple ordering requirements for full system restart</h2>
+
+<p>When component A calls component B during startup, then on a “cold start” of the system it is necessary to remember to start B first, then A. When no such calls occur, then startup is simple: first platform services such as databases (in any order), then back-end components (in any order), then aggregation-layer components (in any order).</p>
+
+<p>By preventing <em>any</em> rest calls between back-end components, we can enforce this “restartability” without “chaos monkeys”, restart-tests, code-reviews, or other time-consuming manual processes.</p>
+
+<h2 id="maximum-system-availability-during-failure-of-specific-components">Maximum system availability during failure of specific components</h2>
+
+<p>When some subset of functions of component A fail if component B is not contactable, then the overall reliability/stability of the system is hard to analyse. When no such calls occur then understanding reliability is easy: only “aggregation-layer” components can ever fail due to their dependencies not currently being available. Back-end components have no unusual failure-modes which need to be tested; they require access to their own databases and Kafka, and that’s about it.</p>
+
+<p>This implies that any “read model” must be cached by each domain so that the data is available even on a restart when the source of the data is not currently available.</p>
+
+<h2 id="ease-of-understanding">Ease of Understanding</h2>
+
+<p>A system in which each component is truly “standalone” makes the architecture easily understandable for new (and existing) IT staff.</p>
+
+<p>For obvious reasons, a system where the coupling between deployed software components is easily understandable and easily drawn on a diagram is desirable. There will always be dependencies between “layers” — clients call APIs and back-end components call platform services. However keeping other connections to a minimum reduces the overall complexity.</p>
+
+<p>The first two diagrams <a href="https://monzo.com/blog/we-built-network-isolation-for-1-500-services">in this presentation from bank Monzo</a> show an example of what we would prefer to avoid..</p>
+
+<h2 id="security">Security</h2>
+
+<p>Allowing cross-component rest calls increases the “attack surface” of components — they have additional APIs. And these APIs need some kind of security model which is quite different from the model applied to client requests. When these APIs are not present, then security analysis becomes much easier.</p>
+
+<p>Allowing cross-component calls also reduces security vulnerability to <a href="https://www.wiz.io/blog/lateral-movement-risks-in-the-cloud-and-how-to-prevent-them-part-1-the-network-layer">lateral movement</a> — the ability of an attacker who controls one component to use that to gain control of other components within the system. If a component makes NO calls to other components, then we can use firewalls (or similar mechanisms) to make life extremely difficult for an attacker. However if even one call to another component is necessary then (a) we cannot use firewalls to block access between these specific components, and (b) it becomes more complex to block calls to other components; the rule is no longer “block everything” but “block everything except …” where the exceptions need to be configured differently for each component.</p>
+
+<h2 id="minimal-api-stability-issues">Minimal API stability Issues</h2>
+
+<p>When no cross-component calls exist then the only APIs for which backwards compatibility must be enforced are:</p>
+
+<ul>
+  <li>calls intended to be used by clients (higher tiers)</li>
+  <li>schemas of published (asynchronous) messages</li>
+</ul>
+
+<h2 id="high-performance-and-predictable-scalability">High Performance and Predictable Scalability</h2>
+
+<p>Because each client request can be served without communicating with any other back-end component, performance is high and predictable.</p>
+
+<p>Scalability is also predictable: find the bottleneck (whether local IO, local CPU, database, etc) and fix that. There is no need to coordinate scaling with the owner of any other component.</p>
+
+<p>Replicated data is also stored locally in a format optimised for the uses of each system. If using a relational store then the data can be denormalised and have appropriate indexes to optimise access for the exact queries needed.</p>
+
+<h2 id="simplified-testing">Simplified Testing</h2>
+
+<p>When each component requires only its local database(s) then testing becomes relatively easy; no need for a complex development environment which includes running instances of the services that a component interacts with.</p>
+
+<h2 id="simplified-debugging">Simplified Debugging</h2>
+
+<p>When each component’s functionality depends only on its own code-base and the data in its own database then diagnosing issues becomes relatively simple — at least much simpler than when a problem involves interactions with code that belongs to someone else.</p>
+
+<h2 id="event-notification-consistency">Event Notification Consistency</h2>
+
+<p>The “publish/subscribe” design pattern is extensible: once a publisher exists, (new) subscribers just need to register themselves with the broker in order to get notifications. The broker has a well-known address and a well-known process for subscriber-registration; all that subscribers need to know is which topics contain what data.</p>
+
+<h2 id="increased-development-rate">Increased Development Rate</h2>
+
+<p>When developing a new feature, if the data needed is already available in the stream that the data owner provides, then implementation does not require any action on the part of the data owner. This eliminates meetings and priority conflicts.</p>
+
+<h1 id="different-approaches-to-data-replication">Different Approaches to Data Replication</h1>
+
+<p>The most important concept related to data storage is: each piece of data has exactly ONE owner, and only the owner may change that data. That owner is the “source of truth” for that data; other systems may potentially have copies of it, but must never modify that copy.</p>
+
+<p>Assuming that a data owner does wish to <em>notify</em> others of changes to the dataset (create/update/delete some entity), the following solutions are possible:</p>
+
+<ol>
+  <li>Make a synchronous call to each interested party (“push notification”)</li>
+  <li>publish a minimal event (perhaps the ID of the changed entity) and expect others to “call back” to obtain data on that entity if they are interested</li>
+  <li>publish a <em>change event</em> that holds info on just the change that occurred to the entity, without its full state</li>
+  <li>publish a <em>change event</em> to an <em>event store</em>; others can <em>subscribe to changes in the event store</em> and <em>query all past events for a specific entity id</em>
+</li>
+  <li>publish an event containing the <em>full current state</em> of that entity</li>
+</ol>
+
+<p>Option (1) has a number of complexities. What if a called system is slow to respond? What if a called system is not currently available at all? And how do “subscribers” register for callbacks? These are all problems that message-brokers already solve and so this isn’t a very appealing approach.</p>
+
+<p>Option (2) has performance issues: each subscriber receives the event, then makes a call to the owner. It also requires that the data owner provide an API to retrieve that data (complexity), has performance concerns, and (as noted in the security section above) has security implications.</p>
+
+<p>Option (3), ie “event sourcing”, requires each subscriber to understand how to apply each kind of “change event” that can occur. It also means missed messages lead to incorrect replicated state. Event sourcing can be very powerful — but is best used when the event producer and consumer are the same application, or at least are tightly coupled and are released effectively as a single app.<sup id="fnref:localeventsourcing" role="doc-noteref"><a href="#fn:localeventsourcing" class="footnote" rel="footnote">5</a></sup></p>
+
+<p>Option (4), an alternative implementation of event-sourcing, solves the issue related to missed messages, but at the cost that consumers of the data need to integrate with this event-store. It still has the higher publisher/subscriber coupling due to the need to understand each kind of “change event”.</p>
+
+<p>Option (5) is rather inefficient in disk space usage, but otherwise resolves almost all of the issues with other approaches. Most importantly, the Kafka message broker has a powerful feature called “compacted topics” which allows this to be implemented effectively. This is why this is our chosen solution. We also typically use the term “message” rather than “event” to make clear that these are not change-events/domain-events - even though a message does represent “a change in the data”.</p>
+
+<h1 id="calls-to-external-services">Calls to External Services</h1>
+
+<p>While we are attempting to eliminate calls between components in the same “layer”, there will occasionally be a need to call third-party services, or legacy services, using traditional synchronous invocation. So why make this distinction between “internal” interactions (replicate async, notify async) and external interactions (blocking call)? Well first, we recommend to indeed follow the same approach used for internal services when possible. Talk to the provider of the external service and see if asynchronous interaction is possible, ie subscribing to data for reads, and sending asynch commands as messages for writes. If this cannot be done, then try to do synchronous calls to the external service from the aggregation layer instead. However if neither approach is possible then synchronous calls must be accepted within the back-end component layer. Such code does require careful implementation and review as it can cause significant performance impact, even leading to outages, if the component being invoked is not available. This problem of course also exists in the aggregation layer, but there (a) such calls are “standard”, and (b) the code is generally simpler — no true business logic is present in that tier.</p>
+
+<p>So in short, while it is sometimes not possible to exclude all interactions with third-parties from the back-end tier, it is worth trying as hard as possible. And interactions with internal code can be done correctly!</p>
+
+<h1 id="data-replication-and-event-driven-architecture">Data Replication and Event Driven Architecture</h1>
+
+<p>Event-driven Architecture and Reactive Architecture (effectively the same thing as far as I can see) are hot topics at the moment. They certainly are powerful concepts, allowing systems to provide near-real-time data to its users.</p>
+
+<p>What is proposed in this article is not quite an event-driven architecture. It does use asynchronous messaging to distribute data between processes, and these messages can under some circumstances be used to trigger business processes. However the primary purpose of the approach described here is to build a system of independently-maintainable user-facing services which share some underlying datasets while avoiding the issues that come with synchronous calls between services. The messages are intended to <em>carry data</em> for the purposes of synchronisation rather than <em>inform systems about events</em>.</p>
+
+<p>Adding a “cause” field (some kind of event-descriptor) to the messages described in this article may make the messages usable for some additional purposes, but the “deduplication” process described in part 2 of this series will need to be disabled, and the use of Kafka’s compacted topics may also cause “lost events”. In general, if you want a truly real-time responsive architecture then you may need to instead look at alternative approaches (possibly event-sourcing) with their higher costs - in particular, the higher coupling between services which results.</p>
+
+<p>One aspect of reactive systems is that they reduce the number of inter-service synchronous calls. The architecture proposed here contributes to this by eliminating calls needed for “data sharing”. Whether these data-change events, or additional separate domain events, are used to move the system further towards an event-driven/reactive design is a separate issue.</p>
+
+<p>Although this proposal isn’t directly an event-driven/reactive system, the technical benefits of high reliability and scalability which are often ascribed to that design <em>are</em> present in the approach proposed here.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>By isolating our back-end components from each other, and transferring data only via messages in Kafka compacted topics (published by data owners, consumed by components who need that data) <em>or</em> by having necessary data passed in as part of the request, we achieve performance, stability, developability, testability, debuggability, and security.</p>
+
+<p>Implementing this pattern does have a cost, and for smaller companies, or ones with a slower rate of software change, it may not be worth it. For our circumstances (&gt; 50 back-end developers, multiple releases to production per day) the benefits are estimated to greatly outweigh the cost.</p>
+
+<p>This pattern does also assume that each (micro) service has its own database and services are relatively coarse-grained. If you are aiming for fine-grained services (eg <a href="https://www.youtube.com/watch?v=7LGPeBgNFuU&amp;t=1500s">Spotify’s 800 services for 600 developers</a>) <em>and</em> for each service to have a private database, then this data-sync approach may be too expensive in terms of data storage. That design probably instead needs to rely on synchronous calls between services to retrieve data when needed - with the associated issues described above. It seems plausible to choose a database per team, with fine-grained services owned by that team sharing a database - a compromise which could support sharing data between teams via data replication rather than synchronous calls. Data duplication would be kept within reason, at the cost of increased coupling - but only between services belonging to a single team. However it isn’t clear what the advantage would be over simply having a few coarse-grained services per team.</p>
+
+<p>Disclaimer: this data-replication approach is relatively new to us. Our first such “data stream” is now about 1 year old, and we currently have 3 such streams with another 2 coming soon. So we can’t claim to have a battle-proven solution — but it’s also not vaporware.</p>
+
+<p>See <a href="/architecture/distributed-read-models-part2">part 2</a> for the implementation details.</p>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<ul>
+  <li>
+<a href="https://www.youtube.com/watch?v=_4gyR6CBkUE">[video] CodeOpinion: Rest APIs for Microservices? Beware!</a> - discusses issues related to synchronous calls (which the architecture in this article reduces or eliminates)</li>
+  <li><a href="https://www.youtube.com/watch?v=IzBEbfSg0uY">[video] CodeOpinion: Event Carried State Transfer</a></li>
+  <li><a href="https://www.youtube.com/watch?v=OyNSFJp8564">[video] Neal Ford: Granularity and Communication Tradeoffs in Microservices</a></li>
+  <li><a href="https://netflixtechblog.com/how-netflix-microservices-tackle-dataset-pub-sub-4a068adcc9a">Netflix: How Netflix microservices tackle dataset pub-sub</a></li>
+  <li>
+<a href="https://netflixtechblog.com/delta-a-data-synchronization-and-enrichment-platform-e82c36a79aee">Netflix: Delta Data Synchronization and Enrichment Platform</a> - in which netflix creates “distributed read models” driven from low-level database change-data-capture events. Same final result as approach described here, possibly simpler, but with higher inter-service coupling. See also the <a href="https://netflixtechblog.com/dblog-a-generic-change-data-capture-framework-69351fb9099b">Netflix dblog</a> project.</li>
+  <li><a href="https://www.youtube.com/watch?v=MrV0DqTqpFU">[video] Christian Posta: The hardest part of microservices is your data</a></li>
+  <li>
+<a href="https://www.youtube.com/watch?v=E8-e-3fRHBw">[video] Managing Data in Microservices (2018)</a> - data distribution is discussed from around minute 30, although the whole presentation is interesting</li>
+  <li>
+<a href="https://www.youtube.com/watch?v=aHsVsbo_VOE">[video] Jimmy Bogard: Effective Microservice Communication Patterns (2020)</a> - data replication discussed from minute 60</li>
+  <li>
+<a href="https://www.youtube.com/watch?v=L1Zgfr6bFvA">[video] David Leitner: Rethinking Reactive Architectures (2021)</a> - in particular, see from minute 25.</li>
+  <li><a href="https://www.youtube.com/watch?v=SKXS2h3MdPM">[video] Duana Stanley: Core Decisions in Event-Driven Architecture (2019)</a></li>
+  <li>
+<a href="https://www.youtube.com/watch?v=tKRa0O7aepo">[video] Dave Farley: Reactive Systems</a> - describes well the problems of systems that rely excessively on synchronous calls between services</li>
+  <li><a href="https://www.youtube.com/watch?v=AEbJgpamZ4w">[video] Chris Richardson: Solving distributed data problems in a microservice architecture</a></li>
+  <li><a href="https://www.confluent.io/blog/data-dichotomy-rethinking-the-way-we-treat-data-and-services/">Confluent: Data Dichotomy: Rethinking the way we treat data and services</a></li>
+</ul>
+
+<h1 id="change-history">Change History</h1>
+
+<p>This article was written by myself while an employee of <a href="https://www.willhaben.at">willhaben</a>, and originally published on Medium (with link from the company website) in February 2023. Minor updates have been made here in June 2023.</p>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:integration-bus" role="doc-endnote">
+      <p>The integration layer has a vague resemblance to the “integration bus” or “enterprise service bus (ESB)” patterns. However code in here is optional (most service calls bypass this layer), code here is very simple, and it exists only to support “external API users”. <a href="#fnref:integration-bus" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:graphql" role="doc-endnote">
+      <p>At some future time, simple “aggregation” of data could be performed by something like a GraphQL server. <a href="#fnref:graphql" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:soa" role="doc-endnote">
+      <p>See <a href="https://www.developertoarchitect.com/downloads/microservices-vs-soa.pdf">Mark Richards’ Report on Microservices vs SOA</a>. <a href="#fnref:soa" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:domain-def" role="doc-endnote">
+      <p>Subdomain might be a more appropriate word here, but is longer to write.. <a href="#fnref:domain-def" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:localeventsourcing" role="doc-endnote">
+      <p>See <a href="https://www.youtube.com/watch?v=L1Zgfr6bFvA">Rethinking Reactive Architectures</a> from minute 21 (data distribution) and minute 33 (event-sourcing) <a href="#fnref:localeventsourcing" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/distributed-read-models-part1/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

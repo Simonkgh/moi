@@ -1,0 +1,411 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Generating Change Events with the Outbox Pattern</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Generating Change Events with the Outbox Pattern</h1>
+    <aside>First published on: March 21, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a>, <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>Sometimes an application needs to write to a database and to send a message to a message-broker at the same time - ie “atomically” or “in the same transaction”. This article describes the options for implementing this, including the <a href="https://microservices.io/patterns/data/transactional-outbox.html">outbox pattern</a>. In particular, this article focuses on sending <em>data update notifications</em> beteen components in a microservice architecture.</p>
+
+<p>The outbox pattern is pretty well-known,  but the majority of descriptions are pretty brief; in this article I want to go into the details of different variants, options, and their tradeoffs. The information here is the result of quite a lot of experience in this area over the last few years, as I have been deeply involved in the design and implementation of a microservices-based system that uses events to replicate data.</p>
+
+<h1 id="the-problem-description">The Problem Description</h1>
+
+<p>A major application at my employer had initially implemented notification events by simply writing to the database then sending the message to a broker (ActiveMQ or Kafka) without any explicit transactions; in practice, it just wasn’t reliable. The exact reason why some messages went missing was never 100% identified, but probably due to things like new system deployments (requiring application restart), intermittent network failures, or software bugs. Having 99.5% of records processed correctly turned out to be not good enough, so downstream applications started implementing “nightly resync jobs” to check for and patch up missing data, and various other ugly workarounds.  A number of these code-points have now been moved to the outbox pattern and everything is much more reliable.</p>
+
+<p>As we have continued our migration to microservices, we have a similar issue: each microservice has its own database, and each data item belongs to just one microservice, but other services may need read-only access to that data. We do this by <em>replicating</em> the needed data; when the owning service modifies data it sends a logical change event which other services may subscribe to in order to update their copy of that data. While the details are somewhat complicated, the most important step is that these messages must be <em>sent reliably</em>. We use the same pattern as was applied to the legacy system: the outbox pattern.</p>
+
+<p>Using an outbox isn’t the only option though; this article looks at everything we considered.</p>
+
+<h1 id="options-for-triggering-events">Options for Triggering Events</h1>
+
+<p>As far as I am aware, the following is a complete list of the available options. Each option is explored further in a following section.</p>
+
+<ol>
+  <li>Use distributed transactions.</li>
+  <li>Use the built-in change event stream of a database (available only in a small set of databases).</li>
+  <li>Use an external transaction-log-tailing tool (eg Debezium).</li>
+  <li>Use an external tool which polls the database for changes.</li>
+  <li>Write outbox records from application code.</li>
+  <li>Write (partial) outbox records via database triggers.</li>
+</ol>
+
+<p>Only the last two use the “outbox pattern”.</p>
+
+<p>Each of these options has sub-variants which are described further in the detailed explorations below.</p>
+
+<p>There is yet another option: to <em>avoid</em> doing an update and message-send atomically, by instead just sending the message and then asynchronously driving the update from that (sometimes called “listen to yourself”). It’s a very valid pattern but isn’t discussed further here.</p>
+
+<h1 id="using-distributed-transactions">Using Distributed Transactions</h1>
+
+<p>There are various protocols that really provide ACID transactions across multiple resources (<a href="https://www.alibabacloud.com/blog/an-in-depth-analysis-of-distributed-transaction-solutions_597232">cross-resource distributed transactions</a>), ie not limited to just a single database. The majority of mainstream relational databases support this protocol, as do <em>some</em> message brokers. Depending on which software you are using, it therefore <em>might</em> be possible to actually do a single ACID transaction which updates a database and sends a message, with the transaction-manager ensuring that either both are successful or both are rolled back.</p>
+
+<p>However there are many databases (particularly NoSQL databases) which don’t support this, and many message-brokers also do not support it (for example, Kafka).</p>
+
+<p>Even if you happen to be using components that do make this possible, there are quite a few disadvantages. The database tables and message queues involved in the transaction often get <em>locked</em> for the duration of the transaction, leading to performance issues and potentially deadlocks elsewhere. It probably makes it impossible to <em>batch</em> transfer of messages from a client application to a message-broker - ie disables a major performance feature. When the message-broker is temporarily not available, then delays (timeouts) can occur in the request-path, followed by a rollback - although the database is working fine. And simply setting up the transaction-manager is quite complicated.</p>
+
+<p>Personally, I would recommend against using this approach; distributed transactions are sometimes not possible and are always difficult.</p>
+
+<h1 id="use-a-databases-built-in-change-event-stream">Use a Database’s Built-in Change Event Stream</h1>
+
+<p>There are a few databases which make it very easy for applications to receive <em>notifications</em> when records change. These include PostgreSQL (a relational database) and MongoDB (a NoSQL document database).</p>
+
+<p>It therefore seems possible for the application which owns the source data to itself subscribe to these events, and for each event to emit the corresponding logical event to a message broker.</p>
+
+<p>I haven’t tried this approach (the database I have been working on does not support such events) but it seems promising. There are a few possible complications:</p>
+
+<ul>
+  <li>Is the change event stream reliable?</li>
+  <li>Does the change event stream require special privileges to subscribe to?</li>
+  <li>How hard is it to “de-duplicate” events, ie to emit a single logical change event for a database update that modified multiple tables/entities?</li>
+</ul>
+
+<p>A reliable stream of change events is needed. The following questions should be considered:</p>
+
+<ul>
+  <li>What happens when the listening application is deployed?</li>
+  <li>Does this work in a cluster of database servers (if applicable)?</li>
+  <li>Does this work when failing over from a “primary” database to a hot-standby instance?</li>
+</ul>
+
+<p>It is of course possible to use a dedicated instance of the primary application to handle such events, ie to deploy N instances of the application to handle regular work, and one (or more) instances dedicated to handling the event-stream. This is particularly tempting if subscribing to the event-stream requires special DB account permissions; the instance handling normal requests can continue to use a normal-privilege database account.</p>
+
+<p>It would be possible to write a different application specifically for handling the raw database change events and mapping them to logical events, but this application would presumably need to copy a lot of the logic from the “primary” application and would be deeply coupled to its data model. A dedicated code-base for this therefore seems like a poor idea; just building the event-mapping logic into the primary application seems like a far more sensible solution.</p>
+
+<p>It would also be possible to write an application which listens to these raw database events and makes calls to the primary application to either (a) return the logical event to be emitted or (b) trigger the event to be emitted directly. While this does decouple the primary application from the raw database event stream, there is a significant price to pay in complexity and performance; this seems like a bad idea (though sadly one I have seen implemented - on top of Kafka Connect in that case).</p>
+
+<p>De-duplicating events is probably not an issue; such change-events are typically emitted “per commit” ie represent a full transaction and therefore all the necessary context is available. However the details would need to be checked per-database as there is no standard for this kind of feature.</p>
+
+<p>This approach might have a minor performance issue; when an event is received then the associated entities may need to be read from the database in order to build the logical event (which option 5 avoids for example). However the entities to be read have just been changed, so are likely to be in memory in the database ie a network round-trip is required but little/no disk IO. That seems reasonable.</p>
+
+<p>The task of mapping “raw” database events to logical events has been mentioned several times above and is considered important. Simply exposing the raw database change events to other applications (ie just piping these changes into a shared message-broker, possibly with some minor restructuring) will produce a very tightly coupled system. Any application consuming these events will need to know (be exposed to) very low-level details of the owning application’s database schema. This in turn is likely to lead to the need to do “synchronised deploys” when that schema must be upgraded to implement new features. Only applications which are already expected to be deployed together as a single unit should be coupled in this way (ie NOT code belonging to different domains, and ideally not even microservices belonging to the same domain). Even for a single application which consumes “its own” change events, this can cause problems when upgrading from one version to the next. Therefore, I strongly recommend mapping any such “raw” events into proper logical events that represent what changed at the <em>domain level</em> not at the persistence level.</p>
+
+<h1 id="using-a-standalone-transaction-log-tracker">Using a Standalone Transaction Log Tracker</h1>
+
+<p>There are various standalone applications such as <a href="https://debezium.io/">Debezium</a> which scan the “transaction logs” of different database types and generate messages - typically written to an event-broker such as Kafka.</p>
+
+<p>This is a very efficient, low-latency, and reliable way to see what changes are occurring in a database.</p>
+
+<p>The primary concerns with this are:</p>
+
+<ul>
+  <li>they are often commercial applications, ie require a license;</li>
+  <li>they are often difficult to install (require tight integration into the database deployment);</li>
+  <li>as standalone code, they require regular patching/upgrading; and</li>
+  <li>it can be very hard to generate a proper “logical representation” of the change which has occurred.</li>
+</ul>
+
+<p>In addition, it is important to configure it to report only changes to tables of interest; it is likely that only a few percent of the tables in the database are actually relevant for the emitting of logical change events. Incorrect filtering will swamp the consumer with irrelevant data - but correct filtering means keeping the primary application and transaction-log scanner configuration “in sync”.</p>
+
+<p>Many of the pros and cons for this approach are described in the section above.</p>
+
+<p>One issue to consider in particular here is generation of logical events. If the tool is capable of writing messages directly into an event-broker, then it is tempting to just do this and mark the task as done. However consider carefully whether the event format being generated is truly a <em>logical</em> representation, or is reflecting the source database schema too directly. Incorrect abstraction here can either limit the ability of the primary application to change its database schema, or force consuming applications to be updated and deployed synchronously with changes in the primary application. When the consumers are applications <em>in the same domain</em> and <em>maintained by the same software team</em> then this is can possibly be tolerated (though it is still not good); when the consumers are applications in different domains and maintained by different developers then incorrect abstraction has a hugely high price, ie proper logical event representations are far more important.</p>
+
+<p>An additional issue is the complications related to installing and managing the external transaction-log-tracking software. These additional complications are significant, and for me make this solution less appealing than option 6 (and maybe 5 depending on context).</p>
+
+<p>Note that Debezium <a href="https://debezium.io/documentation/reference/2.1/development/engine.html">can be used as a library</a> and embedded directly into an application; this mode can be considered a subcase of the previous option. Otherwise, Debezium is actually deployed as a plugin for Kafka Connect - but that is really just an implementation detail and the behaviour is quite different from the “poll database” option described later which can also be implemented with Kafka Connect.</p>
+
+<h1 id="polling-the-database-for-changes">Polling the Database for Changes</h1>
+
+<p>There are standalone CDC servers (such as Kafka Connect) which periodically execute SQL queries against a database to detect changes, and then emit these changes somewhere more accessible (eg to a Kafka message broker). This does require that the table be structured appropriately; an event-source approach definitely works but so do tables which have an incrementing version-number in the row, or a last-updated-timestamp.</p>
+
+<p>If the table being scanned is a true <em>outbox table</em> (see option 5) then this can be an effective solution; this is discussed further later.</p>
+
+<p>However if the tables being scanned are the <em>real entities</em> for which events should be produced then it can be very hard to create a proper “logical representation” of the changed data; instead some other code must read the events produced by this system and map them to proper events - at which point a solution like database triggers may as well be used as it is more efficient and less complex.</p>
+
+<p>There are also a few cases where race-conditions can lead to events being missed. The scanning application needs either a “version counter” or a “last-changed timestamp” in order to filter out entities which have changed since its last scan. However databases can’t reliably provide these. The standard way of allocating version-counters is a database SEQUENCE type, but a number is allocated from this type at the point where a SQL insert/update command is executed, NOT the point where a commit is done. When two transactions run approximately in parallel, the transaction with the higher sequence number can be committed first. If the external tool then happens to execute its query, it will note that higher number as its “current state” and the other transaction (with a lower sequence number) will never be detected. The same issue can happen with timestamps; a timestamp allocated as part of a SQL statement is generated at the point of insert/update, not at the point of commit. In addition, timestamps have a maximum resolution, and timestamps are sometimes generated client-side rather than in the database leading to yet more possibilities for race-conditions. I’ve seen the out-of-order-commit problem actually occurring in production when using Kafka Connect - a fraction of a percent of messages were simply being skipped.</p>
+
+<p>In addition, this solution requires the external tool to be configured with SQL query statements that are very tightly coupled to the database schema, ie any changes to the schema require changes in multiple applications and synchronised deployments.</p>
+
+<p>This approach also has problems detecting deleted records.</p>
+
+<p>This approach also has relatively high latency; queries are being run against the <em>entity tables</em> in the database which are presumably large, and therefore the query cannot be run too often - but this then increases the delay between a change being made and the corresponding event being emitted.</p>
+
+<p>While this approach might be reasonable in cases where the primary application cannot be changed, it is slow, complex, and unreliable.</p>
+
+<h1 id="outbox-records-from-application-code">Outbox Records From Application Code</h1>
+
+<p>The standard description of the outbox pattern is that application code starts a transaction, updates any relevant entities, computes the message to be sent and writes this as a BLOB to some “outbox table”, then commits the database transaction. Some background thread polls that outbox table and simply emits that BLOB value 1:1 as a message (or this step can be delegated to something like Kafka Connect).</p>
+
+<p>This is indeed an elegant solution:</p>
+
+<ul>
+  <li>easy to understand;</li>
+  <li>no external components required;</li>
+  <li>no database triggers;</li>
+  <li>no special database features required; and</li>
+  <li>high-performance (in particular the data needed to create logical event representation is probably already in memory).</li>
+</ul>
+
+<p>However this approach does have a few pre-requisites.</p>
+
+<ul>
+  <li>it must be possible to identify all code-paths which update relevant objects;</li>
+  <li>it must be possible to update the application code, wrapping all relevant paths in transactions, etc.; and</li>
+  <li>creation of the logical event must be done as part of the user’s request.</li>
+</ul>
+
+<p>Those first two items can be particularly tricky when adding change-events to a legacy system. Sometimes there are multiple code-paths which update a specific entity, and <em>all</em> of them must be found and wrapped in transactions that also create the logical event.</p>
+
+<p>The last item is not normally a problem, but could be relevant for very performance-critical systems.</p>
+
+<h1 id="partial-outbox-records-from-database-triggers">Partial Outbox Records From Database Triggers</h1>
+
+<p>Database triggers can be used to insert records into an outbox table whenever specific tables are modified. In this case, “outbox table” is possibly not the correct description as what is in the table is not messages to send, but simply the <em>ids</em> of modified entities (and possibly the operation ie insert/update/delete).</p>
+
+<p>Some application then needs to periodically scan these records and emit logical representations of the changed entities. This is relatively easy to implement in a single-threaded<sup id="fnref:parallel-scan" role="doc-noteref"><a href="#fn:parallel-scan" class="footnote" rel="footnote">1</a></sup> manner (ie where there is no need to handle parallel scanning of this outbox table).  As mentioned earlier, while this could theoretically be a dedicated application, simply having the “primary application” be the one that performs this work seems by far the best solution.</p>
+
+<p>It is assumed that multiple instances of the primary application are deployed (scalable microservice). In order to make scanning of the outbox-table “single-threaded”, a “dedicated instance” of this application can be deployed (with appropriate configuration), but that does complicate deployments. Alternatively the instances of the cluster can dynamically choose at runtime which of them will perform that work; see this article on <a href="/programming/cluster-lock">cluster-locks/leader-election</a> for some suggestions how to achieve this.</p>
+
+<p>The primary advantage of using triggers is that it is relatively easy to catch <em>all</em> updates; the number of tables in a database is far smaller than the number of code-paths in an application and therefore identifying the relevant ones is easier. It also avoids needing to deal with transactions in the code; triggers are by definition correctly integrated into the associated transaction. A given <em>aggregate</em> may consist of multiple entities, but:</p>
+
+<ul>
+  <li>child entities in a relational database always have the ID of their parent (in composite key or as a regular column), and</li>
+  <li>when a child changes, the logical event to be emitted is the parent, not the child.</li>
+</ul>
+
+<p>It is therefore possible for a trigger to store the ID of the primary entity in the outbox table, and the code which processes that table then has the data needed to generate the appropriate message.</p>
+
+<p>The advantages of this approach are:</p>
+
+<ul>
+  <li>reliably catches all changes;</li>
+  <li>not intrusive in the code;</li>
+  <li>offloads the work of building a logical representation to a background thread, not the original request;</li>
+  <li>no external processes or tools needed;</li>
+  <li>no extra libraries needed; and</li>
+  <li>no extra DB privileges needed</li>
+</ul>
+
+<p>The disadvantages of this approach are:</p>
+
+<ul>
+  <li>a transaction may cause multiple triggers to fire, ie code generating messages should do “de-duplication”;</li>
+  <li>managing triggers is a little ugly; and</li>
+  <li>the primary entity (which was just in memory) needs to be re-read from the database, ie slightly less performant than the previous option.</li>
+</ul>
+
+<p>Overall, the pros significantly outweigh the cons, ie this seems a very useful pattern.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>I personally have experience of option 6 (database triggers) and it works very well. The extra code needed to scan the “outbox table”, build/send logical events, then delete the processed outbox records, is reasonably small. The (several) data streams we have built using this approach are running reliably in production under reasonably heavy load.</p>
+
+<p>Option 5 (core outbox pattern, code generates messages directly) certainly has advantages in a modern codebase, but can be tricky to apply even there - and can be really tricky to integrate into a legacy codebase. It also still requires an extra background thread to process the outbox messages (as above) - unless that is delegated to something like Kafka Connect.</p>
+
+<p>Option 2 (using a change-event-stream generated by the database itself) seems interesting, though I haven’t tried it.</p>
+
+<p>Distributed transactions (option 1) have many complications and weak points. So do external CDC tools (option 3 and 4).</p>
+
+<p>In all cases, I would recommend using the primary application itself to generate the logical change messages, rather than creating a dedicated application. The messages are tightly coupled to the logic and data schema of the primary application and separating this out only creates additional problems.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://microservices.io/patterns/data/transactional-outbox.html">microservices.io: Transactional outbox</a></li>
+  <li><a href="https://en.dtm.pub/practice/theory.html">DTM: Distributed Transactions Theory</a></li>
+  <li><a href="http://www.kamilgrzybek.com/design/the-outbox-pattern/">Kamil Grzybek: The Outbox Pattern</a></li>
+  <li><a href="https://debezium.io/blog/2019/02/19/reliable-microservices-data-exchange-with-the-outbox-pattern/">Gunnar Morling/Debezium: Reliable Microservices Data Exchange With the Outbox Pattern</a></li>
+  <li><a href="https://www.squer.at/en/blog/stop-overusing-the-outbox-pattern/">David Leitner/SQUER: Stop Overusing the Outbox Pattern</a></li>
+  <li><a href="https://softwaremill.com/microservices-101/">Krzystof Atlasik/Software Mill: Transactional Outbox and Inbox</a></li>
+</ul>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:parallel-scan" role="doc-endnote">
+      <p>One of the articles in References suggests using SQL statement “select .. for update skip locked” to efficiently scan an outbox table from multiple processes in parallel. This statement isn’t standard, but is supported in at least MySQL and PostgreSQL. <a href="#fnref:parallel-scan" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/outbox-pattern/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

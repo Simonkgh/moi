@@ -1,0 +1,278 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Lessons from a Failed Software Project</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Lessons from a Failed Software Project</h1>
+    <aside>First published on: March 16, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>In 2013 I joined a company to work on an exciting project. Two and a half years later, I resigned - and in fact should have resigned earlier. This project was simply not going anywhere - a good idea that got mismanaged into failure. And about 12 months later it got effectively “shelved” (see later for full details) - a couple of hundred developers for several years adding up to (guessing) at least E50 million for nothing. Here’s my view of that, with the hope that perhaps something can be learned from this history.</p>
+
+<p>The project itself had a promising basis. A consumer utilities company had developed software for managing customers and accounts, and realised this had wider application than just its own internal use. A company was spun off to expand the features, and became a successful supplier of packaged software solutions to banks across the world.  Many years later, the company was still profitable but it was clear that the existing software needed more than just maintenance; it needed a thorough rewrite to meet customer expectations in the modern world.</p>
+
+<p>The software wasn’t just one application but a suite of dozens of applications each with its own quirks. Much of the existing code was in Cobol, but Cobol programmers were getting hard to find - and weren’t really productive. Matching tools (IDEs, compilers, etc) were also getting hard to obtain. Other parts of the suite were using Java servlet APIs, JSPs, and various other old and inconsistent technologies. Dataflows were primarily based around batches; typically N times per day a component would execute a processing/import step against a file of new data. It all <em>worked</em>, and customers weren’t yet leaving in droves, but clearly something had to be done.</p>
+
+<p>So: an established company that has existing customers begging for a new product, experience in the problem domain, motivation to deliver something new in the medium term, and a good cashflow. That’s about the dream base for a successful project.</p>
+
+<p>Sadly what they also had was a pool of senior managers who thought they knew all about software development (“we’ve been doing this for years”), inept software architects, and a very hierarchical attitude to management.</p>
+
+<h1 id="first-lesson-managing-large-projects-is-hard">First Lesson: Managing Large Projects is Hard</h1>
+
+<p>Just because you successfully manage an iterative software development process that delivers small feature-changes and bugfixes on a monthly basis doesn’t mean you are qualified to lead a greenfield development of a new product. They are different skillsets. It is possible to get by in the first case with some common sense; the second requires real knowledge and hard work.</p>
+
+<p>Managing a software project is hard. So look honestly at the management team’s experiences and ask if they are appropriate for this project. And if you do go with a management team who are doing something for the first time, then build in lots of checks, metrics, and feedback loops because there will be a lot to learn - and you only learn from seeing how decisions and actions are affecting the real world.</p>
+
+<h1 id="second-lesson-communicate">Second Lesson: Communicate!</h1>
+
+<p>Software development is a team sport; it is all about communication. Regular and bi-directional communication.</p>
+
+<p>The group set up to build this new system included:</p>
+
+<ul>
+  <li>a couple of software architects in the UK</li>
+  <li>a primary development team of about 100 people in central Europe (including me)</li>
+  <li>primary project management co-located with the above team in central Europe</li>
+  <li>an external software development consultancy company in eastern Europe</li>
+  <li>an external software development consultancy in India</li>
+  <li>and some senior management in US/Canada just for extra complexity</li>
+</ul>
+
+<p>Clearly this menagerie is going to be hard to keep on track and in-sync. Only clear documentation, automated software architecture metrics, and lots of communication will help. What unfortunately happened was pretty much the reverse; I was a senior developer in the “core frameworks” team and yet in the 2.5 years I was there I never got to speak to any of the architects at all. Specifications/guidelines typically arrived as emails with attachments. I do believe my team-lead (a good and competent person and probably the most senior technical person on-site at the core development location) got to speak to them occasionally, but I don’t remember getting much in response to the questions I requested answers to.</p>
+
+<h1 id="third-lesson-avoid-big-bang-software-development">Third Lesson: Avoid Big Bang Software Development</h1>
+
+<p>The general plan for this project was: code for 3 years, test, release, party. And the justification for this is, as far as I ever learned, was that the problem domain was a familiar one: the company in general knew what was needed. The fact that the new project was using a new development team, completely new technology, new database structures, real-time (rather than batch) data processing, and in fact there was 0% overlap with the existing software, didn’t seem to concern anyone. And that the rewrite was a chance to “revisit all the old dataflows and processes and improve them”.</p>
+
+<p>While I never got particularly familiar with the old system, it seems that there must have been an opportunity to progressively roll out the new solution, replacing one existing system (or even feature) at a time. This would have had a number of benefits:</p>
+
+<ul>
+  <li>get improved features into the hands of customers early (ie make customers happy)</li>
+  <li>keep the development team (and architects!) focused</li>
+  <li>develop a culture of “production quality code” in the development team(s)</li>
+  <li>practice the testing and release processes for the new product</li>
+  <li>keep attention of management team</li>
+</ul>
+
+<p>What we instead got was junior-level developers churning out large amounts of code which frankly didn’t work. This is particularly a problem when working with external software development companies; measure their productivity by the number of closed tickets and they will produce code. Lots of code. But generally they won’t come back with hard questions like: why are we doing this, where are our acceptance criteria, can we do this more efficiently? It’s not in the interests of such a company to give feedback such as “these requirements we’ve received are rubbish” or “this architecture won’t scale” or “we don’t have any idea how to test what we’ve just written”. And without any <em>production quality releases</em> this can (and did) go on for years without anyone really noticing. I certainly had my suspicions, but (a) it wasn’t my role to take responsibiity for that, (b) there wasn’t any path for me to report my concerns, and (c) management weren’t showing any indication that they were concerned or interested in such feedback.</p>
+
+<p>This was a company that had a record of success by frequently releasing small iterative improvements. And that’s the success formula for almost all projects IMO - so management should have focused on getting this project onto that track too.</p>
+
+<h1 id="fourth-lesson-the-most-important-requirements-are-seldom-documented">Fourth Lesson: The Most Important Requirements are Seldom Documented</h1>
+
+<p>Requirements management was one of the major issues - there were very few. Oh yes, there were UI-screen-layouts for UI developers to code up, but I don’t remember much else. In particular, I don’t remember anything about non-functional requirements; we mostly made those up on the fly.</p>
+
+<p>This was meant to be a reimplementation of an existing system (roughly) - but any existing non-trivial system has a very large amount of stuff under the surface that is very hard to capture in written requirements. Possible solutions for this include:</p>
+
+<ul>
+  <li>don’t rewrite, refactor</li>
+  <li>run systems in parallel, compare results</li>
+  <li>allocate <em>lots and lots</em> of time for testing and rework</li>
+</ul>
+
+<h1 id="fifth-lesson-when-in-a-hole-stop-digging">Fifth Lesson: When in a Hole, Stop Digging</h1>
+
+<p>Eventually management did decide it was time to ask: can we release this yet? And the answer was a clear no. Not even close. Their response was: ok, you can have another 6 months to fix the problems, but in return we expect an additional N features to be added. This was so inappropriate that it triggered my decision to resign; I’d been concerned for a while but felt that maybe rescue was still possible. However this complete denial of reality showed how unlikely that rescue was going to be. The fact that the software architects had also indicated they were considering changing the whole UI framework also showed a massive failure to grasp the situation.</p>
+
+<p>If a project is in a bad state, then:</p>
+
+<ul>
+  <li>Acknowledge it, talk to the team about it, ask the entire team for that feedback which obviously had not been getting through before. Understanding the real situation is the first step to fixing it.</li>
+  <li>Call in outside help; clearly existing management got it wrong and expecting exactly the same people to now get it right isn’t realistic. I don’t mean fire everyone; there’s existing knowledge that’s useful and people can learn from their mistakes - but they’ll learn faster from experts and given that the project is already late, speed is important now.</li>
+  <li>Trim the requirements, get something (anything) out the door. Of course it does need to be something that brings benefits to customers, but that habit of releasing production code is important. And it shows how deep the rot goes; is it superficial (releasing a small component is relatively easy) or do the failures run deep (nothing is stable)?</li>
+</ul>
+
+<h1 id="the-end-of-the-story">The End of the Story</h1>
+
+<p>I kept in contact with my ex-colleagues after leaving. The project actually limped on for a little longer than I expected, but eventually the inevitable happened: most of the development team was let go. The project wasn’t completely cancelled; it was handed over to the India-based software consultancy that we had been working with to “finish off”. However as the quality of the code they had delivered was far from impressive, I have no doubt as to the final destination of that code.</p>
+
+<p>I am slightly curious as to exactly what happened to the company overall, but haven’t got any details on that. Sinking that amount of money in the sand must hurt. And the lack of a new generation of software must be impacting them now - unless they switched to improving the old stuff component-by-component, which possibly is how it should have been done. That does of course bring its own dangers, particularly if the existing maintainers of a component are responsible for the upgrade. But that’s probably going to remain forever a mystery.</p>
+
+<p>At least I learned a fair bit from the project - both about project management and specific technologies. Recently I got a chance to do another project involving rearchitecting an existing system (not of that scale, but still significant) - this time as an architect. And this one went better - possibly due to these earlier experiences.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/lessons-from-failed-project/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

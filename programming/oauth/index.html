@@ -1,0 +1,1834 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - An Architectural Introduction to OAuth2 and OpenId Connect (OIDC)</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>An Architectural Introduction to OAuth2 and OpenId Connect (OIDC)</h1>
+    <aside>First published on: May 10, 2020</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Cryptography/'>Cryptography</a>, <a href='/category/Security/'>Security</a>, <a href='/category/Architecture/'>Architecture</a></p>
+      
+<p>Note: updated April 2023 (particularly with info regarding restricted tokens)</p>
+
+<h1 class="no_toc" id="introduction">Introduction</h1>
+
+<p><a href="https://en.wikipedia.org/wiki/OAuth#OAuth_2.0">OAuth2</a> is a protocol which defines how multiple separate processes can work together to give some <em>client application</em> access to data belonging to a <em>user</em> which is stored on some other system (<em>resource server</em>) while:</p>
+
+<ul>
+  <li>not exposing user <em>credentials</em> to the <em>client application</em> and</li>
+  <li>allowing the user to maintain control over what rights are granted over that data and for how long</li>
+</ul>
+
+<p>With some non-standardised extensions to this protocol, OAuth2 can also be used to do more generic “user authorization” (eg granting rights to admin-users) and to authorize server-to-server calls that are not operating on behalf of a specific user (“service accounts”).</p>
+
+<p>The OAuth2 specification is relatively small; it deliberately limits itself to a minimum of features but adds a few “extension points”. Other standards then build on top of OAuth2 to solve specific use-cases; the most well-known is <a href="https://openid.net/connect/">OpenID Connect aka OIDC</a>. OIDC adds the ability for a client application to verify that an interactive user is currently present (login) and to obtain limited information about the user - provided the user allows this.</p>
+
+<p>Unfortunately, while extensions to OAuth2 (both standardised and not) solve a lot of interesting use-cases, almost all of the documentation available online covers just a single use-case: the use-case that OAuth1 was created to solve (delegated access to user data). This article tries to cover the architectural decisions behind OAuth2 and OIDC in more detail than typically done, and to look at these more advanced use-cases. In particular, this article looks at how to use OAuth2 and OIDC to provide access-control for a moderately complex set of interacting servers as typical in a modern company or organisation.</p>
+
+<p>This information is intended to be helpful for software architects or developers who are designing software that needs to use authentication/authorization - whether as a “client” of an existing system, or as a “server” that needs to support clients. This article does not cover the exact endpoints, parameters, etc. required - there are enough tutorials for that, or simply see the specification.</p>
+
+<p>This article does not contain any code examples; it covers concepts rather than concrete code. Once the concepts are clear, the code is not hard to write - particularly given the number of supporting libraries available for various languages.</p>
+
+<p>Warning: I am not an OAuth2/OIDC expert; I am a software architect and developer who found the existing information (both online and in books) very unclear and frustrating. This article is the result of a lot of research, consolidated into a presentation that I would have found helpful. Corrections, discussions and feedback in general is very welcome. References to other articles that cover the same topics better than this article does are also very welcome indeed.</p>
+
+<p>Note: the obsolete “OpenID” specification is not related to OpenID Connect and is not derived from OAuth2. It is not addressed in this article.</p>
+
+<p>If you know OAuth2 well, and just want to understand OIDC then <a href="https://medium.com/@robert.broeckelmann/understanding-openid-connect-series-37c93d25e92b">Robert Broeckelmann’s Understanding OpenID Connect</a> is probably what you need.</p>
+
+<p>And finally: this article could certainly be better written; the structure needs improvement and some information is repeated. However it has taken me a very long time to get it to even its current state. As I am not being paid, you’ll just have to take it as it is. I hope that it is helpful nevertheless.</p>
+
+<h1 class="no_toc" id="table-of-contents">Table of Contents</h1>
+
+<ul id="markdown-toc">
+  <li><a href="#assumptions" id="markdown-toc-assumptions">Assumptions</a></li>
+  <li>
+<a href="#some-oauth2-use-cases" id="markdown-toc-some-oauth2-use-cases">Some OAuth2 Use Cases</a>    <ul>
+      <li><a href="#use-case-1-simple-delegated-authorization" id="markdown-toc-use-case-1-simple-delegated-authorization">Use Case 1: Simple Delegated Authorization</a></li>
+      <li><a href="#use-case-2-stateless-api-caller-authorization" id="markdown-toc-use-case-2-stateless-api-caller-authorization">Use Case 2: Stateless API Caller Authorization</a></li>
+      <li><a href="#use-case-3-stateful-session-based-authenticationlogin" id="markdown-toc-use-case-3-stateful-session-based-authenticationlogin">Use Case 3: Stateful (Session-based) Authentication/Login</a></li>
+      <li><a href="#use-case-4-application-level-authentication-and-authorization" id="markdown-toc-use-case-4-application-level-authentication-and-authorization">Use Case 4: Application-level Authentication and Authorization</a></li>
+      <li><a href="#use-case-5-single-web-signon" id="markdown-toc-use-case-5-single-web-signon">Use Case 5: Single Web Signon</a></li>
+    </ul>
+  </li>
+  <li><a href="#kerberos-and-saml" id="markdown-toc-kerberos-and-saml">Kerberos and SAML</a></li>
+  <li><a href="#iam-vs-ciam" id="markdown-toc-iam-vs-ciam">IAM vs CIAM</a></li>
+  <li><a href="#access-tokens" id="markdown-toc-access-tokens">Access Tokens</a></li>
+  <li><a href="#api-keys" id="markdown-toc-api-keys">API Keys</a></li>
+  <li><a href="#benefits-of-oauth2" id="markdown-toc-benefits-of-oauth2">Benefits of OAuth2</a></li>
+  <li><a href="#oauth1-vs-oauth2" id="markdown-toc-oauth1-vs-oauth2">OAuth1 vs OAuth2</a></li>
+  <li>
+<a href="#access-permissions-in-oauth2-and-oidc" id="markdown-toc-access-permissions-in-oauth2-and-oidc">Access Permissions in OAuth2 and OIDC</a>    <ul>
+      <li><a href="#overview" id="markdown-toc-overview">Overview</a></li>
+      <li><a href="#scopes" id="markdown-toc-scopes">Scopes</a></li>
+      <li><a href="#simple-scopes-and-consents" id="markdown-toc-simple-scopes-and-consents">Simple Scopes and Consents</a></li>
+      <li><a href="#magic-scopes-and-complex-user-permissions" id="markdown-toc-magic-scopes-and-complex-user-permissions">Magic Scopes and Complex User Permissions</a></li>
+      <li><a href="#systemservice-accounts" id="markdown-toc-systemservice-accounts">System/Service Accounts</a></li>
+      <li><a href="#first-party-consents" id="markdown-toc-first-party-consents">First Party Consents</a></li>
+    </ul>
+  </li>
+  <li><a href="#auth-server-responsibilities-and-external-dependencies" id="markdown-toc-auth-server-responsibilities-and-external-dependencies">Auth Server Responsibilities and External Dependencies</a></li>
+  <li><a href="#well-known-auth-server-implementations" id="markdown-toc-well-known-auth-server-implementations">Well-Known Auth Server Implementations</a></li>
+  <li><a href="#oauth1-oauth2-and-undefined-behaviour" id="markdown-toc-oauth1-oauth2-and-undefined-behaviour">OAuth1, OAuth2, and Undefined Behaviour</a></li>
+  <li>
+<a href="#grant-types-and-authorization-flows" id="markdown-toc-grant-types-and-authorization-flows">Grant Types and Authorization Flows</a>    <ul>
+      <li><a href="#introduction-1" id="markdown-toc-introduction-1">Introduction</a></li>
+      <li><a href="#the-authorization-endpoint-and-login-sessions" id="markdown-toc-the-authorization-endpoint-and-login-sessions">The Authorization Endpoint and Login Sessions</a></li>
+      <li><a href="#client-credentials-grant" id="markdown-toc-client-credentials-grant">Client Credentials Grant</a></li>
+      <li><a href="#standard-authorization-flow-for-oidc-authentication" id="markdown-toc-standard-authorization-flow-for-oidc-authentication">Standard Authorization Flow for OIDC Authentication</a></li>
+      <li><a href="#standard-authorization-code-flow-for-access-token-only" id="markdown-toc-standard-authorization-code-flow-for-access-token-only">Standard Authorization Code Flow For Access-Token Only</a></li>
+      <li><a href="#other-standard-flows" id="markdown-toc-other-standard-flows">Other Standard Flows</a></li>
+      <li><a href="#general-comments-on-grant-types-and-authorization-flows" id="markdown-toc-general-comments-on-grant-types-and-authorization-flows">General Comments on Grant Types and Authorization Flows</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#mobile-devices-and-oauth2" id="markdown-toc-mobile-devices-and-oauth2">Mobile Devices and OAuth2</a>    <ul>
+      <li><a href="#interacting-with-the-auth-server-from-a-mobile-device" id="markdown-toc-interacting-with-the-auth-server-from-a-mobile-device">Interacting with the Auth Server from a Mobile Device</a></li>
+      <li><a href="#implementing-a-client-app-on-a-mobile-device-authorization-code-flow-with-pkce" id="markdown-toc-implementing-a-client-app-on-a-mobile-device-authorization-code-flow-with-pkce">Implementing a Client App on a Mobile Device (Authorization Code Flow With PKCE)</a></li>
+      <li><a href="#using-id-tokens-for-authentication" id="markdown-toc-using-id-tokens-for-authentication">Using ID tokens for Authentication</a></li>
+      <li><a href="#external-agents-and-embedded-web-views" id="markdown-toc-external-agents-and-embedded-web-views">External Agents and Embedded Web Views</a></li>
+    </ul>
+  </li>
+  <li><a href="#single-page-applications-and-oauth2" id="markdown-toc-single-page-applications-and-oauth2">Single Page Applications and OAuth2</a></li>
+  <li><a href="#hub-providers" id="markdown-toc-hub-providers">Hub Providers</a></li>
+  <li><a href="#auth-server-login-sessions-and-remember-me" id="markdown-toc-auth-server-login-sessions-and-remember-me">Auth-Server Login Sessions and Remember Me</a></li>
+  <li><a href="#bootstrapping-provider-support-in-oidc" id="markdown-toc-bootstrapping-provider-support-in-oidc">Bootstrapping provider support in OIDC</a></li>
+  <li>
+<a href="#refresh-tokens" id="markdown-toc-refresh-tokens">Refresh Tokens</a>    <ul>
+      <li><a href="#refresh-tokens-sessions-and-lifetimes" id="markdown-toc-refresh-tokens-sessions-and-lifetimes">Refresh Tokens, Sessions, and Lifetimes</a></li>
+      <li><a href="#offline-refresh-tokens" id="markdown-toc-offline-refresh-tokens">Offline Refresh Tokens</a></li>
+      <li><a href="#refresh-tokens-and-permanent-login" id="markdown-toc-refresh-tokens-and-permanent-login">Refresh Tokens and Permanent Login</a></li>
+    </ul>
+  </li>
+  <li><a href="#rest-with-session-and-hybrid-authorization" id="markdown-toc-rest-with-session-and-hybrid-authorization">Rest-with-Session and Hybrid Authorization</a></li>
+  <li><a href="#client-applications-using-multiple-resource-servers" id="markdown-toc-client-applications-using-multiple-resource-servers">Client Applications Using Multiple Resource Servers</a></li>
+  <li>
+<a href="#oidc-related-topics" id="markdown-toc-oidc-related-topics">OIDC-Related Topics</a>    <ul>
+      <li><a href="#oidc-id-tokens" id="markdown-toc-oidc-id-tokens">OIDC ID Tokens</a></li>
+      <li><a href="#the-oidc-userinfo-endpoint" id="markdown-toc-the-oidc-userinfo-endpoint">The OIDC userinfo Endpoint</a></li>
+      <li><a href="#oidc-terminology-rps-and-ops" id="markdown-toc-oidc-terminology-rps-and-ops">OIDC Terminology: RPs and OPs</a></li>
+      <li><a href="#oidc-authorization-request-param-extension" id="markdown-toc-oidc-authorization-request-param-extension">OIDC Authorization Request Param Extension</a></li>
+    </ul>
+  </li>
+  <li><a href="#implementing-a-client-application-which-uses-access-tokens" id="markdown-toc-implementing-a-client-application-which-uses-access-tokens">Implementing a Client Application which uses Access Tokens</a></li>
+  <li><a href="#implementing-a-resource-server" id="markdown-toc-implementing-a-resource-server">Implementing a Resource Server</a></li>
+  <li><a href="#rejected-requests" id="markdown-toc-rejected-requests">Rejected Requests</a></li>
+  <li>
+<a href="#site-personalisation-and-auto-single-signon" id="markdown-toc-site-personalisation-and-auto-single-signon">Site Personalisation and Auto-single-signon</a>    <ul>
+      <li><a href="#the-problem" id="markdown-toc-the-problem">The Problem</a></li>
+      <li><a href="#possible-solutions" id="markdown-toc-possible-solutions">Possible Solutions</a></li>
+      <li><a href="#user-profile-in-a-cookie" id="markdown-toc-user-profile-in-a-cookie">User Profile in a Cookie</a></li>
+      <li><a href="#user-profile-in-a-local-db-or-other-local-storage" id="markdown-toc-user-profile-in-a-local-db-or-other-local-storage">User Profile in a local DB (or other local storage)</a></li>
+      <li><a href="#always-redirect-to-auth-server-on-new-session" id="markdown-toc-always-redirect-to-auth-server-on-new-session">Always Redirect to Auth-server on New Session</a></li>
+      <li><a href="#boolean-logged-in-cookie" id="markdown-toc-boolean-logged-in-cookie">Boolean Logged-in Cookie</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#single-sign-off-aka-global-logout" id="markdown-toc-single-sign-off-aka-global-logout">Single Sign Off (aka “Global Logout”)</a>    <ul>
+      <li><a href="#types-of-logout" id="markdown-toc-types-of-logout">Types of Logout</a></li>
+      <li><a href="#single-sign-off" id="markdown-toc-single-sign-off">Single Sign Off</a></li>
+      <li><a href="#front-channel-logout" id="markdown-toc-front-channel-logout">Front-Channel Logout</a></li>
+      <li><a href="#back-channel-logout" id="markdown-toc-back-channel-logout">Back-Channel Logout</a></li>
+      <li><a href="#using-a-custom-logout-application" id="markdown-toc-using-a-custom-logout-application">Using a Custom Logout Application</a></li>
+      <li><a href="#sign-off-per-device-vs-per-session" id="markdown-toc-sign-off-per-device-vs-per-session">Sign Off Per Device vs Per Session</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#restricted-tokens-limiting-stolen-tokens" id="markdown-toc-restricted-tokens-limiting-stolen-tokens">Restricted Tokens (Limiting Stolen Tokens)</a>    <ul>
+      <li><a href="#sender-constrained-tokens" id="markdown-toc-sender-constrained-tokens">Sender-Constrained Tokens</a></li>
+      <li><a href="#audience-restricted-tokens" id="markdown-toc-audience-restricted-tokens">Audience-Restricted Tokens</a></li>
+      <li><a href="#obsolete-token-binding-rfc" id="markdown-toc-obsolete-token-binding-rfc">Obsolete Token Binding RFC</a></li>
+    </ul>
+  </li>
+  <li><a href="#draft-spec-for-oauth-21" id="markdown-toc-draft-spec-for-oauth-21">Draft Spec for OAuth 2.1</a></li>
+  <li><a href="#unresolved-issues" id="markdown-toc-unresolved-issues">Unresolved Issues</a></li>
+  <li><a href="#references-and-further-reading" id="markdown-toc-references-and-further-reading">References and Further Reading</a></li>
+</ul>
+
+<h1 id="assumptions">Assumptions</h1>
+
+<p>I assume you are familiar with HTTP, REST, JSON, public-key-cryptography, and software architecture in general.</p>
+
+<p>I will be talking about “REST endpoints” in this article. OAuth2 and OIDC are not limited to authenticating REST calls, and in fact are not limited to HTTP, but that is the most common RPC procotol that OAuth2 tokens are used with. If you are using something else, most of the info here will still apply.</p>
+
+<h1 id="some-oauth2-use-cases">Some OAuth2 Use Cases</h1>
+
+<h2 id="use-case-1-simple-delegated-authorization">Use Case 1: Simple Delegated Authorization</h2>
+
+<p>This section looks at security from the viewpoint of developers writing a user-facing application (mobile app or webserver) which needs to retrieve data owned by a user from some other system.</p>
+
+<p>OAuth version 1 was designed to solve a specific use-case. <a href="https://tools.ietf.org/html/rfc5849">The OAuth1 specification</a> gives an example of this use-case in sections 1.0 and 1.2:</p>
+
+<ul>
+  <li>a user Jane has an account at service <code>photostorage.example.net</code>
+</li>
+  <li>that service holds photos that Jane has uploaded</li>
+  <li>and Jane now wants to grant service <code>printer.example.com</code> temporary access to those photos</li>
+</ul>
+
+<p>The simplest solution for this use-case is for the user to provide their username and password to the photo-printing service. However that is not a good approach for obvious reasons (see <a href="https://tools.ietf.org/html/rfc6749#section-1">section 1 of the OAuth2 spec</a> for details). What the user really wants is to provide the service they are primarily interacting with (the photo-printing service) with a <em>time-limited</em> and <em>rights-limited</em> token to the photo-storage service, eg grant the right to <em>read</em> photos from their gallery for <em>a few hours</em>.</p>
+
+<p>The OAuth specification (v1 and v2) covers:</p>
+
+<ul>
+  <li>how the developers of <code>photostorage.example.net</code> can set up their systems to support such use-cases against data they hold (provide an authorization-service and integrate access-token support into their server applications)</li>
+  <li>how the front-end developers at <code>printer.example.com</code> can write code to interact with that “authorization service” in order to obtain an “access token” (and how Jane can stay in control of the granted access)</li>
+  <li>how the back-end developers at <code>printer.example.com</code> can use that access-token when interacting with the resource-server to retrieve the desired photos (from <code>photostorage.example.net</code>)</li>
+</ul>
+
+<p>In OAuth2 terminology:</p>
+
+<ul>
+  <li>user Jane is the <em>resource owner</em>
+</li>
+  <li>the photos are <em>protected resources</em>
+</li>
+  <li>host <code>photostorage.example.net</code> is the <em>resource server</em>
+</li>
+  <li>host <code>printer.example.com</code> is the <em>client application</em>
+</li>
+  <li>the service that issues access-tokens that the <em>resource server</em> will accept is called the <em>authorization server</em>
+</li>
+  <li>the application Jane uses to interact with the authorization server (to approve issuing of the token) is called the <em>user agent</em> (and is usually a web-browser)</li>
+</ul>
+
+<p>The OAuth1 specification uses slightly different terminology. It also appears to assume that the <em>authorization server</em> is integrated into the <em>resource server</em>. This article uses the expression “auth server” for this component; this makes clear that the component is also responsible for <em>authentication</em> (ie verifies user credentials). When the “auth server” supports OIDC then it is sometimes called an “identity provider”, “IdP”, “OpenID Provider” or “OP”.</p>
+
+<p>An <em>auth server</em> provides:</p>
+
+<ul>
+  <li>an <em>authorization endpoint</em> (the one which a <em>client application</em> redirects a user to in order to get consent (a grant) to issue an <em>access token</em>)</li>
+  <li>a <em>token endpoint</em> (the one that actually returns the access-token on presentation of an auth-code or a refresh-token or client credentials)</li>
+  <li>and possibly other endpoints (eg the OIDC userinfo endpoint)</li>
+</ul>
+
+<p>OAuth1 provides a protocol for solving exactly the above use-case, and only this use-case. OAuth1 is simple, and complete - the spec defines exactly what compliant implementations of all of the above components must do to make such use-cases work - and to work securely. However it is exactly this limited feature-set that effectively makes OAuth1 obsolete; nobody uses it any more and any reference to “oauth” almost certainly means OAuth2.</p>
+
+<p>Sadly, almost all documentation on the internet regarding “OAuth2” addresses just the same “delegated authorization” use-case that OAuth1 deals with - although OIDC and various other extensions to OAuth2 support many other use-cases in addition to the one above.</p>
+
+<p>From the point of view of a software developer, there are a few interesting points:</p>
+
+<ul>
+  <li>the organisation holding valuable data (the “photo gallery” in this example) needs to actively support the use-case, by providing an auth-server and by ensuring the resource-server accepts (and verifies!) the access-tokens that the auth-server issues</li>
+  <li>the organisation using the data (the “photo printer” in this example) is dependent upon the resource-server</li>
+  <li>the user needs to explicitly <em>agree</em>, ie the auth-server needs to inform the user of the rights that the client-application is requesting and get their permission (a “consent”) to issue a corresponding token</li>
+  <li>an access-token has an expiry time; typically they are valid for an hour (granting rights for longer time-periods is done by renewing the token - which does not necessarily require user interaction)</li>
+</ul>
+
+<p>Note that the term “client application” is a little confusing; it might be an “app” on a mobile device in which case the term is natural. However it can also be a webserver hosted by some organisation or company which the user is interacting with via a web-browser; if this webserver fetches data from some other “resource server” and needs to include an “access token” in such requests to authorize the operation then that webserver is a “client application”.</p>
+
+<p>In practice, this use-case typically overlaps with use-case 2 below; once a software system (such as <code>printer.example.com</code>) has been given a token, it then needs to make a call to the resource-server that owns the desired data (<code>photostorage.example.net</code> in our example) - and will typically do that by using the token as a bearer-token in a network call.</p>
+
+<p>In the real world, there are a number of important services that hold user data and allow third-parties to access it via appropriate tokens; obvious examples are Facebook, Twitter, and Google Docs - all of which provide an OAuth2-compatible “auth service” and provide resource-servers (data-holding services) which accept access-tokens from their auth-service. This makes it possible for users with an account at such a service to grant third-party websites or mobile apps the right to access their data “on their behalf”. These third-parties provide “added value services” to the users, while presumably benefitting themselves in some way. The data storage service (Facebook/Twitter/etc) benefits because the existence of these third-party services makes its users happy, and encourages people to sign up for the core service.</p>
+
+<p>Note that when the “client application” is an app installed on a mobile phone, then the security implications of requesting and storing access-tokens are somewhat different than a webserver doing the same thing. The OAuth2 standard therefore defines different “authorization flows” for these two situations. See later for more information.</p>
+
+<p>An <em>access token</em> represents a <em>target resource</em> (typically the ID of a user, ie “all data for user X”) and a set of <em>permissions</em> that can be applied to that resource (eg “read”). However exactly how this information is encoded in the access-token (and the access-token format) are not specified in the standard; that’s a private implementation detail between the resource-server and its associated auth-server. The client-application does need to specify which permissions it desires when requesting the access-token, and (in this delegation case) the (interactive) user is presented with a “description” of these permissions so they can approve the issuing of the token; exactly how all this works is described later.</p>
+
+<h2 id="use-case-2-stateless-api-caller-authorization">Use Case 2: Stateless API Caller Authorization</h2>
+
+<p>This section looks at security from the viewpoint of a developer writing a back-end system that will be invoked by users registered with the developer’s employer, or other back-end components owned by the same organisation.</p>
+
+<p>A resource-server is a stateless IT system which provides a set of read and/or write endpoints, and typically “owns” data. Other systems then send it requests over a network - typically via HTTP. Such a service does not want to receive <em>user credentials</em> as part of such a request; it would need to look up some database to verify them which is hard work. And more importantly, applications that call such an endpoint would not <em>want</em> to provide credentials here, as:</p>
+
+<ul>
+  <li>they could get lost or leaked, and</li>
+  <li>such credentials grant <em>all rights on the user’s data</em> to the recipient</li>
+</ul>
+
+<p>These back-end systems also don’t have any interest in “login state” or “user identity”; they just need to know whether the originator of the request is <em>authorized</em> to issue the request that was received. This authorization is usually proved by including a value called a <em>bearer token</em>; for REST requests this is provided in an HTTP header of form <code>Authentication: Bearer {token}</code>.</p>
+
+<p>Passing an <em>OAuth2 access token</em> here solves these problems:</p>
+
+<ul>
+  <li>the token has a relatively short expiry-time, so leaking it is not so critical (see section on “Restricted Tokens” for more info on security)</li>
+  <li>the token is a subset of the user’s rights, not all of them</li>
+</ul>
+
+<p>Exactly what an “access token” is, is discussed later.</p>
+
+<p>Note that although the standard HTTP header is named “Authentication”, the token is usually an <em>access token</em> that represents <em>authorization data</em> (a set of rights) rather than <em>authentication data</em>.</p>
+
+<p>Note that there are “stateless systems” that are only accessible from trusted systems, eg “back ends” for stateful front-ends which trust network firewalls to ensure only the approved internal front-end tools access them; these do not need to perform authorization at all as they just trust the caller. However this approach to authorization is going out of style; see <a href="https://en.wikipedia.org/wiki/Zero_trust_security_model">the zero trust security model</a>.</p>
+
+<h2 id="use-case-3-stateful-session-based-authenticationlogin">Use Case 3: Stateful (Session-based) Authentication/Login</h2>
+
+<p>This section looks at security from the viewpoint of a developer writing a webserver-centric application that a user registered with the developer’s employee will interact with.</p>
+
+<p>Any large organisation has many internal IT systems. Some of these are “session-based” systems where all network requests include a “session id” (which is allocated by the server on the first request). Typically such systems allow a user to “log in”, after which requests that include that same session-id (a) run with the access-rights of the user (aka authorization) and (b) have access at least to the user identity (aka authentication) and optionally additional basic info (a profile) about the user.</p>
+
+<p>Requiring a user to provide their username/password to each “session-based” system separately, and then having each such system verify the credentials and load the user’s permissions and (optionally) profile is a poor design; it is unpleasant for the user, hard work for the developers, and prone to security problems. Nevertheless, large IT systems worked like this for decades until effective “single sign on” systems were invented - things like Kerberos, SAML, or OAuth2-based systems. Single-signon is discussed further below.</p>
+
+<p>A “session-based” application can store session-state without knowing the user identity, eg to provide the concept of “current page”, “most recent search”, etc. However knowing the user can support nice things like personal config settings for the site. In addition, authentication (providing proof that the session is associated with a specific user-id) is sufficient to authorize all operations on data belonging to that user; a user typically has rights to read/write/create/delete their own data.</p>
+
+<p>An application never actually wants user credentials - it just wants a trustworthy user-id that it can then use to look up additional user-related info in its database(s). In other words, it is convenient for authentication of the user to be performed by an external system and for some “trustworthy userid” to be provided.</p>
+
+<p>An application sometimes also wants to know basic data about the user such as first-name, last-name, date-of-birth, profile-image. An application can of course store such data itself, keyed by the “user id” (see above); however when the app is using an external system for authentication then the user will typically want to update such “profile info” just in one place and have all applications that use that same authentication system see the latest data automatically.</p>
+
+<p>The OpenID Connect (OIDC) extension to OAuth2 addresses this use-case specifically; it provides a verifiable user-id, and defines a set of “standard profile attributes” that applications can request access to. An application can request an <code>ID token</code> from an auth-server instance and (possibly after user login and approval) receive a signed data-structure whose format is clearly defined by the OIDC standard. Alternatively, an application can request an <code>access token</code> from an auth-server instance which represents sufficient rights to read specific profile attributes; the application can then make a direct call to a “user info endpoint” within that auth-server instance providing the token as proof that it is permitted to do so.</p>
+
+<p>As already mentioned, in many cases “authentication” is equivalent to authorization; a user typically has all rights (read/write/create/delete) over their own data. In other words, any request received by the session-based application which is associated with a session that has a “logged in user” and manipulates data belonging to that user can be allowed.</p>
+
+<p>However sometimes an application also supports “admin users” who have rights to access data associated with other users or to perform “system functions”. In this case, an ID token that simply proves the user identity is not sufficient; additional info about the user’s rights are needed (fine-grained permissions) - ie authorization. An application might just store this info in a local database, keyed by userid - ie implement authorization itself. Alternatively it might also require <em>authorization</em> to be done via OAuth2 - ie require an access-token.</p>
+
+<p>When a session-based application only needs authentication and not authorization (ie no fine-grained permissions) then it can delegate to any OIDC-compatible auth-server. A user simply selects whether they want to log in with Facebook, Twitter, or any other service supported by the application; the user is then redirected to that site to obtain an “ID token”. The application receives (via one of the OAuth2 “flows”) a trustworthy token holding a userid of form (auth-server-id, user-id-within-auth-server), eg (“facebook”, “user100”). OIDC in fact specifies a kind of “metadata-retrieval” system where an application can potentally offer a “login with other” option; the user can enter a hostname like “<code>auth.vonos.net</code>”. As long as that domain provides the right metadata-file at the appropriate “well-known URL” then the application can redirect its user appropriately, validate the returned token, and be sure that this user is indeed <code>("auth.vonos.net", "user1")</code>. However many websites do not support arbitrary auth-servers and instead just limit the options to a few well-known ones; this does have the advantage that a “spammer” cannot host their own auth-server with an infinite number of bot-accounts. Note also that a <em>client application</em> must have a <em>client account</em> with the associated auth-server, and must specify its <em>client id</em> when redirecting the user to the auth-server to generate a token; this makes it rather difficult to dynamically accept any auth-server - though OIDC does <a href="https://openid.net/specs/openid-connect-registration-1_0.html">define a protocol for dynamic client registration</a>. OIDC also defines experimental support for “self-issued OpenID Providers”; see the spec for details.</p>
+
+<p>An OIDC “ID token” includes a field which can be tested to ensure that the other end of the network socket is really an interactive application with a current user present; an “authorization token” aka “access token” does not necessarily mean that a user is present - and in fact is designed to allow client applications to act on behalf of users.</p>
+
+<p>Although it is possible for an application to delegate to a “third party” auth-server for <em>authentication</em> (as long as you are willing to accept user-ids of form <code>[auth-server-id, user-id]</code>), it is not possible for an application to use <em>access tokens</em> issued by a “third party” auth-server to make security decisions within its own code-base. The only use for an access-token issued by a third-party auth-server is to pass it to a resource-server that is also run by that same third-party. If you want to use OAuth2 to implement fine-grained authorization in your own applications then you need to run your own auth-server (self-hosted or at least an instance provided by some auth-as-a-service provider).</p>
+
+<p>Often a large organisation will support login to its apps only via its own auth-server, ie all session-based apps only redirect to the organisation’s own auth-server. If an organisation wants to support “authenticate via external” but also support authorization then one option is “token exchange”; request an ID token from the external system then send this to your own auth-server to map (other-auth-server-id, user-id) to an access-token for the corresponding user in your own system. You still get delegated credentials and user-profile-data but the rights for the user are managed within your own system.</p>
+
+<p>The OIDC standard defines 4 standard scopes that can be specified to fetch different “user-related data” after authentication:</p>
+
+<ul>
+  <li>“profile” - include user attributes <code>name, family_name, given_name, middle_name, nickname, preferred_username, profile, picture, website, gender</code>
+</li>
+  <li>“email” - includes user attributes <code>email, email_verified</code>
+</li>
+  <li>“address” - includes user attribute <code>address</code>
+</li>
+  <li>“phone” - includes user attributes <code>phone_number, phone_number_verified</code>
+</li>
+</ul>
+
+<p>Note that the first time an access-token with rights to such data is requested by an application, the user is presented with a list of the data requested (list of scopes) - and may decline the request if they feel that unreasonable amounts of information is being demanded. Only after the user “consents” to the release of this data is a corresponding token generated.</p>
+
+<p>Although OAuth1 is an authorization framework, it was used as a framework for <em>authentication</em> by a number of organisations, eg facebook. However as it was not designed for this purpose, it had to be extended in ways not compliant with its specification. Each organisation “deriving” its authentication-framework from OAuth1 did so in its own way, leading to a lot of confusion. OAuth2 is instead deliberately defined as an <em>extensible authorization framework</em> and OIDC is an extension that (among other things) officially supports <em>authentication</em> use-cases. It is important to note that <a href="https://oauth.net/articles/authentication/">OAuth2 alone is not an authentication protocol</a>.</p>
+
+<p>The topic of “scopes” is discussed in detail later in this article.</p>
+
+<h2 id="use-case-4-application-level-authentication-and-authorization">Use Case 4: Application-level Authentication and Authorization</h2>
+
+<p>This section looks at security from the viewpoint of a developer writing some back-end system that needs to invoke other back-end systems belonging to the same organisation, or a different organisation.</p>
+
+<p>The previous use-cases talk about <em>logging in as a specific user</em> and then <em>accessing data belonging to that specific user</em>, and that is indeed the primary use of OAuth2/OIDC.  An OAuth2 <em>access token</em> is a combination of a resource-id (typically a user-id) and a set of rights, effectively stating that the holder (bearer) of the token can perform specific operations on data <em>associated with a specific resource</em>. A <em>resource server</em> receiving such a token then has sufficient information to check whether the requested operation is consistent with the provided token.</p>
+
+<p>However sometimes in a complex set of interacting IT systems, an application needs to invoke an API of another application <em>as an application</em> and not <em>on behalf of a user</em>. OAuth2 supports this via access tokens associated with <em>client accounts</em>.</p>
+
+<p>Every application which interacts with an auth-server needs a client-account (ie id and credentials) registered with that auth-server. Mobile-apps and single-page-apps use a single account for all installations/instances of the app, and do <em>not</em> provide the client-account credentials when interacting with the auth-server to allocate user-specific tokens (the auth-flows used for allocating user-specific tokens from “public clients” are carefully designed so that the credentials are not relevant). However an application <em>can</em> also connect to its client-account <em>using the client account credentials</em> and ask for a token for <em>the client account itself</em>. Back-end applications which are not user-facing can use this feature to provide <em>access tokens</em> when invoking APIs of other back-end applications; the embedded permissions represent the rights of the <em>application</em> rather than of a user. The client-accounts associated with such back-end applications are typically called <em>system accounts</em> or <em>service accounts</em>.</p>
+
+<p>The registration process needed to create a <em>client account</em> with an OAuth2 auth-server is often somewhat complex and bureaucratic as client accounts should be registered far less often than standard user accounts.</p>
+
+<p>Trying to represent a specific internal service (application) as a “user” for the purposes of application-to-application authentication is extremely painful; OAuth2 authentication flows are not designed for that. The concept of “consents” also does not work well for non-human entities. It is better to use dedicated client accounts for services rather than user accounts.</p>
+
+<h2 id="use-case-5-single-web-signon">Use Case 5: Single Web Signon</h2>
+
+<p>This section looks at the issues a developer needs to deal with when implementing multiple user-facing applications (mobile apps or webservers) for the same organisation, and wanting to avoid requiring a user to explicitly log into each application.</p>
+
+<p>This is really just a variant of Use Case 3 (stateful system login). As noted there, when an organisation has multiple “session-based” applications then it is not optimal to ask users to log in to each one separately; a single-signon solution is preferable and OIDC supports this.</p>
+
+<p>When a user is interacting with an OIDC-enabled web-server and authentication/authorization is required, a redirect is made to some auth-server. The user then interacts with the auth-server to provide credentials, and is then redirected back to the original website in a way that allows it to obtain an id-token and/or access-token for the user and login takes place. At the same time, a <em>cookie</em> is set that holds an “auth-server session id”.</p>
+
+<p>When the user later interacts with a different website, the same redirect to the same auth-server occurs. However if the auth-server cookie is present then it is sent to the auth-server which verifies that the session is still valid and redirects <em>immediately</em> back to the original website with (again) information to allow it to obtain an id-token and/or access-token for the user. To the user, they seem to just automatically be logged in; in most cases they don’t notice the quick pair of redirects at all. Note however that if the new website requires additional permissions which the user hasn’t yet consented to, then interaction is needed to request those.</p>
+
+<p>Native desktop applications (or mobile apps) can also take advantage of this, as long as they all use a (shared) browser or login-app to perform the actual login.</p>
+
+<p>The result is that many different client-applications can obtain ID-tokens or access-tokens for the user while the user is prompted only once to log in - ie OIDC provides “single signon”.</p>
+
+<p>This also potentially allows a user to remained logged-in even after closing the browser (if the cookie is not transient).</p>
+
+<h1 id="kerberos-and-saml">Kerberos and SAML</h1>
+
+<p><a href="https://en.wikipedia.org/wiki/Kerberos_(protocol)">Kerberos</a> provides a mechanism for “signed authorization tokens” that can be used to efficiently implement both “SSO” (for stateful systems) and authorization-for-stateless-systems. However Kerberos was designed to work at “organisation scale”, eg a company or university linked via a relatively fast network; it <a href="https://security.stackexchange.com/questions/41803/kerberos-authentication-over-the-public-internet">does not work so well</a> in the kinds of situations that “internet-scale” public facing services encounter. The SAML specification was developed to cover this use-case; unfortunately the SAML spec is highly complex and not very performant.</p>
+
+<p>The OAuth2 specification (and extensions) provides the same kind of features as Kerberos or SAML (including single-signon), but in a manner that is efficient at “internet scale”.</p>
+
+<h1 id="iam-vs-ciam">IAM vs CIAM</h1>
+
+<p>When authenticating users, there are two primary categories to consider:</p>
+
+<ul>
+  <li>IAM (Identity and Access Management) solutions aim to manage employees of an organisation, ie up to a few thousand accounts</li>
+  <li>CIAM (Customer IAM) solutions aim to manage customers of a (potentially internet-scale) company, ie into the millions of accounts.</li>
+</ul>
+
+<p>IAM is the kind of thing where a new employee is allocated an account by some sysadmin. CIAM is things like Facebook or Twitter, where anyone on the internet can open an account themselves (self-service).</p>
+
+<p>Most of the information in this article applies to both use-cases.</p>
+
+<h1 id="access-tokens">Access Tokens</h1>
+
+<p>The “access token” is the most fundamental concept in OAuth2. The most interesting thing about it is that the OAuth2 specification never defines what one is; the actual format is an implementation detail of the auth-server that issues it. To quote from the <a href="https://tools.ietf.org/html/rfc6749">OAuth2 specification</a> section 1.1 “Roles”:</p>
+
+<blockquote>
+  <p>The interaction between the authorization server and resource server
+ is beyond the scope of this specification.  The authorization server
+ may be the same server as the resource server or a separate entity.
+ A single authorization server may issue access tokens accepted by
+ multiple resource servers.</p>
+</blockquote>
+
+<p>This means that any “resource server” which wants to check whether an access-token represents some specific “permission” needs to know the details of this representation. Or in short, a resource-server accepts access-tokens only from a specific auth-server and is tightly coupled to that auth-server’s implementation and configuration.</p>
+
+<p>Interestingly, the OAuth2 spec doesn’t even state how the recipient of a “token” issued by that auth-server can ensure it has not been tampered with in transit over the network. That is also an implementation detail.</p>
+
+<p>In practice, a resource-server commonly uses a library provided by the maker of the auth-server in order to validate incoming access-tokens and uses an API provided by this library to also check for the presence of the required permissions. It therefore does not need to know the internal representation of the access-token.</p>
+
+<p>Auth-servers often choose to represent access-tokens using the <a href="https://jwt.io/introduction/">JSON Web Token</a> standard. This provides the following benefits:</p>
+
+<ul>
+  <li>the token embeds the user’s rights, so no DB lookup is required</li>
+  <li>the token is signed by the issuing auth-server, so verifying the token requires just a signature-check</li>
+  <li>resource-servers who do not wish to use the auth-server library to verify/decode an access-token can use any JWT library instead</li>
+</ul>
+
+<p>Even when using JWT, different auth-servers may use different field-names and values to represent access-rights, ie a resource-server remains coupled to a specific auth-server implementation and configuration.</p>
+
+<p>Auth-servers can use other representations for access tokens, eg a Kerberos token.</p>
+
+<p>An access-token could also simply be the key of a record in a database which represents the rights associated with that “token”; in that case the resource-server would need to perform a read operation to access the data (unlike the JWT approach where the data is embedded inline). That record would need to include an “expiry time” (or maybe the record is simply deleted at expiry time), as an access-token always has an expiry time.</p>
+
+<p>Note that the OIDC specification requires that an <em>ID token</em> is always a JWT token.</p>
+
+<p>Although access tokens need to be understood by a resource-server in order to check permissions, a <em>client application</em> does <em>not</em> need to read an access token; it just passes it along to the target resource-server REST endpoint as proof that it is permitted to perform the requested operation. In the case of an OIDC ID token, the <em>client application is the user of the token</em> and is coupled to the auth-server; however OIDC-compatible auth-servers use a standardised format for ID tokens.</p>
+
+<p>Note that the interaction between the user-agent (browser), client-application and resource-server is standardised and does not depend on the auth-server implementation; they all treat an access-token as an opaque block of chars. Only the resource-server’s internal checks which verify the caller’s rights are coupled to the auth-server.</p>
+
+<p>The difference between an <em>access token</em> and an <em>id token</em> is that an access-token represents <code>(resource-id, permissions)</code> and is usually consumed by a resource-server while an id-token represents <code>(userid, profile-info)</code> and is usually consumed by a client-application.</p>
+
+<p>JWT tokens include data and a signature; the signature can be thought of as a “hash” of the data encrypted with the auth-server’s private key (not quite correct, but close enough). Resource-servers typically make a call to the auth-server on startup to fetch its public keys (may be more than one during “key rollover”). A JWT token can then be validated by decrypting the signature using the auth-server’s public key and verifying that the hash matches; this does not require <em>any</em> calls to the auth-server and is therefore very scalable. Because no call to the auth-server occurs, there is no way to invalidate a JWT <em>access token</em>; it is valid until its expiry time has been reached. Access-tokens which are not JWT tokens may be validated in a different way.</p>
+
+<h1 id="api-keys">API Keys</h1>
+
+<p><a href="https://en.wikipedia.org/wiki/Application_programming_interface_key">API keys</a> are not part of the OAuth2/OIDC standards, but it seems helpful to mention them here.</p>
+
+<p>Some services (<a href="https://cloud.google.com/endpoints/docs/openapi/when-why-api-key">Google in particular</a>) use the concept of an “API key” that callers of a REST endpoint need to provide, instead of an OAuth access token.</p>
+
+<p>There is no standard for passing an “API key” from client to server; they can be passed as query-params, http-headers, or cookies. They can be used for authorization (required in order for the caller to invoke that endpoint) or for other purposes such as billing/quota-management.</p>
+
+<p>An API key does not include any “user identifier”, ie does not control “whose data” may be manipulated. In general, an API key does not represent rights at all other than “permitted or not”. They also typically do not have an expiry-time - or at least have a very long lifetime.</p>
+
+<p>Because an API key is a kind of “bearer token”, anyone who obtains a copy of the value has the same rights as the caller. This means that embedding them in apps running on user devices (eg mobile apps or Javascript running in a user’s browser) makes interception very easy. That isn’t necessarily a problem; an attacker pretenting to be a mobile app won’t get much extra in the way of privileges. Only an attacker who gets access to an API key that grants special privileges would be a threat.</p>
+
+<p>The primary purposes of an API key are:</p>
+
+<ul>
+  <li>to be able to revoke permission as a whole for a specific project/application (eg some third-party partner) (not per-user, just per-registered-system)</li>
+  <li>for traceability and billing</li>
+</ul>
+
+<h1 id="benefits-of-oauth2">Benefits of OAuth2</h1>
+
+<p>Here is a quick look at what a user gains when using applications based on OAuth2 rather than “password sharing” or similar.</p>
+
+<p>Readers of this article probably are aware of all this, so I’ll keep it short:</p>
+
+<ul>
+  <li>Only the auth-server ever prompts the user for login credentials</li>
+  <li>Only the auth-server ever stores user credentials</li>
+  <li>Recipients of access-tokens (even refresh-tokens) which are buggy/hacked cause only limited damage
+    <ul>
+      <li>If an access-token is leaked, it is valid only until its expiry-time (typically 1 hour)</li>
+      <li>If a refresh-token is leaked, it is valid until the “consent” is revoked for the client-application associated with that token</li>
+      <li>And the actual user credentials can never be leaked (except directly by the auth-server)</li>
+    </ul>
+  </li>
+  <li>User is well informed of which client-applications are requesting which rights (scopes)</li>
+  <li>User can review their existing “consents” at any time, and revoke them</li>
+  <li>For tokens in JWT form (including OIDC tokens and access-tokens from most auth-server implementations), the token can be verified without contacting the auth-server
+(ie efficient network usage)</li>
+  <li>User credentials and profile data (eg email address) are stored only once; no need to update them per-site</li>
+</ul>
+
+<h1 id="oauth1-vs-oauth2">OAuth1 vs OAuth2</h1>
+
+<p>Although some history of OAuth1 and OAuth2 has already been discussed, it is worth taking a closer look at how the standards developed and what differences exist.</p>
+
+<p>OAuth1 is a concrete specification; it defines:</p>
+
+<ul>
+  <li>how client, auth-server and relying-party interact</li>
+  <li>the full set of parameters and allowed values for on each interaction</li>
+  <li>how the recipient verifies that the token is trustworthy</li>
+  <li>how encryption is used to protect data underway</li>
+</ul>
+
+<p>Like OAuth2, it does not specify is the format of an <em>access token</em>, ie how rights are represented. A resource-server is therefore coupled to a specific auth-server implementation. Unlike OAuth2, there is no standard extension for <em>authentication</em>.</p>
+
+<p>The OAuth1 protocol is very limited in the set of functionality it can provide; the inventors of OAuth1 had a specific use-case in mind (see earlier) and the protocol supports exactly that.</p>
+
+<p>The OAuth2 specification development process was a collaboration between the original developers of OAuth1 (web-centric pragmatists) and architects coming from the enterprise world of Kerberos and SAML. The web people wanted to make minor improvements and cleanups to OAuth1, while the enterprise people wanted something far more ambitious. The result was apparently a significant amount of frustration on both sides.</p>
+
+<p>As noted earlier, the well-known and successful Kerberos protocol provides a mechanism for “signed authorization tokens” that can be used to efficiently implement both “SSO” and authorization-for-stateless-systems. However Kerberos was designed to work at “organisation scale”, eg a company or university linked via a relatively fast network; it <a href="https://security.stackexchange.com/questions/41803/kerberos-authentication-over-the-public-internet">does not work so well</a> in the kinds of situations that “internet-scale” public facing services encounter. The SAML specification was developed to cover this use-case; unfortunately the SAML spec is highly complex and not very performant.</p>
+
+<p>Obviously, trying to produce an OAuth2 specification that supported all of the desired use-cases would have made it very complex - and new requirements/use-cases can potentially be discovered. Instead, an OAuth2 specification was released that defines an extensible “framework” that standardises some things while:</p>
+
+<ul>
+  <li>defining a number of “extension points” - where the results of using these points is not defined in the spec, and</li>
+  <li>leaving a number of issues undefined (eg how to protect tokens from interception while in transit over the network)</li>
+</ul>
+
+<p>As the OAuth2 specification itself states in section 1.8 “Interoperability”:</p>
+
+<blockquote>
+  <p>as a rich and highly extensible framework with many optional components, on its own, this specification is likely to produce a wide range of non-interoperable implementations.</p>
+</blockquote>
+
+<p>The original “editor” of the OAuth2 spec, having come from the OAuth1 world, <a href="https://hueniverse.com/oauth-2-0-and-the-road-to-hell-8eec45921529">was unhappy</a> with the “incomplete” nature of OAuth2. This is a fair complaint in some ways; there is far more “implementation specific” behaviour in a system based on OAuth2 than in one that uses OAuth1. However the OAuth2 specification is far simpler, and allows implementers to optimise for many different use-cases. It is also designed for extension, allowing other standards to build on it.</p>
+
+<p>An OAuth2-compatible system using an auth-server whose access-tokens are represented in JWT format solves many of the complaints about OAuth2 in the previous link. Plain OAuth2 still doesn’t provide the same level of security as OAuth1’s “signed requests” - but that is now also resolved by applying the optional OAuth2 extension described in “Restricted Tokens” below.</p>
+
+<h1 id="access-permissions-in-oauth2-and-oidc">Access Permissions in OAuth2 and OIDC</h1>
+
+<h2 id="overview">Overview</h2>
+
+<p>Enterprise authorization systems such as LDAP or ActiveDirectory have complex structures which represent user rights, including groups, roles, and permissions.</p>
+
+<p>OAuth2’s core concept of permissions was deliberately left very vague; the user-visible concept of “scopes” and “consents” are present but what they actually map to is implementation-specific. As noted earlier, an access-token is effectively represents <code>(resourceid, permissions)</code> where resourceid is often (but not always) a userid (representing “all data for that user”) - but how scopes map to an access-token is implementation-dependent.</p>
+
+<p>Scopes and consents are designed with a simple use-case in mind: granting controlled access to a user’s own data. It assumes that a user has <em>all rights</em> to <em>their data</em>, and then creates an access-token which grants a <em>subset</em> of those rights to the holder.  When an auth-server receives a (typical) request for an access-token, it does not need to consult a database of “user permissions”; the user is free to tell the auth-server to agree to any permissions at all because the access-token is used to access <em>data for that user</em> and therefore the token always represents a <em>subset</em> of permission “all”. This is quite different from systems such as LDAP where the focus is often on specifying access rights to data that a user <em>does not exclusively own</em>.</p>
+
+<p>As with many parts of the OAuth2 spec, the way that permissions are represented in an access-token is undefined. An auth-server can therefore optionally choose to embed LDAP/ActiveDirectory-like permissions in access-tokens; you won’t find this anywhere in the OAuth2 specifications and need to check the documentation for the specific auth-server you choose instead.</p>
+
+<p>In addition, access tokens can be used for non-user-related authorization such as server-to-server calls - in which case scopes and consents are not relevant.</p>
+
+<p>Both of these topics are discussed further below.</p>
+
+<p>And just to avoid any confusion: access-tokens don’t <em>allow</em> a resource-server to do its job. A <em>resource server</em> already has access to all data it manages for all users; it just needs to execute the appropriate query against a database. An access-token is not something that the <em>resource server</em> needs in order to do its job, but is instead something that the <em>resource server</em> voluntarily evaluates in order to determine whether it should process a command it has received from a remote process.</p>
+
+<h2 id="scopes">Scopes</h2>
+
+<p>The OAuth2 specification states that a request for an access-token from a client-application to an auth-server includes a list of “scopes”. These are plain strings that specify (in an abstract way) what “permissions” should be encoded into the returned access-token.</p>
+
+<p>This is yet another place where OAuth2 deliberately <em>avoids specifying</em> the effects. The “scope” parameter:</p>
+
+<ul>
+  <li>is an official part of the access-token request API</li>
+  <li>affects what the user is shown in the “consents” page</li>
+  <li>and will <em>somehow affect the contents of the resulting access-token</em> but exactly how is undefined.</li>
+</ul>
+
+<p>Because the effect of a scope on the resulting access-token is undefined, this is yet another of those details that tightly couple the resource server <em>verifying access rights</em> with the auth-server <em>creating the access token</em>. And as noted, typically the auth-server will have matching libraries for various programming languages that provide an API to inspect/extract the permissions encoded in the access-token; the API will vary from auth-server to auth-server depending on what capabilities in this area the auth-server supports.</p>
+
+<p>In practice, scopes can be divided into:</p>
+
+<ul>
+  <li>simple scope names that represent desired permissions</li>
+  <li>magic scope names that trigger <em>actions</em> in the auth-server</li>
+</ul>
+
+<p>Simple scopes from the request are often just embedded directly into the resulting access-token without change (assuming they match known scope-names configured in the auth-server) and are interpreted there as “permissions” that a resource-server should accept.</p>
+
+<p>Magic scopes behave, of course, quite differently. They can trigger output of all sorts of interesting data into the access-token. One standard magic scope is “openid” which doesn’t change the access-token, but instead causes the response to include an OIDC ID token (assuming the auth-server supports openid). Many auth-servers support non-standardised magic scope-names which embed LDAP-like/active-directory-like permissions into the access-token. A resource-server can then take these into account when deciding to allow a network request.</p>
+
+<h2 id="simple-scopes-and-consents">Simple Scopes and Consents</h2>
+
+<p>An organisation that runs one or more OAuth2-supporting “resource servers” must also manage its own auth-server instance. The auth-server admin defines a set of scopes for their organisation, with a nice human-readable description of each. Some organisations use URL-style names for scopes (particularly those with large numbers of resource-servers) in order to avoid naming conflicts. Other organisations use much simpler strings, eg “read:photos”. The exact format doesn’t matter (as long as the resource-servers know what do do with them).</p>
+
+<p>Each resource-server accepts access-tokens from only one auth-server; that auth-server is (almost always) managed by the organisation to which the resource-server belongs. The auth-server that a resource server depends on should be clearly documented.</p>
+
+<p>When a resource-server developer is creating a new REST endpoint, they need to decide which permissions to check for in order to best protect the owner of the data that the call will access. The developer should first see if an existing “scope” defined within their auth-server is appropriate; if not then they must ask their auth-server admin to define a new scope. The choice of scope doesn’t really affect the resource-server much; it is just a simple “present or not present” check. However all <em>callers</em> of the endpoint will need to get an access-token corresponding to that scope before they invoke the endpoint; if the scope the endpoint has chosen is a “generic” one then:</p>
+
+<ul>
+  <li>the caller will be required to ask the user for a “generic” access token which the user might not want to give, and</li>
+  <li>if the token is leaked then whoever gets hold of that token can perform potentially undesirable operations</li>
+</ul>
+
+<p>It is therefore good practice for an endpoint developer to require “scopes” which represent the operations that the endpoint is carrying out. On the other hand, it is not desirable for every single endpoint to invent its own scopes; the auth-server admin will not like that, the implementers of calling apps will not like that, and neither will the user when they get presented with either yet-another-consent-dialog or a consent dialog for dozens of scopes all at once (though see comment later on “first party consents”). An endpoint can potentially accept multiple scopes, eg “read:photos” <em>or</em> “readwrite:photos”, thus giving the calling applications the choice of which scope to prompt the user for; a client application that only invokes resource-server endpoints that accept “read” permission can ask for the smaller permission while a client app that calls resource-server endpoints that update data too can request just <em>one</em> scope “readwrite:photos” which is also accepted by the readonly endpoints.</p>
+
+<p>The endpoint developer needs to document which scopes are required for calls to the endpoint (as well as the auth-server to fetch it from).</p>
+
+<p>Whichever scopes are requested by a client app, the user is presented with a consent-screen listing them (using the descriptions provided when the scopes were defined). The user then agrees to the set of scopes (or a subset of them) and the returned token includes a list of the scopes that the user consented to, in some undefined form. The user’s answers (consents) for <em>this specific client-id</em> are saved to some kind of database for future use if/when this client application requests another token with the same scopes so the user does not need to be prompted again. A user can typically log directly into the UI of the auth-server itself and view/edit/revoke their existing (saved) consents.</p>
+
+<p>Because an access-token is “opaque” to client applications (ie its format is a private detail that is relevant only for the auth-server and resource server) it is not possible for a <em>client application</em> to extract <em>from the access-token</em> the list of scopes which were actually agreed to (at least not portably); however if an auth-server issues a token which does not represent the set of scopes that was requested (for any reason) then the response that provides the auth-token will include a field “scope” listing the accepted scopes.</p>
+
+<p>Although an auth-server is allowed to react to requested scopes in any way, and encode the rights represented by an access-token in any way it desires, in most cases things are very simple. The most common behaviour is that the returned token is in JWT format and has a field “scopes” (or similar) which is an array of strings that includes every requested scope that the user agreed to (in most cases, all of the requested scopes).</p>
+
+<p>The OAuth scope mechanism cannot represent a right to <em>a specific target entity</em>; for example it is not possible for a user to grant read-access to an arbitrary folder of their photo-gallery. It is possible that some auth-servers support this as a custom extension, but I am not aware of any.</p>
+
+<p>Resource server code typically uses a library provided by the auth-server implementer to decode and verify access-tokens. They therefore don’t actually know or care about the format of the access-token, instead using a library API to check that the incoming access-token has the required permission within it (typically by asking if a specific “scope” string is present).</p>
+
+<p>Note that although traditional user-management systems such as LDAP represent rights in various ways (eg object + read/write/execute flags), resource-server endpoints always document their requirements in terms of “scopes” and users are prompted by the auth-server to “consent” to these scopes using the descriptions associated with the scopes by the auth-server admin. The returned access-token also <em>usually</em> represents the rights embedded in the access-token as a list of the “scopes” that the user agreed to.</p>
+
+<h2 id="magic-scopes-and-complex-user-permissions">Magic Scopes and Complex User Permissions</h2>
+
+<p>The “simple scopes” approach described above works well for issuing access-tokens that represent a <em>subset of rights over the data belonging to a specific user</em>. However sometimes users should have rights over things <em>other than their own data</em>. In particular, “admin users” may have rights to perform various operations that affect data of other users, or rights to perform “system functions”.</p>
+
+<p>This kind of “access right” is not really part of the OAuth1 or OAuth2 usecase, and so doing this kind of thing is only possible via authserver-specific “extensions” outside of the OAuth2 standard.</p>
+
+<p>Many auth-server implementations solve this by providing “magic scope names” which <em>do</em> query user rights in some user-database, and store those rights in some auth-server-specific format in the access-token. Some auth-servers even have a global setting that adds this info for every access-token. Relevant resource-server endpoints then need to check the auth-server-specific fields in the access-token to verify that the access-token permits the requested operation.</p>
+
+<p>Assuming the server is connected to some kind of user-datastore that holds user rights (such as an LDAP server or ActiveDirectory system) then the server might embed any of the following in the returned token:</p>
+
+<ul>
+  <li>a list of all the user’s permissions (flattened)</li>
+  <li>a list of all the user’s roles</li>
+  <li>a subset of the user’s permissions which match some kind of “filter expression” stored in a requested scope string</li>
+  <li>a subset of the user’s permissions which match some kind of “filter expression” stored in a scope-definition (ie set up by the auth-server admin)</li>
+</ul>
+
+<p>Embedding a user’s complete set of rights or roles in a token will of course make it much larger.</p>
+
+<h2 id="systemservice-accounts">System/Service Accounts</h2>
+
+<p>Sometimes one application needs to call an endpoint in another to perform an operation that is not associated with a specific user. As noted earlier, “applications” should have a “client account”. These are sometimes called <em>system accounts</em>, <em>service accounts</em> or <em>machine to machine</em> accounts.</p>
+
+<p>Like user rights, this is somewhat outside of the OAuth2 spec and therefore into auth-server-implementation-specific behaviour.</p>
+
+<p>A client application can obtain an <em>access token</em> for <em>itself</em> which proves the identity of the client application. Sometimes this is enough, ie REST endpoints can be implemented that check for a specific “client id” in incoming access tokens. However sometimes a REST endpoint wants to do checks based on rights rather than on identity.</p>
+
+<p>In some auth-servers, it is possible to assign “default scopes” to the client account. When the client application requests an access-token these scopes are then added to the token directly (no “consent” required of course). In some auth-servers it might be possible to link the client-account to an identity in an LDAP/ActiveDirectory instance and then configure the auth-server to add the rights from that account into the access-token in an implementation-specific manner.</p>
+
+<h2 id="first-party-consents">First Party Consents</h2>
+
+<p>The “consent” feature of OAuth is very nice when the “resource server” that holds the data and the “client application” that reads it are different organisations. In this case the user has control over what data is accessed by whom by <em>consenting</em> to specific <em>scopes</em> for specific <em>clients</em>.</p>
+
+<p>However often a large organisation will run an auth-server, multiple resource-servers <em>and</em> one or more client applications that use those resource-servers. In this case the user is already very aware that they have given their data to this organisation (have uploaded it to the resource-servers); it is therefore probably unnecessary to prompt them for consent when a client-application belonging to <em>the same organisation</em> accesses user data via a resource-server. Many auth-servers therefore offer the option to skip the consent step when the access-token request is from such “first party” client applications. Any external client application which wants an access token still has to get interactive user consent.</p>
+
+<p>In the case of Keycloak, each client account has a simple boolean flag <a href="https://www.keycloak.org/docs/latest/server_admin/#_clients">Consent Required</a>; when this is not enabled then the user is not prompted for consent to scopes requested by this client. Obviously this should be ticked for any “third party” client application, in order to give users control over their data.</p>
+
+<p>This is particularly useful when setting up single-signon for employees within a single organisation.</p>
+
+<h1 id="auth-server-responsibilities-and-external-dependencies">Auth Server Responsibilities and External Dependencies</h1>
+
+<p>An auth-server always needs to <em>authenticate</em> a user before issuing a token. It therefore must have a database of user credentials - whether simple passwords, public keys, ids of identity tokens, or other. An auth-server might run its own database for this (with associated interface for creating/deleting/administering users) or it might use a back-end system such as LDAP or ActiveDirectory to obtain user/credential data.</p>
+
+<p>Some auth-server implementations can act as a front-end for multiple user data stores. Some can even act as a front-end for multiple other auth-server instances. The company <code>auth0.com</code> provides a hosted auth-server that acts as a front-end for many of the large internet resource servers including facebook, google, etc.</p>
+
+<p>An auth-server needs to keep track of:</p>
+
+<ul>
+  <li>scopes and their human-readable-descriptions</li>
+  <li>registered client applications, their human-readable-descriptions, their redirect-URL(s) and their credentials</li>
+  <li>user-ids and their credentials (often implemented by delegating to some backing system such as LDAP)</li>
+  <li>user profile data (if it supports OIDC)</li>
+  <li>user consents - ie (client, scope, state) tuples</li>
+</ul>
+
+<p>However with at least basic OAuth2, the auth-server does not need to manage user permissions, roles or groups. As noted above, none of these are needed for basic OAuth2 as a user has all rights over their data and a basic access-token represents a <em>subset</em> of those rights.</p>
+
+<p>An auth-server should provide a user-facing UI through which users can create accounts, and review/update their profile-data and set of consents.</p>
+
+<p>Some auth-server implementations partition the client/scope/consent records they keep into namespaces (sometimes called “APIs”). This can be useful when an organisation has many resource-servers; each group of related servers can have its own scope-names without worrying about naming conflicts. It also means that an “API” can be deleted, tidily removing all associated client application registrations, consents, etc.</p>
+
+<h1 id="well-known-auth-server-implementations">Well-Known Auth Server Implementations</h1>
+
+<p>If you are a software architect wanting to implement “resource servers” which provide REST endpoints that accept OAuth2 access tokens as a way to authorize callers, then you will also need to have an OAuth2-compliant auth-server. There are two choices: host your own or pay for someone else to provide an instance for you to configure (“OAuth as a service”).</p>
+
+<p>Here are some popular options:</p>
+
+<ul>
+  <li>
+<a href="https://www.keycloak.org/documentation">Keycloak</a> - open-source implementation</li>
+  <li>
+<a href="https://github.com/mitreid-connect/OpenID-Connect-Java-Spring-Server">MitreID Connect</a> - open-source implementation</li>
+  <li>
+<a href="https://www.ory.sh/hydra/">Ory Hydra</a> - SaaS based on <a href="https://www.ory.sh/docs/open-source">open source projects</a>
+</li>
+  <li>
+<a href="https://developer.okta.com">Okta</a> - SaaS</li>
+  <li>
+<a href="https://auth0.com/">Auth0</a> - SaaS</li>
+  <li>
+<a href="https://developers.onelogin.com/">OneLogin</a> - SaaS</li>
+  <li>
+<a href="https://www.pingidentity.com">Ping Identity</a> - SaaS</li>
+</ul>
+
+<p>Keycloak is an open-source project led by RedHat. RedHat also offer Redhat SSO which is self-hosted Keycloak with associated tech-support and official security patches. Various companies also offer hosted Keycloak as SaaS.</p>
+
+<p>The Keycloak, Okta and Auth0 websites all provide excellent documentation on the details of using OAuth2; this article therefore does not try to replicate this. What is provided here is the “architectural context”.</p>
+
+<p>There are of course also the big CIAM players:</p>
+
+<ul>
+  <li>Amazon Cognito</li>
+  <li>Google Identity Platform</li>
+  <li>Microsoft Identity Platform</li>
+</ul>
+
+<p>Which ones are appropriate depends upon your goal/scale (see section earlier on IAM vs CIAM).</p>
+
+<p>From personal experience, I can say that Keycloak in 2020 supported self-service account creation (ie a CIAM feature) but handled only IAM-scale numbers of accounts. We took advantage of its “extensible” nature to adapt it to handle 8 million accounts but it was hard work. More recent versions of Keycloak do scale better out-of-the-box.</p>
+
+<h1 id="oauth1-oauth2-and-undefined-behaviour">OAuth1, OAuth2, and Undefined Behaviour</h1>
+
+<p>The OAuth2 specification is more extensible and applicable to more use-cases than OAuth1. However it does so at some cost.</p>
+
+<p>OAuth1 is very tightly defined, and thus compliant implementations are pretty much compatible. OAuth2 however leaves a couple of features completely (and explicitly) undefined. In particular:</p>
+
+<ul>
+  <li>a client application cannot specify what “format” of token it desires; the auth-server decides what format to issue tokens in and indicates this in field <code>token_type</code> of its response. If the client application does not recognise the value in field <code>token_type</code> then it must not use the token. Normally this value will be <code>Bearer</code> in which case the token can be passed in REST requests as an HTTP header of form <code>Authentication: Bearer ${token}</code>.</li>
+  <li>even when <code>token_type=Bearer</code> is specified, the token value is simply defined to be a string (with some constraints). This value somehow encodes a set of access-rights, but how that is done is implementation-specific.</li>
+</ul>
+
+<p>The fact that the format of a <a href="https://tools.ietf.org/html/rfc6750">Bearer token</a> is undefined means that every resource-server is tightly coupled to a specific auth-server implementation; each REST endpoint in a resource-server needs to check that the access-token provided along with the request is valid then check that the operation it has been requested to perform is consistent with (permitted by) that token. That means the resource-server needs to understand the access-token format (though the code that <em>calls</em> the resource-server, ie the client-application, does not). And that means direct coupling of the two implementations.</p>
+
+<p>One of the primary developers of OAuth1 was involved in much of the development of OAuth2, but finally resigned in frustration. He believed the involvement of the “enterprise guys” in OAuth2 development lead to a spec that was more of an “authorization framework” than an authorization protocol. This is actually a fair claim; anyone implementing a new auth-server has a lot of places where they can pretty much do whatever they like while still being “an OAuth2 implementation”. In particular, the lack of detail around bearer tokens (their format, and how they can be verified) was an issue.</p>
+
+<p>OIDC does not change anything related to OAuth2 access-tokens, ie does not affect <em>authorization</em>. It does clearly specify the format of OIDC ID tokens, which must be JSON Web tokens with specific fields present.</p>
+
+<h1 id="grant-types-and-authorization-flows">Grant Types and Authorization Flows</h1>
+
+<h2 id="introduction-1">Introduction</h2>
+
+<p>This section looks at how a client application obtains an access token or ID token.</p>
+
+<p>The interaction between client and auth-server is in two parts:</p>
+
+<ul>
+  <li>the “token endpoint” performs “grants”: the caller provides some kind of (non-interactive) “authorization” and the server returns tokens</li>
+  <li>the “authorization endpoint” performs (sometimes interactive) “user login” and consent-validation, establishes a “login session”, and can return various output values</li>
+</ul>
+
+<p>The term “grant” means “the thing that proves to the auth-server that it is allowed to return an access token”. The auth-server token endpoint supports multiple “grant types” which tells the auth-server:</p>
+
+<ul>
+  <li>what input parameters to expect in the incoming request, and</li>
+  <li>what output-parameters the caller expects</li>
+</ul>
+
+<p>In some use-cases, a client uses only the token endpoint (eg “client credentials grant”, “refresh token grant”, “resource owner credentials grant”), as it has all the “proof” it needs to convince the auth-server that a token may be issued. In this situation, a “login session” is not created or needed.</p>
+
+<p>For other use-cases, a client must request the user to visit the “authorization endpoint” to obtain a token (typically via an http-redirect); this results in a login-session being created. The authorization endpoint may return a token directly, but the commonly-used “authorization code flow” returns a one-time code that the client then uses in a call to the “token endpoint”.</p>
+
+<p>The standard grant types and the “authorization code flow” are described below.</p>
+
+<p>In practice, most client applications use some OAuth2 library to implement interactions with the user-agent and auth-server. The information below is useful for understanding exactly what that library is doing, but it is usually not necessary to actually write code at this level. These grant-types are identical across auth-server implementation (ie is standardized) and therefore OAuth2 libraries that support such grant-types/flows are not auth-server-specific. When implementing a resource-server, this is not the case; the access-token associated with a request needs to be parsed and validated, and access-tokens are not standardized.</p>
+
+<h2 id="the-authorization-endpoint-and-login-sessions">The Authorization Endpoint and Login Sessions</h2>
+
+<p>When a client application causes a user to interact with the authorization endpoint (typically via an http-redirect) this creates a “login session”. When the interface through which the user logs in is a web-browser (typical case) then cookies are returned which identify this login session; this allows later requests for authorization to complete without prompting the user for credentials again (single-signon). Login sessions typically have a lifetime which is configurable in the auth-server via both a max-lifetime and a max-inactive-lifetime. When a request is received by the auth-server at the authorization endpoint and the associated login session has expired then the user is required to log in again. A user may also explicitly “log out” in which case the session is also invalidated.</p>
+
+<p>Invoking the token endpoint never creates a “login session” for a user. However when a client uses a standard refresh token as parameter to the token endpoint, this will be rejected when the session is no longer valid (ie a standard refresh token is linked to the login session through which it was allocated). An “offline refresh token” does not have this limitation; however users are typically warned when an application requests an offline refresh token (precisely because this gives long-lived access to user data).</p>
+
+<p>Login sessions and associated issues are discussed in more detail later.</p>
+
+<h2 id="client-credentials-grant">Client Credentials Grant</h2>
+
+<p>The “client credentials grant” allows a process which is registered as a “client application” with the auth-server to get an access-token for “itself”.</p>
+
+<p>Such tokens embed the client-id, and can be passed to REST endpoints which explicitly check the incoming access-token for specific client-ids.</p>
+
+<p>In particular, the token can be used with calls to endpoints offered by the auth-server itself. In addition to the standard OAuth2 endpoints a specific auth-server implementation may offer services such as “update the application icon” or “get statistics about this app” (eg number of users who have consented to access  by this particular app).</p>
+
+<p>Some auth-servers allow “rights” to be embedded into the access-token returned from a client login. Auth0 for example allow an arbitrary set of scopes to be automatically embedded in the returned token. It may also be possible to automatically insert permissions/roles from an associated LDAP or ActiveDirectory account (in some auth-server-specific representation).</p>
+
+<p>See <a href="https://developer.okta.com/blog/2018/08/21/build-secure-rest-api-with-node">this article from Okta</a> for more details.</p>
+
+<p>The credentials for a client-account could be in many forms (password, tls-certificate, etc). Below it is assumed this credential is a simple auth-server-generated-password aka “client secret”.</p>
+
+<p>The “flow” required to obtain an access-token for a client (“client credentials flow”) is extremely simple; the request just includes client-id and client-secret and the token is returned as the response. Unlike the authorization-code-flow (see below) there is only one request/response interaction required to obtain the token.</p>
+
+<p>The OAuth2 standard includes a “resource owner password credentials grant type” so it may initially seem tempting to use special user accounts as “system accounts”; here an application provides <code>(userid, userpassword, scopes, clientid, clientpassword)</code> to the auth-server and gets back an access-token for the specified user. However an auth-server has certain expectations about “user accounts” that don’t entirely work for system accounts, and it is best not to do this. Among other things, a user should “consent” to scopes before an access-token is issued; this can be worked around for “first party applications” (see earlier) but is still not elegant. An auth-server admin might also have a policy that all user accounts use multi-factor authentication; something that would then break “password grant” approaches. Instead, for cases of server-to-server calls where the operation is not specifically on behalf of a specific user, register the calling application as a separate <em>client</em> (ie create a client account) and use the Client Credentials grant.</p>
+
+<p>Note that the “client secret” is usually a dynamically-generated password that the auth-server generates when the client account is created, and is transferred to the auth-server using “http basic authentication”. However an auth-server may choose to use a more secure authentication solution if desired (eg public/private key). If using the simple “http basic auth” approach, ensure that it is transferred to the auth-server over HTTPS!</p>
+
+<p>Note also that <a href="https://en.wikipedia.org/wiki/Basic_access_authentication">HTTP basic authentication</a> encodes both <code>id</code> and <code>credentials</code> as a single string which is base64-encoded and placed in the HTTP <code>Authentication</code> header. The OAuth2 specification examples shows only a single string being passed for client authentication but this string is internally a <code>(client-id, client-secret)</code> pair.</p>
+
+<h2 id="standard-authorization-flow-for-oidc-authentication">Standard Authorization Flow for OIDC Authentication</h2>
+
+<p>The following process describes the interactions between user-agent, auth-server and client-application when that client-application is a session-based webserver and the webserver wants to allow users to “log on” by providing their credentials to an OAuth2-compatible auth server (a very common configuration).</p>
+
+<p>An OIDC authentication is not actually one of the core “grant types” defined by OAuth2; OIDC is an “extension” to OAuth2. It is very similar to the “OAuth2 Authorization Code Flow”, with just a few different parameters. This sequence is being described before the Authorization flow because it is commonly performed first; a session-based server application generally requires a user to “log in” before giving them options to interact with resource servers that require access-tokens.</p>
+
+<p>To quote from the OIDC specification (section 3.1.2.1):</p>
+
+<blockquote>
+  <p>An Authentication Request is an OAuth 2.0 Authorization Request that requests that the End-User be authenticated by the Authorization Server.</p>
+</blockquote>
+
+<p>The user accesses the website:</p>
+
+<ul>
+  <li>user accesses a session-based webserver, establishing an anonymous session</li>
+  <li>user performs some action (eg visits a specific page) on that webserver which requires identity information</li>
+  <li>webserver caches the action that the user tried to perform in the user session then redirects to the
+“authentication handler” code within the webserver code (typically a simple wrapper around a library that provides OAuth2 client support)</li>
+</ul>
+
+<p>The (potentially interactive) “Authorization Request” now starts, in order to obtain an “auth code”:</p>
+
+<ul>
+  <li>webserver redirects user to any auth-server that the webserver has a valid client-account for (eg user gets to choose);
+this redirect is typically done via an HTTP “unauthorized” response with a location-header that points to the selected auth-server</li>
+  <li>the auth-server (redirect target) URL includes
+    <ul>
+      <li>response-type = “code” (ie specifying the “authorization code flow”)</li>
+      <li>client-id of the webserver</li>
+      <li>audience-id = client-id</li>
+      <li>one or more “scopes” to specify what access-rights and profile-properties are needed – including string “openid” to trigger OIDC behaviour</li>
+      <li>a redirect-URL that points back to the “authorization endpoint” in the webserver</li>
+      <li>state (optional)</li>
+      <li>prompt (optional)</li>
+    </ul>
+  </li>
+  <li>auth-server checks whether the client-id in the URL is valid (known account)</li>
+  <li>auth-server checks whether user is already logged-in (valid session cookie for auth-server provided); if not user is prompted to log in</li>
+  <li>auth-server checks whether user already has a “consent” for (clientid, requested-scopes); if not user is prompted to agree</li>
+  <li>auth-server checks whether the provided redirect-URL matches one of the values associated with the client-account</li>
+  <li>auth-server generates a temporary “auth code”, caches the “grant” result status in memory using key (clientid, auth-code) and sends a response to the user which includes:
+    <ul>
+      <li>the specified redirect-URL</li>
+      <li>the auth-code</li>
+      <li>and a few additional properties</li>
+    </ul>
+  </li>
+  <li>user follows the redirect-URL, thus passing the “auth code” to the webserver</li>
+</ul>
+
+<p>From here, an additional call is needed to exchange the code (a grant) for tokens:</p>
+
+<ul>
+  <li>webserver connects to auth-server specifying:
+    <ul>
+      <li>client-id and client-secret</li>
+      <li>grant-type = “authorization-code”</li>
+      <li>code = (code from auth-server response above)</li>
+    </ul>
+  </li>
+  <li>auth-server responds with <em>all</em> of the following:
+    <ul>
+      <li>an OIDC “identity token” (JSON Web token)</li>
+      <li>an OAuth2 “access token” (opaque token with undefined format)</li>
+      <li>a “refresh token” (opaque token with undefined format) - provided scope “offline-access” was requested</li>
+    </ul>
+  </li>
+  <li>webserver extracts data from the “identity token” (whose format is defined in the OIDC standard) and stores this info in the user’s session
+together with a marker to indicate “loggedin=true”.</li>
+  <li>webserver then fetches the original operation that the user wanted to do from their session and performs it or does an internal redirect</li>
+  <li>and the operation that the user originally tried to perform is finally run - now as a logged-in user</li>
+</ul>
+
+<p>The “scope” parameter passed to the auth-server in a standard “OAuth2 authorization code flow” lists the permissions that the client-application desires to have in the returned access token. These are normally just arbitrary strings that have meaning to the resource-server and maybe the auth-server. The OIDC standard defines some “magic” scope strings that all OIDC-compliant auth-servers will recognise and respond to.</p>
+
+<p>The most significant “magic scope” is “openid”; when this is present then when the “auth code” is exchanged for “tokens” then the response includes three tokens (usually):</p>
+
+<ul>
+  <li>an OIDC identity token</li>
+  <li>an OAuth2 access token</li>
+  <li>and an OAuth2 refresh token (if scope offline-access was requested)</li>
+</ul>
+
+<p>The OIDC specification includes additional magic strings which indicate which “profile data items” the client application wishes to have access to. The user is prompted by the auth-server to agree to exposing these data items (“consent”). The scope “openid” is needed in order to obtain an “ID token”; as the OpenID Connect specification states:</p>
+
+<blockquote>
+  <p>If no openid scope value is present, the request may still be a valid OAuth 2.0 request, but is not an OpenID Connect request</p>
+</blockquote>
+
+<p>The user is prompted for a “consent” only the first time a particular (clientid, scopes) set is presented. The information that the user is given looks something like  “<code>Application ${client-desc} is requesting the following rights: ${desc for scope1}, $[desc for scope2}, ..</code>”. The client-desc is of course relatively important, and therefore auth-servers need to be somewhat careful when accepting requests for new client-accounts; they should validate that the description associated with the account is true and helpful. Some scopes are “built in” to the auth-server and have standard descriptions (which can usually be customised); other scopes can be added by auth-server admins with sufficient rights.</p>
+
+<p>The auth-server’s authorization endpoint does not directly return any tokens, but instead a code which is then exchanged for tokens. The primary reason for this is that the call to do the exchange is performed directly from client-application to auth-server and requires the client-application to provide its credentials. The benefits are:</p>
+
+<ul>
+  <li>checking client credentials prevents many potential attacks but the user-agent cannot provide these credentials</li>
+  <li>the tokens never pass through the user’s system (browser or mobile device) and therefore are very difficult to intercept</li>
+</ul>
+
+<p>The connection from the webserver to the auth-server is often called a “back channel”.</p>
+
+<p>Although issuing an access-token without checking any client-credentials is not secure, the authorization-code-flow-with-pkce solution described below for mobile apps does do exactly this. That flow should only be used where absolutely necessary.</p>
+
+<p>Having the auth-server redirect the user to a URL that is configured in the “client account” whose client-id was specified in the “auth grant” request is another safety-measure against applications using a false client-id; a website that a user is interacting with can claim to be a “client application” that it is not, but it never gets control returned to it after authentication!</p>
+
+<p>The second safety measure against webservers using a false client-id is of course that they cannot exchange the auth-code for an access-token as that requires access to the <code>(clientid, clientsecret)</code> for the client account (assuming the client-account type is set to “confidential” and not “public”).</p>
+
+<p>The redirect-URL provided in the original request (or the one in the client-account) points at an “authorization endpoint” in the webserver; it is this code that makes the direct call to the auth-server to exchange the auth-code for auth-token/access-token/refresh-token. After this is done, the code then forwards or redirects the request to the (protected) location the user originally requested - ie the URL that triggered authentication to occur. This location may have been stored in the user session before the authentication flow started, or might have been encoded in an optional “state” parameter included in the request to the auth-server; the auth-server appends any provided state parameter to the redirect-URL before redirecting back.</p>
+
+<p>The <code>state</code> parameter can also be used to prevent “replay attacks” (eg via XSRF); before redirecting the user to the auth-server, a random value is generated and stored in the session as well as being placed in the state parameter. When the post-auth redirect is received by the webserver, the value from the state param is compared to the value in the session and then the value in the session is removed. Resending the same response again will fail as there is no state-value in the session to compare against (or there is one with a different value). When using an OAuth2 library to implement OAuth2 interactions (which is highly recommended), such safety-checks will be applied automatically.</p>
+
+<p>The <code>prompt</code> parameter controls whether the auth-server should ask for user credentials or not; the default is to ask if-and-only-if the user is not already logged in (does not already have a cookie issued by the auth-server).</p>
+
+<p>The access-token that is issued here provides rights to call the auth-server’s “userinfo” endpoint and get the items of data listed in the original scope list. If the scopes list also included other non-OIDC scopes then the access-token could also potentially be used to call other resource-servers which use the same auth-server as their token-issuer. However if the resource-servers being invoked require “audiences” to be set (not common) then a separate access-token must be issued. It may be good from a security point of view to issue a separate access-token anyway; the one issued along with the ID token has user-profile-related rights that might not be appropriate for passing on to other systems.</p>
+
+<p>The contents of the OIDC ID Token are described in more detail in a later section.</p>
+
+<p>Note that the interactions described above are at “pseudo-code” level; there are some additional less-important params and the actual param-names are slightly different than written here. See the specification for the exact details - or better yet use an appropriate library.</p>
+
+<h2 id="standard-authorization-code-flow-for-access-token-only">Standard Authorization Code Flow For Access-Token Only</h2>
+
+<p>The following process describes the interactions between user-agent, auth-server and “client application” when that client-application is a session-based webserver and the webserver wants to access data belonging to the user which is stored in some other system. This description does not cover the case when the client-application is an app on a mobile device.</p>
+
+<ul>
+  <li>a user (who might be “logged in” or not) is interacting with a session-based webserver</li>
+  <li>the user performs some action that requires the webserver to access user data in some third-party resource-server</li>
+  <li>webserver checks user’s session and detects that no access-token is available to use with that call</li>
+  <li>webserver caches the action the user tried to perform in the user’s session</li>
+  <li>webserver redirects user to the auth-server associated with the target third-party (no other auth-server will do)</li>
+  <li>the auth-server URL specified includes
+    <ul>
+      <li>client-id of the webserver</li>
+      <li>audience-id (optional auth-server extension to OAuth2)</li>
+      <li>response-type=”code” (ie authorization-code flow)</li>
+      <li>one or more “scopes” to specify what access-rights are needed</li>
+      <li>redirect-URL (optional) that user is directed back to when auth is complete (ie authorization endpoint in webserver)</li>
+    </ul>
+  </li>
+  <li>most of the following steps are the same as above - up until the point where the webserver has retrieved an access-token from the auth-server</li>
+  <li>webserver optionally stores the access-token in the user’s session (for later calls)</li>
+  <li>webserver then fetches the original operation that the user wanted to do from their session and performs it or does an internal redirect</li>
+  <li>and the call to the third-party resource server can now be performed; the necessary access-token is now in the user session and can be
+included in the call as a “bearer token”.</li>
+</ul>
+
+<p>An access-token has a limited lifespan (typically less than 1 hour); the exact lifetime is chosen by the auth-server that issues it. It can therefore happen that a webserver that has cached an access-token in a user session has used it for multiple calls to the associated target resource-server but then eventually gets an authorization-failure indicating “token expired”. In that case the server can redirect the user again to the auth-server in order to obtain a new “auth code” which can be exchanged for a new access-token. Given that the user probably still has a valid login-cookie for the auth-server, they will not be prompted for their credentials. And unless the user has explicitly revoked their earlier “consent” for this specific (clientid, scopes) set, then the user will not be prompted for consent again. The new access-token is therefore usually issued automatically with just a few almost invisible http-redirects from the point of the user. Alternatively, the client application can use the “refresh token” which is usually issued together with each access-token; see later for more info on refresh tokens.</p>
+
+<p>The fact that access-tokens can expire means that a “client application” using them must either:</p>
+
+<ul>
+  <li>check before each call that the access-token has at least N seconds before expiry, and renew it if necessary or</li>
+  <li>wrap every call to an external system in a retry loop, handling “token expired” by fetching a new token and retrying the call</li>
+</ul>
+
+<p>Given that the value “N” above can be hard to estimate, and that it is embedded in the token which is theoretically “opaque”, the retry-loop option is often the best approach.</p>
+
+<p>Note that an access-token issued by a third-party auth-server is <em>opaque</em>; its format is not defined and might change at any time. A client application that holds an access-token for a user should therefore not “peek into it” but instead just pass it along in calls to a resource-server associated with that auth-server.</p>
+
+<p>Unlike the OIDC flow above, a refresh-token is always delivered along with the access-token; no special scope must be requested.</p>
+
+<h2 id="other-standard-flows">Other Standard Flows</h2>
+
+<p>Of the four standard OAuth2 “grant types” (authorization flows) the two most important (client credential and authorization code) have been covered above, plus the OIDC variant for authentication.</p>
+
+<p>The remaining flows are:</p>
+
+<ul>
+  <li>
+<em>implicit flow</em> (deprecated; mobile apps should use “authorization code flow” plus PKCE - see later)</li>
+  <li>
+<em>refresh token flow</em> (see later)</li>
+  <li>
+<em>resource owner password flow</em> in which the request for an access-token just directly includes:
+    <ul>
+      <li>client credentials (client-id/client-secret) and</li>
+      <li>user credentials (user-name/user-password)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The resource-owner-password-flow is useful only in specific cases and not discussed in this article. As with the <em>client credentials flow</em>, only a single request/response is required (not multiple phases as in the <em>authorization code flow</em>). OAuth version 2.1 (currently in draft) drops the resource-owner-password flow from the spec, as authorization-code-flow-with-PKCE addresses the same use-cases and is more secure.</p>
+
+<h2 id="general-comments-on-grant-types-and-authorization-flows">General Comments on Grant Types and Authorization Flows</h2>
+
+<p>The “authorization code flow” (and the OIDC variant) is a two-phase protocol; in this case the desired scopes are passed in the first phase (Authorization Request) and are not permitted in the second phase (token retrieval). The other flows/grant-types have only a single phase (token retrieval), and in these the desired scopes are passed in that step; these flows do not support “user consent”.</p>
+
+<p>As noted later in the section on refresh-tokens, a refresh-token can be used to obtain an access-token with a subset of the originally-requested scopes.</p>
+
+<h1 id="mobile-devices-and-oauth2">Mobile Devices and OAuth2</h1>
+
+<p>Now that OAuth2 “authentication flows” for webservers has been covered, it might be helpful to briefly look at how mobile devices integrate with this.</p>
+
+<p>In general, documentation on OAuth2 assumes that the user is using a web-browser to interact with some session-based system, and that when an OAuth2 token is required then the browser can simply be “redirected” to the website of the relevant auth-server. However the user might be using a web-browser on a mobile device or even a native client on a mobile device; in that case things might work slightly differently. There are two different issues to look at, addressed below.</p>
+
+<p>See also <a href="https://tools.ietf.org/html/rfc8252">RFC 8252</a> which describes “best practice” approaches for using OAuth2 in native client applications.</p>
+
+<h2 id="interacting-with-the-auth-server-from-a-mobile-device">Interacting with the Auth Server from a Mobile Device</h2>
+
+<p>On most (all?) mobile device operating systems, an installed application can request the OS to “open a URL”. The OS then checks whether any “app” installed on the device has registered as being a “handler” for that URL. If so, then that app is opened and given the complete URL. If not, then a standard web-browser is opened. This means that an installed app that wishes to obtain an OAuth2 token can simply pass the appropriate URL to the OS; if (for example) this URL references Facebook’s auth-server and the user has a native Facebook login app installed, then that app opens. That login app then communicates with the corresponding back-end using some dedicated protocol (not the standard OAuth2 URLs) but eventually returns an OAuth2-compliant HTTP response to the calling app. If no dedicated login app matching that URL exists, then the OS instead opens a web-browser window for that URL. The app needing the OAuth2 token sees the same response either way.</p>
+
+<p>Not being a mobile-app developer, I am not sure what happens if the user is using a web-browser to interact with a webserver that then requests a redirect to a URL for which the user has a dedicated login app - ie whether this “detect app handling URL” feature works for redirects within a browser or not. But at worst, the browser interface for the referenced auth-server is available.</p>
+
+<h2 id="implementing-a-client-app-on-a-mobile-device-authorization-code-flow-with-pkce">Implementing a Client App on a Mobile Device (Authorization Code Flow With PKCE)</h2>
+
+<p>A native app installed on a mobile device may want to itself act as a “client application” with respect to some auth-server, ie to obtain an access-token for the user’s data on some resource-server and then contact that resource-server to perform reads or updates.</p>
+
+<p>The problem is that the standard “authentication code flow” requires the client-application to present its client-id and client-secret when exchanging the auth-code for the actual tokens. However:</p>
+
+<ul>
+  <li>this client-secret will be identical for every installation of the app</li>
+  <li>and there is nowhere safe that an app can store that secret on a mobile device</li>
+</ul>
+
+<p>As access to a client-secret allows the holder to impersonate the client application, a “safe” place for the client secret would need to be somewhere that not even the owner of the device on which the app is running can access - which is impossible.  In the OAuth2 specification, client applications are therefore divided into two “types” - confidential and public - depending on whether they can safely store their client-secret. A webserver is an example of a “confidential” client-application while mobile-apps and single-page-apps are examples of the “public” type.</p>
+
+<p>Native apps (being of the “public” type) should use a variant of the standard “Authorization Code Flow” called “Authorization Code Flow with PKCE”. <a href="https://oauth.net/2/pkce/">PKCE</a> doesn’t rely on the client-secret, but instead effectively generates a temporary password whose hash is passed in the first “get auth code” step. The complete (temporary) password is then provided in the second “exchange code for token” step; the auth-server verifies that <code>hash(password)</code> matches the original hash. This doesn’t solve all the problems related to not having a client-secret available, but does at least fix some (see below). The auth-server typically allows the PKCE flow (ie omitting the client-secret) only for clients whose client-account is marked as “type=public”, ie the server has been notified that applications using this client-id are “not properly secure”. Various constraints are then applied to the operations such clients can perform.</p>
+
+<p>The OAuth2 specification originally defined the “implicit grant flow” for this scenario (a client application which does not (cannot) have access to its client secret). However the “authorization code flow with PKCE” approach is significantly more secure (though not as secure as the standard flow).</p>
+
+<p>Although the application does not use its client-secret, it must still have a “client account” with an auth-server in order to request and obtain access tokens. Note also that a single application can be a “client application” with respect to multiple auth-servers (if it accesses resources from multiple distinct organisations), and will require a separate client account with each one.</p>
+
+<p>One threat the PKCE protocol protects against is interception of the HTTP requests. An attacker would need to intercept both requests and correlate them together. In addition, the auth-code that is issued as the first response is a <em>one time code</em> so the attacker would need to <em>block</em> the second request in order to be able to send their own request first.</p>
+
+<p>Another threat <a href="https://security.stackexchange.com/questions/175465/what-is-pkce-actually-protecting/186997#186997">that the PKCE protocol protects against</a> on mobile devices is an evil local app. As noted above, an app on a mobile device can register itself as a “handler” for specific URLs. A bad app might register itself as the handler for URLs referencing popular auth-server addresses and perform a “man-in-the-middle” attack. The PKCE protocol relies on the fact that the native app will request the OS to handle the first “get auth code” step (ie launch a browser or login-app to handle login), but will handle the second step (exchange code for ticket) via a direct rest-call that it does not ask the OS to handle.</p>
+
+<p>Nevertheless, the lack of a client secret is a security problem. For any client-account which is marked as being usable via PKCE, any arbitrary application can pretend to be that client. The application cannot intercept user credentials (they are entered in a web-browser or native login app), and the client-account does have a set of “valid redirect URLs” which can prevent some kinds of attacks from regaining control after authentication has occurred (ie retrieving tokens), but in general it is the responsibility of the user to know which application they are interacting with on their device in order to not give bad apps access to ID and access tokens that allow access to the user’s data.</p>
+
+<h2 id="using-id-tokens-for-authentication">Using ID tokens for Authentication</h2>
+
+<p>As described earlier, server-side client applications typically obtain an ID token then mark the user’s HTTP session as “logged in” (typically also storing the ID token’s contents in the HTTP session).</p>
+
+<p>For a native mobile app, things are significantly simpler. To log a user on, the app opens the auth-server “authentication grant” URL - ie a url that references the desired auth-server and provides parameters such as “client-id” and “response-type”. The OS will either open a native authentication app associated with that URL, or just open a web-browser window with that location. The user interacts with the auth-server, and eventually the native app receives an auth-code as response. It exchanges this auth-code for an ID token (via authentication-code-grant-with-PKCE) and then just stores the ID token in memory.</p>
+
+<p>There is a significant difference to server-side authentication however. A server-side app can use the “logon state” as implicit authorization to perform any operation on data associated with that user. A client-side app typically cannot perform any useful work without calling some services provided by remote systems; these will typically require an <em>access token</em>. The ID token is therefore actually of little use to a native client app; it does provide a way to get user data from the centralised OIDC profile but accessing any remote services require another redirect <em>to the auth-server associated with that remote service</em> in order to obtain a suitable access-token.</p>
+
+<h2 id="external-agents-and-embedded-web-views">External Agents and Embedded Web Views</h2>
+
+<p>Mobile device OSes typically provide two ways for a native client application to display HTML content to its user:</p>
+
+<ul>
+  <li>by starting an instance of “the default web browser” in a separate “window” (aka an “external agent”), or</li>
+  <li>by embedding an OS-provided “web view” component within the native application’s frame (just like a button, slider, or other native component)</li>
+</ul>
+
+<p>A native app has very little control over an “external agent”; it cannot intercept data-flows, modify HTML, watch keystrokes, inject Javascript, read/write cookies, etc. In contrast, an app typically has a lot of control over an HTML-capable component that it has embedded into its own “window”.</p>
+
+<p>As described in the “best practice” link above, sending a user to an auth-server authorization endpoint to “log in” should be done via a web-browser in a separate window. This is for the user’s own security; the whole point of OAuth2 is that a client application doesn’t get to see the user’s credentials, just the access tokens. The lack of control that a native app has over an external agent ensures this is true even for an “evil” native app. With an embedded HTML component, however, credentials can be intercepted directly or the cookies that the auth-server sets can be read. Unfortunately this means that when a user has logged in to an auth-server via the external agent, any <em>embedded web view component</em> will lack the “session cookies” representing this login session and therefore cannot perform “single signon”. I am not aware of any simple solution for this - displaying OAuth2-protected websites within a web-view seems impossible without significant hacks to the auth-server. A system I am currently working on resolves this by extending the (self-hosted) auth-server to support an access-token (with appropriate scope) as a valid credential; the native app allocates a suitable access-token and injects it into the web-view as a cookie. When the web-view redirects to the auth-server authentication endpoint this then causes a login session to be created within the web-view. Extensions to OAuth2/OpenID Connect should be viewed with caution, and I do not guarantee that this approach is safe with respect to security.</p>
+
+<h1 id="single-page-applications-and-oauth2">Single Page Applications and OAuth2</h1>
+
+<p>A single-page-app is where an application is implemented using Javascript (or similar) running within a web-browser on a user-owned system, and wishes to act as a “client application”.</p>
+
+<p>Like a “native app” on a mobile device that is acting as a “client application”, a single-page-app has nowhere that a “client secret” can be safely stored - and the “client secret” will be identical for every instance of the app (every browser in which the code runs). The recommendation here is to use the “authorization code flow with PKCE” to obtain tokens from the auth-server; this does not protect the access-tokens from interception as well as the standard authorization-code-flow does, but it is usually considered sufficient.</p>
+
+<h1 id="hub-providers">Hub Providers</h1>
+
+<p>An auth-server can act as a front-end (proxy) to multiple other auth-servers for the purpose of OIDC authentication. Company Auth0 provides such a hub, delegating to around 50 other providers as needed. Any session-based client app that wants to allow users to “log in” from a range of servers can therefore just redirect to such a hub and let that hub delegate to the auth-server of the user’s choice.</p>
+
+<p>Delegation makes no sense for <em>authorization</em> as the <em>resource server</em> that requires an access-token is tightly coupled to a specific <em>auth server</em>.</p>
+
+<h1 id="auth-server-login-sessions-and-remember-me">Auth-Server Login Sessions and Remember Me</h1>
+
+<p>When an auth-server receives credentials from a user and confirms they are valid, the response it returns includes a set-cookie command that indicates the user is “currently logged in” to the auth-server. It is this cookie that allows future requests to be successful immediately without requiring user interaction (as long as there is an existing consent on all the requested scopes for the specified client-application).</p>
+
+<p>Normally this cookie has session-scope, and the auth-server session is kept alive for a few hours. However after an extended period of inactivity, the “session” held by the authserver can be terminated, meaning that the next time a client-application redirects to the auth-server for a token, the user is prompted for credentials again. If the user closes their browser, the session-scoped cookie is deleted (standard behaviour) and therefore even when the server-side session still exists, the browser is no longer “connected to it” and therefore the user is also prompted for credentials.</p>
+
+<p>Some auth-servers provide a checkbox on the login page labelled “Remember Me” or similar. In this case, the server gives the “login cookie” a lifetime longer than just the current browser session, and extends the timeout on the server-side session. Exactly how long the cookie and corresponding server-side session lifetimes are is usually configurable in the auth-server (eg from a few hours to a few months).</p>
+
+<p>If you intend to rely on this functionality within your application, make sure that the auth-server you are using scales appropriately. At the current time, the Keycloak auth-server (also known as RedHat SSO) stores all active sessions in memory (replicated between server instances) which means cluster restarts typically lose “rememberme” sessions, and scalability is limited (to a few thousands of concurrent rememberme sessions).</p>
+
+<p>The fact that rememberme typically relies on cookies has security implications; anyone with access to the browser, or the ability to steal cookies, can then log in as that user. In general, a user should not select this option on important websites such as e-banking. Despite this potential weakness, the cookie issued when “remember me” is selected is still more secure than the “save my password” option provided by many web-browsers as the “remember me cookie” is a <em>token</em> and not the actual credentials.</p>
+
+<p>A user should also avoid enabling this option on a browser which is shared with other users. Note however that public shared computers typically have a “logout” option for the whole user session and this ensures all browser details (cookies, history, cached data) are purged.</p>
+
+<h1 id="bootstrapping-provider-support-in-oidc">Bootstrapping provider support in OIDC</h1>
+
+<p>By convention, an OIDC provider (auth-server) serves a json document from GET “<code>https://{hostname}/.well-known/openid-configuration</code>” which contains:</p>
+
+<ul>
+  <li>
+<code>authorization_endpoint</code>: The URL where end-users will authenticate</li>
+  <li>
+<code>claims_supported</code>: An array containing the claims supported (more on that later)</li>
+  <li>
+<code>issuer</code>: The identifier of the OIDC provider (usually its domain)</li>
+  <li>
+<code>jwks_uri</code>: Where the provider exposes public keys that can be used to validate tokens</li>
+  <li>
+<code>token_endpoint</code>: The URL that apps can use to fetch tokens</li>
+  <li>
+<code>userinfo_endpoint</code>: The URL where apps can learn more about a particular user</li>
+</ul>
+
+<p>While this info potentially makes it possible for an OIDC client app to dynamically support any identity provider (eg one that I run on my own private infrastructure) in practice most OIDC-supporting applications (servers) instead just support a hard-wired list of servers. The main barrier to dynamically supporting identity providers is that each client-application requires a “client account” with an auth-server; the OIDC spec does <a href="https://openid.net/specs/openid-connect-registration-1_0.html">describe how dynamic client account registration can work</a> but this seems difficult to apply in practice.</p>
+
+<p>The set of scopes an identity-provider supports is listed in its openid-configuration file, but typically is:</p>
+
+<ul>
+  <li>profile: A scope that asks access to claims like name, <code>family_name</code>, and birthdate</li>
+  <li>email : A scope that asks access to the email and <code>email_verified</code> claims</li>
+  <li>address : A scope that asks access to the address claim</li>
+  <li>phone : A scope that asks access to the phone and <code>phone_verified</code> claims</li>
+</ul>
+
+<h1 id="refresh-tokens">Refresh Tokens</h1>
+
+<p>When an OAuth2 access-token is issued, a refresh-token is usually delivered with it. An auth-server does not include a refresh-token for certain insecure “flows” (eg the obsolete implicit-auth flow), and might be configured to not include one under other circumstances. However in general it can be assumed that a refresh-token will be included when using the standard authorization-code-flow.</p>
+
+<p>Example response received after exchanging an authorization code for a token:</p>
+
+<pre><code>     {
+       "access_token":"mF_9.B5f-4.1JqM",
+       "token_type":"Bearer",
+       "expires_in":3600,
+       "refresh_token":"tGzv3JOkF0XG5Qx2TlKWIA"
+     }
+</code></pre>
+
+<p>The access-token expires in a relatively short time (eg 1 hour). The refresh-token can be stored and allows the server to retrieve a new access-token using server-to-server calls without involving the user interactively. Refresh tokens typically do not expire.</p>
+
+<p>A client application holding a refresh-token can call the auth-server to obtain a new access-token; the call specifies a set of scopes which can be the same as the original set, or a subset of them. The auth-server response provides the new access-token.</p>
+
+<p>If a user revokes their consent, the access-token continues to be valid until it expires. However when the refresh-token is used to retrieve a new access-token, the refresh will fail. The step of “refreshing” a token is effectively the point at which a user can “regain control” of their tokens; using access-tokens with a longer expiry time does not provide the same level of control.</p>
+
+<p>A refresh token should be kept relatively secret, and only access-tokens should be forwarded. Leaking a refresh-token is a relatively serious security hole - though not as serious as leaking a user credential. Some auth-servers increase the safety of refresh tokens by tying each token to the client-account through which it was first issued; when that client is a “confidential client” (one with a client secret) then an intercepted refresh-token cannot be used without the corresponding client-secret. Note however that if the refresh-token is issued via a “public client” then it can be used by anyone who simply knows the client-id (no secret required). This security feature is also not part of the official standard as far as I know. In either case, it is best to keep refresh tokens only in memory (non-persistent storage) if possible.</p>
+
+<p>There are two ways to use refresh tokens:</p>
+
+<ul>
+  <li>keep track of the “expiry time” associated with each access-token (included in the auth-server response that issues the token) and verify before each call that uses the acess-token that the token still has “enough time to live” (fetching a new token if not), or</li>
+  <li>wrap each call that uses an access-token in a retry loop; if an error is returned indicating “token expired” then fetch a new access-token and repeat the call.</li>
+</ul>
+
+<p>Exchanging a refresh-token for a new access-token is actually a “grant type” similar to the authorization-code-grant or client-credentials-grant; the refresh-token is the “proof” that the access-token should be issued (the grant).</p>
+
+<p>Refresh tokens are not so important when working with authentication (OIDC), as a “login” typically lasts until the session expires. However OIDC does support refresh-tokens, though with some minor differences from core OAuth2:</p>
+
+<ul>
+  <li>when the auth-server provides an ID token it includes a refresh-token only if the Authorization Request also included scope <code>offline_access</code>
+</li>
+  <li>When requesting new tokens using the refresh-token, a new access-token (one providing access to the userinfo endpoint) is always generated; a new ID token is generated only if the “scope” list includes “openid”.</li>
+</ul>
+
+<p>Because new ID tokens can be generated via a refresh-token, an id-token does not necessarily represent a “recent interactive login”. If the user of an id-token cares <em>when</em> the user was last authenticated, it can check for a field <code>auth_time</code> in the id-token. This field is present only when the issuing request included param <code>max_age</code> or <code>require_auth_time</code>. Even without “offline access”, the refresh token issued along with an ID token can be used to check if the user is currently logged iin (and if so, their user profile data can be fetched).</p>
+
+<p>A refresh token can only be used to allocate new access-tokens with the same scopes that were originally requested when the refresh-token was issued (or a subset thereof).</p>
+
+<h2 id="refresh-tokens-sessions-and-lifetimes">Refresh Tokens, Sessions, and Lifetimes</h2>
+
+<p>An auth-server keeps track of all “currently logged in users”, keyed by their user-id. This session typically expires after an idle-time of 30 minutes or so. Performing an explicit “logout” at the auth-server terminates the session immediately. When a user authenticates via a browser, a cookie is also set (with the domain of the auth-server) which identifies the login-session but the login-session is not 1:1 with the browser session; logging in with multiple browsers will connect each to the same session while logging out terminates the auth-server session even though the browser is active.</p>
+
+<p>Although a refresh-token has a long lifetime (eg 60 days by default for Keycloak), it can be used only when the user has a valid login session with the auth-server. Any attempt to get a new access-token or id-token using a refresh-token will fail (error-code returned) if the auth-server does not consider that user “currently logged in”.</p>
+
+<p>For security reasons, some auth-servers support “rolling refresh tokens”: when a refresh-token is used in a call to the auth-server, the response includes not only a new access-token, but also a new refresh-token and the old refresh-token is marked (server-side) as invalid. In effect, with this feature enabled, refresh-tokens become “one-time tokens”.</p>
+
+<p>WARNING: storing refresh-tokens in cookies, in files, or in any other form, is a potential security risk. Offline refresh tokens are an even higher risk, given that the user does not need to be online and that the lifetime is even longer. Therefore do this only when necessary. On the other hand, storing such tokens is still better than the old approach of storing user credentials, as:</p>
+
+<ul>
+  <li>refresh tokens can only obtain an access-token with the scopes that were specified in the initial request (no privilege escalation)</li>
+  <li>the user credentials (password etc) are never exposed</li>
+  <li>and the user can revoke tokens</li>
+</ul>
+
+<p>See <a href="https://auth0.com/learn/refresh-tokens/">here</a> for further details on refresh tokens in general.</p>
+
+<p>See <a href="https://www.keycloak.org/docs/latest/server_admin/index.html#_timeouts">here</a> for details of various session and token timeout settings in the Keycloak auth-server (other servers will likely have similar options). Note that:</p>
+
+<ul>
+  <li>default lifetime for a login session is 30 minutes after last interaction with the auth-server (SSO Session Idle) - and the same default is used when the user selects “remember me”.</li>
+  <li>default lifetime for an offline-refresh-token is 30 days after last interaction with the auth-server (Offline Session Idle). Note that this isn’t actually an expiry-time, but rather that the token will be auto-blacklisted if not used within the offline-session-idle period.</li>
+  <li>default lifetime for an access-token is 1 minute (Access Token Lifespan)</li>
+  <li>default lifetime for a standard refresh-token is the same as the login session (Client Session Idle) and is settable per-client-account</li>
+</ul>
+
+<h2 id="offline-refresh-tokens">Offline Refresh Tokens</h2>
+
+<p>An “offline refresh-token” is a variant of the refresh-token which can be used to obtain user-profile-data and user-access-tokens regardless of whether the user currently has a login-session with the auth-server. This can be used to support “long-term login” behaviour, but at a price: the refresh-token needs to be stored somewhere long-term and an attacker who obtains access to that token can perform actions as the user regardless of whether the user is online or not. This kind of token is commonly used for applications that need to run “in the background” on behalf of a user, but can also potentially be used for an interactive application, saving the user from having to enter their credentials on app startup. To obtain an offline access token, the client application must specify scope <code>offline_access</code> when requesting the initial tokens. Often this scope requires the user-account to be “enabled for offline access” (eg with a corresponding role). Users are also typically presented with a warning message during the consent-screen, informing them that the client application is requesting such an offline-token. Offline refresh tokens typically have an even longer lifetime than standard refresh tokens. As with normal consents and refresh-tokens, a user can use the auth-server user interface to list all offline refresh tokens and revoke them - in which case the next use of that refresh-token to obtain a new access-token will fail.</p>
+
+<h2 id="refresh-tokens-and-permanent-login">Refresh Tokens and Permanent Login</h2>
+
+<p>Some sites/applications with relatively low security concerns wish to leave users “signed in” on a specific device for long periods of time - ie once logged in, the user remains logged in and doesn’t need to provide their credentials again.</p>
+
+<p>The simplest solution is just to configure your auth-server to have a very long lifetime for user sessions. However before relying on this, ensure that the auth-server scales to the number of concurrent login sessions that you are expecting to support. The Keycloak (RedHat SSO) server currently does not scale to large numbers of concurrent login sessions and other auth-server implementations might have a similar limitation.</p>
+
+<p>An “offline refresh-token” is a variant of the refresh-token which can be used to obtain user-profile-data and user-access-tokens regardless of whether the user currently has a login-session with the auth-server. This can be used to support “long-term login” behaviour, but at a price: the refresh-token needs to be stored somewhere long-term and an attacker who obtains access to that token can perform actions as the user regardless of whether the user is online or not. This kind of token is commonly used for applications that need to run “in the background” on behalf of a user, but can also potentially be used for an interactive application, saving the user from having to enter their credentials on app startup. Users still retain control over their data as they can use the native web interface of any auth-server to list and revoke offline refresh tokens.</p>
+
+<p>Mobile app platforms typically provide “secure storage” APIs that can be appropriate for storing a user’s offline refresh token.</p>
+
+<p>For server-side web applications, storage of refresh-tokens is far more complex. Simply placing a refresh-token in a cookie associated with the application’s domain is fairly risky; cookies can be leaked in various ways and for an attacker obtaining a refresh-token gives a lot of possibilities. Storing the refresh-token server-side and issuing a cookie referencing that “long-lived authentication” seems like a somewhat more secure solution. If you have any better ideas, please comment on this article!</p>
+
+<p>One limitation of the offline-refresh-token approach is that although the client application can use the refresh-token to obtain access-tokens and invoke resource-servers, there is no proper “login session” for the user. This in turn means that redirecting a user to other websites will not result in an elegant “single signon” experience; the user will be prompted for their password. In a system I am currently working on, we have resolved this by extending our auth-server (which has a plugin api) to implement a custom authentication flow which accepts an access-token (with a specific scope) and creates a user login session. Extending the standard OAuth2/OpenID Connect flows with custom logic should of course always be done with great caution and I do not guarantee that this approach is sound with regards to security.</p>
+
+<h1 id="rest-with-session-and-hybrid-authorization">Rest-with-Session and Hybrid Authorization</h1>
+
+<p>There are two basic approaches to servers each of which has a different authorization approach</p>
+
+<ul>
+  <li>session-based systems where each request contains a session-id that references a session datastructure
+    <ul>
+      <li>if the URL is for a “protected resource” but the the session does not hold a “login context” then
+        <ul>
+          <li>the user is redirected to login</li>
+          <li>on redirect back to server, an “auth code” is provided; the server exchanges this code for a token then inserts a “login context” into the session</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>stateless rest-based systems where each request optionally contains a bearer-token as an http header
+    <ul>
+      <li>if the URL is for a “protected resource” but no bearer-token is present, or it is invalid, or it has insufficient permissions
+        <ul>
+          <li>a simple error is returned (not a redirect)</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>The stateless system does not need to “redirect”; the author of the calling application is expected to have read the documentation for the rest-endpoint that is being called (ie know which auth-server and scopes to use), and the calling application should have already obtained the necessary token.</p>
+
+<p>Normally session-based systems do not provide “rest service endpoints”, ie requests which send JSON and receive JSON in a “remote procedure call” approach; instead they support posting of HTML forms and receive back either an HTML page or at least an HTML fragment (AJAX).</p>
+
+<p>However a “rest with sessions” approach can also be used - sometimes deliberately, but quite possibly also just by accident. Here, when a client calls a rest endpoint (ie passes JSON or at least expects JSON back), and the call requires authorization then a redirect is issued to the auth-server. And on return, an “auth code” is processed, a session established, and a session-id cookie returned. Then on future rest-calls, the session-cookie is provided and so the rest calls are authorized via the session.</p>
+
+<p>Traditional rest interfaces do not expect cookies as input, do not set cookies as output, do not send redirects, and are stateless. This “rest with sessions” approach is therefore somewhat unusual. Most significantly, this approach only works when the caller supports cookies like a web-browser does. However this can be true in some circumstances:</p>
+
+<ul>
+  <li>a server which handles an initial GET by returning HTML and javascript resources that form a “rich client application” (Javascript in the client then calls the server making rest APIs)</li>
+  <li>some native app frameworks process “set-cookie” headers returned by rest calls</li>
+</ul>
+
+<p>The rest-with-sessions mode has some behaviours that you should be very wary of:</p>
+
+<ul>
+  <li>although the server provides “rest APIs” that are normally stateless, you will need an external session store (unless running on one node or using sticky sessions)</li>
+  <li>server-to-server calls of the rest endpoints typically will not support cookies.</li>
+</ul>
+
+<p>To support server-to-server calls, your security layer could be configured to support bearer-tokens <em>as well as</em> sessions (“hybrid” authorization). And in fact some OAuth2/OIDC libraries do this almost automatically (eg the spring-security-keycloak integration). This does however have a disadvantage: having some callers be authorized via a cookie referencing an HTTP session while others are authorized via a bearer-token is complex and just plain odd. And that is never a good thing when designing a security-sensitive system.</p>
+
+<p>One issue with this “hybrid” authorization is that server-to-server calls which fail to provide a valid bearer-token will receive a redirect rather than an error-code.</p>
+
+<p>One further inconsistency is that if the session-based authorization is requesting scope “openid” when redirecting on missing authorization (ie requiring “login”) then the grant flow is an OIDC flow returning id-token and access-token, and the id-token is guaranteed to have an “audience” matching the application. However the bearer-token authorization will typically not check for audience (as it is an OAuth2 process and not an OIDC process). If you are relying on the fact that the ID token is valid only for a specific audience (not common but possible) then you have a security hole.</p>
+
+<p>My personal opinion: although I can’t identify a specific flaw in the rest-with-session or hybrid approaches (except the audience issue), having rest calls depend on cookies holding http-session-ids just doesn’t feel like a good idea to me. Having mixed authentication approaches (ie supporting both browser-to-rest calls with sessions and server-to-rest calls with bearer tokens) feels even less good.</p>
+
+<h1 id="client-applications-using-multiple-resource-servers">Client Applications Using Multiple Resource Servers</h1>
+
+<p>An application that calls multiple resource-servers (APIs) associated with the same auth-server can either request a single access-token that contains permissions for all APIs, or obtain multiple tokens.</p>
+
+<p>The multiple token approach is more effort, but more secure. The identity-provider should be able to issue them without user interaction, so the user experience is similar. However an evil (or simply vulnerable) implementation of an API that receives a broad-capability access token can do more damage.</p>
+
+<p>A refresh token can be used to obtain additional access-tokens which represent a subset of the scopes that were specified when the refresh token was generated; this provides an easy way to generate tokens with different scopes for different resource-server-endpoints that share a common auth-server. See <a href="https://www.pingidentity.com/en/company/blog/posts/2019/oauth2-access-token-multiple-resources-usage-strategies.html">this article</a> for further info on this topic.</p>
+
+<p>See section titled “Audience-Restricted Tokens” for further info on token security.</p>
+
+<h1 id="oidc-related-topics">OIDC-Related Topics</h1>
+
+<h2 id="oidc-id-tokens">OIDC ID Tokens</h2>
+
+<p>When a client-application makes a call to the auth-server “token endpoint” to exchange a grant (an auth-code or inline credentials) for a set of access-tokens, and magic scope “openid” is specified, then the response is a JSON structure including a field <code>id_token</code> that is a base64-encoded JSON Web Token whose fields are specified in the OIDC specifiation.</p>
+
+<p>Within the ID token, all the standard JWT fields are present:</p>
+
+<ul>
+  <li>
+<code>iss</code>: the identifier of the auth-server instance</li>
+  <li>
+<code>sub</code>: the identifier of the associated user (unique for that auth-server)</li>
+  <li>
+<code>aud</code>: an array of values which must include the client-id</li>
+  <li>
+<code>iat</code>: timestamp at which the ID token was created (issued at)</li>
+</ul>
+
+<p>OIDC adds several additional fields to the returned token, including:</p>
+
+<ul>
+  <li>
+<code>auth_time</code>: a field that indicates how long ago the user actually interactively authenticated.</li>
+</ul>
+
+<p>The ID token is signed in the usual manner for JWT tokens. When the token is retrieved from the auth-server token endpoint (the usual case) then the token does not need to be encrypted as it is already transported over HTTPS. The client-application also does not need to verify the signature when it has received the token directly from the auth-server.</p>
+
+<p>As noted <a href="http://www.thread-safe.com/2012/01/problem-with-oauth-for-authentication.html">here</a>:</p>
+
+<ul>
+  <li>
+    <p>when a server-side app X receives an OAuth2 <em>access token</em> that grants acess to a user’s profile info from identity-provider Y, this does not mean
+that X should consider the caller to be “logged in” for the purposes of performing other operations on site X. An access token grants access;
+that is all it was designed to do. The caller is an application which has been granted that right at some point in time - which may have been
+a long time ago, and the right to access profile-info from Y is what is granted, not the right to access user data from X.</p>
+  </li>
+  <li>
+    <p>the solution is for X to require an <em>id token</em> whose “audience” is set to the “client id” of X; that guarantees that the token has been
+issued for the purpose of “authenticating to site X as user U” - with a side-effect of also granting access to some profile info about U.
+This is why OIDC exists as a layer on top of OAuth.</p>
+  </li>
+</ul>
+
+<p>When the “scopes” parameter for the token request includes some of the OIDC magic “user data” scopes (eg “email”) then normally the returned ID token does <em>not</em> include that data directly; instead the access-token that is issued provides rights to query that data from the OIDC userinfo endpoint. User data is embedded in the ID token only in the following situations:</p>
+
+<ul>
+  <li>when a grant-type is used that returns an ID token but not an access-token (rarely used feature)</li>
+  <li>or when the authorization request (phase 1 of an authorization code flow) specifies optional parameter “claims”, listing the fields that should be embedded in the ID token</li>
+</ul>
+
+<p>The “claims” parameter of an authorization request is not a simple list of scopes, but instead a moderately complicated nested structure. This field can be used to request non-standard user-related data, or non-standard combinations of user-data fields. The claims property also makes it possible to fetch user-related data in a specific language or script (eg fetch the Katakana version of a person’s name). See the OIDC spec for full details.</p>
+
+<p>Like all tokens, ID tokens have an “expiry time”. However unlike access-token expiry times, it is not entirely clear how an application should respond when the id-token that it holds for a user has expired:</p>
+
+<ul>
+  <li>should an app check for each request that the id-token in the session is still “valid”, and if so fetch a new one via refresh?</li>
+  <li>should an app check for expiry <em>when the user requests an operation that requires a logged-in user</em> and if so fetch a new one?</li>
+  <li>what do standard OAuth2 libraries do in this area?</li>
+</ul>
+
+<p>It isn’t clear whether any checks for id-token expiry are needed at all; a “log-on” effectively authorizes a session. As long as the session lives, it doesn’t seem important to check whether the user is still “signed on” as far as the auth-server is concerned. See the section on “OIDC Single Sign Off” for other relevant issues.</p>
+
+<p>An <em>ID token</em> is not usually passed to another application; a client application retrieves one from an OIDC-enabled auth-server (aka an OIDC Identity Provider, IdP, or OP) and then marks the user’s session as “logged in”. An ID token cannot be passed as a “bearer token” in an “Authentication:” HTTP header; only <em>access tokens</em> can be used in that way. This includes calls to the auth-server “userinfo” endpoint; those require an <em>access token</em> to be passed - the one that was issued at the same time as the ID token.  An ID token can potentially be passed to some other process in a different HTTP header, or simply in the message body, but there is not a lot a recipient can do with an ID token; it effectively just proves that some auth-server (the issuer) states that some user (the subject) agreed (explicitly or implicitly) to log in to some client application (the audience) at some specific time. And if the “claims” parameter was used to explicitly embed profile data into the ID token, then the token also asserts that that user has specific profile attributes, eg email-address. Note however that the recipient of an ID token must still be able to validate the signature in order for the token to be used in even this minimal way. The client-application which retrieves the token directly from the auth-server (ie exchanges code for tokens) does not need this step as that path is already very secure.</p>
+
+<p>For native apps that act as a client application (eg on a mobile device), an ID token is even less useful. Such an app <em>knows directly</em> whether an interactive user is present, and does not normally need to verify the identity of the user (require username/password) on app startup. Retrieving user profile information from an auth-server might be useful. More important is obtaining “access tokens” that allow interaction with remote systems, but that is not related to obtaining ID tokens.</p>
+
+<p>The <em>access token</em> that was issued along with the ID token might be slightly more useful when passed to another app; it is at least valid as a bearer-token in an “Authentication:” header. The token can be used in calls to the auth-server “userinfo” to check whether the user is still logged in (scope “openid” grants that permission to the holder of the access-token), and to fetch additional profile data (depending on what scopes were requested).</p>
+
+<p>If generic scopes were requested as well, eg “photos:read”, then the access-token can also be used as authorization for calls to resource-servers other than the auth-server (as long as they use that same auth-server as their access-token-issuer).</p>
+
+<h2 id="the-oidc-userinfo-endpoint">The OIDC userinfo Endpoint</h2>
+
+<p>When a client application makes a request for tokens specifying scope “openid” then the response includes both an “ID token” and an “access token”.</p>
+
+<p>The client application can then make calls to the “userinfo” endpoint of the auth-server, providing the “access token” and requesting any of the user-related profile information that was listed in addition to scope “openid” (eg “email”). In effect, the access-token grants the holder the right to read specific user-profile-related data.</p>
+
+<h2 id="oidc-terminology-rps-and-ops">OIDC Terminology: RPs and OPs</h2>
+
+<p>The OIDC specification invents some new aliases for words already defined in the OAuth2 spec. Sigh.</p>
+
+<ul>
+  <li>the Relying Party (RP) is a “client application” that supports OIDC (requests ID tokens etc)</li>
+  <li>the OpenID Provider (OP) aka “Identity Provider” (IdP) is an “auth server” that supports OIDC (issues ID tokens, supports “userinfo” endpoint, etc)</li>
+</ul>
+
+<h2 id="oidc-authorization-request-param-extension">OIDC Authorization Request Param Extension</h2>
+
+<p>The OAuth2 authorization request format is fairly ugly; it is an HTTP request with all input values represented as http-query-parameters appended to the URL.</p>
+
+<p>OIDC defines an alternate method of passing the necessary params: as a JWT (optionally signed and optionally encrypted).</p>
+
+<p>The authorization request can be passed this JWT directly (base64-encoded), or the request can just include a URI from which the auth-server can fetch the corresponding JWT object that specifies the desired params. This is particularly useful when the parameters to be passed are large. The parameters then flow directly from client-application to auth-server without passing through the user-agent. The URI-based approach of course applies only to webservers; mobile apps and single-page-apps will not be able to provide an accessible callback URI.</p>
+
+<h1 id="implementing-a-client-application-which-uses-access-tokens">Implementing a Client Application which uses Access Tokens</h1>
+
+<p>This section assumes you are a developer creating a new session-based webserver that accesses user data in some other system which accepts OAuth2 access tokens as authorization.</p>
+
+<p>Your first step as developer is to create an account for your new server application (“app”) at the auth-server that the resource-server uses. It cannot be any other auth-server, as those don’t have the right scope definitions available.</p>
+
+<p>When creating such an account, you typically provide a name for your app, an icon, and a brief description. This is so users who are redirected there see which application is requesting access to their data.</p>
+
+<p>You also provide a “redirect URL” that tells the auth-server where to redirect web-based users to after they have granted your app the right to access their data (a “consent”). This must point to some handler within your application that then calls the auth-server to exchange the auth-code for tokens.</p>
+
+<p>And after registration is complete, you get back a “client id” and (usually) a “client secret”. The client-id is used in calls to the auth-server to identify this “account” that you have just created. The “client secret” is a dynamically-allocated credential for the account that you need when making calls to the auth-server later.</p>
+
+<p>You then implement “login” using the standard OIDC authentication flow, getting an OIDC ID token.</p>
+
+<p>Then for each OAuth2-protected API you need to call, check the docs for that API; those docs should state which “scopes” are needed for the endpoint. You then add code to your app that wraps calls to the remote resource-server. The wrapper code should look in the user’s session to see if an appropriate access-token (one including the necessary scopes) exists and if not make a call to the auth-server to get one. You can either check for token expiration before using it, or handle “token expired” errors via a retry-loop.</p>
+
+<p>You can ask for such a token either when the user logs in, or when the token is needed. Doing it on login is nice in some respects, as the user is already in “login mood”. If you are using the same auth-server for authentication (login) as is needed for the remote service authorization then things are also simplified for the user. However if this access-token is needed only sometimes, then this might not be best.</p>
+
+<p>On first fetch of the token (via redirect), the user will be asked for consent. Later fetches of the token will not present a consent page.</p>
+
+<p>If you choose to ask for a refresh-token (which allows expired tokens to be updated without a redirect), you might store that somewhere longer-term than the user session. Note however that this is sensitive data, nearly as bad as leaking user credentials.</p>
+
+<h1 id="implementing-a-resource-server">Implementing a Resource Server</h1>
+
+<p>This section assumes you are a developer creating a new application that offers REST endpoints through which user-specific data is manipulated. It then describes the set of steps you would need to follow to get authorization working.</p>
+
+<p>This does repeat much of the information already available above, but from a different viewpoint.</p>
+
+<p>First, you need to decide which auth-server you are going to rely on. This auth-server needs to hold the users whose data you are protecting, and you need to be able to define new “scopes” in this auth-server (or are ok with reusing existing scopes).</p>
+
+<p>Second, you need to decide what permissions you want to require for the caller. Look in your organisation’s auth-server to see if a scope exists which represents the permissions you need; if not you need to define a new scope. Exactly how that is configured is very auth-server-dependent. Update your endpoint’s docs so callers of your business services know what scopes to request from your organisation’s auth-server before calling your business service. Of course you need to ensure your scope-name does not collide with other definitions in your auth-server!</p>
+
+<p>If you are using LDAP/ActiveDirectory-style permissions rather than OAuth2’s “simple scopes”, then the caller just needs to request the “magic scope” that pulls those permissions into the access-token. However you should also document which LDAP/ActiveDirectory permissions must be associated with the user to use each endpoint you are developing.</p>
+
+<p>At runtime, your REST endpoint:</p>
+
+<ul>
+  <li>extracts the “bearer token” from the Authorization http header</li>
+  <li>validates the token (checks the signature and various other fields)</li>
+  <li>checks that the user whose data is being manipulated matches the user who is the “subject” of the token</li>
+  <li>check that the token grants permission to perform the operations that this endpoint performs (your chosen scopes)</li>
+</ul>
+
+<p>If the above tests don’t pass then return an error (see section “Rejected Requests”).</p>
+
+<p>The calling application is then responsible for obtaining a suitable access-token.</p>
+
+<p>Typically the code will use a library provided by your auth-server provider to validate the token and extract the token’s <em>subject</em> and <em>permissions</em>, as the token format is auth-server-specific.</p>
+
+<h1 id="rejected-requests">Rejected Requests</h1>
+
+<p>According to the IERT oauth-v2-bearer spec, a server should respond to a request with an expired or missing token with:</p>
+
+<ul>
+  <li>401 Unauthorized</li>
+  <li>WWW-Authenticate: Bearer scope=”neededscope1 neededscope2 ..”</li>
+</ul>
+
+<p>and a token with insufficient scope using</p>
+
+<ul>
+  <li><code>403 Forbidden</code></li>
+  <li><code>WWW-Authenticate: Bearer scope="..."</code></li>
+</ul>
+
+<h1 id="site-personalisation-and-auto-single-signon">Site Personalisation and Auto-single-signon</h1>
+
+<p>Important: this section contains a lot of speculation about possible solutions. Any suggestions here should be treated with caution; I am not an expert in this area. If you have successfully implemented “personalisation” of a website based upon user profile data retrieved from an OIDC “identity provider”, please let me know how you chose to do it!</p>
+
+<h2 id="the-problem">The Problem</h2>
+
+<p>It is useful for a site to greet a user by name (eg place their name in the menu-bar or status-bar) - optionally along with their “avatar” image. It is also useful to display the site using configurable options such as custom colours, number-of-items-per-page, etc. Name and avatar-image are available from the user’s central profile managed by the OIDC auth-server, along with other data that is not normally used for “personalisation” (eg phone, email). The other examples given here (colours, number-of-items-per-page) are not standard OIDC attributes.</p>
+
+<p>The problem is that users should not be forced to enter credentials when just browsing the site; that’s not a nice user experience.</p>
+
+<p>Or otherwise expressed: there are two scenarios to consider:</p>
+
+<ul>
+  <li>rendering the site for users who have proved their identity</li>
+  <li>rendering the site for anonymous users, or users who have not yet provided proof of identity</li>
+</ul>
+
+<p>Sending a visitor to an OIDC identity provider to get an ID token, and then obtaining user profile info from that same identity provider is relatively easy; that is a standard feature of OIDC.  However sending every user to an OIDC identity provider as soon as they arrive at the site, even though they may not be doing any security-sensitive operations, may not make users happy.</p>
+
+<p>Allowing anonymous users to personalise their view of the site, and have that persist across visits, is nice but not absolutely necessary. It is relatively common for customisation to require an account.</p>
+
+<p>Requiring users who do have an account to be “logged in” to get a personalised site is also acceptable, under the same convention.</p>
+
+<p>However forcing users to create an account just to browse the non-sensitive parts of a site is not acceptable. Similarly, forcing users who do have an account to enter their credentials to browse non-sensitive parts of a site is not good; they should be allowed to be “anonymous” if they wish and not be bothered with a credential prompt.</p>
+
+<p>OIDC defines option “prompt” which can be passed on a “login redirect”; when set to “none” then the request immediately redirects back. If the user is already logged-on at that IDP then an ID-token is returned, if not then not. And if the user is not registered with that IDP, then it also returns immediately. A userid does not need to be specified; users with no account and users with an account but no current session and no “remember me” are treated identically: redirect with no ID token.</p>
+
+<p>Note that regardless of the solution chosen for personalisation, it is still necessary for a client application to protect secure operations by checking that a valid login has been done before executing the associated code.</p>
+
+<p>The topic of “Permanent Login” (or at least long-lived login sessions) was discussed earlier. That is, however, not quite the same problem. A user may well have an active login session within an auth-server, but if a website does not have an HTTP session for that user (eg because they haven’t visited for a while) then it is still necessary to somehow determine that fact (that they are logged in to the SSO server) without making the site unusable for visitors who do <em>not</em> have such a login session.</p>
+
+<h2 id="possible-solutions">Possible Solutions</h2>
+
+<p>Options that occur to me are:</p>
+
+<ul>
+  <li>store user profile data in a cookie, separate from authentication</li>
+  <li>store a “profile” of the user in the app’s local database and store the userid in a cookie</li>
+  <li>redirect every user to the auth-server with prompt=none and see if an id comes back</li>
+  <li>store a simple boolean “is-user-logged-in” cookie</li>
+</ul>
+
+<p>In all cases, the presence of <em>personalisation data</em> must not be considered <em>authorization to perform protected operations</em>.</p>
+
+<h2 id="user-profile-in-a-cookie">User Profile in a Cookie</h2>
+
+<p>Storing user preferences separately seems the easiest; when a user first logs on (via OIDC) the relevant parts of their profile can be stored into a cookie that is sent to the user browser. On later visits, their “personalisation info” is immediately available. This does have a few disadvantages:</p>
+
+<ul>
+  <li>a cookie has limited storage</li>
+  <li>the cookie is sent with <em>every request</em> (wasting bandwidth)</li>
+  <li>the cookie has personally sensitive data (could be leaked)</li>
+  <li>there needs to be some way to “refresh” the data from the user’s profile on their auth-server when they are “logged in”</li>
+</ul>
+
+<h2 id="user-profile-in-a-local-db-or-other-local-storage">User Profile in a local DB (or other local storage)</h2>
+
+<p>As a variant on the above, user profile data can be stored in a database, and just a key (eg a userid) can be stored in a cookie client-side.</p>
+
+<p>When establishing a new http session for a user, the data is fetched and stored in the user’s session.</p>
+
+<p>When the user really “logs in”, the server refreshes the local database with the user’s profile info.</p>
+
+<p>A possible security issue is that an attacker could guess a valid user-id and would get a website personalised for that user which might reveal some personal details. Encrypting the cookie might be a solution, as would setting a second cookie with a random “credential” that must match a value in the user’s stored data. Note that this is not about protecting the cookie from theft/interception, but simply about blocking user-id-guessing.</p>
+
+<p>In the case of a “native app”, the data does not need to be stored in a database, but simply cached locally using any available mechanism.</p>
+
+<p>In the case of a “single page app”, modern browsers support “client side storage” (Web Storage and IndexedDB).</p>
+
+<h2 id="always-redirect-to-auth-server-on-new-session">Always Redirect to Auth-server on New Session</h2>
+
+<p>When a request without an http-session-id arrives, it is possible to redirect the caller immediately to an auth-server with “prompt=none” specified. If the user has an SSO session with that auth-server then the response will provide an auth-code that can be exchanged for an ID-token and the user is “auto-logged-in”. When a negative response is returned (user not logged in to this auth-server).</p>
+
+<p>This redirect should not be performed on every request; either it is done only when no session-id is provided, or a “not-logged-in” flag can be stored in the session to skip later redirects for requests with the same session. The disadvantages of this approach are:</p>
+
+<ul>
+  <li>only one auth-server can be supported (eg the “login with…” feature cannot be used, as we don’t know what the user would choose..)</li>
+  <li>when the user is known to the auth-server but not “currently logged in to the auth-server” then no info about the user is available (not a major issue)</li>
+  <li>the first visit to the site <em>always</em> results in a redirect to an auth-server, wasting bandwidth and slowing that important first page render.
+It also requires the site to then exchange the auth-code for the id-token, ie yet more http requests. And potentially then make calls to the
+auth-server “userinfo” endpoint to obtain the data needed to personalise the site.</li>
+  <li>when the auth-server is not accessible then the site is not accessible as the return-redirect never happens</li>
+</ul>
+
+<p>A variant would be on first login to a site, store a cookie with the (auth-server-id, user-id) but no other data. This at least supports the auth-server of the user’s choice.</p>
+
+<p>Note that a user without an account, and a user with an account but who is not currently logged in to the auth-server, are treated identically. In each case, the auth-server sees no “auth-server login session cookie” and returns with a failure status.</p>
+
+<p>When a user has used “remember me” on a previous login to the auth-server then they will automatically be logged in by this redirect.</p>
+
+<p>Unlike the previous options, this really is an “automatic single-signon” that proves to the website that the HTTP session is associated with a particular user.</p>
+
+<h2 id="boolean-logged-in-cookie">Boolean Logged-in Cookie</h2>
+
+<p>This is a variant of the above “always redirect” solution which works when all of the sites that you wish to provide personalization for are subsites of a single domain, as is the auth-server.</p>
+
+<p>Ensure that when the user logs in to the SSO system, a cookie is set which indicates that the user is logged in. Any site which receives a request without an existing HTTP session checks for the cookie and if set redirects the user to the SSO system to obtain an ID token, specifying <code>prompt=none</code>. This should return without user interaction and the ID token provides the needed user information for personalisation. If it should fail, then clear the cookie.</p>
+
+<p>This ensures that the redirect to the SSO system occurs only for users where there is a very high probability that the user is indeed logged in.</p>
+
+<p>This logic can also be performed within an IFrame in the rendered page; when the user really is logged in then the IFrame can invoke the “login endpoint” of the website (often “/ssoLogin”) to update the user’s HTTP session with the necessary data. This avoids ever sending a redirect directly from the viewed website which can give a nicer user experience.</p>
+
+<h1 id="single-sign-off-aka-global-logout">Single Sign Off (aka “Global Logout”)</h1>
+
+<h2 id="types-of-logout">Types of Logout</h2>
+
+<p>When a user is logged in to a client application, there are actually two concurrent logins:</p>
+
+<ul>
+  <li>the client application (native or session-based), and</li>
+  <li>the OIDC auth server</li>
+</ul>
+
+<p>There are therefore two different types of “log out” (aka “sign off”):</p>
+
+<ul>
+  <li>log out from the client application (relying-party-initiated logoff)</li>
+  <li>log out from the OIDC auth server (oidc-provider-initiated logoff)</li>
+</ul>
+
+<p>Logging out from a specific client application is easy. In a native app, the app just responds to a click on a “log out” button by clearing any internal “logged in” state in its memory - including deleting (freeing memory for) the user’s ID token if it has cached that. In a server-side app, the user’s HTTP session should be deleted; ideally an HTTP response should also be returned which deletes the session-id cookie but as the session no longer exists this is not critical. The auth-server does not need to be informed; the user is still “logged in” there, and can select “log in” on the same or other apps and successfully log in without needing to enter their credentials again.</p>
+
+<p>An OIDC auth server typically provides an admin interface for users which a user can visit to perform various tasks such as updating their profile, or viewing and updating consents. This admin interface usually also offers a “log off” (aka sign out) button which clears the user’s auth-server-login-session-cookie - and their “remember me” cookie too. This also affects the way that <em>OIDC refresh tokens</em> work; a client application which tries to use a refresh-token issued along with an ID token where “offline access” was not included will now receive an error response. Access to the “userinfo” endpoint will also fail unless “offline access” was requested.</p>
+
+<p>However logging out of the OIDC auth server does NOT necessarily affect any client applications where the user is currently logged in. Some client applications choose to regularly poll the auth-server to see if the user is “still logged in” (via auth-code-grant calls with <code>prompt=none</code> or via a refresh-token), and consider the user “logged out” at the client app when they are no longer logged in at the auth-server. However such behaviour is optional. It is really a matter of perspective: does the client application see the auth-server as a “session manager” or simply as an “identity confirmer” which it relies on for initial login only.</p>
+
+<p>Some auth-servers offer a URL that client applications can call to perform a user logout - ie programmatically trigger both logout from the client application <em>and</em> logout from the auth-server.</p>
+
+<p>When client applications react to logout at the “auth server” level then this is called “single sign off” or “global logout”.</p>
+
+<h2 id="single-sign-off">Single Sign Off</h2>
+
+<p>Single sign off is actually a rather complex topic.</p>
+
+<p>As described above, an application which accepts an ID-token as proof of a user identity and then considers the user “logged in” can choose if it:</p>
+
+<ul>
+  <li>regularly checks with the auth-server that the user is “still logged in”, or</li>
+  <li>just treats the user as logged-in until the session terminates</li>
+</ul>
+
+<p>If it does check regularly, there is no requirement that it does so at the ID token expiry time. An access-token <em>must</em> be valid in order to pass it to another system, but an ID token is usually never passed to another system and so its expiry-time is not really relevant. The access-token that was issued along with the ID token, and which grants access to the userinfo endpoint, has an expiry time and can no longer be used to fetch user profile data after that time; however normally all relevant user profile data is fetched immediately after login and stored in the local session. Applications which periodically “reload” user profile data (just in case it has changed) are probably very rare; at most there might be a “refresh my profile” option somewhere - though simply logging out and back in might be easier.</p>
+
+<p>One possible option is to check the user’s auth-server login status only when the user performs an operation that requires authorization, ie after a user has “logged out” via one site, they still <em>appear</em> logged in at another until they perform a protected operation at which point they are prompted to log in again. The spring-security library with keycloak integration works this way for example.</p>
+
+<p>Note that “signoff” applies only to “login sessions”, and these are related to ID tokens. Signoff is not related to access-tokens; they remain valid until they exipire, regardless of whether the associated user is “signed in” or not (except the access-token linked to the ID token and used to access the “userinfo” endpoint).</p>
+
+<p>When a user clicks “logout” in a web-based application, the application typically deletes the local http-session and sends an http-response which includes commands to delete the “sessionid” cookie at the client end. However if “single sign out” is desired for a group of applications, this is hard to achieve. Only the app in which “logout” was actually clicked is in a situation where it can send a response to delete its cookies. If the group of applications that wish to “sign out together” can be placed under a single hostname, and can share a single session-id-cookie then that at least solves the cookie-deletion issue. However it does not allow all applications to delete the user http-session immediately. Sessions do time-out, but leaving a session around is inefficient. Possibly more significantly, it is also a potential security risk; if someone obtains the (old) session-id before the session expires then they can “continue” the user’s session - as the logged-in user.</p>
+
+<p>The OAuth2 specification does not address logout at all. Neither does the OIDC core specification, but some additional OIDC specs have been created to address this. See:</p>
+
+<ul>
+  <li><a href="https://medium.com/@robert.broeckelmann/openid-connect-logout-eccc73df758f">Broeckelmann: OpenID Connect Logout</a></li>
+  <li><a href="https://openid.net/specs/openid-connect-session-1_0.html">OIDC Session Management</a></li>
+  <li><a href="https://openid.net/specs/openid-connect-frontchannel-1_0.html">OIDC Frontchannel Logout</a></li>
+  <li><a href="https://openid.net/specs/openid-connect-backchannel-1_0.html">OIDC Backchannel Logout</a></li>
+</ul>
+
+<p>Various auth-server implementations provide their own solutions.</p>
+
+<p>The front-channel logout and back-channel logout specs are summarised briefly below.</p>
+
+<h2 id="front-channel-logout">Front-Channel Logout</h2>
+
+<p>The OIDC spec for front-channel logout requires that a web application that wants to log its user out when the user’s auth-server session is terminated:</p>
+
+<ul>
+  <li>defines an iframe with some custom Javascript</li>
+  <li>periodically polls this iframe to see if the user is “still logged in”</li>
+  <li>when not-logged-in state is detected, then call a “logout” URL on the webserver to trigger the necessary server-side processing.</li>
+</ul>
+
+<p>The iframe just checks if the “auth-server session cookie” still exists; if not then some other tab has sent a “logout” message to the auth-server, received a “delete cookie” command in response, and removed the cookie.</p>
+
+<p>This works without any additional network traffic, just some trickery to make it possible to test for the existence of a cookie associated with some other domain.</p>
+
+<p>This of course does not work when a user is using some other browser - or non-browser client. It also does not detect when the auth-server has “timed out” the user login session. However it is efficient and works for some use-cases.</p>
+
+<p>This partially works when a set of cooperating server-side web applications are redirecting a user between the various sites within a single window. Each app has its own iframe, but there is only one cookie so when logout occurs via one site, then visiting any of the other sites (via a link, back-button, or other) will cause a “logout” callback to the associated server at that time. The user sees “single logout”, but the servers don’t get a chance to actually do cleanup unless/until the user visits them.</p>
+
+<h2 id="back-channel-logout">Back-Channel Logout</h2>
+
+<p>In this approach, when the auth-server executes a “log out” it makes direct calls back to other servers to inform them of the status-change.</p>
+
+<p>This does not work for native apps or single-page-applications; it is applicable only for “server-side” client applications.</p>
+
+<p>For server-side applications, how the change in status is propagated to a web-browser is not defined. For a browser that is connected to a server via “websockets” or similar, the answer is reasonably obvious. For others, the UI must either poll for status or wait until the next call to the server to detect that logout has occurred.</p>
+
+<p>The main benefit of this approach is that each server at which the user is logged-in can immediately clean up its server-side state as soon as logout has occurred.</p>
+
+<p>The OIDC spec states that when a “logout back-channel” call is performed, a <a href="https://tools.ietf.org/html/draft-ietf-secevent-token-02">security event token</a> (ie a JSON Web Token) is provided that identifies the user who is logging out.</p>
+
+<p>A variant of this approach is for the auth-server to send a “logout” message via a message-bus rather than via url-based callbacks. This is not part of the OIDC spec, but may be available in some auth-servers.</p>
+
+<p>The Keycloak server <a href="https://www.keycloak.org/docs/10.0/securing_apps/#admin-url-configuration">supports “back-channel logout”</a> in which each client-account can have an associated “admin url”; keycloak knows which client-applications it has issued tokens for during a specific user-session, and therefore on logout can invoke the “admin url” on exactly the relevant client applications. This does of course require network connectivity <em>from</em> the auth-server <em>to</em> the client application which is otherwise not needed. The API is auth-server-specific.</p>
+
+<p>It seems to me that the most elegant solution would be for an auth-server to support publishing an event to a message-broker for each logoff or logon-session-timeout. Any application maintaining a local login session based on an ID-token from that auth-server could then subscribe to messages from that message-broker and react by deleting the local session. However I am not sure if any auth-server provides such a feature.</p>
+
+<h2 id="using-a-custom-logout-application">Using a Custom Logout Application</h2>
+
+<p>A client-account typically specifies a “post-logout redirect url”; when the client application redirects the client to the auth-server to perform logout, then the auth-server sends the user back to this configured url afterwards. Typically this is the client application’s “home page”. However it is possible to set this to point to some “logout application” that then calls other specific applications that should take action on logout.</p>
+
+<p>This “logout application” can execute code server-side, eg make rest-calls to other applications. Alternatively it can just render javascript which then executes code client-side, eg make rest calls to other applications. The advantage of having javascript execute a set of logout-calls to other applications is that delete-cookie commands returned by those calls can be used (assuming appropriate CORS rules have been defined). The disadvantage is that the logout process is somewhat unreliable; the client is not totally under the control of the systems needing logout.</p>
+
+<p>The “logout application” can be part of an existing application if desired.</p>
+
+<h2 id="sign-off-per-device-vs-per-session">Sign Off Per Device vs Per Session</h2>
+
+<p>A user may be “signed on” to a client-application (and an auth-server) on various devices. When “sign off” is selected on one device, what should happen to the others?</p>
+
+<p>For any client relying on “cookies” to indicate that it is “logged in” (eg a session cookie), then there simply is no way to “push” the deletion of cookies to devices that were not involved in the sign-off. As noted earlier, however, as long as the server-side HTTP session that a session-id cookie refers to has been deleted, it does no harm to leave the cookie in place.</p>
+
+<p>However in general, users do not expect or want a sign-off on one device to affect login sessions on other devices. When single-signon is known to be in use, it might be useful to offer users two logout options: “log out from this app on this device” and “log out from this app on all devices”. Or possibly even a third option: “log out from all apps linked to this auth-server”.</p>
+
+<p>The “auth-server login session” is separate for each device; the user needs to enter their credentials separately on each device, and receives a different “login session” cookie on each device. Login/logout is therefore naturally per-device.</p>
+
+<h1 id="restricted-tokens-limiting-stolen-tokens">Restricted Tokens (Limiting Stolen Tokens)</h1>
+
+<p>One security concern is that tokens may be stolen, either in transit or by being somehow “leaked” by the resource server they were deliberately sent to. Because tokens are useable by anyone who has them (“bearer”), this provides many possibilities for abuse. And the more permissions there are in the token, the more dangerous this is - even when the token lifetime is relatively short.</p>
+
+<p>Section 4.10 of the OAuth2 <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-security-topics/22/">security best practices</a> document describes two ways to mitigate this problem:</p>
+
+<ul>
+  <li>sender-constrained tokens</li>
+  <li>audience-restricted tokens</li>
+</ul>
+
+<p>There is yet another option that helps: ensure each token sent has the minimum permissions needed, so that if it is stolen then it can only be used for a very specific purpose. In particular, this means avoiding using a token representing “the full set of a user’s privileges” in all API calls.  Unfortunately this does mean far more interactions with the auth-server, allocating a special-purpose token for each API call. Tokens should be cached and reused where possible; this means caching all of the available tokens too. Audience-restricted tokens also have this problem, though sender-constrained tokens do not.</p>
+
+<h2 id="sender-constrained-tokens">Sender-Constrained Tokens</h2>
+
+<p>Sender-Constrained Access Tokens “bind” the token to a specific sending application; the stolen token can not be used by any other sender. This of course disables the use of “delegation” with the token, but that is acceptable for many purposes. Two ways of implementing such “binding” are documented:</p>
+
+<ul>
+  <li>via TLS</li>
+  <li>via DPoP</li>
+</ul>
+
+<p>The <a href="https://datatracker.ietf.org/doc/rfc8705/">mutual TLS approach</a> requires the client application to have a TLS certificate. When requesting the token from the auth-server, it presents its certificate and requests a “bound” token; the returned token (signed by the auth-server) includes some (implementation-specific) data that identifies the certificate used - eg its hash. A resource-server receiving a token with this extra field should then verify that the connection over which it received the token was indeed established by a client with a matching certificate. While it is not very common for client applications to have a certificate, they may generate a self-signed certificate on the fly (this is explicitly supported). Various physical security keys also have embedded certificates.</p>
+
+<p>The DPoP approach is somewhat similar, but simpler. During the token request, the client includes a <em>public key</em> in the request (in an http header), and the auth-server (as above) includes a field in the (signed) token that basically mirrors this public key back. When using a token, the sender then needs to provide a hash of the token (plus some other fields) signed with the private key; the recipient uses the public key embedded in the token to check this. The DPoP approach avoids the need to generate certificates, and to point the socket libraries being used at those certificates (difficult in some environments). Physical security keys can potentially be the source of the public key, or one can be generated on-demand.</p>
+
+<p>Both of these approaches are relatively traffic-friendly; because the tokens are bound to the <em>client</em>, there is no need for a client to request multiple tokens from the auth-server when calling multiple resource-servers.</p>
+
+<p>This approach also has the nice effect of protecting against both of the following kinds of stolen token misuse:</p>
+
+<ul>
+  <li>attacker makes calls against other resource servers (which rely on the same auth-server)</li>
+  <li>attacker makes additional calls against the same target resource-server</li>
+</ul>
+
+<p>This solution is also known as <a href="https://www.youtube.com/watch?v=B4abZFFafs4&amp;list=WL&amp;index=3">proof of possession</a> because the provider of the token also needs to <em>prove possession</em> of an associated private key (without revealing it).</p>
+
+<p>Both of these standards are still in draft as of April 2023, but are expected to be approved soon.</p>
+
+<h2 id="audience-restricted-tokens">Audience-Restricted Tokens</h2>
+
+<p>When a client requests an access-token from an auth-server, it may specify an “audience” for the token. This field gets embedded into the token, and any resource-server is expected to simply compare that audience field against “its own audience name” and reject the call if they don’t match. What exactly this audience field is, is undefined. It might be a URL that identifies a service, an OAuth2 client account name, or even the fingerprint of the target server’s TLS certificate; the auth-server doesn’t care. Resource servers simply specify their audience-id in their API docs, and clients can then choose to use that (lock their tokens to that server) if they desire (or if the resource-service makes that mandatory). Many Google services use URLs for audience values.</p>
+
+<p>While very simple, this approach has a few disadvantages. When a client is communicating with multiple servers, it now needs a token per server, rather than just one; this increases the traffic to the auth-server and complicates caching/reuse of tokens. And while it prevents stolen tokens from being used against other services, it fails to prevent an attacker from making additional calls to the target server.</p>
+
+<p>The best-practices document does point out that when an audience-field is passed to the auth-server, then the auth-server can potentially optimise the returned token, eg include only roles relevant for that resource-server.</p>
+
+<p>OpenID Connect (OIDC) takes advantage of this feature by requiring client applications to verify that the ID-token’s audience matches the client-account of the application. Presumably this blocks some kind of attack scenario. In this case, it is the client itself that uses this ID-token, so the disadvantages listed above do not apply.</p>
+
+<h2 id="obsolete-token-binding-rfc">Obsolete Token Binding RFC</h2>
+
+<p>An approach named “OAuth Token Binding” was proposed (as IETF draft) but is now considered obsolete. In this approach, client passes the distinguished name of a <em>target server</em> to the authorization-server, ie the token was bound to the recipient, not the sender. This has the disadvantage that when a client interacts with N servers, then it needs N tokens - one bound to each server. This is the same problem that audience-restricted tokens have. A few other approaches also were published as draft but are now expired.</p>
+
+<p>This is mentioned just because the name “token binding” often comes up when searching the internet for the topic of token security.</p>
+
+<h1 id="draft-spec-for-oauth-21">Draft Spec for OAuth 2.1</h1>
+
+<p><a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-1/08/">Version 2.1 of the OAuth spec</a> is currently in draft version. It primarily pulls several different RFCs related to OAuth2 into one document for convenience - including the separate specs/guides for native apps, browser apps, PKCE, and “best practices”.</p>
+
+<p>Both “implicit grant” and “password credentials grant” have been dropped from the spec. Refresh-tokens must be “one-time-only”.</p>
+
+<p>Otherwise there don’t seem to be any changes of significance - but see section 10 in the link above for the full details.</p>
+
+<h1 id="unresolved-issues">Unresolved Issues</h1>
+
+<p>There are a few areas that I (and my colleagues) encountered when converting a moderately complex suite of applications from hand-crafted authentication/authorization to OAuth2/OIDC, and for which we found no good solution. In order to provide features to our users, we needed to significantly customise the auth-server behaviour. They are discussed above, but in summary:</p>
+
+<ul>
+  <li>embedded web views in a mobile app</li>
+  <li>persistent logins with large numbers of users (Keycloak’s rememberme feature didn’t scale)</li>
+  <li>personalizing sites without forcing login</li>
+  <li>single-signoff across multiple client applications sort of works, but is rather clumsy/inefficient/fragile</li>
+</ul>
+
+<p>Any suggestions on how to implement these behaviours in a more standard way would be appreciated!</p>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<ul>
+  <li>
+<a href="https://tools.ietf.org/html/rfc6749">OAuth2 Specification</a> - with the background info from this article, the specification is quite readable and of course the official definition of OAuth2 behaviour</li>
+  <li>
+<a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core Specification 1.0</a> - note that OIDC is a <a href="https://openid.net/connect/">set of specifications</a>; this is just the “core” component</li>
+  <li>
+<a href="https://oauth.net/articles/authentication/">OAuth.net: OAuth2 is not an authentication protocol</a> - why an access-token should not be used to indicate the user is “logged on”</li>
+  <li><a href="https://www.cloudidentity.com/blog/2013/01/02/oauth-2-0-and-sign-in-4/">Vittorio Bertocci: OAuth2 is not an Authentication protocol</a></li>
+  <li><a href="https://hueniverse.com/introducing-oauth-2-0-b5681da60ce2">Eran Hammer: Introducing OAuth2</a></li>
+  <li>
+<a href="https://medium.com/capgemini-norway/oauth2-authorization-patterns-and-microservices-45ffc67a8541">Sydseter/Capgemini: OAuth2 Authorization Patterns and Microservices</a> - how to use OAuth2 in a microservice architecture</li>
+  <li><a href="https://www.cloudfoundry.org/blog/oauth-rest/">Syer/CloudFoundry: Securing RESTful Services with OAuth2</a></li>
+  <li>
+<a href="https://medium.com/@darutk/understanding-id-token-5f83f50fa02e">Kawasaki: Understanding Id Token(s)</a>  – a thorough analysis of what fields an OIDC ID Token (ie an authentication token) has</li>
+  <li><a href="https://medium.com/@robert.broeckelmann/understanding-openid-connect-series-37c93d25e92b">Broeckelmann: Understanding OpenID Connect</a></li>
+  <li><a href="https://www.pingidentity.com/en/company/blog/posts/2019/oauth2-access-token-multiple-resources-usage-strategies.html">Broeckelmann/PingIdentity: OAuth2 Access Token Usage Strategies for Multiple Resources</a></li>
+  <li><a href="https://medium.com/@robert.broeckelmann/openid-connect-logout-eccc73df758f">Broeckelmann: OpenID Connect Logout</a></li>
+  <li>
+<a href="https://mindtouch.com/resources/which-sso-technology-should-i-choose">Mindtouch: Which SSO Technology Should I Choose</a> - SAML vs OAuth2</li>
+  <li>
+<a href="https://tools.ietf.org/html/rfc8252">IETF: RFC-8252 OAuth 2.0 for Native Apps</a> - IETF <em>best current practice</em> recommendation</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/oauth/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

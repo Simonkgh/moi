@@ -1,0 +1,427 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Bisecting a Linux Kernel</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Bisecting a Linux Kernel</h1>
+    <aside>First published on: September 29, 2012</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="intro">Intro</h1>
+
+<p>When trying to track down a Linux Kernel issue, it is often necessary to repeatedly build the
+kernel, install it, boot it, and test (and using git-bisect to find a kernel issue is an
+extreme case).</p>
+
+<p>There are some pages on the internet that describe how to do this, but they
+generally describe how to use the distribution packaging tools to build and install the
+kernel (eg fakeroot + dpkg + update-initramfs + update-grub). This is totally pointless,
+as it clutters the package-manager with garbage, and scatters unnecessary files everywhere
+- the kernel being built is a <em>temporary</em> one, not one intended for regular use, and so
+should be built as quick as possible, and installed in a way that makes removing it
+again as easy as possible.</p>
+
+<p>Simply running “make install_modules; make install” in the linux build directory is a
+major improvement. It assumes the existence of an /sbin/installkernel script, which
+most distributions do provide. This still does too much though (for example, on 
+Ubuntu, /sbin/installkernel runs all scripts in /etc/kernel/postinst.d which then
+triggers update-grub).</p>
+
+<p>Below is my approach to installing temporary kernels.</p>
+
+<p>WARNING: a kernel installed this way is not suitable for long-term use. For
+example, the kernel headers don’t get installed, so building other userspace
+applications against may not see the right headers.</p>
+
+<p>Note: I’m currently running Ubuntu 12.04 on x86. The commands needed for your
+system might differ slightly (eg here it is assumed that ‘sudo’ works).</p>
+
+<h1 id="setting-up-grub">Setting up Grub</h1>
+
+<p>I create two permanent grub entries for booting a kernel named <code>kimage-test</code>. The
+actual kernel image is then overwritten during the testing, but the grub entry does
+not need to be updated - ie <code>update-grub</code> does NOT need to be run after each kernel
+build.</p>
+
+<p>First create a new grub config template file:</p>
+
+<pre><code>cd /etc/grub.d
+sudo -e 50_test
+</code></pre>
+
+<p>Now paste the following into the new file. The exact contents of the custom grub
+entries needs to match your setup, so you’ll have to tweak the example below. Look
+at a typical entry in your /boot/grub/grub.cfg and copy its settings as appropriate.</p>
+
+<pre><code>cat &lt;&lt; EOF
+
+menuentry 'Test - noinitrd' {
+    recordfail
+    gfxmode $linux_gfx_mode
+    insmod gzio
+    insmod part_msdos
+    insmod ext2
+    set root='(hd0,msdos6)'
+    linux /boot/kimage-test root=/dev/sdaXXXXX ro splash
+}
+
+menuentry 'Test - initrd' {
+    recordfail
+    gfxmode $linux_gfx_mode
+    insmod gzio
+    insmod part_msdos
+    insmod ext2
+    set root='(hd0,msdos6)'
+    search --no-floppy --fs-uuid --set=root XXXXXX
+    linux   /boot/kimage-test root=UUID=XXXXX ro splash
+    initrd  /boot/ramdisk-test
+}
+
+EOF
+</code></pre>
+
+<p>As noted above, the exact contents of the menuentry sections depend on your machine;
+in particular you’ll need to replace the XXXXX parts with appropriate values.</p>
+
+<p>Note that the “noinitrd” version has a <em>device node</em> as the root filesystem, not
+a filesystem UUID. This is necessary because the kernel does not natively support
+specifying the root filesystem via UUID - it relies on the initrd to map this, and
+in this case we have no initrd.</p>
+
+<p>The kernel image file is named <code>kimage-*</code> rather than the traditional <code>vmlinuz-*</code>
+in order to avoid being auto-detected by the standard update-grub script. Similarly,
+<code>ramdisk-*</code> is used instead of <code>initrd.img-*</code>. The non-standard names also are
+useful for identifying which files were installed by this approach.</p>
+
+<p>Make sure the new file is marked executable..</p>
+
+<blockquote>
+  <p>sudo chmod a+x /etc/grub.d/50_test</p>
+</blockquote>
+
+<p>And recreate /boot/grub/grub.cfg</p>
+
+<blockquote>
+  <p>sudo update-grub</p>
+</blockquote>
+
+<h1 id="installing-a-kernel-with-static-modules">Installing a kernel with static modules</h1>
+
+<p>In this approach, all modules needed by the kernel are simply compiled into the kernel.
+There is then no need for an initrd file, and no need for a /lib/modules/{version} directory.
+And there is very little to “clean up” afterwards - just remove the kernel image from the
+boot directory.</p>
+
+<p>Unfortunately:</p>
+
+<ul>
+  <li>some code cannot be compiled into the kernel.</li>
+  <li>some modules act differently when compiled into the kernel <sup id="fnref:staticmod" role="doc-noteref"><a href="#fn:staticmod" class="footnote" rel="footnote">1</a></sup>
+</li>
+  <li>modprobe complains if the /lib/modules/{version} directory doesn’t exist, even
+if it isn’t needed.</li>
+</ul>
+
+<p>Still, avoiding modules is great when possible. So try it first…</p>
+
+<p>Make sure that all devices you intend to use in the custom kernel are plugged in
+(eg mouse, webcam), then:</p>
+
+<pre><code>cd ...
+make dist-clean
+make localyesconfig
+</code></pre>
+
+<p>And now actually start the compilation:</p>
+
+<pre><code>make EXTRAVERSION=-test all
+</code></pre>
+
+<p>Hopefully all build ok, and no modules were produced (or at least that you’ll
+actually need at runtime):</p>
+
+<pre><code>find . -name "*.ko"
+</code></pre>
+
+<p>Now just copy the kernel:</p>
+
+<blockquote>
+  <p>sudo cp arch/x86/boot/bzImage /boot/kimage-test</p>
+</blockquote>
+
+<p>Reboot and test…</p>
+
+<p>Of course, you’ll need to select the “test - noinitrd” option from grub after reboot.</p>
+
+<p>When building further kernels, just repeat from the “make EXTRAVERSION=-test all” step.</p>
+
+<p>Note: <code>localyesconfig</code> was broken around linux 3.5, and only fixed in linux 3.7.0-rc1. If you start your bisect in this area (ie have something in this range checked out when you run “make localyesconfig”) then you will effectively just get <code>localmodconfig</code>. A workaround is to just replace <code>scripts/kconfig/streamline_config.pl</code> with the version from HEAD.</p>
+
+<h1 id="installing-a-kernel-with-loadable-modules">Installing a kernel with loadable modules</h1>
+
+<p>In this approach, things are much more like a distribution kernel, where most kernel
+modules are stored as .ko files in /lib/modules/{version}, and are loaded by the
+modprobe tools when needed. The disadvantage of this approach is that you’ll need
+to manually clean up the /lib/modules/{version} directory (if you care) after testing
+is complete.</p>
+
+<p>First, unpack an existing initrd image into a working directory:</p>
+
+<pre><code>VER=`uname -r`
+INITRD=$(HOME)/Linux/kernel/initrd
+mkdir -p $INITRD
+cd $INITRD
+gunzip --stdout &lt; /boot/initrd.img-$VER | cpio -i
+</code></pre>
+
+<p>Now go to the kernel source root dir, and create a .config file that compiles the
+minimum number of modules. Make sure that all devices you intend to use in the
+custom kernel are plugged in (eg mouse, webcam), then:</p>
+
+<pre><code>cd ...
+make dist-clean
+make localmodconfig
+</code></pre>
+
+<p>Now you can build your kernel:</p>
+
+<pre><code>make EXTRAVERSION=-test all
+</code></pre>
+
+<p>Setting the EXTRAVERSION property overrides the one in the Makefile; so instead of a
+kernel that thinks it is something like ‘3.6.0-rc5+’ it instead thinks it is ‘3.6.0-test+’.
+While this loses a little useful info, it means that the kernel modules installed into
+dir /lib/modules/{version} have this useful “-test” suffix and so won’t overwrite any
+files that are being used by other non-temporary kernels. It also makes it clear which
+dirs can be deleted when you get around to cleaning up the /lib/modules dir after
+testing is complete.</p>
+
+<p>After each compilation is finished, just run the following script (with BUILD and
+INITRD variables modified as appropriate):</p>
+
+<pre><code>BUILD=$(HOME)/Linux/kernel/linus
+INITRD=$(HOME)/Linux/kernel/initrd
+
+cd $BUILD || exit -1
+VER=`cat include/config/kernel.release`
+
+# install the kernel image into /boot/kimage-test
+sudo cp arch/x86/boot/bzImage /boot/kimage-test || exit -1
+
+# install the kernel modules into /lib/modules/{version}
+sudo make modules_install || exit -1
+
+# install the kernel modules into initrd working directory
+rm -rf $INITRD/lib/modules/*
+INSTALL_MOD_PATH=$INITRD make modules_install || exit -1
+
+# package the initrd temporary directory into /boot/ramdisk-test
+cd $INITRD || exit -1
+find . | cpio -o --format=newc | gzip | sudo dd of=/boot/ramdisk-test
+
+echo "Installed kernel version $VER!\n"
+</code></pre>
+
+<h1 id="other-notes">Other notes</h1>
+
+<p>While writing this article, I found that the “Linux Kernel In A Nutshell” book (published 2006)
+recommends something very similar (see chapter 5, “Installing and Booting from a Kernel”).</p>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:staticmod" role="doc-endnote">
+
+      <p>For example, modules which load firmware into a device don’t work well when compiled in, because 
+firmware-loading is implemented by sending a netlink event to the userspace udev process [for
+kernels prior to v3.7]. For compiled-in modules, however, initialisation is run before userspace
+is configured. The result is fairly obvious.. <a href="#fnref:staticmod" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/bisecting-a-linux-kernel/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,286 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Right-sizing Microservices</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Right-sizing Microservices</h1>
+    <aside>First published on: June 20, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a></p>
+      
+<p>When building microservices, what is the right amount of code in each service?</p>
+
+<p>Well, I actually have an issue with the common understanding of “microservices” as something new. In my opinion, every large company already has a “microservice” architecture and has had one for decades. Look at any bank or insurance company, going back even to the 1980s - they don’t have a single codebase compiled into a single artifact. Instead they have multiple systems, each organised around a set of business capabilities, with their own development team, their own codebase, their own database, processes for (loosely coupled) data exchange with other systems, and their own independent release cycle. And that’s pretty much the definition of microservices. Of course these things are typically huge - the teams are 100+ developers, the codebases are millions of lines in size, data exchange latencies are often large (eg nightly batches of files), and releases often happen only a couple of times per year. But it’s still the same pattern.</p>
+
+<p>So for me, microservices is simply a matter of taking this traditional system design and turning up the granularity dial. How far the dial should be turned depends upon the business circumstances.</p>
+
+<p>In particular, there are increasing costs associated with increasingly fine granularity, so (IMO) the dial should be turned only when the cost of doing so is less than the cost of a coarser-grained solution. If you have an existing coarse-grained (or even monolithic) system then this means staying with the current state unless there is a reason to change.</p>
+
+<p>There are two distinct reasons to consider microservices:</p>
+
+<ul>
+  <li>when your development processes are not scaling as desired</li>
+  <li>when your runtime systems are not scaling as desired</li>
+</ul>
+
+<p>In most cases, <em>the first one is far more important</em>.</p>
+
+<p>Runtime performance issues can often be solved far more cheaply by throwing some extra hardware at it than by <em>redesigning the software</em>. Where a real performance issue exists, focusing just on the bottlenecks usually resolves it without system-wide changes. In fact, refactoring a system based on microservice principles can actually reduce performance unless you are very careful where you partition the system.</p>
+
+<p>On the other hand, if the problem is that the development team just can’t keep up with the flow of requests for change, then adding more developers is (a) expensive, and (b) quite often ineffective when the development processes aren’t appropriate. Modular systems (moduliths) can help, as can systems composed of multiple components which are released together (still monolithic in nature). However eventually it may be necessary to have independent release cycles for different features - ie microservices. At that point, the question becomes: how many services should the featureset be implemented as?</p>
+
+<p>Costs of excessively fine granularity:</p>
+
+<ul>
+  <li>many things to security-audit</li>
+  <li>many things to security-patch</li>
+  <li>many things to document</li>
+  <li>many things to learn (for a new developer or admin)</li>
+  <li>high inter-component integration costs - including:
+    <ul>
+      <li>keeping api stability (at both ends)</li>
+      <li>implementing data synchronization</li>
+      <li>dealing with the lack of atomic transactions</li>
+      <li>complex testing for inter-component interactions</li>
+      <li>and much more</li>
+    </ul>
+  </li>
+  <li>high infrastructure costs (distributed systems generally require more memory and cpu than the same task done monolithically)</li>
+  <li>difficulties applying cooperative domain modelling (each bounded context is distributed across code-bases)</li>
+  <li>debugging may require analysing inter-process calls</li>
+  <li>refactoring (particularly changes to a domain model) may be a cross-component task, not an intra-component one</li>
+</ul>
+
+<p>Costs of excessively coarse granularity:</p>
+
+<ul>
+  <li>high collaboration costs (team conflicts)</li>
+  <li>high learning cost for the codebase</li>
+  <li>slow evolution</li>
+  <li>slow time-to-market for new features</li>
+  <li>unclear areas of responsibility</li>
+  <li>unclear domain context boundaries</li>
+</ul>
+
+<p>The cost changes aren’t linear however; the above items have some “tipping points” in them. In particular, people tend to work best in groups of 10 or less. Any codebase that requires tight collaboration in a group larger than that carries a significant cost. There is also a tipping point in codebase complexity, where up to N lines is reasonably understandable, over twice as many lines is much harder, but having half as many lines is not actually a lot easier. Therefore going from “too large” to “right sized” brings a benefit but going to “even smaller” often won’t bring anything additional in terms of code comprehension while bringing costs in other areas.</p>
+
+<p>In my opinion, the right place to “turn the dial up to” is simply the point at which each codebase (and supporting infrastructure such as database schemas) can be maintained by a single team which is small enough to know each other well and communicate regularly. With that reached, all of the items listed as “costs of excessively coarse granularity” are pretty much resolved while taking on as few of the costs<sup id="fnref:stripe-large-micro" role="doc-noteref"><a href="#fn:stripe-large-micro" class="footnote" rel="footnote">1</a></sup> of the “fine granularity” list as possible.</p>
+
+<p>Some people (particularly from the early days of the microservice movement) suggest that “finer is always better” and recommend architectures in which each service is extremely small. I disagree completely, seeing very high costs for little benefit. The argument is that having more deployable units is somehow “more decoupled”. However the finer-grained a service is, the more other services it needs to collaborate with in order to do its work - and those collaborations are themselves couplings with a much higher price than the kind of coupling that occurs within a single codebase and database. While in theory fine-grained services can be modified or replaced in parallel, in practice their collaborative nature require changes to multiple components for any significant behavioural change.</p>
+
+<p>In recent years, there has been a trend towards saying things like “moduliths are the new microservices” and “every system should start as a monolith”. I would agree completely; systems should use the <em>coarsest granularity</em> that works for them. Most projects start with a fairly small feature-set and small development team, so a (nicely modular) monolith is indeed a good starting point.</p>
+
+<p>A graph of codebase-size vs developer-productivity will look something like an inverted bell-curve: a fixed set of functionality distributed over many small components will be hard to maintain, as will one with the same functionality in a single huge codebase. Somewhere in the middle will be an optimum. Of course there are some additional aspects to consider: a “modulith” has better maintainability than a “big ball of mud”, and systems whose components are team-sized or smaller are more parallelizable (productive) which may be beneficial regardless of whether that approach is more cost-effective.</p>
+
+<p>Therefore, turn up the dial on granularity only when the pain of doing so is less than the pain of not doing so. And consider using the term “service-based architecture” rather than “microservice architecture” to avoid confusion.</p>
+
+<p>Of course it is possible to choose different granularities for different parts of the system. Having rapidly-changing parts divided into team-sized pieces while slower-moving parts are coarse-grained cross-team codebases can be the most cost-efficient solution in some cases, particularly when those larger pieces are “legacy code”.</p>
+
+<p>Many software systems have “natural fault lines” where functionality separates; in DDD terms <em>subdomains</em> or <em>bounded contexts</em>. Separating along these lines can be beneficial - while trying to separate into finer chunks can be very difficult. Systems with excessively fine granularity can often only be implemented via intensive synchronous communication between components (RPC-style) which has very high costs in terms of development time, performance, and system stability; coarser-grained systems aligned with domain boundaries naturally have less need for inter-component communication - and <a href="/architecture/distributed-read-models-part1">can use data replication</a> to reduce or even eliminate any synchronous dependencies which remain. Implementing domain model changes is also far less painful in a coarse-grained system than a fine-grained one.</p>
+
+<p>As a guide, I worked for a company that provided an online marketplace. With over 30 active back-end developers and 20 to 30 features being release weekly, our monolith became just too painful so we moved to microservices. But we turned up the dial only a notch or two, with the intention of then re-assessing whether another step to even finer granularity would result in less or more pain. So far, the first refactoring has been sufficient; simply returning to one-team-per-code-base provided a major benefit and everything further seems to be cost without obvious benefit. Where your cost/benefit threshold lies depends upon your codebase size, complexity, team-size, and rate of activity.</p>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<ul>
+  <li><a href="https://www.youtube.com/watch?v=p2GlRToY5HI">[video] Jonathan “J” Tower: Don’t Build a Distributed Monolith</a></li>
+  <li><a href="https://blog.christianposta.com/microservices/when-not-to-do-microservices/">Christian Posta: When Not to Do Microservices</a></li>
+  <li><a href="https://www.youtube.com/watch?v=haejb5rzKsM">[video] Skelton &amp; Pais: Team Cognitive Load</a></li>
+  <li><a href="https://www.youtube.com/watch?v=OyNSFJp8564">[video] Neal Ford: Granularity and Communication Tradeoffs in Microservices (2021)</a></li>
+  <li><a href="/architecture/stosa">STOSA</a></li>
+</ul>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:stripe-large-micro" role="doc-endnote">
+      <p>There is of course such a thing as “too large” for a service; as an example <a href="https://youtu.be/U7rC5xHL8o4?t=41">Stripe has a “microservice”</a> with 1400 transitive dependencies and a correspondingly slow build-time. There may be benefits in further dividing such a codebase even if it is maintained by a single team. <a href="#fnref:stripe-large-micro" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/microservice-size/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

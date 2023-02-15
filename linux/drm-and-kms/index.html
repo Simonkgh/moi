@@ -1,0 +1,539 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - DRM and KMS kernel module implementations</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>DRM and KMS kernel module implementations</h1>
+    <aside>First published on: October 16, 2012</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="intro">Intro</h1>
+
+<p>The “Direct Rendering Manager” (DRM) and “Kernel Modesetting” (KMS) APIs are important parts of the Linux graphics system. However documentation on exactly what they are is very hard to find - and most of what Google turns up is completely obsolete. It appears that the people <em>working</em> in this area are too busy to document it.</p>
+
+<p>An article on this site gives an <a href="/linux/graphics-stack">overview of the linux graphics stack</a>; <strong>this</strong> article presents more detailed information about the internal implementation details of the DRM kernel module.</p>
+
+<p>You may wish to also read <a href="/linux/graphics-card-interfaces">my article on graphics cards</a> to understand roughly how modern graphics cards work.</p>
+
+<p>Update: I have found an article <a href="http://landley.net/kdocs/htmldocs/drm.html">DRM Developers Guide</a> from 2012 which has very detailed discussion of internal DRM details, and is far more thorough than this article!</p>
+
+<p>The code discussion in this article is based on the “radeon.ko” driver for ATI Radeon graphics cards attached via PCIe (as that is what is present in my laptop). However the general principles should apply to many cards, and at least partially to embedded graphics devices as well as PCIe ones.</p>
+
+<p>Note that I’m no expert in this area, and the existing documentation is awful. There <em>will be</em> mistakes and misunderstandings below - possibly significant ones; corrections are welcome. This is also an article-in-progress, and hopefully will improve over time.</p>
+
+<h1 id="purpose-of-dri-drm-and-kms">Purpose of DRI, DRM and KMS</h1>
+
+<p>In the beginning, all graphics was done through the X server <sup id="fnref:vga-text" role="doc-noteref"><a href="#fn:vga-text" class="footnote" rel="footnote">1</a></sup>; a different “DDX” userspace driver exists for each card which maps shared buffers of the video card by making MMAP system calls against the /dev/mem “file”, then reading/writing addresses in the mapped range. The drivers are responsible for both supporting the X11 drawing APIs (traditional 2D API or X Render extension), as well as setting the graphics mode and generally configuring the graphics card - all without any kernel-side support.</p>
+
+<p>The problem with this approach is that this:</p>
+
+<ol>
+  <li>relies on X having <em>exclusive</em> access to the graphics card;</li>
+  <li>is not very efficient (kernel-mode code can handle memory mappings etc. much more efficiently);</li>
+  <li>puts lots of critical logic in the X-specific drivers where other graphics systems can’t use it.</li>
+</ol>
+
+<p>Item (1) is a major issue - forcing applications wanting to use the 3D rendering capabilities of modern cards to pass all data through the X server is just crazy. The X Render extension allows client apps to at least pass tesselated 2D shapes and character glyphs, but that doesn’t help a lot. There is also a mechanism for passing OpenGL commands to X, and have X run them on behalf of the caller (GLX Indirect Rendering) - but that is also rather inefficient. In the end, it is best for performance-critical apps to just have direct access to the graphics card. However there then needs to be a mechanism for coordinating access from multiple applications.</p>
+
+<p>Even in older systems, assumption (1) is not entirely true: virtual consoles based on framebuffer drivers also need access to the graphics card when <code>alt-f{n}</code> is pressed. Without KMS, there are some ugly hacks in X to support this which still don’t work entirely effectively, meaning switching to a console is slow and causes screen flicker. Switching from the framebuffer to X during booting is another case.</p>
+
+<p>Item (2) is also important. Graphics cards use DMA extensively, but driving this from userspace isn’t efficient (in particular, handling interrupts). Doing modern graphics also requires allocating/releasing lots of memory buffers - something that is far more easily done in the kernel.</p>
+
+<p>Item (3) blocks research into and implementation of alternatives to X. While X is a proven system, it is many decades old; it would be nice to allow alternatives to at least be explored without having to port and maintain a fork of many DDX (Device Dependent X) graphics drivers.</p>
+
+<p>The DRM (Direct Rendering Manager) kernel module was developed to deal with the above issues.</p>
+
+<h1 id="libdrm">LibDRM</h1>
+
+<p>The DRM kernel module exposes an “unstable” api to userspace, and should not be directly used by applications. Instead, a C library is available from freedesktop.org (and bundled with all distributions), which exposes a stable api. This library is then used from X, Mesa (opengl) drivers, libva, etc. When features are added to drm drivers (eg new ioctls), a corresponding release of libdrm is made.</p>
+
+<p>This library supports both Linux and BSD, and potentially other operating systems. It contains both generic code, and card-specific code. It then compiles to a set of dynamically-loadable libaries, one for each supported card type (kernel driver), which can usually be found under /usr/lib. For example, on my system the libdrm version for AMD radeon cards can be found at <code>/usr/lib/i386-linux-gnu/libdrm_radeon.so.1</code>.</p>
+
+<p>Reading the libdrm source code - and in particular, headers <code>xf86drm.h</code>, <code>xf86drmMode.h</code> and <code>include/drm/libdrm.h</code> - is probably the best way to start understanding the DRM and KMS kernel implementations.</p>
+
+<h1 id="direct-rendering-manager-drm">Direct Rendering Manager (DRM)</h1>
+
+<p>The “drm core” module is generic code that applies to all cards; it provides a set of IOCTL operations which it either handles itself or delegates to a card-specific kernel module.</p>
+
+<p>When loaded, a card-specific drm helper module calls into the drm module to register itself as a “drm driver”, and provides a set of function-pointers that the drm core module may invoke. The “drm core” then creates a file /dev/dri/card{n} on which IOCTLs can be made to talk to the driver; reading the file also returns “event” structures indicating when things such as “vblank” or “flip complete” events have occurred.</p>
+
+<p>As part of the registration process, the “drm helper module” provides a set of flags indicating which features it supports, for example DRIVER_MODESET indicates that it supports kernel modesetting (KMS). The drm core will return an error when userspace attempts to invoke functionality that the card-specific “helper module” does not support.</p>
+
+<p>The drm “api” (ie the api exposed by libdrm) defines the minimum number of extensions necessary to support sharing of a graphics card between multiple userspace applications. An X DDX driver with card-specific knowledge is still needed to access the full card functionality. For example, it is the DDX driver which knows what address-ranges on the card are safe for userspace to mmap; the driver passes this info to the drm module, so later mapping requests from X client applications can be validated. This reduces the amount of complexity needed in the card-specific drivers (which was particularly useful when migrating from completely userspace X drivers to DRM).</p>
+
+<p>Because “drm” (ie the core code) is itself a kernel module, there are corresponding sysfs entries. You will find them at <code>/sys/virtual/devices/drm</code>, <code>/sys/class/drm</code> and <code>/sys/module/drm</code>. DRM drivers declare a dependency on the drm module.</p>
+
+<p>Because the kernel API for DRM is not exposed directly to users (instead being wrapped in libdrm), there is unfortunately little documentation for the IOCTLs exposed by the drm module itself; it is necessary to read the source-code for libdrm to understand how these ioctls are actually used. As noted above, understanding the libdrm code is really a prerequisite to understanding the drm kernel side.</p>
+
+<h1 id="kms">KMS</h1>
+
+<p>The first version of DRM only provided support for “DMA style buffer transfer” between memory that the userspace graphics application owns, and memory accessable to the graphics card. The DRM functionality was later significantly enhanced to support additional ioctl operations including <em>modesetting</em> (KMS) - provided the card-specific “helper module” supported it.</p>
+
+<p>KMS functionality is accessed via libdrm, as with all other functionality provided by the “drm core” kernel module. Functions and constants used to access KMS functionality via libdrm often have the <code>drm_</code> prefix.</p>
+
+<p>The newer DRM drivers also:</p>
+
+<ul>
+  <li>
+    <p>provide “buffer management” operations (usually via the GEM or TTM libraries) which are a higher-level of abstraction than the DMA-configuration APIs provided by DRM;</p>
+  </li>
+  <li>
+    <p>implement a “modesetting” api which is a superset of the functionality available via the framebuffer modesetting ioctl;</p>
+  </li>
+  <li>
+    <p>implement the “framebuffer” API;</p>
+  </li>
+  <li>
+    <p>provide some card-specific logic that was previously implemented in the X DDX driver (such as the DDX driver <em>telling</em> the drm module what memory ranges may be mapped by users).</p>
+  </li>
+</ul>
+
+<p>The user api for setting graphics modes is defined in libdrm file xf86drmMode.h (particularly, function drmModeAttachMode or drmModeSetCrtc). The kernel side of this api is done via the ioctls named DRM_IOCTL_MODE_*. There are some useful examples of modesetting linked to in the <code>References</code> section of this article.</p>
+
+<p>The fact that some card-specific logic has moved from X to the kernel means that it is easier to implement alternatives to X (eg Wayland). The fact that buffer management code is in the kernel also makes it easier to implement alternatives to X.</p>
+
+<p>The fact that a KMS driver is an integrated DRM <em>and</em> framebuffer driver allows smooth graphics handover from boot to X, and smooth/rapid switching between X and framebuffer-based virtual consoles.</p>
+
+<p>Because some logic was moved from X to the kernel (esp. those where the userspace driver configures the drm kernel module), the corresponding IOCTLs are no longer useful. KMS drivers therefore provide implementations of these APIs which simply return an error-code.</p>
+
+<p>Theoretically, KMS could also be implemented on non-Linux systems. However it does require porting or reimplementing the GEM/TTM modules, which is a non-trivial process. At the current time (late 2012) there are efforts underway to get KMS working on OpenBSD.</p>
+
+<h1 id="ttm-and-gem">TTM and GEM</h1>
+
+<p>GEM is a kernel module that provides a library of functions for managing memory buffers for GPUs. Currently, it doesn’t handle on-card memory directly.</p>
+
+<p>TTM performs the same purpose as GEM; it is more complex, but handles <em>on-card</em> memory better. TTM also implements the GEM API, so userspace doesn’t need to care which implementation is being used by the current driver.</p>
+
+<p>DRM drivers expose a GEM interface via IOCTL operations, for the purpose of manipulating buffers associated with the graphics card that the driver handles.</p>
+
+<h1 id="drm-module-implementation">DRM Module Implementation</h1>
+
+<p>The sourcecode for the drm core is in <code>drivers/gpu/drm</code>.</p>
+
+<p>An example of a pure DRM driver can be found in <code>drivers/gpu/drm/tdfx</code> (supports 3dfx Voodoo cards). Another is in <code>drivers/gpu/drm/sis</code>.</p>
+
+<h2 id="initialisation-and-driver-registration">Initialisation and Driver Registration</h2>
+
+<p>File <code>drm_drv.c</code> is the “entry point” for the drm module: it contains the module_init declaration, pointing to drm_core_init().</p>
+
+<pre><code>drm_drv.c : on init, drm_core_init():
+
+* initialises static var drm_minors_idr to hold an empty mapping of (minor-&gt;drm_device)
+* creates &amp; registers major-device-number DRM_MAJOR (226) with a very simple file_operations structure
+* creates &amp; registers a "class" object with sysfs (drm_class)
+</code></pre>
+
+<p>Card-specific DRM drivers have their own modules which define a list of PCI Ids for devices it can handle, then calls <code>drm_pci.c:drm_pci_init</code>.</p>
+
+<p>For “old” drivers, drm_pci_init manually scans all known PCI devices, and calls <code>drm_get_pci_dev</code> for each matching device.</p>
+
+<p>For “new” drivers, <code>drm_pci_init</code> instead expects the caller’s <code>pci_driver</code> table to include a pointer to a “probe” function; the PCI subsystem will call this for each matching device, and the probe function is expected to then call <code>drm_get_pci_dev</code>.</p>
+
+<p>It appears that the change in the PCI subsystem from caller “scanning” to caller providing a “probe” callback happened <em>coincidentally</em> about the same time as the development of KMS, and therefore KMS drivers provide a probe method while older ones do not.</p>
+
+<pre><code>drm_pci.c:drm_get_pci_dev:
+
+* allocates a device minor number in range 0..63 (LEGACY), and creates device node `/dev/dri/card{n}`
+* optionally allocates a device minor number in range 64..127 (CONTROL), and creates device node `/dev/dri/controlD{n}` which is connected to the modesetting functions only
+  (ie userspace code which can open this file can perform mode-setting but not generate graphics; can be helpful for unusual use-cases).
+* allocates a drm_device structure, and stores it in the drm_minors_idr map keyed by each of the allocated minor#s.
+* calls the "load" function provided by the card-specific driver
+</code></pre>
+
+<p>Both the device nodes inherit the <code>file_operations</code> callbacks from their major device (created in <code>drm_core_init</code> earlier); this has a single hook for “open” operation, which points to <code>drm_stub_open</code>.</p>
+
+<p>When a user opens the <code>/dev/dri/card{n}</code> file (for all operations) or the <code>/dev/dri/controlD{n}</code> file (for modesetting only), function <code>drm_stub.c:drm_stub_open</code> is passed the minor# of the opened file, and uses this as an index into the <code>drm_minors_idr</code> table to obtain a reference to the appropriate drm_device structure. It then stores this pointer into the open file structure so that future file operations can immediately locate the device-specific info.</p>
+
+<p>The stub open function also does a magic switcheroo: it replaces the <code>file_operations</code> structure that the open file handle inherited from the <code>DRM_MAJOR</code> device with one provided by the card-specific driver. In effect, this bypasses the normal Unix behaviour where a major# references a driver and a minor-number indicates multiple instances of the same device, and instead allows each device minor# to point to a different driver. After the file-operations switch, all future file-related system calls performed by userspace go directly to the card-specific driver.</p>
+
+<h2 id="file-operations">File Operations</h2>
+
+<p>As noted in the previous section, a card-specific driver can provide a table of <code>file_operations</code> callbacks to be invoked when the user does various operations on an open file-handle. For most drivers, the majority of entries in this table point back into common library functions provided by the drm core code.</p>
+
+<h2 id="ioctls">IOCTLs</h2>
+
+<p>The standard list of IOCTL operations provided by a DRM driver can be seen in table <code>drm_drv.c:drm_ioctls</code>.</p>
+
+<p>Most drivers have a file-operations structure which maps the ioctl callback into the standard drm_ioctl library function. They then define an additional table of custom ioctl operations and store that in the drm_driver structure. The drm_ioctl function forwards all ioctl operations in range COMMAND_BASE..COMMAND_END (0x40-0xA0) using the device-specific table, and handles all others itself using its ioctls table. This ensures that all the “standard” DRM ioctls are implemented in the drm core, but card-specific drivers can implement additional ioctl operations that their corresponding X DDX driver presumably knows how to use.</p>
+
+<p>Those entries in the main <code>drm_ioctl</code> table which are flagged with <code>DRM_ROOTONLY</code> return errors unless the caller is root (ie the X server itself). This allows the drm driver to separate calls into those safe for use by graphical client applications just doing direct drawing, and those that could be used to take over the machine (eg DMA configuration).</p>
+
+<p>Those flagged with DRM_MASTER return errors unless the file handle used for the ioctl is marked as the “master” for the device. It is expected that the X server will be the first application to open the device node for any graphics device, and will immediately invoke the SET_MASTER ioctl. This allows it to “reserve” access to certain dangerous operations for itself. There is a corresponding DROP_MASTER ioctl. The operations flagged with DRM_MASTER presumably prevent security issues and race-conditions by restricting racy operations to the single “master” process.</p>
+
+<p>As noted previously, the userspace API is defined in libdrm, not at the kernel level - and therefore there is no formal definition of what the various IOCTL operations do (at least none that I can find). The best way to find out the purpose of any specific IOCTL is to look at the libdrm source (which is somewhat better documented).</p>
+
+<p>According to general DRI docs:</p>
+
+<ul>
+  <li>there is a “per card lock to synchronize access”. Is this the LOCK/UNLOCK operations?</li>
+  <li>the X server can specify what memory ranges client apps are permitted to map - is this the ADD_MAP/RM_MAP operations?</li>
+</ul>
+
+<p>The DRI architecture in general expects clients to ask X to allocate data buffers for sharing with the card, and for X to return the addresses of the buffers. Maybe the ADD_BUFS/MARK_BUFS operations are for this? Particularly as ADD_BUFS is marked with DRM_ROOTONLY (ie X), but FREE_BUFS is not (ie the client can free the buffer itself).</p>
+
+<p>I also seem to remember hearing about the necessity of validating the command-stream instructions to prevent system takeover or even damage. Are these the ?? operations?</p>
+
+<p>Perhaps the CTX operations are used to support multiple applications accessing the ring-buffer at the same time?</p>
+
+<h1 id="drm-driver-source-code">DRM Driver Source Code</h1>
+
+<p>The source for these drivers lives in subdirs of <code>drivers/gpu/drm</code>. These register themselves with the drm core module, and the file-operations switcheroo occurs when userspace opens the appropriate file.</p>
+
+<p>For AMD cards, the KMS driver source is in <code>drivers/gpu/drm/radeon</code> and the compiled module is in <code>/lib/modules/{version}/kernel/drivers/gpu/drm/radeon/radeon.ko</code>. This driver supports all the different models of AMD/ATI cards, even though they are quite different.</p>
+
+<p>The X server has a different KMS-enabled userspace driver for each graphics card that has a kernel DRM driver; like the X Native DDX drivers, these drivers are responsible for implementing all acceleration themselves (ie performance depends heavily on the quality of this driver). However unlike the X Native DDX drivers, they can leave modesetting and buffer management up to the kernel layer (which can do it more efficiently). In addition, the fact that buffers are allocated in the kernel opens more options for applications to access the graphics card directly (bypassing X for performance). The X native DDX driver and the X KMS-enabled DDX driver for a card often share significant amounts of code related to generating “commands” for drawing operations.</p>
+
+<p>Note that although a DRM driver implements the framebuffer API, there may also be a separate (simpler) framebuffer driver available for the same card. This is true for some intel and nvidia cards for example - while AMD have just a single combined driver. When the KMS driver is active, the alternative framebuffer driver will not be used. However having the option of using the simpler framebuffer is a good thing (eg embedded systems without requirement for high-performance graphics, or servers); of course this does mean maintaining duplicated code though, so some graphics cards do not have a separate framebuffer driver anymore.</p>
+
+<h2 id="initialisation-and-driver-registration-1">Initialisation and Driver Registration</h2>
+
+<pre><code>radeon_drv.c on init:
+* registers itself with the PCI bus as handler for specific PCI IDs, using
+   + driver=kms_driver
+   + pci_driver = radeon_kms_pci_driver
+
+The PCI bus then calls back into radeon_pci_probe when a radeon card is found.
+This calls drm_get_pci_dev which:
+ + calls drm_get_minor(...,DRM_MINOR_CONTROL) which registers `/dev/dri/controlD{n}`
+ + calls drm_get_minor(...,DRM_MINOR_LEGACY) which registers `/dev/dri/card{n}`
+ + calls back into dev-&gt;driver-&gt;load, ie radeon_driver_load_kms.
+
+drm/drm_stub.c: drm_get_minor 
++ calls drm_minor_get_id to allocate an unused minor-device-number:
+   + type=DRM_MINOR_LEGACY: range = 0..63
+   + type=DRM_MINOR_CONTROL: range = 64..127
+   + type=DRM_MINOR_RENDER: range=128..255 (TODO: is this used anymore?)
+   + this also ensures that drm_minors_idr has enough space for the new node [NOTE: UGLY SIDE-EFFECT]
++ allocates space for a "drm_minor", ie a simple wrapper around card-specific drm_device
++ sets the drm_minor structure to point to the drm_device for the radeon card
++ stores the new drm_minor structure into the drm_minors_idr
++ calls drm_sysfs_device_add
+
+drm_sysfs_device_add:
++ initialises some kdev-related fields
++ sets device_name to either `/dev/dri/controlD{n}`, `/dev/dri/renderD{n}` or `/dev/dri/card{n}` depending on whether
+  the type param was DRM_MINOR_CONTROL/DRM_MINOR_RENDER/DRM_MINOR_LEGACY
++ calls device_register
+
+radeon_driver_load_kms:
+* calls radeon_device_init (inits non-display parts of card, eg command-processor)
+* calls radeon_modeset_init (inits display parts, eg CRTCs, encoders)
+* calls radeon_acpi_init (configures ACPI)
+
+</code></pre>
+
+<p>The different card models are handled by initialising the various callback tables appropriately, eg if the card is a “southern islands” card, then the tables are defined in file <code>si.c</code>.</p>
+
+<h2 id="opening-of-the-device-file">Opening of the Device File</h2>
+
+<p>Userspace eventually opens <code>/dev/dri/card{N}</code>. Function <code>drm_stub_open()</code> is executed, which:</p>
+
+<ul>
+  <li>uses <code>drm_minors_idr</code> to map the minor device number to a struct drm_device registered by the radeon driver on module initialisation</li>
+  <li>then does a switcheroo on the <code>file_operations</code> structure from that drm_device so the radeon-provided one is used directly for future file operations performed by userspace.</li>
+</ul>
+
+<h2 id="ioctl-operations">IOCTL operations</h2>
+
+<p>Userspace then does IOCTLs on the filehandle, which are forwarded to <code>radeon_ioctls_kms</code>.</p>
+
+<p>File <code>radeon_kms.c</code> defines structure <code>radeon_ioctls_kms</code> to define all the IOCTL operations available to userspace. These IOCTLS
+are not “standardised”; they are understood only by the matching libdrm file (eg <code>/usr/lib/i386-linux-gnu/libdrm_radeon.so.1</code>).</p>
+
+<p>The first block (up until the “KMS” comment) are obsolete/disabled IOCTLs that just return -EINVAL. ?? who uses these ??</p>
+
+<p>The following IOCTLs are the APIs used by kms-enabled graphics drivers:</p>
+
+<ul>
+  <li><code>INFO</code></li>
+  <li>
+<code>CS</code> – submit a batch of command-stream instructions</li>
+  <li>
+<code>GEM_INFO</code> – ??</li>
+  <li>
+<code>GEM_CREATE</code>  – create a buffer</li>
+  <li>
+<code>GEM_MMAP</code> – map a GEM buffer into the caller’s address-space</li>
+  <li>
+<code>GEM_SET_DOMAIN</code> –</li>
+  <li>
+<code>GEM_PREAD</code> –</li>
+  <li>
+<code>GEM_PWRITE</code> –</li>
+  <li>
+<code>GEM_WAIT_IDLE</code> –</li>
+  <li>
+<code>GEM_SET_TILING</code> –</li>
+  <li>
+<code>GEM_GET_TILING</code> –</li>
+  <li>
+<code>GEM_BUSY</code> –</li>
+  <li>
+<code>GEM_VA</code> –</li>
+</ul>
+
+<h1 id="ring-buffer-handling">Ring Buffer Handling</h1>
+
+<p>One of the important tasks that userspace apps need to do is send “command stream” instructions direct to the graphics card (not via X). The radeon graphics cards use a “ring buffer” structure to provide a high-performance data channel for these instructions.</p>
+
+<p>File <code>radeon_ring.c</code> implements the necessary logic. In particular:</p>
+
+<pre><code>+ `radeon_ib_get` --&gt; returns one of the "indirect" buffers - in r5xx there are two.
+  * `radeon_sa_bo_new` allocates memory for the buffer
++ `radeon_ib_schedule` --&gt; emits a command on the circular buffer that tells the GPU to use an IB buffer.
+</code></pre>
+
+<h1 id="command-stream-parsing">Command Stream Parsing</h1>
+
+<p>One of the important tasks that userspace apps need to do is send “command stream” instructions direct to the graphics card (not via X). However some of these commands can be used to take over the host computer or even damage the graphics card or display. Therefore the commands sent are first “validated” by the KMS driver before being passed on.</p>
+
+<p>File <code>radeon_cs_parse.c.</code> implements the necessary logic. In particular:</p>
+
+<pre><code>radeon_cs_ib_chunk():
+  + obtains an intermediate buffer
+  + calls `radeon_sc_parse`
+  + calls `radeon_cs_finish_pages`
+  + calls `radeon_cs_sync_rings`
+  + calls `radeon_ib_schedule`
+    ==&gt; writes commands to the main ring to load the intermediate buffer now
+
+radeon_cs.c:radeon_cs_ioctl 
++ validates commands then passes them on to ring buffer
++ referenced from radeon_kms.c as
+     DRM_IOCTL_DEF_DRV(
+</code></pre>
+
+<h1 id="questions">Questions</h1>
+
+<ul>
+  <li>
+    <p>Is DRM_MINOR_RENDER totally obsolete? – looks like it.</p>
+  </li>
+  <li>
+    <p>Does the “/dev/drm” file referenced in comments exist anymore – doesn’t look like it.
+?? does /dev/drm appear if kernel is booted with nomodeset?</p>
+  </li>
+</ul>
+
+<h1 id="references">References</h1>
+
+<p>Information in this article has been pulled from <em>many</em> sources. Here are a few of them:</p>
+
+<ul>
+  <li>
+    <p><a href="http://dri.sourceforge.net/doc/DRIbeginner.html">DRI for Beginners</a></p>
+  </li>
+  <li>
+    <p><a href="http://virtuousgeek.org/blog/index.php/jbarnes/2011/10/31/writing_stanalone_programs_with_egl_and_">Example of initialising graphics mode using the libdrm api</a></p>
+  </li>
+  <li>
+    <p><a href="https://dvdhrm.wordpress.com/2012/09/13/linux-drm-mode-setting-api/">David Herrmann’s libdrm modesetting example</a></p>
+  </li>
+</ul>
+
+<p>And here are some other useful references:</p>
+
+<ul>
+  <li>
+    <p><a href="http://ppaalanen.blogspot.se/2014/06/from-pre-history-to-beyond-global.html">Pekka Paalanen’s History of Graphics Modesetting in X11, KMS and DRM</a></p>
+  </li>
+  <li>
+    <p><a href="http://www.phoronix.com/scan.php?page=news_item&amp;px=MTgwMzU">A project to document DRM/KMS</a> and <a href="https://lwn.net/Articles/582690/">more here</a></p>
+  </li>
+</ul>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:vga-text" role="doc-endnote">
+
+      <p>Consoles (such as the boot console) were output using BIOS VGA text operations, and did not support graphics. <a href="#fnref:vga-text" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/drm-and-kms/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,381 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - The Snowflake Data Warehouse</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>The Snowflake Data Warehouse</h1>
+    <aside>First published on: July 21, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>I recently saw some references to the <a href="https://www.snowflake.net/product/architecture/">Snowflake Data Warehouse</a>. Snowflake’s detailed documentation is excellent, but I could not find a decent <em>overview</em>, ie what use-cases it is best suited for. A few hours of research were needed to discover the details; this article is the result.</p>
+
+<p>Note: this article is not about the <a href="https://en.wikipedia.org/wiki/Snowflake_schema">snowflake schema pattern</a>, but about a database/data-warehouse product called Snowflake.</p>
+
+<p>Snowflake is a database which is available only “in the cloud” as a hosted service (“SaaS”). It currently is available only on the AWS cloud, but is not tightly coupled to Amazon and may well be available on other clouds (eg Azure, GCP) in the near future.</p>
+
+<p>It is intended for “data warehousing” tasks, and is similar to <a href="/cloud/google-bigquery-overview">GCP BigQuery</a> or <a href="/bigdata/hive">Hadoop Hive</a>. It stores large amounts of tabular data efficiently, and runs analytics-type queries efficiently over large datasets.</p>
+
+<p>It is <em>not</em> an “OLAP Engine”, ie “high level” data warehouse tool, and does not directly offer support for <em>star schemas</em>, <em>cubes</em>, etc. If you are interested in this kind of functionality, see Apache Kylin (though that requires Hive, and does not work with Snowflake).</p>
+
+<p>It is also not an OLTP database, ie should not be used for regular updates and lookups of records by exact key.</p>
+
+<p>I am not personally involved with the Snowflake product in any way, and am not currently a user of it - all the following information is just from basic research.</p>
+
+<h1 id="most-significant-features">Most Significant Features</h1>
+
+<p>The most important attributes of Snowflake Data Warehouse at a glance:</p>
+
+<ul>
+  <li>Not a “full OLAP data warehouse solution”, just a database (similar to BigQuery/Hive)</li>
+  <li>Not open-source; cloud-only SaaS (pay for CPU usage by the hour and storage by data volume)</li>
+  <li>Cheap data storage (all data persisted in AWS S3, with heavy data cacheing on worker nodes for performance)</li>
+  <li>Nice control over performance (select size of worker VM pools)</li>
+  <li>Worker VMs can be destroyed when database not active (because data is stored in S3)</li>
+  <li>Cheap “clone” and “snapshot” operations (due to immutable underlying files in hive/hbase style)</li>
+  <li>Excellent support for “document-type data” (hierarchical/nested)
+    <ul>
+      <li>Data can be imported from JSON/AVRO/XML and similar structures into Snowflake without <em>flattening</em>
+</li>
+      <li>Also has interesting approach to handling <em>types</em> within such data (see later)</li>
+    </ul>
+  </li>
+  <li>Near-standard SQL support - but with extensions for handling document-like data</li>
+  <li>All data saved in its own column-oriented storage format (similar to Parquet/ORC)</li>
+  <li>No primary key constraints or foreign key constraints (like BigQuery/Hive)</li>
+  <li>Inefficient single-record lookups, updates and deletes (similar to BigQuery/Hive; Snowflake is for OLAP not OLTP)</li>
+  <li>Reasonably low-latency queries (like BigQuery, HiveLLAP or Impala)</li>
+</ul>
+
+<p>Internally, its architecture is somewhat like a cross between Hive, Hive-LLAP, and HBase. There is an excellent <a href="http://info.snowflake.net/rs/252-RFO-227/images/Snowflake_SIGMOD.pdf">paper</a> describing the implementation in reasonable detail.</p>
+
+<h1 id="comparison-with-bigquery">Comparison with BigQuery</h1>
+
+<p>Snowflake addresses similar usecases to GCP BigQuery - storing large to extremely-large datasets (1TB - 1Petabyte) and doing statistics/reporting/machine-learning over large subsets of the dataset.</p>
+
+<p>Costs approximately the same as GCP BigQuery for data storage and query execution. Of course exact pricing depends on usage patterns, but pricing is certainly not an order of magnitude different.</p>
+
+<p>Performance <a href="https://fivetran.com/blog/warehouse-benchmark">is also roughly the same</a> - though of course both have many “tweakable” parameters that trade off performance against price, so it is hard to make an exact comparison.</p>
+
+<p>Both support “columns” holding array-typed or nested-record-typed values. However BigQuery always requires a strict schema for data, while Snowflake allows importing of data without a schema. Snowflakes’s ability to import and query data without explicit schemas is very interesting and the most innovative part of Snowflake.</p>
+
+<p>Snowflake’s snapshot and clone operations are also interesting, and do not appear to have any equivalent in BigQuery. BigQuery does support “point in time snapshots” for data up to 7 days old via “table decorators” but that feature appears to only be available via the “legacy SQL” syntax - and is not nearly as flexible as Snowflake.</p>
+
+<p>BigQuery has special support for “streaming writes”, ie for small data items to be frequently appended to an existing table. It is not currently clear how Snowflake handles such data.</p>
+
+<p>BigQuery can read external files as well as data imported into its own tables; this is particularly useful for joining large datasets already in BigQuery with small datasets held externally (in GCP cloud storage, or on Google Drive). It appears that Snowflake only queries data that has already been imported into it (written in its own data format to S3).</p>
+
+<p>BigQuery supports “explicit time-based partitioning” of tables, which offers two benefits:</p>
+
+<ul>
+  <li>Queries that specify the partitioning-timestamp column in the where-clause are more efficient (whole partitions can be skipped)</li>
+  <li>Data can be efficiently discarded when older than a threshold</li>
+</ul>
+
+<p>Snowflake also partitions data to make querying efficient. However it does this automatically, without explicit declaration from the schema author. It is not clear how effective this can be - I would expect that partitioning is most effective when exactly one column is chosen, and query authors are aware that the column is a partitioning criteria. It certainly does not allow data to be efficiently discarded as BigQuery does.</p>
+
+<p>BigQuery only charges for use when queries are actually being executed; there is no need to “stop a database” at any time. Snowflake does require some additional administration to minimise costs. However for high-priority jobs, it would seem that Snowflake “virtual warehouses” offer an easier way to guarantee priority.</p>
+
+<h1 id="comparison-to-hive">Comparison to Hive</h1>
+
+<p>Snowflake addresses similar use-cases to Hive.</p>
+
+<p>Due to the fact that data is persisted into effectively unlimited AWS S3 storage, Snowflake will scale far better than Hive. The ability to allocate “worker VM pools” of various sizes for query execution, and then to destroy those pools when they are not needed, together with the cheap cost of S3 storage, is likely to make Snowflake more cost-effective than Hive.</p>
+
+<p>Once a Snowflake worker pool (“virtual warehouse”) is running, latency for queries is low (like HiveLLAP). Startup/warmup of such pools may take some time, ie the first few queries may be slow.</p>
+
+<p>Snowflake is only available on AWS, ie is not an option for data that must be retained on-premise.</p>
+
+<p>Hive supports very flexible partitioning of datasets, which must be explicitly defined on table creation.</p>
+
+<ul>
+  <li>Queries that specify the partitioning-timestamp column in the where-clause are more efficient (whole partitions can be skipped)</li>
+  <li>Specific partitions can be efficiently discarded.</li>
+</ul>
+
+<p>Snowflake also partitions data to make querying efficient. However it does this automatically, without explicit declaration from the schema author. It is not clear how effective this can be - I would expect that partitioning is most effective when exactly one column is chosen, and query authors are aware that the column is a partitioning criteria. It certainly does not allow data to be efficiently discarded.</p>
+
+<h1 id="snowflake-documentation">Snowflake Documentation</h1>
+
+<p>There is <a href="https://docs.snowflake.net/manuals/user-guide-getting-started.html">excellent user-level information</a> available. The only thing really lacking is an overview - which this article hopefully provides.</p>
+
+<p>There is an <a href="http://info.snowflake.net/rs/252-RFO-227/images/Snowflake_SIGMOD.pdf">excellent academic paper</a> on the Snowflake design. I wish all software producers would do something like this! Note that this paper is a little old now; some of the problems they point out with GCP BigQuery no longer exist (eg BigQuery now supports almost-standard SQL).</p>
+
+<h1 id="standard-sql-syntax-support">Standard SQL Syntax Support</h1>
+
+<p>The Snowflake team have gone to considerable effort to support ANSI-standard DDL (defining tables etc) and DML (queries, updates, etc). Scripts designed for other databases should generally work unchanged on Snowflake. However that doesn’t mean that such scripts <em>have the same effect</em>. As an example, tables can be defined with primary and foreign keys, and indexes. However such definitions are <a href="https://docs.snowflake.net/manuals/sql-reference/constraints-overview.html">not enforced</a> - a nicer way of saying they are ignored.</p>
+
+<p>Similarly, selects specifying a full primary key are efficient in relational databases - but not so with Snowflake, as it is an OLAP-style engine and not an OLTP-style engine. Like BigQuery/Hive/etc, a “select” effectively triggers a full-table-scan (but with optimisations; see file format below).</p>
+
+<p>Snowflake adds non-standard extensions to SQL in order to support querying document-like (ie non-tabular, or nested) datastructures.</p>
+
+<h1 id="file-format">File Format</h1>
+
+<p>Columnar storage similar to ORC/Parquet. Hive, BigQuery and similar tools do not keep “indices” of records. Snowflake also does not keep indices (although it does track some metadata due to its “micropartitioning” approach).</p>
+
+<p>When indices are not available, any select must be a “full table scan” - but various optimisations can still be applied:</p>
+
+<ul>
+  <li>Skipping of irrelevant <a href="https://docs.snowflake.net/manuals/user-guide/tables-micro-partitions.html#micro-partitions">partitions</a>
+</li>
+  <li>Per-block metadata containing min/max values for columns</li>
+  <li>Per-block bloom filters (probably)</li>
+</ul>
+
+<p>Datafiles are immutable:</p>
+
+<ul>
+  <li>Each modification produces a newer version of each affected file</li>
+  <li>Immutable files supports efficient snapshots (rewind) and clones</li>
+</ul>
+
+<p>Datafiles are stored in “object storage” aka “blob storage”:</p>
+
+<ul>
+  <li>Currently only AWS S3 supported, but others may come later</li>
+  <li>Storage is thus cheap, cheap, cheap and very reliable.</li>
+  <li>Worker nodes can be shut down without losing data</li>
+  <li>File format is proprietary to snowflake, but similar to ORC/Parquet</li>
+</ul>
+
+<p>For document-typed data, there is some cool auto-type-detect functionality. For each <em>block</em> of data which is imported without a schema (eg from JSON or XML), Snowflake scans all values of each column within the block to deduce the datatype (eg integer, timestamp or string). For each column, the data is then stored in its raw format (string) and its deduced type (eg compact integers). Queries such as sums over integers can then be effectively applied to such data efficiently (no repeated parsing), and the usual per-block statistics (min/max values, bloom filters, etc) can be precomputed to optimise later queries. When a large document is imported (producing multiple blocks of storage) then the type can possibly be different for the same column in different blocks (though that is unlikely). See the <a href="http://info.snowflake.net/rs/252-RFO-227/images/Snowflake_SIGMOD.pdf">Snowflake paper</a> for details.</p>
+
+<h1 id="virtual-warehouses-vws-aka-worker-node-pools">Virtual Warehouses (VWs) aka “worker node pools”</h1>
+
+<p>A Snowflake user (or admin) can start a “virtual warehouse” (pool of worker nodes) at any time. Queries (or updates) can then be executed on that “virtual warehouse”; worker nodes can access existing files within longterm S3 storage. Multiple virtual warehouses can access the same tables concurrently (via lock management system). Virtual warehouses are often started for specific tasks, and terminated when that task is complete.</p>
+
+<p>As queries are executed, data is cached on locally-attached storage on worker nodes for efficient queries later. The “query optimiser” for each VW is aware of which nodes have which files from S3 cached, and direct queries that may affect that file’s contents to the worker node on which that data is already cached. Unbalanced cacheing of data is dealt with by “work stealing”: during a query, when one node is idle then it “takes over” cached files from busy nodes.</p>
+
+<p>While a Snowflake Virtual Warehouse is based on a pool of VMs, this is mostly hidden from users; a user just “creates a VW” of one of the available sizes (small/medium/large); no low-level administration is required.</p>
+
+<p>A VW runs only in one AWS availability zone, ie needs admin intervention in case of full zone outage.</p>
+
+<p>While file cacheing works around the relative slowness of data retrieval from S3, it does mean that a VW has a “warm up period” during which queries execute at reduced speed.</p>
+
+<p>To manage costs, VWs should be shut down when not needed, or at least reduced in size. This is somewhat more complex than BigQuery, where charges are only incurred when queries are actually executed.</p>
+
+<h1 id="document-database-support">Document Database Support</h1>
+
+<p>Snowflake supports schemaless (nonstructured) data.</p>
+
+<p>Fields can be of type VARIANT for “schemaless” storage - VARIANT is a union of all other types.</p>
+
+<p>When loading data without schema, for each column, each “block” of data is scanned to auto-determine the type (eg in a json array of objects, they are divided into blocks of 10K rows. Then for each unique fieldname, the type is determined. When a column with a specific name (eg “count”) frequently exists and always has type INT within that block, then column-oriented storage is used to store “count” separately from other fields, and with integer type.</p>
+
+<p>The use of column-based storage gives the usual column-oriented benefits for queries. The use of a concrete type allows min/max and bloom-filters to be computed for later query pruning. Using a type also gives much more compressed storage (though snowflake also keeps the original string-format for safety).</p>
+
+<p>Performance tests show “schemaless” data can be queried very nearly as fast as data with explicit schema.</p>
+
+<h1 id="data-updates">Data Updates</h1>
+
+<p>Snowflake is “designed for analytic loads”, meaning data is most efficiently added via:</p>
+
+<ul>
+  <li>bulk or incremental appends</li>
+  <li>bulk updates</li>
+</ul>
+
+<p>Snowflake does support <em>ACID transactions</em>, but this does not mean it is anything like a relational database (Oracle, MySQL, etc). Transactions are implemented via “snapshot isolation” on top of MVCC (no table locking). This generally means that when any two transactions touch the same data, then the first one to commit succeeds and the other fails on commit (optimistic locking).</p>
+
+<p>The statement “touch the same data” might possibly mean “change different records in the same file” - need to test exactly how well Snowflake supports concurrent updates. This is not a common pattern for data warehouses, so it may well be that (despite the “acid transaction support”) concurrent updates from multiple applications should be avoided.</p>
+
+<h1 id="additional-minor-stuff">Additional minor stuff</h1>
+
+<p>Snowflake:</p>
+
+<ul>
+  <li>performs transparent online upgrades (without downtime)</li>
+  <li>supports custom UDFs in javascript</li>
+  <li>has its own internal “metadata store” similar to HCatalog</li>
+  <li>uses a key-value store for things like transaction logs.</li>
+</ul>
+
+<p>SQL compilation/optimisation is always done server-side (hiveserver2-style, cassandra-style) rather than client-side (simple hive). In other words, Snowflake runs like a traditional “database server” rather than an “embedded sql compiler library”.</p>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/snowflake/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

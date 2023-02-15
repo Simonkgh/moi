@@ -1,0 +1,378 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Public Key Certificates</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Public Key Certificates</h1>
+    <aside>First published on: December 27, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Cryptography/'>Cryptography</a>, <a href='/category/Security/'>Security</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>Here are some brief notes on how public key certificates work - eg those used to authenticate an https website.</p>
+
+<h1 id="encrypting-and-signing">Encrypting and Signing</h1>
+
+<p>A “key” in asymmetric <a href="https://en.wikipedia.org/wiki/Public-key_cryptography">public-key cryptography</a> comes as a (public,private) pair of values. Once a system has the public key of some other entity, it can then:</p>
+
+<ul>
+  <li>send it a message that nobody but the intended recipient can read, or</li>
+  <li>verify that a (publicly readable) message came from that entity (ie validate a signature)</li>
+</ul>
+
+<p>Sending an encrypted message is straight-forward: the sender generates a random <em>symmetric</em> encryption key, encodes this with the <em>public key of the intended recipient</em> and sends the resulting scrambled symmetric key to (hopefully) the recipient. It doesn’t matter whether the data is intercepted or copied underway; the scrambled data can only be unscrambled by something that knows the corresponding <em>private key</em>. Knowing the public key is enough to <em>scramble</em> the data, but not to unscramble it. The rest of the message is then encrypted with the symmetric key, and sent too; anyone without the symmetric key cannot decrypt it. The message being sent is not (normally) encrypted with the public key directly, as this kind of encryption is much slower than symmetric encryption; the above process supports performance that is (apart from a small startup cost) as fast as symmetric encryption on its own.</p>
+
+<p>Signing messages is also simple. The originator first sends the message to be signed, then computes a <em>checksum</em> of its contents and <em>encodes</em> this with its private key and sends this too. The original message is in plain-text, ie anybody can read it. Anybody in possession of the corresponding public key can then <em>decrypt</em> the signature block at the end of the message, and compare it to a checksum computed locally. If the checksums match, then (a) nobody has modified the data while underway, and (b) the possessor of the private key is the only person who could have generated that encrypted signature.</p>
+
+<p>Given the ability to send a message that only a specific recipient can read, it is trivial to set up two-way encrypted communications: the initial recipient just needs to encode its reply using the same symmetric key that the sender used, as nobody else can know it. Alternatively, that first message can include a <em>different</em> symmetric key to use.</p>
+
+<p>Of course two systems can exchange data, and know a message came from a specific sender, with traditional <em>symmetric encryption</em> too. However that requires that the two somehow <em>share a common encryption key</em> before the communication starts, via some unspecified “secure” approach (eg by previously having met in person, or a trusted courier who brings a USB stick from one to the other). With public-key encryption, an entity can announce its <em>public key</em> to the world, with no need for secrecy - only the private key must be protected.</p>
+
+<p>However there is a problem with the above: we rarely want to communicate simply <em>with the possessor of a specific public/private key pair</em>, but instead want to communicate with <em>the owner of a specific name</em>, eg the owner of a specific email-address or the system managing a specific website-domain. Simply asking for a key by exchanging emails or by downloading a key from a website is unreliable - an attacker can <em>intercept</em> emails and send a fake response, or <em>redirect</em> an http request to their own webserver.  There thus needs to be a way to verify (name, public-key) pairs.</p>
+
+<p>For small numbers of names, it is possible to simply define the (name, public-key) pairs for a system manually, without need for any complex structure. I can visit my friends and family, bring their public keys back home on a USB stick and register these in my PC - no complex system required. However this doesn’t scale well - I don’t want to do this for the hundreds of sites whose identity I want to verify (my bank, telco, email provider, etc).</p>
+
+<p>If there were a trusted global database of all (name, key) pairs then that would also solve the problem. However such a system is simply impossible to build and keep up-to-date. A more “distributed” system is required.</p>
+
+<p>Certificates and chains-of-trust are one popular system that allows verifying an unlimited number of (name,key) pairs given just a small starting set of initial (name,key) pairs. It is used to verify websites, and many other things.</p>
+
+<h1 id="certificates">Certificates</h1>
+
+<p>An X.509 certificate is simply a smallish (few kbytes) block of data that holds the following attributes:</p>
+
+<ul>
+  <li>a unique name</li>
+  <li>a public-key</li>
+  <li>an expiry-date</li>
+  <li>purpose (usage) and constraints of certificate (a set of values)</li>
+  <li>a number of other values that aren’t really relevant here</li>
+</ul>
+
+<p>and a <em>signature</em> of format:</p>
+
+<ul>
+  <li>unique name of signer</li>
+  <li>checksum of the above attributes, encrypted with the private key of the signer</li>
+</ul>
+
+<p>The idea is that I (well, software on my behalf) can download a certificate from anywhere (including untrustworthy sources), and verify whether it is real or faked. When real, then I have the (name, public-key) pair I need to communicate securely with the owner of the name - or rather I can send data to somebody I <em>think</em> is the owner of that name, and at worse they can do nothing with it. An attacker might be able to intercept or redirect my data, but because I am using the public key that <em>really</em> belongs to the desired name, only the owner of that name can decrypt. Only if they can trick me into believing a false certificate (ie name, public-key pair) is real can they point at a key under their control - and such a certificate should be detectable as faked.</p>
+
+<p>The “name” is usually an internet domain name, eg “www.myserver.example”. Actually, this is represented in X.500 (ie LDAP) form, eg “cn=www.myserver.example,o=mycorp,c=mycountry”.</p>
+
+<p>To repeat from above: I can download a certificate <em>from an untrusted source</em>, and still verify its contents (most importantly, the name/key pair) via a <em>chain of trust</em>. This is done as follows:</p>
+
+<p>Step 1: obtain and verify the signer certificate</p>
+
+<ul>
+  <li>if the “signer name” matches one of my “initial trusted certificates”, then done</li>
+  <li>else download the certificate for that “signer name” from anywhere (including untrustworthy sources) and validate it using <em>its</em> signer (recursive!)</li>
+</ul>
+
+<p>Step 2: validate the signature</p>
+
+<ul>
+  <li>compute a checksum over the attributes of the certificate</li>
+  <li>using the public-key from the signer’s certificate, decrypt the “encrypted checksum” supposedly generated by that signer</li>
+  <li>compare the two values - if they match, then the certificate has a valid signature</li>
+</ul>
+
+<p>Step 1 can potentially require several iterations until reaching a certificate that is in the “initial trusted certificates” set. However in practice chains of more than 4 signatures are rare, and software is generally configured to give up and return “failed” after a relatively low number of passes. There is the danger that somebody provides a bad certificate for the signer, but the worst that can happen is that a valid certificate is rejected - never that an invalid certificate is accepted.</p>
+
+<p>A fake certificate can lie about the identity of the “signer”, but the forger has no access to the signer’s private key and so cannot generate an “encrypted checksum value” which will decode to the right value using the signer’s public key. A certificate signed by a real signer can later be modified - but then the decoded checksum does not match.</p>
+
+<p>Typically, a website will provide its own certificate (ie allow downloading of a certificate whose name matches the website). It will also provide all the certificates for the “signers”, except for the final one. The visitor to the website doesn’t care that all this data is coming from an untrusted source; the chain of signatures eventually <em>must</em> end up with a certificate that the user already has installed on their system and that then can detect if any of the data was tampered with.</p>
+
+<p>And this solves our original problem: an organisation can create a “root” (unsigned or self-signed) certificate for itself, and then sign certificates for multiple suborganisations, which can themselves do the same, etc. When a user has the key of a top-level organisation in his initial-set, then any website/etc whose cert is signed by one of its suborganisations can be validated by the user.</p>
+
+<p>In other words, a user can verify a certificate containing a (name, public-key) mapping offered by any site, as long as there is a chain of signatures that leads back to a “trusted” certificate on the user’s system.</p>
+
+<p>An example can be seen by using a web-browser to visit any “https” site (eg https://www.google.com) and then choosing the “view certificate” option (in different places, depending on browser - for Firefox, click on the padlock icon in the navigation bar). This will show the certificate for the current site, and the chain of “signing certificates” ending up at one of the small set of certificates that came builtin to your browser or operating-system.</p>
+
+<h1 id="certificate-stores-and-root-certificates">Certificate Stores and Root Certificates</h1>
+
+<p>How is the initial set of “trusted certificates” configured?</p>
+
+<p>A location in which a set of “initial trusted certificates” is stored is often called a <em>certificate store</em>.</p>
+
+<p>Operating systems often come with a system-wide certificate store, already populated with a handful of certificates that the operating system distributor considers trustworthy. Usually, each user starts with a copy of the standard certificates but can add/remove entries as desired.</p>
+
+<p>Some web browsers simply use the operating system certificate store, while others provide their own certificate store populated with an initial set that the <em>browser distributor</em> thinks are trustworthy. Browser distributors don’t always agree with the OS distributors - eg Mozilla and Microsoft have had significantly different sets of certificates at some times in the past. Web browsers usually have an admin screen somewhere in which the trusted set of certificates can be viewed and edited.</p>
+
+<p>A “root certificate” is one which has no signature; a “self-signed” certificate is one whose “signer name” points back to the same certificate. Such certificates cannot be “verified”, they can only be directly installed onto a system as part of the “initial set of trusted certificates”. That doesn’t mean they are bad, just that they are not “auto-verifiable” via a chain-of-trust. These certificates cannot be used as a <em>link</em> in a chain-of-trust, only as an end-point.</p>
+
+<p>The members of the “initial set of trusted certificates” are often unsigned or self-signed. However it is valid to have a signed certificate in the trusted set; this allows a user to trust a sub-range of signing organisations while <em>not</em> including the parent certificate in the initial trusted set.</p>
+
+<p>It is quite valid for a user to add certificates to their trusted set. Developers may wish to temporarily create a “self-signed certificate” for a website they are developing rather than pay to get the certificate signed by some descendant of the “standard trusted certificate set”. Websites intended for internal use within a company often come with self-signed certificates, and the company IT admins ensure that the relevant certificates are loaded into every employee PC.</p>
+
+<p>It is also quite valid for a user to remove/disable entries from the default set provided by the operating-system or web-browser. On modern OS/browsers, the initial store typically has around 20 certificates belonging to companies specializing in signing certificates for other companies. These are based in various places around the world, including the USA, South America, West Europe, Eastern Europe, Asia, and Africa. For very secure systems, it is wise to disable them all and only add in certificates that are absolutely needed.</p>
+
+<h1 id="certificate-usage-and-constraints">Certificate Usage and Constraints</h1>
+
+<p>Among the attributes of a certificate are fields named “usage” and “constraints”. Together, these are used to specify which purposes a certificate may be used for; when software is <em>validating</em> a certificate, validation will fail if the certificate is being used for some purpose that its usage/constraints do not permit.</p>
+
+<p>The most significant flag is the “Signing Certificate” flag, indicating that this certificate can be used to sign other certificates; these are also known as <em>Certificate Authority Certificates</em> aka CA Certificates. Such certificates are relatively rare; normal certificates used to identify websites do <em>not</em> have the “signing certificate” flag, ie are always at the <em>end</em> of a “chain of trust”.</p>
+
+<p>The possessor of an existing <em>Certificate Authority certificate</em> should be careful who they issue normal (non-CA) certificates to, and extra-careful who they issue <em>CA</em> certificates to (where “issue” means signing a certificate). Of course anyone can <em>create</em> their own certificate with this flag set, but persuading an existing widely-trusted CA to sign that certificate will (and should) be difficult. Persuading end users to <em>directly install</em> such a certificate into their set of initial trusted certificates should also be difficult!</p>
+
+<p>A certificate can optionally be limited to identifying a website, or to signing installable-software-bundles, or various other purposes (identifying a website is by far the most common purpose for a certificate).</p>
+
+<p>As well as usage limitations, each certificate also has an <em>expiry date</em>; certificates are typically valid for 5 years or so (ie Certificate Authorities are usually reluctant to issue certificates with an expiry date longer in the future than that).</p>
+
+<h1 id="constraints-on-ca-certificates">Constraints on CA Certificates</h1>
+
+<p>A CA certificate can optionally have attributes which limit the set of certificates that it can validly sign. This is sometimes referred to as “qualified subordination”.</p>
+
+<p>A CA certificate’s attributes can specify a “Name Constraint”; a constraint of “xyz.example” means that certificate can only validly sign certificates with a CN which end with “.xyz.example”.  Sadly, the DNS names used in the internet have a very broad-and-shallow structure; it is not feasable to have a single CA signing all “*.com” certificates, so in practice many different CAs are in possession of certificate-signing certificates that have rights over the same domains. In particular, organisations in many different countries have the right to sign certificates for “*.com”.</p>
+
+<h1 id="obtaining-a-signed-non-ca-certificate">Obtaining a Signed Non-CA Certificate</h1>
+
+<p>The possessor of a certificate with the “ISA Signing Certificate” flag is sometimes called a CA (Certificate Authority), and their certificate is called a Certificate Authority Certificate. As noted above, anyone can actually create such a certificate, but it isn’t of any use unless it is <em>signed</em> directly or indirectly by one of the certificates that are included in a user’s “initial set of trusted certificates” - or a user can be persuaded to <em>add it</em> to their set of trusted certificates directly.</p>
+
+<p>To obtain a signed certificate for a particular name, a user provides a (name, public-key) pair to a certificate authority (CA) and that authority sends them back a signed certificate. How much effort the CA goes to to verify that the applicant really does have the right to use that name varies - but it usually isn’t very much. A DNS lookup, or ensuring that the applicant can respond to an email sent to that address is usually considered sufficient. The general idea is that the real owner of the name will complain if somebody falsely registers a certificate for them. These certificates don’t have the “Signing Certificate” flag set - they are “endpoints” in the chain of trust.</p>
+
+<h1 id="wildcard-certificates">Wildcard Certificates</h1>
+
+<p>As noted earlier, the “subject” attribute of an X.509 certificate is an LDAP name; it will have a “cn” part, and one or more other parts - eg “cn=myserver.mycorp.example,o=mycorporation,c=mycountry”.</p>
+
+<p>In most cases, (non-CA) certificates are for a single name, ie the “cn” part is a complete name and thus the certificate maps (name-&gt;public key) for exactly one name.</p>
+
+<p>However a certificate can have multiple “Subject alternative name” attributes, specifying additional names that this certificate is valid for, eg “server1.mycorp.example,server2.mycorp.example”. It is also possible for the “cn” part of the “subject” attribute to contain a leading “*”, eg “*.mycorp.example”, in which case the certificate is valid for any name matching that pattern.</p>
+
+<p>Alternative names can be DNS names (eg “foo.bar.example”), email-address (eg “foo@bar.example”), ip-addresses(eg “100.101.102.103”), or URIs (like “http://foo.bar.example/baz”).</p>
+
+<p>A certificate applying to multiple names is called a <a href="http://en.wikipedia.org/wiki/Wildcard_certificate">wildcard certificate</a>. Such certificates can be very useful for a server hosting multiple “virtual servers”. However it does mean that each server needs to be configured with the same private key, ie a breach of any server is a breach of all of them - so don’t overuse.</p>
+
+<h1 id="potential-vulnerabilities-in-the-chain-of-trust">Potential Vulnerabilities in the Chain of Trust</h1>
+
+<p>The primary weaknesses in the “chain of trust” system are:</p>
+
+<ul>
+  <li>a real signer might have their private key stolen, allowing the thief to sign certificates</li>
+  <li>a real signer might deliberately or undeliberately sign an untrue (name,public-key) pair</li>
+  <li>a real signer might issue a “certificate signing certificate” to an untrustworthy company which then deliberately signs other untrue (name,key) pairs.</li>
+  <li>my local PC might have an incorrect set of initial certificates</li>
+</ul>
+
+<p>As noted above, a “certificate signing certificate” can be restricted to a subset of names, which is a good step where possible. However for a large domain like “*.com” it isn’t possible to have just one organisation with the right to sign certificates for corresponding names. There can therefore be many different organisations with certificate-signing certificates for the same names - potentially based in many different countries. It has already been the case that such organisations in some countries have been put under government pressure to issue government departments with certificates for things like “*.google.com”. Possession of such a certificate makes it possible to impersonate the target site and decode encrypted traffic intended for the real owner without the “chain of trust” algorithm reporting a problem. See sections on “potential vulerabilities” and “certificate pinning” below for more information.</p>
+
+<p>There is no such thing as an “official list” of root certificates; it depends on what has been installed on any individual PC. There is also no rule that prevents different root certificates from being able to sign the same name-pattern. If your browser or OS has mutiple initial certificates that cover the same name-patterns, then a (name,key) pair could be signed by any of them and be considered valid.</p>
+
+<h1 id="pinning-of-certificates-and-public-keys">Pinning of Certificates and Public Keys</h1>
+
+<p>One problem with the chain-of-trust is that you can be happily using a website, and then later an attacker gets hold of a certificate for the same name but pointing to a key held by the attacker. With the default implementation of chain-of-trust, the attacker just needs to redirect traffic to their website and whichever program is involved will simply switch over to using the new certificate and new key. Of course CAs <em>should</em> not issue such certificates, but it does happen - CAs do rarely have their keys stolen, and CAs are sometimes put under government pressure. It would be nice to have some defence against such problems.</p>
+
+<p>Certificate pinning simply means that software should remember which certificate it first used to communicate with a specific name, and reject any attempts to switch to a different certificate. The problem with this is that certificates typically have an expiry-time of a few years - and the owner of the certificate will typically renew significantly more often than that in order to ensure they have plenty of time before the expiry occurs (and they are using the latest encryption settings, which are defined in the certificate). Optionally, the system that provides the certificate can also specify <em>how long</em> it should be pinned for.</p>
+
+<p>PublicKey pinning is very similar, except that it remembers the <em>public key</em> that the original certificate was using, and allows switching to a new certificate as long as the <em>public key</em> part remains the same.</p>
+
+<p>Alternatively, programs which talk to a limited set of systems can implement “pinning” simply by hard-coding a specific certificate or public-key - ie not using a “chain of trust” at all - and passing this list of “acceptable keys” to the software APIs that open encrypted connections.</p>
+
+<p>The advantages of pinning are significant. It’s not just for the paranoid; enough attacks against security have happened over the last few years to make this an issue for everyone.</p>
+
+<p>Pinning could cause some minor inconvenience if a site “lost” its private key for any reason, and had to get a new certificate issued. Possibly more likely is that the site had its private key stolen, and therefore had to replace it (and get a new certificate) - but that’s going to be difficult for everyone anyway, for many reasons. It could also cause problems if a site had originally chosen a bad public/private key pair, and had to generate a better one - not something that is likely to happen often.</p>
+
+<h1 id="alternatives-to-a-chain-of-trust">Alternatives to a Chain of Trust</h1>
+
+<p>Rather than rely on a set of “root certificates” and that every element in the chain is trustworthy, there are alternatives.</p>
+
+<p>The “web of trust” treats certificates as a <em>set</em> rather than as a chain. Instead of each certificate being signed exactly once, it is signed many times.
+And instead of locally having a few 100%-trusted root certificates, a system has a large number of partially-trusted certificates installed. For any certificate, a “probability of trust” can then be computed depending on how many independent paths can be traced from the locally-installed certificates to the end one. If I (at least partially) trust A, and A signed B which signed (C-&gt;keyC), then there is a non-zero chance that keyC really is associated with name C, ie the entity using keyC really is the entity known as C.  If a dozen other paths also lead to the same conclusion, then the mapping is very likely to be true. This is robust against a small fraction of dishonest actors in the system - particularly when C is well-known, and makes it hard for C to bias the system.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://www.ietf.org/rfc/rfc2459.txt">IETF: RFC2459 X.509 Public Key Infrastructure Certificate and CRL Profile</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Public_key_certificate">Wikipedia: Public key certificate</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Certificate-based_encryption">Wikipedia: Certificate-based encryption</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Root_certificate">Wikipedia: Root certificate</a></li>
+  <li><a href="https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning">owasp: Pinning</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Certificate_signing_request">Wikipedia: Certificate signing request</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/X.509">Wikipedia: X.509</a></li>
+  <li><a href="http://unmitigatedrisk.com/?p=24">Unmitigated Risk: Least Privilege and Subordinate Certificate Authorities</a></li>
+  <li><a href="https://security.stackexchange.com/questions/59566/ssl-certificate-chain-verification">Security.StackExchange Comment</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/certificates/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

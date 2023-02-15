@@ -1,0 +1,277 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Spring property-placeholder and generated properties</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='post'>
+    <h1>Spring property-placeholder and generated properties</h1>
+    <aside>Posted on: February 1, 2013</aside>
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      <p>Spring dependency injection is a weird beast sometimes. Today I got bitten by some behaviour that makes no sense at all unless you know that <code>context:property-configurator</code> is implemented as a BeanPostProcessor, and are familiar with what a BeanPostProcessor does. As it happens, I did <a href="http://myfaces.apache.org/orchestra">a lot of work with Spring internals</a> about 5 years ago, but the details have rapidly faded. Today was an unwelcome reminder…</p>
+
+<p>In short: when using Spring 3.0 and XML configuration, <code>${varname}</code> is not expanded within a bean-factory that a property-placeholder references via <code>properties-ref</code>.</p>
+
+<!-- more -->
+
+<p>Spring’s <code>&lt;context:property-placeholder&gt;</code> tag allows bean definitions to reference values from property files; once one (or more) property placeholders are defined, then <code>value="${foo.bar}"</code> gets expanded using whatever properties were passed to the property-placeholder. Useful.</p>
+
+<p>However for a particular use-case, I needed to expose properties that weren’t simply loaded from an external file. Simple - just write a factory bean that returns a properties object, then pass that object to <code>property-placeholder</code> using <code>properties-ref="beanname"</code>, right? Well, yes - except that the <em>factory</em> itself needed to be configured - and most conveniently via a properties file.</p>
+
+<p>The result was some XML that looked like this:</p>
+
+<pre><code>    &lt;!-- Retrieve a Properties object from the OSGi ConfigurationAdmin service, and expose for injection into Spring beans --&gt;
+    &lt;osgix:cm-properties id="base.properties" persistent-id="baseprops"/&gt;
+    &lt;ctx:property-placeholder order="2" properties-ref="base.properties"/&gt;
+
+    &lt;!-- Generate some more properties to be exposed for injection into Spring beans --&gt;
+    &lt;bean id="propGenerator" class="example.PropGenerator"&gt;
+      &lt;constructor-arg value="${my.property}"/&gt;
+    &lt;/bean&gt;
+    &lt;bean id="generated.properties" factory-bean="propGenerator" factory-method="generateProps"/&gt;
+    &lt;ctx:property-placeholder ignore-unresolvable="true" order="1" properties-ref="generated.properties"/&gt;
+
+    ...stuff that uses the above properties via expressions like ${propname}...
+</code></pre>
+
+<p>And - it didn’t work. In the PropGenerator constructor, the parameter was literally <code>"${my.properties}"</code> - the variable wasn’t getting expanded at all.</p>
+
+<p>After much research, the cause turned out to be (as mentioned above) how Spring <code>BeanPostProcessor</code> objects work.</p>
+
+<p>Spring’s context setup is basically:</p>
+
+<ul>
+  <li>parse xml to generate BeanDefinition objects</li>
+  <li>for all definitions whose type is a BeanPostProcessor
+    <ul>
+      <li>instantiate that object [1]</li>
+    </ul>
+  </li>
+  <li>for each BeanDefinition
+    <ul>
+      <li>run all the bean-post-processors; these may modify the BeanDefinition [2]</li>
+      <li>instantiate the bean using the updated BeanDefinition</li>
+    </ul>
+  </li>
+</ul>
+
+<p>A property-placeholder is a BeanPostProcessor which does its work at point [2], expanding <code>${foo}</code> within any BeanDefinition’s value attributes.</p>
+
+<p>Because <code>generated.properties</code> is a dependency of a property-placeholder instantiated at [1], it must also be instantiated and run at stage [1] (which is not the case for normal beans). It therefore does not get any variable-expansion support, as that only occurs at [2].</p>
+
+<p>Note also that when multiple property-placeholders exist, then they are all run at [2], in the order specified by their <code>order</code> attribute. If one expands a variable, then the next one simply never sees that the variable ever existed (the BeanDefinition has been updated). Note also that all property-placeholders except the <em>last one to run</em> must have <code>ignore-unresolvable='true'</code>, otherwise <em>it</em> will report an unknown variable even if a later processor might be able to resolve that variable.</p>
+
+<p>Interestingly, the failure to expand <code>${my.property}</code> does not cause an error to be reported - because the message <code>variable undefined</code> is issued by a property-placeholder BeanPostProcessor - and these <em>simply don’t get executed on this bean’s BeanDefinition</em>.</p>
+
+<p>The best solution I could find is:</p>
+
+<pre><code>    &lt;!-- Retrieve a Properties object from the OSGi ConfigurationAdmin service, and expose for injection into Spring beans --&gt;
+    &lt;osgix:cm-properties id="base.properties" persistent-id="baseprops"/&gt;
+    &lt;ctx:property-placeholder order="2" properties-ref="base.properties"/&gt;
+
+    &lt;!-- Generate some more properties to be exposed for injection into Spring beans --&gt;
+    &lt;bean id="propGenerator" class="example.PropGenerator"&gt;
+      &lt;constructor-arg &gt;
+        &lt;!-- ${my.property} doesn't work yet because beanfactorypostprocessors (including property-placeholders) are still being initialized --&gt;
+        &lt;bean factory-bean="base.properties" factory-method="get"&gt;
+            &lt;constructor-arg value="my.property"/&gt;
+        &lt;/bean&gt;
+      &lt;/constructor-arg&gt;
+    &lt;/bean&gt;
+    &lt;bean id="generated.properties" factory-bean="propGenerator" factory-method="generateProps"/&gt;
+    &lt;ctx:property-placeholder ignore-unresolvable="true" order="1" properties-ref="generated.properties"/&gt;
+
+    ...stuff that uses the above properties via expressions like ${propname}...
+</code></pre>
+
+<p>And the lesson learned today is: multiple property-placeholders are fine, but:</p>
+
+<ul>
+  <li>they should be given an “order” attribute;</li>
+  <li>all except the one with the highest “order” value (last to run) should have <code>ignore-unresolvable="true"</code>;</li>
+  <li>those rare beans that <em>provide</em> properties for a property-placeholder cannot use <code>${..}</code>. Instead, use <code>factory-bean</code> to invoke the <code>get</code> method directly on a properties object.</li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/posts/2013-02-01-propertyplaceholderfail/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

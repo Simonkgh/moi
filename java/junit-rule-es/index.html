@@ -1,0 +1,385 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - A JUnit Rule for Elasticsearch Integration Testing</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>A JUnit Rule for Elasticsearch Integration Testing</h1>
+    <aside>First published on: January 27, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      
+<p>I have recently written about both <a href="/java/junit-rules">JUnit rules</a> and <a href="/bigdata/elasticsearch">Elasticsearch</a>. Here is a JUnit rule which supports writing <em>integration tests</em> which interact with a real (but single-node) Elasticsearch 5.1.x instance in the same JVM. Indexes and mappings can be defined, and the standard APIs used for saving, reading, searching and otherwise using that instance.</p>
+
+<p>Elasticsearch does provide its own integration-test-framework, <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/integration-tests.html">ESIntegTestCase</a>. However this is IMO exceedingly complex to use. It starts a cluster of multiple nodes, creates indices with random numbers of shards, allows simulated failure of nodes in a cluster, etc. As far as I can see, this code is useful for testing <em>Elasticsearch itself</em>, but not so useful for testing <em>client applications which use Elasticsearch</em>.</p>
+
+<h1 id="using-esrule">Using ESRule</h1>
+
+<p>The ESRule class can be used as follows:</p>
+
+<pre><code>public class SomeTest {
+  @Rule
+  public ESRule esRule = new ESRule();
+
+  @Test
+  public void testSomething() {
+    Client client = esRule.getClient();
+    // and here, perform any operations supported by an Elasticsearch client object.
+  }
+}
+</code></pre>
+
+<p>This is particularly useful for testing code that uses the Elasticsearch “transport client” interface rather than the REST interface. It is probably possible to adapt this rule to allow testing via the REST interface, but I haven’t tried it.</p>
+
+<p>An embedded Elasticsearch instance is started before each test, and stopped/deleted when the test completes. Starting up the embedded Elasticsearch instance takes around 5 seconds. It is therefore reasonable to use even for tests that run during a normal build of the application. However testing should generally be done in a few larger test-methods rather than many small independent methods, as the startup time is per-test-method.</p>
+
+<p>Just as a side-note, somewhat related to test startup time: some purists argue that “each test should test just one thing”, but I personally take a more pragmatic approach - what makes the application quality better and developer lives easier with minimal cost and wasted time? As long as a test failure still points the finger clearly at <em>the change that broke the test</em>, I see no problem with a single method that verifies multiple features of the application.</p>
+
+<h1 id="implementation">Implementation</h1>
+
+<p>The implementation of ESRule is:</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="comment">// Author: Simon Kitching</span>
+<span class="comment">// This code is in the public domain</span>
+<span class="keyword">package</span> <span class="namespace">net.vonos.testsupport.elastic</span>;
+
+<span class="keyword">import</span> <span class="include">org.elasticsearch.client.Client</span>;
+<span class="keyword">import</span> <span class="include">org.junit.rules.TestRule</span>;
+<span class="keyword">import</span> <span class="include">org.junit.runner.Description</span>;
+<span class="keyword">import</span> <span class="include">org.junit.runners.model.Statement</span>;
+
+<span class="keyword">import</span> <span class="include">java.io.IOException</span>;
+<span class="keyword">import</span> <span class="include">java.util.Collections</span>;
+
+<span class="comment">/**
+ * A JUnit rule which starts an embedded elastic-search instance.
+ * &lt;p&gt;
+ * Tests which use this rule will run relatively slowly, and should only be used when more conventional unit tests are
+ * not sufficient - eg when testing DAO-specific code.
+ * &lt;/p&gt;
+ */</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">ESRule</span> <span class="directive">implements</span> TestRule {
+    <span class="comment">/** An elastic-search cluster consisting of one node. */</span>
+    <span class="directive">private</span> EmbeddedElasticsearchServer eserver;
+
+    <span class="comment">/** The internal-transport client that talks to the local node. */</span>
+    <span class="directive">private</span> Client client;
+
+    <span class="comment">/**
+     * Return a closure which starts an embedded ES instance, executes the unit-test, then shuts down the
+     * ES instance.
+     */</span>
+    <span class="annotation">@Override</span>
+    <span class="directive">public</span> <span class="predefined-type">Statement</span> apply(<span class="predefined-type">Statement</span> base, Description description) {
+        <span class="keyword">return</span> <span class="keyword">new</span> <span class="predefined-type">Statement</span>() {
+            <span class="annotation">@Override</span>
+            <span class="directive">public</span> <span class="type">void</span> evaluate() <span class="directive">throws</span> <span class="predefined-type">Throwable</span> {
+                eserver = <span class="keyword">new</span> EmbeddedElasticSearchServer();
+                eserver.start();
+
+                client = eserver.getClient();
+                loader = <span class="keyword">new</span> ESIndicesLoader(client, <span class="integer">1</span>, <span class="integer">1</span>);
+                <span class="keyword">try</span> {
+                    base.evaluate(); <span class="comment">// execute the unit test</span>
+                } <span class="keyword">finally</span> {
+                    eserver.shutdown();
+                }
+            }
+        };
+    }
+
+    <span class="comment">/** Return the object through which operations can be performed on the ES cluster. */</span>
+    <span class="directive">public</span> Client getClient() {
+        <span class="keyword">return</span> client;
+    }
+
+    <span class="comment">/**
+     * When data is added to an index, it is not visible in searches until the next "refresh" has been performed.
+     * Refreshes are normally done every second, but this makes it explicit..
+     */</span>
+    <span class="directive">public</span> <span class="type">void</span> refresh(<span class="predefined-type">String</span> index) {
+        <span class="keyword">try</span> {
+            client.admin().indices().prepareRefresh(index).execute().get();
+        } <span class="keyword">catch</span>(<span class="exception">Exception</span> e) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="exception">RuntimeException</span>(<span class="string"><span class="delimiter">"</span><span class="content">Failed to refresh index</span><span class="delimiter">"</span></span>, e);
+        }
+    }
+}</code>
+</pre></div></div>
+
+<p>The majority of the logic is implemented in class EmbeddedElasticsearchServer:</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="comment">// Author: Simon Kitching</span>
+<span class="comment">// This code is in the public domain</span>
+<span class="keyword">package</span> <span class="namespace">net.vonos.testsupport.elastic</span>;
+
+<span class="keyword">import</span> <span class="include">org.apache.commons.io.FileUtils</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.client.Client</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.cluster.ClusterName</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.common.network.NetworkModule</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.common.settings.Settings</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.env.Environment</span>;
+<span class="keyword">import</span> <span class="include">org.elasticsearch.node.Node</span>;
+
+<span class="keyword">import</span> <span class="include">java.io.File</span>;
+<span class="keyword">import</span> <span class="include">java.io.IOException</span>;
+
+<span class="comment">/**
+ * Test helper class which starts up an Elasticsearch instance in the current JVM.
+ */</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">EmbeddedElasticsearchServer</span> {
+
+    <span class="comment">// Suitable location for use with Maven</span>
+    <span class="directive">private</span> <span class="directive">static</span> <span class="directive">final</span> <span class="predefined-type">String</span> DEFAULT_HOME_DIRECTORY = <span class="string"><span class="delimiter">"</span><span class="content">target/elasticsearch-home</span><span class="delimiter">"</span></span>;
+
+    <span class="comment">// The embedded ES instance</span>
+    <span class="directive">private</span> <span class="directive">final</span> Node node;
+
+    <span class="comment">// Setting "path.home" should point to the directory in which Elasticsearch is installed.</span>
+    <span class="directive">private</span> <span class="directive">final</span> <span class="predefined-type">String</span> homeDirectory;
+
+    <span class="comment">/**
+     * Default Constructor.
+     */</span>
+    <span class="directive">public</span> EmbeddedElasticsearchServer() {
+        <span class="local-variable">this</span>(DEFAULT_HOME_DIRECTORY);
+    }
+
+    <span class="comment">/**
+     * Explicit Constructor.
+     */</span>
+    <span class="directive">public</span> EmbeddedElasticsearchServer(<span class="predefined-type">String</span> homeDirectory) {
+        <span class="keyword">try</span> {
+            FileUtils.deleteDirectory(<span class="keyword">new</span> <span class="predefined-type">File</span>(homeDirectory));
+        } <span class="keyword">catch</span>(<span class="exception">IOException</span> e) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="exception">RuntimeException</span>(<span class="string"><span class="delimiter">"</span><span class="content">Unable to clean embedded elastic-search home dir</span><span class="delimiter">"</span></span>, e);
+        }
+
+        <span class="local-variable">this</span>.homeDirectory = homeDirectory;
+
+        Settings.Builder elasticsearchSettings = Settings.builder()
+            .put(Node.NODE_NAME_SETTING.getKey(), <span class="string"><span class="delimiter">"</span><span class="content">testNode</span><span class="delimiter">"</span></span>)
+            .put(NetworkModule.TRANSPORT_TYPE_KEY, <span class="string"><span class="delimiter">"</span><span class="content">local</span><span class="delimiter">"</span></span>)
+            .put(ClusterName.CLUSTER_NAME_SETTING.getKey(), <span class="string"><span class="delimiter">"</span><span class="content">testCluster</span><span class="delimiter">"</span></span>)
+            .put(Environment.PATH_HOME_SETTING.getKey(), homeDirectory)
+            .put(NetworkModule.HTTP_ENABLED.getKey(), <span class="predefined-constant">false</span>)
+            .put(<span class="string"><span class="delimiter">"</span><span class="content">discovery.zen.ping_timeout</span><span class="delimiter">"</span></span>, <span class="integer">0</span>); <span class="comment">// make startup faster</span>
+
+        <span class="local-variable">this</span>.node = <span class="keyword">new</span> Node(elasticsearchSettings.build());
+    }
+
+    <span class="directive">public</span> <span class="type">void</span> start() <span class="directive">throws</span> <span class="exception">Exception</span> {
+        <span class="local-variable">this</span>.node.start();
+    }
+
+    <span class="directive">public</span> Client getClient() {
+        <span class="keyword">return</span> node.client();
+    }
+
+    <span class="directive">public</span> <span class="type">void</span> shutdown() <span class="directive">throws</span> <span class="exception">IOException</span> {
+        node.close();
+
+        <span class="keyword">try</span> {
+            FileUtils.deleteDirectory(<span class="keyword">new</span> <span class="predefined-type">File</span>(homeDirectory));
+        } <span class="keyword">catch</span> (<span class="exception">IOException</span> e) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="exception">RuntimeException</span>(<span class="string"><span class="delimiter">"</span><span class="content">Could not delete home directory of embedded elasticsearch server</span><span class="delimiter">"</span></span>, e);
+        }
+    }
+}</code>
+</pre></div></div>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>The ESRule class is used in production code; there the class has some additional helper methods for defining indices and mappings based on json files in the application resources. That may be the subject of a future article..</p>
+
+<p>The above implementation works with Elasticsearch 5.1 (current version at this point in time). It was originally written for Elasticsearch 2.3, and the changes needed were minimal (in case you need to back-port it again…).</p>
+
+<h1 id="credits">Credits</h1>
+
+<p>Developing this simple test framework would have been vastly more effort without a number of other blog and stackoverflow postings. Sorry I didn’t track all the places I gathered information from, but thanks to you all..</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/junit-rule-es/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,342 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Testing Distributed Systems</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Testing Distributed Systems</h1>
+    <aside>First published on: April 17, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>Over the last three years I’ve been involved in a (still ongoing) project to break a monolithic application into microservices. One of the most interesting/complicated parts of this was changing the <em>testing approach</em>; this article talks about the issues and the solutions we have chosen.</p>
+
+<p>This article addresses issues in any system where <em>releases</em> are non-monolithic, ie different components are released on different schedules. It is not looking at systems which are built from multiple artifacts but where all artifacts are released/upgraded synchronously (monolithic release).</p>
+
+<h1 id="the-old-system-and-testrelease-process">The Old System and Test/Release Process</h1>
+
+<p>In order to talk about the solutions that we chose, it is necessary to look at where we started from.</p>
+
+<p>The project I am talking about had a pretty common approach to testing. A monolithic Java code-base was originally created in the mid 1990s, and had a traditionally designed architecture for those days. It is used to provide online services to customers, ie is deployed internally. Coding on this monolith was (and still is) pretty active, with about 20 developers making changes to it, and a new release typically occuring on Wednesday of each week.</p>
+
+<p>The approach to testing this monolith was/is also fairly traditional, consisting of:</p>
+
+<ul>
+  <li>automated unit tests (with about 30% coverage)</li>
+  <li>automated integration tests (with about 40% coverage)</li>
+  <li>automated rest-api-level tests</li>
+  <li>mostly-automated UI-based end-to-end tests</li>
+  <li>a few manual tests</li>
+</ul>
+
+<p>The overall company architecture also includes a set of services that are built “on top of” the monolith; these are independently developed and released, and typically call the monolith’s rest API because the monolith is the owner of the “core database” in which most important data is stored.</p>
+
+<p>Unit tests are built in to the monolithic code-base and are fairly typical (junit) and run completely in about 3 minutes. They interact with no other systems, ie can be run “standalone”. Most tests are “shallow”, ie verify only a single method on a single class - or occasionally small groups of classes.</p>
+
+<p>Integration tests are also built in to the monolithic code-base. Each test uses a dependency-injection context to load a significant set of the application’s overall runtime context. Most tests also depend on a connection to a database; a temporary (containerised) DB is started automatically by the tests for the duration of the tests. Some integration-tests interact with other systems (internal and external); (non-containerised) test instances of these resources exist. These tests take about 15 minutes to run.</p>
+
+<p>API tests verify the application by making calls to its REST API over a network. These tests require a deployed instance of the application; we have one “dev” and one “uat” environment available for that purpose. This has side-effects upon the database backing those environments. These databases are never reset, so care needs to be taken to not generate too much “garbage” - or to clean it up. This also interacts with other systems in that environment (internal and external). These tests run in a few minutes. While it is possible to run these tests against an instance of the application on a developer’s machine, it isn’t trivial so this step is normally executed by the build-servers.</p>
+
+<p>End-to-end tests also rely on a deployed instance of the application, using Selenium to interact with the web UI provided by the application. This has side-effects upon the database backing those environments. This also interacts with other systems in that environment (internal and external). These can take hours to run.</p>
+
+<p>And there are some relatively informal manual tests (“sanity checks”) which are typically performed by QA staff.</p>
+
+<p>There are also mobile applications which interact with the monolith. In general, there are few automated tests for the apps; testing is mostly a manual process. And those tests (automated and manual) exist for testing the apps, not for testing the monolith; the “remote api tests” are the primary way of testing that the API provided by the monolith itself still works.</p>
+
+<p>There is good monitoring of the application in production, and rollback is possible (though non-trivial) if a release has undesirable behaviour.</p>
+
+<p>Builds are automated, with code check-in automatically triggering compilation and execution of all unit/integration tests. Executing the remote-api tests is a single click. Running the end-to-end tests is slightly more complicated - in particular, interpreting the results requires manual inspection.</p>
+
+<p>A release typically consists of making a release-candidate tag in the version-control system, then deploying the code to the “uat” environment and handing over to the testing team to execute the end-to-end tests and do some interactive “playing” with the deployed system to see if all is ok. Deployment to dev and uat environments is automated; simply merging to the appropriate branch triggers deployment. Deployment to production is more complicated, and typically requires a team of 3-4 people for an hour or so to do the work and monitor system behaviour afterwards. A rollback typically requires the same amount of work as deployment.</p>
+
+<p>A release candidate would typically remain in the “uat” environment for a week, ie process was:</p>
+
+<ul>
+  <li>on Wed, release uat to production</li>
+  <li>on Thu, tag new release candidate and deploy to uat</li>
+  <li>test in uat until next wed</li>
+</ul>
+
+<p>This cycle means that most code changes would take 7-14 days to go from merged to production.</p>
+
+<h1 id="the-problems-to-be-addressed">The Problems to be Addressed</h1>
+
+<p>Even before the monolith-refactoring project started, this approach to testing and deployment was showing cracks. As noted above, there were additional systems which interacted with the monolith but had their own deployment schedules. However they had their own independent test/release processes. The integration between these components and the monolith was also typically not tested before monolith releases - the only protection against breaking these systems was the unit/integration/remote-api tests built in to the monolith.</p>
+
+<p>This weekly cycle (and particularly the week that code sat in UAT) was becoming an increasing frustration. We wanted to release changes as soon as they were available. We also wanted to fix some issues related to the large code-base of the monolith, including:</p>
+
+<ul>
+  <li>a lot of code to learn</li>
+  <li>a continual battle to keep code from becoming a ball-of-mud (keeping contexts separated)</li>
+  <li>merge conflicts</li>
+  <li>slow build and test times</li>
+  <li>slow startup</li>
+  <li>high memory usage (making horizontal scaling hard)</li>
+  <li>difficult dependency management (large number of dependencies, with each upgrade potentially affecting every part of the codebase)</li>
+</ul>
+
+<p>We therefore chose a microservice design, ie the cost/benefit tradeoff of that architecture was better than the cost/benefit tradeoff of modularizing our monolith and improving its associated development/deployment/test processes.</p>
+
+<p>However when this codebase became N services (where N was initially expected to be around 6), the existing partially-broken test and release procedures became broken:</p>
+
+<ul>
+  <li>for integration-tests, how do we ensure a consistent environment for those tests which interact with other systems?</li>
+  <li>how do we verify API backwards compatibility for each release of each component?</li>
+  <li>at which point do the end-to-end tests get run?</li>
+  <li>how can we be sure that the environment that the end-to-end tests runs against is in any way stable?</li>
+  <li>how do we ensure consistent state across all N services in any environment so that the end-to-end tests find the data they expect?</li>
+  <li>how can we “clean up” after end-to-end tests are run?</li>
+  <li>how do we manage rollback of the release of a single component?</li>
+</ul>
+
+<p>We also have a long-standing problem that we would like to address: the existence of just one dev and one uat environment. Developers often compete for access to this; we have a primitive “reservation” system which allows someone to deploy arbitrary versions of software to these environments for interactive testing, but it isn’t satisfactory and leads to conflict. Ideally any version of software should be “deployable” in the sense of running while being connected to all the systems that would call it or which it would call when really deployed to production.</p>
+
+<h1 id="our-solution">Our Solution</h1>
+
+<p>One solution that companies have taken to this “environment” issue is to run the full suite of applications on a developer’s machine, eg via a cluster of containers or virtual machines. In fact, one of the sister companies of the company being discussed here did invest significant effort in this. However this seems to be an unproductive approach; most attempts fail. It is clear that there is an upper limit on the complexity of a system that can be replicated on one machine. There is also significant <em>state</em> that needs to be replicated for a proper system, ie not just databases and schemas, message-brokers and topics, but also the data in those databases, the messages in those brokers, etc. The attempt by this sister-company just kept being broken, and they eventually gave up.</p>
+
+<p>Trying to emulate this in a development datacenter or cloud environment by starting up a suite of containers/vms to create “on-demand/dynamic environments” is not much better; extremely complex and resource-intensive.</p>
+
+<p>After some searching on the internet, it seems that the consensus to the environment issue is to use <em>dynamic routing</em>. To test an instance of some service S, deploy it into a shared environment (maybe even production) and then submit requests to the system (via the UI or otherwise) with a specific <em>tag</em>. At appropriate points, components check for tags and route traffic to appropriate addresses. This for example allows the normal UI to be used to interact with a system while having back-end processing for specific operations executed by the code being tested rather than the “default” instance. A company can certainly have separate dev and uat environments if it wishes, and can reasonably create such environments, but companies also often use just production - ie code under development can be deployed into production service clusters, and the production system used to interact with it - but only when the appropriate magic tags are provided. This also solves the problem that production systems often have far more resources than development environments can afford.</p>
+
+<p>This means that any developer can then do any of:</p>
+
+<ul>
+  <li>start the component being developed locally (possibly including its “owned” dependencies, eg a database)</li>
+  <li>start the component being developed on some container/VM in the test environment</li>
+</ul>
+
+<p>When running on a developer machine, then traffic routing can be difficult due to the common inability for datacenters to connect outbound to office networks to which developer machines typically attach. There are “proxies” which run in a datacenter and require a developer machine to initiate a connection; they can then forward traffic back over this existing connection.</p>
+
+<p>Alternatively many modern IDEs are capable of interacting with a development-environment set up within a VM. Development therefore consists of creating a VM <em>within the datacenter</em> and running processes there (including the IDE back-end) with only the IDE front-end on the laptop connected to the office network. Traffic routing to the development-environment which is already in the data-center is then not complicated.</p>
+
+<p>This does raise a few problems. In particular, handling state. In general, some in-development variant S2 of service S will simply use the database of the “real” instance of service S; as long as requests processed by S2 are always for some distinct subset of data (eg “for user Test1”) then little harm can occur. This does however potentially make compliance with privacy laws such as <a href="https://en.wikipedia.org/wiki/General_Data_Protection_Regulation">the GDPR</a> harder, as developers will probably need direct access to the database for service S.</p>
+
+<p>This approach also supports “canary releases”, where a “release” consists of diverting a small portion of real production requests through the new version of a component; if monitoring reports that all is well then this percent can be ramped up over time until 100% of traffic is handled, at which point the older version can be shut down. However if monitoring reports problems, then traffic can be reverted to the earlier version. Tools such as <a href="https://spinnaker.io/">spinnaker</a> are designed to automate this kind of rollout.</p>
+
+<p>Note that this “dynamic routing” is just a concept for us at the current time; our analysis suggests this is the best option but it hasn’t yet been implemented.</p>
+
+<p>In terms of integration testing, we decided to adopt a rule: automated integration tests for component C shall only access external components that they <em>own</em>. This means that accessing the “private database” for component C is acceptable, but accessing a shared message-broker or external service is not; these must be stubbed. This makes integration-tests nicely isolated - they always run, regardless of whether components belonging to other teams are currently broken. However it does mean that integration-tests do not detect incompatibilities between the interfaces of components; some replacement for that is needed. We chose <a href="https://docs.pact.io/">PACT</a> to verify interfaces to other components; this ensures that the API requirements from C on D then become part of the automated tests for component D, rather than C.</p>
+
+<p>The end-to-end user interface tests that we had effectively became legacy stuff that is less and less relevant with each microservice factored out of the monolith. They test the “whole system” but different components of the system are released without executing these (slow-running) tests - and the more components we factor our monolith into, the more independent release-cycles we have. It therefore makes sense to either discard these tests completely, or modify them to instead run at a regular interval against <em>production</em>, making them a kind of “automated sanity check” which hopefully alerts us of problems before too many users find them. If run against production, then any tests which make <em>changes</em> to data of course need to be carefully written, and the side-effects need to be filtered out of reports and similar processes which do not expect test data.</p>
+
+<p>This removal of a large layer of pre-release tests does indeed make releases more risky. However the ability to release a new version of a component into production and then dynamically route traffic to it removes this risk somewhat; the owner of that change can test it directly in <em>real production</em> without exposing it to users, and can then increase the amount of traffic sent to it (eg first employees). It also makes rollbacks very easy - just a matter of updating the traffic routing rules. Nevertheless an increased risk remains. This can be partially mitigated by good monitoring and alerting. Otherwise it must be accepted as the price to pay for more rapid feature release; if you are in a safety-critical industry then don’t do this but otherwise accept that the cost/benefit tradeoff is the important part and perfect integration testing combined with decentralized development and deployment is not achievable. Pick one of (time-based releases with full integration-testing) or (per-feature releases with minimal integration testing). And remember that time-based releases actually have high rollback rates as they include batches of unrelated changes.</p>
+
+<p>If you ever try to do integration-testing of a full suite of components, then one major problem that will be encountered is ensuring consistent state. For example, if a test expects a customer in the database for microservice S1, and then makes a customer-related call to microservice S2, then there may be an expectation that S2 also has some representation of that same customer. If your microservice system is based heavily on synchronous calls then this may not be an issue, ie if S2 <em>calls</em> S1 to fetch customer data. However if S2 <em>caches</em> customer data then its cache might not be consistent with the data of S1 and tests may fail. Simply <em>avoiding</em> tests of this type, and <em>mocking</em> S2 within the automated tests of S1 resolves this issue. To then verify that the interface between S1 and S2 is correct, use something like PACT as a separate step. Alterantively, a “core shared test dataset” could be defined, but this is a major undertaking.</p>
+
+<p>When refactoring a monolith with existing tests, this can be an issue. However the easiest solution is simply to mock those external interactions when they start failing rather than trying to build elaborate test-data-syncing infrastructure.</p>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>When executing tests against production, any metrics associated with that traffic should be separately categorized.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>I came to the conclusion that in an environment where teams are releasing different components regularly on independent schedules the concept of a pre-release cross-component integration test does not make any sense at all. The versions of components in the production and non-production environments are continually changing; any test would verify just a “snapshot in time”. In addition, the production and non-production environments are typically not in sync, ie the fact that an integration-test passes in non-production doesn’t imply that it will work in production.</p>
+
+<p>The only tests that make sense to apply “pre-release” for a component are ones that test that component in isolation; anything else is (a) just too slow in environments where “release per feature” is being applied, and (b) isn’t reliable - the test environment will never match the production environment.</p>
+
+<p>However I don’t see cross-component-integration-test suites and end-to-end suites as useless. Instead I see a role for them as “monitoring” tools; run them regularly (eg daily) against non-prod and prod environments to catch <em>a reasonable number</em> of inconsistencies.</p>
+
+<p>To minimise the number of integration-related failures, binary compatibility of integration-points between components should be verified separately. For message-based integrations, the message-broker might offer “schema validation” of messages so that testing of a component fails if messages published don’t comply with the schema (of the previous version). For API endpoints there are tools which alert developers when they have changed an existing API. The compatibility of endpoints can also be verified via testing - either hand-written tests by the authors of the component, or via <em>contract testing</em> in which assertions about an API <em>by consumers of the API</em> become part of the test-suite of the <em>component publishing the API</em> (eg <a href="https://docs.pact.io/">PACT</a>). Having endpoint APIs defined in a declarative manner (eg using <a href="https://www.openapis.org/">OpenAPI specifications</a> rather than annotations in code) makes changes to APIs more obvious.</p>
+
+<p>Proper production monitoring is important. So is the ability to easily revert a release (roll back to previous version). Without the safety-net of a “full integration test suite” you’ll probably be needing this more often.</p>
+
+<p>It is very helpful to be able to deploy components into production in parallel with the previous version and route <em>just test traffic</em> to the new version of that component. Above all, it makes it very easy to “revert” a deployment - reconfigure routing so all production traffic goes to the new version, and if problems occur then change the routing back. This same approach in non-prod environments can give individual developers the possibility to “integrate” their current development code into an environment without needing complex setup, and without interfering with other users of that environment.</p>
+
+<p>And in general, unless you are working on safety-critical systems, it seems important to keep in mind the cost of integration failures in production vs the benefits of rapid software development and deployment. In most cases, a small-but-non-zero error rate is in fact financially the better option.</p>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<ul>
+  <li><a href="https://www.youtube.com/watch?v=JT3CXCeHizs">[video] Talia Nassi: Testing in Production</a></li>
+  <li><a href="https://www.youtube.com/watch?v=Fh8CqZtghQw&amp;list=WL&amp;index=3">[video] Dave Farley: Simplify Microservice Testing</a></li>
+  <li><a href="https://www.youtube.com/watch?v=QFCHSEHgqFE">[video] Dave Farley: Don’t do E2E Testing</a></li>
+  <li><a href="https://www.mkarkowski.com/why-e2e-testing-will-never-work-in-microservice-architectures/">Michal Karkowski: Why E2E testing will never work in Microservice Architectures</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/testing-distributed-systems/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,694 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Python - Distributing and Installing Code</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Python - Distributing and Installing Code</h1>
+    <aside>First published on: December 28, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>I recently wrote an article about some of the more interesting <a href="/programming/python">things I encountered while learning Python</a>.</p>
+
+<p>This article is a continuation, summarizing my research on various techniques for packaging and uploading, downloading and installing Python-based code.</p>
+
+<p>WARNING: I am an experienced developer, but new to Python. There may therefore be errors/misunderstandingsm in this article - if so, feedback is welcome!</p>
+
+<h1 id="overview-1">Overview</h1>
+
+<p>As developers, we want to take advantage of the large selection of third-party libraries available.</p>
+
+<p>And as developers, we also want to <em>write</em> libraries and applications, and distribute them (whether to production environments in our own companies, or to third-parties).</p>
+
+<p>This article looks at some of the options for downloading/installing Python code, and for publishing Python code.</p>
+
+<p>Unfortunately, the topic is somewhat complicated as there have been various solutions developed over time. Below I discuss the half-dozen most common methods (as far as I know).</p>
+
+<p>There is good documentation in the official <a href="https://packaging.python.org/">Python Packaging User Guide</a>, although they do sometimes mix information on current and obsolete approaches, particularly in the <a href="https://packaging.python.org/key_projects">Packaging Key Projects</a> page.</p>
+
+<h1 id="terminology-distributions-and-packages">Terminology: Distributions and Packages</h1>
+
+<p>Most of the IT world uses the word “package” to describe a bundle of software that can be downloaded and installed - eg Debian or RedHat packages.</p>
+
+<p>However Python uses the word <code>package</code> to mean a directory containing a set of modules (Python sourcecode files). The Python community and documentation therefore often uses the word “distribution” to mean an installable (distributable) bundle of Python code. In the setuptools documentation, “distribution” is defined as “a Python package at a specific version”.</p>
+
+<p>Of course the word “distribution” in the Linux world typically means an entire operating system and supporting software - this is NOT the intended meaning of the word “distribution” in Python documentation.</p>
+
+<p>And sometimes the Python world <em>does</em> use the term “package” to mean a downloadable bundle of Python code - the Python Package Index and documentation for the <code>pip</code> package installer are the most obvious examples.</p>
+
+<p>I use the terms “distribution” and “package” interchangeably (as synonyms) below.</p>
+
+<h1 id="summary-of-options">Summary of Options</h1>
+
+<p>Here’s a quick summary of the various solutions discussed in more detail below:</p>
+
+<ul>
+  <li>distribute sourcecode files directly (as single files, as a git-checkout, or an archive that the receiver unpacks into an arbitrary directory)</li>
+  <li>distribute sourcecode as an “executable zipfile” (assuming python already installed) - ie PEX</li>
+  <li>provide a complete executable, including sourcecode and a Python interpreter (“python freezers”)</li>
+  <li>paas-specific solutions (Heroku, Google AppEngine, etc)</li>
+  <li>a container (docker, etc)</li>
+  <li>native unix packages (rpm/apt/etc)</li>
+  <li>egg bundles</li>
+  <li>use distutils to build:
+    <ul>
+      <li>an sdist (source distribution) - tar.gz file</li>
+      <li>a bdist (binary distribution) - rpm, windows-exe or other formats</li>
+      <li>a wheel distribution</li>
+    </ul>
+  </li>
+</ul>
+
+<p>This article then looks at the distutils option in more detail, including <em>package index servers</em> (eg pypi) and the standard Python package manage <code>pip</code>.</p>
+
+<h1 id="distributing-sourcecode-directly">Distributing Sourcecode Directly</h1>
+
+<p>This choice is only useful for simple projects, but should not be forgotten - simple is sometimes better. As an example, the <a href="https://bottlepy.org/docs/dev/">Bottle Web Framework</a> is distributed as a single Python file.</p>
+
+<p>It assumes that the target system has a Python interpreter of an appropriate version.</p>
+
+<p>Distributing as source-code has obvious problems if there is a dependency that includes native “C” code; in that case, one of the more advanced approaches should be used instead.</p>
+
+<h2 id="distributing-as-a-file-or-archive">Distributing as a File or Archive</h2>
+
+<p>When the code to be distributed is just one file, and has no dependencies then just copying the file around may be the easiest thing to do. Or for multiple files, a zip or tarfile can be distributed and unpacked by users.</p>
+
+<p>If the code to be distributed needs third-party libraries, then you can distribute an archive-file (eg a zip) which contains the necessary libraries embedded in it. When it is unpacked, and a “script” within the unpack-directory is executed, Python automatically adds the directory of the script to its “module search path”, ie other modules/packages included in the archive will take precedence over files installed elsewhere.</p>
+
+<p>The PEX format takes this one step further - the archive file is actually executable, ie can be run without unpacking it. See later for info on PAX.</p>
+
+<h2 id="distribute-as-git-checkout">Distribute as Git Checkout</h2>
+
+<p>Sometimes, the nicest way to distribute Python code is just to “git clone {url}” on each machine the code should run on.</p>
+
+<p>This makes it obvious to sysadmins where the master copy of the code is (<code>git remote -v</code>). It also allows easy updates: <code>git pull</code>. And it makes “hot fixes” trivial to feed back into the official repo: <code>git push</code>.</p>
+
+<p>When the code has dependencies on third-party libraries, then the “bundle them in the archive” solution suggested above clearly is a bad idea when the code is a checkout of a git repo. Instead, <code>pip freeze</code> can be used by the developer to capture those dependencies, and <code>pip install -r requirements.txt</code> can be used on the target systems. This is starting to get a little inelegant now, but possibly still a reasonable solution in some cases.</p>
+
+<h1 id="executable-zipfiles-and-pex">Executable Zipfiles and PEX</h1>
+
+<p>Two interesting features of Python can be combined with an interesting feature of the zip archive format to allow creation of <em>archive files</em> containing python code which can be directly executed without unpacking, ie “distribution” is just a matter of ensuring the target system has a suitable Python interpreter, and then copying that one (archive) file.</p>
+
+<p>Python can be told to execute a specific <em>file</em> as a script (ie application). However when the location is not a file but a directory, then Python looks for a file named <code>__main__.py</code> within that directory.</p>
+
+<p>And Python can be given a <em>zipfile</em> as the file to execute, in which case it effectively treats that zipfile as a directory. That means it looks for a file <code>__main__.py</code> in its (internal) root directory.</p>
+
+<p>The <code>zip</code> archive format includes a special “start sequence” that marks where the zip-archive actually begins within a file, and allows arbitrary data to precede that marker. This is not simply part of a specific zip implementation, but actually part of the specification, and is intended to allow “self-extracting zipfiles”. The Python interpreter also supports this, ie when given a zipfile, will skip any leading non-zip data.</p>
+
+<p>This means that you can take any tree of Python files, zip it, then prefix it with something like this:</p>
+
+<pre><code>#!/usr/bin/env python3
+</code></pre>
+
+<p>The result is something that can be executed as a shell-script (assuming <code>chmod +x</code>); standard unix shell behaviour launches the specified command and feeds it the contents of the file. And voila! The <code>__main__.py</code> file within that archive is run by Python - which skips the zipfile header and then runs <code>__main__.py</code>. No install step is needed.</p>
+
+<p>Creating such files can be done by hand, but there is also a build-tool named PEX (<code>pip install pex</code>) that adds a few nice-to-have features:</p>
+
+<ul>
+  <li>creates a <code>__main__.py</code> file that:
+    <ul>
+      <li>parses various pex-related commandline options, then delegates to another python file within the archive - ie your “entry point” is in a normal file, not <code>__main__.py</code>
+</li>
+      <li>modifies <code>sys.path</code> to ensure there are no conflicts between libs in the pex-file and in the external python environment.</li>
+    </ul>
+  </li>
+  <li>includes third-party libraries (specified individually on the commandline, or via a file in the same format that <code>pip freeze</code> generates)</li>
+  <li>and does the zipping and prepending of the shellscript header line</li>
+</ul>
+
+<p>By convention, the “executable zipfiles” that PEX generates have suffix <code>.pex</code>.</p>
+
+<p>An “executable zipfile” that includes all its necessary third-party dependencies is roughly equivalent to a “fat jar” in the Java world.</p>
+
+<p>See this <a href="https://www.youtube.com/watch?v=NmpnGhRwsu0">‘WTF is PEX?’</a> video presentation (only 15 minutes) for more information. Note that PEX was previously part of package <code>twitter.common.python</code> (as described in video) but is now its own separate pypi package.</p>
+
+<h1 id="freezers">Freezers</h1>
+
+<p>There are several projects that can take Python source-code, and generate an executable application that bundles a complete Python interpreter together with the code.</p>
+
+<p>Unfortunately, the word “freeze” is also used for a number of quite unrelated projects - and in particular <code>pip freeze</code> is quite different (and discussed later). The relevant projects appear to be:</p>
+
+<ul>
+  <li><a href="https://pypi.org/project/cx_Freeze/">cx_freeze</a></li>
+  <li><a href="https://pypi.org/project/PyInstaller/">pyinstaller</a></li>
+  <li>
+<a href="https://pypi.org/project/py2exe/">py2exe</a> – creates ms-windows binaries only</li>
+  <li>
+<a href="https://pypi.org/project/py2app/">py2app</a> – creates macos binaries only</li>
+  <li>
+<a href="https://pypi.org/project/bbfreeze/">bbfreeze</a>  – appears to no longer be maintained</li>
+  <li><a href="https://pypi.org/project/esky/">esky</a></li>
+</ul>
+
+<p>See <a href="https://docs.python-guide.org/shipping/freezing/">the Python Guide</a> for more info.</p>
+
+<h1 id="paas-specific-solutions">PaaS-specific Solutions</h1>
+
+<p>A number of “cloud environments” provide a hosted Python “Platform as a Service” runtime environment into which you deploy your Python code without needing to manage the underlying hosts.</p>
+
+<p>There are a number of advantages to such a system - including automatic load-balancing, SSL termination, backups, etc. However each PaaS implementation comes with its own build/packaging tools and rules.</p>
+
+<p>Examples:</p>
+
+<ul>
+  <li>Heroku</li>
+  <li>Google App Engine</li>
+</ul>
+
+<h1 id="docker-or-other-container-formats">Docker (or other container formats)</h1>
+
+<p>If you are looking to distribute a complete python-based <em>application</em> rather than a library, then one of the nicest solutions for end users is to create a <em>container</em>, with all necessary components installed and upload that to a container registry. The end user (which may be your own operations team, or even yourself) just needs the appropriate container runtime (eg Docker) installed, and then to “pull” the container.</p>
+
+<p>Building a container is a whole complicated topic that is out of scope here.</p>
+
+<h1 id="native-unix-packages-dpkgrpmetc">Native Unix Packages (dpkg/rpm/etc)</h1>
+
+<p>Unix distributions usually come with their own package-management tools.</p>
+
+<p>Distributing code as a native package (eg RPM or DPKG) is certainly easy for end-users. Such packages can be built with <code>setuptools</code> (see section on <code>bdist</code> later); presumably there are other tools that can also build such packages.</p>
+
+<h1 id="egg-bundles">Egg Bundles</h1>
+
+<p>An “egg” is a zipfile with name of form <code>*.egg</code>, where the zipfile contains:</p>
+
+<ul>
+  <li>Python code</li>
+  <li>compiled native libraries (optional)</li>
+  <li>and an EGG-INFO subdir with various metadata files about the package (similar to Java jar’s META-INF subdirectory).</li>
+</ul>
+
+<p>Eggs are actually built by the <code>setuptools</code> library, which has not been discussed yet. However given that <em>using</em> an egg does not necessarily require using setuptools, it seems appropriate to discuss it first.</p>
+
+<p>When an egg does not contain any <em>native code</em>, then the file can simply be placed on the <em>searchpath</em>, ie the file path is added to environment variable <code>$PYTHONPATH</code> (similarly to adding a Java jarfile to <code>$CLASSPATH</code>). Code from the egg can then be run with <code>python -m {module}</code>.</p>
+
+<p>It is also possible to place an egg file (ie a zipfile) in a <em>directory</em> that is already on the searchpath (eg <code>site-resources</code>) - without unpacking it. Other Python files can then import modules from it - but the importing code first needs to do some manipulation of <code>sys.path</code> to “activate” the egg. This manipulation involves calling some code from module <code>pkg_resources</code> which is part of the <code>setuptools</code> package - ie setuptools needs to be installed first, <em>in the environment that uses the egg</em>. As discussed later, <code>setuptools</code> has a special status - it is not in the standard library, but is very much part of Python’s core functionality (like <code>pip</code>); if <code>pip</code> is installed, then so is <code>setuptools</code> - and all Python installations of version 3.4 or newer install <code>pip</code> by default.</p>
+
+<p>For development purposes, there are also “unpacked” forms of eggs that are directory-trees rather than zipfiles:</p>
+
+<ul>
+  <li>a directory with name “<code>*.egg</code>” containing an EGG-INFO subdir</li>
+  <li>a directory with one or more subdirs named “Project-Name.egg-info” (a “development egg”)</li>
+</ul>
+
+<p>Eggs can provide a “plugin-style” framework, where multiple eggs are within directories on the searchpath (ie are findable by <code>pkg_resources</code> but not activated by default). Other code can then use <code>pkg_resources</code> to find all eggs matching specific seach-criteria, and activate them. One use is to have different versions of the same library, and select a specific desired version. Another use is to dynamically discover all eggs which implement a specific “plugin interface”, and activate one or all of them. This is something like Java’s “service discovery” or OSGi features.</p>
+
+<p>An egg can specify dependencies on other eggs - in which case those are also located and activated via <code>pkg_resources</code>. If no matching dependency can be found, an exception is thrown - ie all dependencies must have already been installed (they are not automatically downloaded).</p>
+
+<p>Alternately, an egg can embed other eggs (ie its dependencies).</p>
+
+<p>The EasyInstall application (part of setuptools) can download a source-code bundle from a python package index (eg Pypi), build an egg from it, and copy that egg into the site-packages directory in one step. See later for more info.</p>
+
+<p>See <a href="http://peak.telecommunity.com/DevCenter/PythonEggs">this article</a> for an excellent introduction to the EGG format and features.</p>
+
+<p>An egg archive can also be <em>installed</em> into a Python installation, ie the archive is unzipped and the various components copied into the Python directories - in particular, <code>site-packages</code>. After this has been done, any modules in the egg-file are accessable in the normal manner - via <code>import</code> statements in Python code, and by <code>python -m {modulename}</code>.</p>
+
+<p>The newer <em>wheel</em> distribution format is basically a superset of the egg format, and can be used in the same way - as a “plugin” that needs to be activated, or installed as modules. See later for more on <em>wheel files</em>.</p>
+
+<p>See also: <a href="https://setuptools.readthedocs.io/en/latest/formats.html">setuptools: Internal Structure of Python Eggs</a></p>
+
+<p>One problem with eggs is the generation of <code>.pyc</code> files. As noted earlier, Python source-code is ideally compiled into byte-code once, and this byte-code is cached thus making later loads of the module faster. However for “shared” site-packages directories, this step needs to be done during install as the users who run the code later may not have privileges to write to a <code>__pycache__</code> subdir of the <code>site-packages</code> directory holding the Python source code. The egg format solves this by bundling the <code>.pyc</code> files in the distribution. This however has its own disadvantages: larger files, and the fact that <code>.pyc</code> files are not necessarily portable across Python interpreter implementations (eg CPython/JPython) or across versions of the same interpreter. The <code>wheel</code> format fixes this by delegating the problem of generating <code>.pyc</code> files to the installer.</p>
+
+<h1 id="distutils-setuptool-and-pip">Distutils, Setuptool, and Pip</h1>
+
+<p>Module <a href="https://docs.python.org/3/library/distutils.html">distutils</a> is included in the Python standard library, and <a href="https://docs.python.org/3/distutils/apiref.html">provides low-level apis</a> for:</p>
+
+<ul>
+  <li>invoking c-compilers (wrappers for various implementations such as gcc, msvc, etc) - used when building modules which include native code</li>
+  <li>extract data from setup-scripts</li>
+  <li>create tar or zip files</li>
+  <li>various filesystem-related utilities useful when writing build/install tools</li>
+  <li>a basic “plugin framework” for hooking up “command handlers” to be triggered by commandline options
+    <ul>
+      <li>and a set of plugins that build windows-specific installers, linux rpm files, etc.</li>
+    </ul>
+  </li>
+  <li>unpacking a tar/zipfile into a local <code>site_packages</code> directory tree (python code, executable scripts, datafiles, native libraries, etc. go into different locations)</li>
+  <li>register a package with a <code>python index server</code>, ie make a basic network call to upload metadata about a locally-built package (but not the package contents)</li>
+</ul>
+
+<p>It is not expected that users or developers interact directly with <code>distutils</code> - some of the functionality is obsolete, replaced by better implementations in <code>setuptools</code> while other functionality is low-level and is <em>used</em> by setuptools (and other similar build/install tools).</p>
+
+<p>Setuptools is a project which provides libraries and executable tools for building distributions (installable packages) from source code, and tools for installing such distributions. However setuptools does not do any “dependency management” - it is roughly equivalent to Debian’s “dpkg-build/dpkg” or RedHat’s “rpmbuild/rpm”.</p>
+
+<p>Pip is a “dependency manager” which inspects a package to be installed, and downloads/installs the other packages that it depends on. Pip integrates with “package indexes” (servers hosting pools of packages), including the standard Pypi (Python package index), but can also install from local directories or download dependencies but not immediately install them. Pip also keeps track of which packages are installed.</p>
+
+<p>While distutils is part of the python standard library, setuptools and pip are installed slightly differently. The standard Python download from python.org does include setuptools and pip - but as <em>wheel packages</em> in a special directory. The standard library includes a very small stub-module called “ensurepip” which finds those packages and unpacks them into the “site-packages” directory for the python install. And the standard install process automatically runs “python -m ensurepip” so that this occurs almost transparently (and without needing network access). After this process is complete, “python -m pip” works just as if pip had been provided as part of the standard libraries.  When <code>venv</code> is used to create a project-specific site-packages directory, <code>ensurepip</code> is also run automatically - installing setuptools and pip into that newly-created virtual environment. The benefit of having setuptools/pip as “default-installed packages” rather than in the standard library is that:</p>
+
+<ul>
+  <li>it is possible to avoid installing them if you really want to</li>
+  <li>and they can be updated independently of the Python standard libraries - <code>pip</code> can be used to download new versions of <code>setuptools</code> and even itself!</li>
+</ul>
+
+<p>In summary:</p>
+
+<ul>
+  <li>
+<code>setuptools</code> is something like Debian’s “dpkg-buildpackage” or RedHat’s “rpmbuild” for building packages, together with the <code>dpkg</code> or <code>rpm</code> tools for installing them</li>
+  <li>
+<code>pip</code> is something like Debian’s <code>apt</code> or RedHat’s <code>dnf/yum</code> which installs not only a package but also its dependencies</li>
+  <li>
+<code>distutils</code> is something you don’t usually interact with directly, unless you are writing build-tools or installers yourself</li>
+</ul>
+
+<h1 id="easyinstall">EasyInstall</h1>
+
+<p>Script <code>easy_install</code> (aka <a href="http://peak.telecommunity.com/DevCenter/EasyInstall">EasyInstall</a>) is part of <code>setuptools</code>. It was one of the first build/installation tools for Python; <code>pip</code> is newer than EasyInstall, and supports many of the same usecases (better) - <a href="https://packaging.python.org/discussions/pip-vs-easy-install/">but not all</a>.</p>
+
+<h1 id="module-pkgresources">Module <code>pkg_resources</code>
+</h1>
+
+<p>Module <a href="https://setuptools.readthedocs.io/en/latest/pkg_resources.html">pkg_resources</a> is part of <code>setuptools</code>. It provides utilities for managing libraries which are distributed as <em>wheel</em> or <em>egg</em> files, and installed as “plugin libraries” rather than normal libraries.</p>
+
+<p>The section on EGG files earlier describes how EGG (and WHEEL) archives can be placed on PYTHONPATH or in <code>site-packages</code>, at which point they can be <em>found</em> but are not automatically available like modules installed into <code>site-packages</code>. The <code>pkg_resources</code> module provides APIs to find, filter, and activate such libraries.</p>
+
+<p>Module <code>pkg_resources</code> has a function “<code>find_plugins(Environment)</code>” - where Environment is effectively a list of directories.  The function scans those directories looking for egg/wheel files and returns a list of such libraries that can potentially be added to <code>sys.path</code>. Items will only be returned when their declared requirements (as specified in their internal metadata-files) are available. When an item is added to sys.path then its declared “entry points” are registered; other code can then look up these entry-points and invoke them.  This provides a kind of “service discovery” feature (similar to Java’s discovery convention). And this in turn allows “plugins” to be added to a program just by adding egg-files to the searchpath.</p>
+
+<p>The result is something a little similar to Java OSGi - particularly its “WorkingSet” concept. The primary “working set” of any application is “sys.path”; WorkingSet methods can be used to determine which (of the available pool of eggs) are actually added to sys.path.</p>
+
+<p>See also <a href="https://setuptools.readthedocs.io/en/latest/pkg_resources.html">the pkg_resources documentation on the setuptools site</a>.</p>
+
+<h1 id="setuptools-in-detail">Setuptools in Detail</h1>
+
+<h2 id="overview-2">Overview</h2>
+
+<p>Setuptools is actually a library, ie provides an API. The usual way to <em>build a distribution</em> is to write a <em>Python script</em> (by default, named <code>setup.py</code>) which calls into the setuptools API to define relevant metadata. When this script is executed, the call to setuptools causes a resulting output-file to be generated - with the output format depending upon what commandline options were passed.</p>
+
+<p>Setuptools includes support for formats <code>sdist</code> (a “source distribution”) and various kinds of “bdists” - binary distributions.</p>
+
+<p>A source distribution (sdist) is an archive containing Python code (of course), plus “data files” if needed - and the original <code>setup.py</code> script. If a project includes native C code, then the sdist archive also includes the relevant files in source form. Installing a <code>sdist</code> file is done by running the <code>setup.py</code> script again - at which point files are copied into the local Python environment (ie site-packages). Any native code included in the archive is compiled on the target machine during install, using the compiler-wrappers included in module <code>distutils</code>.</p>
+
+<p>The bdist (binary) formats supported include:</p>
+
+<ul>
+  <li>egg</li>
+  <li>wheel</li>
+  <li>rpm/dpkg</li>
+  <li>windows executable installer</li>
+</ul>
+
+<p>The <code>sdist</code> format is platform independent - any platform with Python, setuptools, and a setuptools-compatible compiler can install modules with native code components (assuming the native code compiles on that platform).</p>
+
+<p>The <code>bdist_*</code> formats, excluding wheel, are platform dependent. They are expected to be built on the platform they target (eg windows installers are built on windows).</p>
+
+<h2 id="simple-example-with-setuppy">Simple Example with setup.py</h2>
+
+<p>See: <a href="https://docs.python.org/3/distutils/introduction.html#distutils-simple-example">https://docs.python.org/3/distutils/introduction.html#distutils-simple-example</a></p>
+
+<p>Write a simple python file named <code>setup.py</code> with the following format:</p>
+
+<pre><code>from distutils.core import setup
+setup(name='foo',
+      version='1.0',
+      py_modules=['foo'],
+      )
+</code></pre>
+
+<p>Then run <code>python setup.py {target-type}</code>.</p>
+
+<p>For output formats that “embed” their dependencies, the result will include all the files listed in <code>py_modules</code>, and their transitive dependencies.  There are additional options for specifying non-Python files to include (eg C sourcecode).  A file MANIFEST.in can further customise the set of files included.  File <code>setup.py</code> is also included in the bundle.</p>
+
+<p>When target-type = sdist then the generated file is just an archive-file (tar.gz or zipfile or various other options). The user “installs” this by:</p>
+
+<ul>
+  <li>unpacking the archive</li>
+  <li>running <code>python setup.py install</code>
+</li>
+</ul>
+
+<p>which causes any “modules” in the local directory to be copied to the local python installation’s “third party modules” directory.</p>
+
+<p>The setup.py file can also specify “scripts”, in which case they are included in the bundle when it is built, but are not copied into the target Python environment (as they are meant to be run directly, rather than used as modules). Note however that any file can be a module, and modules can be “executed” via <code>python -m modulename</code> (the module is loaded with <code>__name__</code> = <code>__main__</code>).</p>
+
+<p>The <code>target_type</code> of “<code>bdist_wininst</code>” produces a windows executable file that installs the python code into the local python environment.</p>
+
+<p>Similarly, “<code>python setup.py bdist_rpm</code>” creates a linux rpm package, etc.</p>
+
+<p>File <code>setup.py</code> can specify:</p>
+
+<ul>
+  <li>requirements, ie packages that need to be installed on the target system first (with versions)</li>
+  <li>provides, ie packages that this distribution “installs”</li>
+</ul>
+
+<p>Running <code>setup.py</code> directly does not automatically download needed dependences. However using pip to pull down a sdist (or bdist) package from Pypi will cause required packages to be pulled down too. See pip for more details.</p>
+
+<p>For target-type of <code>sdist</code>, any native source-code is just included in the generated distribution - and is compiled when the distribution is installed.</p>
+
+<p>For the <code>bdist_*</code> taret types, native source-code is compiled and the result is included in the generated distribution.</p>
+
+<p>Once a “distribution” has been created, you can distribute manually (eg store it on your webserver, or email it around). Or you can use <code>python setup.py register</code> and <code>python setup.py upload</code> to interact with the Pypi package index server (or any other package index server).</p>
+
+<h2 id="security-issues-with-setuptools">Security Issues with Setuptools</h2>
+
+<p>Using a Python file (usually named <code>setup.py</code>) to define the metadata needed for building or installing a distribution is elegant in some ways.</p>
+
+<p>However it has a significant security problem: in order to install a <code>sdist</code> package, the script (provided by the distribution packager) must be run on the target machine. And not as just any user, but as the user who owns directory <code>site-packages</code> - often root.</p>
+
+<p>The <code>wheel</code> format instead uses a declarative metadata format, which is then parsed and used as <em>data</em> by the installer (wheel module or pip). This means that although pip needs to be run as the owner of dir <code>site-packages</code>, it doesn’t execute arbitrary Python code as that user.</p>
+
+<h1 id="wheel-format">Wheel Format</h1>
+
+<p>As noted in the <a href="https://pypi.org/project/wheel/">wheel package description</a>, wheel has two different roles::</p>
+
+<blockquote>
+  <p>A setuptools extension for building wheels that provides the bdist_wheel setuptools command
+   A command line tool for working with wheel files</p>
+</blockquote>
+
+<p>Wheel format is defined in <a href="https://www.python.org/dev/peps/pep-0427/">PEP 427</a>, which is the best resource for learning what Wheel format actually supports.</p>
+
+<p>Wheel itself is provided as a downloadable/installable distribution on Pypi - though AFAIK it is also included with modern versions of <code>pip</code> - and is thus installed by default on modern Python installations. Pip can install <em>wheel</em> packages since v1.4.</p>
+
+<p>The <em>wheel</em> project provides a “plugin” for <code>setuptools</code> to support building and installing wheel-format archives.</p>
+
+<p>To quote the documentation, wheels:</p>
+
+<blockquote>
+  <p>is the new standard of Python distribution, intended to replace eggs
+offers a superset of the functionality provided by the existing wininst and egg binary formats</p>
+</blockquote>
+
+<p>However AFAICT, wheel does <em>not</em> offer the “plugins” feature of eggs - it is intended only for <em>installing</em> files into site-packages directories.</p>
+
+<p>PyPi hosts both wheel and egg archives. Many popular packages have been updated to wheel, but not all.</p>
+
+<p>A wheel is:</p>
+
+<ul>
+  <li>a zip archive with a specially formatted filename and suffix “.whl”.</li>
+  <li>containing a directory <code>{distribution}-{version}.dist-info</code> with further files:
+    <ul>
+      <li>METADATA</li>
+      <li>WHEEL</li>
+      <li>RECORD - a list of the files in the wheel archive (a manifest) with a hash for each</li>
+      <li>RECORD.jws - digital signature of the RECORD file (which contains hashes of all files, thus effectively signing everything)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Pip can convert an <code>sdist</code> distribution into a wheel distribution: with <code>pip instal wheel</code>.</p>
+
+<p>The root of the zipfile may also contain:</p>
+
+<ul>
+  <li>various files or subdirs to be installed into {site-packages}</li>
+  <li>subdir {distribution}-{version}.data/ with its own subdirs:
+    <ul>
+      <li>purelib - plain python code (also to be installed into {site-packages}</li>
+      <li>platlib - platform-specific code (eg windows-specific, or debian-specific)</li>
+      <li>include - c header files</li>
+      <li>scripts - shellscripts that users may directly execute</li>
+      <li>data - nonexecutable reference data files</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Simply unpacking a <code>.wlh</code> file into <code>site_packages</code> is usually sufficient to “install” the project, though more advanced approaches are recommended as the “unzip” approach does not correctly handle the following:</p>
+
+<ul>
+  <li>installing files under <code>{distribution}-{version}.data</code>
+</li>
+  <li>putting bundled scripts into a “scripts” dir which is on $PATH</li>
+  <li>updating the #!python line for files in scripts to point to the exact path of the python interpreter instance into which the code has been installed</li>
+  <li>putting bundled c-header-files into a “headers” dir</li>
+  <li>generating a <code>.pyc</code> bytecode file for each <code>.py</code> source-code file (for a shared python environment, this cannot happen “on demand” when the code is used because the bytecode is cached in dirs which a normal user will not have write-rights to).</li>
+</ul>
+
+<p>Using unzip also does not:</p>
+
+<ul>
+  <li>validate hashes of the archive</li>
+  <li>validate the signature of the archive</li>
+</ul>
+
+<p>Installing a wheel with pip will cause all of the above to be done.</p>
+
+<p>The WHEEL file contains both version-info, and some flags that control details of the “install” process.</p>
+
+<p>The wheel builder tool generates egg-info files from its wheel-specific metadata files.  It is possible to convert existing egg files into wheel files -but not the reverse.</p>
+
+<p>Still unanswered question: how does wheel deal with native code? It definitely bundles precompiled binaries, ie source-code is not expected to be compiled during installation - but I have the impression a single wheel can include binaries for multiple different target architectures - in which case I am not sure how such a wheel is built.</p>
+
+<h1 id="pip-in-detail">Pip in Detail</h1>
+
+<p>Pip can install from local files, or from the network.</p>
+
+<p>Like most package managers, it is not possible for multiple versions of the same logical package to be installed concurrently; one version must be chosen from the available set. Pip chooses the newest version which is compatible with the package that caused it to be downloaded.  (see eggs and working sets which have a different approach)</p>
+
+<p>Pip does not currently have true dependency resolution; when a set of packages are to be installed in one “transaction”, pip just installs them one at a time, pulling in needed dependencies as it goes. Not looking at the “global requirements” can lead to a situation where a later item in the transaction cannot be installed because an earlier one pulled in a conflicting dependency.</p>
+
+<p>Pip keeps a local cache of wheel files (like maven) - but not sdist files.</p>
+
+<p>Pip can download files but not install them with:</p>
+
+<ul>
+  <li><code>pip install --download DIR {packagename}|{-r requirements.txt}</code></li>
+</ul>
+
+<p>Python supports looking for modules in:</p>
+
+<ul>
+  <li>the stdlib install dir (global for the installation)</li>
+  <li>a site-specific install dir (global for the installation)</li>
+  <li>or a per-user dir ($PYTHONUSERBASE)</li>
+</ul>
+
+<p>Packages can be installed into the per-user dir with:</p>
+
+<ul>
+  <li><code>pip install --user SomePackage</code></li>
+</ul>
+
+<p>However in practice, using <code>venv</code> is recommended - in which case “pip install” automatically installs into the local venv instead of either global or per-user.</p>
+
+<p>pip is a “dependency resolution tool” that supports various underlying package formats, similarly to how:</p>
+
+<ul>
+  <li>“apt” is a tool that supports dependency resolution for packages in dpkg format</li>
+  <li>“yum/dnf” are tools that support dependency resolution for packages in rpm format</li>
+</ul>
+
+<p>The underlying formats that pip can download and install are:</p>
+
+<ul>
+  <li>sdist</li>
+  <li>egg</li>
+  <li>wheel</li>
+</ul>
+
+<p>Pip dependency-mgmt features:</p>
+
+<ul>
+  <li>packages can declare their own dependencies</li>
+  <li>pypi metadata declares dependencies</li>
+  <li>requirements.txt</li>
+  <li>pipfile/pipfile.lock</li>
+</ul>
+
+<p>It is possible to run your own “private index server” with only approved packages (similar to using a maven repo-manager).</p>
+
+<h1 id="pip-freeze">Pip Freeze</h1>
+
+<p>When developing code, it is usual to just <code>pip install ..</code> packages as you find you need them. However when distributing code using the “distribute source code directly” approach, it is useful to provide other users (often developers) wiht a specific list of packages to install in order to get the application working. This can be done by running <code>pip freeze</code>, which outputs a list of all the packages currently installed (eg into the active virtual environment). Another user can create a virtual environment and then “replay” this file in order to install exactly the same set of packages. The exact commands are:</p>
+
+<ul>
+  <li><code>pip freeze &gt; requirements.txt</code></li>
+  <li><code>pip install -r requirements.txt</code></li>
+</ul>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://packaging.python.org/">Python Packaging</a></li>
+  <li>
+<a href="https://www.python.org/dev/peps/pep-0517/">PEP 517</a> - actually, I’m not sure what this PEP means - but it is something to do with packaging :-)</li>
+  <li>
+<a href="https://www.python.org/dev/peps/pep-0441/">PEP 441</a> - executing zipfiles</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/python-pack/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

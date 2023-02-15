@@ -1,0 +1,634 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Google Cloud Platform - Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Google Cloud Platform - Overview</h1>
+    <aside>First published on: April 10, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>This article is intended to provide an architect-level view of Google’s cloud-computing services - the <a href="https://cloud.google.com/">Google Cloud Platform</a> (GCP).</p>
+
+<p>UPDATE: This article was heavily modified and updated in April 2019</p>
+
+<p>There is an official <a href="https://cloud.google.com/products/">list of GCP products</a>, but the number of options there is overwhelming at first glance. This article is intended to introduce the most important components, putting them into context - ie which components are most important to know, and which are often used together.</p>
+
+<p>Sadly when I was first dumped into the middle of a GCP-based project, I was unable to find any book or other source which helped me put the pieces into context. Google’s online documentation is unfortunately too detailed; I found nothing which gives an overview of the situation - the big picture into which the dozens of Google components fit. The situation is further confused by the fact that Google often has overlapping services, due to various reasons including:</p>
+
+<ul>
+  <li>Some services being phased out while others are phased in</li>
+  <li>Where companies have been purchased by Google and their services merged in to the overall solution even when some components duplicate existing functionality</li>
+  <li>Apparently competing departments within Google</li>
+</ul>
+
+<p>The following concepts are covered (in brief overview):</p>
+
+<ul>
+  <li>Getting Started (creating a login account)</li>
+  <li>Authentication (Cloud Identity)</li>
+  <li>Authorization (IAM)</li>
+  <li>Projects and Resource Management</li>
+  <li>Office Applications - Drive, GMail, Docs, Sites, etc</li>
+  <li><a href="https://en.wikipedia.org/wiki/G_Suite">G-Suite</a></li>
+  <li>Billing</li>
+</ul>
+
+<p>I am a Google Certified Cloud Architect and Google Certified Data Engineer (ie have completed various courses and the associated exams) and have implemented a couple of projects on the Google Cloud Platform. However the Google platform is large and complex; there are many features and whole products I have never used. Corrections and feedback are therefore welcome!</p>
+
+<h1 id="getting-started-with-the-google-cloud-platform">Getting Started with the Google Cloud Platform</h1>
+
+<p>Google provide a number of end-user services - file storage, online document editing, etc. These are <em>software as a service</em> - something you can use but not <em>program</em>. These services provided by Google need to be secure and very scalable; Google have built datacenters around the world and developed software frameworks that run in these datacenters to support their <em>software as a service</em> offerings (eg <em>Google Docs</em>). And fortunately Google also make it possible for a <em>software developer</em> to get access to these underlying frameworks to run custom code - for a fee of course. This set of services is called the <em>Google Cloud Platform</em> aka GCP.</p>
+
+<p>In fact, Google has a very generous “free tier”, charging for use of the GCP infrastructure only when that usage grows beyond specific limits (storage size, transactions-per-day, etc). It is quite possible to implement reasonable-sized applications without paying a cent - but which can scale to larger data volumes when needed. And if usage does increase to the level that payment is needed, then presumably the service is successful enough that it pays for itself.</p>
+
+<p>Getting access to Google’s GCP services as a developer starts by creating a simple end-user Google account (with id of form <code>user@gmail.com</code>), as needed to access the free software-as-a-service tools. It is then possible to create a Google Cloud Platform account linked to that end-user account, and then various interesting resources can be added to the cloud platform account such as virtual machines on which to run code, or database services into which data can be programmatically stored. Even company accounts start that way - a simple end-user Google account is created, then either a Google Cloud Identity service or Google GSuite service is added to that account and linked to your own DNS domain. Additional user accounts (identities) of form <code>user@yourdomain</code> can then be defined and assigned roles/rights over GCP resources.</p>
+
+<p>The central service which ties everything together is identity-management; this discussion therefore starts there.</p>
+
+<h1 id="the-google-cloud-identity-service">The Google Cloud Identity Service</h1>
+
+<p>Google’s cloud identity service is a distributed database of (id, credentials, profile) information, and various APIs for interacting with this database.</p>
+
+<p>Entries in this database are of four different types:</p>
+
+<ul>
+  <li>A GMail account directly with Google (personal account)</li>
+  <li>A member of a <a href="https://support.google.com/a/answer/7319251">Cloud Identity</a> account</li>
+  <li>A member of a GSuite account (similar to cloud-identity)</li>
+  <li>An application service account (which represent programs rather than users)</li>
+</ul>
+
+<p>Each entry is an <em>identity</em> with a unique string-typed id; for the first three types of entries, the id is of form <code>name@domain</code>. It is common for this id to also be a valid email-address for the user associated with this account - but the concept of account-id and email-address are <em>logically separate</em>.</p>
+
+<p>Every identity also has some associated <em>credentials</em> that can be used to “log in” as that identity. Various types of credentials are supported; the simplest of course being a plain password. More complex options include two-factor authentication, public keys, etc.</p>
+
+<p>As well as implementing a global distributed database for identity information, Google provides an associated REST service for interacting with the Google cloud identity service, in particular to submit credentials and get back an OAuth ticket that can then be used to authenticate to other Google services. Other REST endpoints allow update of the profile information for the identity. The identity service also provides an OpenID Connect page for web-based interactive login and single-signon support - which again results in an OAuth ticket being issued that can then be provided to other Google services.</p>
+
+<p>When accessing any GCP service (ie making a REST call to some GCP endpoint), the request must include a token that proves that the sender is authorized to access that service. Authorization in GCP is very consistent across all services (unlike the craziness of Microsoft Azure for example) - OAuth is supported across all services. OAuth tokens are issued only by Google’s cloud identity service, and rights are granted based on the roles associated with the identity (see IAM below). A few services also support “signed URLs” which grant time-limited access to specific resources (eg a specific file in Google Cloud Storage) without the user needing to have a GCP account.</p>
+
+<p>See <a href="/cloud/google-resources">my article on Google Cloud Identity Service and Resource Management</a> for further information on:</p>
+
+<ul>
+  <li>Authentication and authorization</li>
+  <li>Google Docs/GSuite (with respect to authentication and domain-names)</li>
+</ul>
+
+<p>Note that the Cloud Identity Service is intended to track moderate numbers of users, eg the employees of a company. Similarly, Google’s IAM service is intended for managing rights for that moderate number of users. If you are building the next Twitter or Uber, with millions of customer accounts, then Google’s Cloud Identity Service and IAM are not the right tools; you need a CIAM (Customer IAM) product. Google offers the confusingly similarly-named Google Identity Platform for that, and there are many other competing products. Identity Platform user accounts are completely separate from GCP access rights, and so this product (and customer account management in general) is not discussed further in this article.</p>
+
+<h1 id="google-docs-service-saas">Google Docs Service (SaaS)</h1>
+
+<p>Google provides a suite of “office applications”, including:</p>
+
+<ul>
+  <li>Email</li>
+  <li>Calendar</li>
+  <li>Hangouts (video calls)</li>
+  <li>Docs (word processing, spreadsheet, presentation)</li>
+  <li>Drive (file storage)</li>
+</ul>
+
+<p>Any person can create a free GMail account and get free (limited) access to the above applications. An individual or company can purchase a license and get full access to the above features. For a company with a GSuite licence, various resources are sharable across all employees, eg shared calendars and file storage. A GSuite license also allows “admin” users to manage other user accounts of form <code>user@yourdomain</code>.</p>
+
+<p>Internally, these services are built on top of the Google Cloud Platform APIs, ie use GCP to allocate virtual machines, containers, webapps, storage-buckets, databases, and various other resources that are needed to provide the above services to users.</p>
+
+<h1 id="google-iaas-and-gcp-apis">Google IaaS and GCP APIs</h1>
+
+<p>Google runs datacenters full of servers, disks, routers and load-balancers. It also runs “management software” that accepts requests and makes configuration changes to these physical resources, eg:</p>
+
+<ul>
+  <li>reserve a block of storage on one or more disks</li>
+  <li>install an operating system image on a reserved block of a disk</li>
+  <li>create a virtual machine on a physical server, and boot it from the OS image on a remote disk</li>
+  <li>reconfigure a router to allow/restrict network traffic to that virtual machine</li>
+  <li>configure a load-balancer to distribute http requests across a set of virtual machines</li>
+</ul>
+
+<p>There are many other services that run at a “higher level”, eg:</p>
+
+<ul>
+  <li>create a new identity (user or system credentials) and add access-rights to that identity</li>
+  <li>create a virtual database (a “namespace” within an existing database)</li>
+  <li>create a virtual object-store “filesystem”</li>
+  <li>deploy a block of code that handles HTTP requests, without needing to care where it runs (serverless functions)</li>
+</ul>
+
+<p>Each service that Google provides has a REST api (or REST-like; see section on gRPC later).</p>
+
+<p>Google also provides:</p>
+
+<ul>
+  <li>a set of libraries for various languages/platforms (java, javascript, python, …) which make it easier to send messages to GCP</li>
+  <li>a cross-platform (Python-based) commandline tool “gcloud” which uses the python version of the client library - ie whatever the commandline does you can also do via the library or simply direct messages to GCP</li>
+  <li>a web-based administration portal at <a href="https://console.cloud.google.com">https://console.cloud.google.com</a> which is also implemented using the GCP client libraries - ie there is nothing in the portal that cannot be done via direct messages to GCP</li>
+</ul>
+
+<p>With a free GMail account, the user can use any of the above interfaces to the Google Cloud Platform, eg visit the admin portal and immediately start using GCP resources (eg creating virtual machines running custom code). See later for more details.</p>
+
+<h1 id="permission-and-policy-management-iam">Permission and Policy Management (IAM)</h1>
+
+<p>The Google IAM service provides <em>authorization</em> throughout the Google services, ie maps users to roles and roles to permissions. Various Google services then (indirectly) test whether the user invoking a service (usually via a REST call) is permitted to perform that operation by checking the IAM permissions for that user.</p>
+
+<p>The term IAM is generally used in the IT industry to mean both <em>authentication</em> (identity, ie the “I” in IAM) and <em>authorization</em> (the “A” in IAM), and an “IAM product” typically maintains a database of users, credentials, and permissions. However as far as I can tell, Google has separated these, with Google Cloud Identity handling user accounts and credentials and supporting “login” operations while Google IAM handles only the permissions associated with such accounts.</p>
+
+<p>See <a href="/cloud/google-resources">this more detailed article</a> for more information on IAM.</p>
+
+<h1 id="accounts-and-projects">Accounts and Projects</h1>
+
+<p>The <a href="https://cloud.google.com/">Google Cloud Platform</a>, or GCP for short, is the set of services Google offer for storing and processing data, and running custom applications, within Google’s datacenters.</p>
+
+<p>A GCP account contains:</p>
+
+<ul>
+  <li>Zero or one Organisation resources (which describes the company or other entity associated with the GCP account)</li>
+  <li>Zero or more billing accounts (each with associated credit-card)</li>
+  <li>One or more projects (which hold resources; see below)</li>
+  <li>Zero or more folders (which define a logical tree view of the GCP account projects)</li>
+  <li>Global permissions (actually associated with the folders)</li>
+</ul>
+
+<p>A GCP project is always a direct child of a GCP account - projects are never nested (though folders can be used to create a “navigation structure” that makes it appear as if projects belong to folders). A project holds multiple resources such as:</p>
+
+<ul>
+  <li>An optional reference to a “billing account”</li>
+  <li>Cloud Storage buckets</li>
+  <li>Virtual network definitions (with associated firewall rules)</li>
+  <li>Virtual machines</li>
+  <li>Access permission rules</li>
+  <li>Licences for third-party APIs (free or paid)</li>
+  <li>and various other things</li>
+</ul>
+
+<p>Typically a company will have a single GCP account (with a single Organization resource), with a large number of distinct projects which are organised using a tree of <code>folder</code> entities that roughly follow the company internal management structure. There may be a single billing account, or one per department.</p>
+
+<p>See <a href="/cloud/google-resources">this article</a> for information on registering a GCP account and creating your first project.</p>
+
+<h1 id="the-organization-resource">The Organization Resource</h1>
+
+<p>A GCP account has zero or one Organization resources. As well as providing admin information about the company or other organization associated with the GCP account, permissions (an IAM policy) can be associated with the Organization. This policy applies to (is inherited by) all other resources in the project. When a GCP account does not have an Organization resource then there is no global policy that applies to all resources; each project and other resources (eg billing accounts) have independent policies.</p>
+
+<h1 id="billing">Billing</h1>
+
+<p>A GCP account has a set of billing accounts. A billing account has a credit-card number through which payment is charged, and a bill (cost report) is available per-billing-account.</p>
+
+<p>Each billing account has budget controls, after which no further charges will be incurred (but of course paid-for services will no longer be available).</p>
+
+<p>Each project is associated with zero or one billing accounts from the parent GCP account; if no billing account is linked then the project cannot use any paid features and transaction/storage volumes are limited to the free quota allowed by Google.</p>
+
+<p>In general, GCP’s approach to billing is far simpler than the AWS or Azure clouds. AWS and Azure often require an admin to specify how many CPU-units and IO-units are “prefunded” for each service, with the paid amount being “lost” (not refunded) if the service does not use its prepaid CPU/IO volume - or the service being throttled if it exceeds its quota. Instead GCP simply sets a financial quota on each project; services are then billed based on the amount of CPU and IO that they <em>actually use</em>. No throttling of services occurs unless the entire project goes over budget (and warnings are issued before that occurs). The Google billing approach does provide less control over quotas, but requires far less effort for “resource usage forecasting” and only ever charges you for what you actually use.</p>
+
+<h1 id="the-gcloud-tool">The GCloud Tool</h1>
+
+<p>This article has pointed out that <a href="https://cloud.google.com/apis/">all Google services are accessible via a REST API</a> in addition to a web interface (the web interface is actually implemented via the REST API).</p>
+
+<p>The Google Cloud SDK is a commandline toolset (implemented in Python) that can be installed on developer/administrator systems in order to administer/configure GCP resources; it simply makes calls to the REST APIs, ie anything that can be done via raw REST or via a web interface can also be done via the commandline tool <code>gcloud</code>.</p>
+
+<p>The Google Cloud SDK is actually split into modules; the initial install provides the <code>gcloud</code> tool which also acts as a kind of ‘package manager’ through which additional modules can be installed. Useful modules include things such as an emulator for the Google Datastore NoSQL database, so that code interacting with Datastore can be tested on developer laptops, etc.</p>
+
+<p>I can highly recommend the gcloud commandline tools; it is often far easier to discover and use functionality via this tool than via the web interface.</p>
+
+<h1 id="gcp-rest-calls">GCP REST Calls</h1>
+
+<h2 id="grpc">gRPC</h2>
+
+<p>Although all GCP services can be accessed with traditional REST calls (HTTPS with JSON body), they also support an optimised version called <a href="https://grpc.io/docs/">gRPC</a>. The gRPC protocol uses Protobuf to encode the “message body” rather than JSON - ie the body is densely encoded binary data rather than utf-8 text. However the message is still transferred over HTTPS (to be precise: HTTP/2 over a TLS-encrypted channel). Using protobuf for the message body reduces the amount of network traffic significantly, and also reduces CPU time needed for message serialization/deserialization.</p>
+
+<p>All of Google’s GCP client libraries (eg for Java and Python) default to using gRPC.</p>
+
+<h2 id="api-versioning">API Versioning</h2>
+
+<p>GCP services evolve over time. To handle this, the REST URLs through which services are accessed include a version-number as the first item in the URL path, eg:</p>
+
+<ul>
+  <li><code>https://someservice.googleapis.com/v3/resource/to/be/accessed</code></li>
+</ul>
+
+<p>While talking about versioning, any user of GCP soon notices that many APIs and services are labelled “beta”. In GCP, such services are usually very stable - in my experience, GCP does not make a service available until it is completely usable for even production use. The beta does indicate that they have the right to deprecate and remove the service - but that is very rare. Services often remain in beta for over a year; when they eventually are officially released then the beta APIs continue to be supported. Using a GCP beta-level service in production code is therefore not out of the question.  The Azure cloud seems to take a quite different approach - services not offically at “release” status are often extremely buggy, geographically limited, are often not running at all for periods of time, and basically should be avoided for anything other than prototyping.</p>
+
+<h2 id="programming-language-support">Programming Language Support</h2>
+
+<p>There is usually no need to make raw REST calls to GCP services; Google provides <a href="https://cloud.google.com/apis/docs/cloud-client-libraries">excellent client libraries for many languages</a>. However the primary languages that GCP supports (ie those often found in example code in official documents) are:</p>
+
+<ul>
+  <li>Python</li>
+  <li>Nodejs</li>
+  <li>Java</li>
+  <li>Go</li>
+</ul>
+
+<p>The “Google Cloud Client Libraries” are “idiomatic”, ie feel like they are designed specifically for that programming language.</p>
+
+<p>The “Google API Client Libraries” are a thinner wrapper that expose REST concepts more directly; these are less elegant to use but are auto-generated and therefore are always up-to-date.</p>
+
+<h1 id="project-resources">Project Resources</h1>
+
+<p>After visiting the GCP admin page (<code>console.cloud.google.com</code>) and selecting a project from the dropdown list, a menu of options is displayed on the left. There is a huge amount to learn about all the different services and options available, but it might be useful to get a brief summary of at least the top-level menu items in that list:</p>
+
+<ul>
+  <li>Cloud Launcher  – uses predefined templates to install complete “packages” of software onto the GCP, eg a virtual network plus a set of VMs each running a specific predefined VM image. Things like a LAMP stack (Linux/Apache/MySQL/PHP) can be installed from Cloud Launcher with just a few clicks.</li>
+  <li>Billing – described above</li>
+  <li>APIs &amp; services – configures IAM permissions to allow code within the GCP project to invoke specific APIs (some from Google, some third-party). Some services require payment, in which case a billing account is required. Enabling an API often includes a “setup” phase in which data is entered.</li>
+  <li>IAM &amp; admin – configuring access permissions for users and applications; configure Cloud Identity; manage encryption keys.</li>
+  <li>Compute – configure ways to run custom code, from low-level (pure VMs) to high-level (cloud functions).</li>
+  <li>Storage – persisting data in various ways (either unstructured or structured)</li>
+  <li>Networking – fairly obvious!</li>
+  <li>Stackdriver - tools for monitoring and debugging code running in the compute environments</li>
+  <li>Tools – things for developers and sysadmins</li>
+  <li>Bigdata – services for storing and transforming large amounts of data (aka data analysis)</li>
+</ul>
+
+<p>Of course there are far more online services available via the “APIs &amp; services” menu.</p>
+
+<p>The remainder of this article looks briefly at the most important (IMO) services in the above categories, with links to useful articles on this site or external sites. There are also a couple of categories of services that are not on the primary menu of the GCP web console, and chapters addressing these can also be found below.</p>
+
+<p>See this official <a href="https://cloud.google.com/products/">list of GCP products</a> for more details.</p>
+
+<h1 id="compute-options">Compute Options</h1>
+
+<p>The “Compute” features are generally divided into four categories:</p>
+
+<ul>
+  <li>Compute Engine manages pure VMs, on which you boot a VM image and then configure everything yourself</li>
+  <li>Kubernetes Engine manages containers; you provide the container images and declaratively specify how they should be scaled and wired together</li>
+  <li>
+<a href="/cloud/google-appengine">App Engine</a> manages applications; you provide java packaged apps as <code>.war</code> files, or equivalent “app packages” using Python, PHP, and several other supported languages/frameworks, and GCP deploys and scales them.</li>
+  <li>
+<a href="/cloud/google-cloud-functions-overview">Cloud Functions</a> manages code fragments; you provide very fine-grained logical modules in various supported languages and Google deploys and scales them.</li>
+</ul>
+
+<p>Using <em>Compute Engine</em> to deploy code to VMs is often the easiest way to move existing software from an on-premise environment to a cloud environment; the hassles of maintaining hardware and networks is moved to Google while little or no change is needed to the software. It also allows the VM size to be changed easily - a simple config command can increase or decrease the CPU, IO or RAM capacity of the host. However scalability is limited. It is possible (with some effort) to get GCP to manage a pool of identical VMs where the pool is increased when the load on existing VMs exceeds a threshold and the pool is decreased when load drops; nevertheless scaling in this way is clumsy and relatively slow. It is also difficult to “scale down to zero” when there is no work to do (something very useful for development environments for example, or systems that only intermittently process data). And in general, VMs are the most expensive of the various options for performing data processing. Compute Engine also provides little support for microservice architectures, for restarting software when it crashes, for distributing configuration information, performing elegant “rolling updates”, etc. - you need to take care of all that yourself.</p>
+
+<p>Kubernetes provides a lot of support for managing cooperating software components. Each “unit of software” must be packaged as a “container image” and stored in a container registry. Kubernetes configuration files then specify how many instances of each unit should be running, how load-balancers should distribute data across them, what should happen if a software unit (or the hardware on which it is running) crashes, where logging output should be forwarded to, and various other details. The Kubernetes infrastructure then does its best to ensure that the current state matches the desired configuration - starting and stopping software, injecting configuration, updating load-balancers, and performing various other tasks. If you have a set of collaborating software components, Kubernetes is a good option to look into. Kubernetes is also slightly cheaper than <em>Compute Engine</em> per CPU cycle, as GCP can do some optimisation regarding placement of software. But the biggest saving is in developer and sysadmin time. One limitation is that the “containers” must be Linux-based; any desired Linux userspace may be used within the container image but (unlike Compute Engine VMs) the underlying OS kernel is always Linux. Another is that the “worker nodes” in a Kubernetes cluster are a set of VMs allocated via <em>Compute Engine</em>; scaling a Kubernetes workload occurs rapidly as long as the Kubernetes cluster size does not need to be increased. However scaling the number of worker nodes in a Kubernetes cluster is not as rapid or easy as scaling with AppEngine or Cloud Functions.</p>
+
+<p><a href="/cloud/google-appengine">AppEngine</a> provides a “Platform as a Service” for writing request-response based software, eg webservers. In general, the concept of AppEngine is that developers write code in one of the supported frameworks (eg Nodejs or Java Servlet Engine) and AppEngine then takes care of building, packaging and deploying the software. AppEngine also takes care of many aspects related to scaling, load-balancing, monitoring/logging, and (when needed) rollbacks. However when letting AppEngine take care of all of this, there are some limitations: only specific frameworks are supports, the app must be a request/response type application, the maximum duration of each request is limited to a few minutes, and the OS environment is not under the control of the developer (eg external helper apps cannot be provided). AppEngine is significantly cheaper than Compute Engine VMs and Kubernetes, as GCP can perform some internal optimisations. AppEngine apps can also be scaled rapidly (up or down) in response to incoming load. When no load is present, the number of instances can scale down to zero - and thus no costs are incurred; this is very useful for development environments!</p>
+
+<p>The “AppEngine Flexible” variant is somewhere between AppEngine and Kubernetes - the developer can take responsiblity for software build and packaging, delivering a container image for execution by AppEngine. However prices are higher than AppEngine Standard, and there are some additional limitations.</p>
+
+<p><a href="/cloud/google-cloud-functions-overview">Cloud Functions</a> provides a platform for request-response based software where each “unit of software” has only a single entry-point. The software might handle a single REST endpoint (url), or might handle messages from a single GCP PubSub message-queue. Individual Cloud Functions therefore usually have a single purpose, and complex systems must be built from multiple separate Cloud Functions. Like AppEngine, there is a maximum duration allowed for each request. The lifecycle of a Cloud Function instance is under GCP’s control - each Function is actually a container image, but GCP can start and stop images where and when it chooses - a container might be reused for thousands of requests, or might be shut down after servicing a single request.  Many software systems cannot be built as a Cloud Function - or even a handful of Cloud Functions. However Cloud Functions can scale up or down extremely rapidly in response to incoming load. They are also cheap, as GCP can move them around to optimise its internal resource usage. Functions must be implemented in one of the supported languages (Python, Nodejs, and a few others); GCP provides the necessary support to build and package the results into a container image that can be executed.</p>
+
+<p>The <a href="https://cloud.google.com/run/">Cloud Run</a> service extends cloud functions to allow the implementation to be a <em>container image</em> built by the developer. This of course makes development somewhat more complex than with standard Cloud Functions (which provide the build and packaging process) but allows code to be written in any language that can run in a container on a Linux kernel.</p>
+
+<p>One service that the Azure cloud offers that GCP does not appear to is “batch mode task execution”, where jobs can be queued up to be run when the cloud environment has free resources available. In Azure, this can offer significant savings and a nice logical way of handing latency-tolerant bulk processing tasks.</p>
+
+<p>Each of the major clouds provides some kind of “discount program” that allows customers to run low-priority code when the cloud has resources that are not otherwise being used. AWS has a “bidding system” called <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html">spot instances</a> where the customer sets a price they are willing to pay for VM time, and AWS runs the code only when it is willing to provide a VM at that price. GCP has a simpler system - they have a fixed price for <a href="https://cloud.google.com/preemptible-vms/">preemptible VMs</a>; when your project includes VMs marked as “preemptible” then GCP decides when to boot them, and for how long. A preemptible VM instance never runs for more than 24 hours continuously. Preemptible VMs are an effective way to run time-insensitive processing (eg scanning files in Cloud Storage or processing messages in Pub/Sub). GCP also offers discounts for <a href="https://cloud.google.com/compute/docs/sustained-use-discounts">sustained usage</a>, ie VMs which run for more than 8 days per month).</p>
+
+<h1 id="storage-options">Storage Options</h1>
+
+<p>Storage can be categorized as holding either “unstructured” or “structured” data.</p>
+
+<p>The term “unstructured” here is meant to indicate that standard GCP services cannot be used to “query” the contents; as far as GCP is concerned the persisted data is an array of bytes. Of course almost all data <em>does</em> have internal structure - I just mean here that the structure is not intended to be interpreted by GCP.</p>
+
+<h2 id="unstructured-storage-options">Unstructured Storage Options</h2>
+
+<p>Unstructured storage options include:</p>
+
+<ul>
+  <li>Google Drive</li>
+  <li>Network-mounted Block Storage</li>
+  <li>
+<a href="https://cloud.google.com/filestore/">Cloud Filestore</a> - Network filesystem (NFS/Samba-like)</li>
+  <li>
+<a href="/cloud/google-cloud-storage-overview">Cloud Storage</a> is an object store (somewhere between a filesystem and a key-value store for large amounts of data)</li>
+</ul>
+
+<p>Google Docs provides storage for files, and a REST API can be used to upload and download files. This can be a useful way to exchange data with interactive users. However as “data persistence” for applications running within GCP, this is not a practical storage approach.</p>
+
+<p>A “virtual disk” can be allocated on GCP’s massive storage arrays, and this can then be mounted as a network-block-storage device on any Compute Engine VM. The virtual disk appears to the host it is mounted on as a raw sequence of disk-blocks, and can be formatted with any supported filesystem (eg EXT4). A virtual disk can be mounted read-only on multiple VMs concurrently - or as writable on exactly one VM. Virtual disk storage is relatively expensive. There are maximum size limits to such disks, and they are tightly bound to a specific geographical region.</p>
+
+<p>As of mid-2018, GCP provides <a href="https://cloud.google.com/filestore/">Cloud Filestore</a> - a NFS-like shared file system service. Reading/writing data is not as performant as Cloud Storage, and it costs more. However it does provide Posix-style file access, and standard APIs that existing software is compatible with. Third-party service <a href="https://blocksandfiles.com/2019/04/02/google-endorses-elastifile-cloud-file-service-for-gcp/">Elastifile</a> might also be an option.</p>
+
+<p>The traditional way of persisting unstructured data in GCP is <a href="/cloud/google-cloud-storage-overview">Cloud Storage</a> (a kind of object store). This provides extremely cheap and effectively unlimited storage, with configurable levels of access-speed, availability and reliability. Each “storage bucket” is effectively a (key, value) store where the key is traditionally a string that roughly resembles a file-system path (eg “/path/to/my/file.txt”) and the value is an array of bytes. The storage does not provide all the traditional Posix behaviour, but is fast and cheap. ACLs are only supported at the bucket level, ie access-rights cannot be set for specific files.</p>
+
+<p>One interesting feature of Cloud Storage is that you can use it to serve a static website; place HTML, Javascript, and other resourcefiles in a storage bucket and map your DNS name to the storage bucket and GCP will accept standard http-get requests and return content from the storage bucket.</p>
+
+<h3 id="unstructured-storage-with-hadoop-and-spark">Unstructured Storage with Hadoop and Spark</h3>
+
+<p>Cloud Dataproc is a GCP service for running Hadoop and Spark workloads. Such code will of course need to read data as input, and write data as output.  Dataproc provides a custom HDFS protocol of form <code>gs://</code> which can be used to read and write from GCP Cloud Storage. However cloud storage is not optimal for Hadoop/Spark code in several respects:</p>
+
+<ul>
+  <li>
+    <p>Hadoop and Spark jobs often create temporary directories and then rename or delete them; with object-stores these “directory” operations are typically neither atomic nor efficient.</p>
+  </li>
+  <li>
+    <p>HDFS supports ACLs on a per-file and per-directory basis; Cloud Storage only supports ACLs at the bucket level.</p>
+  </li>
+</ul>
+
+<p>As far as I know, the GCP solution is simply to copy data from Cloud Storage into the Dataproc cluster’s internal HDFS storage at the start of a job, and copy the results out at job end. Or live with the somewhat inefficient (and non-atomic therefore slightly risky) directory operations.</p>
+
+<p>Microsoft Azure has a similar problem. They created “Data Lake Storage v1” which is effectively a long-lived HDFS file storage service; however as this service is completely independent of their primary storage (Azure Blob Store) Data Lake Storage v1 is very expensive and lacks many features available in the core Blob Storage. Recently Azure has released “Data Lake Storage v2” which is effectively implemented by enhancing Azure Blob Storage with “namespaces” that provide efficient directory-level renames and deletes, and ACLs at directory level. This “namespace” support has a minor performance hit, so is not enabled for general Blob Store usage, but is efficient enough that Hadoop/Spark workloads can now run directly against this storage without needing copy-in at job start and copy-out at job end. It is not clear whether GCP will provide a comparable solution.</p>
+
+<h2 id="structured-storage-options-ie-databases">Structured Storage Options (ie Databases)</h2>
+
+<p>Structured (queryable) storage options, ie database-like services include:</p>
+
+<ul>
+  <li>Cloud SQL provides various not-particularly-scaleable SQL-compatible databases</li>
+  <li>Spanner is a very scalable SQL-compatible database with transaction support</li>
+  <li>Datastore is an alternative noSQL database</li>
+  <li>Bigtable is a very scalable noSQL database</li>
+  <li>Bigquery is a data-analytics database</li>
+</ul>
+
+<p>There are, of course, many other third-party solutions as well which can be accessed via the “cloud launcher” menu (ie via a kind of “appstore for GCP” that installs software on compute-engine VMs or similar resources).</p>
+
+<p>GCP Cloud SQL is a kind of management layer for setting up a single or clustered install of Postgres, MySQL, or MS-SQLServer. Once set up, GCP also takes responsibility for applying security patches to the database instance(s). However the databases are not particularly scaleable, and are expensive - you pay while the DB is running, not per-query. It is possible to stop a DB when you are not using it (eg for development environments) but automating that is non-trivial. Costs for storage are also high, and the space must be pre-allocated - ie you need to perform “forecasting” to correctly size the databases.</p>
+
+<p>Spanner is a relational DB that behaves almost like a traditional Postgres/MySQL/Oracle/etc. instance - but scales to extremely high volumes of data. It is a service provided by GCP, ie you don’t have any maintenance responsibilities and are unaware of the actual underlying infrastructure - except for billing purposes. However the performance and amount of data that can be stored are dependent on the number of “nodes” in the database - and these must be paid for. Thus billing is effectively by time the database is running - and you need to perform “forecasting” to ensure that storage and performance resources are appropriately allocated.</p>
+
+<p>Datastore is an “object database” - somewhat similar to document-oriented databases such as MongoDB. Datastore is a completely hosted service - you do not manage hosts or storage, and just pay for usage. Datastore is primarily intended for an application to persist its internal data-structures in, and the Datastore API makes that easy (no object-relational-mapping layer needed). Foreign keys are not enforced - in fact Datastore is schemaless. There is a limited form of transactions. There is limited support for querying of data - ie more than a key/value store but less than a relational database. Datastore scales to extremely large amounts of data - automatically. And Datastore is very cheap - with a generous quota of completely free storage and queries. If your use-case can be implemented using Datastore, then it is almost certainly the best option.</p>
+
+<p>Bigtable is somewhat like a cross between a relational database and a key-value store; it is similar to <a href="/bigdata/hbase">HBase</a> and <a href="/bigdata/cassandra">Cassandra</a>. Data is stored in tables of records, but tables are schemaless - ie each record can contain arbitrary fields. Fields are basically byte-arrays, ie can store any data. Each record has a key which allows rapid lookup, update, and delete by key. Bigtable can also efficiently “scan” all records whose key has a specific prefix - thus allowing basic “index by key”. Fields other than the key cannot be indexed. Bigtable scales to very large amounts of data, and has excellent read/update/delete performance (by key or key-prefix). Pricing is moderate - more expensive than Datastore but less than Spanner. Like Spanner, you need to use “forecasting” to determine the number of “nodes” that your Bigtable database should run on, and you are charged for that regardless of whether the cluster is busy or idle. However administering and updating those nodes is done by GCP.</p>
+
+<p>BigQuery is designed for data warehousing and analytics purposes - summarizing and analysing large immutable datasets; it is similar to <a href="/bigdata/hive">Hive</a> and <a href="/bigdata/spark">SparkSQL</a>. Data is stored in tables of records, and tables have schemas (ie all records in a table have the same set of fields, and fields have known types). BigQuery can hold extremely large amounts of data, and does so cheaply - storage for tables effectively uses the same infrastructure as GCP Cloud Storage and is charged at the same price. Data can be queried using a SQL-like syntax, and queries are executed in parallel for performance - but queries often have high latency; BigQuery is intended for running queries which summarize and aggregate lots of data, not for retrieving specific records. Appending records to tables is efficient; updates and deletes can only be performed in “batches” which are extremely inefficient.</p>
+
+<p>As noted at the start of this chapter, additional third-party database-like services are available via Cloud Launcher.</p>
+
+<h1 id="networking">Networking</h1>
+
+<p>Networking features include:</p>
+
+<ul>
+  <li>Define virtual networks which VMs/containers can be bound to</li>
+  <li>Define firewall rules associated with virtual networks</li>
+  <li>Define load-balancers</li>
+  <li>Define DNS records for use within the cloud environment (VM-to-VM lookup)</li>
+  <li>Access CDN (content distribution) services for serving static content to large numbers of users</li>
+</ul>
+
+<p>The way GCP handles firewalls and network access control is IMO very elegant. It is quite different from traditional router/firewall configuration however, and might take some getting used to. In general, the idea is to define sets of access-rules and then “tag” VMs with the rules that should apply to them.</p>
+
+<p>The way GCP handles load-balancers is, however, very ugly and confusing.</p>
+
+<p>There isn’t a whole lot more to be said about GCP’s networking features. They are generally good, but nothing unexpected.</p>
+
+<h1 id="monitoring-logging-and-debugging-tools-stackdriver">Monitoring, Logging and Debugging Tools (Stackdriver)</h1>
+
+<p>GCP Stackdriver is the platform for viewing the status and history of processing resources in an account, and log output. Unfortunately Stackdriver was originally a product from a third-party company, and IMO it is not particularly elegantly integrated into GCP. This is possibly the weakest part of GCP in my opinion.</p>
+
+<h1 id="developer-tools">Developer Tools</h1>
+
+<p>Features relevant for developers include:</p>
+
+<ul>
+  <li>Container Registry  – central storage for images deployed to Kubernetes Engine</li>
+  <li>Source Repositories  – Google-hosted version control systems</li>
+  <li>Endpoints – provides optional monitoring and security features for REST applications deployed on compute environments (provided those apps are endpoint-enabled)</li>
+</ul>
+
+<p>The Endpoints features deserve a whole article on their own. Some features are addressed briefly in <a href="/cloud/google-appengine">this Vonos article on AppEngine</a>.</p>
+
+<p>GCP does of course provide an extensive library of OS images from which to boot VMs in Compute Engine. It also allows custom VM images to be used for this purpose.</p>
+
+<h1 id="big-data-data-analytics-options">Big Data (Data Analytics) Options</h1>
+
+<p>Google provides the following services, and considers them “Big Data” services (I think many of these are more generally applicable than just to Big Data problems):</p>
+
+<ul>
+  <li>
+<a href="/cloud/google-bigquery-overview">BigQuery</a> – an SQL-execution engine for business intelligence (OLAP) workloads.</li>
+  <li>Pub/Sub – a scalable message broker service</li>
+  <li>Dataproc – batch and streaming data processing based on Hadoop and Spark</li>
+  <li>
+<a href="/cloud/beam-dataflow-overview">Dataflow</a> – batch and streaming data processing based on Apache Beam and Google’s proprietary execution engine (similar to Spark)</li>
+  <li>ML Engine – machine learning tools</li>
+  <li>
+<a href="/cloud/google-dataprep">Dataprep</a>  – ETL data-cleansing tools</li>
+</ul>
+
+<h1 id="scheduling-and-workload-management-options">Scheduling and Workload Management Options</h1>
+
+<p>It is often necessary to execute logic on a time-based schedule, or to manage sequences of processing steps.</p>
+
+<p><a href="https://cloud.google.com/scheduler/">Cloud Scheduler</a> is a simple and fully hosted service for performing one of the following operations on a time-based schedule:</p>
+
+<ul>
+  <li>writing a fixed message to a Pub/Sub topic</li>
+  <li>invoke a fixed http(s) url.</li>
+</ul>
+
+<p>The Cloud Scheduler implementation is a little weird - it requires that the GCP project includes an AppEngine app instance. However pricing is per “job” (schedule item), not per VM.</p>
+
+<p><a href="https://cloud.google.com/composer/">Cloud Composer</a> is basically Apache Airflow running on a GCP VM. Unfortunately it is not really a “hosted service” - you effectively tell Google to allocate a VM and install Composer (Airflow) on it. Google take care of the installation and maintenance (patching) but you pay for the VM (per minute) while your Composer instance is running, even when idle (which is usually 24 hours per day unless you find some way to do some clever automated startup/shutdown). This “pay for underlying VM” approach is common in the Azure cloud, but GCP usually abstracts the underlying platform better, and bills only for actual use (non-idle time).</p>
+
+<h1 id="resource-management-tools">Resource Management Tools</h1>
+
+<p>A GCP project can contain many resources with complex configuration; defining this all interactively is a bad idea (particularly for production environments).</p>
+
+<p>Cloud Deployment Manager allows resources (VMs, networks, databases, etc) to be declaratively defined.</p>
+
+<p>While Deployment Manager is fairly good, the third-party tool <a href="http://moi.vonos.net/cloud/terraform-overview/">Terraform</a> is also a good choice.</p>
+
+<h1 id="machine-learning-options">Machine Learning Options</h1>
+
+<p>I haven’t used these services much myself, so cannot offer much of an overview here.</p>
+
+<p>GCP does offer some REST endpoints (which must be enabled via “apis and services”) for using Google’s own pretrained machine learning models. Available REST endpoints can:</p>
+
+<ul>
+  <li>accept an audio file and return the text equivalent (speech-to-text)</li>
+  <li>accept text and return an audio file (text-to-speech)</li>
+  <li>accept text and indicate which are the “most important words” in the text, and whether the author of the text was using these words in a positive or negative way (sentiment analysis) - this is useful for automated evaluation of customer/user-provided feedback via channels such as a companies’ social media platforms or user forums.</li>
+  <li>accept images and return a list of the physical objects present in the image (image recognition)</li>
+</ul>
+
+<p>GCP also offers a “studio” in which machine learning models can be defined, and then “let loose” on a set of training data.</p>
+
+<p>Once models have been trained, GCP offers a service to host a model as a REST service; your code running elsewhere in GCP (eg an AppEngine instance) can then invoke the model via REST, passing the necessary input data, and receive the model output in return. GCP handles scaling of the infrastructure on which the model maps inputs to outputs.</p>
+
+<h1 id="further-reading">Further Reading</h1>
+
+<ul>
+  <li><a href="/cloud/what-is-a-cloud">Vonos: What is a Cloud</a></li>
+  <li><a href="https://cloud.google.com/docs/overview/">Google: Cloud Platform Overview</a></li>
+  <li><a href="https://cloud.google.com/docs/overview/cloud-platform-services">Google: Cloud Platform Services</a></li>
+  <li><a href="https://support.google.com/a/answer/7319251">Google: What is Cloud Identity</a></li>
+  <li><a href="https://cloud.google.com/apis/">Google: GCP APIs</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/google-cloud-overview/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

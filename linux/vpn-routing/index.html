@@ -1,0 +1,389 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - How does a VPN work on Linux?</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>How does a VPN work on Linux?</h1>
+    <aside>First published on: November 8, 2019</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a>, <a href='/category/Network/'>Network</a>, <a href='/category/Security/'>Security</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>This article was motivated by a problem I had: VPN access to my work environment from my new Linux install didn’t work - and some basic searches on the internet provided no obvious answers. It was therefore necessary to look into how VPNs work in some more detail…</p>
+
+<p>The VPN solution I am using is Cisco Anyconnect (aka Openconnect), but much of the info below should apply to other VPN products.</p>
+
+<p>The environment I am setting up the VPN on is Ubuntu 19.10 with Gnome; this implies network-manager for network configuration and systemd-resolved for DNS.</p>
+
+<p>Note that I am a developer, not a networking specialist - any corrections welcome.</p>
+
+<h1 id="initial-install">Initial Install</h1>
+
+<p>Installing Openconnect is pretty easy:</p>
+
+<pre><code>sudo apt install openconnect network-manager-openconnect network-manager-openconnect-gnome
+</code></pre>
+
+<p>Then go to Gnome’s Settings/Network and add a VPN definition. The VPN can then be enabled from either the settings window or the status-tray.</p>
+
+<h1 id="what-a-vpn-does">What a VPN does</h1>
+
+<p>So what does “enabling” the VPN actually do?</p>
+
+<h2 id="state-with-vpn-not-active">State With VPN Not Active</h2>
+
+<p>Here’s the relevant state of my network without the VPN active:</p>
+
+<pre><code>$ ifconfig
+
+enp0s31f6: flags=4099&lt;UP,BROADCAST,MULTICAST&gt;  mtu 1500
+         ether 98:fa:9b:00:7b:d3  txqueuelen 1000  (Ethernet)
+         ...
+
+lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536
+         inet 127.0.0.1  netmask 255.0.0.0
+         inet6 ::1  prefixlen 128  scopeid 0x10&lt;host&gt;
+         loop  txqueuelen 1000  (Local Loopback)
+         ...
+
+wlp3s0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500
+         inet 192.168.1.147  netmask 255.255.255.0  broadcast 192.168.1.255
+         inet6 fd96:ffc0:5eb9:0:d46b:1e4:5624:5f20  prefixlen 64 scopeid 0x0&lt;global&gt;
+         inet6 fd96:ffc0:5eb9::43a  prefixlen 128  scopeid 0x0&lt;global&gt;
+         ...
+
+$ route -n
+
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use 
+Iface
+0.0.0.0         192.168.1.1     0.0.0.0         UG    600 0        0 wlp3s0
+169.254.0.0     0.0.0.0         255.255.0.0     U     1000 0        0 wlp3s0
+192.168.1.0     0.0.0.0         255.255.255.0   U     600 0        0 wlp3s0
+
+$ cat /etc/resolv.conf
+
+nameserver 127.0.0.53
+options edns0
+search lan
+
+$ systemd-resolve --status
+
+...
+Link 3 (wlps30)
+  Current Scopes: DNS
+  DefaultRoute setting: Yes
+  Current DNS Server: 192.168.1.1
+  DNS Domain: ~.
+</code></pre>
+
+<p>The ifconfig entries show that this system has one external network interface named “wlp3s0”, which has been allocated a local IP address of 192.168.1.147 (by the DHCP server it talked to on initialisation). This network interface name effectively identifies a driver context within the Linux kernel; in this case the context is associated with a Wifi driver. The interface named “lo” is associated with a “loopback” driver context, and is not really relevant here.</p>
+
+<p>The second routing entry specifies that all packets sent to addresses of form <code>169.254.*</code> (ie <code>169.254.0.0/16</code>) are to be processed by the driver context “wlp3s0”.  This range is the <a href="https://en.wikipedia.org/wiki/Link-local_address">link-local address range</a> - a special set of addresses that can only be used to access stations on the same local network segment (ie even more restricted than the <a href="https://en.wikipedia.org/wiki/Private_network">private address range</a>).</p>
+
+<p>Similarly, the third routing entry specifies that any packets sent to <code>192.168.1.*</code> are to be processed by that same context. I presume this is set up to match the gateway address (see below).</p>
+
+<p>The first routing entry specifies that any packet whose destination address is not matched by a more-precise rule should be handled by “wlp3s0”.  That first routing entry is special in that its flags include a “G” (Gateway) and it has a gateway address. This tells the code associated with “wlp3s0” that before it sends the packet out over the wireless device, it should wrap the packet in an <em>envelope</em> whose destination-address is the gateway address - ie the packet is redirected. That address happens to be the incoming-packet interface within the router that is attached to the wifi device; the driver within the router will then extract the original packet from the envelope and send it on to one of the ports attached to it, depending on the original address. For addresses that are “not local”, the packet is sent through the port that leads to an ISP which will then forward it into the wide internet.</p>
+
+<p>DNS resolution has had a long and somewhat complicated history in Linux. The main Linux distributions now use systemd-resolved for resolving names; calls from applications to the standard C library functions that map name-to-address get forwarded to this daemon which then emits DNS queries to obtain the info (or returns values from a local cache).</p>
+
+<p>The systemd-resolve output indicates that wlp3s0 is a valid interface to send DNS queries over, and gives the address to send them to. It also specifies for which domain-names this interface should be used to find ip addresses - “~.” means all domain-names.</p>
+
+<h2 id="state-with-vpn-active">State With VPN Active</h2>
+
+<p>After enabling the Cisco Openconnect VPN via the Gnome UI, things now look somewhat different. Clearly the VPN is at least partially working:</p>
+
+<pre><code>enp0s31f6: (unchanged)
+lo: (unchanged)
+wlp3s0: (unchanged)
+
+vpn0: flags=4305&lt;UP,POINTOPOINT,RUNNING,NOARP,MULTICAST&gt; mtu 1300
+         inet 172.17.35.95  netmask 255.255.254.0  destination 172.17.35.95
+         inet6 fe80::440c:186a:c381:d61  prefixlen 64  scopeid 0x20&lt;link&gt;
+         ...
+
+$ route
+(same 3 entries above)
+111.11.111.11   192.168.1.1     255.255.255.255 UGH   600 0        0 wlp3s0
+188.188.188.18   0.0.0.0         255.255.255.255 UH    50 0        0 vpn0
+199.199.99.0    0.0.0.0         255.255.255.0   U     50 0        0 vpn0
+.. plus many entries similar to the above two
+</code></pre>
+
+<p>A new interface “vpn0” has been defined; this corresponds to a context within the kernel that is associated with the Cisco VPN driver code. This code encrypts outgoing packets and wraps them in an envelope that points at the remote VPN endpoint, then resubmits them to the networking layer within the kernel. This context also receives incoming packets, unwraps and decrypts them, then resubmits them to the networking layer for delivery to the relevant application.</p>
+
+<p>The new UGH entry is telling the kernel that all packets with destination <code>111.11.111.11</code> (the address on the envelope that the VPN driver adds to all outgoing packets) should be sent via the standard wifi driver and then out via my router’s standard route to my ISP. This address is the remote endpoint of the VPN - obviously all packets need to go over my wifi driver and then to my ISP in order to reach the VPN.</p>
+
+<p>The other entries are ensuring that packets destined for specific address-ranges should be handled by the kernel driver responsible for interface “vpn0”.</p>
+
+<p>Note that this VPN does not simply redirect <em>all</em> outgoing traffic; instead it redirects only specific IP-ranges which the server has been configured to intercept. This is certainly more efficient than catching all traffic; it means my employer does not need to act as a relay when I am interacting with sites that are not of interest. On the other hand, it does mean that my employer’s VPN does not protect me from observation or data-manipulation when accessing unrelated insecure sites.</p>
+
+<h2 id="the-dns-problem">The DNS Problem</h2>
+
+<p>The problem that originally motivated me to look into all this is that although the above traffic-routing was working fine, DNS was not.</p>
+
+<pre><code>$ cat /etc/resolv.conf
+
+nameserver 127.0.0.53
+options edns0
+search lan
+
+$ systemd-resolve --status
+
+...
+Link 5 (vpn0)
+  Current Scopes: none
+  DefaultRoute setting: no
+</code></pre>
+
+<p>Note here that vpn0 is not marked as being suitable for DNS requests, no DNS server is defined, and no domain-names are associated with the link.</p>
+
+<p>Therefore, any request to map a name to an ip-address still goes out interface wlp3s0 to my ISP’s DNS server, and will return NXDOMAIN (not found) for any hostname that is defined only in my company’s internal DNS servers.</p>
+
+<h1 id="solving-the-dns-problem">Solving the DNS Problem</h1>
+
+<p>One good step to resolving the problem is to install a few extra packages:</p>
+
+<pre><code>sudo apt install resolvconf resolvconf-admin
+</code></pre>
+
+<p>When activating the VPN, <code>systemd-resolve --status</code> now reports that link vpn0 is suitable for DNS and has a DNS server set.</p>
+
+<p>Sadly, there are still no domain-names associated with that link. Any lookup for a domain-name will therefore <em>still</em> go to the default location, not over the VPN.</p>
+
+<p>Interestingly, assuming my company’s internal DNS names are of form <code>somehost.example.com</code>:</p>
+
+<pre><code>systemd-resolve somehost.example.com  ==&gt; lookup fails
+systemd-resolve --interface vpn0 somehost.example.com ==&gt; lookup succeeds
+</code></pre>
+
+<p>The following manual step therefore resolves the issue by binding one or more domains to the interface:</p>
+
+<pre><code>sudo systemd-resolve --interface vpn0 --set-domain example.com --set-domain otherexample.com
+</code></pre>
+
+<p>There is in fact a standard package that does this for OpenVPN:</p>
+
+<pre><code>sudo apt install openvpn-systemd-resolved
+</code></pre>
+
+<p>which applies the (manually configured) domains associated with the virtual network whenever the VPN is enabled.</p>
+
+<p>There is no such package for Cisco “openconnect” (yet) as far as I know. I believe that an openconnect server provides a list of the domains that it hosts, ie it is possible for suitable client-side software to download and apply the domain redirects automatically (which is what happens on other platforms such as windows and mac). Of course that means that when activating the VPN, you are not in control of which domains will be routed via the VPN - a potential privacy issue.</p>
+
+<p>For me, running a single command to bind the necessary domains to the interface after activating the VPN is sufficient. I have a script which does this, and run it manually after activating the VPN - a minor nuisance but bearable.</p>
+
+<p>All this should of course be automatic, and hopefully will be in the not-to-distant future. On the other hand, some of the bug-reports listed in the references below indicate that for a “split VPN” of this type (where not everything is redirected) some developers think that the current behaviour is “correct”. This appears to be a core philisophical difference between convenience (automatically map domains) vs privacy (only remap domains the user wants to remap).</p>
+
+<h1 id="running-set-domain-automatically">Running set-domain automatically</h1>
+
+<p>If you use the suggested systemd-resolve command above to configure routing via the VPN, then the following will ensure it is run every time the VPN is started:</p>
+
+<pre><code>TARGET=/etc/network/if-up.d/02-vpn-init
+sudo tee $TARGET &gt; /dev/null &lt;&lt; EOF
+#!/bin/sh
+if [ "$IFACE" = "vpn0" ]; then
+  systemd-resolve --interface vpn0 --set-domain ....
+fi
+EOF
+sudo chmod a+x $TARGET
+</code></pre>
+
+<p>Current versions of Ubuntu use NetworkManager for VPN management, and file <code>/etc/NetworkManager/dispatcher.d/01-ifupdown</code> ensures the traditional scripts in <code>/etc/network/if-up.d</code> are executed.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+<a href="https://linuxconfig.org/vpn-virtual-private-network-and-openvpn">Linuxconfig.org: VPNs</a> - a nice article on the topic, but focused on OpenVPN</li>
+  <li>
+<a href="https://unix.stackexchange.com/questions/263678/openvpn-understand-the-routing-table-how-to-route-only-the-traffic-to-a-spec">Stackexchange: Understand the Routing Table</a> - a question on stackexchange with some very good answers</li>
+  <li>
+<a href="https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1726124">Ubuntu Bugtracker: DNS domain search paths not updated</a> - from October 2017!</li>
+  <li><a href="https://askubuntu.com/questions/1032476/ubuntu-18-04-no-dns-resolution-when-connected-to-openvpn">Ask Ubuntu: No DNS Resolution</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/vpn-routing/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

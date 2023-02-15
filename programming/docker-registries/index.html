@@ -1,0 +1,428 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Container Registries, Minikube and Authorization</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Container Registries, Minikube and Authorization</h1>
+    <aside>First published on: November 2, 2019</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Cloud/'>Cloud</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>This article came about because I started <a href="https://github.com/kubernetes/minikube">Minikube</a> on my (Linux) laptop, then wanted to use the Maven <a href="https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin">JIB plugin</a> to build a Java application into a container image and push it to an image registry accessible to Minikube.</p>
+
+<p>That didn’t work well initially; I just got:</p>
+
+<pre><code>Build image failed, perhaps you should use a registry that supports HTTPS or set the configuration parameter 'allowInsecureRegistries'
+</code></pre>
+
+<p>Searching on the internet for that error-message led to a whole bunch of pages that offered wildly different advice, and no <em>context</em> - ie no description of <em>why</em> they were suggesting any specific solution.</p>
+
+<p>I did eventually solve my problem. This article is an attempt to describe not only my solution, but also the reason <em>why</em> it worked for me. Even if you have a slightly different problem, the context presented here might help lead to a solution for your specific issue.</p>
+
+<p>I have possibly included <em>too much</em> background info in this article, including things that most Docker/Minikube users will already know. However it seems easier to skip over info than guess what was omitted..</p>
+
+<p>The article assumes that <em>Docker</em> is used as the container engine within Minikube, and the set of client tools that you are using. There are of course other container engines, but this is the most common setup - and hopefully the background info will be at least partially applicable to other setups.</p>
+
+<p>The <a href="https://docs.docker.com/engine/docker-overview/">official Docker docs</a> are of course the best resource for understanding Docker; I certainly haven’t tried to duplicate that level of detail.</p>
+
+<h1 id="containers-vs-images">Containers vs Images</h1>
+
+<p>A container image is a simple file consisting of:</p>
+
+<ul>
+  <li>a reference to a parent image (optional)</li>
+  <li>a set of files</li>
+  <li>some metadata</li>
+</ul>
+
+<p>The image has a core identifier which is the hash-value of the image. There can also be multiple “tags” which point to the image.</p>
+
+<p>An image can be stored in an “image registry”. It can also be stored in a container-engine’s image cache.</p>
+
+<p>A container is an “instantiation” of an image. It has:</p>
+
+<ul>
+  <li>a filesystem, which initially is defined by its base image but can be modified by write-operations the container makes as it runs.</li>
+  <li>a set of port-mappings</li>
+  <li>a concrete <code>ENTRY-POINT</code> and <code>CMD</code> (which may vary from the default values provided by the base image)</li>
+</ul>
+
+<p>The container may be running or not. When not running, its filesystem image still exists; that is only removed when the container is “deleted”.</p>
+
+<h1 id="dockerd-docker-commandline-etc">Dockerd, Docker commandline, etc</h1>
+
+<p>In a typical Linux-based development environment with Docker installed, you have:</p>
+
+<ul>
+  <li>a bunch of Docker commandline tools in the default path, primarily the “docker” CLI application</li>
+  <li>an instance of Docker server process dockerd (aka docker daemon) running as root and listening on a filesystem-socket at <code>/var/run/docker.sock</code>
+</li>
+  <li>and your user is a member of group “docker” (to allow Docker commandline tools to access dockerd)</li>
+</ul>
+
+<p>When a user executes a command like “docker pull”, and <code>$DOCKER_HOST</code> is not set then the Docker client tool just opens filesystem socket <code>/var/run/docker.sock</code> and sends a request to perform the required action. Similarly, “docker ps” just sends a request to the central server and receives back a list of all containers that exist. The filesystem socket is only accessible to members of group <code>docker</code>; dockerd does no other validation of the caller.</p>
+
+<p>When <code>$DOCKER_HOST</code> is set, then the client opens a TCP socket to the specified address; the dockerd instance that is listening on that address should be configured to perform mutual TLS authentication - ie the daemon provides a signed TLS certificate, and expects the client connecting to it to do the same. The client “identity” is then extracted from the provided client certificate; optionally an “authentication plugin” can be configured in the server to allow/deny specific operations depending on the client identity. A dockerd instance which opens a network port, but does not validate clients, is effectively “world open”.</p>
+
+<p>In a simple setup, the client application and the dockerd process are running in the same operating system as different users.</p>
+
+<h1 id="docker-run">Docker Run</h1>
+
+<p>When a user starts a new container (eg via “docker run ..”), the client tool run by the user just sends that request to the central service. It is the central daemon that:</p>
+
+<ul>
+  <li>communicates with the Linux kernel to create new PID, filesystem, network, and other namespaces</li>
+  <li>creates a filesystem that consists of all the “layers” that the container’s base image reference and mounts that into the newly created filesystem namespace</li>
+  <li>creates a new CGROUP which is a child of the CGROUP in which dockerd is running</li>
+  <li>starts the process specified by the containers ENTRYPOINT and CMD properties (where paths in these values are relative to the container’s filesystem namespace), assigning that
+process to the created CGROUP</li>
+</ul>
+
+<p>Similarly, when a user executes “docker build ..” to process a dockerfile, the client tool opens a socket to dockerd and sends all necessary data to it. It is the server itself which executes the build, and then saves the resulting image to its local cache.</p>
+
+<h1 id="container-filesystem-layers">Container Filesystem Layers</h1>
+
+<p>A container image has a parent and a set of files (as a <code>.tar.gzip</code> archive). The complete filesystem that a container sees when first run is the union of all files provided by all ancestor images.</p>
+
+<p>It is the container runtime (eg dockerd) that is responsible for making this complete filesystem available to the code running in the container.</p>
+
+<p>The simplest solution for creating a complete filesystem from a chain of images is just to allocate a directory on the local filesystem then, starting from the oldest ancestor image, unpack the files from each image into that directory. However this is be relatively time-consuming, generates lots of disk-io on container launch, and uses unnecessary disk capacity when multiple running containers use the same image, or at least share ancestor images.</p>
+
+<p>Linux has provided several “union file systems” over the years, including <a href="https://en.wikipedia.org/wiki/Aufs">AUFS</a> (deprecated) and <a href="https://en.wikipedia.org/wiki/OverlayFS">Overlayfs</a>. The BTRFS and ZFS filesystems can also perform “union” operations natively. All of these solutions are kernel-level code, ie the container engine can use them only if the host operating system happens to have that feature installed. With this approach, each image’s files is unpacked just once on each host, into a cache. When a container needs to be started, a union-filesystem is created which references the unpacked copy of each ancestor image without copying it. The filesystem also points to an empty directory which forms the “writable upper layer”; anything that the running container <em>writes</em> to disk is placed there instead of modifying the underlying layer.</p>
+
+<p>The Docker container engine <a href="https://docs.docker.com/storage/storagedriver/">supports all of the filesystems listed above</a> (including the “just copy everything into one directory” approach which it calls “vfs storage”), and chooses one at runtime based on what is available in the underlying kernel (unless explicitly configured).</p>
+
+<h1 id="container-image-registries">Container Image Registries</h1>
+
+<p>A container image <em>registry</em> is a process that provides a network API over which images can be uploaded and downloaded. The dockerd server caches images, and uses them to launch new containers, but is not itself a registry and does not offer this network API.</p>
+
+<p>Dockerhub offers an image that provides a container image registry; see below.</p>
+
+<p>By convention, an image registry offers its API on port 5000.</p>
+
+<h1 id="image-names">Image Names</h1>
+
+<p>The “one true id” of an image is its hash-value. However it us usually referred to by a name which is a string of form “<code>{registry/}{repository}{:tag}</code>” - ie a name is an alias for a specific image.</p>
+
+<p>The <code>{registry}</code> is optional; if present, it is expected to be of form “<code>{hostname}{:port}?</code>”. If not present then it defaults to the host:port of dockerhub’s image registry server. Note that either the hostname needs to include a dot, or <code>:port</code> needs to be present; if neither of these is used then the string is assumed to be part of the “repository”, and the default registry is used.</p>
+
+<p>The <code>{repository}</code> part is mandatory and is a string of form “<code>{group/}*{name}</code>”; this identifies the “logical artifact”. Characters ‘.’ and ‘:’ are not allowed in group or name fields.</p>
+
+<p>The <code>{tag}</code> part is optional; if present it is of form “:tagname”. If not present then it defaults to “:latest”.</p>
+
+<p>When “pulling” an image from a remote registry with “<code>docker pull {name}</code>”, dockerd checks its local cache to see whether an image-file with the specified name is already available (unless “pull=always” is enabled). If not, then the name includes the network address of the registry from which it should be downloaded.</p>
+
+<p>The <code>docker push ..</code> command uses a slightly unusual approach (at least for those used to maven/gradle/etc). Rather than specify “what to push” and “where to push it” separately, you instead ensure that the images you want to push have “names” that indicate what registry they <em>should</em> be stored in - and <em>then</em> use <code>docker push</code> to upload all matching images to “the registry they belong to”.</p>
+
+<p>There are several very-well-known image registries which provide a large selection of public images (ie clients do not need authentication) as well as images for which authentication is required:</p>
+
+<ul>
+  <li>dockerhub (docker’s image registry) - the primary location for images released by open-source projects</li>
+  <li>gcr.io  (google’s image registry) - hosts many useful containers for projects led by Google</li>
+</ul>
+
+<p>The Amazon ECR and Microsoft Azure image registries mostly provide images that are useful only on those specific platforms.</p>
+
+<h1 id="running-an-image-registry-under-docker">Running an Image Registry under Docker</h1>
+
+<p>If you have a Docker environment, then starting an image registry is trivial:</p>
+
+<pre><code>docker run -d -p 5000:5000 --name registry registry:2
+</code></pre>
+
+<p>This downloads the image “registry:2” (version 2.x of image registry) and starts it as a container named “registry”. It also maps port localhost:5000 to port 5000 of the started container, ie the service is available from the host at two IP addresses:</p>
+
+<ul>
+  <li><code>$(container-ip-address):5000</code></li>
+  <li><code>localhost:5000</code></li>
+</ul>
+
+<p>The registry service is set up to perform no validation of users - ie any application that can reach either of these ports can read/write images.  However given that the container’s IP address is on a “bridge network” that is only accessible from the host on which the container is running, and the “localhost” address is also only accessible from the same host, that risk is relatively low.</p>
+
+<p>The registry service provides its services over HTTPS, but by default uses a self-signed server TLS certificate. Any client that tries to verify this certificate will therefore not be successful; solutions for this include:</p>
+
+<ul>
+  <li>dockerd does not bother to validate the server’s TLS certificate for addresses of form “localhost:someport”</li>
+  <li>dockerd can be told to ignore TLS certificates (or even allow http instead of https) for specific registries via config item <code>insecure-registries</code>
+</li>
+  <li>various non-docker client tools (eg JIB) can be told to ignore TLS certificates for all registries via an option called “allowInsecureRegistries=true” or similar</li>
+  <li>or you can ensure that the dockerd instance that is communicating with the remote registry has that registry’s self-signed certificate in their trust-domain</li>
+  <li>or you can install a properly-signed certificate for your newly-set-up registry</li>
+</ul>
+
+<p>For dockerd, in file <code>/etc/docker/daemon.json</code> configuration item <code>insecure-registries=[..]</code> tells it which remote registries are allowed to be insecure - ie where TLS certificates should not be validated. It also even allows the remote registry to be running HTTP rather than HTTPS. Obviously, enabling this for arbitrary addresses is dangerous but it is sometimes necessary for internal registries.</p>
+
+<p>Remember that when running “docker pull ..” and similar, it is actually some dockerd instance that really communicates with the specified remote image registry..</p>
+
+<h1 id="minikube-and-image-registries">Minikube and Image Registries</h1>
+
+<p>Minikube sets up a VM running Linux and Docker. Command <code>minikube start</code> creates the VM, starts Docker, and launches a bunch of processes and containers that provide a full (but single-node) kubernetes environment.</p>
+
+<p>Command “minikube docker-env” outputs the environment-vars needed to get local Docker commandline tools to talk to the dockerd instance within the VM, rather than the local one (if any). Thus, after “<code>eval $(minikube docker-env)</code>” a call to “docker ps” will show all containers running within the minikube VM rather than containers running on the local host.</p>
+
+<p>The “minikube start” command also creates (or updates) file <code>~/.kube/config</code> which contains the address of the VM minikube created. If you run the standard kubectl tools provided by kubernetes, they will therefore by default talk to the kube-apiserver instance running within the minikube VM.</p>
+
+<p>Minikube does not start an image registries process by default. However starting one is such a common requirement that Minikube offers an “addon” for that purpose:</p>
+
+<pre><code>minikube addon enable registry
+</code></pre>
+
+<p>This starts a pod in namespace “kube-system”, and registers a service-resource named “registry” in the same namespace. You can see the service with:</p>
+
+<pre><code>kubectl --namespace kube-system describe service registry
+</code></pre>
+
+<p>and the pods on which it is running with:</p>
+
+<pre><code>kubectl --namespace kube-system get pods --selector kubernetes.io/minikube-addons=registry
+</code></pre>
+
+<p>The registry service resource definition ensures that port 5000 on the VM’s network interface is forwarded to port 80 on each pod that is running the registry image (only one).</p>
+
+<p>The pod is running exactly the same “registry:2” image described in the above section on running an image registry directly under Docker. It also does no validation of clients, ie allows any application that can reach its network port to read/write any image. However given that the Minikube VM is running on a “bridge network” with an IP address that is only accessible from the host on which the minikube VM is running, that risk is relatively low.</p>
+
+<p>As with image-registry-on-docker, the minikube registry service supports HTTPS but uses a self-signed TLS certificate; any client that tries to verify this certificate will therefore not be successful. The solutions that are documented above for image-registry-on-docker also apply:</p>
+
+<ul>
+  <li>dockerd does not bother to validate the server’s TLS certificate for addresses of form “localhost:someport”</li>
+  <li>dockerd can be told to ignore TLS certificates (or even allow http instead of https) for specific registries via config-item <code>insecure-registries</code> - so add your minikube registry’s address to this list</li>
+  <li>various non-docker client tools (eg JIB) can be told to ignore TLS certificates for all registries via an option called “allowInsecureRegistries=true” or similar</li>
+  <li>or you can ensure that the dockerd instance that is communicating with the Minikube-hosted registry has that registry’s certificate in their trust-domain</li>
+  <li>or you can install a properly-signed certificate for the Minikube-hosted registry service (ie add the cert to the filesystem for that pod)</li>
+</ul>
+
+<p>If you need to have dockerd on your development system push images to the image registry within Minikube, then taking advantage of the localhost-exception is possibly the easiest workaround. The minikube-hosted image registry can be made to appear to be at a localhost address by setting up kubectl port-forwarding:</p>
+
+<pre><code># Sadly, service "registry" does not yet define a named service-port, so the "raw" exported port-number must be used. 
+kubectl port-forward --namespace kube-system service/registry 5000:80
+</code></pre>
+
+<p>As an alternative, plain SSH-port-forwarding could be used.</p>
+
+<h1 id="jib-and-image-registries">JIB and Image Registries</h1>
+
+<p>The <a href="https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin">JIB build plugin</a> (for maven, gradle, etc) creates an image directly rather than talking to a Docker daemon. It then “uploads” the image to a specified registry using the normal network protocols.</p>
+
+<p>Note: JIB can be configured to talk to use <code>docker build</code> instead of creating the image itself. This solves the problem of pushing to a remote registry when using minikube, as you just need to do <code>eval $(minikube docker-env)</code> and then the build is actually done by dockerd within minikube and then stored directly without needing to talk to a registry. An invalid TLS cert is therefore not a problem.</p>
+
+<p>This leads to the problem mentioned at the start of this article: when using <code>$(minikube ip):5000</code> as the registry to write to, the operation fails because that registry has a self-signed TLS certificate.</p>
+
+<p>There are two easy solutions:</p>
+
+<ul>
+  <li>in the JIB plugin config, set allowInsecureRepositories=true</li>
+  <li>or use <code>kubectl port-forward ..</code> as described above to map localhost:someport to the registry-service inside minikube, then use “localhost:someport” as the target registry for JIB</li>
+</ul>
+
+<p>The second solution relies on the fact that, like dockerd, JIB automatically enables “allowInsecureRepositories” for registries with address at localhost. Note that when running JIB in its usual mode (without docker-build) the connection is simply opened by your build-tool, and therefore the port-forwarding needs to be on the server on which the build runs (not on the one on which dockerd is running).</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>Wow - so many words for such simple solutions to the JIB build problem. I hope you found it worth-while to read. I’m sure I’ll find it useful to have these notes available to me if I face the same problem again in a few years!</p>
+
+<h1 id="terminology">Terminology</h1>
+
+<p>Just a brief mention of some confusing word-usage:</p>
+
+<ul>
+  <li>a container registry is a service that stores images</li>
+  <li>a repository is a set of related images (usually different versions of the same application)</li>
+</ul>
+
+<p>In other words, a “repository” is a string of form “group/name”; repository+tag (ie group/name:tag) identifies a specific image. However sometimes the word “tag” is used as a synonym for the whole repository:tag string.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://blog.hasura.io/sharing-a-local-registry-for-minikube-37c7240d0615/">Tanmai Gopal/Hasura Blog</a></li>
+  <li>
+<a href="https://linuxhint.com/setup_own_docker_image_repository/">LinuxHint: Setting Up Your Own Docker Image Repository</a> - Note that the article title uses terms incorrectly: “repository” should be “registry”</li>
+  <li><a href="https://blog.codeship.com/overview-of-docker-registries/">Kriss: Overview of Docker Registries</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/docker-registries/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

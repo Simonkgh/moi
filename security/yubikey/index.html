@@ -1,0 +1,1307 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Yubikey Concepts, Configuration and Use</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Yubikey Concepts, Configuration and Use</h1>
+    <aside>First published on: August 24, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Security/'>Security</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p><a href="https://www.yubico.com/">Yubico</a> is a company which produces a number of hardware authenticator devices, ie small physical tokens that can be used to authenticate (log in) to IT systems.</p>
+
+<p>I recently purchased a <a href="https://www.yubico.com/product/yubikey-4-series/">Yubikey4</a>, and found the technical documentation very lacking; there is lots of info on the website, but most of it is pure marketing-level.  Even the <a href="https://developers.yubico.com/">developer pages</a> are either marketing-oriented or <em>extremely</em> detailed. Therefore this article contains results of some research I did myself on the topic. I’m a software architect, developer, and sometimes sysadmin - and that is the level at which this article discusses the Yubikey.</p>
+
+<p>The content here is mostly Linux-specific; I’m using my Yubikey4 on Linux and MacOS.</p>
+
+<p>The Yubico devices have versions from 1 to 4 (currently). Frankly, the set of available features, options, and the supporting applications are a mess. There is good functionality buried in there, but it takes some effort to find. Similarly, the management apps for them have lots of options that only apply to specific versions of keys and are rather confusing to use.</p>
+
+<p>I hope this article helps you decide whether to buy a Yubikey4, and how to use it.</p>
+
+<p>UPDATE: The <a href="https://www.yubico.com/products/yubikey-5-overview/">Yubikey-5 is now available</a> (since late September 2018). This includes support for FIDO2/WebAuthn.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>To save you a lot of reading, here are my conclusions up front..</p>
+
+<p>In my opinion, the coolest feature of the Yubikey4 is its OpenPGP support. This allows configuring multiple keys for logging in to SSH servers via a private key on the device, encrypting/signing emails, and signing files (eg Docker images).</p>
+
+<p>Probably the most practical feature, however, is its support for up to 28 OATH TOTP credentials. TOTP is not the best authentication protocol, but is widely supported eg as Google login, and by many online banking sites.</p>
+
+<p>The award for “most promising authentication” goes to FIDO2/WebAuthentication. The FIDO2 and associated WebAuthentication protocols are pretty new at this point in time (mid 2018). This appears to be an excellent solution, but currently only a few tools and websites support them. Hopefully at some time in the near future, FIDO2/WebAuthentication will become widespread and then most of the (rather confusing) options presented on the Yubikey website and in this article will become obsolete - instead, “just use FIDO2/WebAuthentication” will be the advice.</p>
+
+<p>Sadly the Yubikey4 does not currently support CTAP2 (needed for FIDO2/WebAuthentication). The (cheaper) Yubico Security Key does support this, but does not support OATH or OpenPGP. Currently very few sites support FIDO2/WebAuthentication; hopefully by the time it is more widely used the Yubikey4 will have been enhanced (though existing keys are not upgradeable).</p>
+
+<p>Despite the lack of FIDO2 on my Yubikey4, the somewhat high price, and the rather clumsy software, I don’t regret having bought it; the TOTP and OpenPGP support is cool and useful. The device has also proven pretty robust so far.</p>
+
+<h1 id="why-use-a-hardware-authentication-device">Why use a Hardware Authentication Device?</h1>
+
+<p>Just quickly, here are some very good reasons why a hardware authenticator device such as a Yubikey is a very good idea:</p>
+
+<ul>
+  <li><a href="https://www.zdnet.com/article/predictable-password-blamed-for-gentoo-github-organisation-takeover/">Predictable Password Blamed for Gentoo Account Takeover</a></li>
+  <li><a href="https://www.business2community.com/cybersecurity/account-takeover-new-account-fraud-spike-2017-02030931">Account Takeover and New Account Fraud Spike in 2017</a></li>
+  <li><a href="https://haveibeenpwned.com/">Lists of passwords leaked from various companies</a></li>
+</ul>
+
+<p>At a personal level, dealing with passwords is a nuisance. Wouldn’t it be nice to:</p>
+
+<ul>
+  <li>not have to invent and record a new password for each site you create an account with?</li>
+  <li>to know that regardless of how incompetent that site is, they simply cannot leak your credentials (for some protocols)?</li>
+  <li>to know that your login simply cannot be used without access to that device hanging on your key-ring (unless your credentials have been stolen from the target site)?</li>
+  <li>to know that your credentials cannot be stolen by malware on your mobile phone?</li>
+</ul>
+
+<p>At a company level, passwords are not only a nuisance for users (whether employees, customers or partners), but also open up a number of potentially costly and inconvenient security holes. Supporting authenticators instead of passwords can save a company a lot of trouble. With a Yubikey or similar device:</p>
+
+<ul>
+  <li>a user cannot choose a bad password</li>
+  <li>a user cannot be tricked into revealing their password</li>
+  <li>malware on the user’s device can never steal the password (though an existing session can be “hijacked”)</li>
+  <li>and it is actually <em>more</em> convenient for users</li>
+</ul>
+
+<p>Some protocols require a shared secret between authenticator device and server (eg OATH, Yubico-OTP, Challenge/Response). Because these secrets must be stored on the target site (and cannot be hashed like passwords), they can potentially be stolen. However these credentials are only random values and are not reused between sites (like passwords often are). A server can potentially store its copy of the secrets in an HSM (Hardware Security Module) in which case the credentials are also almost unstealable server-side too.</p>
+
+<p>Protocols using public/private key pairs (FIDO1/U2F, FIDO2/WebAuthentication, OpenPGP) are completely immune to leaks at the server side; the server side has only a public key component which is not confidential.</p>
+
+<h1 id="yubico-products-and-protocols">Yubico Products and Protocols</h1>
+
+<p>The Yubikey4 supports all of the following authentication protocols:</p>
+
+<ul>
+  <li>static passwords</li>
+  <li>challenge/response</li>
+  <li>OATH-TOTP</li>
+  <li>OATH-HOTP</li>
+  <li>Yubico-OTP</li>
+  <li>FIDO1/U2F</li>
+  <li>PIV (Personal Identity Verification) smartcard protocol</li>
+  <li>OpenPGP</li>
+</ul>
+
+<p>The following is currently supported in the “Security Key by Yubico” but not the Yubikey4:</p>
+
+<ul>
+  <li>FIDO2 and WebAuthentication</li>
+</ul>
+
+<p>Hopefully later versions of the generic Yubikey4 will support FIDO2/WebAuthentication in the near future; sadly existing Yubikey devices cannot be upgraded with new firmware.</p>
+
+<p>Note that OATH is not related to the very similarly named OAUTH protocol. OAUTH is not (directly) relevant for authentication tokens.</p>
+
+<p>Yubico provide a number of desktop applications for configuring their devices. All applications are available on Linux, MacOS and Windows:</p>
+
+<ul>
+  <li>Manager (configures most protocols, plus extended features)</li>
+  <li>Personalization tool (configure the first 5 protocols above in two “slots”; check firmware type; set extended features; etc)</li>
+  <li>Authenticator (for OATH HOTP and TOTP with named credentials)</li>
+  <li>PIV Manager (for managing private keys accessed via the PIV smartcard protocol)</li>
+</ul>
+
+<p>These applications are discussed in more detail later.</p>
+
+<p>All Yubikeys have a button which can be pressed to confirm operations; some authentication operations require a button-press while others do not, and for some protocols each credential can be configured to require button or not. Obviously, requiring a button-press is more secure but also more annoying.</p>
+
+<p>Product “FIDO U2F Key” supports only CTAP1 (ie the FIDO1/U2F protocol). Product “Security Key by Yubico” supports only CTAP2 (ie the FIDO2/WebAuthentication protocol). The NFC-enabled Yubikey Neo can be used with phones that do not have a USB port - but has limited processing capability and therefore does not support all protocols and can store less data.</p>
+
+<p>Yubico may release Bluetooth-enabled devices in the future, or maybe not - they are not convinced Bluetooth is sufficiently secure. Presumably Bluetooth-based devices would require an internal battery.</p>
+
+<p>Interestingly, Google announced in July 2018 that it has <a href="https://www.cyberscoop.com/google-titan-security-key-2fa-anti-phishing/">created its own authenticator device</a>. The online docs are vague, but as far as I can tell, they sadly only support FIDO1 aka U2F - no OATH, FIDO2 or OpenPGP.</p>
+
+<h1 id="data-transfer-between-client-device-pc-or-phone-and-yubikey">Data Transfer between Client Device (PC or Phone) and Yubikey</h1>
+
+<p>While it is not absolutely necessary to understand how a PC or phone actually exchanges data with a connected Yubikey device, I personally find it helpful to understand tech “one level below” the one I am using. Knowing the underlying details often helps when something goes wrong. This section can be skipped if you really don’t care.</p>
+
+<p>There are two communication paths needed during authentication (except in the case of “one touch” authentication; see later):</p>
+
+<ul>
+  <li>client to server</li>
+  <li>client to authenticator device</li>
+</ul>
+
+<p>where <em>client</em> is software running on the desktop/laptop/phone that a user is physically interacting with.</p>
+
+<p>In general:</p>
+
+<ul>
+  <li>the client somehow determines that the server needs authentication information, and optionally obtains authentication parameters (eg a challenge value)
+    <ul>
+      <li>the client sends a request over USB (or NFC or Bluetooth) to the Yubikey as a sequence of bytes</li>
+      <li>the Yubikey does some processing (usually including reading or writing data stored in its persistent memory)</li>
+      <li>the Yubikey sends a response (as sequence of bytes) over USB (or NFC or Bluetooth) to the client</li>
+    </ul>
+  </li>
+  <li>the client builds an authentication request from the Yubikey response (wrapping it however the server expects) and sends it to the server</li>
+</ul>
+
+<p>The client-server interaction is usually defined in some official standard. The following sections discuss the client-authenticator interaction for various protocols.</p>
+
+<p>When a Yubikey4 is attached to a USB port, it announces itself as a “compound USB device” with up to 3 components:</p>
+
+<ul>
+  <li>a USB HID device used for the basic/older protocols referred to as “OTP Mode” (see below)</li>
+  <li>another USB HID device used for FIDO1/U2F and referred to as “FIDO mode” (see below)</li>
+  <li>a USB CCID “smartcard reader” (with smartcard present) - also referred to as “CCID mode”</li>
+</ul>
+
+<p>The Yubikey can be configured to present a subset of these interfaces if desired (ie to disable some encryption protocols).</p>
+
+<p>USB devices announce their “class” (eg HID) when they attach. They also have “subclasses” and other attributes that can be used to further identify them.</p>
+
+<h2 id="usb-hid">USB HID</h2>
+
+<p>One of the available USB device classes is <a href="https://en.wikipedia.org/wiki/USB_human_interface_device_class">HID</a> - meant to represent Human Interaction Devices such as keyboards, mice, and game controllers. The USB spec defines which message-types HID devices can send or receive; these include “mouse movement event”, “keyboard press event” and similar. HID devices are expected to be “low data rate” (compared for example to external graphical displays or external disk drives).</p>
+
+<p>The two HID devices registered by a Yubikey4 are used for separate purposes:</p>
+
+<ul>
+  <li>the first one is used to provide what is known in the Yubico documentation as “OTP mode”, and what I refer to as “one touch mode”, where pressing the Yubikey button generates emulated keyboard output. Data is actually bidirectional, and the host-to-device direction is used to configure the Yubikey “OTP-mode” settings (“slots”).</li>
+  <li>the second one is used for bidirectional communication between a client app and the Yubikey using the CTAP1 (FIDO 1.0) protocol. This is known in the Yubico documentation as (fairly obviously) “FIDO mode”.</li>
+</ul>
+
+<p>When support for CTAP2 is added (to support FIDO2/WebAuthentication) then presumably either the existing HID device for CTAP1 will be used, or the Yubikey4 will register yet another HID device.</p>
+
+<h2 id="usb-ccid">USB CCID</h2>
+
+<p>Another available USB class is “CCID” - meant to represent “smart cards” with their own (low-power) processing units on them. A CCID cannot act as a keyboard or similar.</p>
+
+<p>Until recently it was common for desktops/laptops to come with a built-in “smart card reader”. These are becoming rarer now; if support for smart-cards is needed then this is usually done via an external smart-card reader device which attaches to the host via USB. The Yubikey registers itself as such a USB-based smartcard-reader (and immediately indicates that it has a smart-card inserted into it).</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/CCID_(protocol)">CCID</a> specification defines how a “smart card” attached to a USB port should interact with its host system. This is an extremely low-level specification; it basically just covers how a generic request can be sent to the card, and how a generic response comes back, at the byte level.</p>
+
+<p>See also <a href="https://en.wikipedia.org/wiki/ISO/IEC_7816">standard ISO7816-4 for smartcards</a>. Sadly, ISO standards are not published free-of-charge.</p>
+
+<p>CCID defines several possible message types, including <code>BULK_IN</code> which has a 4-byte header followed by a length-byte and variable-length data that depends on the request-type in the header. The header fields are:</p>
+
+<ul>
+  <li>CLA  – class</li>
+  <li>INS  – instruction id (eg PUT, DELETE, etc for OATH)</li>
+  <li>P1   – param1 (depends on INS)</li>
+  <li>P2   – param2 (depends on INS)</li>
+  <li>Lc   – length of variable data</li>
+  <li>..   – variable data</li>
+</ul>
+
+<p>The meaning of different values for class and instruction are not defined in the CCID specification; those are covered in higher-level standards.</p>
+
+<p>A smartcard announces over CCID which “applications it is running”, eg in the case of a Yubikey:</p>
+
+<ul>
+  <li>OATH HOTP/TOTP (using named credentials)</li>
+  <li>OpenPGP</li>
+  <li>PIV (Personal Identity Verification)</li>
+</ul>
+
+<p>Note that these are not necessarily “applications” in the usual sense - probably more like an endpoint/subsystem/module. Each “application” then has its own protocol built on top of the basic CCID operations (in particular, <code>BULK_IN</code> and <code>BULK_OUT</code>).</p>
+
+<h2 id="usb-hidotp-mode">USB HID/OTP Mode</h2>
+
+<p>The first USB HID device interface is used in bidirectional manner:</p>
+
+<ul>
+  <li>a proprietary Yubico protocol (presumably built on top of the HID protocol) is used to configure “slot-related” functionality on the Yubikey and to query its status</li>
+  <li>and when the button is pushed, the device emulates a keyboard and sends credentials (passwords, HOTP/TOTP codes, etc) to the host</li>
+</ul>
+
+<p>This proprietary protocol is used only for credential setup/configuration; no custom software is needed for the Yubikey to emulate a keyboard.</p>
+
+<p>The “slots” can support static passwords, challenge/response, Yubico-OTP, and slot-based HOTP/TOTP credentials. In other words, all the “older” Yubikey functionality (that stuff accessed via the Yubico personalization app) is done with this protocol.</p>
+
+<p>I could find no documentation on the protocol used over this HID device, but it doesn’t really matter for this article; the protocol will be something like CTAP1. In any case, the point is that custom software on the client sends a request to the attached Yubikey and gets back a response.</p>
+
+<p>Note that there are two separate implementations of OATH in the Yubikey - one for the old “slots” mechanism (HID-based), and one supporting “named” credentials (CCID-based).</p>
+
+<p>Yubico does provide documentation for the server-to-yubico-authentication-server calls, but that is nothing to do with interaction with the Yubikey device itself.</p>
+
+<h2 id="usb-hidfido-mode">USB HID/FIDO Mode</h2>
+
+<p>The second USB HID device interface is used in bidirectional manner to transfer CTAP1 (and maybe later CTAP2) messages to configure the Yubikey, query its status, and request authentication results (eg the next OATH-TOTP code for a named credential).</p>
+
+<p>CTAP stands for Client to Authenticator Protocol (where a Yubikey is an example of an Authenticator). The FIDO1 protocol includes the CTAP1 specification, and the FIDO2 protocol includes the CTAP2 specification. You can read about <a href="https://fidoalliance.org/specs/fido-u2f-v1.1-id-20160915/fido-u2f-raw-message-formats-v1.1-id-20160915.html">CTAP1 here</a> and <a href="https://fidoalliance.org/specs/fido-v2.0-rd-20170927/fido-client-to-authenticator-protocol-v2.0-rd-20170927.html#iso7816-iso14443-and-near-field-communication-nfc">CTAP2 here</a> if you wish. However I think the main point is that (like other protocols):</p>
+
+<ul>
+  <li>requests are sent over USB (or NFC or Bluetooth) from client software to the Yubikey as a sequence of bytes</li>
+  <li>the Yubikey does some processing (usually including reading or writing data stored in its persistent memory), and returns a response (as sequence of bytes)</li>
+</ul>
+
+<h2 id="ccidoath">CCID/OATH</h2>
+
+<p>Setting up and using OATH features of a Yubikey is done by sending messages using (AFAICT) a Yubico-specific protocol built on top of the lower-level CCID protocol. Communication is mostly (exclusively?) done using the <code>BULK_IN</code> and <code>BULK_OUT</code> CCID messages addressed to “the OATH app on the smartcard”; the Yubikey site defines the different CCID header values and data-payloads used in the <a href="https://developers.yubico.com/OATH/YKOATH_Protocol.html">OATH developer page</a>.</p>
+
+<h2 id="ccidopenpgp">CCID/OpenPGP</h2>
+
+<p>An open-source group built <a href="https://en.wikipedia.org/wiki/OpenPGP_card">their own smart-card</a> for authentication and cryptography purposes. The card defines its own higher-level protocol (request and response messages) for registering keys, performing authentication, etc. on top of the base CCID protocol. Code interacting with this card sends CCID messages addressed to “the OpenPGP app on the smartcard”. The open-source GnuPG suite of applications includes an implementation of this protocol; the Yubikey4 also supports this protocol and is thus compatible with GnuPG applications.</p>
+
+<p>The PKCS series of specifications define various protocols and data formats related to encryption and digital signatures. These specifications are not official standards (they are produced by the company RSA Security), but are respected and widely supported. <a href="https://en.wikipedia.org/wiki/PKCS_11">PKCS#11</a> defines a <em>software API</em> for client applications to interact with an authenticator token. The <a href="https://github.com/gpg/scute">GNU scute</a> library implements the <code>PKCS#11</code> API for the above smartcards (ie maps <code>PKCS#11</code> api calls into CCID messages that transfer OpenPGP-smart-card data packets). A number of applications support the <code>PKCS#11</code> API, including the Thunderbird email client (for signing and encrypting emails) and <code>gpg-agent</code> for logging in to an SSH server. These applications can therefore interact with either an OpenPGP smart-card or a Yubikey.</p>
+
+<p>See later in this article for more details on OpenPGP and SSH with Yubikey.</p>
+
+<h2 id="ccidpiv">CCID/PIV</h2>
+
+<p>Some software (eg OpenPGP clients, and login for Apple MacOS) supports “PIV” (Personal Identity Verification) smartcards. The PIV protocol is also layered on top of CCID as an “application” on the smartcard.</p>
+
+<h1 id="number-of-credentials-supported-by-a-yubikey">Number of Credentials Supported by a Yubikey</h1>
+
+<p><a href="https://support.yubico.com/support/solutions/articles/15000006438-how-many-credentials-can-i-program-on-my-yubikey-">As documented (briefly)</a>, the Yubikey4 supports:</p>
+
+<ul>
+  <li>two “slots”, each of which can hold one of:
+    <ul>
+      <li>static password</li>
+      <li>HMAC-SHA1 challenge-response</li>
+      <li>Yubico-OTP challenge-response</li>
+      <li>OATH-HOTP</li>
+      <li>OATH-TOTP</li>
+    </ul>
+  </li>
+  <li>4 PIV slots which together represent <a href="https://developers.yubico.com/PIV/Introduction/Certificate_slots.html">one identity</a> plus 20 additional slots (use not entirely clear)</li>
+  <li>28 “named” OATH-TOTP codes</li>
+  <li>“unlimited” FIDO1/U2F keys</li>
+</ul>
+
+<p>The “slots” functionality has been inherited from older Yubikey devices, and supports the older protocols. The more modern FIDO1/U2F, FIDO2/WebAuthentication and OpenPGP protocols are not stored in the two “slots”.</p>
+
+<p>It isn’t clear from the documentation how many OpenPGP credentials are supported; maybe in the “20 PIV slots”, or maybe they share the “unlimited” U2F storage space?</p>
+
+<h1 id="one-touch-authentication-yubikey-slots">One-touch Authentication (Yubikey Slots)</h1>
+
+<p>As noted earlier, a software application normally runs on the client machine (phone or desktop) which interacts with the Yubikey device.</p>
+
+<p>Yubikeys have a button and support the ability to define a protocol and credential for “slot1” or “slot2” (only some protocols supported). When the button is pressed then the Yubikey acts like a USB keyboard and generates some text output that will end up in whatever text input fields are active at the time (whether commandline or GUI). A <em>short press</em> activates “slot1” and a <em>long press</em> activates “slot2”. This allows a Yubikey to be used to output credentials without needing any client-side software at all.</p>
+
+<p>Yubikey devices with NFC support can be configured to use one of the two slots when activated via NFC (in particular, to send text output to a mobile phone when tapped against it).</p>
+
+<p>This “auth without client software” feature only works for protocols that take no input parameters; the supported protocols are:</p>
+
+<ul>
+  <li>static password</li>
+  <li>challenge-response</li>
+  <li>OATH-HOTP</li>
+  <li>Yubico-OTP</li>
+</ul>
+
+<p>Note that OATH-TOTP is not supported because the Yubikey does not have an internal clock (that would require a battery) and so the <em>current time</em> must be an input parameter.</p>
+
+<p>Because input params are not accepted, the output cannot be site-specific, ie the “one touch” functionality cannot support a different password per site being logged into. This functionality is therefore not very useful for authentication on the internet in general. However it may be useful for specific purposes, eg a Yubikey device dedicated to authentication in a work environment, or one dedicated to a specific bank account.</p>
+
+<p>Slot1 is factory-preset with Yubico-OTP credentials. This consists of a unique “public identity” (randomish 12-char sequence), unique “private identity” (bytes) and a unique AES key (16 random bytes). These values are pre-registered in Yubico’s own authentication server in order to support “self-provisioning”: when a server has integrated with Yubico’s own authentication servers, then it is only necessary to link the key’s ID to the user’s personal account. No setup of a shared “secret” (key) is needed as there is already a shared secret between the Yubikey itself and Yubico. The values in “slot1” can be overridden if desired. A company can also run its own Yubico-OTP servers if desired (though FIDO2 is probably a better option now).</p>
+
+<p>The “settings” part of the Yubico-personalization app allows partial control over the keyboard-emulation that the Yubikey does when its button is pressed to generate “one-touch” output. By default, it produces the key sequence <code>&lt;tab&gt;{public-id}&lt;tab&gt;{code}</code>, ie can also fill in “user-id” and “password” in a form.</p>
+
+<p>In general, this concept of “one-touch” and slots is (IMO) ugly and becoming obsolete. The FIDO2/WebAuthentication approach is far more elegant - that supports a large number of unique keys, each with its own “name”. The server indicates which “named credential” it is expecting, and provides a random challenge, and the Yubikey effectively returns a digital signature of the challenge that the server can verify. This does, however, require software on the client device (which in the case of WebAuthentication is part of the browser itself). Even with HOTP/TOTP, it is (in my opinion) more elegant to just run the relevant client application and copy/paste the codes into the login fields when needed (which is not often).</p>
+
+<p>Despite my personal opinion on the ugliness of the one-touch approach, the Yubico website documentation relies heavily on this. For example, the <a href="https://www.yubico.com/why-yubico/for-business/computer-login/linux/">how to login to Linux</a> information assumes that the user logs in with a “short press” on the Yubikey, thus activating the factory default credentials configured for “slot1”, and the server is set up to verify these credentials by making a request to Yubico’s authentication system. As an admin and architect with interest in security my opinion is that this is madness; <em>I would never set up login on my servers like this</em>. The Yubikey hardware itself is good, and can be set up to provide secure access - but the configuration advice on the website is not optimal for security (presumably presented like that so it looks simple for <em>marketing purposes</em>). Using the preset credentials might be an option when providing a lightweight service to customers over the internet (ie not <em>login to a server commandline or similar</em>).</p>
+
+<p>Settings for “slot1” and “slot2” can be defined via the “Yubico Manager” application (aka <code>ykman</code>) or the “Yubico Personalization” application (aka <code>yubikey-personalization-gui</code>).</p>
+
+<p>It is actually possible to disable the “OTP mode” (what I call one-touch authentication) completely via the Yubico Manager app. This is useful if the Yubikey is only used for OpenPGP/named-OATH/PIV/U2F functionality.</p>
+
+<h1 id="touch-confirmation">Touch Confirmation</h1>
+
+<p>When a credential is loaded into a Yubikey at some location other than slot1/slot2 (eg a named TOTP credential), a “require touch” flag can be specified. When this is set to true, then any attempt to use that credential for authentication will require the user to physically confirm by pressing the button on the Yubikey device (the device will not return its response to an authentication request until the press occurs). This is a minor inconvenience for the user, but ensures that rogue software on the client system cannot perform authentication without the user’s knowledge and cooperation.</p>
+
+<p>This is a different use of the button than for “one-touch authentication”.</p>
+
+<h1 id="device-security-unlocking-a-protocol">Device Security (unlocking a protocol)</h1>
+
+<p>For most supported authentication protocols, a “pin code” or password can optionally be set to prevent all use of that protocol (ie all keys of that type) until the pin is entered to “unlock” the protocol. After attaching to a USB port, the device is in locked mode. Each protocol that supports “unlocking” requires some kind of network message be sent by a software app.</p>
+
+<p>This functionality requires software on the client system in order to send the unlock code to the authenticator device.</p>
+
+<p>Of course, because the PIN is entered via software on the client, it is vulnerable to interception if the host system contains malware. However it does protect against physical theft of the key (the thief cannot use the device without knowing the pin).</p>
+
+<h2 id="unlocking-the-oath-protocol-oath-credentials">Unlocking the OATH protocol (OATH credentials)</h2>
+
+<p>Each OATH credential (except those in slot1/slot2) has a “name” (bytearray).</p>
+
+<p>Before using named OATH credentials, client software must send a CCID SELECT command to the Yubikey device, specifying the OATH protocol (application). When locking is not enabled, or the device is already unlocked, a simple “success” response is returned. When the device is locked, a challenge value (challenge1) is returned. The client app and Yubikey device then do a typical challenge/response algorithm:</p>
+
+<ul>
+  <li>client sends a VALIDATE message consisting of <code>somefn(pin, challenge1)</code> together with another unique challenge value (challenge2)</li>
+  <li>Yubikey verifies this message (using its own copy of pin)</li>
+  <li>Yubikey sends a response consisting of <code>somefn(pin, challenge2)</code>
+</li>
+  <li>client verifies this message (using its own copy of pin)</li>
+</ul>
+
+<p>This message exchange allows both client and Yubikey to be sure the other knows the shared pin without it ever being directly transmitted. The client software can therefore be certain that the Yubikey (or whatever is on the USB bus) really knows the shared secret.</p>
+
+<p>The client/Yubikey protocol for accessing OATH functionality is unfortunately somewhat “stateful”, ie two applications communicating concurrently with the key are not supported. The “get remaining data” instruction is the most obvious one; this supports “paging through” results from a previous instruction which produced lots of output. This statefulness is probably part of the (somewhat old) CCID standard; in practice it is unlikely to be a problem.</p>
+
+<h2 id="unlocking-the-piv-protocol">Unlocking the PIV Protocol</h2>
+
+<p>With PIV authentication, there are effectively three codes: PIN, PUK and Management Key. Unlocking PIV functionality is done with the PIN (each time the key is inserted into a USB port). If the PIN is entered incorrectly three times, then all PIV functionality is locked until the PUK “master id” is entered. Both PIN and PUK are 6-8 characters (digits recommended).  When using PIV mode, you should set a PUK value and save it somewhere safe. All of these codes can be set with the <em>Yubico PIV Manager</em> application <code>pivman</code>. Because PIN entry is part of the PIV standard, non-Yubico PIV software can also be used to change the PIN - but this will have bad consequences if the key has been set up with “use PIN as Management Key”. If you choose to use an explicit management key, then make sure you save that somewhere, as it will be needed when making any future changes as well as the PIN. See <a href="https://developers.yubico.com/yubikey-piv-manager/PIN_and_Management_Key.html">the PIV docs</a> for more info.</p>
+
+<p>With PIV authentication, there are effectively three codes: PIN, PUK and Management Key. Both PIN and PUK are 6 or 8 characters (digits recommended); the management key is a 24-byte 3DES key. There are two different ways of setting up security:</p>
+
+<ul>
+  <li>Define a PIN and a separate management key. In this mode:
+    <ul>
+      <li>the PIN is used only for unlocking the PIV functionality for use (encrypt, sign, authenticate) each time the key is inserted into a USB port</li>
+      <li>the management key must be provided to reconfigure the key (including adding certificates and changing the PIN)</li>
+      <li>the PUK is disabled</li>
+    </ul>
+  </li>
+  <li>Define a PIN and derive the management key from it. In this mode:
+    <ul>
+      <li>the PIN is used for unlocking PIV “for use” and for reconfiguration</li>
+      <li>the PUK “master PIN” can be used if the PIN is incorrectly entered multiple times</li>
+      <li>the management key is not explicitly set (derived from PIN)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>There are different tradeoffs:</p>
+
+<ul>
+  <li>Having an explicit management key is a nuisance if you regularly add/change certificates, etc: it is a very long string that needs to be stored somewhere.</li>
+  <li>Having a derived management key means that:
+    <ul>
+      <li>there is no PUK as backup; if you enter the PIN wrong three times then the PIV module must be reset, losing all PIV credentials</li>
+      <li>you must never use external PIV-compatible software to change the PIN (as they do not update the management key); use Yubico apps only.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>See <a href="https://developers.yubico.com/yubikey-piv-manager/PIN_and_Management_Key.html">the PIV docs</a> for more info.</p>
+
+<h2 id="unlocking-other-protocols-other-credential-types">Unlocking Other Protocols (other credential types)</h2>
+
+<p>I don’t have any details on the “unlock” messages for CTAP1/CTAP2, OpenPGP, etc. Presumably the necessary data-formats are defined in the standards somewhere.</p>
+
+<h1 id="authentication-protocols">Authentication Protocols</h1>
+
+<p>This section provides more detail on the different kinds of authentication that the Yubikey supports.</p>
+
+<h2 id="static-passwords">Static Passwords</h2>
+
+<p>A Yubikey can store <a href="https://support.yubico.com/support/solutions/articles/15000006480-understanding-core-static-password-features">static passwords</a>, though this is not a good use of a Yubikey.</p>
+
+<p>The Yubikey4 supports a maximum of two static passwords, one in each “slot”. The passwords can be set via the Yubico Manager commandline application or the Yubico Personalization GUI application. With a short or long button press on the Yubikey, the password is then emitted by the Yubikey as if typed on a keyboard.</p>
+
+<p>Due to inconsistencies in the ways various operating systems and computers react to USB keyboards, there are some problems with a Yubikey replaying stored passwords as text. There are therefore two modes supported:</p>
+
+<ul>
+  <li>Scancode mode, in which the Yubikey stores exactly the USB keycodes typed when the password was defined. This unfortunately can result in incorrect password playback when used on a different system (eg one set up with a different default keyboard layout).</li>
+  <li>Modhex mode, in which the password must consist of only 16 specific lowercase letters; as such passwords are hard to create manually a Yubico tool is usually used to auto-generate them. Unfortunately modhex passwords are not compatible with sites which mandate non-alphabetic chars in a password. There are various workarounds, though the details were not entirely clear from the Yubico documentation.</li>
+</ul>
+
+<p>A better way to manage login via static password (IMO) is to use one of the available <em>password manager applications</em> for desktop or mobile phone, and then to secure login to this application with the Yubikey. There are instructions on the Yubikey site for integrating with various applications - and the authentication will use one of the <em>properly secure</em> protocols.</p>
+
+<h2 id="challenge-response">Challenge-Response</h2>
+
+<p>In this approach, a “shared secret” is configured between the Yubikey and the target system. Authentication then works as follows:</p>
+
+<ul>
+  <li>the server needing user authentication generates a “challenge value” (usually a random block of data)</li>
+  <li>a client application on the desktop or phone forwards the challenge to the Yubikey</li>
+  <li>the Yubikey creates some response based on <code>fn(challenge, secret)</code> and returns it</li>
+  <li>the client forwards the response to the server</li>
+  <li>the server uses its own copy of the same shared secret to verify that <code>fn(challenge, secret)</code> gives the same value that it received.</li>
+</ul>
+
+<p>When the value received by the server matches what it has computed on its own, then the client (actually the Yubikey) must know the secret, and is therefore valid. The nice benefit of this approach is that:</p>
+
+<ul>
+  <li>the secret itself never passes across the network (except once during account setup)</li>
+  <li>the challenge value, and thus the response value, is different for each login (resistent to replay attacks)</li>
+</ul>
+
+<p>A Yubikey4 supports a maximum of 2 different challenge/response secrets (slot1 and slot2).</p>
+
+<p>The challenge-response protocol uses the standard HMAC algorithm to compute <code>fn(challenge, secret)</code>.</p>
+
+<p>The HOTP and Yubico-OTP protocols are similar to challenge-response, except that the Yubikey generates the challenge itself rather than accepting one from the system it is authenticating to; the challenge is simply an incrementing integer (ie a counter) stored on the Yubikey and thus no client software is needed. TOTP also works similarly; the Yubico authenticator app provides the challenge value to the Yubikey - the current timestamp from the host system. See the sections on these specific protocols for more details.</p>
+
+<h2 id="oath-totp-time-based-one-time-password">OATH TOTP (Time-based One Time Password)</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Time-based_One-time_Password_algorithm">TOTP</a> is a design-pattern for authenticating using an underlying secret that is never passed over the network. It is essentially a challenge/response protocol where the challenge is an implicit value (the current time). The <a href="https://openauthentication.org/">Initiative for Open Authentication (OATH)</a> has published a specification for TOTP, which <a href="https://developers.yubico.com/OATH/">Yubico implements</a></p>
+
+<p>A Yubikey can be configured with up to 28 named credentials (secrets) for TOTP. A command can then be sent to the Yubikey with a timestamp value, and the device returns a 6-digit pin number which is effectively HMAC(secret, timestamp). This 6-digit pin can be submitted to some other system which also has access to the same secret and thus can verify the response.</p>
+
+<p>Usually, the timestamp used is the current time rounded to the nearest 30 seconds. This approach is pretty secure, as:</p>
+
+<ul>
+  <li>an intercepted code is only valid for 30 seconds</li>
+  <li>a very large number of codes would need to be intercepted to even start to deduce the shared secret</li>
+</ul>
+
+<p>The Yubico authenticator application is needed to communicate with a Yubico key in order to generate TOTP codes. This is available for all major desktops (Linux, Windows, Mac) and for Android.</p>
+
+<p>The Yubico manager application is needed to configure the Yubikey with credentials. One of the disadvantages of TOTP (when compared to public/private key algorithms such as U2F or FIDO2/WebAuthentication) is that both ends need to have the same secret configured.</p>
+
+<p>Optionally, a credential can be configured to require a keypress on the Yubikey before returning a code. This prevents rogue software on the client system from interacting with the Yubikey to generate TOTP codes without the user’s knowledge.</p>
+
+<p>Optionally, the entire OATH subsystem on the Yubikey can be protected with authentication, requiring Yubikey OATH functionality to be “unlocked” (via a pin entered into the Yubico authenticator app) each time the key is inserted.</p>
+
+<p>The TOTP protocol is very popular; lots of secure systems support TOTP codes (eg by requiring the user to type in the code in a field of an html login form). In fact, some banks have offered dedicated hardare tokens for TOTP for many years; they are credit-card-like (or USB-stick-like) devices with a small LED screen that shows a code that changes every 30 seconds; the Yubikey TOTP support is just a more flexible version of these tokens (but does require client software capable of communicating with the Yubikey device to be installed).</p>
+
+<p>The 6-digit (or 8-digit) pins returned from the Yubikey (eg via the Yubico Authenticator app for desktop, or the Yubico Authenticator app for Android) are 100% compatible with pins returned from the <a href="https://en.wikipedia.org/wiki/Google_Authenticator">Google Authenticator</a> application. Google Authenticator is an Android app which also generates TOTP codes, but does not require a physical key - it just stores the secret and does the computation directly on the phone. The Google Authenticator app is less secure than using a Yubikey for two reasons:</p>
+
+<ul>
+  <li>when the phone is stolen (and unlocked), the thief can use Google Authenticator but cannot use Yubikey Authenticator without the matching Yubikey device</li>
+  <li>malware on the phone can potentially steal Google Authenticator secrets; this is not possible with Yubikey Authenticator (particularly when keypress-required is enabled for the credentials).</li>
+</ul>
+
+<p>TOTP can also be used for logging into operating systems. <a href="https://en.wikipedia.org/wiki/Linux_PAM">PAM</a> modules for Linux and MacOS can be configured with the same shared secret, and the TOTP pin-code then used as the password (or appended to it). Ths requires client and server clocks to be approximately in sync. The interactions are:</p>
+
+<ul>
+  <li>user uses Yubico authenticator application to generate a 6-digit pin</li>
+  <li>user enters username as usual for login</li>
+  <li>user copy/pastes or retypes the 6-digit pin from Yubico authenticator into login password field</li>
+  <li>user submits login request</li>
+  <li>server retrieves shared secret for user</li>
+  <li>server takes current server-side timestamp and truncates it to nearest 30 seconds</li>
+  <li>server computes HMAC(secret, timestamp) and compares it to submitted password</li>
+</ul>
+
+<p>As an example, the process for enabling TOTP-based login at dropbox.com is:</p>
+
+<ul>
+  <li>create an account with the usual name + password</li>
+  <li>go to account settings and select “enable two-step verification”</li>
+  <li>dropbox then generates a “secret” for your account. It presents this value as a QCode on the screen; if running an OATH client app on a mobile phone then you can start that app and scan the code to import the code. Alternatively you can select “enter manually” then copy the code text (a string of 25 chars) and paste that into the Yubico Manager application as an OATH credential.</li>
+</ul>
+
+<h2 id="oath-hotp-hmac-based-one-time-password">OATH HOTP (HMAC-based One Time Password)</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/HMAC-based_One-time_Password_algorithm">HOTP</a> is a design-pattern for authenticating using an underlying secret that is never passed over the network. It is essentially a challenge/response protocol where the challenge is an implicit value (a counter that both ends of the authentication keep approximately in sync). The <a href="https://openauthentication.org/">Initiative for Open Authentication (OATH)</a> has published a specification for HOTP, which <a href="https://developers.yubico.com/OATH/">Yubico implements</a>.</p>
+
+<p>There are two separate HOTP implementations within the Yubikey:</p>
+
+<ul>
+  <li>for “one-touch authentication” (OTP mode), limited to the two “slots”</li>
+  <li>up to 28 “named” credentials (CCID mode)</li>
+</ul>
+
+<p>Once a Yubikey is configured with <a href="https://developers.yubico.com/OATH/">HOTP</a> credentials, a command can then be sent to the key with <em>no parameters</em>, and the key returns a 6-digit pin number which is effectively HMAC(secret, counter). This 6-digit pin can be submitted to some other system whch also has access to the same secret and an approximately synchronized counter. The Yubikey internally maintains a counter which it increments each time it generates a pin (password).</p>
+
+<p>Both client and server need the shared secret and counter. The server must keep the “last counter received from client” (ie per-client state), and never accept any pins less than this counter (to block replay attacks). When a login attempt from a client does not match the expected counter, the server can try expected+1 up to expected+n in case it missed some client login attempts, but N should be low.</p>
+
+<p>Because no input parameters are required (the counter is implicit), HOTP credential can be used in the “one-touch” slots, in which case pressing the button on a Yubikey causes it to emit the 6-digit pin as a string of characters, as if typed on a keyboard. This makes it possible to fill out password fields in web forms or applications without needing any custom software on the client machine at all (though configuring the Yubikey does require using the Yubico manager software at some time).  This no-software approach might be particularly useful when using public PCs (eg at a library). Because pins are “one-time” codes, intercepting them is not useful. Note however that using public PCs still makes the user vulnerable to many attacks.</p>
+
+<p>Interacting with named HOTP credentials requires using the Yubico Authenticator application.</p>
+
+<p>The HOTP protocol can be used as a replacement for the “one time password lists” that are sometimes used by banks for authenticating financial transactions (as long as the bank server side uses the official HOTP algorithm for generating the passwords/pins, and the shared secret is loaded in to the Yubikey).</p>
+
+<h3 id="sharing-secrets-with-qr-codes">Sharing secrets with QR codes</h3>
+
+<p>Both TOTP and HOTP require having the same “secret” on both ends of the authentication. During account setup, websites often auto-generate the shared secret and present it to the user as a QR code image (a graphical 2-dimensional barcode).</p>
+
+<p>When the user is running an OATH client app on a mobile phone, the client app scans the internal graphics buffer to find the QR code and extracts the shared secret from it (even though the content is in a window belonging to another app - eg a web browser).</p>
+
+<p>When running an OATH application on a PC/Laptop, then some apps on some operating systems can also scan the currently displayed graphics buffer for QR codes. However other operating systems forbid apps from accessing content in other windows; in particular Wayland on Linux prevents such arbitrary access for security reasons.</p>
+
+<p>Most websites which offer QR codes for OATH secret setup also have a button that shows the underlying text for the shared secret; when QR code scanning does not work then this text can be copy/pasted into the Yubico OATH application.</p>
+
+<p>After this setup step has been run once, all other authentication is done with TOTP/HOTP which does not need to pass the secret over the network, and which generates codes that cannot be <em>reused</em> by an attacker if they are intercepted.</p>
+
+<h2 id="yubico-otp">Yubico-OTP</h2>
+
+<p><a href="https://developers.yubico.com/OTP/">Yubico OTP</a> is a Yubico-specific authentication scheme (a <a href="https://developers.yubico.com/OTP/OTPs_Explained.html">variant on OATH HOTP</a>).</p>
+
+<p>Like HOTP, the “challenge” is an implicit integer counter which must be kept approximately in sync on both client and server. The primary difference from HOTP is that the Yubico algorithm embeds the “private identity” identifier of the Yubikey into the response. This allows a server to use just the response alone to perform authentication, rather than require a (userid, response) pair.</p>
+
+<p>Yubico-OTP authentication requires the server-side to either:</p>
+
+<ul>
+  <li>run an instance of the Yubico-OTP authentication software, or</li>
+  <li>make calls to a Yubico-hosted authentication server.</li>
+</ul>
+
+<p>As with HOTP, a Yubico-OTP credential stored in “slot1” or “slot2” is output as if typed on a keyboard when the button is pressed, allowing a Yubikey to be used without any client software.</p>
+
+<p>The generated id can be used instead of a password, or in addition to one.</p>
+
+<p>The terms “public id” and “private id” occur in the configuration settings for Yubico-OTP. As far as I can tell:</p>
+
+<ul>
+  <li>public id is the “username” with which you log in to some app or site</li>
+  <li>private id is the id under which the shared secret is registered in the back-end authentication server</li>
+</ul>
+
+<p>Yubico provides “plugins” for various systems that allow integration of Yubico-OTP into other apps as a replacement for standard passwords. Supported systems include Windows login, <a href="https://en.wikipedia.org/wiki/Linux_PAM">PAM</a>, and FreeRADIUS.</p>
+
+<p>Each Yubikey comes with a factory-preset id in “slot 1”, meaning that systems which simply integrate with Yubico’s authentication servers do not need to set up any secrets on the device. This is called “self-provisioning” in the Yubico documentation. Depending on an external server for authentication has obvious reliability and privacy implications; if these are not acceptable then you can run your own Yubico-OTP server and overwrite slot1 with new (public-id, private-id, secret) values.</p>
+
+<h2 id="fido-1x-u2f-uaf">FIDO 1.x (U2F, UAF)</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Universal_2nd_Factor">U2F</a> is an authentication protocol from the FIDO Alliance; it was really designed to be a “second factor” for logins, ie (username, password, u2f-code) are required for login. UAF is a similar spec, intended for “passwordless logins”. Together U2F/UAF are effectively “FIDO 1.0”.</p>
+
+<p>The U2F standard (aka FIDO1) defines a USB protocol for communicating with Authenticators (security devices such as Yubikey) which register as USB HID devices; the specification is <a href="https://fidoalliance.org/specs/fido-u2f-v1.1-id-20160915/fido-u2f-raw-message-formats-v1.1-id-20160915.html">here</a>. This protocol is also known as CTAP1 (Client To Authenticator Protocol 1).</p>
+
+<p>Unlike other protocols discussed so far, the client-software part of U2F was designed to be built in to a web-browser, making the transfer of the “challenge” data from server to authenticator, and the transfer of the authenticator output to the remote webserver transparent to the user. The result is that the user just needs to enter a user-id (and “unlock” the authenticator with a pin if that is configured and has not yet been done); the remaining authentication steps happen automatically.</p>
+
+<p>Browser support for U2F is uneven:</p>
+
+<ul>
+  <li>Chrome supports U2F fully</li>
+  <li>Firefox <a href="https://www.yubico.com/2017/11/how-to-navigate-fido-u2f-in-firefox-quantum/">supports U2F partially</a> (sufficient for login, but not for registering new accounts)</li>
+  <li>No other browser supports U2F as far as I know</li>
+</ul>
+
+<p>Firefox U2F support is not enabled by default; you need to set property <code>security.webauth.u2f</code> in <code>about:config</code>. Firefox does not support the “key registration” flow; keys need to be registered via Chrome. However once the Yubikey has been “paired” with an account using Chrome, Firefox is able to use the Yubikey to log in to that account.</p>
+
+<p>U2F never really got popular. There was one major authenticator-side supporter (Yubico), and one major server-side supporter (Google) - no surprise, as Yubico and Google invented U2F together. A hundred or so other sites support U2F (server-side) - but there is no guarantee that any browser other than Chrome works with them (Firefox tests its U2F support mostly against Google’s authentication services).</p>
+
+<p>It is also possible to use U2F for login other than to websites. Yubico provides a <a href="https://developers.yubico.com/pam-u2f/">Linux PAM module</a> which authenticates local logins to a Linux server by using the CTAP1 protocol to communicate with an attached Authenticator. If you have a Yubikey4, then in my opinion using the PIV (smartcard) functions would be a better (more standard) choice.</p>
+
+<h2 id="fido2webauthentication">FIDO2/WebAuthentication</h2>
+
+<p>Following U2F (aka FIDO1), the FIDO Alliance defined an updated standard, FIDO2. The <a href="https://developers.yubico.com/FIDO2/">Yubico FIDO2 page</a> is actually quite well written, and I recommend reading it. The <a href="https://fidoalliance.org/fido2/">FIDO Alliance page</a> is also good. However for completeness of this article, this section describes FIDO2 in my own words.</p>
+
+<p>FIDO2 works similarly to FIDO1 (U2F):</p>
+
+<ul>
+  <li>uses public/private keys</li>
+  <li>expects the server to provide a random challenge</li>
+  <li>uses the Authenticator device to generate a digital signature of the challenge for the server to verify with the user public key</li>
+</ul>
+
+<p>The FIDO2 specification has multiple parts:</p>
+
+<ul>
+  <li>WebAuthn - a javascript API for interacting with an authenticator, and for performing authentication steps; the specs is actually defined by W3C</li>
+  <li>CTAP2 - the client/authenticator-device protocol for interacting with external authenticators such as a Yubikey</li>
+  <li>A way of interacting with “built-in” authenticators</li>
+</ul>
+
+<p>The FIDO2 standard aims to support both (username, password, code) and just (username, code) for login.</p>
+
+<p>FIDO2 includes backwards-compatibility for U2F credentials (ie U2F public/private keys).</p>
+
+<p>There are two parts to authenticating a user:</p>
+
+<ul>
+  <li>client interacting with server (FIDO2)</li>
+  <li>client interacting with auth-device (CTAP2)</li>
+</ul>
+
+<p>The client/server interaction also has two use-cases:</p>
+
+<ul>
+  <li>registration of shared credentials with a server</li>
+  <li>authentication using the shared credentials</li>
+</ul>
+
+<p>The FIDO2 spec <a href="https://fidoalliance.org/specs/fido-u2f-v1.1-id-20160915/fido-u2f-raw-message-formats-v1.1-id-20160915.html">defines the wire protocol</a> used to communicate with key-storage devices, known as <a href="https://fidoalliance.org/specs/fido-v2.0-rd-20170927/fido-client-to-authenticator-protocol-v2.0-rd-20170927.html#iso7816-iso14443-and-near-field-communication-nfc">CTAP2</a> (FIDO2 Client To Authenticator Protocol). A client therefore only needs to implement this protocol once, and should be compatible with all USB-based, NFC-based or Bluetooth-based “security key” devices. The “Security Key by Yubico” is CTAP2-compliant, and hopefully a future version of the Yubikey4 will also implement this. FIDO2 authentication support for PAM, RADIUS, etc. will hopefully be available soon.</p>
+
+<p>The FIDO2 specification also requires support for the W3C-defined <code>WebAuthn</code> low-level API for javascript to interact with an authenticator device; web-browsers are expected to provide an implementation of this API which maps function calls to CTAP2 messages. At the current date, the most widely-used web-browsers have implemented WebAuthn support.</p>
+
+<p>The way the protocol works is that the site provides its id (usually its base url). A public/private key pair is then generated and stored within the Yubikey; the public part is also sent to the site. When the browser later connects to that website, it gets an “authentication required” message back, with the site-id and a random “challenge” value. The browser then forwards (site-id, challenge) to the Yubikey together with the webserver origin (server host/port, not full url) and some other connection info. The Yubikey uses the site-id to select the matching private-key then generates a digital signature of (challenge, origin, other-stuff). That signature is then forwarded by the browser to the server, which validates the signature using the public key of the user. The challenge ensures that replay attacks cannot be used, and the origin plus other info protects against man-in-the-middle attacks.</p>
+
+<p>It isn’t quite clear how many FIDO2 keys a Yubikey4 device supports; the documentation just says “unlimited”…</p>
+
+<p>Note that no Yubico software is used when configuring a new key (unlike HOTP/TOTP, where Yubico Manager must be used); the browser provides all the necessary client-side logic.</p>
+
+<p>FIDO2-compatible software includes:</p>
+
+<ul>
+  <li>Chrome Browser (since v67, May 2018)</li>
+  <li>Firefox Browser (since v60, May 2018)</li>
+  <li>Microsoft Edge Browser (since May 2018)</li>
+  <li>Microsoft Windows Hello plugins</li>
+  <li>Probably more..</li>
+</ul>
+
+<p><a href="https://www.computerworld.com/article/3244347/microsoft-windows/what-is-windows-hello-microsofts-biometrics-security-system-explained.html">Windows Hello</a> is part of Windows 10 and later; it is most widely known for allowing login via an image of the user’s face. However internally, Windows Hello effectively integrates the FIDO2 authentication flow into the standard windows login process, allowing any FIDO2-compliant system to be used to authenticate a user (kind of like a limited <a href="https://en.wikipedia.org/wiki/Linux_PAM">PAM</a> for MS-Windows). The result is that the Yubikey can be used to log in to Windows; when the Yubikey has a PIN set for FIDO2, then login requires both device and pin (2 factors) and when no pin is set then login just requires the device only.</p>
+
+<p>A browser can support WebAuthentication without an external authenticator; the FIDO2 authentication mechanisms are still better than using passwords even when the credentials (private keys) are stored on local disk by the browser. When the operating-system provides a central FIDO2 authenticator in software, that is better (eg Windows 10 provides this). And a dedicated Authenticator device is even more secure.</p>
+
+<p>It is not yet clear whether Apple will support FIDO2 in their browser (Safari) and their web services.</p>
+
+<h2 id="piv-personal-identity-verification-smartcard-authentication-protocol">PIV (Personal Identity Verification) Smartcard Authentication Protocol</h2>
+
+<p>A NIST standard defines a protocol for client software to talk to smartcard devices for the purpose of authentication. Yubico <a href="https://www.yubico.com/solutions/smart-card/">implements this protocol</a>.</p>
+
+<p>This protocol is used reasonably widely within the US Government. A moderate amount of additional software also supports PIV, including <a href="https://www.yubico.com/why-yubico/for-business/computer-login/mac-os-login/">MacOS login</a>.</p>
+
+<h2 id="openpgp-pretty-good-privacy">OpenPGP (Pretty Good Privacy)</h2>
+
+<p>OpenPGP is a public/private key system for signing and encrypting data. OpenPGP is an official standard, derived (with permission) from the proprietary PGP suite of applications. The GNU Privacy Guard project (aka GnuPG or GPG) provides an open-source implementation of the OpenPGP standard.</p>
+
+<p>The most common uses for OpenPGP are:</p>
+
+<ul>
+  <li>to encrypt emails</li>
+  <li>to digitally sign emails</li>
+  <li>to digitally sign files (eg docker images)</li>
+  <li>to authenticate against an SSH server</li>
+</ul>
+
+<p>As mentioned in section <em>CCID/OpenPGP</em>, the open-source GnuPG suite implements a protocol for talking to authentication tokens; this protocol is not part of the OpenPGP standard but has nevertheless become a “defacto standard”. The Yubikey4 supports this protocol and can therefore be used together with GnuPG (or any other compatible client software) to do key setup, encryption and signature-creation. Yubico does not provide its own software for OpenPGP; you just use GnuPG or any compatible alternative.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/PKCS_11">PKCS#11</a> standard defines how a “smart card cryptography token” should interact with a system (over USB or other), and a Yubikey4 announces itself as a <code>smart card</code> when connected. Any software designed to work with such a smart card therefore works with a Yubikey. The <a href="https://github.com/gpg/scute">GNU scute</a> library is one such tool. And fortunately, a number of applications support <code>PKCS#11</code> including the Thunderbird email client (for signing and encrypting emails) and <code>gpg-agent</code> for logging in to an SSH server.</p>
+
+<p>A Yubikey contains four OpenPGP “slots” for different purposes (sign, encrypt, authenticate, card-authenticate); each slot may contain a single OpenPGP key. In practice, some (or all) of these keys will be <em>subkeys</em> of other keys. The “card-authenticate” slot is not often used. PGP keys themselves have “usage flags” embedded into them which limit what they can do - Sign, Encrypt, Authenticate, Certify; the first three correspond to the first three slot-types within the Yubikey. The “certify” flag is used on keys that can sign other keys.</p>
+
+<p>The public parts of the keys loaded into the Yubikey should be placed somewhere internet-accessible, eg on your own webserver or uploaded to a public keyserver. The easiest solution is to use the GPG command <code>gpg --send-keys ..</code> to publish the public parts of these generated keys to the standard OpenPGP keyservers (indirectly, by publishing DNS records).</p>
+
+<h3 id="configuring-openpgp-keys">Configuring OpenPGP Keys</h3>
+
+<p>The simplest approach to configuring a Yubikey for OpenPGP is to get the Yubikey to create OpenPGP keys within the device. These keys can be used for signing, encrypting, and authenticating - but because the private keys can never be extracted from the Yubikey, if the Yubikey is lost or damaged then you lose access to all encrypted data, must publish a new signature, and must reconfigure all servers you authenticate against with the new public key.</p>
+
+<p>A slightly more complex approach to setting up OpenPGP keys is to use a desktop system to create a single key with certify and encrypt abilities, and subkeys with sign and authenticate abilities. Back this key up somewhere  secure (eg a USB stick in a bank safe). Then load the three keys (master, and two subkeys) into the appropriate slots in the Yubikey. If the Yubikey is lost or damaged, you can reload everything from the backup into a new Yubikey device. You can also potentially load the same keys into multiple Yubikey devices, eg as backups or for team use.</p>
+
+<p>The most secure approach is to create a master key with <em>just</em> the certify usage enabled, create a subkey for each purpose you need (sign, encrypt, authenticate), and load just the subkeys (and not the master key) into the Yubikey device. The master can then be kept safely backed up and <em>offline</em>, just in case new subkeys need to be created. The master key is really your <em>identity</em>; even though Yubikeys are designed to make it extremely difficult to extract keys from it, having the master safely offline is even better. As with the previous approach, the same subkeys (or different subkeys of the same master key) can be loaded into multiple Yubikey devices if desired. When the entire master key is not in the Yubikey, then at least the public key part must be loaded into the Yubikey in order to provide a full chain of authentication for the subkeys.</p>
+
+<p>The first two approaches are documented <a href="https://support.yubico.com/support/solutions/articles/15000006420-using-your-yubikey-with-openpgp">by Yubico</a>. The offline-master approach is <a href="https://www.esev.com/blog/post/2015-01-pgp-ssh-key-on-yubikey-neo/">documented by Eric Severance (esev) here</a>. The <a href="https://github.com/gpg/scute">scute</a> documentation also has some examples of how to set up PGP keys in a hardware token.</p>
+
+<p>It is recommended that the master key be created on a PC, and kept on a USB stick or similar which is stored somewhere very safe. It is also recommended that subkeys be created on a PC and stored in safe offline storage like the master (possibly on the same device), and then the subkeys be loaded into the Yubikey. Potentially the same subkey can be loaded into multiple Yubikey devices.</p>
+
+<p>Here is a brief summary of the (most complex) process as recommended by esev; it takes a while (maybe an hour the first time), but only needs to be done once for a Yubikey.</p>
+
+<pre><code># Temporarily disable standard keyring
+mv .gnupg .gnupg-orig
+
+# Make a clean, configured keyring
+mkdir .gnupg
+chmod 0700 .gnupg
+echo "cert-digest-algo SHA512" &gt;&gt; .gnupg/gpg.conf
+echo "default-preference-list SHA512 SHA384 SHA256 SHA224 AES256 AES192 AES CAST5 ZLIB BZIP2 ZIP Uncompressed" &gt;&gt; .gnupg/gpg.conf
+
+# Make a backup dir (ideally on a mounted USB key)
+export backupdir=...
+mkdir ${backupdir}
+chmod 0700 ${backupdir}
+
+# Create master certification key
+gpg --expert --full-generate-key 
+# choose "RSA - set own capabilities"
+# change permissions so that only "certify" is enabled for this key
+# accept all other defaults
+
+# Get created key id
+gpg --list-keys
+export keyid=...  # appropriate id
+
+# Create a revocation certificate for the master, just in case
+gpg --gen-revoke ${keyid} &gt; ${backupdir}/${keyid}-revocation-cert.asc
+
+# Create an encryption subkey of the master key
+gpg --edit-key ${keyid}
+# &gt; addkey
+#  choose kind = RSA encrypt only
+# &gt; save
+
+# Export the master key (and its encryption subkey) to backup storage
+gpg --export-secret-key ${keyid} &gt; ${backupdir}/${keyid}-secret.pgp 
+
+# Create signing and authentication subkeys (inside Yubikey, directly in appropriate slot)
+# using the specified master key as the created key "parent"
+gpg --edit-key ${keyid}
+# &gt; addcardkey
+# select type = signature
+# &gt; addcardkey
+# select type = authentication
+# save
+
+# And finally, load the manually-created encryption subkey into the Yubikey too
+# Command "key 1" selects the first subkey (which is the encryption key, marked with an E) - and
+# marks it in the output with an asterisk
+gpg --edit-key ${keyid}
+# &gt; key 1
+# &gt; keytocard
+# select type = encryption
+# &gt; save
+
+# Add a keyserver URL to the master key, and push the master public key to the keyserver
+# As keyserver, you can use the full path to a file on your webserver, eg 'https://yourwebserver/keys/{keyid}.asc'
+# or you can use the hkps protocol plus path to a host, eg 'hkps://hkps.pool.sks-keyservers.net'.
+#
+# Note that because the backup has been made before this change, you will need to redo this if reloading the master key from backup
+gpg --edit-key ${keyid}
+# &gt; keyserver
+#  Enter path to a keyserver  (your server via https:// or public one via hkps://)
+# &gt; save
+gpg --armor --export ${keyid} &gt; /tmp/${keyid}.asc
+# then do one of the following..
+scp /tmp/${keyid}.asc ... # copy to your own server, then ensure it is accessible at the specified {keyserver-url}
+gpg --keyserver {hkps-serverurl} --send-key ${keyid} # publish to public openpgp keyservers
+
+# Remove the temporary key-dir and restore the default dir (if any)
+rm -rf .gnupg
+mv .gnupg-orig .gnupg
+
+# Various final tasks..
+gpg --card-edit ${keyid}
+# &gt; admin
+# &gt; forcesig  # ensures keypress on Yubikey is required for each generated signature
+# &gt; url
+#   Enter keyserver url from earlier
+# &gt; fetch  # fills local filesystem-based GPG keyring with public key from above URL plus "stubs" pointing to keys on the card
+# &gt; quit
+
+# And if you have not changed the Yubikey PIN values, do so now..
+gpg --change-pin
+</code></pre>
+
+<p>GPG normally expects keys to be stored on the local filesystem under <code>~/.gnupg</code>. When an authenticator (eg a Yubikey) is used, then the local keyring instead holds “stubs” that tell GPG to delegate to the authenticator device; the “fetch” command creates stubs for each key on the authenticator. The <code>fetch</code> command also appears to import the default SSH key <code>~/.ssh/id_rsa</code> (if it exists) into the GPG keyring.</p>
+
+<p>Why is the encryption subkey created on the PC and backed-up, but the signing and authentication subkeys are created on the Yubikey where they cannot be backed up? Simply because a new signing key can be created when needed; recipients will accept a signature as valid when signed with <em>any valid subkey</em>. Similarly, a new authentication key can be created when needed. Getting the Yubikey to create these subkeys itself is the cleanest solution; the keys then never exist outside of the Yubikey protected memory. However encrypted data can only be decrypted with <em>exactly</em> the correct subkey, so it should be created on a PC so that it can be backed up (despite the very slightly higher security risk).</p>
+
+<p>Ideally the system on which the keys are created is transient (eg a PC booted from a live CD for security), so that no trace of the created keys exist outside of the Yubikey and the backup.</p>
+
+<p>If <code>addcardkey</code>, <code>keytocard</code> or <code>gpg --card-status</code> give you “No SmartCard daemon” then (for Ubuntu) run <code>sudo apt install scdaemon</code>.</p>
+
+<p>You will need the Yubikey openpgp PIN code <em>and</em> the admin PIN code; the defaults are 123456 and 12345678. The pin can be changed with <code>gpg --change-pin</code> and the whole OpenPGP module on the Yubikey can be reset with <code>ykman openpgp reset</code>.</p>
+
+<p>The details of using OpenPGP for SSH login are described later.</p>
+
+<h1 id="software-authenticators-on-mobile-phones">Software Authenticators on Mobile Phones</h1>
+
+<p>There are several “software authenticator” applications available for mobile phones which support HOTP/TOTP. These do not use an external hardware key (like a Yubikey); they are better than using a plain password for authentication but not as secure as a Yubikey. The site being logged into prompts for a code; the user then uses the authenticator app to get a code and paste it into the site’s login window.</p>
+
+<p>Probably the best-known software authenticator application is <a href="https://en.wikipedia.org/wiki/Google_Authenticator">Google Authenticator</a>.</p>
+
+<p>Other software authenticator apps for mobile phones include:</p>
+
+<ul>
+  <li><a href="https://1password.com/">1pass</a></li>
+  <li><a href="https://authy.com/">Authy</a></li>
+  <li><a href="https://support.logmeininc.com/lastpass/help/lastpass-authenticator-lp030014">Lastpass</a></li>
+</ul>
+
+<p>The three tools above are “cloud based”, ie the secret is actually stored on a remote server, not on the device. Security then relies on secure login to that site, ie relies on the fact that only your phone can log in to retrieve credentials. However this is not usually true; such systems provide multiple ways to get access to your stored secrets. Remember that the point of <em>two factor authentication</em> is:</p>
+
+<ul>
+  <li>something you know</li>
+  <li>something you have</li>
+</ul>
+
+<p>If authentication to your store of secrets is also based on “something you know” then that is “two things you know”, and not real two factor authentication. However at least all of these systems ensure that there is a unique secret per site/account, rather than tempting users to reuse passwords across multiple sites.</p>
+
+<p>Possibly the best of both worlds is to use a password-service such as one of the above, but authenticate to it using a Yubikey.</p>
+
+<p>As noted earlier, the HOTP and TOTP protocols require both the client and server sides to share a common secret (key). The use of QR codes to do this is discussed earlier in this article.</p>
+
+<h1 id="google-authentication">Google Authentication</h1>
+
+<h2 id="overview">Overview</h2>
+
+<p>As Google’s GSuite services (including GMail) are so widely used, the specific authentication options supported by Google are discussed here. Other sites may use some of the same approaches. Much of this content repeats info already presented earlier - but in the specific context of login to Google.</p>
+
+<p>The currently-supported two-factor authentication options for logging in to Google are:</p>
+
+<ul>
+  <li>Authentication codes via SMS (user must be online)</li>
+  <li>Google Authenticator/TOTP (code-generator may be offline), or compatible (eg Authy app)</li>
+  <li>Google Prompt</li>
+  <li>Backup Codes</li>
+  <li>U2F via Web-browser</li>
+</ul>
+
+<h2 id="sms">SMS</h2>
+
+<p>SMS has a number of weaknesses; in particular attackers regularly persuade phone companies to “port” an existing mobile phone number to a new device and therefore get access to the SMS texts. There are other ways to intercept SMS messages too - they are an old technology that was not designed with high security in mind.</p>
+
+<h2 id="google-authenticator--yubico-authenticator">Google Authenticator / Yubico Authenticator</h2>
+
+<p>The Google Authenticator App for Android/IOS/etc is simply a TOTP code generator; click on it to get a current time-based code that can be copy/pasted into a login field. The Google Authenticator app stores the shared secret used to generate codes locally on the phone, which is not ideal. The Yubico Authenticator app works identically to Google Authenticator, but the secret is stored in a Yubikey device which is much safer. Various applications for desktop computers also exist for generating TOTP codes from locally-stored secrets.</p>
+
+<p>Google login via time-based authentication codes (OATH-TOTP):</p>
+
+<ul>
+  <li>basically, each side (Google and you) compute hash(key, now % 30 secs)</li>
+  <li>locally, you use a TOTP application (Google Authenticator, Yubico Authenticator, or other)</li>
+  <li>then paste the output of authenticator into the Google login field</li>
+</ul>
+
+<h2 id="google-prompt">Google Prompt</h2>
+
+<p>Google Prompt is a mobile phone app which supports “push messages”, where a remote server sends a message to a phone. The application then prompts the user to confirm login to the server, and sends some kind of confirmation to the originator of the push message. This supports an elegant 2FA login to the Google site:</p>
+
+<ul>
+  <li>user visits site and enters username/password</li>
+  <li>site looks up phone id from username</li>
+  <li>site sends push message to phone</li>
+  <li>authenticator asks user “do you wish to login?”</li>
+  <li>authenticator sends TOTP value to Google site</li>
+  <li>Google site detects valid response for user and links it to the (recent) login attempt</li>
+  <li>login attempt is authorized</li>
+</ul>
+
+<p>There is no Yubico equivalent to Google Prompt.</p>
+
+<p>Various companies provide similar apps for login to their sites (eg Microsoft, Blizzard).</p>
+
+<p>I cannot find any details on the protocol used to communicate between server and Google Prompt app, ie it is not clear how the server side ensures that it is talking to the correct phone.</p>
+
+<p>The Google Prompt application provides some kind of API which allows other sites to also validate login via the Google Prompt application on the user’s phone. I don’t currently have any details on that, and it is out of scope for this article.</p>
+
+<h2 id="backup-codes">Backup Codes</h2>
+
+<p>The security configuration settings within Google allow a user to generate a list of a few dozen “backup codes” for login. These can be printed out and stored somewhere safe - an excellent emergency fallback. This is of course google-specific, ie these codes cannot be used on other sites. Creating backup codes for every site you have an account with is <em>not</em> so convenient.</p>
+
+<h2 id="u2f">U2F</h2>
+
+<p>Google login via U2F (ie FIDO1 authentication) is fairly easy to set up, and very easy to use - provided you have compatible software.</p>
+
+<p>When registering your U2F token (eg Yubikey4) against your account, it is necessary to use a Chrome browser; no other browser correctly supports the U2F registration flow as far as I know.</p>
+
+<p>When logging in to Google using a U2F-enabled browser, a user-id and password must be entered as usual; the “2FA” component is then silently provided by the attached token without any further steps on the user side.</p>
+
+<p>Google Chrome is obviously a U2F-enabled browser. Firefox U2F support works sufficiently for login, but U2F support <a href="https://www.yubico.com/2017/11/how-to-navigate-fido-u2f-in-firefox-quantum/">must be explicitly enabled</a> first: go into “about:config” and set <code>security.webauth.u2f</code> to true.  Neither Safari nor Internet Explorer support U2F, and are not likely to ever support U2F - instead, they are implementing FIDO2/WebAuthentication.</p>
+
+<p>Note that if you have previously logged in with 2FA eg via phone, and selected “dont ask again on this device”, then clear all “<code>*google*</code>” cookies first to force 2FA login.</p>
+
+<h2 id="general-notes">General Notes</h2>
+
+<p>Mobile phones with access to Google accounts (eg Google mail) are a security problem, as the “second factor” for login is actually the phone itself. A separate key (Yubikey etc) is therefore a good idea. However plugging a key into a USB port does not work for mobile phones (no ports). The Yubikey-neo supports NFC, and can be “tapped” against an android phone to have the same effect. Doesn’t currently work with Apple.</p>
+
+<p>One of the greatest advantages of a Yubikey over an “auth app” on a mobile phone is that the key is <em>simple</em>. It does not run any apps, does not run a separate embedded “baseband processor” with software from the phone manufacturer, etc. It is thus much more difficult to corrupt the software. Of course, it is also smaller! And has no battery, so is always available.</p>
+
+<h1 id="ssh-authentication">SSH Authentication</h1>
+
+<h2 id="via-openpgp">Via OpenPGP</h2>
+
+<p>The best way to set up SSH login appears to be to create an OpenPGP key, load the secret part into the Yubikey, deploy the public part to the target machine, and then ensure that SSH can start gpg-agent when needed. As long as the GPG keyring contains “stubs” pointing at the Yubikey (see OpenPGP setup above), the key will be used to authenticate.</p>
+
+<p>The process of creating an OpenPGP key and loading it into the Yubikey is documented under PGP above.</p>
+
+<p>To install the relevant public key into the target system:</p>
+
+<pre><code># Find the id of the subkey with type="A" (authentication)
+gpg -k --with-subkey-fingerprint
+
+# export as ssh public key
+gpg --export-ssh-key {subkeyid} &gt; /tmp/yubikey.pub
+
+# install it (-f is needed because the private-key part is not available)
+ssh-copy-id -f -i /tmp/yubikey.pub {user}@{host}
+</code></pre>
+
+<p>On the client side, you need to run something that knows how to interact with the Yubikey to fulfil the SSH login protocol; fortunately many tools are compatible with the OpenPGP smartcard, and the Yubikey emulates an OpenPGP smartcard. The standard <code>ssh</code> command uses environment-variables to find the port on which a “key agent” program is running, and delegates to that. The <code>ssh-agent</code> tool is one such program, but it does not handle GPG keyrings; instead <code>gpg-agent</code> is needed.</p>
+
+<p>The usual way to start <code>gpg-agent</code> is just to ensure that a few environment variables are defined (usually in <code>~/.bashrc</code> or similar); when SSH finds the vars are defined but the background service is not running then it is auto-started. A gpg-agent process is never shared between users, ie the background process is per-user. In fact, all the <code>gpg ..</code> commands used earlier to configure the Yubikey are simply forwarding data to a <code>gpg-agent</code> daemon.</p>
+
+<p>On my Ubuntu-18.04 system, environment var <code>GPG_AGENT_INFO</code> is already set to <code>/run/user/1000/gnupg/S.gpg-agent:0:1</code> (where 1000 is my userid), and this is sufficient. The gpg-agent may need to prompt for a PIN at some stages, and therefore needs to be configured with a suitable <code>pinentry-program</code>; again, my Ubuntu system is appropriately set up to show a simple but effective graphical dialog for pin entry.</p>
+
+<p>SSH does try to talk to its standard ssh-agent by default; this can be changed by setting env-vars <code>SSH_AGENT_PID</code> and <code>SSH_AUTH_SOCK</code>.</p>
+
+<pre><code># Terminate the gpg agent (occasionally useful)
+gpgconf --kill gpg-agent
+
+# The following script-commands will set up SSH to talk to gpg-agent. These can be defined in a script that is sourced when needed, or can be
+# added directly to ~/.bashrc if you always want to use gpg-agent instead of ssh-agent. The call to gpgconf also starts gpg-agent if not already
+# running..
+unset SSH_AGENT_PID
+if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+  export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+fi
+
+# ssh commands
+ssh-add -l  # lists all keys in the GPG keyring (now that ssh/gpg connectivity has been set up by above ENV-vars)
+ssh {user@host}
+</code></pre>
+
+<p>Note that the Yubikey supports only one OpenPGP authentication key, so there is no need to specify <em>which</em> key you want (unlike ssh-agent), ie no need to use <code>ssh-add {key}</code> to enable specific keys before authenticating.</p>
+
+<p>The cool part of all this is: remove the Yubikey from the USB slot, and “ssh user@host” no longer works.</p>
+
+<h2 id="with-yubico-otp">With Yubico-OTP</h2>
+
+<p>An alternative is to install a PAM module on each target system, configure a list of allows Yubico token ids per user, and then integrate PAM with a Yubico authentication server that has the shared secret in the Yubico keys of all users who may log in. When using the factory-set credentials in “slot1” of each key, then PAM can be set to use Yubico’s own authentication servers - that is easy to set up, but has obvious drawbacks. As alternative, a sysadmin can configure each Yubikey user with a credential and enter that into a company-hosted Yubico authentication server.</p>
+
+<p>This is two-factor authentication in that the user must enter their usual password <em>and</em> provide the Yubikey credentials too. I believe that the credentials are <em>appended</em> to the user’s password, and the pam module then splits the password field into the two parts before verification.</p>
+
+<p>Personally, I find the OpenPGP-based approach far more elegant and secure.</p>
+
+<h1 id="macos-login">MacOS Login</h1>
+
+<h2 id="using-smartcard-integration">Using Smartcard Integration</h2>
+
+<p>On mac, you can log in with (key + pin) rather than password (“smartcard integration”). The MacOS login itself recognises when a PIV-compatible device is present and the selected user has a registered PIV public key credential (ie a PIV device <a href="https://support.yubico.com/support/solutions/articles/15000006468-using-your-yubikey-as-a-smart-card-in-macos">has been paired</a> with this account in the past). MacOS then changes the login screen to prompt for username/pin rather than username/password; the pin is then used to unlock the authenticator device, and a challenge/response algorithm is used to verify that the device contains a private key that matches the public key associated with the user. Only one private key is supported.</p>
+
+<p>Sadly, this integration is not a major advantage in useability - you still need to enter a pin instead of a password. It can be a useability benefit in companies where IT forces password changes on a regular basis; there is no need to force changes in the key or pin!</p>
+
+<p>With the standard Mac PIC integration, if the key is not in the laptop then you can still log in with password. Users who choose poor passwords, or reuse passwords, are therefore still a danger. Given that users do not enter their password directly, it would be possible to require long and complicated passwords.</p>
+
+<p>One significant benefit is that “shoulder surfers” can only observe the pin during login, which is not useful without the Yubikey itself.</p>
+
+<h2 id="using-pam">Using PAM</h2>
+
+<p>It is supposedly possible to install a Yubico-provided authentication module onto the MacOS system, and configure it to use this module during authentication. This makes it possible to prevent any login without the Yubikey being present. I haven’t tried this myself.</p>
+
+<h1 id="mobile-devices">Mobile Devices</h1>
+
+<p>Mobile phones with access to accounts (eg Google mail) are a security problem, as the “second factor” for login is actually the phone itself. A separate key is therefore a good idea. However plugging a key into a USB port does not work for mobile phones (no ports). The Yubikey-neo supports NFC, and can be “tapped” against an android phone to have the same effect. Doesn’t currently work with Apple.</p>
+
+<h1 id="backing-up-credentials">Backing Up Credentials</h1>
+
+<p>What if your Yubikey gets lost or damaged? Well, that is a big problem. A Yubikey device is explicitly intended to be a “write-only” device, where credentials can be sent to it but never retrieved.</p>
+
+<ul>
+  <li>credentials generated <em>on</em> the device are very secure, but cannot be backed up</li>
+  <li>credentials generated <em>outside</em> the device can be loaded into the device.
+    <ul>
+      <li>includes public/private keypairs (PGP)</li>
+      <li>includes challenge/response protocols (static password which is never revealed by the key)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Possible strategies to handle key loss:</p>
+
+<ul>
+  <li>buy two Yubikeys, link both with each critical account, carry one and keep the other very safe</li>
+  <li>enable “backup codes” (if supported) for each account you link the Yubikey to, and keep the downloaded codes very safe</li>
+  <li>enable the “account recovery” feature (if supported) for the account
+    <ul>
+      <li>eg another mobile phone (probably best when it is not yours, to avoid losing it at the same time)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>If you enter HOTP/TOTP credentials manually, then the secret can just be written into a text document and stored somewhere safe. If you use the QR-code entry method, then the secret is written to the Authenticator logfile, from which they can be extracted and saved safely. If you click “generate” to create the credentials in the Authenticator app, they are also logged.</p>
+
+<p>Dealing with backing up of PGP credentials is described in the articles linked to in the relevant sections - in general, allocate credentials on very secure PC (perhaps booted from “live Linux image”), back up, then install them into key.</p>
+
+<p>While FIDO2/WebAuthentication looks very promising, one major concern is backups of credentials; lots of keys will be generated (one for each account created on each site), and these keys will be generated automatically within the Yubikey. That makes the traditional Yubico-recommended approach of having a “backup Yubikey” practically useless; you would need to have the backup available all the time, so each new site could be registered with both keys - but the point of the backup key is to have it somewhere safe (long-term storage).  It would be great if the Yubikey supported an “export keys” option where the exported keys were <em>encrypted</em> with some master key that the user <em>can</em> load explicitly (eg an OpenPGP key, or just a special FIDO2 key). That approach would seem to nicely protect user security while also allowing at least periodic backups; unfortunately I have seen no indication that such functionality exists or is planned. The alternative seems painful and insecure - activating an “alternative login” of some kind for each site.</p>
+
+<p>Some useful references regarding backups:</p>
+
+<ul>
+  <li>
+<a href="https://www.yubico.com/2017/04/backup-recovery-plan/">Yubico Blog: Backup and Recovery Plan</a> - the solutions recommended here are useful only when the Yubikey has a small number of credentials, eg a single Yubico-OTP or a single PGP id. The suggestions in this page do not work well for users of U2F or FIDO2.</li>
+</ul>
+
+<h1 id="yubico-applications">Yubico Applications</h1>
+
+<h2 id="for-android">For Android</h2>
+
+<p>The Yubico Authenticator for Android is apparently a fork of the Google Authenticator code (which is open-source), with additional support for communicating with a Yubico authenticator device to actually generate the TOTP code (rather than storing the TOTP account secret directly in the local filesystem and computing the code directly in the app).</p>
+
+<h2 id="for-linux-desktops">For Linux Desktops</h2>
+
+<p>It would appear that all Yubikey desktop software is written in Python (currently v2.x), with graphics depending on Qt. The software is therefore cross-platform (though not pretty).</p>
+
+<p>The desktop applications are, frankly, extremely ugly and clumsy to use. Clearly the Yubico company is full of electronic engineers and <em>not</em> software developers.</p>
+
+<p>A number of Yubikey applications are available in the standard Ubuntu package repository. However the Ubuntu ones are extremely old; Yubico recommends enabling <a href="https://support.yubico.com/support/solutions/articles/15000010964-enabling-the-yubico-ppa-on-ubuntu">a custom package archive (PPA)</a> and the following information is based on the current apps from that PPA.</p>
+
+<p>The packages in that PPA provide the following tools:</p>
+
+<ul>
+  <li>
+<code>ykman</code> (commandline) and <code>ykman-gui</code> (graphical)</li>
+  <li><code>yubikey-personalization-gui</code></li>
+  <li>
+<code>yubioath</code> (commandline) and <code>yubioath-desktop</code> (graphical)</li>
+  <li><code>pivman</code></li>
+</ul>
+
+<p>Yes, that is a fairly chaotic naming standard there…</p>
+
+<p>These are all (currently) implemented in Python, using the QT library for graphics. The graphical interfaces are fairly primitive.</p>
+
+<p>App <code>ykman</code> provides a commandline with the ability to:</p>
+
+<ul>
+  <li>set a password for global configuration settings (“configuration lock code”)</li>
+  <li>turn off specific authentication protocols you are not using</li>
+  <li>configure credentials for slot1 and slot2 (“one touch”) - password, challenge/response, Yubico-OTP, or OATH.</li>
+  <li>enable/disable “button press required” for openpgp authentication (but not manage keys)</li>
+  <li>list, add, delete and use named OATH TOTP/HOTP credentials, and to set a password for access to named OATH functionality (duplicates some functions in yubioath/yubioath-desktop)</li>
+  <li>create/import the (single) credential for PIV authentication, export certificates, etc. (duplicates some functions in pivman)</li>
+</ul>
+
+<p>Strangely, <code>ykman-gui</code> provides access to just slot1/slot2 config and enable/disable protocols (aka modes). The other functionality of the ykman commandline tool is not currently available in graphical form.</p>
+
+<p>App <code>yubikey-personalization-gui</code> provides detailed info and settings for the overall key, and (like ykman) allows configuration of slot1 and slot2. Most users will never need this app. If you do, the <a href="https://www.yubico.com/wp-content/uploads/2016/03/YubiKeyPersonalizationToolUserGuideMarch2016.pdf">guide</a> is very useful as the inteface is extremely hard to use.</p>
+
+<p>App <code>yubioath/yubioath-desktop</code> provides the ability to configure named HOTP and TOTP credentials. It also is the main app that a user interacts with to obtain HOTP/TOTP output which can be pasted into input fields in other apps/websites. And when running on a mobile phone, the application emulates Google Authenticator, supporting the simple “click ok to login” flow (which sends a TOTP code in the background). As TOTP is widely used (eg login to Google), most Yubikey owners will use this app on a daily basis.</p>
+
+<p>App <code>pivman</code> is used for viewing and deleting smartcard-based credentials (public/private keys). If you are using smartcard-based login (eg with MacOS) then you will need pivman once to set up an initial key and pin (or possibly ykman will be sufficient). In most cases, you will not need pivman after initial setup.</p>
+
+<p>The U2F (FIDO1) and FIDO2 algorithms do not need any dedicated admin applications; the necessary support is built in to client applications (web-browsers etc).</p>
+
+<p>The PGP support in Yubikey does not need a dedicated admin app; the standard OpenPGP-compatible tools are all that is needed.</p>
+
+<p>Yubico also provides software for server-side support: pam plugins, various libararies, and an authentication server for the Yubico-OTP protocol. Yubico also provides server-side credential store hardware (“HSM Modules”), and associated software - but that is not in scope for this article.</p>
+
+<p>Secrets in a Yubikey cannot be read, only written. Nevertheless, a Yubikey can be reconfigured using the <em>personalization</em> application. By default, this can be done without a password - ie anyone with access to the Yubikey can reconfigure it. The personalization tools allow setting a separate password that is needed for reconfiguration of each (obsolete) protocol.</p>
+
+<h1 id="the-open-source-controversy">The Open Source Controversy</h1>
+
+<p>The original Yubikey devices were developed “in the open” and all source-code in the devices was published as open source for inspection. Later they changed their minds and developed later code in private. This disappointed many open-source supporters, and also those who supported “open review” for security purposes. However at the current time there are no completely open competitors (except for the OpenPGP card, which is in smartcard format and does not support as many features).</p>
+
+<h1 id="defense-against-phishing">Defense against Phishing</h1>
+
+<p>One of the claims about FIDO1/U2F and FIDO2/WebAuthentication are that they prevent “Phishing attacks”. The point is: if a user <em>can</em> give someone else their authentication credentials, then at least some users will.  Users can (sadly often easily) be persuaded to give out passwords. Users can also potentially be tricked into giving out HOTP codes (valid for one use only) and TOTP codes (valid for one use within the next 30 seconds only) - better than passwords, but still not perfect.</p>
+
+<p>Because FIDO1/FIDO2 credentials (private keys) are effectively large random numbers, it is extremely difficult for a user to hand them over at all. Of course, the credentials must also be <em>useable</em> - ie they require client-side software support to be useable.</p>
+
+<p>Additional benefits of complex random keys (in place of passwords) are:</p>
+
+<ul>
+  <li>no need to regularly change them; they are not vulnerable to brute-force attacks</li>
+  <li>no need to worry about users choosing “weak” passwords</li>
+  <li>no need to worry about passwords being shared across sites - usually one keypair per site is used, and sites have only the public-key part anyway.</li>
+</ul>
+
+<h1 id="defence-against-malware-on-the-desktopphone">Defence against Malware on the Desktop/Phone</h1>
+
+<p>Malware on a device (or possibly a MITM attack) can hijack a session. The user logs into the site as usual; because the credential is not passed over the network, the attacker cannot intercept it - but can intercept any “session cookie” that the server returns which then allows the malware to perform operations during the lifetime of that session. It is therefore a good idea for a server to prompt for yet another authentication code at critical points, eg before changing account credentials or making a financial transfer. The user must then actively approve the operation. This will not stop all attacks, but helps.</p>
+
+<h1 id="alternatives-to-yubikey">Alternatives to Yubikey</h1>
+
+<h2 id="your-phone">Your Phone</h2>
+
+<p>Google have recently added a feature to the Android mobile phone OS to allow it to <a href="https://venturebeat.com/2019/04/10/you-can-now-use-your-android-phone-as-a-2fa-security-key-for-google-accounts/">act as a bluetooth-connected security key</a>. When a PC user connects to a website using a browser and is prompted for 2FA login, the PC communicates directly with the phone via Bluetooth and retrieves the necessary one-time-only credential. AFAICT, there is no need for the phone to be online. Both phone and PC must of course be bluetooth-enabled.</p>
+
+<p>AFAICT, this new feature has been back-ported to earlier versions of Android, and is useable from Android 7.0 (Nougat) - released in March 2016.</p>
+
+<p>Most phones simply implement the key-storage in software, presumably meaning that software on the phone which has root privileges could extract the underlying secret from which the one-time-only credentials are derived. However Google’s Pixel3 phones actually include a Titan chip, the same one as in Google’s Titan USB security key - meaning that extraction of the underlying secret is impossible. In FIDO/FIDO2, new secrets are generated on the security token itself, meaning that these can also not be intercepted even by root-level software on the phone. Uploading of new secrets would be vulnerable to malware running at root level, eg uploading keys for SSH or similar purposes where they were generated outside of the embedded hardware token.</p>
+
+<p>Unfortunately it appears that only FIDO-1 is supported at the current time - a protocol that is already obsolete, and used almost exclusively to log into Google online services.</p>
+
+<p>However the idea is very good IMO; if future phones come with an embedded cryptographically secure key storage module, and FIDO2-capable interfaces then this could be an excellent alternative to a separate physical security token. The separate token will always be slightly superior, just because it does not run arbitrary software, but the convenience of a phone-based solution might make this a good solution for most users.</p>
+
+<p>One concern is the “Cloud-assisted Bluetooth Low Energy” protocol - does this require internet access from the phone? I can’t currently find any hits with a search on that expression even though the referenced article states that this protocol has been “submitted to FIDO”.</p>
+
+<p>See also <a href="https://nakedsecurity.sophos.com/2019/04/12/android-phones-transformed-into-anti-phishing-security-tokens/">this article</a> for more details. This states that the software supports FIDO2 - not sure this is the case!</p>
+
+<p>Theoretically, any phone could act as an authentication token over NFC; the <a href="https://fidoalliance.org/specs/fido-u2f-v1.0-nfc-bt-amendment-20150514/fido-u2f-bt-protocol.html">FIDO spec for U2F explicitly supports this</a>.</p>
+
+<p>One of the original developers commented on slashdot; the <a href="https://it.slashdot.org/comments.pl?sid=14149162&amp;cid=58754154">comments are worth reading</a>.</p>
+
+<p>There is also an amusing article on <a href="https://arstechnica.com/information-technology/2019/06/ill-be-passing-on-googles-new-2fa-for-logins-on-iphones-and-ipads-heres-why/">the complications of logging in to your Google online account from an Apple device using an android device as the 2FA</a>.</p>
+
+<h2 id="alternatve-security-tokens">Alternatve Security Tokens</h2>
+
+<p>The following <a href="https://en.wikipedia.org/wiki/Security_token">hardware tokens aka security tokens</a> may be interesting as alternatives to Yubikey:</p>
+
+<ul>
+  <li>Google Titan</li>
+  <li>
+<a href="https://onlykey.io">Onlykey</a> - <a href="https://onlykey.io/pages/how-it-works">how it works</a>, <a href="https://docs.crp.to/usersguide.html">userguide</a> and <a href="https://groups.google.com/forum/?#!forum/onlykey">user forum</a> (thanks to Kent H. for the tip).</li>
+  <li><a href="https://www.nitrokey.com">NitroKey</a></li>
+  <li>
+<a href="https://trezor.io">Trezor</a> - actually a “secure digital coin wallet”, but can also be used for credentials</li>
+  <li>Feitian - security key from China</li>
+  <li>
+<a href="https://puri.sm/products/librem-key/">Librem Key</a> - supports OpenPGP signing and HOTP/TOTP, but not (yet) FIDO2/U2F</li>
+  <li>
+<a href="https://shop.solokeys.com/">Solokeys</a> - a fully open-source project funded via Kickstarter. Hardware and software source is <a href="https://github.com/solokeys">available in their Github projects</a> and docs on <a href="https://docs.solokeys.io/solo/">their docs site</a>.</li>
+</ul>
+
+<p>The Solo is similar to the Yubikey in many ways (USB-A or USB-C with NFC coming in mid-2019; button for press-to-confirm). I have written a <a href="/security/solokey">separate article on Solokeys</a>.</p>
+
+<h1 id="further-reading">Further Reading</h1>
+
+<ul>
+  <li>
+<a href="http://lorgor.blogspot.com/2016/09/yubikeys-demystified.html">Lorgor: Yubikeys demystified</a> – an excellent article on Yubikey details; sadly I found this only after writing most of this article. Nevertheless, the content of this article owes a significant debt to lorgor’s post. I think the content in my article is still significantly different enough to be worth posting in addition to Lorgor’s.</li>
+  <li>
+<a href="https://lwn.net/Articles/618888/">LWN: Smartcard Features on Yubikey NEO</a> – from 2014 (when the Yubikey still ran open software)</li>
+  <li><a href="https://blog.josefsson.org/2014/06/23/offline-gnupg-master-key-and-subkeys-on-yubikey-neo-smartcard/">Joseffson: setting up keys on yubikey</a></li>
+  <li>
+<a href="https://wiki.archlinux.org/index.php/yubikey">Archlinux: Yubikey</a> – a surprisingly complete overview of the Yubikey (comparable to this article)</li>
+  <li><a href="https://medium.com/@nparlante/the-unofficial-fido-u2f-faq-9201fa5cb4da">Parlante: The Unofficial U2F FAQ</a></li>
+  <li><a href="https://fidoalliance.org/faqs/">FIDO Alliance Official FAQs</a></li>
+  <li><a href="https://blog.trezor.io/why-you-should-never-use-google-authenticator-again-e166d09d4324">Why U2F is better than Google Authenticator</a></li>
+  <li><a href="https://pages.nist.gov/800-63-3/sp800-63b.html">NIST Digital Identity Guidelines</a></li>
+  <li><a href="https://nakedsecurity.sophos.com/2017/07/18/google-wants-you-to-bid-farewell-to-sms-authentication/">Bid Farewell to SMS Authentication</a></li>
+  <li><a href="https://authy.com/blog/google-prompt-confirms-future-of-2fa-and-authentication-technologies/">Authy One-Touch</a></li>
+  <li><a href="https://krebsonsecurity.com/tag/google-authenticator/">Krebs: Google Authenticator</a></li>
+  <li><a href="https://github.com/google/google-authenticator">Google Authenticator Source Code</a></li>
+  <li><a href="https://freeotp.github.io/">FreeOTP</a></li>
+  <li><a href="https://github.com/Yubico/python-fido2">Python library for FIDO2</a></li>
+  <li><a href="https://security-architect.com/fido-passwordless-authentication/">Security Architect: FIDO2</a></li>
+  <li><a href="https://www.rsaconference.com/writable/presentations/file_upload/idy-f02_mcdowellfinal.pdf">RSA Conference: FIDO2</a></li>
+  <li><a href="https://fidoalliance.org/download/">FIDO Alliance Specifications Download</a></li>
+  <li><a href="https://gist.github.com/ageis/14adc308087859e199912b4c79c4aaa4">Yubikey 4 series GPG and SSH setup guide</a></li>
+  <li><a href="https://www.yubico.com/2018/08/10-things-youve-been-wondering-about-fido2-webauthn-and-a-passwordless-world/">Yubico: Fido2</a></li>
+  <li><a href="https://www.yubico.com/why-yubico/for-developers/developer-videos/">Yubico developer videos on FIDO2</a></li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/security/yubikey/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

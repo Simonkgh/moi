@@ -1,0 +1,877 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Notes on Virtualization with Linux</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Notes on Virtualization with Linux</h1>
+    <aside>First published on: August 4, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a>, <a href='/category/Infrastructure/'>Infrastructure</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>This article is about running guest operating systems using <em>whole system virtualization</em> on top of or managed by a Linux system. It is named “notes on”, not “intro to”, because I’m far from an expert in this area. This is just my understanding/rephrasing of existing information from more official sources; I do not recommend relying on it - read the source information yourself!</p>
+
+<p>I’m a software developer with an interest in operating system kernels and other low-level stuff, and so these notes are mostly about <em>how</em> virtualization works rather than how to install and administer clusters of virtual environments. You won’t find any information about <em>why</em> virtualization is useful (ie the relevant use-cases) either; that’s covered adequately elsewhere.</p>
+
+<p>While some of the information here is architecture-independent, I mostly assume the use of an x86-based architecture below.</p>
+
+<p>Definitions:</p>
+
+<ul>
+  <li>The term “host” is used for the software that is <em>really</em> in control of the physical computer. The term “guest” is used for software that has been virtualized.</li>
+  <li>The term “virtual machine” is technically the emulated environment in which a guest operating system instance runs, but is often used to mean a guest instance.</li>
+</ul>
+
+<p>General References on Virtualization:</p>
+
+<ul>
+  <li><a href="http://virt.kernelnewbies.org/">Kernel Newbies Virtualization Wiki</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/X86_virtualization">Wikipedia on Virtualization for x86 architectures</a></li>
+  <li>
+<a href="https://www.usenix.org/system/files/login/articles/105498-Revelle.pdf">An Overview of Virtualization on x86</a> [Don Revelle, October 2011]</li>
+  <li><a href="http://www.ibm.com/developerworks/linux/library/l-hypervisor/index.html">Anatomy of a Linux hypervisor</a></li>
+</ul>
+
+<p>Sadly, while there is a lot of documentation over the general concept, and a large amount of user-level documentation, information on low-level details are hard to find.</p>
+
+<p>See also: my companion article on <a href="/linux/linux-containers">Containers with Linux</a>.</p>
+
+<h1 id="hypervisors">Hypervisors</h1>
+
+<p>In <a href="https://en.wikipedia.org/wiki/X86_virtualization">whole system virtualization</a>, some software emulates a physical computer that has no software already running on it.</p>
+
+<p>The host software is called a <a href="https://en.wikipedia.org/wiki/Hypervisor">hypervisor</a> (also known as a Virtual Machine Monitor or VMM), and is generally divided into two types:</p>
+
+<ul>
+  <li>A type-1 hypervisor is part of an operating system kernel, ie the virtualization code is running in privileged mode.</li>
+  <li>A type-2 hypervisor is a user-space application running as a normal process on some other operating system kernel. A non-administrator user can install such software (eg VirtualBox) and then use it to start guest systems. Possibly some custom drivers can be installed into the guest system to improve features/performance, but a type-2 hypervisor never messes with the kernel of the <em>host</em> it is running <em>on</em>.</li>
+</ul>
+
+<p>Some would debate the above definitions of hypervisor types, and claim that VirtualBox and KVM are “type 2 hypervisors” because they “require a host kernel” rather than “being a host kernel”. However any time software requires kernel modules, I would say that hypervisor is <em>part</em> of the operating system kernel.</p>
+
+<p>Some hypervisors start a standard <em>bootloader</em> in a <em>guest</em> environment, as if it is running directly on real hardware, and let this bootloader in turn start a full <em>operating system kernel</em> and its user-space applications. Other hypervisors (eg lguest) start the guest kernel directly. In either case, an x86 hypervisor needs to be able to emulate <a href="http://wiki.osdev.org/Real_Mode">x86 Real Mode</a> as a Linux kernel expects a bootloader to leave the hardware in this mode when jumping to the kernel entry point. The linux kernel runs a small amount of assembly-code in real-mode before switching the MMU on; the hypervisor therefore needs to support this real-mode code and emulate switching to protected mode when the kernel sets the magic control bit. Note however that a hypervisor does not need to emulate real-mode <em>efficiently</em> as a kernel only uses real-mode briefly during startup.</p>
+
+<p>Optionally a hypervisor can make information available which allows the guest to detect that it is in a virtual environment so it can optimise its behaviour for that situation.</p>
+
+<p>The following things need to be handled properly by a hypervisor for the guest operating system kernel to function:</p>
+
+<ul>
+  <li>Execute CPU instructions that make up the guest operating system and user-space</li>
+  <li>Ensure access to generic memory (via the Memory Management Unit) is remapped to not collide with other processes on the host</li>
+  <li>Ensure access to devices (usually accessed via memory-mapped memory) is remapped to give the illusion of dedicated devices</li>
+</ul>
+
+<p>In addition, the following are important:</p>
+
+<ul>
+  <li>The host should be able to control the CPU share of a guest</li>
+  <li>The host should be able to limit IO bandwidth (to disks, network, etc)</li>
+</ul>
+
+<p>When the guest operating system invokes code within the hypervisor (whether deliberately or not) this is termed a <em>hypercall</em> or a VM-EXIT.</p>
+
+<p>TODO: what advantages/disadvantages does being a type-2 hypervisor bring?</p>
+
+<h1 id="executing-guest-cpu-instructions">Executing Guest CPU Instructions</h1>
+
+<p>There are three possible ways to “execute” CPU instructions within a guest environment:</p>
+
+<ul>
+  <li>emulate instructions one by one, thus preventing the real instructions from executing on the CPU at all;</li>
+  <li>statically modify the operating system to be executed, so that all unsafe operations are replaced by code that invokes the appropriate handler in the host instead;</li>
+  <li>rely on <a href="https://en.wikipedia.org/wiki/Hardware-assisted_virtualization">hardware virtualization features</a> of the CPU, where the host can configure handlers to be executed whenever guest code tries to execute an unsafe operation.</li>
+</ul>
+
+<p>CPU instructions can be considered as falling into two categories: safe and unsafe. The x86 instruction set has long had the concept of safe/unsafe instructions, and treats unsafe instructions differently depending upon what <em>privilege level</em> (aka ring) the CPU is currently configured to run at. This is what makes it possible to execute user-space (non-kernel) code directly on a CPU as long as the current privilege-level (ring) is set appropriately; the CPU itself will refuse to perform unsafe operations when the privilege-level is incorrect.  Examples of safe instructions are adding, multiplying and shifting data; unsafe instructions include switching to/from kernel mode and disabling/enabling interrupts. User-code should consist entirely of safe instructions, as unsafe ones would always fail. Operating system kernels are also mostly composed of safe instructions. However kernels are written with the assumption that they are running in privileged mode, and may use unsafe operations where needed.</p>
+
+<p>Emulation manually fetches each guest instruction (whether kernel or user-space) and mimics what the real CPU would do. For more performance, small sequences of instructions can be translated into “safe” equivalents and then called as a function; this is called <em>dynamic translation</em>. Both kernel and user code always need to be emulated/translated even when the source CPU instruction set is the same as the native instruction set, in order to fake MMU behaviour; see the section on QEMU later.</p>
+
+<p>Static modification (“os-level paravirtualization”) can be very effective when the operating system to be executed supports it. In this approach, user-space code in the guest is executed natively on the CPU (as unsafe instructions aren’t expected to work); only guest kernel code needs to be specially handled. The linux kernel has <em>hooks</em> at every location where it performs an operation that will not work in guest mode (or will not work efficiently). At boot-time, the linux kernel checks whether it is a guest of a supported hypervisor, and if so then activates the corresponding hook implementations. Some *BSD systems also have paravirtualization hooks for some hypervisor types. However older versions of Linux, and most other operating systems, have no such hooks and therefore cannot be run via paravirtualization. Note that the term “paravirtualization” is also used to refer to emulating <em>devices</em> rather than core hardware; this is discussed below. As guest code (kernel and userspace) is running natively on the CPU, the hypervisor relies on a periodic <em>timer interrupt</em> to regain control of the CPU from time to time - or paravirtualization hooks inserted into the guest kernel’s scheduler code.</p>
+
+<p>Hardware virtualization takes advantage of the distinction between safe and unsafe CPU instructions. The safe instructions cannot be used by a guest to interfere with a host, and so do not need any special handling; a hypervisor can simple execute them natively on the CPU as normal. However the unsafe instructions must be emulated by the host; modern x86 CPUs allow a hypervisor to set up “handlers” that are invoked whenever an unsafe instruction is executed. Guest kernel code can then be executed in <em>unprivileged</em> mode, with handlers configured to emulate just those problem instructions while letting everything else run at full speed. Mainframe architectures have had hardware support for virtualization for a very long time; Intel’s x86 CPUs were originally intended for “simple home and office” use, and therefore never had these features. Initial support was eventually added in 2006 (Intel VT-x and AMD-V), and has improved in following generations. Support covers various features, and different CPU models offer varying support (features not supported in hardware can be emulated in software in most cases):</p>
+
+<p>Both paravirtualization and emulation were in use before hardware support for virtualization existed. OS-level paravirtualization is very efficient, when possible. Dynamic translation can also be efficient (VMware still relies on it in many cases according to their documentation).</p>
+
+<h1 id="hardware-supported-virtualization">Hardware-supported Virtualization</h1>
+
+<p>While the above section discussed hardware support for virtualization of CPU instructions, there are actually several areas where hardware support is useful:</p>
+
+<ul>
+  <li>CPU instruction interception (VT-x and AMD-V)</li>
+  <li>Register read/write support (VT-x and AMD-V)</li>
+  <li>MMU support : EPT (Extended Page Tables)</li>
+  <li>Interrupt Handling support (APICv)</li>
+  <li>other stuff useful only in really high-end setups eg network and IOMMU virtualization</li>
+</ul>
+
+<p>A CPU which supports virtualization allows handlers to be configured for various “events”, such as certain CPU instructions. When such an action occurs, the hypervisor code is invoked; this is called a VM-EXIT. The current state of the CPU is saved in a structure named VMCB or VMCS before switching to the <em>real</em> privileged mode and invoking the hypervisor handler.</p>
+
+<p>From <a href="https://www.usenix.org/system/files/login/articles/105498-Revelle.pdf">Don Revelle’s presentation</a>:</p>
+
+<blockquote>
+  <p>Both AMD and Intel use the key idea of a VMM management table as a data structure for virtual-machine definitions, state, and runtime tracking. This data structure stores guest virtual machine configuration specifics such as machine control bits and processor register settings. Specifically, these tables are known as VMCB (AMD) and VMCS (Intel). These are somewhat large data structures but are well worth reviewing for educational purposes. These structures reveal the many complexities and details of how a CPU sees a virtual machine and shows other details that the VMM needs to manage guests.</p>
+</blockquote>
+
+<p>The x86 architecture defines four different levels of privilege, named “ring 0” through “ring 3”. When the CPU is in “ring 0”, all CPU instructions are allowed; in other rings certain instructions do not have their usual effect. Operating system kernel code is expected to execute with “ring 0” as the current mode, and user-space code runs with “ring 3” as the current mode. When user-space code wishes to request the kernel to perform an operation, it does a <em>system call</em> which switches the current mode and jumps to one of a set of predefined memory addresses within the kernel. The kernel does the reverse, using an instruction to switch back to “ring 3” before executing user-space code. When the VT-x or AMD-V support is available, then the privilege level is effectively a (mode,ring) pair - so guest kernel code can be run in (nonroot, ring0) level. The VMCB/VMCS structure is then configured to define exactly which instructions (or other operations such as writes to control registers) actually triggers a call to the hypervisor (ie switch to mode (root,ring0)). In particular, this allows SYSENTER instructions (ie <em>system calls</em>) executed in guest “ring 3” mode to call into the guest kernel directly, as normal.</p>
+
+<p>When hardware virtualization support is not available, a guest kernel must not run in “ring 0” as unsafe instructions would “work”; common practice is to use “ring 1” as the current mode when executing code in the guest kernel. In “ring 1”, an unsafe instructions will of course not execute properly; unfortunately while <em>some</em> unsafe instructions trigger an event that a hypervisor can intercept, other unsafe instructions just fail silently - hence the need for hardware-virtualization support, or other workarounds such as <em>emulating</em> or <em>rewriting</em> problematic instructions. Note that a SYSENTER instruction (ie <em>system calls</em>) executed by guest userspace code would trigger a call to the <em>hypervisor</em> code, not the guest kernel; this situation needs to be efficiently handled to avoid a performance bottleneck.</p>
+
+<p>A type-2 hypervisor cannot take advantage of hardware-supported virtualization; that requires integration with the host operating system which is not available to user-space code.</p>
+
+<p>Warning: many PCs come with hardware virtualization disabled in the BIOS, ie you need to enter the BIOS setup screen on boot and enable this feature. A website suggested that this is done in order to prevent malware from taking advantage of hardware virtualization to hide itself.</p>
+
+<p>One of the best presentations I found on the topic of software and hardware virtualization is the <a href="https://www.virtualbox.org/manual/ch10.html">Technical Background</a> page of the VirtualBox manual (sections 10.3 through 10.6).</p>
+
+<h1 id="virtualizing-memory-management">Virtualizing Memory Management</h1>
+
+<p>A real system has a number of “banks” of memory, with each bank starting at a physical address. The addresses might not be contiguous.  In “real mode” the addresses used by CPU instructions are treated as <em>physical addresses</em>, but only the bootloader and very early kernel setup code runs in real mode. In protected mode, addresses referenced by CPU instructions are <em>virtual addresses</em> and are mapped via MMU config tables into corresponding <em>physical addresses</em> before data is requested from the memory banks.</p>
+
+<p>Memory access in a guest falls into two different cases:</p>
+
+<ul>
+  <li>guest user-space and kernel code instructions which reference virtual addresses (reads or writes) need to map to an appropriate “real” memory location decided by the hypervisor rather than the guest kernel</li>
+  <li>guest kernel code which explicitly manipulates MMU configuration</li>
+</ul>
+
+<p>An MMU on x86 systems keeps the tables that define mappings for virtual memory pages in the standard address space; the mappings are effectively large arrays of “page table entries” (PTEs). Each entry contains the virtual-&gt;physical address mapping, page access-rights, and other flags.</p>
+
+<p>When using <em>emulation</em> or <em>dynamic translation</em>:</p>
+
+<ul>
+  <li>each instruction which reads or writes memory instead uses the hypervisor’s equivalent of an MMU to determine which memory address to really access; the hardware MMU is not used;</li>
+  <li>instructions which try to manipulate an address within the range containing MMU tables are detected and the hypervisor makes appropriate changes to its equivalent of an MMU.</li>
+</ul>
+
+<p>When using paravirtualization:</p>
+
+<ul>
+  <li>guest CPU instructions which perform reads and writes are translated from virtual to physical addresses using the system MMU as normal;</li>
+  <li>guest kernel code which manipulates MMU configuration is replaced by hypercalls that request the hypervisor to perform the relevant operation on the system MMU.</li>
+</ul>
+
+<p>When using hardware-assisted virtualization:</p>
+
+<ul>
+  <li>guest CPU instruction virtual-&gt;physical address translation uses the system MMU like normal;</li>
+  <li>(AIUI) some <em>advanced</em> systems provide hardware assistance to detect guest kernel changes to MMU configuration, and invoke a handler in the hypervisor;</li>
+  <li>(AIUI) in systems without MMU virtualization support the hypervisor sets up fake MMU tables in normal memory where the guest would expect to find the real ones, and marks them as write-protected so it gets a signal when the guest tries to reconfigure the MMU (a “soft MMU”).</li>
+</ul>
+
+<p>There is also the issue of what physical memory the guest kernel thinks exists, and at which physical locations. I don’t know the details of how linux determines this at bootup but the hypervisor will need to fake this information appropriately. In general, a hypervisor sets aside a fixed portion of memory before starting a guest and then creates fake system information so that the guest operating system sees that preallocated memory as the “whole memory” available for it, and at locations which are plausible for real physical memory to be at.</p>
+
+<p>It is also sometimes desirable for a host to dynamically increase or decrease the amount of memory the guest has, without having to reboot the guest. This is called “ballooning” - TODO: write more about this.</p>
+
+<p>The emulation, paravirtualization and hardware-assist approaches all work perfectly fine for type-2 hypervisors (user-space code) as well as type-1 hypervisors. Emulation and paravirtualization are clearly possible. The third is a little trickier, but posix does provide an API (mprotect) that a normal process can use to set memory it owns as read-only, and if a write to that page occurs then a SEGV signal will be generated which the hypervisor can receive. Guest code then always “uses” memory that is owned by its user-space hypervisor.</p>
+
+<p>As updating of page-table entries is something a kernel does fairly often, hardware assistance for MMU virtualization can provide a significant boost. At the moment however it is not commonly found in desktop/laptop systems (mostly in the Intel Xeon datacentre-focussed series).</p>
+
+<h1 id="virtualizing-devices">Virtualizing Devices</h1>
+
+<p>On x86 systems, there are two ways to interact with devices: via IN/OUT instructions that specify io-space addresses and via normal READ/WRITE instructions that specify memory-space addresses that happen to correspond to addresses that device registers have been <em>mapped to</em>. In addition, devices generate interrupts which force the CPU to start executing code at whatever address has been configured for that interrupt id.</p>
+
+<p>The PCI bus configuration is traditionally accessable via a small range of fixed addresses in io-space, and the devices plugged in to the PCI bus can then be <em>discovered</em> and <em>configured</em> by the kernel to take further instructions via ios-space or memory-space addresses of the kernel’s choosing. Other things in IO space include DMA, serial port and storage controllers. The host operating system needs to ensure that IN/OUT instructions are intercepted, and that the physical addresses to which devices have been memory-mapped are not accessable from guests; having the host and the guest send configuration directly to the same device is a recipe for disaster, as well as a security issue. The host then needs to <em>emulate</em> some devices so that the guest can ‘detect’ them, and use its corresponding inbuilt drivers to interact with this emulated device. The host then must convert these very low-level read/write operations back into logical operations, transform them into operations appropriate for the guest (eg map network addresses or disk addresses) and pass the command on to a <em>real</em> device driver.</p>
+
+<p>As a performance optimisation, some hypervisors allow specific devices to be <em>assigned</em> to a guest, in which case the guest can then directly access the hardware (ie the host maps the devices’ memory ports into the guest’s memory). The host then of course should <em>not</em> access this device; a device can have only one owner. This is also known as “pass-through”.</p>
+
+<p>Typically, hosts emulate quite old and simple devices, as (a) that is easier to implement, and (b) a wide range of guest operating systems will have support for these old devices. However that means that the guest is missing out on features - particularly performance features. In addition, an interface which emulates a device by providing a set of fake “registers” which can be written to one-by-one is not a very effective manner of communication. Fake device interfaces designed especially for virtualization have therefore been designed; when the guest detects one of these on startup and when it has the appropriate driver for it, the communication between guest and host is then much more efficient. Of course a guest which sees one of these devices knows immediately that it is in a virtual environment, but it is extremely seldom that hiding virtualization from the guest is important (maybe when investigating malware).</p>
+
+<p><em>Virtio</em> is a general-purpose “bus” for passing data between a guest and a hypervisor; a range of device-drivers have been created which use virtio as their data-passing mechanism. A guest which discovers that a virtio bus is present can <em>query</em> the bus (similarly to the way it would query a PCI bus) to find out which devices the hypervisor provides, and then it can try to load suitable drivers in the guest environment.</p>
+
+<p>The most difficult device to emulate is a GPU. There are two distinct use-cases: (a) letting the guest display on the local screen, and (b) letting the guest generate output that can then be seen via a remote-desktop protocol. However both these use-cases require generating graphics into a buffer (which is either output to the screen, or output over a network). Emulation of primitive VGA-level graphics has existed for a while - enough to bring up a basic desktop. Xen has GPU emulation working which allows guests to perform sophisticated graphics, including taking advantage of hardware acceleration. VirtualBox has an equivalent solution. A <a href="https://lwn.net/Articles/611212/">solution for QEMU-based hypervisors</a> named <a href="http://virgil3d.github.io/">Virgil3D</a> is currently being developed.</p>
+
+<p>ACPI is also used by kernels to find and interact with devices; a hypervisor may therefore need to provide emulated ACPI “tables” suitable for a virtual machine environment. See later for more information on ACPI.</p>
+
+<h1 id="virtualizing-graphics">Virtualizing Graphics</h1>
+
+<p>There are several different projects to offer virtual GPUs:</p>
+
+<ul>
+  <li>
+    <p>The VirtualBox “guest additions” provides a <code>vboxvideo</code> driver that hooks into the linux graphics stack somehow (not well documented), and forwards OpenGL operations to the host. This is apparently done in a fairly hacky way, as the kernel and other tools issue many errors/warnings when this is enabled. Nevertheless it works - but only supports <em>OpenGl2.1</em>. Dave Airlie (who designed Virgil3D) considers passing OpenGL commands to be insecure (server cannot validate them).</p>
+  </li>
+  <li>
+    <p>A virtual Cirrus DRM driver exists which provides the /dev/fb and KMS APIs needed for the userspace DDX Cirrus driver to perform graphics output. No other DRM functionality is supported, ie no acceleration is provided. The Cirrus DDX driver does everything in software, just expecting the card to provide a framebuffer - which this device does emulate, and pass on to the host.</p>
+  </li>
+  <li>
+    <p>Virtio GPU is a DRM driver which communicates with a host over virtio. It was first implemented in Kernel 4.2, and that version only supports the KMS modesetting APIs, ie
+can be used by a 2D DDX driver to perform modesetting and writes to a framebuffer (ie software rendering), but cannot yet be used to perform accelerated rendering or 3D - that requires Virgil3D.</p>
+  </li>
+  <li>
+    <p>QXL/Spice DRM driver. QXL is a guest-side virtual graphics device which the corresponding DDX driver can use. A DRM driver which provides KMS support was implemented mid-2013. No other DRM interfaces are implemented, ie no 3D support. ? ddx driver packaged as xserver-xorg-video-qxl? Intention is to base 3D support on virgil3d. QXL/spice does support efficient transfer of video streams. It also AFAICT forwards X packets to the final display machine where possible (ie acts like a remote X server).</p>
+  </li>
+  <li>
+    <p>Virgil3D</p>
+  </li>
+</ul>
+
+<p>The virgil3d project is attempting to provide accelerated graphics rendering within a guest environment. The general architecture is that the guest runs a paravirtualized device that provides an API for things like allocating buffers and submitting textures and Gallium3D instruction streams. Guest code uses a Gallium3D driver to generate a custom command-stream and TGSI-format shader programs, which are then passed via the paravirtualized device to the host. The host side of the driver then validates the command-stream and maps it into OpenGL equivalents (and the shaders into GLSL equivalents). Commands and shaders are passed on to the host’s graphics driver (and thence to the card) at a suitable time and the resulting pixels displayed or stored for later retrieval by the guest.</p>
+
+<p>Apparently VirtualBox provides 3D acceleration in guests via a driver that passes “native” OpenGL commands from guest to host, but Dave Airlie (who designed Virgil3D) considers this a security issue.</p>
+
+<p>This approach avoids needing to <em>assigned</em> a graphics card to the guest at any time.</p>
+
+<p>TODO: is Glamor related?</p>
+
+<p><a href="/linux/graphics-stack">This article</a> provides an overview of the linux graphics stack, and how DRM drivers are used.</p>
+
+<p>For further information on graphics in virtual environments, see:</p>
+
+<ul>
+  <li><a href="http://www.phoronix.com/scan.php?page=news_item&amp;px=VirtIO-DRM-KMS-GPU-Driver">Announcement: KMS Driver for VirtIO</a></li>
+  <li><a href="http://www.phoronix.com/scan.php?page=article&amp;item=linux_kvm_kms&amp;num=1_">Announcement: KMS Driver for Cirrus GPU</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/SPICE_%28protocol%29">Wikipedia: Spice protocol</a></li>
+  <li><a href="http://www.spice-space.org/docs/spice_for_newbies.pdf">Spice Architecture</a></li>
+  <li><a href="http://www.spice-space.org/page/Spice3DNotes">Spice3D notes</a></li>
+  <li>
+<a href="http://chromium.sourceforge.net/doc/index.html">Chromium Distributed GL</a> - used by virtualbox</li>
+  <li><a href="http://phoronix.com/scan.php?page=news_item&amp;px=VMwgfx-OpenGL3-Linux-4.3">Announcement: vmware OpenGL 3.x support</a></li>
+</ul>
+
+<h1 id="allocating-resources-fairly">Allocating Resources Fairly</h1>
+
+<p>The hypervisor is responsible for sharing the CPU between itself, all of the guest virtual machines, and all of the normal processes running on the hypervisor (host). It therefore needs a sophisticated scheduling system, memory-management, etc. - in fact all of the things that a normal operating system requires.</p>
+
+<p>A type-2 hypervisor is a normal process, and its host operating system gives that process a “fair share” of resources; that naturally limits the CPU, memory, etc which that hypervisor process can pass on to its guest. It is obvious how a type-2 hypervisor which uses <em>emulation</em> provides itself with time to perform its own housekeeping; effectively the hypervisor regains control of the CPU after each instruction. Type-2 hypervisors that use paravirtualization or rely on hardware-assistance could potentially run each guest in a separate <em>thread</em>, thus delegating the problems of scheduling and CPU ownership to the host operating system.</p>
+
+<p>A type-1 hypervisor which uses paravirtualization or hardware-assistence does allow guest code to “take control” of a CPU for a while - but retains control of the device interrupts (except possibly for those devices <em>assigned</em> to a particular guest). In particular, it receives the <em>timer interrupts</em> which drive the operating system scheduler - and it can therefore appropriately time-share the CPUs between the various processes it knows about. A guest operating system is usually handled as a single task/process, and the guest kernel then further shares out the time it gets using its own scheduler.</p>
+
+<p>The host also needs to ensure that a guest receives a <em>fair share</em> of the available IO bandwidth (where the definition of fair is set by the host administrator); a guest should not be able to hinder the host from performing IO. Maximum disk-space is set when the guest is started (by configuring the emulated storage to return suitable values). IO bandwidth can be limited by the code implementing the “emulated block device”, or by simply ensuring the storage available to the guest is on a different device than the storage used by the host.</p>
+
+<h1 id="installing-a-vm">Installing a VM</h1>
+
+<p>An installation medium (eg a CD-ROM image as a .iso file) can be “booted” by a hypervisor, as it would on real hardware. The standard installation application on that medium can then execute an install as normal, writing to an emulated “hard drive” provided by the hypervisor (which maps to a file on the host system). The result is a file in the host which holds an “installed system” that can then itself be “booted”.</p>
+
+<p>An installed-system image can also be distributed directly. For some operating systems (eg Windows), the installation process also configures the installed operating system depending on the available hardware - in particular, only device drivers for available hardware gets installed. This makes it impossible to simply copy an “installed image” onto other physical hardware. Linux doesn’t select device drivers at install-time; it always installs everything - but nevertheless does configure things like a hostname which makes installing literal copies of an OS onto other hardware problematic. In a virtual machine, there are no such problems:  the “hardware” is always the same (the hypervisor can always present the same emulated devices), and things like hostnames are abstracted (can be mapped in the hypervisor). Therefore a single “installed” system image can be used to boot many virtual machine instances on different physical hardware.</p>
+
+<h1 id="available-hypervisors-for-linux">Available Hypervisors for Linux:</h1>
+
+<ul>
+  <li>Bochs (open-source)</li>
+  <li>QEMU (open-source)</li>
+  <li>User Mode Linux (UML)</li>
+  <li>lguest (open-source)</li>
+  <li>KVM (open-source)</li>
+  <li>Xen (open-source GPL)</li>
+  <li>VMware products (proprietary) : ESX Server, Workstation, Player</li>
+  <li>VirtualBox (Oracle Corp, Open Source GPL with a few proprietary extensions)</li>
+  <li>HAXM (Intel, proprietary) : mostly used to emulate Android environments</li>
+</ul>
+
+<p>While each of the above come with tools to manage virtual environments, there are also a few tools that manage multiple technologies:</p>
+
+<ul>
+  <li>
+<a href="http://virt-manager.org">virt-manager</a> - depends on <a href="http://libvirt.org">libvirt</a>
+</li>
+  <li><a href="http://community.redhat.com/blog/2014/10/gnome-boxes-3-14-unboxed/">Gnome Boxes</a></li>
+</ul>
+
+<h2 id="bochs">Bochs</h2>
+
+<p>Bochs is a type-2 hypervisor, ie runs purely in user-space.</p>
+
+<p>Bochs is a traditional <em>emulator</em>; given a block of code and an initial value for its <em>program counter</em> (PC), it repeatedly loads the instruction referenced by the PC, and emulates its behaviour - which directly or indirectly updates the PC. Bochs represents the PC, CPU registers, MMU, system memory, and other relevant hardware features using in-memory data structures; emulating an instruction updates the relevant Bochs data structures <em>not</em> the real hardware equivalents. The result is, as can be expected, very slow.</p>
+
+<p>Bochs can only emulate x86 instructions (though it supports just about every model of x86 ever made) - but it can do so on many platforms (eg emulate x86 on MIPS).</p>
+
+<h2 id="qemu">QEMU</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/QEMU">QEMU</a> is one of the oldest virtualization-related projects. It has many possibly uses, one of which is to act as a type-2 hypervisor.</p>
+
+<p>There are several parts to <a href="http://wiki.qemu.org/Main_Page">QEMU</a>:</p>
+
+<ul>
+  <li>Like Bochs, it emulates CPU instructions. However it is capable of <em>dynamic translation</em>: short sequences of suitable guest code can be mapped into equivalent native instructions that it can then call as a subroutine. Problematic instructions (including jumps) are still emulated as with Bochs. It can emulate several different CPU instruction sets.</li>
+  <li>It can act as a type-2 hypervisor, ie run as a user-space application to host virtual machines.</li>
+  <li>It provides code for emulation of several hardware devices including disks, network-cards, VGA-level graphics.</li>
+</ul>
+
+<p>Using QEMU, it is possible to launch individual <em>linux</em> applications compiled for MIPS on x86 hardware and various other interesting combinations. Any systemcalls made by the application get transformed as appropriate then passed to the current operating system kernel. Note that this does NOT provide any kind of virtualization or containerization - the executed application sees the full local environment as a normal process would. In this mode, QEMU is a “CPU emulator” rather than a virtualization tool.</p>
+
+<p>When used as a type-2 hypervisor to run x86 code on x86, dynamic translation is still applied in order to support virtual memory: every instruction that accesses memory is rewritten into a form that consults QEMU’s internal equivalent of the page-tables rather than the real ones; each guest load or store instruction therefore maps to a <em>sequence</em> of real instructions. In addition, unsafe instructions that are supposed to run in “ring 0” (eg configuring interrupts) are emulated appropriately.</p>
+
+<p>In the past, the <a href="https://en.wikipedia.org/wiki/QEMU#Accelerator">kqemu and qvm86</a> projects implemented kernel modules based on QEMU technlology to significantly improve performance without needing hardware support for virtualization_ (incidentally making it a type-1 hypervisor). However both of these projects have died; it appears that the effort required to implement and maintain such a solution were not worth it. Instead, the primary linux-based type-1 hypervisor implementation is KVM, which assumes hardware support (no longer a major issue as most chips since 2006 have such support)</p>
+
+<p>QEMU’s performance is not great. Normally, KVM (or lguest) are preferred over plain QEMU for full virtualization. Some rough benchmarks suggest that QEMU (without kvm) running x86 code on x86 is about 15x slower than native code.</p>
+
+<p>One example of using qemu to execute the installer present on a CD-ROM image (“boot from the CD-ROM”), and have it install into a local file that can then be executed as a guest.</p>
+
+<pre><code>dd if=/dev/zero of=rootfile bs=1M count=2048
+qemu -cdrom image.iso -hda rootfile -net user -net nic -boot d
+</code></pre>
+
+<p>QEMU’s block-device emulation supports writing files in “qcow2” format; this provides two features:</p>
+
+<ul>
+  <li>snapshotting, in which all changes to the image are written to a separate file.</li>
+  <li>thin provisioning, in which the file is not of a fixed size, but instead takes up only as much space on the host system as needed to hold the data written by the guest.</li>
+</ul>
+
+<p>The source-code for QEMU can be obtained via:</p>
+
+<pre><code>git clone git://git.qemu-project.org/qemu.git
+</code></pre>
+
+<p>See later for a more detailed description of QEMU’s dynamic instruction translation.</p>
+
+<h2 id="user-mode-linux">User Mode Linux</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/User-mode_Linux">User Mode Linux</a> (UML) is a “port of the linux kernel to userspace”, in which parts of the kernel code which interact with “real hardware” have been replaced by code that uses POSIX apis to call into a host operating system instead. The User Mode Linux kernel is <em>not</em> a normal kernel, and could not be booted on “real hardware”, aka “bare metal”. UML therefore is not a “hypervisor”, but a special kernel that <em>needs no hypervisor</em>, ie can be hosted on a totally normal linux distribution.</p>
+
+<p>Because UML invokes systemcalls on the underlying kernel, it is in some ways more like a <em>container</em> than <em>whole system virtualization</em>. It comes with a special <code>hostfs</code> filesystem-type that effectively works like a “chroot”: it invokes the host kernel’s normal filesystem-related systemcalls and thus works like a “bind-mount” of a directory from the host. Alternatively, filesystem storage can be done as in other <em>whole system virtualization</em> solutions, ie the host provides a “block device” (backed by a large binary file) that the guest formats as a filesystem. It is possible to boot the UML kernel as a non-root user on the host, but the <code>hostfs</code> approach doesn’t work well in this case (“root” within the UML environment only has the rights of the original user with respect to the mounted filesystem); better to use the block-device approach in this case.</p>
+
+<p>Because the UML guest kernel can invoke host OS systemcalls, it is not as secure as <em>whole system virtualization</em>: if userspace code running under the UML guest kernel can inject code into the guest kernel, then that can directly attack the host kernel via its standard systemcalls.</p>
+
+<p>The UML code was originally a <em>fork</em> of the Linux kernel, maintained at Sourceforge. It was merged into the standard Linux kernel sourcecode repository in the 2.6 series (see the standard Linux kernel source tree at <code>/arch/um</code>). Prebuilt UML kernels can be downloaded <a href="http://uml.devloop.org.uk/kernels.html">here</a>, but it is recommended that you build your own instead. Use the standard build-process and specify <code>arch=um</code>. Debian does provides a precompiled UML kernel as package “user-mode-linux”.</p>
+
+<p>The <a href="http://user-mode-linux.sourceforge.net/">Sourceforge User Mode Linux Home Page</a> is still somewhat useful as a resource, but be careful as much of it is out-of-date. The <em>source code</em> associated with this project is completely abandoned (see the standard kernel tree). Sadly, many other sites that are returned from a google search are <em>completely</em> out-of-date.</p>
+
+<p>Some people have apparently been using UML in production - though possibly not since KVM stabilised. UML is mostly used for “testing, kernel development and debugging, education etc”.  One major limitation is that a UML kernel only ever uses one CPU (no SMP). UML is, however, faster than plain QEMU (ie without KVM). It is possible to start a UML kernel via a debugger on the host system, making testing of kernel patches quite convenient.</p>
+
+<p>TODO: need more info on how UML actually works, eg how <code>/dev</code> nodes get created, how syscalls are handled, what SKAS0 is..</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="http://www.landley.net/code/UML.html">Rob Landley: UML</a></li>
+  <li><a href="http://uml.devloop.org.uk/index.html">devloop: User Mode Linux</a></li>
+  <li><a href="http://user-mode-linux.sourceforge.net/old/als2000/index.html">Original design paper</a></li>
+  <li>
+<a href="http://user-mode-linux.sourceforge.net/">Sourceforge: Home page</a> - partially out-of-date</li>
+</ul>
+
+<p>Very Obsolete References (ie avoid all of the following):</p>
+
+<ul>
+  <li><a href="http://usermodelinux.org/">Usermodelinux</a></li>
+  <li><a href="http://sourceforge.net/projects/user-mode-linux/?source=directory">Sourceforge: Source Code</a></li>
+</ul>
+
+<h2 id="lguest">lguest</h2>
+
+<p>lguest is probably the simplest of all whole-system-virtualization solutions. It only supports linux as guests, and relies on linux paravirtualization; every kernel includes appropriate hooks for lguest which get activated when it detects that it has lguest as a hypervisor. It currently supports only 32-bit kernels (TODO: as host, guest, or both?). See the kconfig for LGUEST_GUEST.</p>
+
+<p>lguest is a type-1 hypervisor, ie the paravirtualization hooks that the guest kernel execute communicate with a kernel module on the host (hypervisor). Because of paravirtualization, lguest does not require hardware virtualization support.</p>
+
+<p>A guest environment is started from the host by specifying a kernel image to boot, and a root filesystem to use. Unlike most other virtualization tools, the guest kernel is read from the host filesystem, not the specified root system. Lguest does not execute a bootloader, but instead boots directly into the specified kernel. TODO: does lguest emulate real-mode or does it somehow invoke a kernel entry-point that skips that part?</p>
+
+<p>?? does lguest use QEMU for device emulation, or does it only provide paravirtualized devices to the guest??</p>
+
+<p>Source-code for lguest is at <a href="http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/drivers/lguest/">http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/drivers/lguest/</a></p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="https://lwn.net/Articles/218766/">https://lwn.net/Articles/218766/</a></li>
+  <li><a href="https://swtch.com/lguest/">https://swtch.com/lguest/</a></li>
+</ul>
+
+<p>Development on lguest isn’t particularly active. There was some work in Dec2014-&gt;Feb2015 to add support for the virtio bus. However AFAICT, it is still 32-bit-only, and apparently intended as a “learning tool” rather than for use in production.</p>
+
+<p>The lguest documentation notes that the <em>easiest</em> way to start a lguest environment is to use the same kernel image for host and guest. However that isn’t actually required; any image can be used as a guest as long as it has the lguest paravirtualization hooks compiled in.</p>
+
+<h2 id="kvm">KVM</h2>
+
+<p><a href="http://www.linux-kvm.org">KVM</a> consists of a kernel module and user-space tools which extends a normal Linux instance to allow it to be a type-1 hypervisor.</p>
+
+<p>KVM also requires some user-space components, and there are <em>two</em> implementations of this. One implementation is delivered as part of the QEMU project, and reuses significant portiosn of QEMU’s userspace code. The other implementation is KVM-Tool.</p>
+
+<p>When using the QEMU-based userspace for KVM, the KVM kernel module completely replaces the emulation/dynamic-translation code in QEMU, relying on hardware-assistance instead. This implies:</p>
+
+<ul>
+  <li>instructions in the guest are never modified/replaced;</li>
+  <li>the CPU’s real program counter is used rather than QEMU’s variable;</li>
+  <li>instructions access real CPU registers rather than QEMU’s datastructures;</li>
+  <li>instructions read/write memory via the normal MMU (as configured by the hypervisor) rather than using QEMU’s emulated PTEs.</li>
+</ul>
+
+<p><a href="https://github.com/penberg/linux-kvm/tree/master/tools/kvm">KVMTool</a> can be used with KVM instead of QEMU to provides minimal device emulation. Only virtio devices are made available by the host to the guest (ie the guest must have corresponding drivers available). KVMTool launches the guest kernel directly (as lguest does) rather than executing a bootloader; it therefore does not need to support real-mode code. Note: “kvmtools” (plural) is a different project..</p>
+
+<p>KVM is available for only a limited subset of the systems that linux is available on; the following are included: x86, PowerPC, S390. Unlike pure QEMU (and unlike previous QEMU accelerators) KVM can only support guest code compiled for the same architecture as the host.</p>
+
+<p>The guest is kept under control by:</p>
+
+<ul>
+  <li>relying on the hardware’s ability to define “handlers” which are invoked when guest code tries to execute any unsafe instructions;</li>
+  <li>having KVM keep control of all interrupt-handlers, and in particular the timer interrupt which allows it to periodically regain control of the CPU. Attempts by guest code to modify interrupt-handler addresses are intercepted;</li>
+  <li>(AIUI) making a <em>copy</em> of the MMU’s configuration tables (PTEs) and placing them in the guest’s memory space such that the guest thinks they are the real ones. These pages are marked as write-protected so that any attempt by the guest to modify them triggers a call to the hypervisor which can then make appropriate changes to the <em>real</em> MMU config.</li>
+</ul>
+
+<p>The device-emulation part of the QEMU project is used together with the KVM kernel module to provide devices to the guest (including disks, network-cards, etc). The guest performs an access which triggers a handler within KVM (VM-EXIT), and KVM then sends a request to a QEMU userspace process to perform the operation - ie QEMU always runs in userspace mode, as it does when acting as a full type-2 hypervisor.</p>
+
+<p>KVM is generally regarded as being the “most linux-friendly” whole-system-virtualization solution, ie the one that the kernel developers support the most. In particular, Xen have implemented their hypervisor as a mini-operating-system (with scheduler, memory manager, etc) which many in the Linux kernel community see as a duplication of effort; the Xen developers of course see this differently. Nevertheless, Xen developers do contribute regularly to the Linux kernel.</p>
+
+<p>KVM is an open-source project. It was initially started by Qumranet, a company based in Israel, which is now part of RedHat Linux. There is a significant open community based around KVM.</p>
+
+<p>This <a href="http://www.phoronix.com/scan.php?page=article&amp;item=linux_kvm_virtualbox4">performance benchmark suite</a> from 2010 compares QEMU+KVM to native performance. IO-intensive microtests appear to run about 80% of native speed (sadly, not indicated whether paravirtualized devices were used or not). CPU-intensive microtests (compression, rendering) ran only a few percent slower. More general-purpose tests such as serving webpages or performing compilation appear to run at 40-60% of native speed.</p>
+
+<h2 id="xen">Xen</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Xen">Xen</a> has its own kernel that acts as a type-1 hypervisor. This kernel has no user-space, ie no interactive shell or similar. Instead, a machine with the Xen hypervisor installed must always have one special guest operating system instance installed, called dom0. Administrators log on to the dom0 system to perform system administration.</p>
+
+<p>AIUI the xen hypervisor does not itself have any device drivers for real hardware - ie is not capable of itself driving any devices attached to the physical machine. It <em>emulates</em> devices (reusing QEMU device emulation code) and includes the back-ends for paravirtualized devices; any device operations performed by guests are handled in the Xen kernel by simply forwarding to the dom0 system where the <em>real</em> device drivers exist. This allows Xen to take advantage of standard Linux device drivers, ie support any device that Linux can support, while having a minimal hypervisor - which improves security.</p>
+
+<p>Xen supports paravirtualized linux guests, and other guests via hardware-supported virtualization. Although basic device emulation is provided via QEMU code, it is recommended to install paravirtualized drivers in the guest for performance.</p>
+
+<p>Xen was originally a university project, then a startup company XenSource which was purchased by Citrix; the core Xen code is a fully <a href="http://xenproject.org">open-source project</a> with many contributors.</p>
+
+<p>The following commercial products are based on the open-source Xen code:</p>
+
+<ul>
+  <li>Citrix XenServer</li>
+  <li>Oracle VM (note that this is unrelated to the Oracle VirtualBox type-2 hypervisor).</li>
+</ul>
+
+<p>Note: in the past, a Linux kernel had to be specially compiled to enable paravirtualization hooks, and therefore Xen distributed their own versions of the Linux Kernel - or Linux distributions (such as Debian and RedHat) included Xen-specific kernels. This is no longer the case; the standard Linux kernels in most distributions now include all hooks by default and select the appropriate version (including the “no hypervisor” version) at boot-time.</p>
+
+<p>Refs:</p>
+
+<ul>
+  <li><a href="http://www.phoronix.com/scan.php?page=news_item&amp;px=Linux-4.1-Intel-DRM-First">Accelerated graphics in Xen guests with Intel GUs</a></li>
+</ul>
+
+<h2 id="vmware">VMware</h2>
+
+<p>The VMware company provides a wide family of proprietary tools related to virtualization.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/VMware_ESX">VMware ESXi Server</a> is their own type-1 hypervisor (operating system) implementation. This is a microkernel-based system that, like Xen, does not support “logins”; it is dedicated to hosting guests only and must be configured via an external operating system. This is also referred to sometimes as the “vSphere hypervisor”.</p>
+
+<p>There are still many references on the internet to their earlier ESX Server, which was a real operating system derived from Linux (though apparently with a very non-posix user-space). Presumably the user-space was meant primarily for <em>configuring</em> the way it manages guest applications, and possibly hosting applications written by VMware themselves, rather than customer-written code.</p>
+
+<p>VMware Workstation is their type-2 hypervisor, ie an application that can be installed on top of some other operating system; Linux and Windows are supported as hosts. VMware Player is a reduced (and cost-free) version of VMware Workstation.</p>
+
+<h2 id="virtualbox">VirtualBox</h2>
+
+<p>VirtualBox was originally a type-2 hypervisor, ie once ran as a user-space application not as part of the kernel. Support for hardware-virtualization was added later (via a kernel driver, making it a type-1 hypervisor). Hardware-virtualization support is now mandatory when running more modern operating systems as guests, ie the VirtualBox team no longer bother to implement the type-2 support code for modern operating systems (Windows-8 and newer, and all 64-bit guests).</p>
+
+<p>Even when not taking advantage of hardware-virtualization-support, VirtualBox on Linux uses a kernel driver (<code>vboxdrv</code>) to perform “physical memory allocations” and other tasks. So in practice, VirtualBox on Linux is a type-1 hypervisor even when not using hardware virtualization.</p>
+
+<p>It is an excellent tool for developers on Windows machines to run guest Windows or Linux VMs. It also works well on Linux, but there are a number of equally good options there.</p>
+
+<p>Better performance can be had by installing special device-drivers into the guest operating system (“Guest Additions”); these can be reconfigured after installation with <code>/usr/lib/VBoxGuestAdditions/vboxadd setup</code> and <code>vboxadd-x11 setup</code>. These drivers then talk efficiently to the VirtualBox user process, rather than having VirtualBox emulate old hardware at the memory-register level and the guest poke data into these emulated registers. Note that although the “guest additions” add support for accelerated graphics in the guest, it also needs to be enabled in the “display settings” for the guest. The system for sharing files between host and guest is a little unusual; on the host side a (logical-name =&gt; directory) mapping needs to be defined. Within the host, a custom <code>vboxsf</code> filesystem (note spelling) takes a (logical-name, mountpoint) pair and makes the contents of the host directory corresponding to that logical name available; that means that for Linux guests the <code>mount</code> command must be used to make such folders available. An example of such a mount is:</p>
+
+<pre><code>sudo mount -t vboxsf logical-name /local/mount/point
+</code></pre>
+
+<p>The VirtualBox accelerated graphics feature comes with the warning “Untrusted guest systems should not be allowed to use VirtualBox’s 3D acceleration features”. This is due to the use of plain OpenGL as the communication protocol between guest and host, and is an issue that the Virgil3D project will hopefully not have; see section on Virgil3D for more details. Sadly, virtualbox supports fairly old versions of opengl only (v2.1 in VirtualBox v5.0); it is enough to get basic acceleration for desktops but not enough to run most games. Note that with vbox 3d acceleration, the guest kernel will log lots of warnings/errors like “core dri or dri2 extension not found” and many “OpenGL Warning: … not found in mesa table”; apparently these are “expected”, and not a problem as long as <code>glxinfo</code> reports:</p>
+
+<pre><code>OpenGL vendor string: Humper
+OpenGL renderer string: Chromium
+OpenGL version string: 2.1
+</code></pre>
+
+<p>On most linux distribution, virtualbox comes as two mandatory packages: “virtualbox” and “virtualbox-dkms”. The vast majority of linux kernel drivers have their source-code in the standard kernel git repository, and therefore when a new kernel version is released then the corresponding kernel driver is automatically available. However the virtualbox team maintain their kernel code <em>outside</em> of the standard git repository, which causes problems when a user installs a non-default kernel. Their solution is to take advantage of the <a href="https://en.wikipedia.org/wiki/Dynamic_Kernel_Module_Support">dkms</a> framework; the virtualbox-dkms package contains the virtualbox kernel code in <em>source form</em> and installing the package <em>compiles</em> the code at install-time against whatever kernel headers the user has currently installed. Presumably the virtualbox kernel code has large numbers of <code>#ifdef</code> lines in the code to handle different kernel versions. This isn’t a complete solution though; when installing a very new kernel it can be that the virtualbox kernel code just doesn’t compile.</p>
+
+<p>VirtualBox is an Oracle (and formerly Sun) product, but the source-code is available under the GPL (except for a couple of minor proprietary extensions).</p>
+
+<p>When not using hardware-virtualization, virtualbox uses techniques somewhat different than QEMU. It runs guest kernel code at “ring 1” privilege level, but first somehow <em>scans and patches</em> the code that is to be executed to replace all unsafe instructions with calls into the hypervisor. I don’t currently know how it manages to figure out what code is going to be executed, and how it transforms such code. It is clear that virtualbox uses the hardware virtual-&gt;physical address translation rather than QEMU’s approach of replacing all reads/writes with sequences of operations that use QEMU’s MMU-equivalent. It therefore has significant performance benefits over QEMU even without hardware virtualization support - though clearly hardware-support is even better as they require this for recent guest os types.</p>
+
+<p>As well as the “guest additions” that can be installed inside a guest, VirtualBox provides a <em>proprietary</em>  “extension-pack” file (suffix <code>.vbox-extpack</code>) which can be installed inside the <em>host</em> using the menus from the VirtualBox interface. This adds <a href="https://www.virtualbox.org/manual/ch01.html#intro-installing">a few not very important features</a> - and is under a proprietary licence.</p>
+
+<p>VirtualBox can take advantage of the paravirtualization hooks in the linux kernel; there is a guest config setting to have virtualbox pretend to be a hypervisor such as KVM, in order for the linux guest to enable the appropriate paravirtualization hooks. TODO: is this v5+ only?</p>
+
+<p>VirtualBox can also take advantage of the virtio-based drivers standard in most linux distributions; in particular, virtualbox can be configured to offer a virtio-based network device to the guest, which performs much better than emulating a real hardware device.</p>
+
+<p>The default networking-mode for a VirtualBox guest is <code>NAT</code>, in which all network operations performed by the guest get forwarded to the VirtualBox hypervisor application which performs the operation on the guest’s behalf, and then forwards reply packets back to the guest. This means that external systems see an <em>origin address</em> matching the virtualbox hypervisor. Normally this means that external systems cannot connect <em>back</em> to the guest. VirtualBox supports a kind of “port forwarding” in which the hypervisor can be configured to listen on specific ports, and forward incoming traffic on that port to a specific guest. Other kinds of networking are more powerful but more difficult to configure correctly.</p>
+
+<p>VirtualBox v5.0 adds support for directly encrypting VM images (requires the “extension pack” to be installed). To encrypt an existing <code>.vdi</code> file, use menu “settings|general|encryption” in the gui, or use the commandline: <code>vboxmanage encryptmedium /path/to/file.vdi --cipher AES-XTS256-PLAIN64 --newpassword /tmp/pwd.txt --newpasswordid someid</code>.</p>
+
+<p>References:</p>
+
+<ul>
+  <li>
+<a href="https://www.virtualbox.org/manual">Virtualbox user manual</a> - particularly chapter 10, “Technical Background”</li>
+  <li>
+<a href="https://www.virtualbox.org/wiki/Technical_documentation">Virtualbox technical site</a> - though there isn’t much useful here (see above reference instead)</li>
+</ul>
+
+<h1 id="launching-guests-from-a-desktop-installation">Launching Guests from a Desktop Installation</h1>
+
+<p>With QEMU, UML, lguest, KVM, and VirtualBox it is possible to boot a guest operating system from any normal Linux installation without great effort. KVM provides a kernel module that enhances a running linux kernel to add hypervisor support, and the others are all “type-2” hypervisors that simply run as normal processes.</p>
+
+<p>For Xen and VMware-ESX, the host system hardware must boot the Xen hypervisor or the VMware ESX server respectively. Xen also requires a dom0 “helper” operating system be installed (which may be Linux).</p>
+
+<h1 id="storage-in-virtual-machines">Storage in Virtual Machines</h1>
+
+<p>With virtualization, the guest is almost always provided with a fake “block device” to use for storage. The guest kernel then reads/writes this as it would a raw disk, and the host simply maps this block device to a partition, or to a big file on the host system. Files created on this storage device are not readable from the host - unless the backing partition or file is mounted with a “loop device”. I supose it would be possible for the host to provide a “virtual device” whose API works at file-level, and for the guest to have a suitable driver. However that has never been implemented AFAIK; if it is desirable for the host to see files created by the guest then the usual solution is for the host to export a <em>network</em> file system, eg NFS or SMB (via samba).</p>
+
+<p>There are many disk formats for storing images of installed operating systems; it seems each virtualization tool has invented its own format :=(. The Open Virtualization Format (OVF) is an open standard for storing images of installed operating systems. In theory, an OVF file can be “booted” by any whole-system-virtualization system.</p>
+
+<p>TODO: possibly not supported by lguest or kvm/kvm-tool as they boot directly into an external kernel, and don’t emulate real-mode.</p>
+
+<p>Sometimes an “installed os” in a single file is referred to as an “appliance” or “<a href="https://en.wikipedia.org/wiki/Virtual_appliance">virtual appliance</a>”.</p>
+
+<h1 id="custom-distributions-for-virtualization">Custom Distributions for Virtualization</h1>
+
+<p>While virtualization (VMs) are often used to run a full operating system, it is also sometimes used as a way to run a <em>specific application</em> easily. VM “images” with a suitable operating-system and the required application can be distributed as a single file, and then started on any host. In “cloud” datacentres, it may also be possible to rapidly start many instances of the same VM image in parallel to handle large loads. There are a number of linux distributions which are “stripped down” to the minimum, and designed to be embedded in such “single-purpose” VM images; see <a href="https://getfedora.org/en/cloud/">Fedora Cloud</a> for example.</p>
+
+<p>On the other side, some linux distributions have been stripped down to the minimum required to <em>host</em> VM images; see <a href="http://www.projectatomic.io/">Fedora Atomic Host</a> for an example.</p>
+
+<p>There have been some suggestions that full virtualization can be used to run applications <em>without</em> an operating system: just link the code to be executed with a <em>library</em> that can perform input and output, in the way that programs used to be written in the pre-DOS age. At runtime, IO operations would of course enter the host-provided emulation layer and then into a normal device-driver, but the application in the VM would be extremely simple and portable. The guest environment would not need to emulate an MMU; because there is only a single process running there is no need for isolated address-spaces. No system-calls are required, and possibly no scheduler either (if the app uses cooperative threading or alternative techniques).</p>
+
+<h1 id="paravirtualization">Paravirtualization</h1>
+
+<p><a href="https://en.wikipedia.org/wiki/Paravirtualization">Paravirtualization</a> means a couple of different things. It can mean that the host provides emulated devices which do not resemble “old hardware”, but are instead designed for use in a virtual environment, and that the guest can use a corresponding device driver. It can also mean that the guest operating-system has been modified to replace core sections of the code with virtualization-friendly versions; the linux kernel can be compiled in a special way (paravirt-ops) that makes it compatible with the Xen hypervisor or VMware hypervisor or potentially others (for memory management, process scheduling, etc).</p>
+
+<h1 id="management-tools">Management Tools</h1>
+
+<ul>
+  <li>
+<a href="http://virt-manager.org">virt-manager</a> - depends on <a href="http://libvirt.org">libvirt</a>
+</li>
+  <li>Gnome Boxes</li>
+  <li>Systemd (systemd-nspawn manages VM images as well as containers)</li>
+</ul>
+
+<p>oVirt is a management system for clusters of virtual machines. Each physical server gets a copy of the oVirt Node software (either deployed <em>onto</em> a full linux distro, or a hypervisor). One or more servers run the “oVirt Engine” master software. Images can then be <em>pushed</em> to nodes and started there.  VMWare vSphere is similar. There are many other companies competing to offer tools in this area.</p>
+
+<h1 id="virtio">Virtio</h1>
+
+<p>virtio is a kind of message-broker for communication between guest and host kernels. Code on either end can use virtio APIs to place messages on a queue, and on the other end virtio will dispatch the message to the corresponding registered consumer. This infrastructure makes it easier to implement paravirtualized device-drivers. The <a href="http://www.ibm.com/developerworks/library/l-virtio/index.html">IBM Overview of virtio bus</a> includes a good (short) overview of full virtualization. The resources section at the end of this page is a good collection of links to information about virtualization in general - TODO: All the links here appear to be broken - where are the articles?</p>
+
+<h1 id="configuring-networking">Configuring Networking</h1>
+
+<p>TODO: write here about how the hypervisor can provide networking facilities to the guest…</p>
+
+<p>Hypervisors often provide a kind of virtual networking that joins:</p>
+
+<ul>
+  <li>a virtual machine to the host</li>
+  <li>a virtual machine to another virtual machine</li>
+  <li>a set of virtual machines and the host</li>
+</ul>
+
+<p>This looks to the various operating systems like a normal network device, but is implemented purely in memory. In VirtualBox this is called “internal networking” or “host-only networking”.
+Linux containers perform similar setup using <code>veth</code> (virtual ethernet).</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Bridging_%28networking%29">Wikipedia on Bridging Networking</a></li>
+</ul>
+
+<h1 id="emulating-a-bios">Emulating a BIOS</h1>
+
+<p>The PC architecture traditionally provides a BIOS in firmware that the operating system can use early in startup. The INT CPU instruction is used to jump into BIOS code, to access information about the system and perform initial reading of data from disk.</p>
+
+<p>Linux doesn’t use the BIOS much during normal operation. BIOS code always assumes that the CPU is in <em>real mode</em>, so a kernel needs to <em>switch to real mode</em> before invoking any BIOS functions. BIOS implementations are also slow and often buggy so reimplementing such logic in the OS kernel is almost always the better choice (and linux does so).</p>
+
+<p>However <em>bootloaders</em> (such as GRUB) do rely on some BIOS functionality, and so hypervisors that execute a <em>bootloader</em> (most of them) need to provide a BIOS implementation. In particular, they need to ensure that INT instructions perform as a BIOS would.</p>
+
+<p>QEMU relies on the <a href="http://www.seabios.org/SeaBIOS">Seabios</a> project’s implementation of an x86 bios. TODO: how do things like “read system clock” or “read sector of disk” work when running Seabios under QEMU?</p>
+
+<p>?? TODO: are there <em>any</em> BIOS operations that linux regularly uses? Maybe some during startup? If so, are they paravirtualized?</p>
+
+<h1 id="emulating-acpi">Emulating ACPI</h1>
+
+<p>Modern PCs come with embedded firmware which uses <a href="/2015/06/acpi">ACPI</a> to provide operating systems with access to very system-specific operations such as:</p>
+
+<ul>
+  <li>controlling a laptop’s screen brightness;</li>
+  <li>powering down a USB controller;</li>
+  <li>receiving notifications about hot-plugging events for memory or CPUs</li>
+  <li>receiving notifications about thermal-related events</li>
+</ul>
+
+<p>BIOS isn’t used much/at all by Linux, but ACPI is heavily used by linux on x86 if available, and MS-Windows absolutely requires ACPI firmware to be present. It is therefore necessary for a hypervisor to provide “fake” ACPI tables with all the necessary “ACPI functions” and datastructures that guest operating systems expect to find.</p>
+
+<h2 id="qemu-dynamic-translation">QEMU Dynamic Translation</h2>
+
+<p>As mentioned earlier in the section on QEMU, <em>dynamic translation</em> is used to increase the performance of QEMU (compared to something like Bochs). However most QEMU documentation is very vague on exactly what <em>dynamic translation</em> does.</p>
+
+<p>The best technical descriptions of QEMU I have found are:</p>
+
+<ul>
+  <li>
+<a href="https://www.usenix.org/legacy/publications/library/proceedings/usenix05/tech/freenix/full_papers/bellard/bellard.pdf">this paper from 2005</a>.</li>
+  <li><a href="http://qemu.weilnetz.de/qemu-tech.html">these notes on QEMU internals</a></li>
+</ul>
+
+<p>In very brief summary:</p>
+
+<ul>
+  <li>
+    <p>QEMU defines its own “microcode” format. Each microcode instruction has a corresponding implementation in <em>c</em>; these are compiled and embedded within QEMU as a kind of “library”. Note in particular that the implementation for instructions that read/write memory provide the equivalent of <em>virtual address translation</em> by consulting the QEMU datastructures representing PTEs. Instructions that read/write registers access QEMU datastructures representing CPU registers rather than using the real ones, etc.</p>
+  </li>
+  <li>
+    <p>For each supported guest instruction-set there is a table mapping each instruction to a sequence of QEMU microcode instructions.</p>
+  </li>
+  <li>
+    <p>QEMU executes guest code somewhat like a normal emulator; it has its own <em>program counter</em> which it uses to fetch the code to be executed. However rather than emulating each instruction one-by-one, it sorts them into small blocks which do not include jump-instructions or other tricky cases. For each block it then generates corresponding host-native code by inlining the appropriate microcode instructions. These generated code blocks are stored in a limited-size cache (unused blocks fall out of the cache eventually and must be regenerated). Emulating the original block is then just a function-call into the generated code.</p>
+  </li>
+</ul>
+
+<p>Generated code blocks are relatively short and have no loops, thus always terminate within a short time. This ensures that the QEMU main loop regains control regularly after calling into such a generated block. Tricky instructions such as jumps are emulated individually (as in Bochs or similar).</p>
+
+<p>Some rough benchmarks suggest that QEMU (without kvm) running x86 code on x86 is about 15x slower than native code.</p>
+
+<p>Imagine a pure CPU interpreter, like Bochs, booting a guest kernel. The first sector of the “boot device” is loaded into memory, as BIOS would do. The interpreter sets its “virtual program counter” to the start of this loaded data and then repeatedly fetches the instruction at that address, and emulates its behaviour (which might update the virtual program counter). Emulating a particular CPU instruction can involve dozens of steps, such as decoding the instruction into (op, address, register) parts, fetching from (emulated) memory or registers, performing the operation, and then updating the appropriate (emulated) address or register.</p>
+
+<p>QEMU works very much like such an emulator except that the function which handles each guest instruction is <em>generated</em> using the instruction-to-microcode mapping for the guest instruction-set. The generated code still does things like use QEMU data-structures to look up memory addresses via emulated MMU mapping tables (as a traditional interpreter would do).</p>
+
+<p>Interestingly, this process of breaking instructions into microcode sounds rather like the way some real CPUs work too. x86 systems no longer interpret the complex x86 instructions directly; instead hardware breaks it down into smaller steps that the CPU core actually process. It can also be compared to cross-compiling x86 to a RISC architecture, eg Transmeta.</p>
+
+<p>Some QEMU microcode instructions are defined as <em>templates</em> rather than full functions; when a guest instruction is expanded to such a template at runtime, template values are replaced by data from the guest instruction. This is called <em>specialization</em>, and similar to how C++ templates are specialized at compile-time. As an example, a microcode instruction to add a constant to a register can be written in terms of a templated constant value. At runtime when an “add 3 to R0” instruction needs to be emulated, a specialized instruction sequence can be created to do exactly that rather than have a function that takes a parameter - which would involve pushing onto the stack, etc. These templates are originally written in C, but are compiled during the normal QEMU compilation phase into binary form. The expansion of template values is then done at the binary-level, ie no “c” or assembly code is processed at runtime.</p>
+
+<p>The end result is that each emulated CPU instruction maps to a specialized function, sometimes even to the level of a separate function for each different constant in an add-instruction. These functions still are an order of magnitude slower than real code (eg reading registers means reading a QEMU data structure held in normal memory, reading memory means reading a QEMU equivalent of a PTE), but an order of magnitude faster than a simple emulator like Bochs.</p>
+
+<p>QEMU uses some other tricks for optimisation: it uses real CPU registers as working space for its microcode, it maintains the equivalent of a TLB structure for virtual-memory-mapping.</p>
+
+<p>QEMU handles interrupts by suppressing them during normal execution and checking for them each time control returns to the interpreter.</p>
+
+<h1 id="displaying-an-x-client-app-on-the-host">Displaying an X client app on the host</h1>
+
+<p>Because the X protocol is “network transparent”, it is possible to run a graphical application in a guest and have it send its output to the X server running on the host; “ssh X tunneling” is a well-known feature allowing a user to execute an application remotely with display set to the user’s desktop. This of course requires the host to be accessable via “virtual networking”.</p>
+
+<p>There are many tutorials for “ssh tunneling” available, but as a quick summary:</p>
+
+<ul>
+  <li>ensure the guest has an ssh-server, eg <code>sudo apt install openssh-server</code>
+</li>
+  <li>from host, <code>ssh -X username@guest-ip-address</code>
+</li>
+  <li>now execute graphical applications from the ssh terminal session</li>
+</ul>
+
+<p>When using virtualbox, ensure the guest has “bridging” network mode is enabled; you will then be prompted for the name of the host interface to “bridge to”. Alternately, use “host only” mode - ie where host can see guest and vice-versa, but guest cannot see rest of network.</p>
+
+<p>You might need to edit /etc/ssh/sshd_config and enable “ForwardX11”.</p>
+
+<p>This works reasonably well for applications that perform 2D drawing - and for those that use <em>very simple</em> 3D. However more complex 3D apps (including games) simply don’t work adequately with this “indirect 3D rendering” - one frame per 5 seconds is not useable :-)</p>
+
+<p>It is also possible to set things up the other way around, so the host’s X server allows incoming connections. However this is much more work; most distros don’t set up X to listen on network ports by default. The host must also grant the guest rights to connect via the <code>xhost</code> command. Then in the guest, set <code>$DISPLAY</code> appropriately. And in future where toolkits like GTK or Qt default to using <em>wayland</em>, it may also be necessary to force them to use the X back-end.</p>
+
+<p>See:  <a href="http://askubuntu.com/questions/203173/run-application-on-local-machine-and-show-gui-on-remote-display">http://askubuntu.com/questions/203173/run-application-on-local-machine-and-show-gui-on-remote-display</a></p>
+
+<h1 id="clear-containers">Clear Containers</h1>
+
+<p><a href="http://lwn.net/Articles/644675/">Clear Containers</a> is an Intel-lead project that optimises virtualization such that running Linux in a VM takes little more memory than using standard Linux containers (ie using kernel namespaces to run a new userspace on a shared kernel). This allows true virtualization to be used (with security benefits over containers) with (near) the efficiency of containers - as long as the virtualization technology used is KVM, and the OS running in the container is Linux!</p>
+
+<p>Clear Containers is currently “under development” (as of mid 2015), but is already functional, and it appears that there are no significant issues left to resolve. Work is underway to integrate it into rkt and Docker as an option when running a rkt/docker image.</p>
+
+<h1 id="unikernels">Unikernels</h1>
+
+<p>A radical approach to using virtualization is to not run a traditional <em>kernel</em> in the virtual machine at all. The “unikernel” approach essentially rewinds to the MS-DOS era, where the operating-system code runs in the same address-space as user code. The kernel can be considered like a “library”.</p>
+
+<p>An application to be run in a VM is compiled against the “unikernel” code, and then launched in a virtual machine. Of course such code can “corrupt its kernel”, something that normal operating systems try to avoid. However at the worst it can only affect other code within the same VM; the hypervisor protects the host. Such systems usually only run one application per VM (or maybe a couple of tightly-coupled processes).</p>
+
+<p>The benefits are low memory use, and performance - all the costs of transitioning from userspace to kernelspace vanish (replaced by costs transitioning from guest to host of course).</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="http://rumpkernel.org/">Rump Kernels</a></li>
+  <li><a href="https://mirage.io/">MirageOS</a></li>
+  <li><a href="http://lwn.net/Articles/645953/">LWN comment by Mato</a></li>
+</ul>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>Virtualization tools sometimes offer <a href="https://en.wikipedia.org/wiki/Live_migration">live migration</a> features, where an entire virtual environment can be frozen on one host, sent across the network to another host, and resumed there. Very cool. Advanced implementations of this actually do as much copying as possible <em>before</em> freezing the original, keeping track of changed pages so data changed after copying but before freezing can be detected. This then allows the time between freeze-old and resume-new to be reduced to a minimum.</p>
+
+<p>Many tools use “snapshotting filesystems” to keep track of changes made by a running system. This allows a base system to be configured, and then multiple copies started - each of which starts with the original disk image but then can make changes independently. It also allows resetting a system to a previous state. This does not rely on BTRFS or similar filesystems; a hypervisor typically provides an emulated <em>block device</em> to a guest, and so snapshotting needs to be done at the block level within the emulation software.</p>
+
+<p>Some tools offer “virtual SMP” - emulating more CPUs than actually exist, for testing purposes???</p>
+
+<p>Sometimes encryption of the guest disk is supported; this is quite easy to provide in the hypervisor as the disk emulator is simply working at the block level (emulating a block device) which is an appropriate unit for encryption.</p>
+
+<p>Ram deduplication is a recent feature. When running several guest instances from the same base filesystem image (as may happen in a data-center), it will be common for different guests to have exact copies of data in memory. By finding and sharing such blocks (with copy-on-write in case a guest tries to modify it), memory is more efficiently used.</p>
+
+<p><a href="http://www.spice-space.org">Spice</a> is the <em>Simple Protocol for Independent Computing Environments</em>. It is a kind of remote-desktop-protocol on steroids; it supports streaming not just a desktop image and input events, but also video, audio, and other similar things. Various virtualization environments support Spice in order to allow users to communicate with a virtual machine. Spice design is led by Red Hat, who also provide an implementation (device-driver for linux, a browser plugin, and a client application). QEMU has support for using the device driver. Note however than when sharing a desktop or video over spice, the virtual machine is still responsible for <em>generating</em> the graphics, and access to hardware-accelerated-graphics is not yet a solved problem for many virtualization environments.</p>
+
+<h1 id="general-references-and-useful-links">General References and Useful Links</h1>
+
+<ul>
+  <li><a href="http://www.vmware.com/resources/techresources/1008">VMware’s intro to full virtualization</a></li>
+  <li><a href="http://searchservervirtualization.techtarget.com/definition/container-based-virtualization-operating-system-level-virtualization">Comparison of Virtualization and Containers</a></li>
+  <li><a href="http://lwn.net/Articles/645455/#Comments">Announcing qboot</a></li>
+  <li><a href="https://lkml.org/lkml/2011/3/31/406">KVMTool Announcement</a></li>
+  <li><a href="http://lwn.net/Articles/645455/#Comments">Qboot, a minimal x86 firmware for QEMU</a></li>
+  <li><a href="http://lwn.net/Articles/658511/">LWN: The KVM API</a></li>
+  <li><a href="http://www.dwheeler.com/essays/cloud-security-virtualization-containers.html">David Wheeler: cloud security: Virtualization, Containers and Related Issues</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/linux-virtualization/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

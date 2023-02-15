@@ -1,0 +1,610 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Home Networking Foundations</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Home Networking Foundations</h1>
+    <aside>First published on: March 15, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a>, <a href='/category/OpenWRT/'>OpenWRT</a>, <a href='/category/Infrastructure/'>Infrastructure</a>, <a href='/category/Network/'>Network</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>Below is a description of how a home or small-business computer network functions, and in particular it describes the role/functionality of a “router” and (hopefully) explains what the different terminology used by the router administration/configuration application means.</p>
+
+<p>This article:</p>
+
+<ul>
+  <li>assumes fundamental knowledge of computers, but no previous knowledge of computer network configuration</li>
+  <li>provides something that can be read in 20 minutes (though fully understanding it might take longer!)</li>
+  <li>provides only information relevant to setting up a computer network in a residential house or small office - and in particular, installing/configuring OpenWRT software on a router.</li>
+</ul>
+
+<p>Of course, the topic of computer networks is complex: there are entire university-level courses on it, textbooks hundreds of pages thick, and official accreditation exams that last <em>hours</em>. This article focuses on the subset required to configure a network within a private house/apartment or small office, and goes into only as much depth as can be covered in a few pages. The information is not presented “for dummies” though - it is for readers who truly want to understand networking principles, and are willing to work for it!</p>
+
+<p>As the intent is to discuss <em>home/small-office</em> networks, only the Ethernet networking protocol and devices commonly used with that protocol are discussed. The vast majority of data networks (outside of large commercial and ISP environments) use Ethernet.</p>
+
+<p>This article also assumes that IPv4 (version 4 of the IP standard) is being used on the local network; this article might be updated later with relevant information for IPv6.</p>
+
+<p>There are many sites/pages on the internet that have information about computer networking; in particular there is some excellent information on Wikipedia. However much of this focuses on individual pieces of the overall system without showing how the bits fit together (the “big picture”). Links to relevant pages are included throughout this article for those with previous networking knowledge or as follow-up reading. The best overall guide, ie alternative to this article, which I am aware of is <a href="http://www.comptechdoc.org/independent/networking/guide/">the CTDP Networking Guide</a> - well-written, very detailed, but slightly out-of-date. The <a href="https://en.wikipedia.org/wiki/Computer_network">wikipedia article on computer networks</a> covers the same topics, but rather tersely.</p>
+
+<p>The following description is far from perfect; the topic is large and complicated, and describing how it all fits together in a readable manner is <em>hard</em>. I apologise for the occasional references to terms not yet defined, and the (current) lack of diagrams. Nevertheless, as far as I am aware this is the only online resource that covers the whole range of relevant technologies. At the least, this should provide a good basis for further reading/research.</p>
+
+<h1 id="the-osi-model-of-network-layers-and-other-terminology">The OSI Model of Network Layers and Other Terminology</h1>
+
+<p>Different kinds of computer networks have been invented by different people at different times, and the inventors often used different terminology. Fortunately there is a document called the <em>OSI network model</em> which is widely used as standard terminology for networking. It is very useful to know at least the most common definitions in the OSI model as you will find these words used everywhere in network-related documentation. Sorry to start this article with some dry and abstract terminology, but it really is helpful and only the minimum is defined here…</p>
+
+<p>The OSI model describes networks as having seven layers, from the most primitive to the most complex; each layer extends the capabilities of the previous layer. For this article, only the first four layers are relevant:</p>
+
+<ul>
+  <li>Layer 1 = Physical layer (PHY):  responsible for representing a single bit as an electrical (or radio, or light) signal.</li>
+  <li>Layer 2 = Data Link Layer (DLL): responsible for transferring a small block of bytes between two computers which are <em>nearby</em> (on the same local network, ie not separated by a router).</li>
+  <li>Layer 3 = Network Layer: given a network of many computers, responsible for transferring a small block of bytes between two computers which are (or can be) on different networks (and therefore potentially far apart) - ie add the concept of <em>routing</em> between networks.</li>
+  <li>Layer 4 = Transport Layer: given a network of many computers
+    <ol>
+      <li>support the concept of a destination <em>application</em> (port) not just a destination computer;</li>
+      <li>ensure data is transferred to its destination <em>reliably</em> (ie handle packet loss); and</li>
+      <li>support the concept of “a sequence of data blocks that belong together” (ie a stream of data).</li>
+    </ol>
+  </li>
+</ul>
+
+<p>We will be talking about Ethernet, IP and TCP in this article, and unfortunately they have their own terminology which does not map exactly 1:1 onto the OSI model. However the basic correspondence is:</p>
+
+<ul>
+  <li>Ethernet (Ethernet data frames + MAC addresses): layer 1 + layer 2</li>
+  <li>IP (Internet Protocol): layer 3</li>
+  <li>UDP (User Datagram Protocol): layer 4 (part 1 only)</li>
+  <li>TCP (Transmission Control Protocol): layer 4 (all parts)</li>
+</ul>
+
+<p>Other useful terminology:</p>
+
+<ul>
+  <li>“link” means the electrical wiring connecting one computer to another</li>
+  <li>“station” means some device that sends or receives data across a network link. This applies to both “wired” and “wireless” networks.</li>
+  <li>“frame” and “packet” mean almost the same thing; they refer to a smallish sequence of bytes (typically up to 1500 <sup id="fnref:framesize" role="doc-noteref"><a href="#fn:framesize" class="footnote" rel="footnote">1</a></sup>) which are transmitted together. However the word “frame” is used when talking about the lowest-level parts of networking while “packet” is a more abstract term used when talking about higher-level networking concepts. And in practice, a “packet” of data can potentially be split up and transferred using two or more “frames” when necessary.</li>
+</ul>
+
+<p>And most important is to discuss the meaning of the word “network” itself. This is unfortunately used in at least three ways:</p>
+
+<ul>
+  <li>to describe something that connects a <em>small set of computers directly without a router</em> (aka a “broadcast domain”)</li>
+  <li>to describe something that connects a <em>set of computers in the same building</em> by <em>using routers</em> but without needing an Internet Service Provider (aka ISP) to be involved; or</li>
+  <li>to describe anything that connects two computers regardless of how far apart they are (usually via an Internet Service Provider).</li>
+</ul>
+
+<p>In this article, I will try to refer consistently to the first above as “an L2 (layer2) network” or “ethernet network”, the second as “an IP network” or “LAN” (local area network) and the third as “the internet” or “WAN” (wide area network).</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="http://en.wikipedia.org/wiki/OSI_model">Wikipedia: the OSI Model</a></li>
+</ul>
+
+<h1 id="ethernet-ip-and-tcp-overview">Ethernet, IP and TCP Overview</h1>
+
+<p>The Ethernet specification (IEEE standard 802.3) defines how to transfer bits (zeros and ones) across a physical connection, eg. as electrical signals in a pair of wires (layer 1/PHY). It also defines data frame formats (layer 2), ie how to interpret the bits at the start of a block of bits (headers), such that the rest of the block (the actual user data, aka payload) can be sent unambiguously from one station (device) to another.</p>
+
+<p>Each station attached to an Ethernet network must identify itself using a unique number known as a MAC address (aka Ethernet Address or Link Layer Address) which is 48 bits long; each Ethernet packet contains the sender’s MAC address and the recipient’s MAC address. Ethernet packets of data are quite small - usually less than 1500 bytes.</p>
+
+<p>The relative simplicity of the Ethernet specification means that it is cheap to build the required circuits; this simplicity also makes it a good initial building block for more sophisticated communication. However pure Ethernet has the following limitations:</p>
+
+<ul>
+  <li>MAC addresses have to be unique on a single L2 network, but otherwise have no meaning (structure) at all. The lack of structure means that stations and switches need to keep tables of all MAC addresses on their L2 network - and this limits Ethernet to a small number of computers on each L2 network.</li>
+  <li>Standard copper ethernet cables have a maximum length of 100 meters.</li>
+  <li>The Ethernet packet structure is extremely simple - so provides no way to link different payloads together into a “stream of data”, to handle failures/retries etc.</li>
+</ul>
+
+<p>To allow communication between large numbers of computers over large distances, each L2 network has at least one “router” device attached to it. This device copies data to/from one or more adjacent L2 networks - forming a larger L3 network. A block (packet) of data is forwarded from L2 network to L2 network until the data eventually ends up on the L2 network to which the recipient is attached (hence the name “internet”). The different L2 networks are not limited to also using the Ethernet protocol. However this process can not work with MAC addresses; that would require each router to have a table with an entry for every computer in the world which is obviously not possible.</p>
+
+<p>The Internet Protocol (IP) defines a more sophisticated way of specifying the destination of a packet of data than an Ethernet MAC address. A MAC address is simply a unique number, while an IP address is structured as “{id}{subid}{subsubid}…{hostid}” where {id} specifies one of the world-wide “top-level” L3 networks, {subid} specifies a subsection of that L3 network, and so on until eventually a specific computer is identified. Determining how to contact these networks is not trivial - doing it efficiently requires some complex algorithms. However it <em>is</em> possible without needing a table holding the addresses of all computers in the internet. There is more information about IP addresses and their structure later in this article.</p>
+
+<p>The User Datagram Protocol (UDP) defines a simple data-format that consists of an IP address, a “port number”, a block of user data, and a checksum. The IP address allows such packets of data to be handled by <em>routers</em> and forwarded through the internet (unlike a block of data with just a MAC address in it). The port-number can be used by the receiver to select a particular <em>application</em> to pass the data to (assuming a program has previously been started on the destination device which requested that data labelled with that ‘port number’ be passed to it). And the checksum can be used to ensure that the data has not been corrupted underway (though it provides no help in dealing with such a problem if it occurs!).</p>
+
+<p>The Transmission Control Protocol (TCP) adds more headers to UDP which define the “sequence number” of each packet, and other useful things<sup id="fnref:tcp" role="doc-noteref"><a href="#fn:tcp" class="footnote" rel="footnote">2</a></sup>. These extra values allow a large block of data to be broken into a sequence of small packets of data by the sender, for those to be transferred individually across the network to the receiver, and for the receiver to then merge them together again at the other end. If packets of data get lost in transmission, then the receiver can detect this and ask for them to be retransmitted, etc. This is the kind of data transmission that we experience when connecting a web-browser to a remote webserver: bidirectional data transfer, where the two ends don’t need to know that the data has been transferred as many small pieces across potentially dozens of different L2 networks (and different packets might take different paths!).</p>
+
+<p>However UDP and TCP data packets and their IP addresses cannot be understood by devices that are designed to handle Ethernet data (network cards and switches). When a station wishes to send a UDP or TCP packet, it builds an Ethernet frame and puts the UDP or TCP packet into the “payload” part, rather like putting a letter into an envelope. The ethernet frame is then given a suitable destination MAC address and sent out into the local ethernet (L2) network. Which MAC address is used, do you ask? Well, if the recipient is on the local L2 network then the MAC address will be the address of the computer that matches the IP address in the nested data - ie when the recipient specified by the MAC address unpacks the UDP packet from its ethernet frame it will find the nested packet has its own IP address on it. However if the recipient is not on the local L2 network, then the MAC address used will be the address of a <em>router</em> device on the local L2 network; that device will unpack the nested packet, and then forward it on to an adjacent L2 network. This process is described in more detail later.</p>
+
+<p>While in theory devices that only need to communicate with other very nearby devices (ie don’t need to send data to devices on other networks) <em>could</em> choose to use Ethernet directly for communication, it is extremely rare. Applications running on devices like computers, tablets, mobile phones or smart televisions almost always send/receive data using the TCP or UDP protocol, so that the owner is free to attach the sender and receiver to the same network or not. The operating system then passes this on via Ethernet, but that is not relevant to the application.</p>
+
+<p>The term <em>network</em> has been used above without really defining it. A station connected to a network can send messages to a specific other station, or can send a <em>broadcast</em> message to all stations; a “broadcast domain” is the set of stations that a broadcast will reach. Obviously, broadcasting to every computer in the world is a bad idea - and even broadcasting to every computer within a small company is probably bad; a broadcast domain is usually just a handful of stations. And in general, “L2 network” and “broadcast domain” are the same thing - a small set of stations that can see each other’s broadcast messages. An “intranet” or “internet” is a set of L2 networks joined together via shared routers so stations on separate L2 networks can communicate - but never via broadcast messages! For Ethernet, an L2 network can also be defined as the set of stations that can communicate with each other by using just MAC addresses; routers only pass data in IP format (ie with associated IP addresses) to adjacent networks.</p>
+
+<p>Note that Ethernet and Internet Protocol are quite independent things. IP data can pass through “intermediate networks” which are not Ethernet - and frequently does (though not within home/small-office environments). And Ethernet “local networks” can be used to carry higher-level protocols that are not IP - though again those are not likely to be found (any more) in home/small-office setups.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://en.wikipedia.org/wiki/Ethernet">Wikipedia: The Ethernet Protocol (IEEE standard 802.3)</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Ethernet_frame">Wikipedia: Ethernet Frames</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Internet_Protocol">Wikipedia: The Internet Protocol aka IP</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/User_Datagram_Protocol">Wikipedia: User Datagram Protocol aka UDP</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Transmission_Control_Protocol">Wikipedia: Transmission Control Protocol aka TCP</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Internet_protocol_suite">Wikipedia: Internet Protocol Suite</a></li>
+</ul>
+
+<h1 id="historical-notes-on-ethernet">Historical Notes on Ethernet</h1>
+
+<p>The original ethernet specification assumed a “shared bus” configuration, ie a single shared cable connected to multiple stations; this configuration requires “collision detection” (CSMA/CD) and thus limited data to “half duplex” operation and speeds of only up to 10MB/s. An L2 network containing “hubs” still works on this principle. However since the year 2000, almost all L2 networks use <em>switches</em> instead of hubs, a star-form L2 network configuration (multiple stations connect to a central switch), and work at 100Mbps or 1000Mbps. In a star-form network with a switch in the center, CSMA/CD is competely unnecessary (and you can ignore any references to it that you might see in other documents)<sup id="fnref:csmacd" role="doc-noteref"><a href="#fn:csmacd" class="footnote" rel="footnote">3</a></sup>.</p>
+
+<p>The Ethernet standard defines how to transfer data across various types of cables (coax, twisted pair, 4 twisted pairs, fibre-optic). Home networks these days always use CAT5<sup id="fnref:cat5" role="doc-noteref"><a href="#fn:cat5" class="footnote" rel="footnote">4</a></sup> or CAT5e cables (4 twisted pairs) - this is the only kind of cable sold at normal computer stores, so you can’t really go wrong. However if you inherit a dusty box of old computer parts, there may be older cat3 cables there in which case your network will run with max 10mb/s!</p>
+
+<p>And “crossover cables” are also obsolete. Modern ethernet connections automatically detect and configure themselves appropriately - and the fastest ethernet protocols don’t have separate send/receive wires at all.</p>
+
+<h1 id="hubs-switches-routers">Hubs, Switches, Routers</h1>
+
+<p>Data flows across network cables which are connected at each end to a physical port (socket).</p>
+
+<p>A “hub” is a very simple box that has several physical ports (sockets) and basically connects together the network cables that are plugged into it as if they were soldered together. It may also boost/clean-up the electrical signals that pass through it but does nothing else. In particular, data arriving via one port (ie from one cable) is forwarded to <em>all</em> other ports (cables). You’ll probably never see or need one of these; using a hub makes a network much slower than using a switch (see below), and is no longer any cheaper.</p>
+
+<p>A “switch” (more specifically, a level-2 ethernet switch) is more sophisticated than a hub; it inspects the destination MAC address of data packets arriving on one port, and forwards the data only onto the port (cable) on which the destination station is attached. This obviously increases the average throughput of the network significantly. However to do this selective-forwarding, the switch needs to be able to “listen” for stations announcing their presence (and address), remember which port they are attached to, and then inspect each packet as it arrives and match this with its internal table of known stations (addresses). This requires moderate processing power and some memory (storage), but not a full general-purpose CPU. Processing is done only based on “ethernet frame headers”, ie MAC addresses; a switch does not understand or handle the IP or TCP/IP protocols, and therefore is limited to handling stations on the same local (L2) network (within a few hundred meters of each other). Normally, a small network consists of a single central switch to which each other device is directly connected (star layout). A larger network can be made by connecting multiple switches in series (A&lt;-&gt;B&lt;-&gt;C)<sup id="fnref:spanning" role="doc-noteref"><a href="#fn:spanning" class="footnote" rel="footnote">5</a></sup> and then connecting other devices directly to any of these switches. See: <a href="http://en.wikipedia.org/wiki/Network_switch">Wikipedia: Network Switch</a>.</p>
+
+<p>A “router” is a device that works with IP addresses; it is always connected to at least two L2 networks concurrently, and forwards data packets from one L2 network to another, rewriting the Ethernet (L2) addresses in the process. When a station wishes to send data to a recipient identified by an IP address, it first checks whether this address is within the range of addresses for its “local network”. If so, it can simply send an Ethernet frame with the MAC address of the recipient. However when the IP address is not local (ie is not in the range of addresses used by the local network) then the sender must instead send the data using a MAC address belonging to a <em>router</em> attached to the local network. The router extracts the IP packet, builds a new Ethernet frame with a new destination MAC address and transmits that onto some other network (ie where the sender cannot get to directly with simple ethernet frames). Correctly choosing the next MAC address to forward data to, and rewriting the packets, requires more CPU processing power and more memory than a switch requires; routers therefore typically have a fully-programmable CPU and significant memory. As routers must inspect and rewrite packets to correctly forward them, this is also a good place to implement network security (“firewalls”), NAT (network address translation), and similar tasks. There is more information on this process later…</p>
+
+<p>Note that a switch is “invisible” to stations on the same network. Stations never talk to the switch directly<sup id="fnref:snmp" role="doc-noteref"><a href="#fn:snmp" class="footnote" rel="footnote">6</a></sup>; the switch simply “snoops” on data going past, and forwards the packets onto the appropriate cable(s) with little or no change. A level-2 ethernet switch can be replaced with a hub (actually, one hub per VLAN configured on the switch; see later) with no effect other than reducing the available bandwidth on the network. A router is much more active; sending devices are aware of its existence and actively use it as a “forwarding agent” when the desired destination IP address is not local. In particular, a router is responsible for forwarding data from an in-home network onto the link leading to your ISP and thus out into the internet.</p>
+
+<p>The boxes named “routers” which are sold for home/small-office use are typically a combination of switch and router, having both a decent CPU (for running routing logic) and a separate switch component within the same box; the switch provides two or more separate local networks (eg one leading to your ISP, and one for local devices) and the router transfers data between the networks depending on the specified IP address. Having a full CPU available in the router part also allows many other useful things to be done - particularly if you install the OpenWRT linux-based operating system on it!</p>
+
+<p>A router is not necessarily a custom-made device; anything that has a decent CPU, some memory, and the ability to send data packets to two different networks can be a router. It is entirely possible to use a normal desktop PC or even a laptop as a router. However given that prices for dedicated router hardware are now so cheap, this article assumes a dedicated commercially-manufactured router. Interestingly, as technology has improved, dedicated routers are approaching low-end PCs in their capabilities (with the exception of graphics output, naturally!) - which makes things like the OpenWRT linux distribution for dedicated routers possible.</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="http://www.practicallynetworked.com/networking/all_about_routers.shtml">practicallynetworked: all about routers: 2005</a></li>
+  <li><a href="http://www.practicallynetworked.com/networking/bridge_types.htm">practicallynetworked: Bridge Types</a></li>
+</ul>
+
+<h1 id="modems">Modems</h1>
+
+<p>To access the internet from your house, data needs to somehow flow out of the house and many kilometers away until it reaches equipment belonging to your Internet Service Provider (ISP). The data does <em>not</em> flow over cat5 copper cables using Ethernet, as it does within a house/apartment/office. The ISP therefore provides a <em>modem</em> device which connects on one side to whatever technology the ISP uses (cable-tv, ADSL, maybe wireless) and on the other side has an Ethernet connection.</p>
+
+<p>Sometimes this modem is quite simple and just provides a single Ethernet input, in which case you can connect one single computer to it - or can connect a <em>router</em> to it, and then connect as many devices as you want to the router. Sometimes the ISP will provide a box which is a combination modem/switch/router (ie with multiple Ethernet inputs) - and sometimes even a modem/switch/router with wireless capability.</p>
+
+<p>While having switch/router functionality built in to the modem device provided by your ISP is convenient, it also has disadvantages. This device is controlled by the ISP, and can be sent configuration commands by the ISP at any time. Having all your networked devices connected directly to this is an unnecessary security risk; it is much better to <em>always</em> have your own router (ideally with OpenWRT installed) which is connected to the ISP’s device even when that device itself is able to act as a switch/router. In this configuration, data “internal” to your network (between your own devices) does not go through a device owned and configured by an external party. The rules about how to handle data coming from the outside world into your network are also then controlled by yourself.</p>
+
+<h1 id="mapping-ip-addresses-to-mac-addresses-arp">Mapping IP addresses to MAC addresses (ARP)</h1>
+
+<p>When a station wishes to send a packet to a specific IP address, it must first determine which MAC address to send the data to.</p>
+
+<p>When a device first gets allocated its own IP address, it is also given a “subnet mask” which is effectively the range of addresses used by devices on its local (L2) network. This process is described later in “Allocating MAC and IP Addresses”. If the destination IP address is not within this range, then the sender instead chooses the address of a router from its “table of routers”, and sends the data to the MAC address of that router. This process is also described later.</p>
+
+<p>However when the destination IP address is a <em>local</em> address (matches the subnet mask), then the Address Resolution Protocol (ARP) is used to find the MAC address for a specific IP address. Each device maintains a small table of (IP-address -&gt; MAC address) for entries on its local network (the “ARP Cache”). If the IP address is already in the cache, then the problem is already solved. If not then the sender creates an ARP (Address Resolution Protocol) request structure containing the destination IP address and broadcasts it to all stations on the local network. The recipient (ie device which has that IP address) will send a response with its MAC address. This is cached for later reuse, and the original data is now sent labelled with the appropriate destination MAC address.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://en.wikipedia.org/wiki/Address_Resolution_Protocol">Wikipedia: Address Resolution Protocol</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Gateway_%28telecommunications%29">Wikipedia: Gateways</a></li>
+</ul>
+
+<h1 id="allocating-mac-and-ip-addresses-dhcp">Allocating MAC and IP Addresses (DHCP)</h1>
+
+<p>Each station in a local (L2) network must have a different MAC address, or bad things will happen. Originally, every manufacturer of an Ethernet-enabled device (eg a network card that plugs into a computer) would apply to an international group for their own MAC-address prefix. Each device they manufactured then had a unique MAC address which starts with the manufacturer’s prefix. This simple scheme ensured that every ethernet-capable device ever created would have a world-wide-unique MAC address. The world-wide uniqueness was never actually itself useful, but it certainly guaranteed that no two stations on the same network had the same id.</p>
+
+<p>This approach is still generally followed, although there are now very many manufacturers, and some of those don’t allocate IDs correctly. Many modern devices also have the ability to <em>configure</em> their MAC address rather than being hard-wired to the address that was built in at the factory - and it is therefore possible for the owner/administrator of a network to allocate MAC addresses manually.</p>
+
+<p>As noted, only stations on the same local network need unique addresses. Manufacturers should only allocate <em>even</em> addresses to their devices; all “odd” addresses (with the least-significant bit set to one) are reserved for use as “local ids”; an administrator can allocate such IDs to devices and know that they will never conflict with the manufacturer-allocated ID of any other station that might be connected to the network.</p>
+
+<p>IP addresses are quite different; they have a hierarchical structure that indicates <em>who is responsible for</em> the station (rather than who manufactured it), similar to the way that the address on a postcard does: country/city/postal-code/street/house/apartment/recipient’s name. For an IP address, the first few bits describe which of a few “world-wide” organisations is responsible for this address; the next few bits tell that organisation which sub-organisation is responsible, and so on until the address eventually specifies a single responsible network-router, and that then uses a MAC address to send the data to a particular computer. Of course, in many cases the sender and recipient are within some common suborganisation so data does not have to be passed up to the global level; in particular if the sender and receiver are within the same house then the data never needs to leave the house. Nevertheless, the IP addresses are theoretically global - except as described below.</p>
+
+<p>Because the IP address of a device depends on where it is (which router it is connected to), a fixed address cannot be allocated by the manufacturer. The usual way of allocating a suitable address is for one device on each network (known as a DHCP server) to be manually configured with a range of “available network addresses”. When any other device turns on (or is connected to the network), it broadcasts a request on its local network, effectively asking “somebody please tell me what address to use” (DHCPDISCOVER); the DHCP server then replies to the broadcast with a suitable address. Usually the DHCP server keeps a table of (MAC address, IP address) somewhere so that when a station which it has previously known about asks for an address it can be allocated the same address again (assuming it is not already in use); having such “stable” addresses is nice although not mandatory in most cases. Where a particular station should really have the same address each time it is turned on, an administrator can manually configure the DHCP server with the appropriate (MAC, IP) address pair to ensure that IP address is never given to any other station. An alternative is for a device to be manually configured with a fixed IP address, ie not to ask a DHCP server for an address at all - but in that case, it is the administrator’s responsibility to ensure that no other station has that address (and the address must be manually updated if the station is moved to a different router). In practice, a router usually also acts as a DHCP server for one or more of the L2 networks that it is connected to.</p>
+
+<p>The DHCP server’s reply message which indicates which IP address should be used also includes the “subnet mask”, ie specifies the range of IP addresses which are “local” to that L2 network. This then allows a device to determine which addresses should be mapped to local MAC addresses via the ARP protocol and which addresses require the data to be sent via a router instead. The response also commonly specifies a list of (subnet, router-address) pairs - in a home environment, the list will contain exactly one router which is responsible for all addresses. And as noted, in a home environment the DHCP server and the router are usually the same device.</p>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="http://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol">Wikipedia: DHCP</a></li>
+</ul>
+
+<h1 id="ip-addresses">IP Addresses</h1>
+
+<p>An IPv4 address is a 32-bit number. Each station obtains a unique IP address either by having it manually (and permanently) configured by the administrator, or by broadcasting a DHCP request on startup and waiting for some DHCP server on the local network to specify the address the station should use.</p>
+
+<p>Every router (whether a small local device or an industrial-strength device in some ISP’s datacentre) knows the <em>range</em> of IP addresses that it administers. The range is simply a <em>fixed prefix</em>: any address which starts with that prefix is handled by the router. The range a router manages is usually manually configured at the router by a network administrator. Each router then communicates with the other routers around it to tell them which range it manages, and find out which ranges they manage. The router builds a table of (range-&gt;router) called a <em>routing table</em> so that when it receives a message it knows which other router to pass the message on to. Eventually, the message should reach a router which is attached to the L2 network on which the actual destination station resides and the data can finally be delivered.</p>
+
+<p>There are a number of ways that ip-addresses and ranges can be written (eg input into programs or printed in documentation).</p>
+
+<p>An address is a 32-bit binary number, eg “010101011111111100000000000000000” but that isn’t very readable. Dividing it up into groups of 8 (bytes) is a slight improvement: “01010101.11111111.00000000.00000000”. A common convention is to write each byte in decimal format; the previous address in this “dotted decimal” format is “85.255.0.0”.</p>
+
+<p>A “prefix” (ie range) can be expressed as the base address plus an integer specifying how many of the bits in the base address are “fixed” (ie the length of the prefix). As example, a range “<code>01010101.11111111.00000000.*</code>” can be written as “85.255.0.0/24”. Any incoming address whose first 24 bits match the base address is within the range. Decimal is perhaps not the ideal representation for ranges; a prefix “<code>0101</code>” would be written as “80.0.0.0/4”, and indicates a range of addresses between “<code>01010000.00000000.00000000.00000000</code>” and “<code>01011111.11111111.11111111.11111111</code>” ie between 80.0.0.0 and 95.255.255.255. The “80-95” is not initially obvious when the range is written as a decimal format, though clear when the number is written in binary. Similarly, “<code>10000000.00000000.011*</code>” can be written as “128.0.48.0/19” and matches any address from 128.0.48.0 through 128.0.127.255.</p>
+
+<p>The smaller the “fixed” number of bits is, the more numbers are in the range; a “/8” range contains 2^24 addresses while a “/24” range contains only “2^8” (256) addresses and a “/30” range would contain just 4 addresses. Ranges can be of any desired size (though in early internet days they were limited to multiples of 8).</p>
+
+<p>An alternative to the “base/prefixlen” convention for describing ranges is the “base+subnetmask” convention, where the number of fixed bits in the prefix is simply represented as a series of 1-bits. For example, rather than write “127.0.0.0/24” (first 24 bits are fixed), this can be written as “<code>011111111.00000000.00000000.00000000</code>” with subnet mask “<code>11111111.11111111.11111111.00000000</code>” or equivalently “127.0.0.0” with mask “255.255.255.0”. Syntax “/N” is simply equivalent to a subnet-mask with the first N bits being set to 1.</p>
+
+<p>The IP-protocol specification defines a number of special address-ranges:</p>
+
+<ul>
+  <li>
+    <p><code>192.168.*</code> (ie 192.168.0.0/16) is a “private” range. Each router must decide whether to pass on data-packets with such addresses or not. Routers at ISPs will <em>never</em> be configured to pass on packets with such addresses. At large companies, inter-department routers are typically also configured to block/ignore packets with the <code>192.168.*</code> addresses. The result is that any department (or home-network) may allocate addresses in the <code>192.168.*</code> range as it wishes for internal use, while other departments/home-networks may use the same addresses for different purposes. Because the data never “escapes” the local environment, the addresses only need to be unique within that local environment. Of course that means that computers <em>outside</em> that environment cannot exchange data with a computer using such an address. Some administration care is also needed to ensure that two computers within the same department/home-network never use the same address.</p>
+  </li>
+  <li>
+    <p><code>10.*</code> (ie 10.0.0.0/8) works similarly; it is also a “private” range but a larger one. As for the <code>192.168.*</code> range, ISPs will just drop (ignore) such packets. However in large companies, packets in the “<code>10.*</code>” range may be permitted to pass between departments while packets with <code>192.168.*</code> addresses are blocked. This allows a company to allocate addresses to servers which can be accessed by any station within the company network. Of course this requires some careful administration to ensure that no two computers within the whole company ever use the same address.</p>
+  </li>
+  <li>
+    <p><code>169.254.*</code> (ie 169.254.0.0/16) is the “auto-allocation” (APIPA) address range. If a computer starts up and requests an address via DHCP (see later) but gets no response, then it can optionally use an address from this range. There is an official (and complicated) sequence of steps the computer should perform to try to find out if some other station is using that address first. Having a DHCP server allocate addresses is better, but this approach does allow a station to start using the local network even if a DHCP server is not available. This is particularly useful in “ad-hoc networking” where a bunch of laptops or similar build a local network amongst themselves (advanced topic!).</p>
+  </li>
+  <li>
+    <p><code>127.*</code> (ie 127.0.0.0/8) is the “local address range”. An operating-system’s network software does not permit any packets with such addresses to leave the <em>sending computer</em>. The primary use for such addresses is for a network-enabled client application to talk to a network-enabled server application running on the same computer even when no other networking is available. Usually each network interface in the computer gets assigned an address on system boot, starting from 127.0.0.1 and counting upwards. The address “127.0.0.1” usually can be referred to via the alias “localhost”.</p>
+  </li>
+</ul>
+
+<p>See the section on NAT below for information on how to allow computers with “private” addresses to access the internet.</p>
+
+<h1 id="dhcp">DHCP</h1>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol">Dynamic Host Configuration Protocol</a> is a way for a network station (eg a PC) to obtain a valid IP address when it enables networking.</p>
+
+<p>In summary, the station sends out a layer-2 broadcast message containing its own MAC address, and a request for an IP address (DHCPDISCOVER). Some station attached to the same local (L2) network which is running a DHCP server program will then send back a response message to that sender MAC address containing a suitable IP address to use. It is common (though not compulsory) for the DHCP server program to be running on a <em>router</em>.</p>
+
+<p>The address sent back will be within the address-range managed by a router attached to that L2 network.</p>
+
+<p>Actually, the response also includes additional information:</p>
+
+<ul>
+  <li>the <em>range of IP addresses</em> (ie address prefix, aka subnet-mask) used on the local (L2) network. As noted, the address allocated to the requester should be within this range. This range indicates to the station when it can send <em>direct</em> to some destination (ie when to use an ARP request), and when it needs to relay the data via some router.</li>
+  <li>the MAC address of a “default router” to use when a computer wants to send data to an address not within the local network</li>
+  <li>the IP address of a DNS server (or multiple servers) which can be used to map computer-names to ip-addresses (see below)</li>
+</ul>
+
+<p>In the case of a home-network, the router that connects the internal home network to an ISP will use DHCP (as a client) to obtain a (single) external (public) address from the ISP’s available range when the router is booted. When the router also runs a DHCP server (usually the case), it then hands out addresses in the range <code>192.168.*</code> or <code>10.*</code> to devices within the network, and performs Network Address Translation (NAT) to allow such devices to access the “outside world” using the IP address the router obtained from the ISP; see the section on NAT below.</p>
+
+<h1 id="domain-name-system-dns">Domain Name System (DNS)</h1>
+
+<p>Dealing with IP-addresses is not convenient for humans; we want to type “myfavsite.example” not some dotted-decimal address. The <a href="https://en.wikipedia.org/wiki/Domain_Name_System">Domain Name System (aka DNS)</a> protocol defines a standard way of asking some arbitrary DNS server to map a name to an IP address. This is quite decoupled from the core of networking, ie is a layer on top whose <em>only</em> role is to map a name to an address. Once that is done, the networking layer uses only the numerical address for its work.</p>
+
+<p>Computers typically cache recent (name-&gt;address) lookups for performance.</p>
+
+<p>As noted in the section on DHCP, a router that connects a home/office network to an ISP normally uses DHCP (as a client) to get an external(public) address from the ISP when it is turned on. The ISP also usually sends back the address of a DNS server (or two), which the router then passes on to any local devices that use the router’s DHCP server to allocate their address. ISPs typically provide DNS servers for use by their customers; name lookups are very common ie generate lots of network traffic. However some ISPs have been known to use such queries to <em>track</em> which sites their customers are visiting, and even occasionally to manipulate the results - in particular, on lookup failures (site not found) to return a <em>wrong address</em> (eg the address of an advertising site) rather than returning a failure-code. It is entirely valid for a desktop user to manually override the address of the DNS server to use - some freely available and trustworthy servers are available on the internet.</p>
+
+<p>Although the primary purpose of DNS is to provide a world-wide “database” of (<code>hostname-&gt;ip-address</code>) pairs, the fact that it is a world-wide database makes it useful for some other purposes too. DNS actually supports multiple “record types”; requests sent to a DNS server specify a (key, record-type) pair and the response is a list of matching records. A record of type “A” for a specific key holds the IPv4 address of the host with the specified name; record-type “AAAA” holds the IPv6 addresses of the specified host. Records of type “TXT” can be stored in DNS to associate arbitrary strings with a specific name (limited to about 1Kb in length); the owner of a domain-name can publish TXT records for a domain-name they own to define config-settings used by various security-protocols such as SPF, DKIM and MARC. A few other record-types are also used.</p>
+
+<h1 id="network-ports">Network Ports</h1>
+
+<p>Both MAC and IP Addresses identify a computer - but not an application on that computer. However normally one computer wants to send data <em>to a particular kind of application</em> on the destination computer. And if that application sends a response, then that response data should be sent to <em>a particular application</em> on the original sending computer. The UDP and TCP protocols therefore created the concept of a “port”: just a 16-bit number that indicates an application on a computer.</p>
+
+<p>UDP is a “one-way” protocol; data flows from a sender to a receiver and that’s it. The header of a UDP packet therefore includes a <em>destination</em> port only.</p>
+
+<p>TCP is a “two-way” protocol. Each packet includes a <em>destination</em> port and an <em>origin</em> port. The origin port is normally auto-allocated by the sender (any value currently unused on the sending device), and added automatically to the packet header. The receiver can then send data back by placing the origin-port into the destination-port field; the sending computer’s operating system then knows which sending application to forward the received data to. As port-numbers are only 16 bits (0..65535), that does mean that a single station can only have 65535 open connections to the same destination (address, port); in practice that is seldom a problem.</p>
+
+<p>A router does not normally need to look at the port# within a data packet to transfer it to the correct network, ie a port-number is mostly relevant <em>after</em> data has arrived at its destination station. However in the following cases the router <em>does</em> care about the port number:</p>
+
+<ul>
+  <li>when handling response data for a NAT-translated request</li>
+  <li>when receiving incoming connection requests that should be forwarded to an internal computer (eg for gaming sessions, or an internal webserver) which does not have a public address (ie which has an address in the <code>192.168.*</code> or <code>10.*</code> range).</li>
+  <li>when implementing firewall rules</li>
+</ul>
+
+<p>Note that the word “port” has two unrelated meanings: it can be a <em>physical plug</em> on a switch/router device, or it can be an “application identifier number” within a data packet (as discussed here).</p>
+
+<h1 id="network-address-translation-nat">Network Address Translation (NAT)</h1>
+
+<p>Normally, an ISP will only allocate one internet (IP) address to a home or office. Multiple computers may therefore need to “share” this address. This is done by having the router which acts as the “gateway” from the home network to the outside world <em>rewrite</em> the packets that it sends and receives. This is called <a href="https://en.wikipedia.org/wiki/Network_address_translation">Network Address Translation aka NAT</a>.</p>
+
+<p>A device on the home network wants to sends a packet to IP address “w.x.y.z”; it notices that this is not part of the range of addresses for its local (L2) network, so sends it to the router’s MAC address. The router notices that this address is for the “outside world”, and that NAT is enabled. It therefore replaces the “sender IP address” in the packet with its own IP address instead, and replaces the “origin port number” with a currently-unused port-number. The packet is then forwarded to the ISP. When the recipient gets around to sending a reply, it will send its response to the replaced address/port pair - ie the data will eventually be forwarded to the router itself. The router will then notice that the IP address is for itself (rather than a computer in one of the networks it manages), and that the port-number corresponds to a value it used during a recent NAT-rewrite. The router then modifies the incoming packet to replace the (destination,port) values with the (address,port) of the original sender, and passes the packet on to that real destination.</p>
+
+<p>The result is that multiple computers within the home network can “share” a common address without needing to do anything special, in most cases. There are a few implications however:</p>
+
+<ul>
+  <li>anonymity: the external computer cannot tell which original computer really sent a request - it just sees the router’s address. This has been an issue in several law-cases, where prosecutors have tried to claim that a specific computer was used to break a law; in general it can only be determined that <em>some</em> computer behind that common router performed the act. This can also mean that the remote system cannot provide personalised services based solely on the IP address. Shared addresses also interfere with the ability of commercial companies to track users (or at least individual computers) solely by their IP address.</li>
+  <li>inaccessibility: external computers cannot <em>initiate</em> connections to computers within the internal network; the outgoing part needs to occur first.</li>
+</ul>
+
+<p>The fact that incoming connections don’t work over NAT is generally good for security - computers using NAT to access the internet are by default protected from unexpected network attacks. However some systems require incoming connections; games are a common case as are some video-call software etc. Hosting an externally-accessable web-site on a computer would also be such a case, but there are addiitonal complications there (including needing a stable IP address for the router, a DNS mapping, etc). There is a somewhat-clumsy workaround for this situation; the router can be explicitly configured to forward connections to (router-address, some-port) on to a specific computer in the local network. That computer will then need to be configured with a static IP address, so the rule doesn’t break when the computer or router is rebooted. This is called “port mapping”.</p>
+
+<p>Some software (eg Skype) works around the “incoming connections with NAT” issue by using a central relaying-server; both ends in the communication open a connection to the central server. Unfortunately this is inefficient for network traffic, and is potentially bad for privacy. Try an internet search for “NAT Traversal” for further information on this topic.</p>
+
+<p>The newer IPv6 network protocol mostly does away with the concept of NAT; the router instead requests an <em>IPv6 address range</em> from the ISP, and computers within the network are then given addresses from this range. They can then potentially be addressed from outside - ie incoming connections are possible - which is convenient but has security implications. This approach also removes the “partial anonymity” provided by NAT, although there are official ways to restore this if desired.</p>
+
+<h1 id="router-firewalls">Router Firewalls</h1>
+
+<p>A router can potentially <em>refuse to pass on</em> data that it thinks is an attack on computers on the networks it manages.</p>
+
+<p>NAT inherently provides a kind of firewall for <em>incoming</em> data - no packet will be passed on unless it is a response to a request that originated from within the network, or is addressed to a port configured wth “port mapping”.</p>
+
+<p>When NAT is not enabled, then some protective behaviour on the router can be useful.  As an example, it is generally undesirable to allow computers on the internet to access “ports” associated with the old/obsolete telnet application, or with databases such as postgres/oracle. It is rare for a computer to <em>want</em> to allow computers from the wide internet to access such applications - but sometimes administrators can make mistakes and enable external access to such applications on their computers unintentionally. Having the router block such connections anyway is a nice safety-backup.</p>
+
+<p>It can also be useful for a router to block unexpected <em>outgoing</em> traffic (whether NAT is enabled or not). In the case that a computer within the network is infected with a virus, this can perhaps prevent the malware from reporting back to its “control center”, or spreading to other networks. Having such traffic reported/monitored is of course even better - as a prompt to check for infected systems!</p>
+
+<p>Of course, each computer on the network should also be running some kind of firewall software as well, to protect itself on a per-machine basis. A router-based firewall only blocks traffic between networks.</p>
+
+<h1 id="openwrt-and-switches">OpenWRT and Switches</h1>
+
+<p>As noted earlier, home routers typically have a switch component and a router component within a single case. The switch component is wired to a number of sockets (ports) on the outside of the case, and internally connected to the router component. The router component is then connected to another socket (port), typically labeled “WAN” which leads to the ISP. The router therefore (as usual) joins two distinct networks, copying data between them as appropriate. Interestingly, in most cases the switch and router components communicate with each other over Ethernet - ie just as if they were physically separate boxes connected with a network cable.</p>
+
+<p>While a switch is simply a circuit (though a complicated one), the router part is usually a general-purpose CPU capable of running a conventional operating system. The manufacturer will provide its own software stored in flash memory within the device, but in many cases this can be replaced by the owner if desired - eg with an appropriate version of the OpenWRT Linux distribution. In either case, the device will provide some kind of <em>configuration interface</em>; it might have an embedded webserver that can be accessed via a web-browser or the manufacturer might provide <em>client software</em> that must be installed on a PC or other device to send configuration commands to the router.</p>
+
+<p>The switch component within a combined (switch, router) device can be configured too; I’m not currently sure whether this is technically done via special Ethernet packets sent from router CPU to switch, or whether there is an additional communications channel (eg I2C or PCI). Regardless, the configuration process is different for each switch model. Fortunately, the OpenWRT kernel that matches this router type will come with suitable tools.</p>
+
+<p>As noted earlier, a switch automatically tracks which MAC address is on which physical socket (port), and forward packets automatically without informing any attached router. Therefore two stations on the same LAN communicate using MAC addresses directly. However when a switch has multiple physical ports, it is possible to create “groupings” within which data packets will be forwarded - in effect making a single switch act as if it were several separate switches joined by the router. These groups are called “VLANs”, and under OpenWRT the switch configuration is set by using the “swconfig” commandline tool, or via the LuCI web interface. Stations on two separate VLANs can then no longer communicate directly; they must instead send Ethernet frames containing IP packets to the router’s MAC address and let the router copy the data from one network (VLAN) to another - or not, depending on firewall rules.</p>
+
+<p>When the switch forwards packets on to the Router CPU, it also usually populates the VLAN header field of the ethernet packet with the id of the VLAN on which the data arrived (information about which actual port within the vlan is lost, but that does not matter). Rules in the router can then use this VLAN id during the process of deciding what to do with a data packet.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://wiki.openwrt.org/doc/uci/network/switch">http://wiki.openwrt.org/doc/uci/network/switch</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Virtual_LAN">http://en.wikipedia.org/wiki/Virtual_LAN</a></li>
+  <li><a href="http://wiki.openwrt.org/doc/techref/swconfig">http://wiki.openwrt.org/doc/techref/swconfig</a></li>
+</ul>
+
+<p>On my current router, the switch component supports 6 ports. One is internal, and connects to the CPU (port#0). One is connected to a physical port which is labelled “WAN”. There are 4 additional physical ports which are labelled “LAN”, and one of the switch component’s ports is not used (no space on the case). By default, the four ports labelled “LAN” are all configured as a single VLAN, ie stations attached to any of the ports can by default send Ethernet packets to stations attached to any of the other ports without having that data pass through the router CPU. However any station attached to the WAN port is “isolated” from the other stations, ie data flowing LAN-&gt;WAN or WAN-&gt;LAN can only go via the CPU. There is nothing special about the port labelled “WAN” other than the default VLAN configuration; any other port can also be “isolated” in the same way by assigning it to a different VLAN.</p>
+
+<p>Port#0 is a little special with respect to VLANs; it is implicitly in any VLAN that is defined. The router therefore sees all layer-2 broadcast packets on any VLAN.  The router can also send layer-2 packets out on a <em>specific VLAN</em>. I’m not sure if the router <em>labels</em> the packets it sends with the target VLAN, or if it simply specifies a MAC address and lets the switch figure out which VLAN (which physical port) is appropriate.</p>
+
+<p>Of course the WAN port will not be able to directly reach the ISP using ethernet - native ethernet electrical signals have a maximum range of a hundred meters or so, while the ISP may be many kilometers away. Therefore the WAN port will be connected to some device that uses a more robust data transfer mechanism, eg a “cable modem” (which places varying-frequency signals on a cable-television wire) or an “ADSL modem” that does something similar for telephone cabling. Or more modern, the WAN port could connect to a 3G wireless modem that sends the data wirelessly to the ISP’s nearest transmission tower. But none of that is really relevant to OpenWRT configuration; such modems can be treated as a “black box”.</p>
+
+<p>Within Linux (including within OpenWRT), multiple networks can be combined together and treated as a group; this is called “bridging” and is effectively the reverse of defining a VLAN. Bridging is often used within routers to merge traffic from a wireless network and a wired network together.</p>
+
+<h1 id="wireless-networks">Wireless Networks</h1>
+
+<p>The IEEE standard 802.3 (Ethernet) specifies how multiple stations connected to the same physical wire can communicate at least at a basic level (datagrams). In a similar way, IEEE standard 802.11 specifies how multiple stations nearby to each other can communicate with radio signals. The “layer 1” (PHY) part of the specifications are very different of course. However the “layer 2” (MAC) parts are reasonably similar; wireless devices exchange “data frames” which are reasonably similar to wired Ethernet frames. Like wired ethernet, each frame specifies the origin and destination stations using a 48-bit MAC address.</p>
+
+<p>One significant difference between ethernet and wireless is that Ethernet works with a number of “peer” devices connected to the same shared wiring; none of the devices needs to be “in charge”. With conventional wireless networks, one device sends out special data packets (“beacon frames”) stating that it is an “access point”, and other devices communicate with it, ie a “client-server” type arrangement. There are some alternative wireless protocols for “adhoc” or “mesh” networks but these are not currently in wide use.</p>
+
+<p>Another difference is that data in a wireless network is encrypted; it may be acceptable for all devices physically wired together to exchange data in “plain text” by default, but doing that over a wireless network is quite different and obviously unacceptable. However the use of encryption also enforces a client/server arrangement; a client station and its access-point (server) set up encryption keys during a “session setup phase” (aka association). In fact, the concept of a “session” is also quite different from wired ethernet, but is needed due to the much greater complexity of communicating over radio signals; a whole lot of parameters need to be agreed on in order for efficient data transfer, such as frequencies and timings.</p>
+
+<p>However as with a VLAN of a wired switch, multiple wireless stations connected to the same access-point communicate with each other without passing through the router. A station may send an ARP request just as in wired ethernet, and will get a response containing the appropriate MAC address to which it should send data; the MAC address may be another wireless client attached to the same access-point or (if no connected wireless station has that address) the MAC address of an attached router. In effect, all wifi stations are on “the same network”. This means that the router has no ability to apply firewall rules to communication between stations on the same wireless network - only when a station sends data (via the access-point) to another network.</p>
+
+<p>A wifi-capable router is simply one that has a separate wireless component within the same case which is connected to an antenna and can convert data to/from radio signals. This component acts as an “access point” for a wireless network, ie a hub that other client devices can connect to. As with the “switch” component that handles wired networks, a wifi access-point component has a connection to the router CPU and the router operating system comes with suitable tools to send configuration commands to the wireless component. And like a switch component, the wifi component typically communicates with the router CPU via Ethernet - as if it were an external box connected via a cable <sup id="fnref:extraaps" role="doc-noteref"><a href="#fn:extraaps" class="footnote" rel="footnote">7</a></sup>. What the router CPU then sees is normal wired ethernet frames, just as if a remote wireless station were attached via wired cable to a switch - the complexity of radio signal management is largely hidden from it.</p>
+
+<p>Some wifi access-point components can only support a single SSID, ie the component’s internal configuration settings don’t allow multiple SSIDs to be loaded into it, and therefore the radio signals the component generates only ever specify a single SSID and appear to wireless clients as a “single network”. More advanced components can be configured to appear to external devices as multiple independent wireless networks working on the same frequency (but without the data collisions!).</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="Wireless%20standard%20802.11">http://en.wikipedia.org/wiki/IEEE_802.11</a></li>
+  <li><a href="/linux/wireless-stack">Mine of Information: The Linux Wireless Network Stack</a></li>
+</ul>
+
+<h1 id="ieee-standards">IEEE Standards</h1>
+
+<p>The IEEE is a society whose members publish documents defining how to implement specific technologies.</p>
+
+<p>These documents are typically only available for a fee, but fortunately a few have been made available at no charge - and the WiFi standard is one of them. The specification for wireless networking can be downloaded <a href="http://standards.ieee.org/about/get/802/802.11.html">here</a>. However, you almost certainly do not want to read it!</p>
+
+<h1 id="other-topics">Other Topics</h1>
+
+<p>Point-to-point protocol (PPP) is used when two computers are directly connected to each other, ie a kind of “private network” consisting of only two stations. In this case, network addresses are obviously not very relevant. However some of the other features of TCP (retry, flow-control, etc) are useful. So the PPP protocol is a kind of “simplified TCP protocol” which uses the relevant parts of TCP and ignores the routing/addressing parts. You probably won’t encounter it in home networking, but some documents and admin interfaces might use the term. In the past, routers sometimes communicated with the ISP using PPP - a classical 1:1 network.</p>
+
+<p>Ethernet does not support any “Quality of Service (QOS)” functionality - ie there is no concept of priority within Ethernet itself. The operating-system-level drivers might support it, ie reorder packets that are queued but not yet sent or reorder packets received but not yet delivered to applications. Ethernet hubs and switches do not support QOS either - but routers can.</p>
+
+<p>IEEE specification 802.1D: MAC bridges…</p>
+
+<p>802.1X –&gt; defines extra network management and security features. For example, it:</p>
+
+<ul>
+  <li>defines how to set up “authentication” for devices attaching to ports on a switch</li>
+  <li>defines how to set up <em>encryption</em> between a switch and the devices attached to it</li>
+  <li>defines data packets for reconfiguring switches (eg setting up VLANs).</li>
+</ul>
+
+<h1 id="books">Books</h1>
+
+<ul>
+  <li>TCP/IP Network Administration, Hunt, O’Reilly</li>
+  <li>Computer Netzwerke 3 ed., Schreiner, Hunser Verlag</li>
+</ul>
+
+<h1 id="other-useful-references">Other useful references</h1>
+
+<ul>
+  <li><a href="http://www.thegeekstuff.com/2011/11/tcp-ip-fundamentals/">TheGeekStuff: TCPIP Fundamentals</a></li>
+  <li><a href="http://www.thegeekstuff.com/2013/09/hubs-switches-routers/">TheGeekStuff: Hubs, Switches, Routers</a></li>
+  <li><a href="http://www.mcmcse.com/comptia/network/hubs_repeaters_bridges_switches.shtml">Microsoft: Hubs, Bridges, Switches</a></li>
+  <li><a href="http://linux-ip.net/html/">Linux-ip</a></li>
+  <li><a href="http://tools.ietf.org/html/rfc1541">The DHCP specification</a></li>
+  <li><a href="https://www.ict.tuwien.ac.at/lva/384.081/datacom/09-IP_Technology_v6-1_handout.pdf">Data Communication Lectures of Manfred Lindner – Part IP Technology Fundamentals</a></li>
+</ul>
+
+<h1 id="footnotes">Footnotes</h1>
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:framesize" role="doc-endnote">
+      <p>There are ways to generate ethernet frames larger than 1500 bytes, but the point is that the maximum amount of data that can be transferred in one operation is much smaller than many files, and even most web-pages, so data is almost always transferred between two computers in a series of frames (chunks). <a href="#fnref:framesize" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:tcp" role="doc-endnote">
+      <p>The Transmission Control Protocol (TCP) specifies a sequence of administrative data-packets that must be exchanged before “real data” gets sent (called a “handshake”). This sequence of packets sets up some useful shared state between the two communicating devices so they can exchange the following data better. This initial data exchange is called “setting up a connection”, and TCP is therefore described as a “connection-oriented” protocol. The UDP protocol does not do this, and therefore is called a “connectionless protocol”. <a href="#fnref:tcp" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:csmacd" role="doc-endnote">
+      <p>Actually, when a device connects to a wired network (eg after being turned on) it broadcasts a message effectively saying “hello, I am a device supporting technology x,y,z. What am I connected to?”. And this message is sent using the oldest Ethernet technology in case it is connected to something really old. But in practice, it will be connected to a modern Ethernet switch device, and so will receive a message “Hi, I’m a modern switch; lets talk with technology z”. As the “oldest technology” uses half-duplex with csma/cd, this old technique <em>is</em> used very briefly during initialisation of a network connection - but never again. <a href="#fnref:csmacd" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:cat5" role="doc-endnote">
+      <p>“cat” is the common abbreviation for “category”. Manufacturers of ethernet cables are required to apply very specific tests where an electrical signal is applied to one end, and the signal at the other end is measured. Higher ‘categories’ of cable must have less signal distortion. <a href="#fnref:cat5" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:spanning" role="doc-endnote">
+      <p>Actually, “tree shaped” networks are also allowed with simple switches; the requirement is that there is only ever one path between two devices. More advanced switches exist which allow configurations like “rings” of switches. These are useful as the network can then still function if one switch in the network stops working - there are multiple paths between devices in the network, so if one path does not currently work then the other can be used to bypass the failed part. However this requires the switch to support a ‘spanning tree algorithm’ which is far from trivial and currently only available in expensive switches intended for industrial use - not in typical devices sold for home use. Building a ring of switches using devices that do <em>not</em> support spanning-trees will result in a non-functioning network. <a href="#fnref:spanning" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:snmp" role="doc-endnote">
+      <p>Advanced switches do also show up as a device on the network, so that they can be sent SNMP configuration commands. However this is not relevant to other devices using the network. <a href="#fnref:snmp" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:extraaps" role="doc-endnote">
+      <p>And in fact you can buy additional “wireless access point” devices, place them at convenient locations, and then connect them via wired ethernet to your router. To the router CPU, these look just like the built-in access-point component, and can be handled in a similar way. They can even use the same SSID (network name) - though they will have a different BSSID (base station id). <a href="#fnref:extraaps" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/home-network-foundations/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

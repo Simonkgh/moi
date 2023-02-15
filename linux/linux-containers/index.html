@@ -1,0 +1,1048 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Notes on Containers with Linux</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Notes on Containers with Linux</h1>
+    <aside>First published on: August 10, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>This article is about running sets of processes (including potentially a complete OS set of userspace apps) in an isolated “container” environment provided by a Linux system. It is named “notes on”, not “intro to”, because I’m far from an expert in this area. This is just my understanding/rephrasing of existing information from more official sources; I do not recommend relying on it - read the source information yourself!</p>
+
+<p>I’m a software developer with an interest in operating system kernels and other low-level stuff, and the information below is aimed at that level. I’m more interested in <em>how</em> containers work (and in particular how userspace interacts with the kernel) than in how to install and administer large clusters of the things.</p>
+
+<p>While some of the information here is architecture-independent, I mostly assume the use of an x86-based architecture below.</p>
+
+<p>General References:</p>
+
+<ul>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Operating-system-level_virtualization">Wikipedia: OS-level Virtualization</a> - aka “containers”</li>
+  <li>
+<a href="http://referaat.cs.utwente.nl/conference/21/paper/7449/virtualization-and-containerization-of-application-infrastructure-a-comparison.pdf">A Comparison of Virtualization and Containerization</a> - from June 2014</li>
+</ul>
+
+<p>See also: my companion article on <a href="/linux/linux-virtualization">Virtualization</a>.</p>
+
+<h1 id="containers">Containers</h1>
+
+<p><em>Whole system virtualization</em> emulates a fresh machine (cpu, ram, etc), and the guest must be an operating system kernel plus its userspace. This gives the greatest flexibility to code within the guest environment, but has a significant overhead.</p>
+
+<p><em>Containers</em> instead are isolated environments <em>on top of the kernel of the host system</em>; the guest runs only <em>userspace</em> code.</p>
+
+<p>An operating system kernel is responsible for sharing resources between applications; the kernel (and its drivers) tracks processes, shared memory, filesystems, network state and makes this information available for userspace code to query. A kernel that is able to restrict information about which resources are available depending upon some “group” to which the caller belongs can provide ‘isolated’ environments that solve many real-world usecases. When all kinds of resources are simultaneously isolated, the result is similar to “whole system virtualization”.</p>
+
+<p>There are three different use-cases for isolated resources:</p>
+
+<ul>
+  <li>Limited Isolation: isolate one or more kinds of resource, but not all of them (see later for some use-cases);</li>
+  <li>Operating System Level Virtualization: set up a fully isolated environment and then run a complete operating system userspace on it;</li>
+  <li>Application Level Virtualization: set up a fully isolated environment and run a small set of applications on it, plus any necessary supporting processes but not a complete operating system.</li>
+</ul>
+
+<p>Q: in a traditional (non-virtual) environment, kernel modules can be loaded on-demand. What happens in a container (loading a kernel module from the guest into the host kernel is obviously unsafe)?</p>
+
+<p>64-bit linux kernels still support 32-bit syscalls, so a 64-bit host kernel can run a 32-bit operating-system userspace fine, while the reverse is not true.</p>
+
+<p>Most important: while <em>whole system virtualization</em> is pretty good at keeping the host safely protected from the guest (ie it is extremely difficult for malware in a guest to affect its host), this is <em>not</em> currently true of containers. From the systemd documentation: “Linux containers are not a security technology right now. There are more holes in the model than in a swiss cheese”. Containers are far more efficient if you need to run many instances of <em>software you trust</em>, but if you don’t control or trust the software being run in the guest environment then use <em>whole system virtualization</em> instead.</p>
+
+<h1 id="linux-namespaces">Linux Namespaces</h1>
+
+<p>The Linux kernel provides several APIs for isolating the following kernel resources:</p>
+
+<ul>
+  <li>Process IDs (PID namespace)</li>
+  <li>User and Group IDs (USER namespace)</li>
+  <li>Filesystem mountpoints (NS namespace, name is for historical reasons)</li>
+  <li>Network addresses (NET namespace)</li>
+  <li>Posix inter-process communication resources (IPC namespace)</li>
+  <li>Hostname (UTS namespace)</li>
+</ul>
+
+<p>Note that these are APIs, ie things for use from <em>code</em>, not from the commandline. Most of this functionality is implemented as flags to the <code>unshare</code> system call (which creates the specified namespaces), the <code>setns</code> system call (which moves an existing process into an existing namespace) or the <code>clone</code> system call which combines normal cloning (forking) and creation of namespaces. A child process by default inherits the namespaces of its parent process. Creating a new namespace (except for a user namespace) requires the CAP_SYS_ADMIN capability (ie must be done by apps running as root). However if a user namespace is being created, then the process is “root” within that user-namespace so can also create namespaces of the other types.</p>
+
+<p>When all the above resources (namespaces) are simultaneously isolated, then the resulting environment is called a <em>container</em>. There are commandline and graphical tools which set up containers and launch processes within the container; such processes can see and share resources with other processes in the same container, but cannot see or share resources with processes in other containers or in the host.</p>
+
+<p>The BSD operating system has had containerization for a long time (“BSD jails”), and similar functionality is built-in to Solaris (“Solaris Zones”). Note that a “chroot jail” is quite different, and only isolates filesystem resources.</p>
+
+<p>There are a few use-cases in which just one namespace can be useful on its own (ie using namespaces for something other than a full container):</p>
+
+<ul>
+  <li>
+    <p>A NET namespace effectively has a complete “network stack”; networking can then be configured for that namespace with its own routing rules. A process associated with that net namespace will then have its traffic managed by those rules, without affecting other processes on the same host.</p>
+  </li>
+  <li>
+    <p>An NS (filesystem) namespace has its own “root” and mount-points. A process associated with that filesystem namespace cannot see filesystems that are not mounted in that namespace (similar to <code>chroot</code>). This isn’t useful for security (as a process not isolated from other resources can use “work arounds” to access other filesystems), but can be useful for other purposes.</p>
+  </li>
+</ul>
+
+<p>When a new PID namespace is created, then the first process started within that namespace is given a process-id (PID) of 1. This PID value is special in unix systems, and is referred to as the “init process”. This process is the (indirect) parent process of all other processes in the system, and becomes the direct parent of any “orphaned” process. When this process exits, the container terminates. However a container environment doesn’t necessarily have to run a traditional Linux init process as PID1; it can also run a “normal” application directly.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://lwn.net/Articles/531114/">LWN on Namespaces</a></li>
+  <li><a href="https://blog.jtlebi.fr/2013/12/22/introduction-to-linux-namespaces-part-1-uts/">Introduction to Linux Namespaces Blog Series</a></li>
+  <li>“<code>man 7 namespaces</code>” on any linux system</li>
+</ul>
+
+<h2 id="more-on-the-user-namespace">More on the USER Namespace</h2>
+
+<p>The USER namespace is sometimes particularly tricky to understand.</p>
+
+<p>Unlike other namespaces, a user namespace acts as a <em>parent</em> for other namespaces, ie each type of namespace is <em>associated</em> with a particular “parent” user-namespace,</p>
+
+<p>Each process has a set of “capability bits” associated with it. When a systemcall is invoked, the kernel implementation of that code checks the capability bits, and returns an error if the user does not have the required capability to perform the specified operation. To support user-namespaces, the kernel first checks which namespace the specified resource belongs to (eg in the case of a filesystem-path resource, it obtains the filesystem-namespace for the calling process). It then determines which <em>user namespace</em> that resource-namespace belongs to; if that user-namespace does not match the user-namespace the calling process is in, then the capabilities of the calling process are zero. In other words, a process belonging to one user-namespace has <em>no</em> capabilities with respect to any file/ipc/network/etc resource belonging to a different user namespace.</p>
+
+<p>In short, a user-namespace simply <em>removes all capabilities</em> from the calling process with respect to host resources that are associated with an existing namespace. Some systemcalls will therefore fail as the calling process does not have the required capabilities <em>in the host user namespace</em>.</p>
+
+<p>A user namespace can <em>optionally</em> have a table which maps ranges of IDs within the parent user-namespace to corresponding ranges within the child user-namespace. This can only be initialised once, by writing to <code>/proc/{pid}/uid_map</code> and <code>/proc/{pid}/gid_map</code>. Whenever a filesystem-related system-call is invoked, the kernel first maps the UID of the caller into a corresponding host-based UID (possibly requiring multiple steps as user-namespaces can be nested) before testing access-rights.</p>
+
+<p>The <code>lxc-start</code> tool only creates a user-namespace if a userid-mapping is provided; this means that when running an LXC container without user-mapping, root within the container is <em>the same as root outside the container</em>, ie not only the same UID but also the same <em>capabilities</em>. Similarly, <code>systemd-nspawn</code> only creates a user-namespace if <code>--private-users</code> is specified. This is obviously a significant (and known) security hole; this approach should only be used to run <em>trusted</em> code.</p>
+
+<p>This userid-mapping allows a <em>normal host user account</em> to launch a container which thinks its “init” process is running as UID=0, while the host treats it as if it were some other user. There are naturally implications when invoking systemcalls that check capabilities. In particular, using <code>mknod</code> to create a char-device or block-device requires the caller to have CAP_MKNOD in the host user namespace; standard Linux init-systems that try to create nodes in <code>/dev</code> will fail to run correctly when a user-namespace is enabled and thus such distros need to be customised to run in such a mode (“unprivileged containers”). Running the same distro in a container that enables all namespaces <em>except</em> user-namespace <em>will</em> work - but that container must of course be launched by root if its “init” process should run as UID=0.</p>
+
+<p>AIUI, when userid-mapping is active, then <code>setuid (2)</code> and related systemcalls will fail unless the target UID is within the active mapping range, ie a container cannot spawn a process running as a userid which is not explicitly mapped to a suitable value in the host.</p>
+
+<p>Note that activating a user-namespace but not mapping UIDs means that root <em>inside</em> that namespace is <em>still the original root</em>, but has effectively dropped all capabilities.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://man7.org/linux/man-pages/man7/user_namespaces.7.html">User Namespaces manpage</a></li>
+</ul>
+
+<h1 id="linux-control-groups-cgroups">Linux Control Groups (cgroups)</h1>
+
+<p>The host needs to ensure that a container receives a <em>fair share</em> of the system resources, but not more. The “namespaces” mechanism controls <em>visibility</em> of resources, but does not limit <em>bandwidth</em>. The kernel “control groups” (aka cgroups) mechanism provides the ability to enforce bandwidth limits on groups of processes; it can be used effectively with or without containers.</p>
+
+<p>The kernel provides the ability to define a tree of “groups”, to associate processes with a group, and to enable/configure zero or more “controllers” for a group. When the kernel performs various actions on a process, it consults the enabled controllers associated with the group the process belongs to - and the controllers associated with all ancestor groups of that group. Controllers affect things like scheduling decisions (ie process priority and CPU share quotas), Input/Output (IO priority and bandwidth quotas), memory allocation (memory quotas). Controllers can keep statistics associated with a control-group, allowing things like setting a cpu-share quota for a cgroup as a whole. Child processes are by default created within the cgroup of their parent process.</p>
+
+<p>Groups of processes can also be useful for other purposes; systemd creates a cgroup for each login session so that it can easily terminate all processes associated with that session when the user logs out. This use-case doesn’t rely on  <em>any</em> “controllers” associated with the control-group.</p>
+
+<p>The usefulness of cgroups with containers is fairly obvious, particularly the memory and cpu controllers.</p>
+
+<p>The cgroups feature has a somewhat complicated past; see <a href="https://lwn.net/Articles/574317/">here</a> for some discussion.</p>
+
+<p>The cgroups status is exposed as a filesystem (type=cgroupfs), normally mounted as a subdir of /sys/fs/cgroup.</p>
+
+<p>In modern (unified hierarchy) cgroups (cgroups2), there is only a single tree of groups, processes (rather than individual threads) are bound to groups, and a process can only belong to one group. Every cgroup controller module that is available to the kernel is automatically available for use by nodes of the cgroup tree - though a node needs to “activate” it to have it apply to the children of that node. Each node has a “cgroup.procs” file; writing the process-id of a process will <em>move it into that group</em> (though this is not encouraged), while reading the file will list the set of processes currently associated with that group. Creating a subdirectory in the filesystem creates a new subgroup (which automatically gets its own <code>cgroup.procs</code> file). The entire tree is usually owned (and writeable only) by the <code>root</code> user, and it is recommended (though not enforced AFAIK) that only one system daemon manage the cgroups hierarchy (see later commends on systemd and cgmanager later).</p>
+
+<p>cgroups v1 was added in Linux 2.6.26; v2 was merged into 3.16 but only as “experimental” option. V2 is available as a standard feature since linux 4.5 (march 2016).</p>
+
+<p>The cgroupfs filesystem <em>does</em> support changing the owner of a node in the tree; this is intended to allow a group created to hold the processes <em>associated with a specific container</em> to be managed by whichever user the container is running as, ie a container can manage allocation of processes within its own groups.</p>
+
+<p>The original cgroup design was somewhat different; it supported multiple cgroup trees, individual threads (rather than all threads of a process) could be assigned to a group, and threads could belong to multiple groups at the same time. Controllers needed to be specified as mount-options to the cgroup filesystem. <a href="http://lwn.net/">LWN</a> has a good <a href="https://lwn.net/Articles/574317/">discussion of the history</a>. You will find traces of this original behaviour when running <code>ls /sys/fs/cgroup</code> (which on “older” systems shows not only the single ‘modern’ root cgroup but also several other cgroups named after a controller, eg ‘blkio’, ‘cpu’, ‘memory’) - or running <code>mount</code> which will reveal that cgroupfs is mounted multiple times. When searching the internet for cgroups info, you will often find advice related to the <em>old</em> cgroups approach.</p>
+
+<p>The current kernel cgroup implementation supports both the modern and old-style features; it can be mounted <em>once</em> in “unified mode”, and multiple times in “backwards-compatibility” mode. In backwards-compatibility mode, the mount options specify which controllers are apply to processes in the tree (run the <code>mount</code> command). As the new “unified hierarchy” functionality was first merged in kernel 3.16 (mid 2014), there are many systems out there which are designed to use the old behaviour. If a cgroup mount-point (eg <code>/sys/fs/cgroups/systemd</code>) contains a file named <code>release_agent</code> then cgroupfs mounted at that point is using old-style cgroups. Debian 8 (current stable release) is based on kernel 3.16, and uses “old-style” cgroups. Fedora 22 has kernel 4.0 but <em>also</em> uses “old-style” cgroups.</p>
+
+<p>Each process-descriptor in <code>/proc/{pid}</code> has a link back to the cgroup that process belongs to; to see the information for the current process use <code>/proc/self/cgroup</code>. Due to the backwards-compatibility issues above, this is actually a <em>set</em> of cgroups: the “modern” one, and then a “/” for each of the other available per-controller cgroups to indicate it is in the “default” group for that controller.</p>
+
+<p>When mounted in unified (aka “sane”) mode, a cgroupfs directory has the following files:</p>
+
+<ul>
+  <li>
+<code>cgroup.controllers</code> which is read-only and list the full set of available controllers</li>
+  <li>
+<code>cgroup.subtree_control</code> which can be used to enable or disable a controller</li>
+  <li>
+<code>cgroup.procs</code> which can be read to list the PIDs of all processes in this control-group</li>
+  <li>
+<code>cgroup.populated</code> (not in root node) which can be used with the <em>poll</em> systemcall to detect when the number of processes assigned to this group drops to zero (useful for performing “cleanup” tasks)</li>
+  <li>AUIA, a set of config files for the enabled controllers.</li>
+</ul>
+
+<p>When mounted in “backwards compatible mode”, each node (directory) of a cgroupfs tree has the following files:</p>
+
+<ul>
+  <li>
+<code>tasks</code> which can be read to list IDs of all <em>threads</em> in this control-group. It does not list threads in child cgroups.</li>
+  <li>
+<code>cgroup.procs</code> which can be read to list the IDs of all <em>processes</em> in this control-group.</li>
+  <li>
+<code>cgroup.clone_children</code>; writing “1” to this file tells the cpuset controller to make a copy of the config associated with the parent cgroup.</li>
+  <li>
+<code>notify_on_release</code>; writing “1” to this file will invoke whatever application was specified in the <code>release_agent</code> file of the root node of this configfs hierarchy.</li>
+  <li>some configuration files for whichever controllers are attached to this mount (eg “net_*” files for the NET controller)</li>
+</ul>
+
+<p>All available cgroup controllers get attached automatically to the root of the “unified hierarchy”; there is no need to perform any manual steps, and there are no special mount-options needed. However if a cgroup controller is attached anywhere in an “old-style” groups hierarchy, then it cannot be attached to the “unified hierarchy”; when the “old-style” hierarchy is deleted then the controller gets auto-attached to the unified group root.</p>
+
+<p>Question: Is the recommended “single cgroup manager process” simply implemented by having directory <code>/sys/fs/cgroup</code> and its children owned and writable only by root? If there is no syscall interface for manipulating cgroups (and I haven’t seen any documentation that suggests there is one) then that would still solve the problem fairly nicely. I see that <code>/sys/fs/systemd/user.slice/user-1000.slice</code> (my login) is owned by root. And everything under this point is also owned by root <em>except</em> dir <code>user@1000.service</code> which is owned by my user. So I can potentially put “my services” (whatever they are) into their own groups manually, but not mess with anything else except via requests to systemd-init. Currently <code>user@1000.service</code> holds pids of two processes running as me: <code>/lib/systemd/systemd -- user</code> and <code>(sd-pam)</code> (sd-pam is also part of systemd).</p>
+
+<p>In a system using systemd-init, systemd-init <a href="http://www.freedesktop.org/wiki/Software/systemd/ControlGroupInterface/">should manage all cgroups</a>. Any process may send a dbus message to systemd-init to create a new “scope”, which causes systemd-init to create a cgroup within the tree starting at <code>/sys/fs/cgroup/systemd</code>. The alternative cgmanager tool performs a similar role for non-systemd-init systems.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://lwn.net/Articles/601840/">LWN article on cgroups</a></li>
+  <li>
+<a href="https://www.kernel.org/doc/Documentation/cgroups/unified-hierarchy.txt">cgroup unified hierarchy</a> - from the linux sourcecode documentation directory. Note that the <a href="https://www.kernel.org/doc/Documentation/cgroups/cgroups.txt">cgroups.txt</a> document describes the old (deprecated) interface.</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Cgroups">Wikipedia: cgroups</a> - though the discussion of “unified hierarchy” here is very confused.</li>
+  <li>
+<a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Resource_Management_Guide/ch01.html">RedHat Resource Management Guide for RHEL6</a> - documents obsolete interface</li>
+  <li><a href="http://0pointer.de/blog/projects/cgroups-vs-cgroups.html">systemd: cgroups</a></li>
+</ul>
+
+<h2 id="cgroups-under-systemd">cgroups under systemd</h2>
+
+<p>When systemd-init is used as the OS init (PID 1) process of a container, then systemd-init expects to be the <em>sole</em> cgroups manager <em>for that environment</em>, ie no other process should create new groups or move tasks between groups. The justification given by systemd developers is:</p>
+
+<ul>
+  <li>cgroup management is <em>integrated</em> into the init process because systemd-init places the processes it starts into appropriate cgroups immediately. But init is the first process started, and the ancestor of all other processes. To have it then <em>rely</em> on an external process to perform cgroup stuff on its behalf is (according to the systemd developers) not acceptable.</li>
+  <li>having only one process managing cgroups is important to keep things consistent; eg systemd kills all processes associated with a login session by killing all processes in a group. This behaviour cannot be relied on if something else can move processes out of the groups that systemd originally placed them in</li>
+  <li>having multiple processes modify the cgroup hierarchy is prone to <em>race conditions</em>
+</li>
+</ul>
+
+<p>In a systemd-managed system, cgroupfs is mounted at <code>/sys/fs/cgroup/systemd</code>. Systemd then automatically creates some subdirectories (subgroups):</p>
+
+<ul>
+  <li>a “system.slice” dir with a subdir for each “system service” managed by systemd.</li>
+  <li>a “user.slice” dir with a subdir for each userid, which has a subdir for each login-session</li>
+</ul>
+
+<p>The cgroup-per-user/cgroup-per-login hierarchy makes it easy to (a) add per-user or per-login resource limits, and (b) cleanly kill all processes associated with a login-session on logout.</p>
+
+<p>Other processes in the system which need to allocate a process to a control-group should send a message to systemd-init via dbus (or the appropriate tool which uses dbus).</p>
+
+<p>TODO: how are controllers enabled for a cgroup, and the parameters for the controllers configured, eg the CPU scheduling weights? Is this also done over dbus, or can admins do this via direct writes to the cgroupfs filesystem?</p>
+
+<p>systemd works with both the old and new cgroup code. When using cgroup “old style”, systemd mounts cgroupfs at <code>/sys/fs/cgroup/systemd</code> but does not use the “unified hierarchy” mount option. Something (systemd?) also mounts additional instances of cgroupfs in the old way: one dir per controller. The result is that the systemd cgroup hierarchy has no controllers attached to it; only controllers <em>not</em> already mounted elsewhere are added to the tree rooted at the systemd mountpoint. Debian8 uses the “old style” for mounting cgroupfs.</p>
+
+<p>Within a container, the host directory <code>/sys/fs/cgroup/systemd</code> should also be mounted within the container, unaltered. This means that systemd-init running within the container can see <em>all</em> cgroups, including those only relevant for the host; however this is not a significant “information leak” as all cgroup directories except its “own cgroup” are read-only, and the <code>cgroup.proc</code> file in all other cgroups is not readable at all. Code in the container can see which cgroups exist in the host, but not which processes are assigned to them; this is not considered dangerous. Within a container, the “PID1” process (systemd-init) can look in <code>/proc/1/cgroup</code> to find out which cgroup it is running within; the host init process will of course be in cgroup “systemd:/” while for a systemd-init process running in a container the content will be a longer path.</p>
+
+<p>Systemd within a container must be started with a special environment variable.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="https://lwn.net/Articles/555922/">An email discussing systemd and cgroups</a></li>
+</ul>
+
+<h2 id="cgroups-under-cgmanager">cgroups under cgmanager</h2>
+
+<p><code>cgmanager</code> is a standalone application for managing cgroups. Distributions which do not wish to use systemd-init typically run cgmanager instead. As with systemd-init, cgmanager expects to be the <em>sole</em> manager of the cgroup tree for an environment - though AFAIK nothing enforces this. Applications wishing to move processes between cgroups should send a DBUS message to cgmanager. Question: are the dbus messages accepted by cgmanager the same ones accepted by systemd-init?</p>
+
+<p>A container should run <code>cgproxy</code> instead of <code>cgmanager</code>; this passes all cgroup configuration operations out to the <code>cgmanager</code> instance running in the host. Communicating with the master <code>cgmanager</code> process is done by writing to socket <code>/sys/fs/cgroup/manager</code>, which is expected to be “bind-mounted” into the container.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="https://lwn.net/Articles/575672/">LWN cgmanager article</a></li>
+</ul>
+
+<h1 id="combining-control-groups-and-namespaces">Combining Control Groups and Namespaces</h1>
+
+<p>Together, namespaces and cgroups allows user applications to be run <em>directly on a host kernel</em>, isolated from the host’s filesystem and other applications on the same host, and with their resource-usage under control of the host.</p>
+
+<p>Consider the things you need to hide in order to provide a “virtual machine” experience to a process:</p>
+
+<ul>
+  <li>filesystem</li>
+  <li>user ids</li>
+  <li>other processes (process should not be able to detect whether other processes exist)</li>
+  <li>system clock (process should be able to change time without affecting host)</li>
+  <li>network (process should be able to stop network without affecting host)</li>
+  <li>network ports (process should be able to listen on any port regardless of what ports are in use on host)</li>
+</ul>
+
+<p>And consider the things you need to limit in order for a process to not unfairly impact processes on the host or other containers:</p>
+
+<ul>
+  <li>CPU time</li>
+  <li>Allocated memory</li>
+  <li>network bandwidth</li>
+</ul>
+
+<p>This list matches exactly what Linux namespaces and cgroups provides.</p>
+
+<p>Running a single application on the bare kernel is possible, and some tools (eg Docker) focus on this approach. Other tools focus on running the standard user-space tools of a linux distribution (eg the init process, cron, system daemons) and then some target applications that are actually desired.</p>
+
+<p>Any linux distribution can be started in a “guest” mode on top of some host linux environment, as long as the kernel of the host environment is compatible with the guest. As the linux kernel development process lays great worth on keeping the kernel backwards-compatible, this generally means that any linux distribution G can be run in a container hosted by and linux distribution H as long as H is newer than G. Running a newer distribution on an older host <em>might</em> work; most applications correctly check the features available from the kernel they are on, and avoid using features which are not available - but there is no guarantee.</p>
+
+<p>A linux distribution is a kernel plus a specific set of system daemons, libraries and tools. However linux kernels are almost always backwards-compatible (code written for use on old kernels almost always works on newer ones), and often forwards-compatible (code written for use on new kernels often works on older ones). The glibc library also contributes to this compatibility by testing for kernel features and emulating them or using fallbacks when not available. This compatibility means that it is often possible to run the libraries+tools from one distribution on top of a kernel from another distribution. This makes it possible for one linux distribution to “emulate” another : just hide all processes and files of the host distro and then execute the “user-space” code of the emulated distribution as if the emulated distro’s kernel had just booted.</p>
+
+<p>Of course all operations that might reveal the presence of applications running within the host need to be hidden : calls that return lists of processes must only return ones belonging to the emulated system, network ports need to be remapped, etc. The /dev filesystem that represents raw devices also needs to be faked so that the emulated system sees only a subset of the available hardware; ioctl systemcalls need to be remapped, etc.  Configuring all of this correctly is the role of the different tools for managing/starting containers.</p>
+
+<h1 id="container-filesystems">Container Filesystems</h1>
+
+<p>In whole-system-virtualization, a virtual machine is given a fake <em>block device</em> storage device which it then uses to create a root filesystem. From the host side, this appears to be a single large binary file. When the guest is not running, it may be possible to mount such a binary file on the host using “loopback”, but otherwise the root storage device is not a normal filesystem. Of course, the guest can potentially mount directories provided by the host via NFS, or via vm-specific tools (eg the virtualbox <code>vboxsf</code> filesystem).</p>
+
+<p>In a container, the root filesystem can be a bind-mounted directory from the host’s filesystem. Applications running in the guest call into the shared kernel to make changes to the filesystem, and applications on the host can see these changes immediately just as if a process on the host had made the same change. The guest of course cannot see “above” its mount-point. One problem with this, however, is in managing the <em>ownership</em> of these files; when not using userid-mapping then “root within the container” is the same as “root outside the container” and so the container’s “system” files need to be owned by host-root, and files belonging to a <em>userid</em> defined within the container need to be owned by the same userid outside the container. When userid-mapping is being used, things get even more complicated: see section on “Account Management” later.</p>
+
+<p>Question: what happens if there are hard-links under the mount-point pointing to files outside the mount-point? I presume the guest can then see the referenced files (or directories)..</p>
+
+<p>Some container systems allow using a fake “block device” as the container’s filesystem, as in <em>whole system virtualization</em>. This makes management of file ownership simpler, as the whole binary file backing that block device is owned by whoever the container was executed as, and ownership of files nested within that image is invisible to the host - the guest can use whichever userids it wishes.</p>
+
+<p>It is common practice for containers to store their “real data” on a different filesystem than their rootfs. This allows the rootfs to be mounted read-only, and thus to be usable for launching multiple instances of the container. It also makes upgrading the container easier; a new updated container instance can be created, referencing the original data storage.</p>
+
+<h1 id="graphics-in-containers">Graphics in Containers</h1>
+
+<p>In general, there is no problem to allow applications running within a container to efficiently display 2D or 3D graphics via the host’s display-server.</p>
+
+<p>To connect to an X11 display server in the host, the guest will need access to /tmp/.X11-unix, which is where the running X server creates a unix-domain socket for local X clients to communicate with it. The guest <em>might</em> also need access to the host’s /dev/dri/card0 node so that libdrm works. Question: is this still needed with DRI2/DRI3 where the X server returns a file-descriptor to the client over the X socket? The tools which launch containers do not (yet) set this up by default, but instructions can be found <a href="https://wiki.archlinux.org/index.php/Linux_Containers#Systemd_considerations_.28required.29">here in the section labeled xorg</a>.</p>
+
+<p>For 3D operations, the guest will also need the appropriate OpenGL libraries for the physical graphics card that the host has; in the DRI architecture the client generates card-specific CPU instructions which are passed to the kernel DRM driver.</p>
+
+<p>The need for a card-specific driver in the guest unfortunately means that containers do not <em>isolate</em> guest code from details of the host’s graphics well. It is not possible for a game-publisher to simply provide a container image with a 3D game - all possible opengl libraries also need to be included in the image. Containers performing 3D may also break if the host upgrades a graphics card. Perhaps at some future time a “portable” architecture can be developed, eg where an X client can just fill a DRM buffer with gallium3d intermediate-representation code, and let the host then apply the gallium3d back-end to map that to GPU-specific code.</p>
+
+<h1 id="sound-in-containers">Sound in Containers</h1>
+
+<p>It is reasonably simple to redirect sound from applications in the container to a PulseAudio daemon process in the host; all that is necessary is to make the host <code>pulseaudio</code> daemon process create an additional communications socket, bind-mount that into the guest’s filesystem and set an environment-variable in the guest to point to that socket. See <a href="/linux/sound-stack">this article</a> for more information.</p>
+
+<h1 id="user-account-management">User Account Management</h1>
+
+<p>The earlier section on the USER namespace described what support the kernel provides for managing user-ids and rights. This section describes how this applies to containers in particular.</p>
+
+<p>By default, the user-ids within a container are the same as the user-ids outside the container, and in particular the container’s “root” is the same user as the host’s “root”. This means that:</p>
+
+<ul>
+  <li>When a filesystem from the host is bind-mounted into the filesystem-namespace of the guest, then guest code can access files with the same rights as outside the host.</li>
+  <li>When code in the guest creates files within <em>its</em> root filesystem, processes in the host can access those files with the same rights as the user of the same id inside the guest. For example, when directory /var/lib/machines/guest1 is the rootfs of a container, then when code running as user #1000 (“foo”) within the guest creates file $HOME/foo/readme.txt then a process in the host sees the file has owner=uid#1000 (whatever username that might correspond to in the host).</li>
+</ul>
+
+<p>Retaining the same UIDs is not a major security issue; although systemcalls from the guest execute as the “root” user (uid=0) resource-identifiers passed to system-calls are interpreted “in the namespaces of the caller process” - meaning that even though “root in the container” is the same as “root in the host”, processes running as root in the container simply cannot <em>reference</em> dangerous resources. In particular, when syscalls have parameters containing filesystem paths, those are interpreted in the context of the calling process’ filesystem-namespace - meaning arbitrary access to files on the host is just not possible.</p>
+
+<p>Syscalls which apply to resources not specified via a filesystem path (eg changing the system clock) are protected via “capabilities”; when a container launched in a new user-namespace then no process in the container has any capabilities on such resources. User namespaces are somewhat new; some containers (LXC in particular) were implemented before they existed. Such containers provide alternate ways of protecting the kernel from code running in the guest.</p>
+
+<p>TODO: how exactly is security achieved for pre-user-namespace containers? The LXC release notes state that some calls (including loading modules, kexec and open_by_handle_at) are “filtered” but doesn’t say how..</p>
+
+<p>When not mapping userids, the fact that root outside == root inside means that providing the guest with read-only views of host files needs to be done via read-only bind-mounts.</p>
+
+<p>Most containerlaunchers support customising userid-mappings if desired; a table can be defined which specifies that id=n outside the container means id=p inside the container. So for example, <code>ls -l /var/lib/machines/guest1/home/foo</code> might show that directory is owned by user#44000, but code running in the guest will see a different userid as the owner of that file.</p>
+
+<h1 id="container-management-tools">Container Management Tools</h1>
+
+<p>The following “container launcher” tools are capable of coordinating namespaces, cgroups, and other things to achive the effect of a “guest system”:</p>
+
+<ul>
+  <li>systemd-nspawn</li>
+  <li>lxc-start</li>
+  <li>libcontainer</li>
+</ul>
+
+<p>The following “container manager” tools wrap the above to provide additional features:</p>
+
+<ul>
+  <li><code>systemd-machinectl</code></li>
+  <li><a href="https://en.wikipedia.org/wiki/LXC">LXC</a></li>
+  <li>
+<a href="https://github.com/coreos/rkt">Rkt</a>, a subproject of <a href="https://coreos.com/">CoreOS</a>
+</li>
+  <li><a href="http://www.docker.com">Docker</a></li>
+  <li><a href="https://linuxcontainers.org/lxd/">LXD</a></li>
+</ul>
+
+<p>The following provide simple “container manager UIs”:</p>
+
+<ul>
+  <li>
+<a href="http://virt-manager.org">virt-manager</a> - depends on <a href="http://libvirt.org">libvirt</a>
+</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/GNOME_Boxes">Gnome Boxes</a> - also depends on libvirt</li>
+</ul>
+
+<p>The following provide management tools for large “cloud” datacenters, and may use container technologies:</p>
+
+<ul>
+  <li>
+<a href="http://kubernetes.io/v1.0/docs/user-guide/overview.html">Kubernetes</a> - an <a href="https://en.wikipedia.org/wiki/Cloud_computing#Infrastructure_as_a_service_.28IaaS.29">Infrastructure-as-a-Service</a> project initiated by Google</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/OpenStack">OpenStack</a> - an <a href="https://en.wikipedia.org/wiki/Cloud_computing#Infrastructure_as_a_service_.28IaaS.29">Infrastructure-as-a-Service</a> project initiated by RackSpace</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/OpenShift">OpenShift</a> - a <a href="https://en.wikipedia.org/wiki/OpenStack">Platform-as-a-Service</a> project initiated by RedHat</li>
+</ul>
+
+<p>A container is usually represented as a single file (tar/zip/etc) containing the executable code and scripts for the applications to be executed in the container environment. One use-case is to run a totally normal linux distribution as a container - and then potentially log in, and use package-management and manual changes to configure it with the desired application. Another use-case is to build a custom minimal set of code that just has a few applications (eg a database server); building such an environment so it has the right files in it is a non-trivial process and Docker currently has the best tools for this purpose.</p>
+
+<p>The <a href="https://www.opencontainers.org/">Open Container Initiative</a> is attempting to standardize the format of a “container file” so that the same container can be managed via tools from different providers (eg systemd, LXC, Docker or Rkt).</p>
+
+<h1 id="container-launchers">Container Launchers</h1>
+
+<h2 id="systemd-nspawn">Systemd-nspawn</h2>
+
+<p>The <code>systemd-nspawn application</code> can be given the path to a directory containing the root filesystem for a container. It will then set up a filesystem namespace with this directory/image as its root, create the other linux resource namespaces such as processes and network, and execute a initial application within that container. As alternative to a local directory, systemd-nspawn can be given a <code>/dev</code> node pointing to a disk partition, or the path to a file containing a filesystem (ie something mountable with loopback) - ie the sort of thing a standard distro installer can produce when run in a virtual machine.</p>
+
+<p>Mounting a directory from the host can be convenient, but there can be problems with file-permissions. Using a fake block-device avoids these file-permission issues, as the host doesn’t care which userids are assigned to which files inside the “big binary file” backing a fake block-device.</p>
+
+<p>The related systemd <code>machinectl pull</code> command can be used to <em>download</em> suitable container images (by default to <code>/var/lib/machines</code>), including Docker-format images (requires systemd v219). Command <code>machinectl</code> can also launch an image via <code>systemd-nspawn</code> with appropriate parameters; and administer running container instances (unless option <code>--register=no</code> was used). See later for more information on <code>systemd-machinectl</code>.</p>
+
+<p>Before launching a container, <code>systemd-nspawn</code> mounts various pseudofilesystems in the container’s (new) filesystem-namespace before invoking any process in the container. The <code>/sys</code> filesystem from the host is bind-mounted read-only; apps in the guest can therefore see all the host’s physical devices, buses, kernel-settings, etc. but cannot modify them. The guest is provided with a <code>/dev</code> which is a tmpfs filesystem with only a few nodes in it by default (eg <code>/dev/null</code>) - and this filesystem is read-only, so udev and related tools will not work within the guest. The guest’s <code>/proc</code> is a <em>new instance</em> of <code>procfs</code> and thus only shows processes running within the container. The <code>/run</code> mountpoint is also customised.</p>
+
+<p>Update 2015-09-11: There are <a href="https://lwn.net/Articles/656941/">plans to filter uevent messages</a> sent over the relevant netlink socket, allowing only processes in the root namespace to see them by default (ie all uevents would be invisible to a udev instance running in a container). A “forwarding app” running in the host can then optionally forward some messages to the container’s namespace. So maybe some day in the near future, udev can usefully be run in a container.</p>
+
+<p><code>systemd-nspawn</code> can make a copy of the specified filesystem or image first, thus making it simple to launch multiple identical containers from the same initial definition; when the initial image is on a BTRFS filesystem then the “copy” is a subvolume (snapshot). This is a feature of many container launchers.</p>
+
+<p><code>nspawn</code> can set up basic networking for the launched container. By default (no network-related commandline options), the container shares the network devices of the host - ie sees all devices that the host has, including the same IP addresses. The <code>private-network</code> option instead isolates the container completely, resulting in no network access. Option <code>network-interface</code> hands over exclusive ownership of a specified host network interface to the container. Option <code>network-veth</code> creates a virtual network consisting of guest and host and if it is named host0 then allocates it an appropriate IP address. Option <code>network-bridge</code> creates a virtual network (as with network-veth) then connects it to a specified network interface on the host; this option makes the container act mostly like an independent computer on the network while not interfering with the networking of the host. Option <code>port</code> can be used with network-veth or network-bridge to perform port-mapping from the host onto the guest.</p>
+
+<p>The cgroup created by <code>nspawn</code> to hold the new “initial process” of the container is usually named <code>/sys/fs/cgroup/systemd/machine.slice/{machinename}</code>.</p>
+
+<p>Although nspawn supports a large number of command-line options, most of them have sensible defaults. In most cases, all that is needed to start a complete-distro-in-container are “-D” and the path to the initial executable to run. The initial executable:</p>
+
+<ul>
+  <li>can be explicitly specified;</li>
+  <li>can be “–boot” in which case nspawn <em>searches likely locations</em> within the container to find an “init executable” (eg systemd-init)</li>
+  <li>can be omitted, in which case it defaults to <code>/bin/sh</code>
+</li>
+</ul>
+
+<p>In all the above cases, the <em>user</em> to run the command as can also be specified (though that isn’t very useful with the –boot option). When no user is explicitly defined, then the user is the same as the user that ran systemd-nspawn.</p>
+
+<p>The initial executable gets assigned a process-id of 1. When that process exits, the container terminates.</p>
+
+<p>See the <a href="http://www.freedesktop.org/software/systemd/man/systemd-nspawn.html">systemd-nspawn man-page</a> for more information on the command-line options for this tool.</p>
+
+<p>Recent <a href="https://github.com/systemd/systemd/blob/master/NEWS">changes</a> to nspawn:</p>
+
+<ul>
+  <li>v220 2015/05: adds “–private-users” to enable use of the linux user-namespace, support for the new kernel “overlayfs” filesystem</li>
+  <li>v219 2015/02: new nspawn options “–template”, “–ephemeral”, “–port”, machinectl gets “–copy-from” and “–copy-to”, machinectl gets “pull-*” commands to download images. Downloaded images are stored in /var/lib/machines.</li>
+</ul>
+
+<p>Note that systemd-importd is a simple helper for the “machinectl pull-*” commands, for security reasons (privilege separation).</p>
+
+<p>The nspawn “–port” option is interesting; it sets up networking so that the specified port in the <em>host</em> is mapped to the same port in the <em>guest</em>. This allows easy export of services in a guest as if they were running on the host. As an example, running an oracledb on an unsupported linux instance becomes trivial; install the supported linux version as a container and run oracle within it, and use –port to make it appear the DB is running on the host.</p>
+
+<p><code>nspawn</code> does not create a new user-namespace unless the <code>--private-user</code> flag is specified (requires systemd v220 or later); without this option, “root” within the container is really root, with all the normal root capabilities. Unprivileged containers (ie a non-root user launching a container) requires a user-namespace.</p>
+
+<h3 id="running-a-full-distribution-in-a-container-with-nspawn">Running a full distribution in a container with nspawn</h3>
+
+<p>Normally, a standard linux distribution’s userspace code assumes on startup that the underlying kernel has freshly booted, and so a set of startup-related processes perform initialisation steps such as scanning for devices and mounting filesystems. The systemd development team have gathered all such initialisation-related applications into the systemd project and updated them all to be container-aware, ie the systemd version of all such applications do <em>not</em> assume they are on a freshly-booted kernel but instead <em>check the kernel state</em> to see if there is any work for them to do. This allows a distribution that uses the systemd init-related tools to boot correctly on real hardware <em>or</em> in a container. The systemd variants of some standard tools check things such as whether the /sys filesystem is read-only (eg when udev then assumes it is in a container, and does nothing as the host will manage devices). Systemd-init allows “unit files” for system services to test whether the code is in a container, and if so then act differently. Systemd-init is responsible for mounting filesystems, but <em>checks</em> whether the specified filesystem is already mounted first; this allows a host to pre-mount certain filesystems before executing the systemd-init process within a container.</p>
+
+<p>Other custom containers (eg ones containing just a single app to execute) can also use relatively easily use systemd-init as their “pid1” process even when they otherwise lack most of the applications of a normal linux distro; they just need appropriate systemd unit files. Such an approach can be more elegant than simply executing the target application directly as PID#1 within the container; for example a container with systemd-init, a webserver and a suitable “unit file” that starts the webserver may be more robust than just executing the webserver directly.</p>
+
+<p>Systemd-init checks whether it is running in a container, and if so then handles cgroups appropriately; the cgroup created to represent processes within the container should be writable by the user the container is running as (nspawn creates the cgroup and sets ownership appropriately).</p>
+
+<p>Although systemd provides tools to launch and manage containers, it provides no tools for creating them. Fortunately, as a systemd-based distro runs fine within a container (as long as the launcher correctly sets things up), this is no problem at least for the “run complete distro in container” use-case. Distributions don’t typically provide files that can just be downloaded and “unzipped”, but debootstrap (debian), yum (fedora), and pacstrap (arch-linux) are all capable of setting up a complete distro; see the examples section of the systemd-nspawn documentation for details - but note that the given example commands must be run as root.</p>
+
+<p>Init systems <code>sysv-init</code>, <code>upstart</code>, and probably all others except systemd, will not run correctly within <em>any</em> container by default (it’s not an nspawn issue); they need to have various config-files modified first. nspawn provides no tools or help to perform this modification process; see later information about lxc-create for how the LXC project works around this. One particular problem is that distros that do not use systemd will usually use <code>cgmanager</code> to manage cgroups; see lxc-create for more information about cgmanager and the issues with integrating it into a container environment.</p>
+
+<h2 id="lxc-start">lxc-start</h2>
+
+<p>This tool is part of the LXC project, and is responsible for actually launching a new container from an existing image. Like <code>systemd-nspawn</code>, it <em>implicitly</em> requires:</p>
+
+<ul>
+  <li>the path to a directory containing the guest’s root filesystem</li>
+  <li>the path of an “initial app to run” within the container (defaults to <code>/sbin/init</code>)</li>
+</ul>
+
+<p>It then:</p>
+
+<ul>
+  <li>creates a cgroup to hold the initial process</li>
+  <li>creates a new linux filesystem namespace, and points it at the base dir of the guest’s rootfs</li>
+  <li>premounts a number of filesystems into the container’s filesystem namespace, including read-only bind-mounts of various host pseudofilesystems such as /sys</li>
+  <li>creates new process, network, and other linux namespaces</li>
+  <li>executes the specified initial application within the container</li>
+</ul>
+
+<p>In summary, pretty much like systemd-nspawn. Unlike nspawn, lxc-start doesn’t usually take a large list of commandline parameters. Instead it takes just a “container name”, and looks in <code>/var/lib/lxc/{container-name}</code> to find:</p>
+
+<ul>
+  <li>a <em>config file</em> that provides the necessary launch options, and</li>
+  <li>a subdir holding the container’s root filesystem</li>
+</ul>
+
+<p>This config file and rootfs are created by the lxc-create command; see the section on LXC later.</p>
+
+<p>lxc-start does not have automatic support for setting up the container’s networking; that needs to be done by a separate layer. However it does allow a container to “share the networking of another container”, ie once a single running container is correctly set up, other containers can be simply “joined to its network”.</p>
+
+<p>lxc-start is slightly more flexible than systemd-nspawn; for example it supports creating only a subset of the available namespaces. On the other hand, it is slightly more complex to use directly.</p>
+
+<h2 id="libcontainer">libcontainer</h2>
+
+<p>The Docker project’s most innovative features are related to defining and distributing container images. However it does of course also need a way to <em>launch</em> the containers it creates. Initially it did this by executing the lxc-start commandline tool. Later they reimplemented the core functionality of lxc-start as a library, so they could call that directly from the Docker tools. The <a href="http://jancorg.github.io/blog/2015/01/03/libcontainer-overview/">libcontainer</a> library is managed as a separate project, with the hope that other container-related projects could reuse it. Reuse has not been common, however; the fact that libcontainer is written in the Go programming language may be a significant cause (even though C code can link to it).</p>
+
+<p>lxc-start could be rewritten as a thin layer on top of libcontainer, but has not.</p>
+
+<p>systemd-nspawn has similar functionality but does not reuse libcontainer.</p>
+
+<p>The libvirt lxc “driver” also effectively reimplements lxc-start, and could potentially instead reuse libcontainer - though AFAIK that hasn’t been done.</p>
+
+<p>See the section on Docker for more information</p>
+
+<p>As libcontainer doesn’t actually provide a commandline inteface, this section should possibly cover the docker commands that start containers too. However, in general, Docker starts containers (via libcontainer) in a very similar manner to systemd-nspawn or lxc-start.</p>
+
+<p>The Docker commandline tool has a vast number of subcommands; “docker run …” is the one that actually launches a container, ie is the part that uses libcontainer. A typical command is:</p>
+
+<pre><code>docker run -d -P {containername} command
+</code></pre>
+
+<p>The “-d” runs the container “in the background” (ie does not connect the specified command to stdin/stdout). The “-P” means to look into the container’s config-file and map ports from the localhost interface onto the ports that the container declares it listens on; code on the local system can then connect to localhost:port to talk to daemons within the container. All rather similar to nspawn/lxc-start.</p>
+
+<h1 id="container-managers">Container Managers</h1>
+
+<h2 id="systemd-machinectl">systemd-machinectl</h2>
+
+<p><a href="http://www.freedesktop.org/software/systemd/man/machinectl.html">This tool</a> can download images (in “raw” format, docker format, etc) and write them into a suitable directory (<code>/var/lib/machines</code> when run as root).</p>
+
+<p>The downloaded images may contain a “manifest file” that machinectl can use to determine the appropriate parameters to pass to <code>nspawn</code> in order to start a container.</p>
+
+<p>There is a systemd daemon process (<code>systemd-machined.service</code>) with which all running containers register themselves by default; machinectl then consults it to determine which running containers exist.</p>
+
+<h2 id="lxc">LXC</h2>
+
+<p><a href="https://linuxcontainers.org/">lxc</a> is an open-source project (currently with a heavy Ubuntu influence). The <a href="https://linuxcontainers.org/lxc/getting-started/">LXC Getting Started</a> documentation is a good place to start. Note however that AFAICT the “creating unprivileged containers” instructions do not (currently) work when the host or guest uses systemd-init.</p>
+
+<p>There is a reasonable <a href="https://linuxcontainers.org/lxc/introduction/">official overview</a> and a very good blog posting named <a href="http://blog.scottlowe.org/2013/11/25/a-brief-introduction-to-linux-containers-with-lxc/">A brief introduction to lxc</a>. As the official overview states, LXC aims for the “operating system virtualization” goal, ie tries to set up a full operating system in a container, resulting in something similar to “whole system virtualization” but with better performance, less memory use, a little less flexibility (kernel version and drivers can’t be chosen in guest), and potentially more security issues (due to the shared kernel instance).</p>
+
+<p>The lxc project provides a <em>library</em> with all container-related functionality, library bindings for multiple languages, and some linux command-line tools that invoke the library.</p>
+
+<p>Commandline tool <code>lxc-create {cname} ...</code> is used to set up a container image ready for execution; a directory is created which contains a “config file” and the rootfs of the container. Command <code>lxc-start {cname}</code> then reads the config-file saved by lxc-create for that specified container, sets up filesystems/namespaces/mountpoints/etc as required then executes the specified ‘init’ process for that container.</p>
+
+<p>While systemd-based distributions auto-adapt to container environments, most other init systems instead assume a fresh kernel and so need modification before they will run in a container. The <code>lxc-create</code> tool provides a “template” system which can download and suitably modify a Linux distribution. Each template is a plain shell-script which fetches the original filesystem image (via debootstrap, dnf/yum, wget, etc) and then post-processes it.</p>
+
+<p>LXC can run a container in “privileged mode” (start it as root, with no user-namespace) or “unprivileged mode” (start it as any user, and use a user-namespace to run the init-process within the container as a container-local root). Running in “unprivileged mode” requires additional changes to the original distribution, ie different templates are required.</p>
+
+<p>The scripts for “privileged” containers are part of the LXC distribution, and can be found under <code>/usr/share/lxc/templates</code>. Alternatively, the special “download” template can be used, which dynamically downloads additional templates from a central repository. A template will typically:</p>
+
+<ul>
+  <li>validate the commandline arguments passed to lxc-create</li>
+  <li>WGET the OS image and unpack it</li>
+  <li>In the filesystem of the downloaded OS, mess with <code>/etc/inittab</code>, <code>/etc/network/interfaces</code> and <code>/etc/rc*.d</code> (to make them suitable for use in a container)</li>
+  <li>Install additional packages on the downloaded system!</li>
+</ul>
+
+<p>Run <code>sudo lxc-create -t download --name {somecontainername}</code> to get a list of all the “privileged templates” in the central repository. Run the same command without <code>sudo</code> to see the list of unprivileged templates. Currently, the list of templates for “unprivileged” containers is not very up-to-date (there are fewer options than for privileged templates).</p>
+
+<p>TODO: where is the central repository? The privileged templates appear to be version-controlled in the LXC git repo under <a href="https://github.com/lxc/lxc/tree/master/templates">templates</a>.</p>
+
+<p>Interestingly, the template system often uses ‘chroot’ to switch “/” to the downloaded OS filesystem temporarily, and then executes script-files from the downloaded OS to update it!</p>
+
+<p>The installation of packages is particularly interesting; for a debian target, this requires debootstrap to be installed on the <em>host</em>; for a redhat target rpm/yum must be available locally, etc. A package-manager on the <em>host</em> can be used to install packages on the <em>target</em> because of the “chroot” hack mentioned above; when the package-manager looks for the installed-packages database, it finds the one on the <em>guest</em> system (due to the chroot), and it installs files into the <em>guest</em> system filesystem for the same reason.</p>
+
+<p>Systems using non-systemd init systems will typically use <code>cgmanager</code> to handle control-groups. LXC therefore installs the cgproxy package into the unpacked distro - which overrides the standard cgmanager binaries with the cgproxy versions which forward all cgroup-handling DBUS commands to the cgmanager process in the host.</p>
+
+<p>Note that the “i386” templates provide a 32-bit userspace, while the “amd64” templates provide a 64-bit userspace.</p>
+
+<p>The “templates” used by LXC are basically the full user-space of the selected operating system. In the case of templates for “unprivileged” containers, the downloaded files have been modified to not perform steps which a non-root user are forbidden to do. The referenced “getting started” tutorial describes the things an “unprivileged container” cannot do as:</p>
+
+<ul>
+  <li>mounting most filesystems</li>
+  <li>creating device nodes (ie invoking system-call mknod)</li>
+  <li>any operation against a uid/gid outside of the mapped set</li>
+</ul>
+
+<p>See the earlier section on the USER namespace for the reasons why these are not possible when running a guest in a user-namespace. Interestingly, this of course means that these things <em>are</em> possible when running a container (not just LXC) without using a user-namespace. The security implications are clear - any code running as “root” within such a container can almost certainly compromise the host.</p>
+
+<p>Running <code>lxc-checkconfig</code> will show whether lxc is properly installed. On my Debian-8 system, it reports that the “cgroups memory controller” is not available. This is compiled in to the debian kernel, but disabled by default. It is optional for lxc, but can be enabled by editing /etc/default/grub and setting <code>GRUB_CMDLINE_LINUX="cgroup_enable=memory"</code> then running <code>update-grub2</code>.</p>
+
+<p>TODO: the above didn’t seem to work. The entry is indeed in <code>/boot/grub/grub.cfg</code> but lxc-checkconfig still reports “cgroup memory controller: missing”. Maybe this is because a cgroupfs mountpoint at <code>/sys/fs/cgroup/memory</code> already uses the memory-controller and so it is unavailable to <code>/sys/fs/cgroup/systemd</code>?</p>
+
+<p>Note that lxcfs (a part of the lxc project) is a special fuse-based filesystem that supposedly better isolates a container from its host. TODO: what exactly does this fix? Appears to be mounted at <code>/proc/meminfo</code> by default.</p>
+
+<p>Although the lxc-create command appears to be focused on setting up a complete <em>distribution</em> in a container, the lxc-start command is much more generic - it just sets up resources and namespaces then executes some process within the container. The executed process could be just about anything. Unfortunately, the executed process cannot (currently) be systemd-init, as that assumes some things about its environment which systemd-nspawn will set up but lxc-start will not. As noted earlier, the executed process can be sysv-init or upstart or similar - but only when their configuration-files have been specially set up to be container-friendly (which lxc-create is responsible for).</p>
+
+<p>When run as root, lxc-create writes information about the new container into <code>/var/lib/lxc/{container-name}</code>, where other lxc commands (eg lxc-ls and lxc-start) can see it. When run as non-root to create “unprivileged containers”, I presume this information goes into $HOME/lxc or similar - so won’t be seen by other users running lxc-ls.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="https://wiki.debian.org/LXC">LXC Configuration for Debian</a></li>
+  <li>
+<a href="https://www.stgraber.org/2013/12/20/lxc-1-0-blog-post-series/">Graber: LXC Blog Series</a> - from December 2013</li>
+  <li><a href="https://www.stgraber.org/2014/01/17/lxc-1-0-unprivileged-containers/">Graber: LXC unprivileged containers</a></li>
+</ul>
+
+<h2 id="default-mounted-filesystems-under-lxc">Default Mounted Filesystems under LXC</h2>
+
+<p>In the absence of any explicit configuration, the container will inherit the host OS filesystem mounts. A number of mount points will be made read only, or re-mounted with new instances to provide container specific data. The following special mounts are setup:</p>
+
+<ul>
+  <li>
+<code>/dev</code>: a new “tmpfs” pre-populated with authorized device nodes</li>
+  <li>
+<code>/dev/pts</code>: a new private “devpts” instance for console devices</li>
+  <li>
+<code>/sys</code>: the host “sysfs” instance remounted read-only</li>
+  <li>
+<code>/proc</code>: a new instance of the “proc” filesystem</li>
+  <li>
+<code>/proc/sys</code>: the host “/proc/sys” bind-mounted read-only</li>
+  <li>
+<code>/sys/fs/selinux</code>: the host “selinux” instance remounted read-only</li>
+  <li>
+<code>/sys/fs/cgroup/{something}</code>: the host cgroups controllers bind-mounted to only expose the sub-tree associated with the container</li>
+  <li>
+<code>/proc/meminfo</code>: a FUSE backed file reflecting memory limits of the container</li>
+</ul>
+
+<p>The documentation for the <a href="http://libvirt.org/drvlxc.html">libvirt lxc driver</a> appears to document LXC behaviour better than any lxc site…</p>
+
+<h2 id="coreos-and-rkt-aka-rocket">CoreOS and Rkt (aka Rocket)</h2>
+
+<p>The CoreOS project is a relatively new project which provides a custom Linux distribution intended to be run on big clusters of servers, where the sole purpose of each server in the cluster is to host large numbers of <em>containers</em> which perform the actual work. This approach is known as <a href="http://www.interoute.com/what-iaas">Infrastructure as a Service aka IaaS</a>; think “cloud data center” kinds of environments. Such an architecture allows admins to easily roll out new applications, scale them up as needed, add/remove hardware from the cluster at any time, etc.</p>
+
+<p>They decided not to use Docker for their container infrastructure, but instead develop their own named <a href="https://github.com/coreos/rkt">Rkt</a> (pronounced “rocket” or “rockit”). Unlike Docket, rkt deliberately does <em>not</em> contain any cluster-related features; it focuses only on managing containers on <em>one</em> host, and leaves cluster-management to a separate layer of tools (Docker tends to mix the layers together, and be a “swiss army knife” kind of tool).</p>
+
+<p>Rkt stores a “container image” in Application Container Image (ACI) format, which is pretty simple: a base directory containing a MANIFEST file and an adjacent directory named “rootfs” which contains the root directory for the container. The image-file is a tar-archive of these two things, and then optionally compressed. The manifest contains:</p>
+
+<ul>
+  <li>the name of the application within the container to be executed when the container is launched. AIUI, the container will terminate when this process terminates.</li>
+  <li>a list of “event handler” applications within the container which are to be executed in various circumstances, eg on container launch (“pre-start”)</li>
+  <li>mount-points: a list of (fstype, path) pairs which instructs the launcher which filesystems (eg /sys) from the host should be bound to which locations within the container</li>
+  <li>dependencies: a list of other images that should be <em>merged</em> with this one!</li>
+  <li>ports: a list of ports that apps in the container will be listening on; the rkt launcher can optionally ensure that these can be accessed from the host via address “localhost:{port}”.</li>
+</ul>
+
+<p>Rkt supports configuration files called “pods” which define <em>sets</em> of containers that should be run together, and how the networking of the containers should be set up so that the applications can correctly communicate. An example is a system composed of an http server, a “business tier” application and a database layer.</p>
+
+<p>The Rkt project provides a commandline application <code>rkt</code> for controlling rkt-format containers. This supports:</p>
+
+<ul>
+  <li>“<code>rkt run</code>” to launch a container</li>
+  <li>“<code>rkt fetch</code>” to download an image from a central repository</li>
+</ul>
+
+<p>One of the primary differences between the rkt and docker project has been rkt’s emphasis on security and verification; it has always supported/required cryptographic signatures on container images and various other items. Docker was unfortunately at least initially rather lazy on the security front, and potentially vulnerable to attack via modified container images; Docker developers have been working to improve this in recent releases.</p>
+
+<p><code>rkt</code> divides the process of launching a container into three parts:</p>
+
+<ul>
+  <li>stage0 is the work done by the rkt application itself. This involves downloading and unpacking the container image into a suitable location. It then chooses a suitable ‘execution engine’ to handle stage-1, links or copies the execution-engine into <code>stage1/rootfs/init</code>, and executes it;</li>
+  <li>stage1 is what is referred to elsewhere as an “execution engine”; it is responsible for setting up an environment that can be <em>executed</em> (see below);</li>
+  <li>stage2 is an “init process” (pid1) that runs binaries within the container</li>
+</ul>
+
+<p>The most common stage1 implementation sets up the container root filesystem to be ready for execution by systemd-nspawn. This application <em>parses the container manifest</em>, and modifies the container root filesystem so that it contains systemd configuration files corresponding to the container’s manifest. It also writes a copy of systemd-init into the container filesystem. It then executes systemd-nspawn with appropriate parameters. In this case, “stage2” is the systemd-init process running within the container; this will find service “unit files” in the local filesystem that point to the actual applications that the rkt manifest wanted to run.</p>
+
+<p>When using the “systemd-nspawn” stage1, rkt therefore effectively <em>converts the executed container into a custom systemd-based distro</em> by generating the necessary systemd service files and launching systemd-init for the container even though the container has no such config-files or init-binary. The systemd-init service files then point to the actual end application(s) within the container. Note that while this is the current implementation, rkt could potentially use other techniques in future; the use of systemd is really an internal implementation detail.</p>
+
+<p>There is an alternate stage1 which sets things up so that the container can be executed via QEMU/kvm - ie in a “whole virtual environment” with its own linux kernel rather than a namespaced-container sharing the linux kernel of the host. I presume kvm-tool is used (or similar), where the linux kernel to be executed is specified by a path - and presumably this path points to the same linux kernel used by the host, ie the launched environment is running a <em>new copy</em> of the same kernel as the host.</p>
+
+<p>So what’s the difference between rkt and simply using systemd-nspawn directly?</p>
+
+<ul>
+  <li>optionally, rkt can use a different stage1</li>
+  <li>rkt can download images from remote repositories</li>
+  <li>rkt uses a manifest to determine the options to pass to systemd-nspawn</li>
+  <li>rkt uses a manifest to determine which applications within the container to start on boot, by auto-generating the appropriate systemd unit-files</li>
+  <li>a few other minor points</li>
+</ul>
+
+<p>In short, for most people rkt is a nice but not very complicated wrapper over systemd-nspawn.</p>
+
+<p>One way to create an appropriate container filesystem for rkt is to use <code>packages2aci</code> which takes as input a debian package and generates an ACI file containing all the files in that package, plus all the files from the packages it <em>depends on</em>. This should ensure that all the necessary config-files, dynamic libraries, etc are included.</p>
+
+<p>Another is to convert an existing Docker file to rkt format with <code>docker2aci</code>.</p>
+
+<p>Question: are there other ways to create an appropriate container filesystem for rkt generated? Given an app A which depends on dynamic libraries (almost <em>everything</em> depends on glibc for example), how can a suitable filesystem containing all the necessary libraries be easily created?</p>
+
+<p>CoreOS provides a set of other functionality in addition to Rkt;</p>
+
+<ul>
+  <li>
+<code>rkt</code> provides the basic container management;</li>
+  <li>
+<code>etcd</code> provides centralized configuration;</li>
+  <li>
+<code>fleet</code> provides load-balancing of container instances across a set of servers.</li>
+</ul>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="https://github.com/coreos/rkt/blob/master/Documentation/devel/architecture.md">Rkt Architecture</a></li>
+  <li><a href="http://rocket.readthedocs.org/en/latest/">Rocket Internals</a></li>
+  <li>
+<a href="http://containerops.org/2014/12/19/docker-vs-rocket-gimme-a-break/">Docker vs Rocket</a> - a (fair) review of the state of Rkt in December 2014, in comparison to Docker.</li>
+  <li><a href="https://github.com/appc/spec/blob/master/SPEC.md#app-container-image">Rkt APPC specification</a></li>
+  <li><a href="http://blog.justinsb.com/blog/2015/04/12/packages-to-aci/">Packages2aci</a></li>
+  <li><a href="https://blog.kismatic.com/running-rkt-on-kubernetes/">rkt on Kubernetes</a></li>
+</ul>
+
+<h2 id="docker">Docker</h2>
+
+<p>In comparison to other tools:</p>
+
+<ul>
+  <li>The LXC set of tools are mostly intended for launching a complete distro; an administrator can then log in to the resulting container and further configure it (eg via the distro’s standard package-management tools).</li>
+  <li>nspawn is a tool for launching a system image, but doesn’t address how to create such an image (other than ensuring that a totally normal distro works fine in the container, as long as it is based on systemd).</li>
+  <li>rkt is primarily a tool for launching a few specific applications in a container, wrapped in autogenerated systemd-init configuration files.</li>
+</ul>
+
+<p>While Docker can be used to execute a complete distribution (LXC-style), but it is most commonly used like <code>rkt</code> to launch specific applications. It provides tools which takes a <em>specific application</em> (or set of related applications) and build a system image that contains <em>just enough userspace operating system support</em> for those applications to run within a container. A container <em>definitely needs</em> an “init” process which acts as the parent for all other processes, and the specifed applications may need supporting files such as system libraries, shells, possibly a display-server. Docker’s main purpose is to <em>figure out</em> what those dependencies are and then create a suitable system image.</p>
+
+<p>Alternatively, Docker can be thought of as a way to bundle an application with all its dynamic libraries and other resources into a single “installable unit” - a “fat application”. Such an application will then run on a wide variety of underlying platforms - and will be stable over long time-periods even when the underlying platform (host distribution) has significant changes. The disadvantages are of course: higher disk usage, poorer performance (due to duplication), and not getting security/bugfix updates through the underlying platform’s normal update mechanism.</p>
+
+<p>Docker provides its own commandline tools to <em>launch</em> such containers - though systemd-nspawn can also do so (as long as the container uses systemd-init), as can lxc-start. Unlike systemd/lxc, Docker can potentially launch containers on non-linux host operating systems such as Solaris (which has long had an excellent container system of its own) or BSD (which have long had “bsd jails”).</p>
+
+<p>Docker provides an “image repository” to which system images can be uploaded, and from which they can be downloaded. There is a nice set of “predefined” images, for such things as running a postgresql database. When managing a cluster of hosts, a custom image can be created and uploaded to a local repository and then downloaded from there to multiple hosts in the cluster. This repository has been a big success, and many non-docker tools have added support for fetching and launching images held in the docker repository (including nspawn and rkt).</p>
+
+<p>Once installed on a host, a docker daemon process (running as root) called the “docker engine” listens for docker admin commands. The <code>docker</code> commandline <em>client</em> application sends commands to the local “docker engine”. The primary <a href="https://docs.docker.com/reference/commandline/cli/">commands</a> provided by the docker client are:</p>
+
+<ul>
+  <li>
+    <p>“<code>docker pull {image}</code>” downloads the specified container image from the main repository to the local filesystem</p>
+  </li>
+  <li>
+    <p>“<code>docker run {image} {command} {args}</code>” creates a new container (filesystem image) using the specified image (downloading it if necessary), then executes the specified command within the container as if logged-in. When the command completes, the container stops. A particularly useful command is <code>docker run -it {image} /bin/bash</code> which gives an interactive shell within the container. The <code>-d</code> option instead leaves the container running after the command has completed.</p>
+  </li>
+  <li>
+    <p>“<code>docker ps</code>” lists all running containers</p>
+  </li>
+  <li>
+    <p>“<code>docker stop {id}</code>” terminates a running container</p>
+  </li>
+</ul>
+
+<p>Kitematic is a GUI application for Windows or MacOS which creates a virtualbox-based VM, installs linux into this VM, then installs Docker into that linux instance. Kitematic also provides GUI tools to browse the set of images available from the standard docker repository, and automatically install/launch them as containers inside the linux instance running within virtualbox.</p>
+
+<p>Docker on Linux requires the host to be a 64-bit system.</p>
+
+<p>To actually <em>launch</em> a container, the Docker Engine can use LXC or systemd-nspawn. Or it can use its own <code>libcontainer</code> library. All of these interact with the linux kernel systemcalls and cgroup-filesystem in order to create appropriate control-groups and namespaces, mount/configure filesystems for the container environment, etc, and then finally load and execute the “init” process for the container. As noted above, Docker can also launch containers on some non-linux operating systems.</p>
+
+<p>Docker images can easily be created by <a href="https://docs.docker.com/userguide/dockerimages/">modifying other images</a>. The manual approach is to start a container with a base image, make changes within the container (eg use a package-installer), then stop the container and <em>upload</em> its current state as a new image. The automated approach is to create a kind of script called a <a href="https://docs.docker.com/reference/builder/">dockerfile</a> which specifies the original image, and a list of operations to perform within the container (eg to install additional packages); <code>docker build</code> will then execute the dockerfile to produce an output image.  This dockerfile approach is somewhat similar to <code>lxc-create</code> templates.</p>
+
+<p>The “Docker Hub” website can be configured to associate a dockerfile with an existing image and a set of other git repositories; when any of the other repos changes, the dockerfile is re-executed to update the image. <code>docker build</code> produces <em>overlay files</em> that can be applied to the original image, ie uses much less diskspace than a complete new image. When the <code>docker pull</code> command downloads such a “modified image”, it downloads the original image and the overlay(s) separately then merges them.</p>
+
+<p>The most significant difference between Docker and other container tools is its build-tools and docker-hub website. These allow people to easily create images (often as derivatives of other images), and use images created by others. Images are managed as layers, and stored in a git repository which makes them efficient in disk storage, and provides history and stable versions. The tools for launching and managing containers are not much different than LXC or systemd-nspawn.</p>
+
+<p>Each Docker image includes a <em>manifest file</em> that specifies things like exposed network ports, or “linked images”.</p>
+
+<p>Containers (ie <em>installed images</em>) can be “linked”. As each container is installed, docker assigns a permanent internal IP address to it; when the “dependent” container is started, global environment variables and file <code>/etc/hosts</code> are set to provide the IP address of the container that it is linked to, and the ports it exports; applications can then check for these environment variables. An example: user installs an image containing a database, and a second image containing a webapp, and links the two. The user then starts the database and webapp containers. Code in the webapp container can use the magic environment variables to find the name/IP-address of the database-container, and the ports that it exports. Docker naturally also ensures that networking is appropriately set up so that the two containers can see each other; this does NOT necessarily imply that they are on the same host.</p>
+
+<p>As noted in the section on “filesystem storage”, it is common practice to have separate filesystems for the <em>container</em> and the data it operates on. Docker really encourages this as it makes it possible to use <em>version control</em> on the container image. Docker provides tools to manage “data volumes” for data-storage. The docker management tools track “data volumes” as separate items from “container images”; tools can list existing data volumes, and associate them with containers (in which case they are auto-mounted into that container) etc.</p>
+
+<h2 id="lxd">LXD</h2>
+
+<p>The <a href="https://linuxcontainers.org/lxd/">LXD project</a> is a layer <em>on top of</em> LXC which adds tools for managing <em>clusters</em> of virtual machines.</p>
+
+<p>An “lxd agent” daemon process (system service) is expected to run on each host in the cluster, listening for admin commands.</p>
+
+<p>It provides an “lxd-images” command which downloads lxc-compatible linux operating-system images from a remote repository. The primary difference between lxc-create and lxd-images is that lxd-images only supports “pre-built images” rather than the lxc approach of modifying real distro images on-the-fly. The lxc approach can better keep up with rapid distro releases (ie it is easier to get LXC running on a recently running distro). However the LXD approach is more “stable”; the lxc approach can quite easily produce a <em>broken</em> container image if an old script is applied to a new distro. LXD appears to be more “production-quality” focused, ie something that can be used in commercial environments, while LXC is more “developer-oriented”, ie for experienced linux admins to create test environments with.</p>
+
+<p>Strangely, it appears to provide a command named “lxc” which extends the set of commands provided by the lxc project. The extensions include:</p>
+
+<ul>
+  <li>
+<code>lxc exec {container} {command}</code> which executes a process within the container</li>
+  <li>
+<code>lxc exec file [pull|push] {container}/path</code> which reads or writes files within the container filesystem</li>
+</ul>
+
+<p>All of the <code>lxc</code> commands are simply sent to an appropriate <code>lxd</code> agent process; by default the one on localhost but alternate agents can be specified by ip-address.</p>
+
+<p>The “lxd agent” can optionally receive commands over the network, allowing lxd client tools to configure remote servers via their lxd agents.</p>
+
+<p>The LXD project also provides an integration module for the OpenStack “cloud administration” software, allowing OpenStack tools to deploy/start/manage containers on a linux host running the lxd agent.</p>
+
+<h1 id="container-manager-uis">Container Manager UIs</h1>
+
+<h2 id="virt-manager">virt-manager</h2>
+
+<p>This application can be used to manage the set of containers on the local host, or on remote hosts. It is based on “libvirt”, and thus can administer a wide range of technologies including Xen, Microsoft Hyper-V, KVM (whole system virtualization), and lxc-based.</p>
+
+<p>By “administer”, I mean being able to see which virtual-machines/containers are <em>installed</em> on each host and which are running, being able to start/stop such images, and potentially be able to do things like manage their assigned disk storage or network interfaces (depending on the underlying virtualization technology).</p>
+
+<p>In the simplest case, virt-manager provides a user with a UI to define new VMs or containers and start them.</p>
+
+<h2 id="gnome-boxes">Gnome Boxes</h2>
+
+<p>This is a nice gnome-desktop-compliant GUI application which can be used to manage the set of containers (or VMs) on the local host (or remote hosts when appropriately configured).</p>
+
+<p>Gnome-boxes uses <code>libvirt</code> underneath, and so supports all virtualization technologies that libvirt supports - ie has exactly the same functionality as the virt-manager GUI application.</p>
+
+<h1 id="cloud-management-tools">Cloud Management Tools</h1>
+
+<p>Some applications running within containers can be scaled up just by providing more instances (eg http servers returning static pages). However other applications need to <em>communicate with other instances of the same application</em>, or with <em>helper applications</em>; such functionality is sometimes referred to as “Orchestration”.</p>
+
+<p>Orchestration tools help applications running in containers or virtual machines to find and communicate with their helper applications running in other environments. Configuration is also a significant issue: when thousands of instances of the same container exist, it is not desirable to have to log in to each one to change a configuration parameter!</p>
+
+<p><a href="http://www.ovirt.org/About_oVirt">oVirt</a> helps to deploy large numbers of kvm-based whole-system-virtualization images within a datacenter. However it is a reasonably simple tool, not comparable to Kubernetes or OpenShift (described below).</p>
+
+<p><a href="http://kubernetes.io/v1.0/docs/user-guide/overview.html">Kubernetes</a> provides tools that deploy and administer container images across large numbers of servers - ie provides <a href="https://en.wikipedia.org/wiki/Cloud_computing#Infrastructure_as_a_service_.28IaaS.29">Infrastructure-as-a-Service</a>. It uses either Docker or Rkt to actually deploy/manage container images and instances. Kubernetes also provides a set of other technologies such as distributed configuration and networking.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/OpenStack">OpenStack</a> provides similar functionality to Kubernetes, but also supports <em>whole system virtualization</em>.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/OpenShift">OpenShift</a> is software that provides <a href="https://en.wikipedia.org/wiki/OpenStack">Platform-as-a-service</a>; it deploys and manages <em>plugins/configuration</em> across many servers rather than managing <em>container or VM images</em>. Such plugins/configuration can themselves be executable code in interpreted or bytecode-based languages (eg Java, Perl, PHP) but are processed in the context of some userspace application (eg a webserver or PHP installation). OpenShift may use containers to deploy the <em>applications</em> that the user’s plugins/config are then deployed into - though that is not directly visible to the end users.</p>
+
+<p>Neither of these tools will be covered in any further detail here, as it is all user-space code; this article is mostly about how container tools interact with the Linux kernel on a single physical machine.</p>
+
+<h1 id="other-topics">Other Topics</h1>
+
+<h2 id="open-container">Open Container</h2>
+
+<p>The open-container project is trying to unify parts of Docker, systemd machinectl, Rkt, etc. These projects are all aware that differentiation is what makes them money, but too much fragmentation helps none of them.</p>
+
+<p>The <code>runc</code> commandline tool effectively replaces <code>systemd-nspawn</code> or <code>lxc-start</code>. Rather than take a bunch of commandline parameters, it instead takes a JSON file that defines how networking is to be set up, which <code>/dev</code> nodes should be made available, which special filesystems need to be mounted, etc. The <code>runc</code> tool can then be used from scripts etc, without needing to worry about different tools taking different arguments.</p>
+
+<p>The OpenContainer “Bundle Container Format” specification defines that a “container image” should be a directory with at least 2 top-level entries:</p>
+
+<ul>
+  <li>config.json as defined in <a href="https://github.com/opencontainers/specs/blob/master/config.md">this specification</a>
+</li>
+  <li>some directory holding the actual filesystem of the container - its name is referenced from an entry in <code>config.json</code>
+</li>
+</ul>
+
+<p>It seems that OpenContainer is even looking to support Windows - it isn’t currently clear to me if this means the <em>host</em> is Windows, or the <em>guest</em> or both..</p>
+
+<h2 id="libvirt">libvirt</h2>
+
+<p><a href="http://libvirt.org/goals.html">libvirt</a> is something in between a container “launcher” and an “orchestration tool”. It is a library that provides a standard API for starting/stopping and otherwise administering containers, while isolating the caller from the underlying technology. It can be applied to containers <em>on the local host</em>, or to <em>containers on remote hosts</em>.</p>
+
+<p>It supports a whole range of VM/container technologies including:</p>
+
+<ul>
+  <li>Xen hypervisors</li>
+  <li>QEMU/KVM hypervisors</li>
+  <li>Linux containers</li>
+  <li>Microsoft Hyper-V</li>
+</ul>
+
+<p>When the target is remote, and the target technology already provides a remote-management API then libvirt uses that API - eg with Xen. When the remote target does not provide a native remote-management API then the target host needs to be running an instance of the <code>libvirtd</code> daemon (which despite the name is an application, not a library).</p>
+
+<p>One of the nice features provided by libvirt is the ability to query remote machines for the list of containers that exist/are-running (may require a libvirtd daemon on that server).</p>
+
+<p>The Linux-containers support in libvirt is referred to as “LXC”, but it appears to have very little to do with the <em>project named LXC</em>, instead just meaning “containers on linux, using Linux namespaces”. <code>libvirt</code> has an <a href="http://libvirt.org/drvlxc.html">lxc driver</a> which effectively implements the same logic as the lxc-start tool from the lxc project does - and in fact the lxc tools do not need to be installed for the libvirt-lxc driver to work. According to the man-page for lxc-create, creating a container will create a config-file under <code>/var/lib/lxc/{container-name}</code>. Presumably the libvirt-lxc driver can look there to see which containers exist, and then looks somewhere else to see which of them are <em>running</em>.</p>
+
+<p>The libvirt project provides <code>virsh</code> which is an interactive shell for administering virtual environments.</p>
+
+<p>libvirt is really as useful for whole-system-virtualization as is for containers..</p>
+
+<p>The API for libvirt can be found <a href="http://libvirt.org/hvsupport.html">here</a>.</p>
+
+<h1 id="xdg-app">xdg-app</h1>
+
+<p>Some developers are experimenting with ways to run individual desktop applications in a “sandbox” using container-like technologies. The current concept is that the author of some software (or someone else like a distribution) can create an “xdg package” for that application which is then installed. Running the app sets up a container-like environment before executing the actual application.</p>
+
+<p>See: <a href="https://wiki.gnome.org/Projects/SandboxedApps">https://wiki.gnome.org/Projects/SandboxedApps</a></p>
+
+<h2 id="related-software">Related Software</h2>
+
+<ul>
+  <li>
+<a href="https://coreos.com/blog/cluster-level-container-orchestration/">Fleet</a> – possibly comparable to Kubernetes/OpenStack?</li>
+  <li>virt-p2v is a live-cd which can be booted on a physical machine, and generates an image of that machine which can then be run under KVM.</li>
+  <li>virt-v2v converts a Xen or VMWare guest into an image usable with KVM.</li>
+</ul>
+
+<h1 id="applying-security-updates">Applying Security Updates</h1>
+
+<p>Code sometimes needs to be updated to include patches for security issues discovered since its release. This is a solved problem for standard Linux distributions; a task like “apt update; apt upgrade” or equivalent is executed regularly (eg once per day). This <em>might</em> require updated applications to then be <em>restarted</em> (or in worst case, for the entire OS to be rebooted) but that can also be managed.</p>
+
+<p>Unfortunately, applying security patches to containers is not so easy. In general, container images are <em>immutable</em>; it is not appropriate to apply updates to the container image from inside the container. A minimal container image might also not have the necessary update-tools or associated database of installed packages.</p>
+
+<p>AIUI, the current recommendation is to (somehow) detect when a relevant security patch has been issued, and then rebuild the container image using the very latest package versions. A container image is usually build from <em>within</em> some host environment; if that host environment is itself a VM, then the regular update-tools and package-database should be available there (in order to detect relevant patches), and that environment (after update) can then be used to build the updated container images. Any currently-running containers should then be stopped and restarted using the new image.</p>
+
+<p>This approach does have problems, however. See <a href="http://lwn.net/Articles/645467/">this discussion</a> for more information.</p>
+
+<h1 id="references-and-useful-links">References and Useful Links</h1>
+
+<ul>
+  <li><a href="http://searchservervirtualization.techtarget.com/definition/container-based-virtualization-operating-system-level-virtualization">Comparison of Virtualization and Containers</a></li>
+  <li>
+<a href="https://linuxcontainers.org/">linuxcontainers.org</a> - the umbrella project for LXC, LXD, LXCFS and CGManager</li>
+  <li>
+<a href="https://lwn.net/Articles/745820/">LWN: Containers from Userspace</a> – link added 2018-02</li>
+  <li><a href="http://community.redhat.com/blog/2014/10/gnome-boxes-3-14-unboxed/">Gnome Boxes Blog</a></li>
+  <li><a href="https://www.insecure.ws/linux/systemd_nspawn.html">containers, nspawn and overlayfs</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Chroot">chroot</a></li>
+  <li><a href="https://wiki.debian.org/FakeRoot">FakeRoot</a></li>
+  <li><a href="https://wiki.archlinux.org/index.php/Install_bundled_32-bit_system_in_64-bit_system">Running 32-bit apps on a 64-bit system via chroot</a></li>
+  <li><a href="http://lwn.net/Articles/572957/">LWN: Creating containers with systemd-nspawn</a></li>
+  <li><a href="http://phoronix.com/scan.php?page=news_item&amp;px=Ubuntu-LXD-vs-KVM">Video: LXD vs KVM</a></li>
+  <li><a href="http://0pointer.net/blog/systemd-for-administrators-part-xxi.html">Systemd for Administrators: Container Integration</a></li>
+  <li><a href="https://lwn.net/Articles/647634/">LWN: systemd and containers</a></li>
+  <li><a href="https://lwn.net/Articles/646054/">LWN: Containers and Persistent Data</a></li>
+  <li>
+<a href="https://felipec.wordpress.com/2013/11/04/init/">Contreras: Demystifying the init system</a> - an excellent presentation of what a PID1 process does, by reimplementing a basic <code>init</code> in Ruby.</li>
+  <li>
+<a href="http://www.freedesktop.org/wiki/Software/systemd/ContainerInterface/">systemd-init container interface</a> - specifies what <em>host</em> code that launches a container needs to do when the launched container uses systemd-init as its init system.</li>
+  <li><a href="http://lwn.net/Articles/645013/">LWN: CoreOS Fest</a></li>
+  <li>
+<a href="http://lwn.net/Articles/644675/">LWN: Clear Containers</a> - Clear Containers is an Intel-lead project that combines hardware-virtualization and containers, ie a middle-ground between containers and full VMs.</li>
+  <li><a href="http://www.dwheeler.com/essays/cloud-security-virtualization-containers.html">David Wheeler: cloud security: Virtualization, Containers and Related Issues</a></li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/linux-containers/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

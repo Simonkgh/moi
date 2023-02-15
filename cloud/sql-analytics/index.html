@@ -1,0 +1,390 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Analytic Functions, Partitioning and Windowing in SQL and BigQuery</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Analytic Functions, Partitioning and Windowing in SQL and BigQuery</h1>
+    <aside>First published on: April 19, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a>, <a href='/category/BigData/'>BigData</a>, <a href='/category/Programming/'>Programming</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>Many databases which support SQL offer “analytic functions” (also known as “analytical functions”). I recently needed to perform some queries (on Google BigQuery) that regular SQL just couldn’t handle, so had to brush up on my knowledge in this area - and here are my (prettified) notes.</p>
+
+<h1 id="the-different-kinds-of-sql-function">The Different Kinds of SQL Function</h1>
+
+<h2 id="normal-functions">Normal Functions</h2>
+
+<p>Normal SQL functions apply independently to each row, without any inter-row interactions; an example is <code>to_upper(fname)</code> whose output is never affected by values in other rows.</p>
+
+<h2 id="aggregate-functions">Aggregate Functions</h2>
+
+<p>Aggregate functions combine values from multiple rows and produce just one row of output. An example is:</p>
+
+<pre><code>select sum(x), max(x) from data
+</code></pre>
+
+<p>Aggregate functions are often used with groups. Grouping results in one output row per group:</p>
+
+<pre><code>select category, sum(x), max(x) from data group by category
+</code></pre>
+
+<p>The only “output columns” allowed in a grouped query are:</p>
+
+<ul>
+  <li>columns used in the group-criteria</li>
+  <li>the results of aggregate functions</li>
+</ul>
+
+<p>When no group is specified for an aggregate function then the entire table is considered to be a single group and (as aggregates generate one output row per group) the output is a single row.</p>
+
+<h2 id="analytic-functions">Analytic Functions</h2>
+
+<p>Analytic functions combine values from multiple rows (like aggregates), but produce an output for each row (like normal functions).</p>
+
+<p>The set of rows over which values are combined is specified by a <em>window frame clause</em>. For each record, the <em>window frame clause</em> is applied to that record to determine the <em>pane</em> (set of records) over which the analytic function will be applied. The function is then applied, and the result output.</p>
+
+<p>The <em>window frame clause</em> may also specify an <em>order by</em> clause (and usually does). This does not affect the order in which rows are returned from the select-statement, but instead affects which records are in each <em>pane</em>.</p>
+
+<p>Analytic functions are often used with partitions. Partitioning effectively splits a table into a set of subtables. The <em>pane</em> computed for each record is clipped to the boundaries of the partition, ie a <em>pane</em> only includes records in the same partition. The process of partitioning is somewhat like the first pass of grouping, but without the following “roll-up” that generates just one output record per group.</p>
+
+<p>When a query does not specify a <em>window frame clause</em> at all then the <em>pane</em> for each record is the entire partition. And when a <em>partitioning clause</em> is not specified, then one partition exists which contains the entire set of records selected by the where-clause. It is therefore valid to use an analytic function without an (explicit) <em>window frame clause</em> or partition - ie to write just “<code>somefn(..) over ()</code>”.</p>
+
+<h1 id="the-over-clause">The Over Clause</h1>
+
+<p>Each analytic function used in a select-statement must be followed by “<code>over (..)</code>” to indicate that the analytic version of that function is wanted. This is necessary as there are some analytic functions with the same name as an aggregate function; without the <code>over</code> the aggregate version will be used - and the SQL will be rejected if no <code>group by</code> is present.</p>
+
+<p>The form “<code>over ()</code>” (with empty parentheses) can be used if the default value for the <em>window clause</em> is sufficient (see later).</p>
+
+<p>While all aggregate functions in a statement share the same grouping condition, each analytic function in a statement has its own over-clause. As it is common for multiple analytic functions in the same statement to use the same <em>window clause</em>, BigQuery has a syntax to allow the <em>window clause</em> to be defined once within the SQL statement and referenced by name with “<code>over somewindowname</code>” rather than “<code>over (..)</code>”.</p>
+
+<h1 id="the-rownumber-function">The <code>row_number</code> Function</h1>
+
+<p>Probably the simplest of all analytic functions is <code>row_number()</code> which simply generates increasing integer values for each row. When applied to a sorted set of records, this makes it easy to then select the first N records.</p>
+
+<p>There is one slight problem: BigQuery does not allow analytic functions in where-clauses, nor does it allow referring to computed columns from where-clauses. This statement therefore does not work:</p>
+
+<pre><code>select id, row_number() over (order by score) as rn from data where rn &lt; 3;
+</code></pre>
+
+<p>but this one does:</p>
+
+<pre><code>with 
+  results as (select id, row_number() over (order by score) as rn from data)
+select * from results where rn &lt; 3;
+</code></pre>
+
+<p>There are a few details in the above query that are discussed later, but hopefully the purpose of <code>row_number()</code> is reasonably clear.</p>
+
+<h1 id="window-frames">Window Frames</h1>
+
+<p>A <em>window frame clause</em> is an expression which is applied to “the record currently being evaluated”, to determine which other records in the current partition should be included as input to the analytic function. The resulting set of records is called a <em>pane</em>.</p>
+
+<p>Some examples of window-frame-clauses (from the BigQuery docs):</p>
+
+<ul>
+  <li>
+<code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> – (from start of partition to row being evaluated)</li>
+  <li>
+<code>ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</code> – (all records in partition)</li>
+  <li><code>ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING</code></li>
+  <li><code>ROWS 10 PRECEDING -- equivalent to BETWEEN 10 PRECEDING AND CURRENT ROW</code></li>
+</ul>
+
+<p>Any record offsets for the pane are clipped to the partition; for example when “ROWS 10 PRECEDING” is applied to the first record in a partition the pane includes just the current record, and when applied to the second record in a partition it includes just the first record and the current record.</p>
+
+<p>When no <em>window frame clause</em> is specified:</p>
+
+<ul>
+  <li>when there is no order-by clause then the pane for each record consists of the whole partition</li>
+  <li>when there is an order-by clause then the pane for each record consists of all records up to the current row</li>
+</ul>
+
+<p>It is quite common for a query using analytic functions to use the default window frame.</p>
+
+<p>An example of the use of order-by is:</p>
+
+<pre><code>select id, sum(value) over () as totalSum, sum(value) over (order by id) as runningSum from data
+</code></pre>
+
+<p>in which totalSum is the same for each record, while runningSum is not.</p>
+
+<p>The keyword RANGE can be used instead of ROWS, in which case the pane (set of records) is determined using the value of the order-by column +- the offset. Example:</p>
+
+<pre><code>select .. (partition by somecol order by myval RANGE between 2 preceding and 2 following) ...
+</code></pre>
+
+<p>For each record in the above query, the <em>pane</em> is the set of records where <code>myval</code> is in range <code>(curr-record.myval - 2, curr-record.myval + 2)</code>. Because the data is sorted by <code>myval</code>, the set of records in the pane are all adjacent - but the number of records in that set may not always be the same.</p>
+
+<p>Reminder: when no partition is explicitly defined, then the whole set of selected records is a single partition.</p>
+
+<h1 id="partitions">Partitions</h1>
+
+<p>Here is an example of applying the analytic function <code>row_number()</code> to a partitioned dataset:</p>
+
+<pre><code>select row_number() over (partition by league order by score) as rn from data where ...
+</code></pre>
+
+<p>The partition-by clause actually takes a list of <em>expressions</em>; a column-name is a trivial expression. In BigQuery, the expression-types are not allowed to return a value of type struct, array or float.</p>
+
+<p>The result of partitioning is a set of partitions (subtables) where evaluating the expression(s) on all records within a subtable returns the same result. In the simple case of a list-of-column-names, it means that all records in a partition have exactly the same value for the specified columns.</p>
+
+<p>Within the subtables generated by the partioning, the data can optionally be sorted:</p>
+
+<pre><code>select fname, lname, someAnalyticFn(..) over (partition by to_upper(fname), to_upper(lname) order by fname asc, lname asc)
+</code></pre>
+
+<p>When no partitioning is specified (<code>select .. over ()</code>) then the table is treated as one single partition. There can still be an order-by clause in the <code>over (..)</code> without a partition-by criteria; this simply sorts the (single) partition.</p>
+
+<h1 id="windows">Windows</h1>
+
+<p>The term <em>window</em> or <em>window clause</em> simply refers to a combination of partition-specification and window-frame-specification.</p>
+
+<h1 id="some-common-analytic-functions">Some Common Analytic Functions</h1>
+
+<p>The most commonly-used analytic functions include:</p>
+
+<ul>
+  <li>
+<code>row_number()</code> – returns an index of the row within the pane (often used with pane=partition)</li>
+  <li>
+<code>rank()</code> - similar to <code>row_number</code>, except when two rows have the same value for the order-by criteria. In this case, <code>row_number</code> arbitrarily assigns the row-number, while <code>rank</code> works like a sport competition : first, second, second, fourth.</li>
+  <li>
+<code>lead(expr)</code> - returns the value from some other record in the pane relative to the current row; useful for calculating diffs between adjacent records.</li>
+  <li>
+<code>first_value(expr)</code> - returns the value of expr when applied to the first record in the pane. This allows grabbing data from some other record and inserting it into the output for the current row - eg computing the diff between each record and the first record in the corresponding pane.</li>
+</ul>
+
+<p>And examples of well-known functions that also work in analytic context (ie in a pane)</p>
+
+<ul>
+  <li>
+<code>count(*)</code> - the number of records in the pane associated with the current record</li>
+  <li>
+<code>sum(expr)</code> - as for groups, but for each record the output sum is computed only over the set of rows in the pane associated with that record.</li>
+  <li>
+<code>min(expr)/max(expr)</code> - as for groups, but limited to the set of rows in the pane associated with the current record.</li>
+  <li>
+<code>avg(expr)</code> - as for groups, but limited to the set of rows in the pane associated with the current record</li>
+</ul>
+
+<p>Note that some functions take zero parameters (they operate on “the whole record” rather than a specific column or derived value) - but the parentheses are still required.</p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>Given the above info, this quote from the Google BigQuery docs may now be enlightening:</p>
+
+<blockquote>
+  <p>In databases, an analytic function is a function that computes aggregate values over a group of rows. Unlike aggregate functions, which return a single aggregate value for a group of rows, analytic functions return a single value for each row by computing the function over a group of input rows.</p>
+
+  <p>Analytic functions are a powerful mechanism for succinctly representing complex analytic operations, and they enable efficient evaluations that otherwise would involve expensive self-JOINs or computation outside the SQL query.</p>
+</blockquote>
+
+<h1 id="appendix-testing-queries-with-bigquery">Appendix: Testing Queries with BigQuery</h1>
+
+<p>This section is not really about analytic functions; however it shows a useful technique for trying out some of the analytic functions described above.</p>
+
+<p>To test any SQL statement, it is necessary to first insert some test data into a test table. This is somewhat more complicated with BigQuery than traditional relational DBs, as “insert” is a fairly heavy-weight command - and has a quota of 1000 operations per day.</p>
+
+<p>The <code>unnest</code> operator can instead be used to <code>fake</code> a table for tests:</p>
+
+<pre><code>#standardSQL
+with data as (select * from unnest(array&lt;struct&lt;id string, value1 int64, value2 int64&gt;&gt;[
+ ("row0.f1", 12, 112),
+ ("row1.f1", 13, 113),
+ ("row2.f1", 14, 114)
+ ]))
+select * from data
+</code></pre>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<ul>
+  <li><a href="https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators">Google: BigQuery functions and operators</a></li>
+  <li><a href="https://technology.amis.nl/2004/09/29/analytical-sql-functions-theory-and-examples-part-1-on-the-partition-clause/">Lukas Jellema: Analytical SQL Functions</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/sql-analytics/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

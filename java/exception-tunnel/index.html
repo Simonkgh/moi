@@ -1,0 +1,366 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Tunneling Checked Java Exceptions Through Lambdas</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Tunneling Checked Java Exceptions Through Lambdas</h1>
+    <aside>First published on: May 15, 2021</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>I wrote an article <a href="/java/exception-checking">promoting the use of checked exceptions in Java</a> - or at least defending checked exceptions against the argument that “Java checked exceptions are bad”.</p>
+
+<p>There is one use-case where checked exceptions are particularly ugly to handle: when using lambdas (anonymous functions). For some reason, the designers of the JDK classes defined a set of types to represent lambdas which do not throw exceptions (eg Supplier, Function) and then defined many standard-library methods which accept these types. This means those utility methods cannot directly be invoked with lambdas which throw exceptions. One example is <code>Stream.map(Function)</code>.</p>
+
+<p>The simplest solution is to just disable checked exceptions, either by rewriting functions to use unchecked exceptions or by using the <a href="https://www.baeldung.com/java-sneaky-throws">Sneaky Throws</a> approach. However as I argue in the article above, that’s a bad solution which leads to error-prone applications.</p>
+
+<p>The best solution is probably to simply write lambdas which do not throw exceptions, instead returning some type that can represent failures as data (eg the traditional functional-programming type <code>Either</code>). Sadly, no such type has been provided in the JDK. However there are many open-source projects which address this problem, eg <a href="https://www.vavr.io">vavr</a>.</p>
+
+<p>If you cannot or do not wish to make that jump, there are a number of libraries which directly solve the lambda problem by “tunneling” the checked exception in a more controlled way than SneakyThrows (see section “Alternatives” below). Sadly, I found many of them to be poorly documented - ie it wasn’t clear to me how to use them.</p>
+
+<p>I’ve decided to add to the set of options by creating my own “tunneling” solution. It consists of just one class, so is easy to simply copy into a project (a library would be overkill). I haven’t used this class extensively yet, ie can’t guarantee that it works well in real world situations. There may also be some code-structures that it doesn’t support.  However its basic functionality seems elegant to me. It is also more type-safe than many of the other proposals.</p>
+
+<p>This solution allows suppressing specific checked exceptions - but only within the scope of a specific try-catch clause. The compiler therefore forces all checked exceptions to be handled (as recommended by my earlier article), but that handling can be done in a try/catch clause that encloses multiple lambdas.</p>
+
+<p>The amount of extra code needed is minimal, and IMO clear to read.</p>
+
+<p>Here’s an example of code using it:</p>
+
+<pre><code>    public void run() {
+        List&lt;String&gt; strings = List.of("one", "two", "three");
+
+        try (var t1 = Tunnel.of(IOException.class); var t2 = Tunnel.of(InterruptedException.class)) {
+            // Object t1 can be used for suppressing exceptions from fnThrowingIOException; t2 cannot.
+            // Object t1's close-method forces catching of IOException at end of the try-clause.
+            String result1 = strings.stream()
+                    .map(t1.tunnel(s -&gt; fnThrowingIOException(s)))
+                    .collect(Collectors.joining(","));
+            System.out.println(result1);
+
+            // Object t1 can be used for suppressing exceptions from fnThrowingSubtypeOfIOException; t2 cannot.
+            // Object t1's close-method forces catching of IOException at end of the try-clause.
+            String result2 = strings.stream()
+                    .map(t1.tunnel(s -&gt; fnThrowingSubtypeOfIOException(s)))
+                    .collect(Collectors.joining(","));
+            System.out.println(result2);
+
+            // Object t2 can be used for suppressing exceptions from fnThrowingInterruptedException; t1 cannot.
+            // Object t2's close-method forces catching of InterruptedException at end of the try-clause.
+            String result3 = strings.stream()
+                    .map(t2.tunnel(s -&gt; fnThrowingInterruptedException(s))
+                    ).collect(Collectors.joining(","));
+            System.out.println(result3);
+        } catch(IOException|InterruptedException e) {
+            System.out.println("found:" + e);
+        }
+    }
+</code></pre>
+
+<p>And here’s the full implementation (which you are welcome to copy/paste and modify as long as the copyright statement is retained).</p>
+
+<pre><code>// Copyright Simon Kitching (vonos.net) 2021. Licensed under the Apache License 2.0
+package net.vonos.tunnel;
+
+import java.util.function.Function;
+
+/**
+ * Helper for tunneling checked exceptions from within a Lambda to a higher level in a type-safe way.
+ * &lt;p&gt;
+ * It is recommended that code represent errors as return-values rather than exceptions where possible (in
+ * which case this class is not needed). However if that is not an option, then this class allows disabling of
+ * checked exceptions in a controlled manner; checked exceptions do not need to be handled within a lambda,
+ * but do need to be handled within an enclosing try-with-resources clause.
+ * &lt;/p&gt;
+ * &lt;p&gt;
+ * This class extends the well-known "sneaky throws" pattern, re-adding type-safety. The "sneaky throws"
+ * pattern allows the Java compiler's checked-exception-validation mechanisms to be suppressed for a specific
+ * method-call (see method "tunnel" below). The AutoCloseable interface is then used to re-enable
+ * checked exception validation at a "higher level".
+ * &lt;/p&gt;
+ * &lt;p&gt;
+ * In the following example, exception-validation is disabled for someFnThrowingException within the lambda-expression,
+ * but the catch-clause at the end of the try-clause is mandatory (required by Java compiler). In other words,
+ * checked-exception-handling is disabled within the scope of the try-with-resources, but pops back up again at
+ * the end of that scope.
+ * &lt;/p&gt;
+ * &lt;pre&gt;
+ * try (var t = Tunnel.of(SomeException.class) {
+ *     return somelist.stream().map(t.tunnel(s-&gt;someFnThrowingException()).collect(...);
+ * } catch(SomeException.class) {
+ *     ...
+ * }
+ * &lt;/pre&gt;
+ */
+public class Tunnel&lt;E extends Exception&gt; implements AutoCloseable {
+    public static &lt;E extends Exception&gt; Tunnel&lt;E&gt; of(Class&lt;E&gt; etype) {
+        return new Tunnel&lt;E&gt;(etype);
+    }
+
+    private final Class&lt;E&gt; etype;
+
+    /**
+     * Constructor. The class-param here is not actually used, but provides an elegant and readable way
+     * of specifying generic type E for this class.
+     */
+    Tunnel(Class&lt;E&gt; etype) {
+        this.etype = etype;
+    }
+
+    /**
+     * Suppress validation of checked exceptions thrown by the specified function.
+     */
+    public &lt;E2 extends E, T, R&gt; Function&lt;T,R&gt; tunnel(ThrowingFunction&lt;E2, T, R&gt; f) {
+        return new Wrapper&lt;&gt;(f);
+    }
+
+    /**
+     * Suppress validation of checked exceptions thrown by the specified function.
+     */
+    public &lt;E2 extends E, T, R&gt; Function&lt;T,R&gt; tunnel(Class&lt;E2&gt; ex, ThrowingFunction&lt;E2, T, R&gt; f) {
+        return new Wrapper&lt;&gt;(f);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static &lt;T extends Exception, R&gt; R sneakyThrow(Exception t) throws T {
+        throw (T) t;
+    }
+
+    /**
+     * Although this close-method is empty (performs no operation), its signature ensures that the exception
+     * which method tunnel suppresses must be caught at the end of a surrounding try-clause.
+     */
+    @Override
+    public void close() throws E {
+    }
+
+    private static final class Wrapper&lt;E extends Exception, T, R&gt; implements Function&lt;T, R&gt; {
+        private final ThrowingFunction&lt;E, T,R&gt; f;
+        private Wrapper(ThrowingFunction&lt;E, T, R&gt; f) {
+            this.f = f;
+        }
+
+        @Override
+        public R apply(T param) {
+            try {
+                return f.apply(param);
+            } catch(Exception e) {
+                return sneakyThrow(e);
+            }
+        }
+    }
+
+    @FunctionalInterface
+    public interface ThrowingFunction&lt;E extends Exception, T, R&gt; {
+        R apply(T t) throws E;
+    }
+}
+</code></pre>
+
+<h1 id="future-extensions">Future Extensions</h1>
+
+<p>One problem with try/catch blocks is that when multiple lines of code within the block can throw the same exception-type, it is no longer possible to find out which line was the cause - which may limit the options for error-recovery. The usual solution is to break code up into multiple try/catch blocks - but that rather defeats the point of separating error-handling code from the “success path”.</p>
+
+<p>With this Tunnel class, it could be possible to “register” each exception befure invoking sneakyThrow, allowing code in a catch-block to then do:</p>
+
+<pre><code>  if (t1.wasActivated()) {
+    // here we know the reason this catch-block was triggered is that something wrapped by t1.tunnel(...) threw an exception
+  }
+</code></pre>
+
+<h1 id="alternatives">Alternatives</h1>
+
+<p>I am aware of the following alternative solutions to this issue:</p>
+
+<ul>
+  <li><a href="https://belief-driven-design.com/functional-programming-with-java-exception-handling-e69997c11d3/">Belief-Driven-Design: Functional Programming with Java Exception Handling</a></li>
+  <li><a href="https://betterprogramming.pub/functional-programming-with-java-exception-handling-67f40b1f0330">Better Programming: Functional Programming With Java: Exception Handling</a></li>
+  <li><a href="https://www.codeproject.com/Articles/1231137/functionExtensions-Techniques-Throwable-Functional">Code Project: Function Extensions Techniques 1: Throwable Functional Interfaces</a></li>
+  <li><a href="https://github.com/StefanLiebenberg/throwable-interfaces">Stefan Liebenberg: Throwable Interfaces</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/exception-tunnel/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

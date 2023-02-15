@@ -1,0 +1,293 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Handling Spam with Postfix, SpamAssassin, Dovecot and Sieve.</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Handling Spam with Postfix, SpamAssassin, Dovecot and Sieve.</h1>
+    <aside>First published on: January 30, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      
+<p>(Back to the <a href="/linux/email-overview">main article</a>)</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>I’ve got a personal email server running Postfix, Dovecot and SpamAssassin. Email comes in to Postfix, is passed through SpamAssassin which sets a header with the “spam score” of the email, and is then passed to the Dovecot LMTP server for <em>delivery</em> to the local user.</p>
+
+<p>I would now like to:</p>
+
+<ul>
+  <li>automatically delete any email with a very high spam-score, and</li>
+  <li>deliver emails with middle-rated spam scores into a “spam folder” rather than the main inbox of the target account.</li>
+</ul>
+
+<p>Sieve is the tool that can do this, and this article describes how I added Sieve to the overall setup.</p>
+
+<p>Actually, Sieve is a <em>specification</em> of a language for writing filters in. Each <em>mail delivery agent</em> which supports Sieve needs to provide a suitable implemenation of the language; the Sieve implementation for Dovecot’s delivery agent is <a href="https://wiki2.dovecot.org/Pigeonhole/Sieve">pigeonhole</a>.</p>
+
+<h1 id="installing-sieve-for-dovecot">Installing Sieve for Dovecot</h1>
+
+<p>On Ubuntu 16.04, installation is simple:</p>
+
+<ul>
+  <li><code>apt install dovecot-sieve</code></li>
+</ul>
+
+<h1 id="configuring-sieve-for-dovecot">Configuring Sieve for Dovecot</h1>
+
+<p>Sieve needs to be enabled in Dovecot for LMTP delivery, so edit <code>/etc/dovecot/conf.d/20-lmtpd.conf</code>:</p>
+
+<pre><code>   mail_plugins = $mail_plugins sieve
+</code></pre>
+
+<p>I want the spam-handling script to be applied to all mailboxes, so need to define the location of a global sieve script in <code>/etc/dovecot/conf.d/90-sieve.conf</code>:</p>
+
+<pre><code>   sieve_default = /etc/dovecot/sieve/default.sieve
+</code></pre>
+
+<p>The other defaults for Sieve are fine; the conf-file documents the options well and there is also <a href="https://wiki2.dovecot.org/Pigeonhole/Sieve/Configuration">online documentation</a>.</p>
+
+<p>The defaults also allow per-user sieve scripts in the “mail user home directory” (which is not necessarily the same as a native unix account home directory); see later for some comments on user-specific scripts.</p>
+
+<h1 id="the-spam-filtering-script">The Spam-filtering Script</h1>
+
+<p>Define the global filtering script:</p>
+
+<pre><code>echo &gt; /etc/dovecot/sieve/default.sieve &lt;&lt; EOF
+mkdir /etc/dovecot/sieve
+require ["fileinto", "mailbox"];
+if header :contains "X-Spam-Flag" "YES" {
+    fileinto :create "Junk";
+}
+EOF
+</code></pre>
+
+<p>The option <code>:create</code> will create the target mailbox if it does not exists. Option <code>require mailbox</code> is needed to make this option available.</p>
+
+<p>Sieve is a <em>compiled</em> language. Filters can be compiled “on demand”, and this is sufficient for per-user scripts (which are stored in per-user directories). However this global script is in a directory which is only writable by <code>root</code>, so it must be <em>precompiled</em>. This also allows syntax-errors to be detected early. Compilation is simple:</p>
+
+<ul>
+  <li><code>sievec /etc/dovecot/sieve/default.sieve</code></li>
+</ul>
+
+<h1 id="configuring-dovecot-mailboxes">Configuring Dovecot Mailboxes</h1>
+
+<p>The Sieve script above will cause Dovecot to create the new mailbox and write the incoming email into it. However it won’t automatically be <em>shown</em> to client applications; for that to happen it needs to be added to the user’s “subscribed mailboxes” list. Most IMAP email clients have an option to search for existing mailboxes which are not “subscribed to”; marking them as subscribed will cause the mailbox to appear in the client UI.</p>
+
+<p>To have this happen automatically, either:</p>
+
+<ul>
+  <li>define that specific mailbox (eg “Junk”) in <code>/etc/dovecot/conf.d/15-mailboxes.conf</code> and mark it as <code>auto=subscribe</code>, or</li>
+  <li>edit <code>/etc/dovecot/conf.d/15-lda.conf</code> to set <code>lda_mailbox_autosubscribe=yes</code> (this works also for LMTP delivery)</li>
+</ul>
+
+<h1 id="testing">Testing</h1>
+
+<p>To test: send an email with special body as documented <a href="https://spamassassin.apache.org/gtube/">here</a>. Unfortunately, with my (recommended) setup, spamassassin doesn’t get run on emails delivered from a user on the same domain, so the test email must be generated from some external email system.</p>
+
+<p>The spamfiltering can be checked with <code>grep "identified spam" mail.log</code> which shows all matched emails, and their rating. Values over 10 should be discarded, values between 5 and 10 should land in the “Junk” box.</p>
+
+<h1 id="user-sieve-scripts">User Sieve Scripts</h1>
+
+<p>One use of sieve-scripts is to forward some specific emails to another account. Forwarding <em>all</em> emails for an account could be done via a sieve script, but is more efficiently achieved by defining the target address in /etc/postfix/virtual. On the other hand, forwarding via sieve does allow custom processing such as the above spam-filtering to be applied first.</p>
+
+<p>There is a standard API for client/server communication for reading and writing sieve scripts. This allows an email-client app to submit per-user scripts to the server, allowing users to configure things like “on holiday” auto-respond messages, and auto-sorting of incoming email into subfolders. Of course most client apps will not expose a “sieve script edit window” to users, but instead a simpler interface. Various email clients have support for this protocol, including claws-mail and roundcube. These per-user scripts get saved into the user’s “mailserver home directory” which is not the same as the directory into which mail is saved, and does not require the user to have a native account on the server (though it can be configured that way).</p>
+
+<p>Ubuntu packages related to user-specific sieve scripts:</p>
+
+<ul>
+  <li>dovecot-managesieved - also part of Pigeonhole project</li>
+  <li>roundcube-plugins-extra</li>
+</ul>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>This <a href="http://stackoverflow.com/questions/24256008/how-to-move-spam-to-spam-folder/34571858#34571858">stackoverflow article</a> was useful.</li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/email-sieve-spam/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

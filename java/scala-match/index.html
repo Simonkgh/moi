@@ -1,0 +1,356 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Scala's match operator and unapply methods</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Scala's match operator and unapply methods</h1>
+    <aside>First published on: August 19, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      
+<p>My <a href="/java/scala">scala notes</a> article just mention under “pattern matching” that apply/unapply is “too complex to discuss here”. I’ve attempted to address the issue in <em>this</em> article; as I am pretty new to Scala please don’t take the info below as guaranteed correct. This article also covers only the most common features of pattern-matching; <a href="http://danielwestheide.com/scala/neophytes.html">the Neophytes Guide articles</a> cover the topic in more detail.</p>
+
+<h1 id="the-magic-unapply-method">The Magic Unapply Method</h1>
+
+<p>Pattern-matching is a feature available in many functional programming languages, and is supported in Scala via the <code>match</code> operator together with the magic <code>unapply</code> method that can be defined on classes and singleton-objects.  Method <code>unapply</code> takes as its only argument an instance of a target type and returns an Option containing a tuple of parameters, or None if the argument is not of an acceptable type. Unapply methods are often referred to as “extractors”.</p>
+
+<h1 id="the-match-algorithm">The Match Algorithm</h1>
+
+<p>After some research, it appears that the pattern-matching algorithm is (in my phrasing) as follows.</p>
+
+<p>Given an expression like the following:</p>
+
+<pre><code>var result = someobj match {
+  case somepattern =&gt; ...
+  case somepattern =&gt; ...
+  case somepattern =&gt; ...
+</code></pre>
+
+<p>the algorithm is (roughly):</p>
+
+<pre><code>for each pattern in order:
+  if somepattern is just "_" then the case succeeds
+  else if somepattern is just a variable-name then the variable is bound to the object being matched and the case succeeds
+  else if somepattern is just a literal value x (without following parentheses) then the case succeeds if someobj.equals(x)
+  else if somepattern is of form "someMatcher(somepattern2)" then
+    var unapplyMethod = findBestMatchingMethod(target=someMatcher, methodName="unapply", paramType=classOf(someobj))
+    if no such unapply method exists, the case fails to match
+    else
+      var results = someMatcher.unapplyMethod(someobj)
+      if results is None then the case fails to match
+      else if result is Some(someobj2) then
+        recursively invoke the above algorithm to try to match someobj2 against somepattern2
+      else if result is Some(sometuple) then
+        for each pair of values (someobj2, somepattern2) from the result tuple and the pattern tuple
+          recursively invoke the above algorithm to try to match the object against the pattern
+</code></pre>
+
+<p>Value “someMatcher” is usually a reference to a Scala singleton object, in which case its name will start with a capital letter. And usually the singleton object is the companion-object of some class. However this is not a requirement; a reference to a non-singleton is also acceptable. Remember that singleton and non-singleton objects both have an associated class with a fixed set of methods and fields - it is just that the singleton instances cannot be manually instantiated.</p>
+
+<p>Note that when matching using the form <code>case Foo(1,2,3) =&gt; ..</code> then this looks like the apply method of (singleton) object Foo is being invoked and passed three parameters. However in match-patterns this is not the case; in fact the dataflow is quite different: <code>Foo.unapply</code> is being invoked with the <em>object being matched on</em> and then the contents of the returned tuple are matched pairwise (like the method zip) with the tuple <code>(1,2,3)</code>. That the tuple following Foo is not a regular parameter list is more obvious when using wildcards and variables eg <code>case Foo(1, a, _)</code>.</p>
+
+<h1 id="a-match-example">A Match Example</h1>
+
+<p>As the above algorithm is somewhat abstract, lets walk through an example:</p>
+
+<pre><code>trait Node(val id:String)
+class Nonleaf(id:String, val left:Node, val right:Node) extends Node
+class Leaf(id:String, val name:String) extends Node
+
+object Nonleaf {
+  def unapply(obj:Nonleaf) = Some((obj.id, obj.left, obj.right))
+}
+
+object Leaf {
+  def unapply(obj:Leaf) = Some((obj.id, obj.name))
+}
+
+val leaf1 = new Leaf("l1", "leafname1")
+val root = new Nonleaf("root", null, leaf1)
+
+val result = root match {
+  case "hello" =&gt; "matched literal value"
+  case Leaf(_, _) =&gt; "matched leaf"
+  case Nonleaf("unknown", a, b) =&gt; "matched unknown"
+  case Nonleaf("root", _, Leaf("l1", name)) =&gt; s"matched root with right child having name=$name"
+  case _ =&gt; "Default case matched"
+}
+println(result)
+</code></pre>
+
+<p>The first case is evaluated:</p>
+
+<ul>
+  <li>The case pattern is a value (and not followed by parentheses), so it is directly compared against the object being matched; they are not equal (one is a string, the other is a NonLeaf instance) so the case fails.</li>
+</ul>
+
+<p>The second case is evaluated:</p>
+
+<ul>
+  <li>Leaf is an object followed by parentheses, but method <code>Leaf.unapply(root)</code> cannot be invoked, as there is no method <code>Leaf.unapply(Nonleaf)</code>; the case therefore fails to match.</li>
+</ul>
+
+<p>The fact that Leaf is a <em>singleton instance</em> is not relevant; any object will be treated the same here.</p>
+
+<p>The third case is evaluated:</p>
+
+<ul>
+  <li>Nonleaf is an object followed by parentheses, so method <code>Nonleaf.unapply(root)</code> is invoked; it returns <code>Some("root", null, leaf1)</code>, ie “extracts” the properties of the root object</li>
+  <li>The elements of the returned tuple are then compared pairwise with the elements specified in the case: <code>("unknown", a, b)</code>, ie the match-algorithm is recursively applied to each (value, pattern-element) pair.
+    <ul>
+      <li>the first pair to compare are value “root” andd literal “unknown” which are not equal, so the case fails to match</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The fourth case is evaluated:</p>
+
+<ul>
+  <li>Nonleaf is an object followed by parentheses, so method <code>Nonleaf.unapply(root)</code> is invoked as with the case above</li>
+  <li>The elements specified in the case are then compared pairwise with the elements returned by unapply:
+    <ul>
+      <li>literal “root” is equal to literal “root”</li>
+      <li>an underscore matches anything</li>
+      <li>Leaf is an object followed by parentheses, so method <code>Leaf.unapply(leaf1)</code> is invoked, returning the tuple <code>("l1", "leafname1")</code>
+</li>
+      <li>The elements specified in the case are recursively compared pairwise with the elements returned by unapply:
+        <ul>
+          <li>literal “l1” is equal to “l1”</li>
+          <li>varname “name” is bound to “leafname1”</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>there are no more elements to compare, so this case succeeds</li>
+</ul>
+
+<h1 id="notes">Notes</h1>
+
+<p>Classes Leaf and Nonleaf could be implemented as case-classes, in which case companion-objects would automatically be generated, with unapply methods that look just like the ones above.</p>
+
+<p>Note that <code>Leaf.unapply</code> does not take an object of type Node or Nonleaf as parameter. When the match-statement executes, it therefore must skip the case-clause if no matching unapply exists.</p>
+
+<p>An unapply method often returns values which are similar to, or identical to, the tuple passed to the object constructor. When an object defines an apply method for use as a factory-method, then often the apply params and unapply return-value are symmetrical. However this isn’t a requirement.</p>
+
+<p>An object can potentially define multiple unapply methods which take different types of parameters; the match-statement will select the most appropriate method depending on the runtime type of the object being matched.</p>
+
+<p>There is yet another magical method named <code>unapplySeq</code> which can be defined for objects which are containers for variable length data. As example,</p>
+
+<pre><code>   var somelist = List(....)
+   somelist match { case head::tail =&gt; ...}
+</code></pre>
+
+<p>The singleton object List defines an <code>unapplySeq</code> method rather than <code>unapply</code>, as the contents of a list cannot be reasonably represented as a tuple. Similarly, a regular expression applied to a string can have an arbitrary number of capture-groups so class Regex defines an <code>unapplySeq</code> method which returns <code>Option[List[...]]</code> rather than an <code>unapply(..)</code> method which returns <code>Option[Tuple]</code>.</p>
+
+<p>Methods <code>unapply</code> and <code>unapplySeq</code> are also used in “destructuring assignments” such as</p>
+
+<pre><code>    val SomeMatcher(field1, field2) = someobj
+</code></pre>
+
+<h1 id="the-at-operator">The At Operator</h1>
+
+<p>A match expression can also include an <code>@</code> symbol, which allows capturing of the “top level” object in the match.</p>
+
+<pre><code>  obj match {
+    case widget:Widget =&gt; println(s"Encountered a Widget with content ${widget.content}") // match root object but not nested fields
+    case Gadget(x, y) =&gt; println(s"Encountered a Gadget with x=$x y=$y") // match nested fields but not root object
+    case f @ Fidget(x, y, 1) if x &gt; 0 =&gt; println(s"Encountered a Fidget with obj=$f x=$x y=$y") // match root object and nested fields
+    case other =&gt; println(s"encountered an object of type ${other.getClass.getName}") // match root object but not nested fields
+  }
+</code></pre>
+
+<p>In the third case, not only are x and y bound to attributes of the matched object, but f is also bound to the entire object.</p>
+
+<p>The <code>@</code> is only needed when a reference to the whole matched object is needed <em>and</em> bindings are required to attributes of the matched object at the same time.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://danielwestheide.com/scala/neophytes.html">Westheide: Neophytes Guide to Scala</a></li>
+  <li><a href="http://wiki.ifs.hsr.ch/SemProgAnTr/files/PatternMatchingInScala.pdf">Pattern Matching in Scala</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/scala-match/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

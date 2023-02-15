@@ -1,0 +1,71 @@
+# How to debug the linux kernel
+
+This article describes how to start kernel development.
+
+The easiest way to look at how the kernel works, or to test a kernel that you have modified, is to
+run that kernel in a virtual machine, and then attach a debugger to it.
+
+The QEMU virtual machine is a very good choice for this, and makes attaching a debugger easy.
+For debugging environments, there are a number of options.
+
+If you are doing module development, then it may be easier to just load the module into your
+current kernel, and use ftrace.
+
+## Setting up QEMU
+
+### Standard Distro Install
+
+One way is just to create a file that will become a "virtual block device" for qemu, then start
+qemu with this file as "the hard drive", and a linux distro image as "the cdrom". The normal distro
+installation process can then be used to set up linux on that virtual block device.
+
+If the target block device format is a "raw image" then it is possible to mount this image via the 
+loop driver when qemu is not running, and fiddle with the installed distro's files from the host
+system. If the more efficient QCOW2 format is used, then this is not possible as there is currently
+no QCOW2 driver for linux (hmm..would be an interesting project to write one).
+
+Question: is it easy to figure out where the fs partition boundaries are, so the loop device
+can correctly mount the image?
+
+Question: are there other ways of transferring files from host to qemu guest?
+
+### Cloning the current distro
+
+The attached script shows one way of building a qemu image based on the host installation.
+
+TODO: can I mount my home dir there? Probably not; any time a file in $HOME on the host gets
+changed, the guest would get very confused as fs drivers don't expect the underlying data to
+change. So an NFS mount or similar is really needed to get this to work.
+
+### Why using snapshots of the current OS doesn't work
+
+QEMU has a "snapshot" feature, where the disk image doesn't get modified. This can be
+very useful for testing, as restarting qemu resets the emulated system to its start.
+
+However this cannot be used to mount host filesystems from the guest; when the host modifies
+a filesystem, the guest will get very confused as fs drivers don't expect the raw blocks to
+change under them.
+
+## Compiling a custom kernel
+
+And enable the following options: In the "Kernel hacking" menu enable both "Compile the kernel with debug info" and "Compile the kernel with frame pointers".
+
+CONFIG_DEBUG_INFO=y
+CONFIG_SCHED_OMIT_FRAME_POINTER is not set
+CONFIG_ARCH_WANT_FRAME_POINTERS=y
+CONFIG_FRAME_POINTER=y
+
+enable FTRACE
+
+## Using Eclipse
+
+
+## Using GDB
+
+## Using Emacs + CEDET
+
+## Using ftrace
+
+# References
+* http://issaris.blogspot.com/2007/12/download-linux-kernel-sourcecode-from.html
+* http://revver.com/video/606464/debugging-the-linux-kernel-using-eclipsecdt-and-qemu/

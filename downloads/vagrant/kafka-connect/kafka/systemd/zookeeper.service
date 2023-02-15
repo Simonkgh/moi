@@ -1,0 +1,16 @@
+[Unit]
+Description=Apache Zookeeper server (broker) - used by Kafka
+Documentation=http://kafka.apache.org/documentation.html
+Requires=network.target remote-fs.target
+After=network.target remote-fs.target
+
+[Service]
+Type=simple
+User=kafka
+Group=nogroup
+ExecStart=/opt/kafka/current/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties
+Restart=on-failure
+SyslogIdentifier=kafka-zookeeper
+
+[Install]
+WantedBy=multi-user.target

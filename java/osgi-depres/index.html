@@ -1,0 +1,514 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - OSGi Artifact Resolution and Build Tools</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>OSGi Artifact Resolution and Build Tools</h1>
+    <aside>First published on: June 9, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/OSGi/'>OSGi</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>There are a number of topics loosely related to <em>finding</em> and <em>loading</em> bundle jarfiles which it took me a while to figure out. Maybe an overview is useful for other people too..</p>
+
+<p>Warning: This article may contain more errors than typical for other articles I have written on OSGi (and they probably contain a fair number of mistakes too). I have mostly used the maven-build-plugin for compiling OSGi code, and apache-karaf features-files for provisioning; information on other approaches has been obtained primarily by reading rather than personal experience. It is therefore possible that some of that material contains misunderstandings on my part. Nevertheless, this hopefully gives a good overview of the available technologies and their tradeoffs. Comments welcome!</p>
+
+<h1 id="osgi-requirementcapability-model">OSGi Requirement/Capability Model</h1>
+
+<p>OSGi Core specification R5, section 3 (“Module Layer”) subsection 3.3 (“Dependencies”) defines the OSGi “Core Requirement/Capability model”. The general idea is that statements in the MANIFEST.MF can be used to define <em>any arbitrary</em> set of things the bundle can provide to its users (capabilities) and define <em>any arbitrary</em> set of things the bundle requires in order to function (requirements).</p>
+
+<p>One common use of the requirements/capabilities statements is to declare that the bundle requires a certain service (eg SCR or the Http whiteboard), or that it provides such a service. However all sorts of things can be expressed via capabilities and requirements, whether runtime-related or non-functional (eg licencing). Requirements are expressed as standard osgi <em>filters</em> using the Require-Capability manifest header. Capabilities are expressed in a Provide-Capability header as a “namespace” (identifies the capability) and a map of properties that can be filtered against.</p>
+
+<p>The Import-Package and Export-Package headers can be considered special cases of the generic requirement/capability model: an Import-Package statement is a requirement (necessary in order for the bundle to function) and an Export-Package statement is a capability (what the bundle provides to its environment). The Require-Bundle header can also be represented as a generic requirement if desired: one where the requirement filter matches a specific bundle-symbolic-name and bundle-version.</p>
+
+<p>When an OSGi container tries to move an installed bundle into <em>resolved</em> state (which is necessary to make it usable from any other bundle), the primary thing it needs to do is find other bundles which <em>export</em> the packages that the bundle-to-resolve imports. However it isn’t that simple, as there may be multiple bundles which export those packages (in different versions), the exports may have uses-constraints which mean that the bundle has to be wired to <em>compatible</em> versions of those packages, etc. And there may be additional requirements expressed via the Require-Capability framework. Therefore before a bundle is resolved, those import constraints are transformed into <em>requirements</em>, combined with any other requirements, and then the full set of requirements is passed to a <code>resolver</code> which effectively applies a <a href="http://en.wikipedia.org/wiki/Boolean_satisfiability_problem">constraint satisfaction</a> algorithm to this set of requirements and the capabilities available from other currently-resolved bundles. If the resolver can find a solution, then it returns a set of “wires” which map each requirement to the resource that provides a suitable capability; in the case of import-package requirements, these ‘wires’ indicate which bundle the java package should be imported from. This resolver logic used to be entirely hidden within the OSGi container, ie no API was available to access or influence the bundle resolution process. In specification R5 the <code>Resolver Hooks</code> API was defined to allow certain steps to be customised, and the <code>Resolver Service</code> API was defined so a bundle can <em>invoke</em> the resolver logic as a library - see later.</p>
+
+<h1 id="osgi-repository-service-and-resolver-service">OSGi Repository Service and Resolver Service</h1>
+
+<h2 id="provisioning-overview">Provisioning Overview</h2>
+
+<p>Java code running in an OSGi container can take advantage of the OSGi Repository Service and Resolver Service at runtime in order to do <em>provisioning</em>. Provisioning is a process where a primary bundle set of bundles is specified for installation into an OSGi container and all their transient dependencies are located and also installed (while taking into account which bundles are already loaded into the current container). These features introduced in OSGi R5 can be considered as making the previously internal bundle-resolution functionality of an OSGi framework available for <em>choosing</em> things to install rather than just wiring together already-installed bundles, and allowing it to apply to <em>external repositories</em> rather than just the set of bundles already installed into the container.</p>
+
+<p>An OSGi Repository is a collection of resources (typically but not always OSGi bundles) that an OSGi Repository Service can search. The Resolver algorithm needs to find resources based on ‘filters’, so each resource in a bundle repository needs to have an associated set of capabilities. A bundle repository therefore needs some kind of table mapping <em>capabilities</em> to resources that filters can efficiently be applied to. It also needs information on the <em>requirements</em> of each resource so that transient dependencies can be calculated (though these are not searched for via filters; they <em>are</em> filters). One standard representation of a repository has been defined: a directory-tree containing the resources (bundles etc) plus a single XML-format <code>index</code> file that contains the requirement and capability information for each resource plus a reference to the resource-file. A Maven artifact repository is a suitable directory structure; one can be turned into an OSGi bundle repository just by generating a suitable index file, ie by extracting the capabilities/requirements from the manifest of each bundle. Note however that it is possible to have alternative Repository Service implementations that use a structure other than an XML file to map capabilities-&gt;resource-files; some Maven repository managers (servers) provide an API which allows them to act as OSGi repositories (ie search-by-filter against the declared capabilities of resources in the repository).</p>
+
+<p>Given a set of repository services (each of which manages an underlying repository), a <em>current state</em>, and a set of <em>mandatory</em> bundles to install, the resolver algorithm can then find the <em>best</em> set of transient dependencies to install. And this makes it possible to implement a tool for <em>provisioning</em> of bundles in an OSGi environment; the administrator can then just install the bundles they <em>directly want</em> and let the transient dependencies (mostly) take care of themselves.</p>
+
+<p>The repository index xml format was first formally specified in OSGi enterprise R5, and is referred to as an “R5 format repository”. The format that was in use prior to standardisation is slightly different, and is named OBR (OSGi Bundle Repository). The name OBR is somewhat inappropriate as an R5 repository can potentially contain things other than bundles; nevertheless it seems to be common usage for the term OBR to also be used for standards-compliant repositories. And in practice most tools that support R5 format also support OBR format for backwards compatibility. I use the acronym OBR in this article to mean any kind of repository where resources (usually bundles) are indexed via their capabilities.</p>
+
+<p>While the resolver and repository features only became part of the spec in R5, this provisioning functionality has long been available as an “add-on” to OSGi containers, simply called OBR. The disadvantage of this approach was that the resolver logic within the container was not accessable and therefore had to be duplicated in the provisioning tool which was inefficient and also had the risk that the bundles chosen as ‘compatible’ by the provisioning tool might not be considered compatible (satisfying all requirements) by the container’s resolver. These problems no longer exist in R5 or later.</p>
+
+<p>One alternative to OBR-based provisioning is Apache Karaf’s <a href="https://karaf.apache.org/manual/latest/users-guide/provisioning.html">features-files</a>. A karaf feature-file is an xml document that defines a set of named features. Each feature is a set of (bundle-symname, version-number) and possibly nested references to other features. When the administrator installs a <em>feature</em> by name, then all the bundles in that feature (and recursively the bundles in referenced features) are installed. However the fixed version-numbers are tricky; this approach often leads to multiple versions of the same bundle being loaded when that is not necessary. It also makes customisation difficult; when the files specify featureA depends on featureB which depends on bundleC, it isn’t possible to substitute alternative (compatible) bundleC2 without a major copy-and-paste effort. OBR avoids both problems by evaluating each transient dependency against the <em>current state</em> and <em>proposed set of bundles to install</em>; if a bundle that satisfies the requirements is already loaded or intended to be loaded, then the transient dependency can be ignored. Karaf features-files actually also support OBR, in that a bundle in a feature can be marked in the XML with <code>dependency="true"</code> in which case the specified (bundle,version) artifact is considered as a <em>potential candidate</em> which will be installed only if it actually satisfies otherwise unsatisfied requirements. The set of bundles specified as “dependencies” can be thought of as forming an on-the-fly OBR repository which applies to that feature only. The set of bundles not labelled as ‘dependency’ form the <em>mandatory</em> bundles to install. The OBR support in Karaf is is an optional feature; it can be turned off - or the feature definitions can simply omit the dependency=true attributes.</p>
+
+<p>The Eclipse p2 feature was developed for a similar reason to OBR: it primarily handles <em>provisioning</em> of Eclipse plugins, so that a user can specify a plugin they want and the provisioning system computes the necessary transient dependencies. Some OSGi developers are of the opinion that OBR would have worked for this Eclipse use-case and that it was not necessary to create p2.</p>
+
+<p>Some history on OBR:</p>
+
+<ul>
+  <li><a href="http://www.javabeat.net/osgi-bundle-repository/">http://www.javabeat.net/osgi-bundle-repository/</a></li>
+  <li><a href="http://tensegrity.hellblazer.com/2009/03/30/osgi_rfp_122_-_the_osgi_bundle_repository/">http://tensegrity.hellblazer.com/2009/03/30/osgi_rfp_122_-_the_osgi_bundle_repository/</a></li>
+</ul>
+
+<p>See Also:</p>
+
+<ul>
+  <li><a href="http://stackoverflow.com/questions/10868312/does-karaf-support-downloading-of-transitive-dependencies-from-maven-central">How to create an OBR repository containing just the desired bundles</a></li>
+  <li><a href="https://www.youtube.com/watch?v=hemY-6dfPnw">A video of a presentation by Peter Kriens</a></li>
+  <li><a href="http://njbartlett.name/2011/09/12/why-obr.html">A blog post comparing Eclipse p2 and OBR</a></li>
+</ul>
+
+<h2 id="the-repository-service">The Repository Service</h2>
+
+<p>The OSGi enterprise specification version R5 defines an “OSGi Repository Service” which provides an API that any bundle can use at runtime to retrieve a single bundle from some external <em>repository</em>, given a set of constraints (a requirement) to fulfil. Exactly how the service works internally is not specified, and how the repository is actually stored on disk is also deliberately not specified. One option is to use an existing Maven repository, scan it for all jarfiles that have an OSGi manifest, extract the Import-Packages, Export-Packages, Requirements and Capabilities from that manifest, and then build an <em>index</em> of some kind. The index could be an xml file, or could be a database of some kind. The Nexus Maven repository manager <a href="https://books.sonatype.com/nexus-book/reference/osgi-sect-intro.html">automatically builds a suitable index</a> for any repository it manages; others might do this also.</p>
+
+<p>In a running OSGi container, the OSGi service registry contains one <em>instance</em> of the <a href="https://osgi.org/javadoc/r5/enterprise/org/osgi/service/repository/package-summary.html">Repository service</a> for each available repository - eg there may be one on disk, one on your corporate server, and two on the internet, making a total of four repository services. A Repository instance provides just one method:</p>
+
+<pre><code>Map&lt;Requirement, &lt;List&lt;Capability&gt;&gt; findProviders(Collection&lt;Requirement&gt; requirements) 
+</code></pre>
+
+<p>which is effectively equivalent to this, except that a single call can “batch” multiple queries:</p>
+
+<pre><code>List&lt;Capability&gt; findProviders(Requirement r)
+</code></pre>
+
+<p>A Capability then has a method “getResource()” which returns the actual object (eg a bundle).</p>
+
+<p>Every item in a repository is expected to have associated properties (metadata) including:</p>
+
+<ul>
+  <li>type (eg bundle)</li>
+  <li>osgi.identity (equivalent to a Maven groupid:artifactid)</li>
+  <li>version</li>
+</ul>
+
+<p>A Requirement which includes a directive of type “filter” which selects based on (type, osgi.identity and version) is then effectively equivalent to a Maven dependency declaration, ie is a dependency on a particular version of a particular artifact. However the OSGi model allows much more flexible selection than this; it can match on any properties of the artifact, on version ranges, etc.</p>
+
+<p>Note that a Repository service does not itself handle transitive dependencies; it just returns all resources (artifacts) that match a Requirement (a filter).</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://bndtools.org/repositories.html">The kind of repositories that bndtools supports</a></li>
+</ul>
+
+<h2 id="the-resolver-service">The Resolver Service</h2>
+
+<p>The Resolver is given a set of requirements and a “current state” and:</p>
+
+<ul>
+  <li>queries all Repositories to find all resources (bundles) that match the requirements;</li>
+  <li>chooses the “best” bundle or bundles from the set of possibilities</li>
+  <li>deals with any transient requirements of the bundles it found, ie adds the requirements of the chosen bundles to the set of requirements and queries the repositories again</li>
+</ul>
+
+<p>The task of the Resolver service is <em>to find the best set of bundles to add to the current state such that the specified set of requirements are met</em>. This is a <em>constraint satisfaction</em> problem which is a well-known problem in computer science, but not one with a 100% perfect solution. Finding the “best fit” can require some trial-and-error (backtracking) and the application of heuristics.</p>
+
+<p>Optionally, choosing the bundles to install may involve an interactive part. For example, in an IDE selecting a bundle to install may then display a dialog asking the user to choose from a set of possible options.</p>
+
+<p>Linux users may note a similarity between the Resolver functionality and linux package-managers such as <code>apt</code>, <code>yum</code> or <code>dnf</code>. The problem it has to solve:</p>
+
+<ol>
+  <li>is NP-complete, so can be slow and can involve multiple “tries” with backtracking</li>
+  <li>may have multiple solutions</li>
+</ol>
+
+<p>One significant problem with deriving “transient dependencies” from the requirements/capabilities data is that, unlike Maven dependencies, dependencies are usually on abstract interfaces/APIs and not on concrete implementations. When bundle B depends on javax.xml apis, ie requires <em>some standard-compliant xml parser</em>, then how can the Resolver choose which of the available implementations to use? Options that the administrator/developer can use to cause a Resolver to choose a particular solution are:</p>
+
+<ul>
+  <li>to ensure a suitable one is already available in the “current state”; the resolver will not install a new bundle if an adequate one is already available;</li>
+  <li>for the initial set of requirements to specify exactly the identity of the desired implementation, ie manually provide the <em>correct solution</em> for some problems;</li>
+  <li>to control the contents of the available repositories such that there is just one suitable implementation;</li>
+  <li>??? other ???</li>
+</ul>
+
+<p>Note that the requirements passed to the resolver can include interesting things like specifying an operating-system; that allows selection of resources which are compatible with that operating system (particularly useful for native-code libraries).</p>
+
+<p>I am not an expert on the OSGi resolver, so any other info on this topic is welcome!</p>
+
+<p>In general, it is <a href="http://www.mail-archive.com/users%40felix.apache.org/msg16350.html">recommended</a> that OSGi bundles which implement a standard API include a <em>copy</em> of that API within the same bundle. With this approach, finding a bundle that implements the desired API automatically also makes an implementation of that API available. Such bundles should also <em>import</em> the API that they export, to minimise wiring conflicts. Note that whether an OSGi bundle contains an implementation is usually not visible from outside - OSGi bundles don’t export their implementation packages but instead export instances of those implementation classes as services. However such bundles should define a capability that indicates that it provides services of types defined in the API. Other bundles then don’t depend on the <em>impl</em> - they depend on the <em>service</em>, ie have a requirement that describes the need for the specific service. The advantages of combining API and implementation are:</p>
+
+<ul>
+  <li>reduces the number of bundles</li>
+  <li>avoids any incompatibility issues between API and impl</li>
+  <li>allows the OBR resolution to automatically find the impl - the dependency from user is on the API, so if the impl is elsewhere then the automatic-resolution needs manual help.</li>
+</ul>
+
+<p>One potential problem with the OSGi resolver is that the metadata for bundles in the repository must be 100% correct; missing requirements or capabilities can cause major problems for the constraint-satisfaction algorithm. Sadly, incorrect metadata on OSGi bundles is not uncommon, particularly for open-source projects who are not primarily interested in OSGi.</p>
+
+<h1 id="other-use-cases-for-the-resolver-service">Other Use-cases for the Resolver Service</h1>
+
+<p>Above the primary use-case of <em>provisioning</em> has been discussed. However the repository and resolver functionality can also potentially be useful outside of a running container:</p>
+
+<ul>
+  <li>given some source-code to compile, and a set of bundles that the code depends on, determine the transient dependencies that also need to be added to the compilation classpath;</li>
+  <li>given a bundle to test, find the best set of bundles to add to the classpath such that the bundle’s unit-tests can be executed;</li>
+  <li>given a set of <em>mandatory</em> bundles, find the additional set of bundles that need to be loaded in order to launch an OSGi container with the mandatory bundles active (this is actually
+just the provisioning use-case, automatically applied on launch of the container)</li>
+</ul>
+
+<p>In particular, the bndtools plugin for the Eclipse IDE applies the three features above to provide OSGi-specific build/compile/unit-test/launch features within the Eclipse IDE.</p>
+
+<p>The <code>bnd</code> commandline tool also supports the above three use-cases, allowing transient-dependency resolution for compile, test and launch to be applied from command-line tools.</p>
+
+<p>See later in this article for discussions of <code>bnd</code> and <code>bndtools</code>.</p>
+
+<h1 id="using-maven-dependency-information-for-provisioning">Using Maven Dependency Information for Provisioning</h1>
+
+<p>Just as a thought-experiment: can Maven poms be used to do provisioning? Considering why or why not may make the features of OBR clearer.</p>
+
+<p>A <code>dependency</code> element in a Maven pom-file declares a requirement: the specified artifact (in some version-range) is needed for some purpose (compilation, unit-test execution, or runtime). The <a href="http://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin">exec-maven-plugin</a> uses the dependency section of a pom to download the dependencies of any artifact (including transient dependencies) then build a classpath pointing to those jarfiles and execute a main-method. The downloading of dependencies is effectively provisioning, ie at least primitive provisioning <em>is</em> possible using the dependency information from Maven poms.</p>
+
+<p>In an OSGi environment, each compile-scope dependency entry in a Maven pom <em>could</em> be used to determine additional bundles to install. Maven dependencies can specify version ranges, so a provisioning engine could check whether the container already had a matching bundle with a compatible version installed, and if so then skip the dependency. What it does not support is having different artifacts providing the same API, ie having package “com.acme.utils” provided by either Maven artifact com.acme:utils or org.freeacme:utils. Maven specifies dependencies on artifacts, not packages. OSGi supports - <a href="http://www.mail-archive.com/users%40felix.apache.org/msg16350.html">and even encourages</a> - multiple bundles containing copies of the same API classes (with different implementations).</p>
+
+<p>As noted earlier, the OSGi requirement/capability model allows a bundle’s manifest to express many different types of requirement. Maven can express dependencies for purposes other than compilation; in particular a dependency can have a “runtime” scope which can be used to declare a dependency on the services of some other bundle - eg when it uses Declarative Services then it could define a runtime dependency on a bundle providing SCR (Service Component Runtime). However this kind of dependency would be on a <em>specific artifact</em> not on an abstract service, so substitution of an alternate implementation is not possible. Clearly in the case of SCR that isn’t reasonable.</p>
+
+<p>The primary differences between the information available via a Maven pom and the information available via OSGi requirements/capabilities are:</p>
+
+<ul>
+  <li>
+    <p>Maven poms <em>overspecify</em> dependencies, while OBR <em>underspecifies</em> them. With a system based on poms, it would be necessary to have some table of “equivalent artifacts” so that a declared dependency on some <em>concrete artifact</em> can actually be satisfied by some other artifact; without this many bundles with duplicated functionality may be loaded. Unfortunately such a table would be difficult to maintain. OBR instead leads to situations where provisioning fails because there are <em>multiple possible artifacts</em> that satisfy the requirements and the resolver cannot choose between them. However failure-to-solve is an easier problem for administrators to deal with; the issue is immediately obvious and can be solved simply by manually loading the bundles which provide the <em>desired implementation</em> then retrying (as the <code>initial state</code> is considered during resolution). Another possible solution is to control the contents of the provided OSGi repositories so that only the desired implementation is available.</p>
+  </li>
+  <li>
+    <p>Maven poms have <em>coarse grained</em> dependencies (requirements) which obscure the <em>reason</em> for the dependency. It is clear from a Maven pom <em>which</em> other artifacts the author expected to be present, but not why. OSGi Import-Package declarations and other kinds of requirements are much clearer, and so provide more information to an administrator about the purpose of a dependency. As an example, when a Maven artifact has a <em>runtime scope</em> dependency on another artifact, does it mean there is a dependency on some <em>service</em> that the required artifact provides, or some resource - and if so, which service or resource?</p>
+  </li>
+  <li>
+    <p>Maven poms cannot express the wide range of requirements that the OSGi requirement/capability model can, eg expressing licencing or operating-system dependencies are tricky.</p>
+  </li>
+  <li>
+    <p>Using Maven poms for provisioning would <em>duplicate</em> information present in the manifest. When an OSGi container moves a bundle from installed to resolved status, it needs to find all the imported packages - and does this using the requirements information (Import-Package) from the manifest. If the provisioning system has not installed the correct bundles, then this will fail - ie the provisioning step needs to be <em>consistent</em> with the resolution done by the OSGi container. OBR uses the information from the manifest to drive provisioning, and is therefore far more likely to result in a consistent solution than dependencies in external pomfiles.</p>
+  </li>
+</ul>
+
+<p>One example of the way that Maven overspecifies dependencies is use of the well-known slf4j library. Code is compiled against the slf4j api, but can be executed at runtime with any one of a set of jarfiles that implement that API in different ways: forwarding to java.util.logging, or to log4j or logback. A maven dependency can only be to <em>one of these artifacts</em>, while an OSGi-style package dependency requires <em>some</em> compatible library but doesn’t specify which one (thanks to Roland Tepp for this excellent example).</p>
+
+<p>In conclusion, it seems to me that Maven poms could be used to do provisioning if you really had to; the principles aren’t too different. Maven’s pattern of depending on a concrete artifact rather than an abstract package is however difficult when multiple bundles can provide the same class, and using this pattern to define non-compilation-related dependencies (eg services) is even clumsier. It might be possible to have a table mapping artifact-ids to “equivalent artifacts” to resolve both of these issues, but that would be a lot of manual work. And most significantly, Maven’s dependencies hide the <em>reasons</em> for a dependency: with OSGi the dependency on a package or service or licence or other capability is clear; Maven’s simplistic depend-on-artifact masks the reason for the dependency which always reduces flexibility.</p>
+
+<p>And by the way, according to Neil Bartlett, OBR (for provisioning) was actually invented before Maven (first released 2002).</p>
+
+<h1 id="using-obr-at-compilation-time">Using OBR at compilation time</h1>
+
+<p>The same logic used to do provisioning can also be used at build-time to find the set of transient dependencies.</p>
+
+<p>The bnd tool supports this (see later for more information on bnd). A “bnd file” contains a <a href="http://bnd.bndtools.org/instructions/buildpath.html">-buildpath</a> option which specifies the direct dependencies of the code being compiled - as a Maven pom would do. These dependencies are (as in Maven) directly on a particular artifact (ie bundlesymname,version). However whereas Maven would then look into the pom-file of each of those dependencies to find transient dependencies, bnd instead extracts the <em>requirements</em> from the MANIFEST.MF of each of those <em>direct dependencies</em>, then applies the <code>resolver</code> algorithm to the requirements and the set of available OBR repositories to determine which bundles should be transiently on the compile-path.</p>
+
+<p>Using OBR to compute transient dependencies avoids having redundant information about transient dependencies available in both the OSGi manifest and a build-configuration-file (eg pom.xml). It also ensures that when a bundle is loaded at compile-time into an OSGi container, the same algorithm is used to find bundles-to-wire-against which was earlier used to find bundles-to-compile-against. The results may not be exactly the same: resolution at wiring time depends on the existing state (ie the existing set of bundles in the container) and the repositories used. However the results should be <em>consistent</em>, while Maven’s hand-maintained compilation dependencies might not be.</p>
+
+<p>Note that while bnd will compute the compile-path (and launch the java compiler, etc) it isn’t a full build tool. Both Ant and Gradle can use bnd to perform the compilation step on a single module, while managing the other steps of the build themselves. It appears that such integration is not possible for Maven - ie when compiling OSGi code with Maven it is necessary to compute transient dependencies in the Maven way.</p>
+
+<p>The bndtools plugin for the Eclipse IDE uses the logic from bnd to compute the transitive dependencies at compile-time. There have been a few attempts to add similar functionality to IntelliJ IDEA, but none have reached useable status as far as I can tell.</p>
+
+<h1 id="other-obr-related-projects">Other OBR-related projects</h1>
+
+<p>The <a href="http://felix.apache.org/documentation/subprojects/apache-felix-osgi-bundle-repository.html">Apache Felix Bundle Repository</a> is an implementation of OBR-format and R5-format repositories (ie supports indexing and searching of resources, but not the resolver logic).</p>
+
+<p><a href="http://karaf.apache.org/">Apache Karaf</a> is an OSGi environment build on the following:</p>
+
+<ul>
+  <li>Apache Felix Framework OSGi container;</li>
+  <li>Gogo command-line shell for OSGi;</li>
+  <li>and a few other features</li>
+</ul>
+
+<p>Karaf accepts a configuration file which specifies the bundles to load; they can be grouped together as “features”. An administrator can install a ‘feature’ to get a set of bundles loaded including all the necessary transient dependencies. The features format supports OBR via the “dependency=true” flag which marks a bundle as being a ‘candidate’ for loading if-and-only-if its capabilities are actually needed by some other bundle.</p>
+
+<p>The <a href="https://karaf.apache.org/index/subprojects/cave.html">Apache Karaf Cave</a> project also appears to be something to do with OBR repositories, but I’m not quite clear what use-cases it satisfies. I <em>think</em> it is intended to be used like a maven repository manager (eg Artifactory or Nexus), running as a system service and consulted over the network by OSGi containers as a source of OSGi resources (ie a remote repository).</p>
+
+<p>The <code>bnd</code> tool supports generation of an R5 index file from an existing tree of bundles. The maven-build-plugin and bnd-maven-plugin for Maven provide access to that <code>bnd</code> functionality from within a maven project.</p>
+
+<h1 id="the-bnd-project">The bnd Project</h1>
+
+<p><code>bndlib</code> is a java library for various OSGi-related tasks, and <code>bnd</code> wraps <code>bndlib</code> as a command-line tool. Describes itself as a “swiss army knife for OSGi”.</p>
+
+<p><code>bnd</code> is most commonly used post-compile-time to scan a tree of classfiles to determine which packages are imported, and generate the appropriate manifest entries. It requires some manual configuration to specify which packages of the scanned code should be exported, but then determines the packages which need to be imported itself - including adding appropriate <code>uses</code> declarations and version-ranges. Generating this information automatically is <em>far</em> more reliable than maintaining it by hand (as well as more convenient).</p>
+
+<p><code>bnd</code> can also:</p>
+
+<ul>
+  <li>compute a “baseline” on a bundle, ie a snapshot of the public API of the bundle. It can later compare a newer version of the bundle against the original baseline and tell you if they are API-compatible. Intended to help developers assign proper version-numbers to their bundle - in particular, ensure the major version# is incremented if incompatible changes are present.</li>
+  <li>invoke a java compiler with an appropriate classpath (including transitive dependencies), compute an appropriate manifest and produce a jarfile.</li>
+  <li>be an “app launcher” that builds a classpath from jars retrieved from an OBR repository then launches a JVM.</li>
+  <li>pretty-print info about a jarfile (extracted from manifest)</li>
+  <li>apply “grep” to jar manifests</li>
+  <li>convert a non-OSGi jarfile into an OSGi bundle</li>
+  <li>copy a jarfile from one location to another. Most importantly, the from (and maybe to) location can be an HTTP url, ie can replace wget or similar.</li>
+  <li>create an executable jarfile (with embedded OSGi runtime + set of required bundles)</li>
+  <li>and perform various less-common tasks</li>
+</ul>
+
+<p><code>bnd</code> is an open-source project, not (officially) a project of the OSGi Alliance. However official OSGi features are often first prototyped within bnd. The sourcecode is at: <a href="https://github.com/bndtools/bnd">https://github.com/bndtools/bnd</a>. Documentation can be found at the following locations; it isn’t clear which is more up-to-date or more-official:</p>
+
+<ul>
+  <li>
+<a href="http://bnd.bndtools.org/">http://bnd.bndtools.org/</a> (content derived from the github repo at https://github.com/bndtools/bnd.manual).</li>
+  <li>
+<a href="http://www.aqute.biz/Bnd/Bnd">http://www.aqute.biz/Bnd/Bnd</a> (content possibly derived from github repo https://github.com/duckAsteroid/bnd-book).</li>
+</ul>
+
+<p>See <a href="http://bnd.bndtools.org/chapters/400-commandline.html">here</a> or <a href="http://bnd.bndtools.org/chapters/860-commands.html">here</a> for more information on the available features of bnd.</p>
+
+<p>The precompiled versions of bndlib/bnd can be found in the Maven central repository under 4(!) different ids:</p>
+
+<ul>
+  <li>biz.aQute.bnd:biz.aQute.bndlib:2.4.1 (jan 2015; 1.9MB)  – the “library” version ie bndlib</li>
+  <li>biz.aQute.bnd:biz.aQute.bnd:2.4.1 (jan 2015; 2.6MB) – the “commandline” version ie bnd</li>
+  <li>biz.aQute.bnd:bndlib:2.4.0 (nov 2014)  – obsolete I think</li>
+  <li>biz.aQute:bndlib -&gt; renamed to above</li>
+</ul>
+
+<p>I presume that the first is a library-only release; the second a commandline tool based on the library. And presumably the last two are now obsolete. The aQute.biz website doesn’t appear to have been updated with the new ids yet; it still refers to the last of the above.</p>
+
+<p>Note that bnd was originally developed by Peter Kriens, and so uses package-names based on his private domain (aQute.biz). After the founding of the bndtools project by Neil Bartlett, and creation of a GitHub project of the same name, development of bnd was moved to github as a “subproject” - although bnd/bndlib can be (and is) used independently of bndtools.</p>
+
+<p>Minor note: the bnd development community is extremely small; mostly Peter Kriens (independent) and BJHargraves (IBM). The source-code is almost completely without javadoc, and the Git commit comments are very cryptic. The code uses wildcard-imports extensively (not a common practive); tabs/spaces are randomly used - ie set tabs to 4 spaces for readable code.</p>
+
+<h2 id="installing-the-bnd-commandline-tool">Installing the bnd commandline tool</h2>
+
+<p>The bnd documentation recommends using <a href="http://jpm4j.org">jpm</a> to install bnd. However I would recommend against this; among other things jpm (a project from Peter Kriens) requires installation as <em>root</em>. Jpm’s documentation is also a mess. For debian systems, bnd is packaged (“apt install bnd”), but not in a very useful way. The items on the <a href="https://github.com/bndtools/bnd/releases">github release page</a> are also fairly useless.</p>
+
+<p>I would recomend simply downloading the <a href="http://mvnrepository.com/artifact/biz.aQute.bnd/biz.aQute.bnd">current bnd jarfile from maven</a> and writing your own trivial script to execute the jarfile. An example script for Linux is:</p>
+
+<pre><code>#!/bin/sh
+java -jar /some/path/biz.aQute.bnd-{some.version}.jar $@
+</code></pre>
+
+<p>Run bnd without any options to get basic help.</p>
+
+<h2 id="more-info-about-using-bnd-for-compilation">More info about using bnd for compilation</h2>
+
+<p>The bnd builder functionality which invokes a java compiler uses a “.bnd” config file to provide the initial set of dependencies, the list of packages to export, etc. One or more OSGi repositories are also needed, from which dependencies are resolved as described earlier in this article. However bnd is not a complete build-tool; in particular it only ever builds a single project (source tree). It can be used together with Ant or Gradle to build multi-artifact projects. This functionality cannot be used with Maven due to completely different artifact resolution and lifecycle issues.</p>
+
+<p>You can use command <code>bnd compile</code> in any project directory; it will then run “javac” on the source-code directories. You can then run <code>bnd build</code> which will assemble the jarfile (including generating a manifest). Or you can rely on some other tool to compile the java source-code into the <code>bin</code> directory, and then just use <code>bnd build</code> as the assembly step.</p>
+
+<p>When running <code>bnd compile</code> or <code>bnd build</code>, config settings can be <em>inherited</em> from a master config file, which allows sharing of some config information across multiple source-code trees (projects). The inheritable settings are expected to be found in <code>../cnf/build.bnd</code> - which implies that a bnd “workspace” consisting of multiple projects should always have a “flat” structure, unlike Maven-based development which often uses nested directories. The “cnf” directory can also define <em>plugins</em> which will affect the behaviour of bnd in sibling directories; see the bnd documentation for more details.</p>
+
+<p>Within a bnd project directory, if a file named “bnd.bnd” is present, then a single artifact is generated whose bundle–symbolic-name is the directory-name. Alternatively, one or more “.bnd” files named something other than “bnd.bnd” may be present, in which case a separate artifact will be created for each .bnd file (ie unlike Maven, bnd projects can produce multiple artifacts) - and the artifact symbolic-name is dirname + bnd-file-prefix. A bnd file can contain a “-sub” entry which contains a list of other .bnd files in the same directory in order to control build order if necessary.</p>
+
+<p>The most important entry in a .bnd file is “-buildpath” which specifies the bundles that the project has direct dependencies on (ie equivalent to Maven’s <code>&lt;dependency&gt;</code> tag with scope=compile). Also important is the entry that defines the packages from this project that are to be exported. Many other options exist; see the bnd documentation for details.</p>
+
+<h1 id="maven-plugins">Maven Plugins</h1>
+
+<p><a href="http://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html">maven-bundle-plugin</a> is a Maven wrapper over parts of the bnd library’s functionality.</p>
+
+<p><a href="http://felix.apache.org/documentation/subprojects/apache-felix-maven-scr-plugin.html">maven-scr-plugin</a> processes declarative-services annotations present in source-code and generates the relevant xml-format files and manifest-entries.</p>
+
+<p><a href="https://github.com/bndtools/bnd/tree/master/bnd-maven-plugin">bnd-maven-plugin</a> is an alternative to maven-bundle-plugin. It is newer, and part of the bnd project rather than part of the Felix project. While the maven-bundle-plugin defines its own <em>packaging</em> type and takes over many steps of building a bundle’s jarfile, bnd-maven-plugin simply generates the manifest - which interferes less with Maven’s normal functionality. Whereas maven-bundle-plugin defines options for bnd in the pom.xml file, bnd-maven-plugin expects a separate “bnd.bnd” file in normal bnd format.</p>
+
+<h1 id="bndtools">bndtools</h1>
+
+<p><code>bndtools</code> is an Eclipse-IDE extension that replaces the standard Eclipse project builder with the “bnd” builder. And replaces the standard Eclipse launcher with bnd -run.</p>
+
+<p>The bndtools site has a page on <a href="http://bndtools.org/concepts.html">the basic concepts of bndtools</a>.</p>
+
+<p>In traditional Eclipse, package imports are managed via a wizard. In bndtools they are auto-generated by bnd, by analysing the classfiles generated during a build.</p>
+
+<p>AFAIK, bndtools also keeps an OSGi container instance running in the background, and when code is modified then a new version of the relevant OSGi bundle is built, the old OSGi bundle <em>unloaded</em> and the new bundle <em>loaded</em> automatically. The result is a kind of ‘hot deploy’ that is much faster than relaunching the entire container. This approach does only work when (a) the bundle and all bundles that depend on it correctly support unloading/reloading, and (b) when the number of other bundles that depend on the bundle being replaced is small.</p>
+
+<p>When using the bndtools Eclipse plugin, there are no “target” files or similar - the bnd equivalents are used instead. And no “tycho” plugin needed. And no “p2” format repositories (an OBR repository is needed instead).</p>
+
+<h1 id="enroute">Enroute</h1>
+
+<p>Enroute is Peter Krien’s attempt to build a “ruby on rails killer” or “php killer” on top of OSGi + Eclipse-IDE + bndtools (my phrasing).</p>
+
+<p>The belief of the project developers is that Java is an excellent language for such projects, but that Java development tools are not letting people rapidly develop and deploy. OSGi as a deployment framework (with its remote-management, provisioning, etc), OSGi remote services, and its modular development are things that “pure” java does not have, and the Eclipse IDE plus bndtools allows rapid code/build/test cycles.</p>
+
+<p>This is a work-in-progress at the current time. In particular, the project is struggling with things like persistence frameworks.</p>
+
+<h1 id="karaf-features">Karaf Features</h1>
+
+<p>The Apache Karaf project and its ‘features-based’ provisioning system has been mentioned a few times above. There are a few additional things about this project that should be mentioned.</p>
+
+<p>See <a href="http://stackoverflow.com/questions/8977381/whats-the-difference-between-features-in-karaf-and-obr">here</a> for a nice comparison of OBR and Karaf features.</p>
+
+<p>Information on the xml attribute <code>dependency=true</code> can be found in the <a href="https://servicemix.apache.org/docs/5.0.x/users-guide/provisioning.html">provisioning section of the servicemix user guide</a> and <a href="http://karaf.922171.n3.nabble.com/features-xml-dependency-quot-true-quot-td3286359.html">this email</a> has further discussion.</p>
+
+<p>To turn off OBR completely within karaf, edit etc/startup.properties and comment-out the obr line.</p>
+
+<h1 id="background-info-on-the-osgi-alliance">Background info on the OSGi Alliance</h1>
+
+<p>The OSGi Alliance is an industry body (actually, a non-profit corporation) which publishes its specification free-of-charge, and allows it to be implemented without licence (including by open-source projects). However the alliance is not itself an “open” body.</p>
+
+<p>The Alliance doesn’t publish any code itself, although some of its staff (particularly Peter Kriens) appear to be permitted to contribute to open-source projects related to OSGi.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/osgi-depres/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

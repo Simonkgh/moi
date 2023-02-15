@@ -1,0 +1,792 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Executing External Processes from Java</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Executing External Processes from Java</h1>
+    <aside>First published on: March 12, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>Sometimes it is necessary to start a local native-code application from a Java application. The Java standard library provides basic support for this, but it has two problems:</p>
+
+<ul>
+  <li>the Java app should read from the app’s stdout and stderr while simultaneously blocking on the application exit status; and</li>
+  <li>the code should be unit-testable.</li>
+</ul>
+
+<p>The requirement to do two or three things at once requires either threads or some very clever selects on filedescriptors; the standard API does not help with this. And the standard API is extremely unit-testing-unfriendly, being based on a set of concrete and final classes.</p>
+
+<p>There are a couple of execution-libraries available, including:</p>
+
+<ul>
+  <li><a href="http://commons.apache.org/proper/commons-exec/">Apache commons-exec</a></li>
+  <li><a href="https://github.com/zeroturnaround/zt-exec">zt-exec</a></li>
+</ul>
+
+<p>The above libraries are good, but “overkill” for simpler requirements. Rather than add an extra dependency to my current project, I implemented a basic wrapper around the standard process-execution APIs which has been successfully used in production. Here is the code..</p>
+
+<h1 id="why-reading-process-output-is-important">Why Reading Process Output is Important</h1>
+
+<p>The standard way to pass data between applications under Unix is a <code>pipe</code>, eg :</p>
+
+<pre><code>grep wanted somefile.txt | wc -l
+</code></pre>
+
+<p>The writing process sees the pipe as a file it can write to, and the reading process sees it as a file it can read from. However a pipe has some unusual features, most important of which is that it has a <em>limited size</em>. When a pipe is full and an application tries to write to it, it <em>blocks</em> until either some other process reads from the pipe (freeing up space) or all readers of the pipe exit. In normal use, this elegantly provides a kind of performance-throttling for applications in the pipeline, automatically handling cases where one application in the pipeline naturally runs faster than others. However in our use-case the Java application is typically both a writer into the pipeline and a reader from it. If the parent Java process does not read regularly from the external process STDOUT and STDERR, and the external app writes at least one pipe-full of data (typically 4KB) then it will block - forever.</p>
+
+<p>The code below deals with this by:</p>
+
+<ul>
+  <li>accepting a closure which should be invoked for each line of data from STDOUT/STDERR, and</li>
+  <li>spawning threads to read from STDOUT/STDERR and execute the closure.</li>
+</ul>
+
+<p>Of course the closure must be thread-safe.</p>
+
+<h1 id="a-simple-process-management-framework">A Simple Process Management Framework</h1>
+
+<p>ProcessDesc wraps java.lang.ProcessBuilder (but is an interface rather than a concrete final class):</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="comment">// Author: Simon Kitching</span>
+<span class="comment">// This code is in the public domain</span>
+<span class="keyword">package</span> <span class="namespace">net.vonos.process</span>;
+
+<span class="keyword">import</span> <span class="include">java.io.File</span>;
+<span class="keyword">import</span> <span class="include">java.io.IOException</span>;
+<span class="keyword">import</span> <span class="include">java.util.List</span>;
+<span class="keyword">import</span> <span class="include">java.util.function.Consumer</span>;
+
+<span class="comment">/**
+ * An interface equivalent to java.lang.ProcessBuilder. See ProcessFactory for more information.
+ */</span>
+<span class="directive">public</span> <span class="type">interface</span> <span class="class">ProcessDesc</span> {
+    <span class="comment">/** Sets the application to start, and its commandline-arguments. */</span>
+    ProcessDesc command(<span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; args);
+
+    <span class="comment">/** Sets the current-working-directory for the new process. */</span>
+    ProcessDesc directory(<span class="predefined-type">File</span> dir);
+
+    <span class="comment">/** Sets a callback which is invoked for each LF-terminated line that the process writes to its STDOUT. */</span>
+    ProcessDesc inputConsumer(Consumer&lt;<span class="predefined-type">String</span>&gt; consumer);
+
+    <span class="comment">/** Sets a callback which is invoked for each LF-terminated line that the process writes to its STDERR. */</span>
+    ProcessDesc errorConsumer(Consumer&lt;<span class="predefined-type">String</span>&gt; consumer);
+
+    <span class="comment">/** Start the external process (which also starts callbacks to the inputConsumer and errorConsumer). */</span>
+    ProcessHandle start() <span class="directive">throws</span> <span class="exception">IOException</span>;
+}</code>
+</pre></div></div>
+
+<p>ProcessHandle wraps java.lang.Process (but is an interface rather than a concrete final class):</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="keyword">package</span> <span class="namespace">net.vonos.process</span>;
+
+<span class="keyword">import</span> <span class="include">java.util.concurrent.TimeUnit</span>;
+
+<span class="comment">/**
+ * An interface equivalent to java.lang.Process. See ProcessFactory for more information.
+ * &lt;p&gt;
+ * There are no getInputStream() or getErrorStream() methods here because the ProcessDesc class takes
+ * "consumer" objects as parameters instead; that is a safer way to handle processing of output from
+ * an external process.
+ * &lt;/p&gt;
+ */</span>
+<span class="directive">public</span> <span class="type">interface</span> <span class="class">ProcessHandle</span> {
+    <span class="comment">/**
+     * Return true if the process is still running.
+     */</span>
+    <span class="type">boolean</span> isAlive();
+
+    <span class="comment">/**
+     * Block until the process terminates or the timeout expires.
+     *
+     * @return true when the process has terminated (ie false when timeout expired)
+     */</span>
+    <span class="type">boolean</span> waitFor(<span class="type">long</span> timeout, <span class="predefined-type">TimeUnit</span> unit) <span class="directive">throws</span> <span class="exception">InterruptedException</span>;
+
+    <span class="comment">/**
+     * Return the exit-status of the application. Only valid after waitFor(..) returns true.
+     */</span>
+    <span class="type">int</span> exitValue();
+
+    <span class="comment">/**
+     * Terminate the process.
+     * &lt;p&gt;
+     * Note: on unix this sends a SIGTERM to the process. If the started application spawns child processes, then the
+     * parent should trap SIGTERM and explicitly forward it to the child processes, eg as described here:
+     *   http://veithen.github.io/2014/11/16/sigterm-propagation.html
+     * &lt;/p&gt;
+     * &lt;p&gt;
+     * If the started process is a shell which starts exactly one child process then instead of catching/relaying
+     * signals it may use "exec ..." to replace itself with another process.
+     * &lt;/p&gt;
+     */</span>
+    <span class="type">void</span> destroyForcibly();
+}</code>
+</pre></div></div>
+
+<p>ProcessFactory has no equivalent in the standard Java APIs; this is an interface through which ProcessDesc instances can be created:</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="keyword">package</span> <span class="namespace">net.vonos.process</span>;
+
+<span class="comment">/**
+ * Interface through which external processes can be started.
+ * &lt;p&gt;
+ * The standard Java ProcessBuilder class is unfortunately extremely unit-test-unfriendly; this is better.
+ * &lt;/p&gt;
+ */</span>
+<span class="directive">public</span> <span class="type">interface</span> <span class="class">ProcessFactory</span> {
+    ProcessDesc newProcessDesc();
+}</code>
+</pre></div></div>
+
+<p>InputHandler is a thread which reads from a pipe and executes a closure per line of input:</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="keyword">package</span> <span class="namespace">net.vonos.process</span>;
+
+<span class="keyword">import</span> <span class="include">org.slf4j.Logger</span>;
+<span class="keyword">import</span> <span class="include">org.slf4j.LoggerFactory</span>;
+
+<span class="keyword">import</span> <span class="include">java.io</span>.*;
+<span class="keyword">import</span> <span class="include">java.util.function.Consumer</span>;
+
+<span class="comment">/**
+ * Continuously reads data from an input-stream, splits it into lines, and passes it to a Consumer object.
+ * &lt;p&gt;
+ * External processes need to have their input and error streams regularly read, as they may be fixed-size
+ * buffers which will cause the external process to block when they are full. An instance of this type,
+ * run as a thread, will ensure that is done - and each line is passed to the specified consumer (if any).
+ * When no consumer is set, the data read is just discarded.
+ * &lt;/p&gt;
+ * &lt;p&gt;
+ * This thread terminates automatically when EOF is encountered - which is guaranteed when the external
+ * process being read from has been terminated.
+ * &lt;/p&gt;
+ */</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">InputHandler</span> <span class="directive">extends</span> <span class="predefined-type">Thread</span> {
+    <span class="directive">private</span> <span class="directive">static</span> <span class="directive">final</span> <span class="predefined-type">Logger</span> LOG = LoggerFactory.getLogger(InputHandler.class);
+
+    <span class="comment">// Stream to read from</span>
+    <span class="directive">private</span> <span class="directive">final</span> <span class="predefined-type">InputStream</span> is;
+
+    <span class="comment">// Consumer to pass each line to (may be null)</span>
+    <span class="directive">private</span> <span class="directive">final</span> Consumer&lt;<span class="predefined-type">String</span>&gt; consumer;
+
+    <span class="directive">private</span> <span class="directive">final</span> <span class="predefined-type">BufferedReader</span> reader;
+
+    <span class="comment">/** Constructor. */</span>
+    <span class="directive">public</span> InputHandler(<span class="predefined-type">InputStream</span> is, Consumer&lt;<span class="predefined-type">String</span>&gt; consumer) {
+        <span class="local-variable">super</span>(<span class="string"><span class="delimiter">"</span><span class="content">Process input</span><span class="delimiter">"</span></span>); <span class="comment">// name thread for debugging purposes</span>
+        <span class="local-variable">this</span>.is = is;
+        <span class="local-variable">this</span>.consumer = consumer;
+        <span class="local-variable">this</span>.reader = <span class="keyword">new</span> <span class="predefined-type">BufferedReader</span>(<span class="keyword">new</span> <span class="predefined-type">InputStreamReader</span>(is));
+    }
+
+    <span class="comment">/**
+     * Thread run method, which keeps processing output from the inputstream until EOF or exception.
+     */</span>
+    <span class="annotation">@Override</span>
+    <span class="directive">public</span> <span class="type">void</span> run() {
+        <span class="keyword">try</span> {
+            <span class="keyword">for</span>(;;) {
+                <span class="predefined-type">String</span> line = reader.readLine();
+                <span class="keyword">if</span> (line == <span class="predefined-constant">null</span>) {
+                    <span class="keyword">break</span>; <span class="comment">// EOF</span>
+                }
+
+                <span class="keyword">if</span> (consumer != <span class="predefined-constant">null</span>) {
+                    consumer.accept(line);
+                }
+            }
+        } <span class="keyword">catch</span> (<span class="exception">IOException</span> e) {
+            LOG.info(<span class="string"><span class="delimiter">"</span><span class="content">IOException</span><span class="delimiter">"</span></span>, e);
+        } <span class="keyword">finally</span> {
+            <span class="keyword">try</span> {
+                reader.close();
+            } <span class="keyword">catch</span>(<span class="exception">IOException</span> e) {
+                LOG.warn(<span class="string"><span class="delimiter">"</span><span class="content">Exception while closing reader</span><span class="delimiter">"</span></span>, e);
+            }
+        }
+    }
+}</code>
+</pre></div></div>
+
+<p>ProcessFactoryImpl provides implementations of all the above interfaces, allowing ProcessDesc instances to be created, configured with handlers for their STDOUT and STDERR, then started.</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="keyword">package</span> <span class="namespace">net.vonos.process</span>;
+
+<span class="keyword">import</span> <span class="include">org.slf4j.Logger</span>;
+<span class="keyword">import</span> <span class="include">org.slf4j.LoggerFactory</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.stereotype.Component</span>;
+
+<span class="keyword">import</span> <span class="include">java.io.File</span>;
+<span class="keyword">import</span> <span class="include">java.io.IOException</span>;
+<span class="keyword">import</span> <span class="include">java.util.List</span>;
+<span class="keyword">import</span> <span class="include">java.util.concurrent.TimeUnit</span>;
+<span class="keyword">import</span> <span class="include">java.util.function.Consumer</span>;
+
+<span class="comment">/**
+ * A simple factory for ProcessBuilder instances and its related types.
+ * &lt;p&gt;
+ * The inner-classes defined here are 1:1 wrappers around java.lang.ProcessBuilder and java.lang.Process. However
+ * unlike the standard classes, these implement interfaces so they can be mocked for testing; the native classes
+ * are both concrete and final, so any code that uses them directly cannot be unit-tested with Mockito or similar.
+ * &lt;/p&gt;
+ */</span>
+<span class="annotation">@Component</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">ProcessFactoryImpl</span> <span class="directive">implements</span> ProcessFactory {
+    <span class="directive">private</span> <span class="directive">static</span> <span class="directive">final</span> <span class="predefined-type">Logger</span> LOG = LoggerFactory.getLogger(ProcessFactoryImpl.class);
+
+    <span class="directive">public</span> ProcessDesc newProcessDesc() {
+        <span class="keyword">return</span> <span class="keyword">new</span> ProcessDescImpl();
+    }
+
+    <span class="comment">/** Wraps a java.lang.ProcessBuilder instance. */</span>
+    <span class="directive">private</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">ProcessDescImpl</span> <span class="directive">implements</span> ProcessDesc {
+        <span class="directive">private</span> <span class="directive">final</span> <span class="predefined-type">ProcessBuilder</span> builder = <span class="keyword">new</span> <span class="predefined-type">ProcessBuilder</span>();
+        <span class="directive">private</span> Consumer&lt;<span class="predefined-type">String</span>&gt; inputConsumer;
+        <span class="directive">private</span> Consumer&lt;<span class="predefined-type">String</span>&gt; errorConsumer;
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> ProcessDesc command(<span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; args) {
+            builder.command(args);
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> ProcessDesc directory(<span class="predefined-type">File</span> dir) {
+            builder.directory(dir);
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> ProcessDesc inputConsumer(Consumer&lt;<span class="predefined-type">String</span>&gt; consumer) {
+            <span class="local-variable">this</span>.inputConsumer = consumer;
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> ProcessDesc errorConsumer(Consumer&lt;<span class="predefined-type">String</span>&gt; consumer) {
+            <span class="local-variable">this</span>.errorConsumer = consumer;
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> ProcessHandle start() <span class="directive">throws</span> <span class="exception">IOException</span> {
+            <span class="keyword">return</span> <span class="keyword">new</span> ProcessHandleImpl(builder, inputConsumer, errorConsumer);
+        }
+    }
+
+    <span class="comment">/** Wraps a java.lang.ProcessBuilder instance. */</span>
+    <span class="directive">private</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">ProcessHandleImpl</span> <span class="directive">implements</span> ProcessHandle {
+        <span class="directive">private</span> <span class="directive">final</span> <span class="predefined-type">Process</span> process;
+        <span class="directive">private</span> <span class="directive">final</span> InputHandler inputConsumer;
+        <span class="directive">private</span> <span class="directive">final</span> InputHandler errorConsumer;
+
+        ProcessHandleImpl(<span class="predefined-type">ProcessBuilder</span> builder, Consumer&lt;<span class="predefined-type">String</span>&gt; inputConsumer, Consumer&lt;<span class="predefined-type">String</span>&gt; errorConsumer)
+                <span class="directive">throws</span> <span class="exception">IOException</span> {
+            process = builder.start();
+            <span class="local-variable">this</span>.inputConsumer = <span class="keyword">new</span> InputHandler(process.getInputStream(), inputConsumer);
+            <span class="local-variable">this</span>.errorConsumer = <span class="keyword">new</span> InputHandler(process.getErrorStream(), errorConsumer);
+
+            <span class="local-variable">this</span>.inputConsumer.start();
+            <span class="local-variable">this</span>.errorConsumer.start();
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">boolean</span> isAlive() {
+            <span class="keyword">return</span> process.isAlive();
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">boolean</span> waitFor(<span class="type">long</span> timeout, <span class="predefined-type">TimeUnit</span> unit) <span class="directive">throws</span> <span class="exception">InterruptedException</span> {
+            <span class="type">boolean</span> finished = process.waitFor(timeout, unit);
+            <span class="keyword">if</span> (finished) {
+                inputConsumer.join();
+                errorConsumer.join();
+
+                <span class="keyword">try</span> {
+                    process.getInputStream().close();
+                    process.getOutputStream().close();
+                    process.getErrorStream().close();
+                } <span class="keyword">catch</span>(<span class="exception">IOException</span> e) {
+                    LOG.warn(<span class="string"><span class="delimiter">"</span><span class="content">Exception while closing process streams</span><span class="delimiter">"</span></span>, e);
+                }
+            }
+            <span class="keyword">return</span> finished;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">int</span> exitValue() {
+            <span class="keyword">return</span> process.exitValue();
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">void</span> destroyForcibly() {
+            <span class="comment">// Note: on unix this sends a SIGTERM to the process.</span>
+            <span class="comment">// If the started application spawns child processes, then the parent should trap SIGTERM and</span>
+            <span class="comment">// explicitly forward it to the child processes, eg as described here:</span>
+            <span class="comment">//   http://veithen.github.io/2014/11/16/sigterm-propagation.html</span>
+            process.destroyForcibly();
+        }
+    }
+}</code>
+</pre></div></div>
+
+<p>ProcessMock is a test-helper class which provides implementations of all the above interfaces which are suitable for unit-testing; the implementations can be preconfigured with desired behaviour and then during testing they capture their inputs for later assertions. Because both ProcessFactoryImpl and ProcessMock implement the ProcessFactory interface, code which uses ProcessFactory can be passed either the real or mock implementation without code-changes. This class is expected to be in the “test classpath” rather than the standard one.</p>
+
+<div class="CodeRay"><div class="code"><pre class="CodeRay">
+<code class="language-java"><span class="keyword">package</span> <span class="namespace">net.vonos.process</span>;
+
+<span class="keyword">import</span> <span class="include">java.io.File</span>;
+<span class="keyword">import</span> <span class="include">java.io.IOException</span>;
+<span class="keyword">import</span> <span class="include">java.util.ArrayList</span>;
+<span class="keyword">import</span> <span class="include">java.util.Arrays</span>;
+<span class="keyword">import</span> <span class="include">java.util.List</span>;
+<span class="keyword">import</span> <span class="include">java.util.concurrent.TimeUnit</span>;
+<span class="keyword">import</span> <span class="include">java.util.function.Consumer</span>;
+
+<span class="comment">/**
+ * Implementations of the ProcessFactory interface and related types which are convenient for unit-testing.
+ * &lt;p&gt;
+ * These implementations can be preconfigured to return specific values (like mock-objects) and save parameters
+ * passed to them for later verification by unit-test assertions.
+ * &lt;/p&gt;
+ */</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">ProcessMock</span> {
+    <span class="comment">// Simple factory methods</span>
+
+    <span class="directive">public</span> <span class="directive">static</span> Factory newFactory(Desc... descs) {
+        Factory pf = <span class="keyword">new</span> Factory();
+        pf.pds.addAll(<span class="predefined-type">Arrays</span>.asList(descs));
+        <span class="keyword">return</span> pf;
+    }
+
+    <span class="directive">public</span> <span class="directive">static</span> Desc newDesc(Handle... handles) {
+        Desc pd = <span class="keyword">new</span> Desc();
+        pd.phs.addAll(<span class="predefined-type">Arrays</span>.&lt;Handle&gt;asList(handles));
+        <span class="keyword">return</span> pd;
+    }
+
+    <span class="directive">public</span> <span class="directive">static</span> Handle newHandle() {
+        <span class="keyword">return</span> <span class="keyword">new</span> Handle();
+    }
+
+    <span class="directive">public</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">Factory</span> <span class="directive">implements</span> ProcessFactory {
+        <span class="comment">// List of preconfigured objects to be returned from newProcessDesc.</span>
+        <span class="directive">private</span> <span class="predefined-type">List</span>&lt;Desc&gt; pds = <span class="keyword">new</span> <span class="predefined-type">ArrayList</span>&lt;&gt;();
+        <span class="directive">private</span> <span class="type">int</span> pdIndex;
+
+        <span class="directive">public</span> Factory add(Desc pd) {
+            pds.add(pd);
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> ProcessDesc newProcessDesc() {
+            <span class="keyword">if</span> (pdIndex &lt; pds.size()) {
+                <span class="keyword">return</span> pds.get(pdIndex++);
+            }
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="exception">IllegalStateException</span>(<span class="string"><span class="delimiter">"</span><span class="content">No more pds available</span><span class="delimiter">"</span></span>);
+        }
+    }
+
+    <span class="directive">public</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">Desc</span> <span class="directive">implements</span> ProcessDesc {
+        <span class="comment">// Mocked outputs</span>
+        <span class="directive">private</span> <span class="predefined-type">List</span>&lt;Handle&gt; phs = <span class="keyword">new</span> <span class="predefined-type">ArrayList</span>&lt;&gt;();
+        <span class="directive">private</span> <span class="type">int</span> phIndex;
+
+        <span class="comment">// Captured Inputs</span>
+        <span class="directive">private</span> <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; command;
+        <span class="directive">private</span> <span class="predefined-type">File</span> dir;
+        <span class="directive">private</span> Consumer&lt;<span class="predefined-type">String</span>&gt; inputConsumer;
+        <span class="directive">private</span> Consumer&lt;<span class="predefined-type">String</span>&gt; errorConsumer;
+
+        <span class="comment">// Configuration methods</span>
+
+        <span class="directive">public</span> <span class="type">void</span> add(Handle ph) {
+            phs.add(ph);
+        }
+
+        <span class="directive">public</span> Handle mockHandle() {
+            Handle ph = <span class="keyword">new</span> Handle();
+            phs.add(ph);
+            <span class="keyword">return</span> ph;
+        }
+
+        <span class="comment">// Query methods</span>
+
+        <span class="directive">public</span> <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; command() {
+            <span class="keyword">return</span> command;
+        }
+
+        <span class="directive">public</span> <span class="predefined-type">File</span> directory() {
+            <span class="keyword">return</span> dir;
+        }
+
+        <span class="comment">// ProcessDesc implementations</span>
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> ProcessDesc command(<span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; args) {
+            <span class="local-variable">this</span>.command = <span class="keyword">new</span> <span class="predefined-type">ArrayList</span>&lt;&gt;(args);
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> ProcessDesc directory(<span class="predefined-type">File</span> dir) {
+            <span class="local-variable">this</span>.dir = dir;
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> ProcessDesc inputConsumer(Consumer&lt;<span class="predefined-type">String</span>&gt; consumer) {
+            <span class="local-variable">this</span>.inputConsumer = consumer;
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> ProcessDesc errorConsumer(Consumer&lt;<span class="predefined-type">String</span>&gt; consumer) {
+            <span class="local-variable">this</span>.errorConsumer = consumer;
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> ProcessHandle start() <span class="directive">throws</span> <span class="exception">IOException</span> {
+            <span class="keyword">if</span> (phIndex &lt; phs.size()) {
+                Handle ph = phs.get(phIndex++);
+                ph.init(inputConsumer, errorConsumer);
+                <span class="keyword">return</span> ph;
+            }
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="exception">IllegalStateException</span>(<span class="string"><span class="delimiter">"</span><span class="content">No more phs available</span><span class="delimiter">"</span></span>);
+        }
+    }
+
+    <span class="directive">public</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">Handle</span> <span class="directive">implements</span> ProcessHandle {
+        <span class="comment">// Mocked Outputs</span>
+        <span class="directive">private</span> <span class="type">int</span> exitValue;
+        <span class="directive">private</span> <span class="type">long</span> durationMillis;
+        <span class="directive">private</span> <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; inputs;
+        <span class="directive">private</span> <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; errors;
+
+        <span class="directive">private</span> <span class="type">long</span> terminatesAt;
+
+        <span class="comment">// Captured Inputs</span>
+        <span class="directive">private</span> <span class="type">boolean</span> isStarted;
+        <span class="directive">private</span> <span class="type">boolean</span> isDestroyed;
+
+        <span class="comment">// Configuration methods</span>
+        <span class="directive">public</span> Handle exitValue(<span class="type">int</span> val) {
+            exitValue = val;
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="directive">public</span> Handle duration(<span class="type">long</span> timeout, <span class="predefined-type">TimeUnit</span> unit) {
+            durationMillis = unit.toMillis(timeout);
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="directive">public</span> Handle inputs(<span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; val) {
+            inputs = val;
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="directive">public</span> Handle errors(<span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; val) {
+            errors = val;
+            <span class="keyword">return</span> <span class="local-variable">this</span>;
+        }
+
+        <span class="type">void</span> init(Consumer&lt;<span class="predefined-type">String</span>&gt; inputConsumer, Consumer&lt;<span class="predefined-type">String</span>&gt; errorConsumer) {
+            isStarted = <span class="predefined-constant">true</span>;
+            terminatesAt = <span class="predefined-type">System</span>.currentTimeMillis() + durationMillis;
+
+            <span class="keyword">if</span> (inputs != <span class="predefined-constant">null</span>) {
+                <span class="comment">// Assume inputConsumer is not null; if a test defines inputs it is assuming there is something</span>
+                <span class="comment">// to consume it, and it would be a valid test failure if there is no such consumer.</span>
+                inputs.forEach(inputConsumer::accept);
+            }
+
+            <span class="keyword">if</span> (errors != <span class="predefined-constant">null</span>) {
+                <span class="comment">// Assume errorConsumer is not null; if a test defines inputs it is assuming there is something</span>
+                <span class="comment">// to consume it, and it would be a valid test failure if there is no such consumer.</span>
+                errors.forEach(errorConsumer::accept);
+            }
+        }
+
+        <span class="comment">// Query methods</span>
+
+        <span class="directive">public</span> <span class="type">boolean</span> isStarted() {
+            <span class="keyword">return</span> isStarted;
+        }
+
+        <span class="directive">public</span> <span class="type">boolean</span> isDestroyed() {
+            <span class="keyword">return</span> isDestroyed;
+        }
+
+        <span class="comment">// ProcessHandle implementations</span>
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">boolean</span> isAlive() {
+            <span class="keyword">return</span> <span class="predefined-type">System</span>.currentTimeMillis() &lt; terminatesAt;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">boolean</span> waitFor(<span class="type">long</span> timeout, <span class="predefined-type">TimeUnit</span> unit) <span class="directive">throws</span> <span class="exception">InterruptedException</span> {
+            <span class="type">long</span> untilTermination = terminatesAt - <span class="predefined-type">System</span>.currentTimeMillis();
+            <span class="type">long</span> millisToSleep = <span class="predefined-type">Math</span>.min(unit.toMillis(timeout), untilTermination);
+            <span class="keyword">if</span> (millisToSleep &gt; <span class="integer">0</span>) {
+                <span class="predefined-type">Thread</span>.sleep(millisToSleep);
+            }
+            <span class="keyword">return</span> !isAlive(); <span class="comment">// finished --&gt; true</span>
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">int</span> exitValue() {
+            <span class="keyword">return</span> exitValue;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="type">void</span> destroyForcibly() {
+            isDestroyed = <span class="predefined-constant">true</span>;
+        }
+    }
+}</code>
+</pre></div></div>
+
+<h1 id="using-the-framework">Using the Framework</h1>
+
+<p>How to use the interfaces to start processes and manage their output from regular code should be obvious.</p>
+
+<p>How to use the ProcessMock class is perhaps not quite so obvious, so here is some example unit-test code:</p>
+
+<pre><code>@Test
+public void testSomeMethodWhichInvokesExternalProcess() throws Exception {
+  // Configure the emulated STDOUT output of the first process started
+  // The exit-status is not defined, so defaults to immediately returning 0 (success)
+  ProcessHandle process1 = ProcessMock.newHandle().inputs(Arrays.asList("stdout-line1", "stdout-line2", "stdout-line3"));
+  ProcessDesc process1Desc = ProcessMock.newDesc(process1);
+
+  // Configure the emulated STDOUT output of the second process started
+  // The exit-status is not defined, so defaults to immediately returning 0 (success)
+  ProcessMock.Handle process2 = ProcessMock.newHandle().inputs("just-one-line-of-stdout");
+  ProcessMock.Desc process2Desc = ProcessMock.newDesc(process2);
+
+  // Configure a processFactory which first returns process1 then process2.
+  ProcessFactory processFactory = ProcessMock.newFactory().add(process1).add(process2);
+
+  // Invoke method-under-test. This will:
+  // * call processFactory.newProcessDesc() to obtain a ProcessDesc
+  // * set arguments on the ProcessDesc then call start() on it to obtain a ProcessHandle
+  // * call ProcessHandle.waitFor()
+  // And then repeat the above for a second process.
+  objectToTest.methodWhichStartsProcess(processFactory, ...);
+
+  // Verify that the method-under-test really did obtain and start a process, and that the commandline it used
+  // had the expected format.
+  //
+  // In a real test, there would also be assertions here that the emulated outputs of process1 had the expected
+  // effect on objectToTest (whatever that might be)...
+  Assert.assertEquals(true, process1.isStarted());
+  Assert.assertEquals("/path/to/process1::someArg1::someArg2", String.join("::", process1Desc.command()));
+
+  // Verify that the method-under-test obtained and started a second process, and that the commandline it used
+  // had the expected format.
+  Assert.assertEquals(true, process2.isStarted());
+  Assert.assertEquals("/path/to/process2::someArg", String.join("::", process2Desc.command()));
+
+}
+</code></pre>
+
+<p>One limitation of ProcessMock is that it does not emulate the threaded behaviour of the STDOUT/STDERR callbacks, ie the callbacks are run in the test thread, and thus race-conditions will not be detected.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/process/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

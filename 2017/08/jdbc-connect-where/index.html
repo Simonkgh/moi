@@ -1,0 +1,228 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Kafka Connect JDBC Source Where Clauses</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='post'>
+    <h1>Kafka Connect JDBC Source Where Clauses</h1>
+    <aside>Posted on: August 9, 2017</aside>
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<p>The Kafka Connect <a href="http://docs.confluent.io/current/connect/connect-jdbc/docs/source_connector.html">JDBCSourceConnector</a> reads from a relational database and outputs each row as a message in a kafka topic.</p>
+
+<p>The <a href="http://docs.confluent.io/current/connect/connect-jdbc/docs/source_config_options.html">config-file</a> supports specifying the data to read as either a table-name (<code>table.whitelist</code>) or a custom query (<code>query</code>). Unfortunately, the documentation states clearly that when option <code>query</code> is used, and “incremental load” is also enabled then the query must not include any “where” component as the connector will itself add a where-clause and this will result in invalid SQL syntax.</p>
+
+<p>Is there anything that can be done about this? For most databases, the answer is yes…</p>
+
+<!-- more -->
+
+<p>When using incremental loading via <code>mode=timestamp+incrementing</code>, the query emitted by the JDBCSourceConnector looks like:</p>
+
+<pre><code>  $query
+  WHERE $timestamp.col.name &lt; :1
+    AND (($timestamp.col.name = :2 AND $inc.col.name &gt; :3) OR $timestamp.col.name &gt; :4)
+  ORDER BY $timestamp.col.name, $inc.col.name ASC
+</code></pre>
+
+<p>The binding values are:</p>
+
+<ul>
+  <li>
+<code>:1</code> is current-time minus a delay (<code>timestamp.delay.interval.ms</code>), so that database updates can be given a small window in which to complete before being read by kafka-connect</li>
+  <li>
+<code>:2</code> and <code>:3</code> are used to continue after an earlier shutdown</li>
+  <li>
+<code>:4</code> is the normal case for loading new records</li>
+</ul>
+
+<p>Obviously, <code>$query</code> cannot contain a where-clause right? Wrong! A clever user on stack-overflow <a href="https://github.com/confluentinc/kafka-connect-jdbc/issues/112">pointed out</a> that a subselect can be used:</p>
+
+<pre><code>query=select * from (select a,b,c from sometable where ....)
+</code></pre>
+
+<p>And just by the way, there is currently a bug in the JDBCSourceConnector which prevents table names of form “schema.table” from being specified - which means that it is not possible to use option <code>table.whitelist</code> to read from a table which is in a schema which is not the default schema of the login user account. The workaround is to use the “query” config option. Another <a href="https://github.com/confluentinc/kafka-connect-jdbc/issues/247">possible workaround</a> is to add <code>&amp;currentSchema=</code> to the JBDC connection string.</p>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/posts/2017-08-09-jdbc-connect-where/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,341 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Storage Space Efficiency in Avro and HBase</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Storage Space Efficiency in Avro and HBase</h1>
+    <aside>First published on: July 19, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="hbase-with-long-column-names">HBase with Long Column Names</h1>
+
+<p>There are many sources which state that HBase rows “should have short column names”, eg from <a href="https://hbase.apache.org/book.html#keysize">the HBase documentation</a> or <a href="https://www.ibm.com/support/knowledgecenter/en/SSPT3X_4.2.5/com.ibm.swg.im.infosphere.biginsights.analyze.doc/doc/bigsql_designhints.html">an IBM article</a>. The reason is obvious when you look at the way that HBase stores data internally.</p>
+
+<p>But exactly <em>how bad</em> is the impact of long column names, particularly when the data is compressed with the Snappy algorithm? Dennis B. and I investigated..</p>
+
+<p>This article was inspired in part by <a href="https://db-blog.web.cern.ch/blog/zbigniew-baranowski/2017-01-performance-comparison-different-file-formats-and-storage-engines">an interesting article by Baranowski</a> who compared speed and disk usage for various storage formats including HBase, Avro, Parquet, and Kudu. However he did not measure the effect of short vs long column names in HBase.</p>
+
+<h1 id="measuring-space-usage">Measuring Space Usage</h1>
+
+<p>Simple Python programs were written to write data to HBase and to AVRO, with various settings. Links to the source-code are provided below.</p>
+
+<p>For each test, a schema was created with varying number of columns. Each column was given a random alphanumeric name, where the length of the name varied by test.  A large number of rows were then written, with the <em>value</em> in each column being a string of length 10 chars that was chosen to be not very compressible.</p>
+
+<p>The use of random strings for column names was to ensure that snappy did not heavily compress the names. Deliberately difficult-to-compress strings were used for column values to ensure the column storage part did not unrealistically outweigh the actual data storage.</p>
+
+<p>The rowkey for each row is a string “<code>row-{N}</code>”.</p>
+
+<h1 id="hbase-storage-format">HBase Storage Format</h1>
+
+<p>An HBase “table” consists of a set of HFile-format files.</p>
+
+<p>Each hfile is just a sequential list of <code>(rowid, column-name, version, value)</code> entries, one for each “cell” (ie for each column of each row). Metadata, bloom filters, min/max column values, etc. are also present in the hfiles but the space required should be statistically not significant.</p>
+
+<p>This format means that the row-id and column-name are repeated <em>once for each column value</em>, which is not the case with row-oriented databases.</p>
+
+<p>This repetition is what makes the “schemaless” feature of HBase possible; a new column can be added at any time. However this also potentially leads to a less space-efficient encoding on disk - exactly the issue this article sets out to measure.</p>
+
+<h1 id="storing-data-with-avro">Storing Data with Avro</h1>
+
+<p>As a comparison to HBase, data was stored in AVRO binary format, with and without compression. An AVRO container file in binary format includes a copy of the schema once, then each row is stored in a fairly efficient manner. For reasonably large numbers of rows, the size of the schema should not be significant.</p>
+
+<p>Note that colnum and rownum are not padded, as lots of zeroes would presumably make snappy look even better than it is..</p>
+
+<p>A test writing 100k rows with 100 cols and 20 chars per value produced the following results. This test is comparable to the HBase results for 100 cols and various column-name-lengths (colnames in the AVRO test had 100 chars, but that is not relevant for AVRO as the schema is only written once).</p>
+
+<ul>
+  <li>without compression:  206Mb</li>
+  <li>with snappy compression: 59Mb</li>
+</ul>
+
+<p>A test with 1000 columns produced the following results:</p>
+
+<ul>
+  <li>without compression: 2.2Gb (ie approx 10x 100-column requirements, as would be expected)</li>
+  <li>with snappy compression: 687Mb</li>
+</ul>
+
+<p>Just as a comparison, the theoretical optimal storage space without compression should be just the space needed for the column data. This was calculated simply as <code>nrows * ncols * (sizeof(colvalue) + 2)</code>, on the assumption that value-strings are stored uncompressed with a 2-byte “field length”, and that the space to store the schema is not significant. The colvalue isn’t always of a fixed size, as it is of form “<code>colnum.rownum.abc.rownum.colnum</code>” where column is between 1 and 4 chars, and rownum between 1 and 6 chars. However on average, assume value is around 20 chars.</p>
+
+<p>The optimal storage for 100k rows times 100 columns times (approx) 22 bytes per column value is 209Mb. Obviously, the “without compression” results are almost identical, ie AVRO does store data extremely efficiently.</p>
+
+<p>Just for sanity, I confirmed that setting the column-name to only 10 chars makes almost no difference (just the schema at the front is larger, not the per-row values).  With 100 columns of 1000 chars, also nearly identical.</p>
+
+<p>Interestingly, although the value-strings were chosen as “reasonably hard to compress”, snappy did a good job, reducing the file to just 29% of its original uncompressed size.</p>
+
+<h1 id="storing-in-hbase">Storing in HBase</h1>
+
+<p>Here are the results of populating HBase tables with various numbers of columns having various column-name lengths:</p>
+
+<ul>
+  <li>10 columns with 10-char names
+    <ul>
+      <li>uncompressed size: 60M</li>
+      <li>snappy-compressed size: 12M</li>
+    </ul>
+  </li>
+  <li>10 columns with 100-char names
+    <ul>
+      <li>uncompressed size: 146M (2.4 times space for 10x10)</li>
+      <li>snappy-compressed size: 16.9M</li>
+    </ul>
+  </li>
+  <li>100 columns with 10-char names
+    <ul>
+      <li>uncompressed size: 615M</li>
+      <li>snappy-compressed size: 125M</li>
+    </ul>
+  </li>
+  <li>100 columns with 100-char names
+    <ul>
+      <li>uncompressed size: 1.4GB (2.2 times space for 100x10 for some reason, not 10x)</li>
+      <li>snappy-compressed size: 368M</li>
+    </ul>
+  </li>
+  <li>1000 columns with 10-char names
+    <ul>
+      <li>uncompressed size: 6.2G</li>
+      <li>snappy-compressed size: 2.1G</li>
+    </ul>
+  </li>
+  <li>1000 columns with 100-char names
+    <ul>
+      <li>uncompressed size: 14.6G   (no surprise, 10 times more than 100x100)</li>
+      <li>snappy-compressed size: 10.3G  (surprisingly little savings compared to uncompressed)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Interestingly:</p>
+
+<ul>
+  <li>moving from 100x10 to 100x100 only slightly more than doubled the hbase storage required (615Mb vs 1400Mb)</li>
+  <li>moving from 100x10+snappy to 100x100+snappy approximately triples the storage required.</li>
+  <li>moving from non-snappy to snappy reduces size to 20-30% of the original.</li>
+  <li>moving from HBase to Avro reduces size to around 30% of original based on 100x10-char colnames (3x better), 15% (7x better) based on 100x100-char names, and even better for more/longer names.</li>
+  <li>moving from HBase+snappy to avro+snappy reduces to around 50% of the size for 100x10-char colnames (2x better), 16% (6x) based on 100x100-char names</li>
+</ul>
+
+<p>Data sizes for the resulting tables were measured with a simple “hdfs dfs -du -h ..” on the base path for the table within HDFS. Disk-space was measured before and after ‘disable {table}’ to ensure all data was migrated from WALs to table-files but that made little difference.</p>
+
+<h1 id="conclusions">Conclusions</h1>
+
+<p>The conclusions for compression are:</p>
+
+<ul>
+  <li>For storing large amounts of data in Avro, definitely turn on Snappy</li>
+  <li>For large amounts of data in HBase which is seldom read, definitely turn on snappy</li>
+  <li>For large amounts of data in HBase which is regularly read, measure - you <em>probably</em> want to turn on snappy</li>
+</ul>
+
+<p>The conclusion for Avro vs HBase is:</p>
+
+<ul>
+  <li>AVRO storage is much more efficient than HBase (3 to 10 times better, depending on column name lengths)</li>
+</ul>
+
+<p>The conclusion for column-name lengths in HBase is:</p>
+
+<ul>
+  <li>Short column-names are clearly more efficient than long names, but not quite as bad as would be expected.</li>
+</ul>
+
+<p>The impact of using long column names in HBase is not quite as serious as logic would imply. Logically, it would be expected that moving from having each cell hold (10-char-rowid, 10-char-name, 8-byte version, 20-char-value) to (10-char-rowid, 100-char-name, 8-byte version, 20-char-value) would increase storage by 48/138 = 3.5 times. Instead, we see only a 2.2x increase when snappy is not in use (1.4G/615M) and a 3x increase (368M/122M) when snappy is used. We are not completely clear why the impact is slightly less than expected. Results of snappy compression were also inconsistent between the 100-column and 1000-column tests (3.8x compression vs 1.4x compression).</p>
+
+<p>Nevertheless, for large datasets, short column names (and family names) are indeed recommended - doubling or tripling data storage costs just for more descriptive column names is usually not worth it. The extra storage space will also increase IO times during query execution.</p>
+
+<p>The actual ratio will depend upon the data in each column; when columns hold large data values (eg large binary arrays or long strings) then the cost of longer column names is relatively less. When columns hold numeric or boolean values, the cost of longer column names will be relatively larger.</p>
+
+<p>And if you can store in Avro rather than HBase, that seems well worthwhile (3-10 times less space, depending on number and size of columns). And with Avro you can use whatever column names you desire, as the names are saved only once per file!</p>
+
+<p>In a large cluster, having to buy only 1/3 as many physical disks (and corresponding servers to host them) is a truly significant saving.</p>
+
+<h1 id="source">Source</h1>
+
+<p>The <a href="/downloads/code/avro-hbase-colnames/avro-hbase.zip">source can be found here</a>.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/avro-hbase-colnames/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

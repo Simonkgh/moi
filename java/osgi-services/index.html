@@ -1,0 +1,580 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - OSGi Services</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>OSGi Services</h1>
+    <aside>First published on: March 4, 2013</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/OSGi/'>OSGi</a></p>
+      <p><a href="/java/osgi-intro">(back to Osgi Introduction)</a></p>
+
+<h1 id="about-this-article--osgi-services">About This Article : OSGi Services</h1>
+
+<p>OSGi is a Java-specific framework that improves the way that Java classes interact within a single JVM. It provides the following features:</p>
+
+<ol>
+  <li>a modified Java classloader which provides fine-grained control over symbolic linking with other code in the same JVM;</li>
+  <li>a central service registry for decoupling callers of an interface from the interface implementation;</li>
+  <li>an enhanced version of the java.lang.SecurityManager (ConditionalPermissionAdmin);</li>
+  <li>a large set of standardized optional services for things like loading configuration-files, publishing events, exposing Java servlets, etc.</li>
+</ol>
+
+<p>This article provides some details about how item (2) can be used; it is an interesting design with many positives and a few negatives.</p>
+
+<p>For further information about OSGi in general, see the <a href="/java/osgi-intro">OSGi Introduction</a>.</p>
+
+<h1 id="service-objects">Service Objects</h1>
+
+<p>An OSGi service is simply an <em>object instance</em>. One block of code (usually itself a service) invokes a service via a normal Java method call on a normal Java reference.</p>
+
+<p>OSGi provides a central “service registry” where any Java object can be registered as a “service” (usually using an interface it implements as the lookup key). Registered objects can later be retrieved by lookup. The “service registry” also provides an event-dispatching system allowing user code to listen for service-related events (such as registration of a new service).</p>
+
+<p>The existence of a service registry means that other code:</p>
+
+<ul>
+  <li>makes fewer calls to “new” (ie has less coupling to the concrete implementation and details of instantiating a helper object);</li>
+  <li>makes less use of the traditional “singleton pattern” where a static method is used to obtain “the instance” of some helper object (ie is coupled only to the interface the helper provides, not its implementation).</li>
+</ul>
+
+<p>There are some parallels between OSGi services and the kind of injection-driven configuration encouraged by the Guice or Spring-DI frameworks; code needing access to a helper object is provided with that object rather than actively initialising it. Combining OSGi services and dependency injection (DI) together provides a very powerful way to compose applications; OSGi does provide some simple DI functionality, and external libraries exist that provide enhanced functionality.</p>
+
+<h1 id="event-driven-applications">Event Driven Applications</h1>
+
+<p>There are two kinds of applications:</p>
+
+<ul>
+  <li>“active” ones which busily rush around calculating values and moving data;</li>
+  <li>“reactive” ones which initially set up a bunch of callbacks and timers, then sit back and wait for events to happen; when an event occurs
+the appropriate callback gets invoked and the application springs to life to process the event, then returns to its waiting state.</li>
+</ul>
+
+<p>The “active” type is typical of mathematical computing, of commandline-utility-type programs, and of toy test programs. The second type is
+actually far more common in modern computing;</p>
+
+<ul>
+  <li>Programs with a user interface initially create windows and widgets, then sit back and wait for the user to trigger events like
+“button clicked” or “menu selected”. Timers can also exist to handle repeating background tasks;</li>
+  <li>Programs for data processing often register callbacks with “message queuing” systems, then sit back and wait to be notified when
+a message arrives;</li>
+  <li>Embedded systems set up interrupt-handlers associated with physical conditions and user inputs, and configure timers for regular
+tasks, then sit back and wait for those conditions, user inputs, or timers to occur.</li>
+</ul>
+
+<p>The OSGi service model (where an application is a set of services) is a good match for these “reactive” type applications. This is no
+surprise really, as OSGi was initially designed for embedded systems.</p>
+
+<h1 id="osgi-activators">OSGi Activators</h1>
+
+<p>The OSGi unit of code-packaging is the jarfile (just like traditional Java). If a jarfile has some OSGi-specific extra properties in its <code>META-INF/MANIFEST.MF</code> file then it is an “OSGi Bundle”.</p>
+
+<p>There are a dozen or so properties defined by the OSGi specification, and one is of specific interest for OSGi services:</p>
+
+<ul>
+  <li>Bundle-Activator -&gt; name of a class implementing the org.osgi.framework.BundleActivator interface</li>
+</ul>
+
+<p>The BundleActivator interface defines the following methods:</p>
+
+<ul>
+  <li><code>void start(BundleContext context)</code></li>
+  <li><code>void stop(BundleContext context)</code></li>
+</ul>
+
+<p>As noted in the article on OSGi classloading, bundles are loaded into memory by invoking a method on an OSGi Framework object.  After an OSGi bundle has been loaded and “resolved”, it can optionally be started (via another OSGi Framework method). All that ‘starting’ actually does is create an instance of the class specified by the Bundle-Activator entry in the manifest, and invoke its start method. The start method can do anything it wants; on normal return the bundle is marked as being in state ‘STARTED’.</p>
+
+<p>Starting a bundle also fires a “bundle started” event that any other bundle can choose to receive. The Declarative Services bundle (if installed) handles the event by parsing the newly started bundle’s manifest properties looking for paths to xml files defining other class to instantiate on startup; see later. Other standard (and custom) bundles can use the same mechanism to perform custom operations on bundle start, including executing code within the started bundle.</p>
+
+<h1 id="registering-services-manually">Registering Services Manually</h1>
+
+<p>One of the major things that an Activator class can do is create instances of objects, then call methods on the BundleContext object to register these as services, ie make them available for use by code elsewhere in the application. The objects are typically instances of classes defined in the same bundle jarfile; the implementation classes do not need to be in any of the bundle’s “exported” packages. In fact it is quite valid for a bundle to not export any packages at all, but instead just register one or more service objects. The service objects typically implement an interface that is exported either by the same bundle, or by some other bundle, so that users of these services can actually cast them to a useable type.</p>
+
+<p>An activator can also register “service factory” objects; it uses the same BundleContext APIs which register normal (singleton) service objects, but when the registered object implements the org.osgi.framework.ServiceFactory interface, then other code that “gets” the service from the central registry instead triggers a call to the ServiceFactory.getService method on the registered object, which can create actual service objects ‘on the fly’, and possibly customised for the caller.</p>
+
+<p>The actual method to perform service registration is <code>BundleContext.registerService(interface, serviceObject, properties)</code>. The first parameter defines the primary ‘key’ used by other bundles to locate a matching service (See <code>org.osgi.framework.Constants.OBJECT_CLASS</code>), and the last parameter is an optional map of service properties. While the first parameter is technically just a string, it is expected to be the fully-qualified name of a class (eg an interface) that the service implements or extends. It is possible to pass arbitrary strings to the registration function, but some parts of the OSGi framework (eg default filtering of service events before delivery) assume this is a class-name.</p>
+
+<p>That’s it - very simple. Specify an activator class in the manifest file, then when it is started create service objects and register them with the BundleContext which then allows other bundles to find and call them. If the activator’s stop method is called, then perform any cleanup needed; deregistering services is not required as that is done automatically.</p>
+
+<p>Is there a catch? Of course there is a catch! The complications come in when service objects depend upon <em>other</em> service objects (whether in this bundle or other bundles). Then you need “service listeners”, “service trackers”, “declarative services”, “blueprint”, or equivalents; see later.</p>
+
+<p>Note that even if a service object’s concrete implementation class is not ‘exported’ by the providing bundle, any other bundle that obtains a reference to the service object can access the implementation’s Class object via the <code>obj.getClass()</code> method. By following references from that Class, other bundles can potentially access many Class objects that are not explicitly exported. The OSGi ‘Export-Package’ declarations are therefore not a security mechanism for preventing access to classes; they simply affect the way that default class resolution “by name” occurs.</p>
+
+<p>A single service instance can be registered multiple times with different key/properties if desired. Alternately, a single registration call can also specify a list of keys (ie interface names) and can then be looked up by <em>any</em> of the specified interfaces.</p>
+
+<p>The other way to register services is to let Declarative Services or Blueprint do it for you; see later.</p>
+
+<h1 id="retrieving-services">Retrieving Services</h1>
+
+<p>Bundles containing code that wishes to <em>use</em> service objects registered by other bundles may use a <code>Bundle-Activator</code> manifest entry to point to an internal activator class; the activator is passed a BundleContext object from which it can:</p>
+
+<ul>
+  <li>immediately retrieve the desired services directly;</li>
+  <li>cache the BundleContext so services can later be retrieved when needed;</li>
+  <li>register itself as a “ServiceListener” so it gets callbacks when other services are registered/deregistered;</li>
+  <li>create a “service tracker” object which gathers references to desired services.</li>
+</ul>
+
+<p>Bundles can alternatively use a more “declarative” approach to obtaining services, allowing required services to be “injected” via “declarative services”, “blueprint” or equivalents.  For now, we’ll just look at the APIs provided by BundleContext for obtaining references to service objects.</p>
+
+<p>The simplest method available is <code>ServiceReference&lt;SomeIface&gt; BundleContext.getServiceReference(SomeIface.class)</code>. The parameter should match the key used by some other bundle when registering the service (ie the interface that the service implements). Assuming some matching service has already been registered, then a “descriptor” object is returned that describes the service’s associated properties. The method <code>&lt;T&gt; BundleContext.getService(ServiceReference&lt;T&gt; ref)</code> can then be invoked to actually get the service object that was registered. There are also non-typesafe versions of these methods.</p>
+
+<p>Example:</p>
+
+<pre><code>  ServiceReference&lt;Widget&gt; ref = BundleContext.getServiceReference(Widget.class)
+  Widget service = context.getService(ref)
+</code></pre>
+
+<p>The <code>getServiceReference</code> method returns null if no such service is currently registered, ie if there is no <em>started</em> bundle which provides an implementation of the specified interface. If there happen to be multiple implementations registered, then OSGi will return one of them; there are other APIs if you expect multiple to exist and wish to find <em>all</em> of them.</p>
+
+<p>Why the separate steps of first obtaining a reference then obtaining the service object? There are several reasons:</p>
+
+<ul>
+  <li>you might inspect the ServiceReference’s properties and decide this isn’t the object you actually want;</li>
+  <li>the service object might actually be a factory, in which case you may want to call getService(ref) multiple times for the same reference. Note however that
+  OSGi caches service objects per-bundle, ie only one service object per calling bundle exists at a time.</li>
+  <li>service objects are reference-counted by the OSGi framework, so that it knows when it is safe to unload a bundle (only when all services from that bundle
+  have a reference count of zero). When you no longer need a service, the <code>BundleContext.ungetService(ref)</code> must be called, passing in the original
+  <em>service-reference</em> object as an identifier. While it may seem more intuitive to actually pass back the service object <em>itself</em> to the ungetService method,
+  the OSGi people presumably had a reason.</li>
+  <li>the service might be declared “lazy”, in which case the ServiceReference can be retrieved without triggering creation of the service; only the call
+to getService actually instantiates it.</li>
+  <li>the bundle doing a service lookup might then pass the resulting ServiceReference to some other bundle to use; it might even be that the bundle
+doing lookup does not have the necessary permissions to “get” the underlying service - but finding a ServiceReference requires no privileges.</li>
+</ul>
+
+<p>The BundleContext class provides several variants of the <code>getServiceReference</code> method. One takes a Class object, which is simply a convenient shortcut for invoking the method using the <em>name</em> of the provided Class; service objects are usually registered using a key which is the name of an interface they implement. There are also methods that take “filter” parameters that do moderately sophisticated matching against the map of service properties that a service has defined; there may be several service objects implementing the DataSource interface for example (and registered using that interface as their key) but with a property that defines their intended use. Filter expressions are based on the LDAP expression language which is a little odd at first but well documented.</p>
+
+<h1 id="dynamic-services">Dynamic Services</h1>
+
+<p>There is a problem with simply using <code>BundleContext.getServiceReference</code> from some bundle’s activator (ie on bundle start): the service might <em>not yet</em> be available, or might <em>not currently</em> be available (ie once was available, then was stopped/deregistered). On startup, it is common for bundles to have complicated dependencies between each other, and for a bundle’s activator to be invoked before the activator of bundles that publish services it needs. The OSGi framework also actively <em>encourages</em> developers to <em>deregister</em> services when some kind of needed resource is not available, and then re-register the service when the resources do become available (eg network down, licenses expired). This part of OSGi is <em>not</em> so elegant; the idea is nice but having to deal with services <em>not yet</em> or worse <em>not currently</em> available adds significant complexity to applications. However it is the way that many OSGi services work, so if your app expects to deal with services provided by others then you’ll need to learn the recommended ways of dealing with it.</p>
+
+<p>Having promoted the idea of dynamically appearing/disappearing services, the OSGi framework has then gone through several different attempts to make it feasable for programs to actually handle this. The fact that they are on the fourth design now, and the most recent approach (“blueprint”) still has significant flaws shows that this is a far from trivial task. In practice I expect that the vast majority of OSGi-based applications out there do <em>not</em> correctly handle dynamic services; not only is implementing it correctly difficult, but testing for correctness is also challenging.</p>
+
+<p>There are good reasons why the OSGi foundation recommends deregistering unavailable services:</p>
+
+<ul>
+  <li>In embedded systems, having services appear and disappear makes sense; physical devices can actually be attached and detached (eg USB camera, …).
+This is not just a matter of a fixed number of possible components either being present or not; it actually is the <em>number</em> of them as well as the
+type that can change. Of course this can also be modelled via a service that is always there, and methods that allow iteration over all devices of
+that type.</li>
+  <li>In distributed systems, a service in the local system can provide a proxy that communicates with a remote system. So for example if a printer is
+attached to a network, that could trigger some OSGi app to then register a service which is a proxy for that printer. When the printer is
+turned off or detacted, the service could be removed.</li>
+  <li>In an IDE, when a user installs or activates an optional IDE plugin, then a service can be registered; other parts of the IDE can then respond
+to the register event by doing things like adding entries to a menu, or adding the plugin to the list of objects to be invoked during a build.
+A user can deactivate or deinstall a plugin, and the resulting event can cause corresponding entries to be removed from menus, view windows
+to be closed, etc. Not sure the convenience advantage is worth the complexity of OSGi’s dynamic services but Eclipse apparently think so.</li>
+  <li>In an ESB system, system administrators can stop certain services, unload the module, and load a new version without having to stop the
+whole system. This is the least convincing use of dynamic services; a real enterprise-scale system these days should be clustered, and then
+whole instances can be stopped/upgraded/restarted without affecting overall operation.</li>
+</ul>
+
+<p>Being able to unload/load bundles is also useful during development of modules within complex systems; the module being worked on can be unloaded and a new version installed without having to restart the entire test environment.</p>
+
+<p>See the following sections for information about the OSGi-provided APIs for handling dynamic services.</p>
+
+<h1 id="service-listeners">Service Listeners</h1>
+
+<p>The BundleContext class has a method <code>addServiceListener</code> which a bundle’s activator can use to register itself (or helper objects) for callbacks related to services being registered and deregistered. This approach seems reasonably elegant at first glance - rather than assume a service is available, register a listener that detects when the service arrives.</p>
+
+<p>Unfortunately the design was somewhat flawed, causing some corner-cases that make using this API rather tricky. It also becomes rapidly more complex when a bundle wants to publish a service that itself depends on <em>several</em> other services - and wants to <em>postpone</em> registering the service until those dependencies are available, and also wants to <em>deregister</em> the service if any of the dependencies becomes deregistered.</p>
+
+<p>After a ServiceListener instance is registered, it gets a callback for all changes to services that match its associated filter : services <em>registered</em>, <em>deregistered</em>, or services whose properties have changed. Often, the correct response is simply to update a local reference to point to the service, so that processing happening in other threads can then use the service (or not, if the reference has been set to null). Of course thread-safety is important here. Unfortunately, when a ServiceListener is registered after the service it is watching for, it does NOT receive a “registered” event, so manually has to use BundleContext.getServiceReference to see if the service is already there.</p>
+
+<p>It’s important to understand the principles of the ServiceListener interface. However after using it a few times, you’ll see that there is quite a lot of boilerplate code needed. The ServiceTracker utility class basically wraps that repeated code up into a utility class. It’s a small saving in lines-of-code, and a moderate gain in code clarity as it is more obvious what a ServiceTracker does than a hand-coded ServiceListener.</p>
+
+<h1 id="service-trackers">Service Trackers</h1>
+
+<p>The org.osgi.util.ServiceTracker class can be thought of as a smart Collection type; you tell it what types of service objects should be in the collection, and it registers itself as a ServiceListener to track appropriate service events and keep its collection as full of matching services as possible. Other code can then ask a service-tracker at any point to return the matching services, and gets back all corresponding services that exist at that time.</p>
+
+<p>This is more convenient than using the BundleContext.getService(ref) method for the following reasons:</p>
+
+<ul>
+  <li>after using getService(ref), callers must remember to call ungetService(ref), otherwise the reference-count for the service will increase continuously.</li>
+  <li>it works around the tricky flaw in the ServiceListener API where events <em>after</em> the listener is registered are processed, but if the service already
+exists then BundleContext.getService must be called directly (rather than waiting for REGISTERED event).</li>
+  <li>the activator can create a ServiceTracker instance and pass this to a service object’s constructor, to give that service object a way of obtaining
+the services it needs without needing a reference to the BundleContext object (which has a far more complex/powerful API).</li>
+</ul>
+
+<p>Note that code may use a ServiceTracker to obtain a reference to a service, then work for a while. In the meantime, that service might decide to stop for some reason, broadcast an event that the ServiceTracker handles by setting its internal reference to null, then the service may be “stopped”. The result is that the original code is now running with a reference to a service that has asynchronously terminated. It is therefore possible for code to correctly obtain a reference from a ServiceTracker, then a few milliseconds later find that reference is in fact unusable. OSGi recommend that services which have stopped should throw IllegalStateException when invoked, and that all code that <em>uses</em> an OSGi service should be prepared to get a runtime exception on <em>any</em> method call. This is somewhat similar to dealing with remote services, where any remote call might fail due to network issues. This kind of behaviour is not trivial to correctly handle, nor to test - but that’s how it is.</p>
+
+<p>A service-tracker can also be subclassed, and the <code>addingService</code> and <code>removedService</code> methods can be customised if desired, resulting in something similar to writing a complete custom ServiceListener. Alternatively, a ServiceTracker can be passed a “customizer” callback object, which does the same thing.</p>
+
+<p>The <code>ServiceTracker.addingService</code> is somewhat poorly documented, at least with respect to its return value. The sole parameter to this method is a ServiceReference and the default behaviour of the method is to invoke the <code>getService</code> method on that reference and return that value. When overriding the method, it is important to also call <code>getService</code>. However any object can be returned at all; the returned object is simply what a ServiceTracker will return from its getService/getServices methods. It is therefore possible for the addingService method to wrap/decorate the obtained service if desired, returning the wrapper rather than the original.</p>
+
+<p>Service tracker objects are still only a very small step up from implementing a ServiceListener directly, and are actually rather hard work to use. The declarative services approach (see below) is far superior.</p>
+
+<h1 id="declarative-services-ds">Declarative Services (DS)</h1>
+
+<p>Declarative Services (DS) is a fairly recent addition to OSGi (since version 4), which solves the following problems:</p>
+
+<ul>
+  <li>Removes the need for a jarfile to contain a “Bundle Activator” class which uses OSGi interfaces.</li>
+  <li>Removes the need for the bundle to use ServiceListener or ServiceTracker objects to track the existence of external OSGi services it depends upon.</li>
+  <li>Removes the need for classes within a bundle to use OSGi APis (ie allows them to be plain POJOs, optionally with OSGi annotations).</li>
+</ul>
+
+<p>DS is a simple configuration system which tells OSGi how to:</p>
+
+<ul>
+  <li>instantiate <em>components</em> (ie objects);</li>
+  <li>inject OSGi services (from other bundles) into components;</li>
+  <li>inject OSGi configuration data into components;</li>
+  <li>optionally register components as OSGi services.</li>
+</ul>
+
+<p>To use DS, a bundle must:</p>
+
+<ul>
+  <li>place appropriate xml configuration files somewhere in the jarfile which defines the classes to be managed via DS;</li>
+  <li>add a <code>Service-Component</code> entry to its manifest file which specifies where the config files are to be found (wildcards are supported, eg <code>OSGI-INF/component-*.xml</code>).</li>
+</ul>
+
+<p>Each config file can define one or more “components” (managed java classes); the root element in the file can either be a <code>&lt;component&gt;</code> element (ie one definition per file) or some root element (with any name) containing multiple <code>&lt;component&gt;</code> child elements. The xml file contents can declare all the necessary information for management of a component, or it can simply specify the class-name and the class can use annotations to specify its own requirements.</p>
+
+<p>The most useful OSGi-specific feature of DS is how it deals with the problem of services needing to track dependent services; when a component requires a <em>service</em> as a mandatory injected object, DS delays instantiating the component until the required service exists, and automatically stops/deregisters the service when any required service is no longer available.</p>
+
+<p>Don’t be fooled into thinking that “declarative services” is a kind of Dependency Injection framework. There are some superficial similarities to one, but it is very inflexible and tightly bound to the purpose of consuming or publishing OSGi services. A DS “component” is far more heavy-weight than a Spring “bean”. Because each component can potentially have OSGi services injected into it, it needs to be managed by OSGi so it can be notified of changes to the services it uses, and deactivated if the services are unavailable; a “component context” object is therefore created to manage each component. A component can get access to its ComponentContext object by declaring an <code>activate</code> method which takes a ComponentContext parameter. Each DS component is also independently configurable via the OSGi ConfigurationAdmin service. For those familiar with Spring, note that the DS <code>&lt;property name="xyz" value="abc"/&gt;</code> syntax has a very different meaning : in DS this does not invoke a property-setter method on the target class, but instead just sets a default value for a “configuration property”. Components whose activate method take a Map object are passed the result of merging the ConfigurationAdmin properties and the DS-specific properties.</p>
+
+<p>DS components may be used as:</p>
+
+<ul>
+  <li>a normal OSGi service - in which case the component is a singleton</li>
+  <li>an OSGi ServiceFactory - in which case one instance of the target type is created per bundle that “gets” the service</li>
+  <li>a non-service singleton - in which case it presumably does something useful inside the bundle, eg initialises static vars or starts threads</li>
+  <li>a non-service ComponentFactory - in which case a service of type ComponentFactory is automatically created and published which is capable of
+instantiating and returning instances of the target type. Users look up the ComponentFactory object using interface=org.osgi.component.ComponentFactory,
+and a filter which specifies component.name, and then call the “newInstance” method on the factory to create whatever “component” was configured.</li>
+</ul>
+
+<p>A component’s declaration (in XML or annotations) may specify that the component be published as an OSGi service. Registration of the service then automatically happens as soon as the component’s dependencies are satisfied. If the declaration marks the component as a “service factory”, then DS instantiates a different instance of the component type for each different bundle which retrieves the service (ie normal OSGi ServiceFactory behaviour). While components do not <em>have</em> to be registered as services provided by their host bundle, most will be.</p>
+
+<p>Declarative Services also hooks into the OSGi ConfigurationAdmin system, so that the standard configuration APIs can be used to configure (and even instantiate/register) component instances.</p>
+
+<p>Because DS “activates” (instantiates) a component as soon as its dependencies are available, and invokes an “activate” method if one exists (like a PostConstruct method), the equivalent of a standard OSGi “Bundle-Activator” class can be implemented via DS as follows:</p>
+
+<pre><code>&lt;scr:component name="example.activator" xmlns:scr="http://www.osgi.org/xmlns/scr/v1.2.0"&gt;
+  &lt;implementation class="example.ui.Activator"/&gt;
+&lt;/scr:component&gt;
+
+public class Activator {
+  public Activator() {...}
+  private void activate(BundleContext context) {...}
+  private void deactivate() {...}
+}
+</code></pre>
+
+<p>A component C which depends on other services simply defines a bind(“setter”) and optionally an unbind(“unsetter”) method pair for each service it requires, and declares the dependency via a <code>reference</code> xml element or annotation. When all mandatory services become available, the class is instantiated, setters are invoked and the activate method is invoked. If any of the required services later become unavailable then the “deactivate” method is invoked. This doesn’t mean the class can completely ignore the “dynamic” behaviour of services; it is still possible that it uses a reference to a service that is no longer available before that services’ “deregister” event has been received by DS. In this case, a RuntimeException will usually occur. The set/unset methods also are called in a thread different from the one that other code invokes methods on S with, so threadsafety has to be carefully handled. A reference declaration which does <em>not</em> define bind/unbind methods still blocks creation of the service until it is available, but the component must look up the service via the ComponentContext object.</p>
+
+<p>By default, a dependency on some service interface R is satisfied by <em>any</em> service that implements R. However a dependency can also be marked “multiple”, in which case the service “setter” method is called once for each service that implements the interface. This pattern is quite useful; it allows some service to locate <em>all</em> services in the OSGi environment that implement a specific API, and interact with them. One common use of this is to implement the “whiteboard” pattern; see section later on the Whiteboard pattern.</p>
+
+<p>If any dependency (reference) of the component is marked “static” (which is the default), then the component can rely on the following additional behaviour which is not very efficient if services change frequently, but is reasonably simple to handle:</p>
+
+<ul>
+  <li>the bind method will be called before activate (as normal);</li>
+  <li>the bind method will <em>never</em> be called after activate; if the dependent service changes in any way (including just its service properties) then the current component instance
+is <em>stopped</em> instead. If the component requirements are still satisfied, then a new component instance is created bound to the updated service.</li>
+</ul>
+
+<p>Interestingly, “Declarative services” is not itself built-in to OGSi, ie does not use any custom interfaces. It is simply a normal bundle which should be loaded early in the OSGi startup sequence, and then registers itself as being interested in the “registering” of any other bundles. When another bundle is started, it then receives an event, and itself parses the MANIFEST.MF file for the new bundle. If that MANIFEST.MF has the “Service-Component” property, then declarative services takes the appropriate actions : instantiating services immediately and registering them, or creating “tracker” objects that wait until all required services are needed before instantiating and registering services. The fact that DS is just a normal OSGi bundle also makes it possible to provide similar features based upon non-xml configuration. See the references section for alternative third-party service management approaches.</p>
+
+<p>Declarative Services (DS) is also known as Service Component Runtime (SCR). Technically, DS is the “configuration file”, and SCR is the runtime code that processes DS config files.</p>
+
+<p>Sadly, while DS solves some of the complications related to registering services and obtaining references to other services, it provides no help whatsoever for those people (like me) who prefer to build systems using Dependency Injection (DI). It is neither a decent DI solution itself, nor does it provide (AFAICT) any hooks to call into one.</p>
+
+<p>For further information on Declarative Services, see:</p>
+
+<ul>
+  <li><a href="http://wiki.osgi.org/wiki/Declarative_Services">http://wiki.osgi.org/wiki/Declarative_Services</a></li>
+  <li><a href="http://www.vogella.com/articles/OSGiServices/article.html">http://www.vogella.com/articles/OSGiServices/article.html</a></li>
+  <li><a href="http://sully6768.blogspot.co.at/2012/09/scr-components-with-karaf.html">http://sully6768.blogspot.co.at/2012/09/scr-components-with-karaf.html</a></li>
+  <li><a href="http://alexander.holbreich.org/2012/09/osgi_ds/">http://alexander.holbreich.org/2012/09/osgi_ds/</a></li>
+</ul>
+
+<h1 id="blueprint">BluePrint</h1>
+
+<p>Blueprint is a proper dependency-injection framework which contains additional OSGi-specific integration features. It has been part of the OSGi specification since version 4.2. Blueprint is a proxy-based approach originally implemented as an extension to the Spring Framework (“spring-dm”, aka “Spring Dynamic Modules”), and later accepted as part of the OSGi “enterprise” specification. It is sometimes also referred to as “Gemini” (the codename for the reference implementation) or “Aries” (the codename for a competing implementation). In short, think of the entire Spring dependency injection framework plus a few OSGi-specific features.</p>
+
+<p>A bundle should have one of the following features to enable Blueprint:</p>
+
+<ul>
+  <li>an internal directory <code>OSGI-INF/blueprint</code> containing blueprint xml files; or</li>
+  <li>a manifest.mf property <code>Bundle-Blueprint:</code> pointing to blueprint xml files.</li>
+</ul>
+
+<p>On the positive side of Blueprint:</p>
+
+<ul>
+  <li>like Declarative Services, it allows services to be implemented via POJOs (ie code that does not use OSGi interfaces). In fact, it is even better than DS in this area
+(it’s often hard to write DS services without using BundleContext or ComponentContext);</li>
+  <li>it really is a full Dependency Injection framework (unlike Declarative Services).</li>
+</ul>
+
+<p>On the negative side of Blueprint:</p>
+
+<ul>
+  <li>the specification is much more complex (too complex to be properly described in this article);</li>
+  <li>it hides much of the native OSGi service “lifecycle”. While this allows code to “ignore” the presence of OSGi, it also exposes code to more unexpected runtime exceptions;</li>
+  <li>it makes heavy use of proxy objects (like Spring), resulting in nasty stack-traces and often making interactive debugging difficult;</li>
+  <li>a bundle is “started” as a whole, rather than individual services being started, ie none of the services in a bundle starts if the dependencies of <em>any</em>
+service in the bundle are unsatisfied. This can lead to circular dependencies between <em>bundles</em> even when there are no circular dependencies between <em>services</em>.</li>
+</ul>
+
+<p>As with Declarative Services, xml is used to declare what services a bundle has, and what other services they depend upon.</p>
+
+<p>Unlike declarative services, there are no “unsetter” methods, and no “deactivate” method. Instead, Blueprint always injects service “proxy” objects rather than real references to services. When a service injected in this way becomes unavailable, then from the using services’ point of view, nothing happens - until the proxy is invoked. At this point in time, the proxy attempts to <em>locate a new implementation</em> of the required service, and if none is available then an exception is thrown. Unlike DS, a service is not automatically stopped/deregistered if the required dependencies are no longer available.</p>
+
+<p>For cases where a service wants access to “multiple” implementations of a particular interface, Blueprint injects a List object. The list contents then dynamically change as services come and go. Fortunately, this list type does <em>not</em> throw ConcurrentModificationException if a service is iterating over it at the time it is modified; the behaviour of the list in such cases is carefully defined.</p>
+
+<p>See: <a href="http://wiki.osgi.org/wiki/Blueprint">http://wiki.osgi.org/wiki/Blueprint</a></p>
+
+<h1 id="the-whiteboard-pattern">The Whiteboard Pattern</h1>
+
+<p>The Whiteboard pattern is very simple; it is just an inversion of the “Listener” pattern used so commonly in GUI frameworks (eg AWT, Swing). When some component wishes to “register” itself with some other object, then the Listener pattern requires that the component first <em>find</em> the “central service” it wishes to register with, and then call a method (eg ‘addListener’) passing a reference to itself. This pattern can be a lot of work to implement in OSGi in order to correctly handle dynamic availability of the central service. The Whiteboard instead just requires components to register a service with a common interface, and the “central service” then finds <em>it</em>. In other words, the “calling object” asks the OSGi service registry to tell it when any service with a specific interface or properties is registered, the “calling object” then adds the matching services to its list of “listeners”.</p>
+
+<p>One useful example is the OSGi ConfigurationAdmin service. Any bundle which registers a service implementing the “ManagedService” interface will then automatically receive a callback whenever the configuration properties associated with that service are modified; there is no need for the service implementation to “look up” the ConfigurationAdmin service and register for callbacks, nor to <em>deregister</em> when the service stops.</p>
+
+<h1 id="bundle-startup-order">Bundle Startup Order</h1>
+
+<p>OSGi deliberately provides no way for <em>bundles</em> to specify their start-order. There is a way for an administrator to explicitly control bundle start-order via “start levels”, but bundle developers are strongly discouraged from relying on this, and instead encouraged to write their bundles in a way that postpones startup until required services are available.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>The basic idea behind OSGi services is very good; components of a large system should be able to export active “objects” as well as passive “classes”. However:</p>
+
+<ul>
+  <li>The core support classes ServiceListener and ServiceTracker are not easy to use directly; they should instead be regarded as a basic foundation on which to build
+more developer-friendly higher-level tools.</li>
+  <li>The “declarative services” specification is a higher-level tool (based internally on ServiceListener/ServiceTracker); it may be sufficient for simple bundles but is
+simply too inflexible to be useful for wiring together bundles with many internal classes.</li>
+  <li>The “blueprint” specification is IMO a failure - it hides a lot of the OSGi lifecycle, resulting in runtime exceptions occurring in unusual places and making fine
+integration with OSGi system difficult. In addition, it introduces (IMO) the weaknesses of the Spring DI libraries into OSGi, in particular heavy proxy object usage.</li>
+</ul>
+
+<p>The Eclipse project appear to have also found the existing dependency-injection options disappointing; e4 has its own DI framework layered on top of the underlying OSGi implementation.</p>
+
+<p>Despite some flaws, OSGi services are a good idea. If you want to stick with ‘pure’ OSGi, then despite its weaknesses Blueprint is the best option. However OSGi’s excellent “layered” structure means that DS and Blueprint are just optional bundles - and thirdparty bundles can offer similar features. It may therefore be worth evaluating additional options for managing OSGi services such as the following:</p>
+
+<ul>
+  <li>
+    <p><a href="http://felix.apache.org/site/apache-felix-ipojo.html">iPojo</a> is somewhere between DS and Blueprint, but based on neither.</p>
+  </li>
+  <li>
+    <p><a href="http://code.google.com/p/peaberry">Peaberry</a> provides service management and DI based on the Guice framework.</p>
+  </li>
+  <li>
+    <p><a href="http://felix.apache.org/documentation/subprojects/apache-felix-dependency-manager.html">Felix Dependency Manager</a> works similarly to the standard OSGi Declarative Services (DS), but via an API or annotations. Although developed as part of the Felix OSGi project, this library works on any OSGi container. The API provides hooks that look like it may be possible to integrate Felix-DM’s handling of OSGi services with another dependency injection framework such as Guice or Spring.</p>
+  </li>
+</ul>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+    <p><a href="http://wiki.osgi.org/wiki/Main_Page">OSGi Wiki</a></p>
+  </li>
+  <li>
+    <p><a href="http://www.osgi.org/javadoc/r4v42/">The OSGi core r4.2 javadocs</a></p>
+  </li>
+  <li>
+    <p><a href="http://www.knopflerfish.org/osgi_service_tutorial.html">Knoflerfish OSGi Service Tutorial</a></p>
+  </li>
+  <li>
+    <p><a href="http://felix.apache.org/site/apache-felix-ipojo.html">iPojo</a></p>
+  </li>
+  <li>
+    <p><a href="http://felix.apache.org/documentation/subprojects/apache-felix-dependency-manager.html">Felix DM</a></p>
+  </li>
+  <li>
+    <p><a href="http://code.google.com/p/peaberry/">Peaberry</a></p>
+  </li>
+  <li>
+    <p><a href="http://www.infoq.com/articles/service-dynamics-todor-boev">Service Dynamics the Lazy Man’s Way</a> is an interesting article about the difficulties of implementing dynamic OSGi services correctly.</p>
+  </li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/osgi-services/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

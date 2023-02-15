@@ -1,0 +1,507 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Terminals, Gettys and Display Managers</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Terminals, Gettys and Display Managers</h1>
+    <aside>First published on: November 4, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 id="overview">Overview</h1>
+
+<p>The concept of a “terminal” (aka tty) for text-based input and output is encountered in many corners of unix/linux - even when running in graphical mode. Interestingly, graphical login (via a Display Manager) is also quite closely related to terminals. This article looks at the concept of terminals (including virtual terminals), how Linux supports them, and how software interacts with them.</p>
+
+<p>Topics covered by this article include:</p>
+
+<ul>
+  <li>Old serial-attached terminals</li>
+  <li>USB keyboards and text-mode screen output</li>
+  <li>Virtual terminals</li>
+  <li>Multi-seat systems</li>
+  <li>KVM keboard switches</li>
+  <li>Telnet/ssh servers</li>
+  <li>The System Consoles</li>
+  <li>The <code>getty</code> program and PAM authentication</li>
+  <li>The relevant <code>/dev</code> nodes (eg <code>/dev/tty*</code>, <code>/dev/ptmx</code>, <code>/dev/vcs*</code>) and the kernel code behind them</li>
+  <li>Graphical Display Managers and the XDMCP protocol</li>
+</ul>
+
+<h1 id="text-mode-and-serial-terminals">Text Mode and Serial Terminals</h1>
+
+<p>In the <a href="https://en.wikipedia.org/wiki/History_of_Unix">early days of unix</a>, a computer was physically quite large. It usually included multiple serial-io ports, with a terminal (aka teletype or tty) attached to each in order to support multiple concurrent users (“timesharing”). Each terminal was a single device that included a keyboard and a text-mode display. Pressing a key on the keyboard would cause a single byte to be sent over the serial cable to the computer, and each byte written by the computer to the serial port would be received by the terminal and update a local display buffer. The display buffer was an array of X*Y bytes (characters) which was then rendered on the terminal’s screen using a built-in font. The terminal had a concept of “cursor position” which is where new bytes (characters) received from the computer were written into the buffer; some special characters could be used to update the cursor position (eg move up a line, or erase the character preceding the cursor - aka backspace). Unfortunately, different terminals could send different codes for specific keypresses (eg backspace key), and interpreted some characters differently when displaying (particularly related to cursor movement), so the computer needed to be told which “terminal type” was connected to each serial IO port.  The serial connection also had to be appropriately set up, eg the computer and terminal had to use the same <a href="https://en.wikipedia.org/wiki/Symbol_rate">baud rate</a> and stop-bits settings.  Some ttys supported not just one-byte-per-character, but instead <em>two</em> bytes per character, where one of the bytes specified character <em>attributes</em> such as color, bold/italic, etc. A common example of such terminals is the <a href="https://en.wikipedia.org/wiki/VT100">VT-100</a>; the V stands for Video (not virtual) because the terminal has a <em>screen</em>.</p>
+
+<p>Serial ports on computers can still be used to attach “terminals”. Network routers sometimes still have a serial-port, and run software which allows a “terminal” to be attached to that port - though the terminal is now usually a computer running a <em>terminal emulator</em> application. Some tablets/phones also have some connection that can be configured as a serial-port for a terminal, mainly in order to perform debugging of serious system issues. True serial ports are becoming rare on desktops/laptops now, but there are USB-to-serial adapters that (with the correct software) can be used to connect a device with a USB port to a device that provides a serial port.</p>
+
+<p>Unix/Linux systems still provide (and heavily rely on) this terminal/tty concept - ie a device that can provide a stream of bytes (keystrokes) and consume a stream of bytes (characters to display). Of course modern systems typically have a USB-attached keyboard, and either a graphics card or graphics support built into the CPU. The kernel therefore ensures that on boot such keyboards/graphics-devices appear to be a terminal - ie provide a <em>device file</em> under <code>/dev</code> which can be read/written by software as if it were an <em>attached serial terminal</em>; the kernel maps USB keyboard events into “terminal keyboard strokes” that software can read, and forwards characters <em>written</em> to the device to the appropriate graphics device driver.</p>
+
+<h1 id="virtual-terminals">Virtual Terminals</h1>
+
+<p>Most people do not have a set of physical terminals hanging around the house or office, but it is often convenient to have multiple independent login sessions on the same computer. Linux therefore sets up multiple <em>virtual terminals</em> on boot. A device-file is created under <code>/dev</code> for each virtual terminal, and these can be opened/read/written by userspace software as if it were a real serial terminal. However only one of these virtual terminals is “active” at a time; keyboard strokes coming from the “console keyboard” are forwarded over the currently-active virtual terminal device file. Each virtual terminal has its own “text display buffer”, but only the buffer for the currently-active virtual terminal is connected to the actual graphics system. Special keystrokes (usually <code>ctrl-alt-F{n}</code>) changes the active virtual terminal, ie tells the kernel to remap keyboard input events to a different virtual terminal device file, and to reconfigure the graphics system to match the settings for the newly active virtual terminal.</p>
+
+<p>Any virtual terminal can be in “graphics mode” as well as “text mode”, in which case switching to that virtual terminal is a more significant reconfiguration of the graphics driver. This used to be quite tricky/unreliable when graphics modes were set via X user-space drivers, but the in-kernel KMS (kernel modeswitching) drivers have fixed that issue.</p>
+
+<p>The default number of virtual terminals is 7. By convention, a graphical login “greeter” is configured to run on virtual terminal 7 - ie ctrl-alt-F1 (or F2..F6) switches to a text console while ctrl-alt-F7 switches to the “graphical session”.</p>
+
+<h1 id="background-and-foreground-processes">Background and Foreground Processes</h1>
+
+<p>Multiple applications can potentially be connected to the same TTY (virtual or real). In particular, when a <em>shell</em> (eg the bash program) is using a TTY for input/output and it starts a process “in the foreground” then that new process inherits the STDIN/STDOUT of its parent process (the shell). However keystrokes should only go to one process, and to avoid confusion only one process should be able to write to the TTY display. Therefore the kernel scheduler and kernel-level TTY driver tracks all processes using a specific TTY, and has the concept of a “foreground job” - ie the process(es) which receive(s) input and may generate output. When any process that is not “foreground” tries to read from the TTY device, or write to it, that call blocks until the device becomes the “foreground process”.</p>
+
+<p>See <a href="/linux/process-groups">this companion article</a> for more detail on managing foreground and background processes.</p>
+
+<h1 id="thin-clients-and-multiseat-setups">Thin Clients and Multiseat Setups</h1>
+
+<p>Modern computers are powerful enough to multiple users at the same time. There are two modern ways to share a powerful computer across multiple users:</p>
+
+<ul>
+  <li>thin-client (graphical terminals)</li>
+  <li>multiseat</li>
+</ul>
+
+<p>In the <a href="https://en.wikipedia.org/wiki/Thin_client">thin client</a> approach, each users sits in front of a device which is a full computer - CPU, ram, keyboard, mouse, screen, GPU and ethernet port. However the CPU is usually a cheap, low-power one - just enough to run a basic operating system. Usually such a device does not have any local storage (hard-drive), instead having a small amount of flash storage which allows it to boot to the point that it can load an operating system over the network. It then runs that operating system locally, and a graphical display server (eg Xorg or Wayland). All other applications run remotely on the shared server, sending their graphical output back to the terminal. This is a very similar architecture to the old text-based terminals except that an IP network is used for terminal/server communications rather than a serial line, and the terminal is somewhat smarter. This architecture was quite popular around the year 2000 (see Sun’s “the network is the computer” concept for example).</p>
+
+<p>A cheaper approach than thin-client is to attach multiple keyboards, mice, and screens to a single physical computer; this is called “multi-seat”. These days, even basic desktop systems are powerful enough to support multiple users concurrently as long as those users are not doing CPU-intensive tasks. Attaching multiple USB-based keyboards and USB-based mice to a single computer is not complicated. Attaching multiple displays is currently more difficult, and is usually done by inserting multiple PCI/PCIe graphics cards into the shared computer. Each (keyboard,mouse,screen) combination is referred to as a “seat”. When properly configured, the linux-based operating system on the shared computer can then support multiple “seats” (users) concurrently, as if each “seat” were attached to a separate computer. The recently-specified <a href="https://en.wikipedia.org/wiki/USB_Type-C">USB Type C</a> connector and the associated <a href="https://en.wikipedia.org/wiki/DisplayPort#USB_Type-C">DisplayPort Alternate Mode</a> allows video data to be piped over a USB connection rather than a dedicated video cable (eg HDMI or DisplayPort) which should make multi-seat setups simpler. The latest graphics cards (2015/2016) are also gaining “virtualization” features which allow a single card to be partitioned across multiple users (similar to the way that “preemption” allows a CPU to be “timeshared” across multiple processes); this could make multi-seat support possible with a single graphics card. Of course all “seats” need to be physically within a few meters of the shared computer - unlike the “thin client” approach where the users can be much further away.</p>
+
+<p>The thin-client/multi-seat approaches are particularly popular in schools and libraries, reducing setup costs and system administration effort.</p>
+
+<p>A slightly different approach is taken by Google’s chromebook devices. They are full computers, and have local storage which holds both an operating-system and optionally some user files. They also have reasonably powerful CPUs and reasonable amounts of RAM. However they have few or no <em>applications</em> installed locally. Instead, they mostly run a <em>web browser</em> locally which then connects to remote http servers in order to provide services that the user wants. The remote servers may end up doing much of the work, or the remote server may provide large amounts of <em>javascript code</em> that the chromebook device then runs locally.</p>
+
+<p>Thin-client/multi-seat setups are logically related to the early “terminals”, but are not really related to the topic of this article and so will not be discussed further here.</p>
+
+<p>While on the topic of multi-seat systems, it seems relevant to mention the reverse problem - needing to control multiple physical computers from a single keyboard/mouse/screen. This happens most frequently in small “server rooms” which may contain a few to a few dozen “server” computers. Such computers are normally accessed over a network, eg via SSH text sessions, graphical remote desktop applications, or similar. But there are a few occasions where such servers really need to be accessed <em>directly</em> - eg when there are network problems. Having to make space for a keyboard/mouse/screen for <em>each</em> computer in the server-room is costly and a nuisance; the alternative of plugging in the keyboard/mouse/screen only when necessary is also a nuisance - particularly for rack-mounted servers where the connections are on the rear of the device.  In this situation, a <a href="https://en.wikipedia.org/wiki/KVM_switch">KVM switch</a> can be used; it is a box which has multiple groups of (keyboard,mouse,video) sockets, where each group is permanently connected to a target computer (server). A single real keyboard/mouse/screen are then attached and a physical dial selects which “group” the real devices get directed to, ie which server they are currently connected to. The arrival of USB Type C connectors supporting DisplayPort Alternate Mode may simplify KVM switches in future. KVM switches are invisible to the operating-system, so are not discussed further in this article.</p>
+
+<h1 id="telnet-and-ssh-sessions">Telnet and SSH Sessions</h1>
+
+<p>A common way to obtain a text-mode “login” on a computer is to connect to it over a <em>network</em> from a different computer (or the same computer for experimentation). The common protocols used are telnet (insecure and mostly obsolete) or ssh. This requires the target computer to be running a <em>telnet server</em> or an <em>ssh server</em> - or for it to configure something like inetd or systemd-init to start such a server on an incoming network connection to a specific port.</p>
+
+<p>Remote graphical logins are discussed later in this article.</p>
+
+<h1 id="the-system-console">The System Console</h1>
+
+<p>One of the terminals attached to a computer (whether real or virtual) is considered to be the “system console”; the kernel displays messages on this terminal (including the annoying “thread terminated” messages which are <em>not</em> errors). On a typical desktop running graphics, virtual terminal #1 (ctrl-alt-F1) is usually the “system console”.</p>
+
+<h1 id="pseudoterminals">Pseudoterminals</h1>
+
+<p>The kernel provides a mechanism for a userspace application to emulate an attached serial terminal; this is called a “pseudo-terminal” (aka PTS). The primary users of this are applications such as “xterm” which provide a terminal in a graphical window. The text-mode applications started from the window (particularly text-mode shells) should think they have been started from a traditional text-mode login session which is attached to a traditional terminal device.</p>
+
+<p>Userspace code sets up a pseudoterminal by opening a character-special file, usually “<code>/dev/ptmx</code>” or “<code>/dev/pts/*</code>”.</p>
+
+<p>Pseudoterminals can act as “controlling terminals”, participate in “job control”, etc., as real or virtual terminals would. See <a href="/linux/process-groups">this companion article</a> for more on these topics.</p>
+
+<h1 id="getty-and-pam">Getty and PAM</h1>
+
+<p>The <code>getty</code> program opens a <em>tty device</em>, writes a prompt like “login:” to it, and waits for a username/password to be entered. It then <em>validates</em> the username/password (usually by invoking functions from the <em>PAM</em> library), and executes (ie replaces itself with) whatever “initial program” is associated with that user account - usually a shell.</p>
+
+<p>When the user logs out (ie that initial program terminates), something needs to run a new instance of <code>getty</code> on that same tty device, so that another login prompt is displayed.  A getty instance also terminates when a user enters an invalid username, or fails to enter a suitable password after N attempts; again some external component must start a replacement <code>getty</code> process on the same terminal.</p>
+
+<p>In an operating system using systemd-init, the init system automatically does this when the <em>control group</em> for that login session becomes empty.</p>
+
+<p>For systems using sysv-init, file <code>/etc/inittab</code> includes entries for getty with the “respawn” flag; sysv-init will then take care of restarting any getty process that terminates.</p>
+
+<p>On my system, looking for processes with a “controlling tty” produces:</p>
+
+<pre><code>$ ps -efl | grep tty
+4 S root       869     1  0  80   0 -  3602 ?      Oct05 tty1     00:00:00 /sbin/agetty --noclear tty1 linux
+4 S root       921   887  0  80   0 - 394108 ?     Oct05 tty7     00:36:02 /usr/bin/Xorg :0 -novtswitch ... vt7
+...
+</code></pre>
+
+<p>Note that on this systemd-init-based system, although the kernel has created 7 virtual terminals, getty is only running on virtual terminal tty1 - and an X server is associated with virtual terminal vt7 (aka tty7). Systemd-init starts new getty instances on-demand; pressing ctrl-alt-F2 then switching back to another terminal and running “ps” again will show a getty instance now running on tty2. Other init-systems start a getty process on a fixed number of virtual terminals on startup.</p>
+
+<p>The PAM (Pluggable Authentication Module) framework consists of a configuration-file and a library that uses it. Any application that wishes to confirm an <em>identity</em> (authentication), or to verify the <em>rights</em> of some identity (authorization) may link to the pam library and make relevant calls into it, passing relevant parameters such as username/password. The pam configuration-file then defines which tests will be applied, and which “side-effects” should be triggered. Modules exist to test usernames/passwords against local config-files (eg /etc/password or /etc/shadow), to make calls to remote LDAP servers, etc. Modules also exist to perform side-effects such as informing a daemon process of successful logins (logind), or adding names/IP addresses to blacklists on repeated unsuccessful logins.</p>
+
+<p>The getty program is obviously a primary user of the PAM framework, but graphical logins via a “display manager” also use PAM.</p>
+
+<h1 id="kernel-device-drivers-for-ttys">Kernel Device Drivers For TTYs</h1>
+
+<h2 id="a-quick-review-of-device-drivers">A Quick Review of Device Drivers</h2>
+
+<p>Userspace can communicate with specific kernel modules via the “device” mechanism. Kernel code associates some callbacks with a <em>device number range</em> of form (major-from, minor-from, count).  Usually something then ensures that a <em>special device node</em> (ie a file) is created in the filesystem which is tagged with a (major,minor) number pair; the “something” is usually devtmpfs or udev, but such files can also be created via the OS init-system or even by the sysadmin “by hand”. Such files are called <em>char-special</em> or <em>block-special</em> device files. Userspace code can then <em>open</em> such a file, obtaining a file-descriptor that is “linked to” whichever set of callbacks was registered for that (major,minor) pair.  Any systemcalls made using that filedescriptor trigger those callbacks, and pass the minor-device-number as a parameter. See <a href="http://www.makelinux.net/ldd3/chp-3-sect-2">the Linux Device Drivers</a> book for more details.</p>
+
+<p>This approach is used both for “character-based” and “block-based” devices, the major/minor numbers are in separate “namespaces”, ie char-device major number 1 is quite separate from block-device major number 1. The kernel functions used by character/block drivers to reserve ranges and associate callbacks with them are also different. As terminal(tty) drivers are character-based, the rest of this section (and indeed this whole article) discusses only character-based devices/drivers.</p>
+
+<p>Although it is technically possible for two ranges with the same major-number to be registered by different “drivers”, in practice that is rarely done - ie different drivers don’t usually share a common major-device-number (though some drivers do use more than one major device number). Interestingly, the TTY_MAJOR value <em>is</em> such a case: the “vt” driver uses range <code>(TTY_MAJOR, 0..63)</code> while the various <em>serial-port</em> drivers use range <code>(TTY_MAJOR, 64..255)</code>.</p>
+
+<p>Some kernel drivers (older and more “important” ones) use a statically-allocated major device number, while others allocate an unused one at runtime.  Static major numbers are allocated from 1 upwards in <code>usr/include/linux/major.h</code> while dynamically-allocated major numbers <em>currently</em> start from 255 and count down (though this might change at some time). The kernel function <a href="http://lxr.free-electrons.com/source/fs/char_dev.c#L174">register_chrdev_region</a> is used to reserve static ranges, while <a href="http://lxr.free-electrons.com/source/fs/char_dev.c#L210">alloc_chrdev_region</a> is used to allocate ranges dynamically. Once a range has been allocated, function <a href="http://lxr.free-electrons.com/source/fs/char_dev.c#L452">cdev_add</a> binds <a href="http://lxr.free-electrons.com/source/fs/char_dev.c#L347">chrdev_open</a> callbacks to that range.</p>
+
+<p>File <code>/proc/devices</code> lists all the major/minor device number ranges reserved by kernel code calls to <a href="http://lxr.free-electrons.com/source/fs/char_dev.c#L174">register_chrdev_region</a> or <a href="http://lxr.free-electrons.com/source/fs/char_dev.c#L210">alloc_chrdev_region</a>. Each call to these methods specified a different “name”, and that name is also shown in <code>/proc/devices</code>. Some kernel code uses range-names that look like file-paths (eg “/dev/tty”) but that doesn’t <em>necessarily</em> mean there is such a file in the filesystem. Sadly, the output only shows the “major” number of each range-entry.</p>
+
+<p>AFAIK, there is no direct way of determining which kernel code (driver) reserved which major/minor device ranges - but grepping the kernel sourcecode for <code>_chrdev_region</code> and the range-name from <code>/proc/devices</code> finds the appropriate place pretty quickly. See also function <code>register_chrdev</code> which is defined inline in <code>linux/include/linux/fs.h</code> as a wrapper which reserves a block of minor numbers and calls cdev_add at the same time.</p>
+
+<h2 id="tty-related-device-drivers">TTY-related Device Drivers</h2>
+
+<p>Statically-allocated major device numbers that are of interest for this article include:</p>
+
+<ul>
+  <li>VCS_MAJOR = 7</li>
+  <li>TTY_MAJOR = 4</li>
+  <li>TTYAUX_MAJOR = 5</li>
+  <li>UNIX98_PTY_MASTER_MAJOR = 128..135 // aka “ptm”</li>
+  <li>UNIX98_PTY_SLAVE_MAJOR = 136 // aka “pts”</li>
+</ul>
+
+<p>The <code>/proc/devices</code> content includes in the “Character devices” section:</p>
+
+<pre><code>  4 /dev/vc/0
+  4 tty
+  4 ttyS
+  5 /dev/tty
+  5 /dev/console
+  5 /dev/ptmx
+  7 vcs
+128 ptm
+136 pts
+</code></pre>
+
+<p>and the <code>/dev</code> directory on my system has the following entries related to ttys:</p>
+
+<ul>
+  <li>VCS_MAJOR devices (ie those with major=7)
+    <ul>
+      <li>
+<code>/dev/vcs{N}</code>  – access to screen content (without text attributes) of console #N</li>
+      <li>
+<code>/dev/vcsa{N}</code> – access to screen content (with text attributes) of console #N</li>
+    </ul>
+  </li>
+  <li>TTY_MAJOR devices (ie those with major=4)
+    <ul>
+      <li>
+<code>/dev/tty{N}</code> – has (major=4,minor=N) where 0&lt;=N&lt;64 – “virtual” ttys</li>
+    </ul>
+  </li>
+  <li>TTYAUX_MAJOR devices (ie those with major=5)
+    <ul>
+      <li>
+<code>/dev/tty</code> has (major=5,minor=0)</li>
+      <li>
+<code>/dev/console</code> has (major=5,minor=1)</li>
+      <li>
+<code>/dev/ptmx</code> has (major=5,minor=2)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>As noted above, different devices <em>can</em> theoretically share major-numbers: and in fact there are files with names of form <code>/dev/ttyS{N}</code> referencing (major=4,minor=N+64). These are (on my system) created by the code under “drivers/tty/serial/8250”; while serial-ports are <em>categorised</em> as “tty code”, this isn’t really what this article is about and will not be discussed further here.</p>
+
+<p>Interestingly, the TTYAUX_MAJOR also is shared between two “drivers”: minor numbers 0 and 1 are handled by code in <code>drivers/tty/tty_io.c</code>; opening a char-special file with number <code>(TTYAUX_MAJOR,0)</code> is basically an alias for opening the file <code>/dev/tty{N}</code> where N is the “currently active” tty. Similarly, minor-number 1 gives access to “the currently active console”. However minor-number 2 is instead handled by code in <code>drivers/tty/pty.c</code>; see the section on pseudo-terminals below.</p>
+
+<p>As I currently understand it:</p>
+
+<ul>
+  <li>The keyboard-drivers and display-drivers form the lowest layer related to terminal-handling.</li>
+  <li>The “virtual console” code then builds on top of those, by creating one or more “vc” datastructures which hold a text-buffer containing screen contents, and a reference to a keyboard device.</li>
+  <li>The “virtual terminal” code builds on the “virtual console”, adding VT102-specific features so that a userspace application expecting to deal with a VT102 will work unchanged.</li>
+  <li>the “pseudo-terminal” code is not really related to any of the above; it does not use a keyboard (data comes from a userspace app) or display device (output goes to a userspace app), nor does it maintain a screen-buffer in memory.</li>
+</ul>
+
+<h2 id="the-virtual-console-code-vc">The virtual console code (“vc”)</h2>
+
+<p>AIUI, the virtual-console kernel code was originally quite separate from the tty code, hence the distinct acronyms “vc” and “vt”. However a comment in file “vt.c” states “Merge with the abstract console driver .. 1997”; this presumably lead to the somewhat inconsistent use of “vc” and “vt” in this area.</p>
+
+<p>The “vc” code appears to have the following functionality:</p>
+
+<ul>
+  <li>creates some “struct vc” datastructures to represent consoles</li>
+  <li>listens for keyboard devices being registered, and determines which VC to “bind” it to</li>
+  <li>map from keypresses to unicode-glyph-ids depending on the selected “terminal type” (eg vt100)</li>
+  <li>register “notifier functions” which get invoked when a keystroke is entered at the <em>console</em> keyboard (register_keyboard_notifier).
+This hook is used by the braille and speakup drivers.</li>
+  <li>map scancodes to keycodes, handle LEDs on keyboards, handle capslock/numlock/key-repeat-rate etc</li>
+  <li>handle copy/paste on console text buffer</li>
+  <li>and other very low-level stuff</li>
+</ul>
+
+<p>Major number VCS_MAJOR is associated wth kernel file <code>drivers/tty/vt/vc_screen.c</code>.</p>
+
+<p>As noted earlier, a terminal’s display has an associated buffer holding an array of characters (and their attributes), of size nrows*ncolumns; these buffers are accessable as char-special files. Each local “virtual terminal” set up by the kernel on boot has a local display buffer, and opening a char-special file with major=VCS_MAJOR and minor=N will give access to the buffer for virtual terminal N, so that the display of that virtual terminal can be read/modified <em>directly</em>. Opening a file with major=VCS_MAJOR and minor=N+128 gives access to the buffer for virtual terminal N, but with char-attribute info too.</p>
+
+<p>On my system, files <code>/dev/vcsN</code> and <code>/dev/vcsaN</code> exist for N=1..7 and are bound to the appropriate major/minor numbers.</p>
+
+<p>A console can be in “raw mode” or “cooked mode”; in raw-mode keystrokes are passed through almost unaltered while in cooked-mode much more “remapping” and handling of special keystrokes is done within the driver.</p>
+
+<p>AFAIK there is no way for userspace to obtain <em>keystrokes</em> directly from this layer; use the vt driver (via the <code>/dev/tty{N}</code>) instead.</p>
+
+<h2 id="the-virtual-terminal-code-vt">The virtual terminal code (“vt”)</h2>
+
+<p>As noted earlier, the VT100 terminal (and related products) were very popular; the “V” stands for video. The kernel “vt” (virtual terminal) code emulates a vt102 (video terminal).</p>
+
+<p>Major number TTY_MAJOR is associated with kernel file <code>drivers/tty/vt/vt.c</code> - which registers one range under name “/dev/vc/0”. However (at least on my system) there are no files with names of form “<code>/dev/vc*</code>”; the files are named “<code>/dev/tty*</code>” instead. Presumably this is a side-effect of the vc/vt “code merge” referenced in the previous section.</p>
+
+<p>The vt support builds on top of the vc support, ie each vt datastructure holds a pointer to a vc_data structure from the lower layer. The “current screen contents” is held at the vc layer.</p>
+
+<p>When key sequence “<code>ctrl-alt-F{N}</code>” is used to “switch virtual terminals”, then data from the physical console keyboard gets redirected to a different <code>/dev/tty</code> node, and the display-device is reconfigured to take its data from a different vc screen buffer. However I am not currently sure if that “switching” logic is implemented at “vc” or “vt” level.</p>
+
+<p>The virtual-terminal layer can also wrap a <em>serial port</em> rather than a virtual-console. Question: is there much logic in the tty-driver for this case?</p>
+
+<p>Function <code>register_vt_notifier</code> can be used to register callbacks for events related to any virtual terminal. The braille and speakup drivers use these hooks (in addition to the similar hooks available at the virtual-console layer).</p>
+
+<p>The <code>/dev/tty{N}</code> files can be opened and then read (to obtain keyboard input) or written (to place characters into the associated text buffer). Whether the read actually returns keystrokes or not depends on whether that tty is “active”; the same applies to data written to the tty.</p>
+
+<h2 id="the-pseudo-terminal-code">The pseudo-terminal code</h2>
+
+<p>The difference between a virtual terminal and a pseudo-terminal is:</p>
+
+<ul>
+  <li>for a terminal the source of keystrokes is a <em>kernel keyboard device</em> and the sink is a <em>kernel display device</em>;</li>
+  <li>for a pseudo-terminal the source and sink are a <em>userspace program</em>.</li>
+</ul>
+
+<p>Device number (TTYAUX_MAJOR, 2) is normally found as file “/dev/ptmx” and is associated with kernel file <code>drivers/tty/pty.c</code> - although the TTYAUX_MAJOR is shared with file “tty_io.c”. Opening “/dev/ptmx” is the way to <em>allocate a new</em> master pseudo-terminal.</p>
+
+<p>The UNIX98<em>PTY</em>* major numbers are associated with kernel file <code>drivers/tty/pty.c</code>. These provide “pseudo-terminals” so that userspace applications (eg xterm) can emulate terminals that other commandline applications can then talk to.</p>
+
+<p>AFAIK, the <code>/dev</code> filesystem never has an actual file with major-number in the UNIX98<em>PTY</em>* range; these numbers are managed via the <code>/dev/ptmx</code> file instead. Opening the ptmx file registers a new kernel “driver” using a free major number in the UNIX98<em>PTY_MASTER range - though I’m not sure how the caller is supposed to know _which one</em>. See function <code>pty.c:ptmx_open</code>.</p>
+
+<h2 id="other-information">Other Information</h2>
+
+<p>There are some related files in the /proc filesystem:</p>
+
+<ul>
+  <li>
+<code>cat /proc/consoles</code> shows tty0. I’m not sure when there would be more than one console.</li>
+  <li>
+<code>cat /proc/tty/drivers</code> shows more interesting into.</li>
+</ul>
+
+<p>Also interesting to look at:</p>
+
+<ul>
+  <li>/sys/devices/virtual/tty/*</li>
+  <li>/sys/devices/virtual/vc/*  (major=7)</li>
+  <li>/sys/devices/virtual/vtconsole (major=?)
+    <ul>
+      <li>vtcon0 is named “(S) dummy device” - where S means statically-compiled-in?</li>
+      <li>vtcon1 is named “(M) frame buffer device” - where M means dynamically-loaded module?</li>
+    </ul>
+  </li>
+  <li>/sys/class/tty</li>
+  <li>/sys/class/vc</li>
+  <li>/sys/class/vtconsole</li>
+</ul>
+
+<h1 id="text-mode-session-managers">Text-Mode Session Managers</h1>
+
+<p>As an alternative to having the <em>kernel</em> manage virtual terminals, the <a href="https://en.wikipedia.org/wiki/GNU_Screen">screen</a> application can be used to do it in userspace.</p>
+
+<p>Run screen once, and it takes over the current terminal window. Running it again in the same window creates “new buffers”. The sequence “ctrl-a” is used to send commands to the screen program; the most important is “ctrl-a ?” which shows help.</p>
+
+<p>The screen program is particularly useful when using a network connection to a remote server; the network connection can be terminated and applications running under “screen” continue to run (rather than being terminated). After reconnecting to the server, running “screen” again will “reconnect” to the original session, with all applications still present.</p>
+
+<h1 id="graphical-display-managers">Graphical Display Managers</h1>
+
+<p>This section covers how an X server starts up, the role of the display-manager, greeter, xinirc files, XDMCP and similar things.</p>
+
+<p>If you are not familiar with X and graphics under Linux, then <a href="/linux/graphics-stack">this article</a> might be helpful.</p>
+
+<p>This section assumes the computer which a user physically sits in front of has a graphics card.</p>
+
+<p>The original concept of X is that a user would <em>log in</em> via a <em>console</em> (ie a physically-attached keyboard and screen), resulting in a text-only session. The user would then start an X server instance (resulting in a graphical display), and a “window manager” application which connects to the X server as a client. The user can then interact with the window manager to launch further graphical applications. Exactly which <em>client</em> applications are started when the X server instance is started is controlled by file “<code>$HOME/.xinitrc</code>”; when that script terminates the X server is also terminated.</p>
+
+<p>Alternatively, the user first interacts with a graphical <em>greeter</em> program, aka a “display manager”. The greeter is traditionally an <em>X client application</em> ie connects to some X server (and thus receives input from whatever keyboard that X server is attached to). When a desktop system boots, it starts a greeter which in turn <em>starts</em> an X server attached to the system console, then the greeter connects to that X server as a client. When username/credentials are entered into the greeter, it invokes the normal login process (ie verifies the credentials), then terminates the X server it is attached to and starts a new one. It also starts some X applications as clients of this new server, in particular a Window Manager or similar; exactly what gets started depends upon the desktop environment the greeter launches. Traditionally, file “<code>$HOME/.xsession</code>” was used (similarly to the .xinitrc file) but many desktop environments do not use this file.</p>
+
+<p>It is also possible for a desktop system to connect to a <em>remote</em> greeter program. The XDMCP protocol is designed for this; an X server starting up on a user’s desktop can be configured to send out an XDMCP <em>broadcast</em> and then listen for remote <em>greeter</em> programs to respond with their addresses. The local X server on the desktop then provides a list of available systems to log in to; the user enters username/password which are sent to the selected greeter and if that target system accepts the credentials then the remote greeter sets <code>$DISPLAY</code> to point back to the X server on the user’s desktop and then starts whichever graphical apps are configured to run on login. These will run on the remote system but send X drawing commands to the user’s X server (and accept input from there); the remote system may not even have a graphics card. This approach was reasonably popular in the 1980s and 1990s but is less common now and many modern greeter implementations do not support XDMCP at all.</p>
+
+<p>In modern desktop systems it is typical for the operating-system to start an X server instance on bootup, with that instance taking input from the console keyboard. In addition, a local X greeter application is started which connects as a client to the X server (and thus receives keystrokes from the console keyboard via the X server). When a user at the console keyboard enters the correct credentials into the greeter application, the greeter terminates and the normal login process is executed - which would then start a window-manager as a client of the same X server. Actually, although a simple desktop system has only one keyboard, the Linux kernel typically creates multiple “virtual terminals” (VTs) on boot, and forwards keystrokes from the real keyboard to whichever virtual terminal is active; programs then connect to a VT to read input. Similarly, each VT has a small amount of memory for a text-only output buffer, and the display shows the buffer from the active terminal. The “getty” program is then run on multiple virtual terminals, allowing the user to press a sequence such as “<code>ctrl-alt-f{n}</code>” to activate a particular virtual terminal and log in with text-mode - very useful on occasion. The X server is connected to <em>one</em> of these virtual terminals, ie sees keystrokes only when that virtual terminal is active (normally, ctrl-alt-f7 selects that terminal). Of course the kernel needs to change graphics-card setting when switching between a VT in “text mode” and one in graphical mode (ie with an attached X server). Switching mode is easy with a KMS (kernel modesetting) graphics driver (modern style), but was difficult/unreliable with the older X userspace modesetting approach; see later for further details.</p>
+
+<h2 id="x-server-instances">X server instances</h2>
+
+<p>Traditionally, a single X server is started (as user root) on system bootup, and remains running until system shutdown. When a user logs in, it may need to reconfigure the screen to match the user’s desired setting (resolution, etc).</p>
+
+<p>In the last few years, effort has been put into running “rootless X”, ie running the X server as a non-root user. In this case, the X server running when nobody is logged-in uses a non-root “system” account. When a user logs in, that X server instance is terminated and a new one running as the logged-in-user is started. On logout, the current X server instance is again terminated and a new one started (to support the greeter program).</p>
+
+<p>TODO: how is graphical “fast user switching” supported? Is a new X server started on a second virtual terminal?</p>
+
+<p>Traditionally, the bootup sequence executes <code>/etc/X11/default-display-manager</code> or <code>/etc/sysconfig/desktop</code>. However on my debian8 systemd-init-based system, there is a “gdm.service” unit which starts the gdm3 display-manager directly.</p>
+
+<p>Some Display Manager implementations support “remote login”, ie XDMCP, while others have dropped support for this.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://www.linusakesson.net/programming/tty/index.php">The TTY Demystified</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/ttys/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

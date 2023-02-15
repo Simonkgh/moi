@@ -1,0 +1,305 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Mapping Transactional Exceptions in Spring</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Mapping Transactional Exceptions in Spring</h1>
+    <aside>First published on: October 10, 2019</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      <h1 id="overview">Overview</h1>
+
+<p>Recently I wrote a simple Java Spring/JPA application which included writing data to a database, where the underlying table had a uniqueness-constraint. The user-provided inputs could potentially violate that uniqueness constraint, and so I wanted to detect the error reported by the database operation and transform it into a user-friendly “name already in use” error.</p>
+
+<p>This proved surpisingly difficult to do. Below I describe why this was so, and what solution I eventually implemented.</p>
+
+<h1 id="the-problem">The Problem</h1>
+
+<p>When using JPA (Java Persistence API) to write to a database, various exceptions can occur. However it is desirable not to have exceptions related to a specific technology propagating through the entire application.</p>
+
+<p>Spring and Hibernate do their parts by remapping exceptions from driver-specific exceptions (PostgreSQL in my case) to Hibernate’s standard exceptions and from there to Spring’s standard persistence exceptions. See:</p>
+
+<ul>
+  <li>
+<code>org.springframework.dao.DataAccessException</code> – Spring’s exception hierarchy</li>
+  <li>
+<code>org.springframework.dao.support.PersistenceExceptionTranslator</code> – applied automatically by Spring</li>
+</ul>
+
+<p>However in many cases it is still desirable to map the Spring exception to something more domain-specific. As an example, when persisting an Account object it may be appropriate to remap a <code>DataIntegrityViolationException</code> (DB language for trying to insert a duplicate value into a column with a uniqueness constraint) into a “Duplicate Account name” exception, or similar.</p>
+
+<p>A method which is not transactional can use the usual approach:</p>
+
+<pre><code>public Account addAccount(..) throws DuplicateAccount {
+  try {
+    Account account = ...
+    accountDao.save(account);
+  } catch(DataIntegrityViolationException e) {
+    throw new DuplicateAccount();
+  }
+}
+</code></pre>
+
+<p>When invoked with no transaction active, the call to <code>save</code> triggers an insert immediately, ie is performed as an “auto-commit” operation; the exception-catching-and-mapping then executes as expected.</p>
+
+<p>However if some code starts a transaction <em>then</em> calls the above method, the behaviour is quite different: the catch-clause is ignored and the exception-remapping never happens!</p>
+
+<p>The problem is that the database verifies various constraints only on commit - and the above code has no control over where that commit occurs.</p>
+
+<p>This is a very nasty problem actually - whether this code works or not depends on invisible state (whether a thread-local transaction object exists).</p>
+
+<p>The same problem occurs if the above method is annotated with <code>@Transactional</code>; in fact that <em>guarantees</em> that the commit occurs after the method has returned and thus the catch-clause has no effect. Fortunately in that case, the problem is visible in the source-code.</p>
+
+<h1 id="solutions">Solutions</h1>
+
+<p>The only solutions that occurred to me were:</p>
+
+<ul>
+  <li>force a commit at a place where the exception can be caught</li>
+  <li>explicitly test for uniqueness before trying the insert</li>
+  <li>register a list of error-handlers to apply on commit</li>
+</ul>
+
+<p>Some searching on the internet revealed no other solutions - people just seem to be happy with returning “failed due to database problem” to their clients, without further detail. Or people are implementing the “ahead-of-time-test” approach and find it so self-evident that they don’t mention it.</p>
+
+<h2 id="forcing-a-commit">Forcing a Commit</h2>
+
+<p>When using Spring-Data annotations, a commit could potentially be forced with something like:</p>
+
+<pre><code>public Account addAccount(..) throws DuplicateAccount {
+  try {
+    Account account = ...
+    self.doSave(account);
+  } catch(DataIntegrityViolationException e) {
+    throw new DuplicateAccount();
+  }
+}
+
+@Transactional(propagation=Propagation.REQUIRES_NEW, rollbackOn=Exception.class)
+public void doSave(Account account) {
+  accountDao.save(account);
+}
+</code></pre>
+
+<p>This isn’t a very elegant solution though:</p>
+
+<ul>
+  <li>if a transaction is currently active when addAccount is called, then the account-save operation will be done in an unrelated transaction which is something the caller might not expect.</li>
+  <li>the <code>REQUIRES_NEW</code> specifier is not supported by all transaction-manager implementations when another transaction is already active</li>
+  <li>the “self” invocation is ugly</li>
+</ul>
+
+<p>Possibly <code>Propagation.NESTED</code> would also work - I haven’t tested that. In this example where the operation that can potentially trigger a constraint-violation is just a single statement, then <code>Propagation.NOT_SUPPORTED</code> or <code>Propagation.NEVER</code> might also do, depending on context and requirements.</p>
+
+<p>Note that the “self” invocation is needed because Spring annotations are implemented via proxy objects; such proxies do not intercept intra-class method calls (and it is therefore pointless to annotate a private method, as its invocations are aways intra-class).</p>
+
+<p>Of course, explicit calls to EntityManager methods can be used rather than Spring-data annotations to implement transactions. That avoids the clumsy self-reference and having to factor the actual save out into a different method. It does not remove the need to use <code>Propagation.REQUIRES_NEW</code>.</p>
+
+<h2 id="explicit-testing">Explicit Testing</h2>
+
+<p>This approach takes the brute-force solution of just testing ahead-of-time whether a particular uniqueness-constraint would fail later - ie in this example doing something like “<code>select 1 from ACCOUNT where name=?</code>” to see if a record with that name already exists. The database uniqueness-constraint is then just a “backup validation” that should never fail.</p>
+
+<p>This has the cost of an extra round-trip to the database, just to query data that the insert will actually validate anyway (via the constraint). However the point-in-time at which the validation is done can be controlled, unlike the constraint-check which occurs only on commit.</p>
+
+<p>While part of me dislikes the idea of enforcing the constraint in two places (code and database), there are also arguments for this. The validation rule “account names must be unique” is a <em>business rule</em>, and therefore logically should be enforced in the business tier. There are also persistence technologies which do not offer uniqueness-constraint-enforcement (eg various NoSQL databases). And there are also similar constraints that a database could not enforce - eg “Account name must have at least one upper-case letter”. It is therefore <em>normal</em> for such constraints to be implemented in the code.</p>
+
+<h2 id="register-error-handlers-for-commit">Register Error Handlers for Commit</h2>
+
+<p>An idea I briefly considered was to store a list of exception-handler objects in a thread-local, then somehow ensure that when Spring invokes the commit it passes any resulting exception to the list of handlers which may map the exception to a different type. The new exceptions would need to be subtypes of RuntimeException, but that’s not unreasonable.</p>
+
+<p>That would seem to be a nice feature for Spring-Data (or Hibernate) to implement, but probably rather complex.</p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>In the end, I chose to implement the “explicit ahead-of-time test” solution. Detecting constraint violation at commit-time was just too imprecise:</p>
+
+<ul>
+  <li>it is not localised in the code (exception occurs when commit occurs)</li>
+  <li>it is not localised to a specific SQL operation (in a transaction with multiple inserts, it is not clear which constraint failed)</li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/spring-transaction-exceptions/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

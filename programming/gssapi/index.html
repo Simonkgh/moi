@@ -1,0 +1,326 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - GSSAPI Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>GSSAPI Overview</h1>
+    <aside>First published on: October 27, 2016</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Cryptography/'>Cryptography</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p><a href="https://en.wikipedia.org/wiki/Generic_Security_Services_Application_Program_Interface">GSSAPI</a> is a fairly old and well-established programming API for establishing a communications channel between two processes, including optional authentication and encryption.</p>
+
+<p>In this article, the term “client” is used for the application which initiates/establishes communication and “server” is used for the application which waits for a client to connect to it.</p>
+
+<h1 id="setup">Setup</h1>
+
+<p>The GSSAPI specification is language-independent; implementations exist for various languages and map the GSSAPI “design” into language-specific form. Being relatively old, the API is pretty ugly by modern standards - but effective.</p>
+
+<p>The GSSAPI specification defines functions for channel init/setup, functions for encrypting/decrypting data (aka wrapping/unwrapping), and functions for signing/verifying data.  It also defines the concept of a “mechanism” which is a kind of plugin which implements a specific handshake-sequence, and generates datapackets in some specific format. A particular concrete gssapi library provides a language-specific API, an implementation of that API, and bundles one or more mechanism implementations.</p>
+
+<p>The channel-initialisation-function takes a “mechanism identifier”; an error is returned if the gssapi library implementation does not support that mechanism. The GSSAPI initialisation functions act as a kind of “state machine”; each call to the library returns a value which indicates what action the client application must take next - eg send the next output buffer to the receiver. This state-machine effectively “walks the client application” through the setup/handshake sequence of network packet exchanges. On the server side, it works similarly: when incoming data is first received, the server initialises a new channel, specifying the expected mechanism, and the gssapi library returncodes walk the server process through the necessary steps. Together this ensures the client and server perform whichever “handshake” is appropriate for that mechanism.</p>
+
+<p>This generic state-machine approach allows a wide variety of mechanism initialisation-sequences to be supported through a common interface.</p>
+
+<p>After setup is complete, the caller can use the GSSAPI wrap/unwrap functions to convert blocks of bytes to/from their encrypted formats.</p>
+
+<p>At no time does the gssapi implementation perform any communications/network operations directly - that is the responsibility of the calling application. GSSAPI simply generates appropriate data-buffers and indicates when they should be sent. This allows GSSAPI to be used with any kind of communication system; GSS datapackets can be passed as RPC parameters, sent over a message-broker, send as emails, or transmitted via pigeons if desired! In practice, the underlying comms channel should be “low latency” as some mechanisms require multiple round-trips as part of the “handshake”; pigeons might not be appropriate after all :-)</p>
+
+<p>The most-commonly-used gssapi mechanisms are for Kerberos, NTLM (now obsolete) and SPNEGO (described later).</p>
+
+<h1 id="gsswrap-and-gssmic">GSSWrap and GSSMic</h1>
+
+<p>The <code>GSSWrap</code> function takes a block of unencrypted bytes and returns a buffer containing a “gsswrap data packet” that has headers and an encrypted form of the original data.</p>
+
+<p>The <code>GGSSMic</code> function takes a block of data and returns a buffer containing a data-packet that has headers, the original data, and a “signature” (encrypted checksum). This functionality is not often used as encryption offers both integrity and privacy. Note: MIC = Message Integrity Check.</p>
+
+<h1 id="the-gss-api-kerberos-mechanism">The gss-api-kerberos Mechanism</h1>
+
+<p>There is an <a href="https://tools.ietf.org/html/rfc4121">rfc for the gss-api kerberos mechanism</a> which defines a mechanism for setting up an authenticated and encrypted communications channel based on a Kerberos service ticket. Given an initial service-ticket (which includes a symmetric encryption key), the mechanism walks client and server through a sequence of states and generates a sequence of encoded buffers to agree that each is the expected party. The GSSAPI can then be used to encrypt packets of data for sending, and decrypt packets of data which have been received.</p>
+
+<p>The “handshake” sequence for gss-api-kerberos is actually extremely simple, due to the fact that a Kerberos service ticket contains all the necessary data.</p>
+
+<p>Both client and server must use a library that implement the gss-api-kerberos mechanism/protocol (ie the same state-machine and packet-formats) though they do not need to actually be GSSAPI implementations, ie the code does not need to offer the GSSAPI as its API.</p>
+
+<p>A server that supports communication over gss-api-kerberos must listen on a dedicated port for that protocol.</p>
+
+<p>The Kerberos specification defines packet-formats <code>KRB_PRIV</code> and <code>KRB_SAFE</code>, with the intention that client applications use these as containers for encrypted or signed data respectively - eg an app encrypts a block of N bytes with a kerberos symmetric key, then places it in the “payload” section of a <code>KRB_PRIV</code> packet, and sends it to a receiver. This can form the basis of an encrypted channel without using gssapi. However (unlike other parts of Kerberos) this functionality has never been widely used; in the vast majority of applications, transfer of data encrypted with a Kerberos session-key is performed via gss-api-kerberos.</p>
+
+<h1 id="spnego">SPNEGO</h1>
+
+<p>As mentioned earlier, a gssapi library may support multiple “mechanisms”; the initialisation phase for GSS must specify which mechanism (state-machine and packet-formats) will be used. It is of course a runtime error if the library implementation being used does not happen to support that specified “mechanism”. And channel setup will fail if the server-side is expecting a different mechanism.</p>
+
+<p>SPNEGO defines a mechanism for dynamically negotiating a suitable mechanism/protocol. A GSSAPI client application calls the GSS init function with SPNEGO as the mechanism; the underlying implementation then generates a special packet which includes a list of all protocols that the client supports, and indicates via the state-machine that this should be sent to the receiver. The server selects its preferred mechanism from the provided list, and sends this in a response message, which the client feeds back into GSSAPI. The spnego mechanism then delegates all further processing to the selected mechanism.</p>
+
+<p>The result is that the client and server end up selecting a mutually-agreeable protocol, rather than having to configure the client and server with exactly one fixed common protocol.</p>
+
+<p>SPNEGO is sometimes called a “meta-mechanism”, as it simply delegates to some other mechanism (eg gss-api-kerberos).</p>
+
+<p>The generic state-machine design of GSSAPI makes this “pre-handshake handshake” phase transparent to applications which correctly use GSSAPI - it is just a couple of additional states in the state-machine.</p>
+
+<h1 id="kerberos-vs-tls">Kerberos vs TLS</h1>
+
+<p>TLS is a “point-to-point tunnelling” protocol. It can be set up to:</p>
+
+<ul>
+  <li>authenticate both client and server, or just server, or neither;</li>
+  <li>encrypt or not encrypt the data.</li>
+</ul>
+
+<p>However in the vast majority of cases, just the server side is authenticated, and encryption is enabled.</p>
+
+<p>A Kerberos service ticket authenticates both client and server, and is therefore a <em>better authentication method</em> than TLS, when available. GSSAPI implementations often include both kerberos and TLS mechanisms; where Kerberos is available the client application should choose that in preference due to the mutual authentication.</p>
+
+<h1 id="sasl">SASL</h1>
+
+<p>GSSAPI functions are buffer-oriented; they take blocks of bytes as input and generate data-packets to be sent, and vice-versa. They also require the application using the API to implement the client-side part of the “state machine”, ie a loop which follows the instructions being returned from GSSAPI functions.</p>
+
+<p>SASL is an alternative API which is “stream-oriented”. Like GSSAPI, it is an abstract API which supports multiple “mechanisms”. The SASL Kerberos mechanism uses the same on-the-wire format as gss-api-kerberos, and is in fact usually a wrapper over a gss-api-kerberos implementation. SASL implementations hide the “state machine” loop from users, making it friendlier to use.</p>
+
+<p>SASL is considered the “simpler version” of GSSAPI, and does not have as much flexibility - or in other words, easier to use but not as powerful.</p>
+
+<p>The most common mechanisms (ie “authentication/encryption protocol plugins”) used with SASL are:</p>
+
+<ul>
+  <li>EXTERNAL: used when setting up the socket already included authentication, eg using SASL over a TLS socket which has already done mutual-authentication-via-certificates.</li>
+  <li>PLAIN: a userid and password are passed in plaintext over the socket (which hopefully is encrypted)</li>
+  <li>NTLM: the old ms-windows login protocol</li>
+  <li>GSSAPI: this name is not well chosen; it is not “gss-api in general”, but “gss-api with the kerberos back-end and packet-encryption enabled”.</li>
+  <li>and various kinds of challenge/response protocols to authenticate via password but without passing the password itself over the network</li>
+</ul>
+
+<p>Cyrus-sasl is the most popular SASL implementation for C. The Java standard library also includes an implementation.</p>
+
+<h1 id="channel-binding">Channel Binding</h1>
+
+<p>The GSSAPI documentation mentions “channel binding” in several places, but the description is difficult to understand. The concept has been given its own RFC, as it is actually a general-purpose concept.</p>
+
+<p>As described in <a href="https://tools.ietf.org/html/rfc5056">the channel-binding RFC</a>, “the main goal of channel binding is to be able to delegate cryptographic session protection to network layers below the application” and “the critical problem .. is ensuring that there is no man-in-the-middle”. A common case is using Kerberos with a TLS or IPSec communications channel. Kerberos can be used to perform both authentication and encryption, but it is rather wasteful using CPU cycles to encrypt data that is being sent over an already-encrypted channel - particularly in the case of IPSec which can have very high-performance encryption and decryption. However TLS and IPSec don’t necessarily provide <em>authentication</em> themselves, ie an application knows that the data it sends cannot be intercepted but cannot be sure who it is talking to. This opens the door to a “man in the middle” attack, where the entity it is talking to is actually an attacker who is receiving all data, and then relaying it to the intended target system. Performing authentication (correctly) over such a network connection, then relying on encryption in the underlying connection is fairly pointless as the attacker can just let the authentication-related packets flow past and then start reading or modifying the data that is transferred after authentication is complete.</p>
+
+<p>So the problem is: we can’t trust the authentication of an underlying connection but want to take advantage of its encryption. The answer is simply to gather some information about the <em>endpoints</em> and <em>keys</em> used by the underlying encrypted network connection, and include this information in the authentication process. This small amount of data is digitally-signed using the high-level and trusted authentication protocol (eg Kerberos), so a man-in-the-middle cannot interfere with it. And if both ends see the “same settings” for the underlying channel, then they can be sure there <em>is</em> no man-in-the-middle (ie there is just one connection, and not two hops) and can switch off any further encryption at the higher level, trusting the underlying channel to take care of that.</p>
+
+<p>The datastructure transferred during a channel-binding is as follows:</p>
+
+<pre><code>  int32 initiator_addrtype
+  byte[] initiator_address
+  int32 acceptor_addrtype
+  byte[] acceptor_address
+  byte[] data
+</code></pre>
+
+<p>It shows the <em>real addresses</em> at each end of the system, and the “data” block contains the “settings” for the underlying channel, eg TLS or IPSec keys.</p>
+
+<h1 id="framing-and-magic-numbers">Framing and Magic Numbers</h1>
+
+<p>The databuffers generated by GSSAPI mechanisms may be transferred over various network channels, including TCP sockets, message-queues, and possibly even email. Some of these channels naturally indicate the “length” of datapackets, so gssapi mechanisms do not generally have “length” fields themselves. When transferring over TCP, it is therefore necessary to provide some way for the receiver of datapackets to know where each packet ends. This is called “framing” and is not part of the GSSAPI specification.</p>
+
+<p>GSSAPI datapackets do, however, start with a two-byte “magic number” which at least makes detection of framing errors possible.</p>
+
+<h1 id="java-gssapi-and-sasl">Java, GSSAPI and SASL.</h1>
+
+<p>The Java standard libraries provide an implementation of GSSAPI. This “Java flavor” of GSS is called JGSS; see package <code>org.ietf.jgss</code>. The official Java GSS documentation includes an example client/server pair that set up a channel and exchange some basic packets. This example code implements “framing” by writing (len, databuffer) pairs.</p>
+
+<p>The java standard libraries also provide an implementation of SASL; see package <code>javax.security.sasl</code>.</p>
+
+<h1 id="other-interesting-information">Other Interesting Information</h1>
+
+<p>NFS is a file-transfer protocol which is built on top of an RPC (remote-procedure-call) framework. NFS can use GSS to secure remote procedure calls; GSS tokens (data-packets) are passed as an RPC body.</p>
+
+<p>There are some GSS mechanisms which provide authentication but not encryption. These mechanisms can usefully be combined with TLS. When TLS endpoints use self-signed certificates, then TLS can provide encryption but cannot provide authentication. GSS datapackets can then be exchanged over this channel to authenticate the endpoints thus validating the TLS channel.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://tools.ietf.org/html/rfc1508">RFC: GSSAPI</a></li>
+  <li><a href="https://tools.ietf.org/html/rfc4422">RFC: SASL</a></li>
+  <li>
+<a href="https://tools.ietf.org/html/rfc4121">RFC: Kerberos GSS-API Mechanism</a> – the gssapi-inspired mechanism for encrypted sockets using Kerberos. Note that libraries may implement this protocol without offering a GSSAPI programming interface.</li>
+  <li><a href="https://en.wikipedia.org/wiki/Simple_Authentication_and_Security_Layer">Wikipedia: SASL</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/gssapi/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

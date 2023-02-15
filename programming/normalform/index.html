@@ -1,0 +1,380 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Relational Normal Forms</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Relational Normal Forms</h1>
+    <aside>First published on: December 6, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>While researching <a href="/programming/dwh-intro">data warehousing</a>, I noticed that it is quite hard to find a good definition for the <em>relational normal forms</em> commonly used in data modelling for operational databases. The 3rd normal form is widely used, and one of those things “you know  when you see it”, but what is the actual definition? And what about all the other normal forms?</p>
+
+<p>As usual, a very good source is <a href="https://en.wikipedia.org/wiki/Database_normalization#Normal_forms">wikipedia</a> (including the linked pages defining each form). However I personally find the “list of objectives” as quoted from Codd unhelpful:</p>
+
+<ul>
+  <li>objective 1 which describes the “anomalies” that normal forms can resove is interesting, but not really helpful</li>
+  <li>the other objectives (2, 3, 4) are debatable; eg are normal forms really more resistent to model changes, or easier to understand?</li>
+</ul>
+
+<p>The Wikipedia pages which define each form are also very mathematical and academic.</p>
+
+<p>There is an easier-to-read article from <a href="http://www.bkent.net/Doc/simple5.htm">William Kent</a>.</p>
+
+<p>And IMO the best explanation of all is <a href="http://mikehillyer.com/articles/an-introduction-to-database-normalization/">Hillyer’s article on normal forms</a> - alternatively <a href="https://web.archive.org/web/20180829204718/http://mikehillyer.com/articles/an-introduction-to-database-normalization/">via the wayback machine</a>. However Hillyer looks only at normal forms one, two and three.</p>
+
+<p>The remainder of this article is just my summary of Hillyer and Kent; I recommend that you read the original articles which are far better written than this one.</p>
+
+<h1 id="goals-of-the-normal-form">Goals of the Normal Form</h1>
+
+<p>I prefer this definition of the goals of normal forms:</p>
+
+<ul>
+  <li>eliminating redundant data (avoiding having the same data in more than one table)</li>
+  <li>eliminating unrelated data within the same table (splitting tables where columns are not directly coupled)</li>
+</ul>
+
+<p>The only difference in the various normal forms is how extreme they interpret these issues; the higher the number the more strictly the two points above are implemented.</p>
+
+<h1 id="key-and-column-dependencies-first-three-normal-forms">Key and Column Dependencies (First Three Normal Forms)</h1>
+
+<h2 id="overview-1">Overview</h2>
+
+<p>Most people using or even designing database tables only need to know the first three normal forms. In my opinion, the easiest way to understand them is the definitions from Kent:</p>
+
+<ul>
+  <li>first form: “every column depends on the key”</li>
+  <li>second form: “every column depends on the whole key”</li>
+  <li>third form: “every column depends on nothing but the key”</li>
+</ul>
+
+<p>Or as Hillyer puts it:</p>
+
+<blockquote>
+  <p>The goal of database normalization is to ensure that every non-key column in every table is directly dependent on the key, the whole key and nothing but the key</p>
+</blockquote>
+
+<p>Databases are surprisingly often not even in first normal form. Inexperienced designers often “multiplex” different types into the same table, often resulting in lots of nullable columns in a table. However this excess of nullable columns makes writing queries dangerous, and the rules about which data can be expected to exist for specific types cannot be represented in the table schema.</p>
+
+<h2 id="first-normal-form">First Normal Form</h2>
+
+<h3 id="basics">Basics</h3>
+
+<p>Requirement: “every column depends on the key”.</p>
+
+<p>This means in practice:</p>
+
+<ul>
+  <li>Define a unique primary key for each table. Optionally, use a surrogate key - but still identify the natural key and add a uniqueness constraint on those fields</li>
+  <li>Dont mix completely unrelated data in the same table - one table per logical purpose.</li>
+</ul>
+
+<p>Alternatively, it can be stated that “within a table, every record has the same columns with the same required/optional properties”. That means that two quite different datatypes cannot be mixed in the same table, as each datatype has at least one mandatory field and thus every row requires <em>all types</em> to be present which is obviously not sensible.</p>
+
+<p>There are some NoSQL databases which support variable numbers of fields (eg bigtable-like and document-like) - but relational systems do not. However the “normal forms” don’t really apply to these.</p>
+
+<p>Applying the first normal form to unstructured data results in more tables. The consequence is a need to:</p>
+
+<ul>
+  <li>Define references between tables with a <em>foreign key</em>
+</li>
+  <li>Define link tables to represent many-to-many relations where needed.</li>
+</ul>
+
+<p>That lifetimes of independent objects are now separated; when two records are unrelated then one can be deleted without affecting the other; this is not the case when a row mixes unrelated data together. In fact, this fact can be used in reverse to determine whether data belongs in the same table or not: if it makes sense to delete a set of columns without deleting the whole record (ie if the key still makes sense without the columns), then that set of columns are in fact independent and should be in a separate table.</p>
+
+<p>Using first normal form also reduces the need for lots of nullable columns on a record. A table where many columns are nullable is a hint that perhaps some columns are not related. As a practical measure, writing code or queries that work correctly with nullable columns is tricky - it is nice to minimise them.</p>
+
+<h3 id="one-value-per-column">One Value Per Column</h3>
+
+<p>A somewhat unrelated requirement is also thrown into the first normal form:</p>
+
+<ul>
+  <li>Don’t combine different data items in same column</li>
+</ul>
+
+<p>Sometimes the last point is clear: a single column should generally not have a value like “Cheese, Milk, Celery” - those are three items. However in practice, it depends what users of that column are going to do with it; when the column contents is really a set of values which can be queried or updated independently, then combining them in one column is not accepable in 1st normal form. However if the column contents is only going to be treated as an atomic unit, being updated only via a complete replacement, then it can be considered a single value. Examples:</p>
+
+<ul>
+  <li>Is “22 smith st, myburb, mycity” one item or not? It depends on what you do with the data..</li>
+  <li>Is “john smith” one item or not? It depends on whether you search for lastname or not..</li>
+</ul>
+
+<p>There are also extended-sql databases which support array-typed columns (eg postgres, bigquery) - but in general, relational systems do not. The “normal form guidelines” still apply to such databases, but the “atomic value” rule should probably be viewed in a more relaxed manner, as the query language is also extended to support querying of these.</p>
+
+<p>Note that defining cols “member1”, “member2”, “member3” .. “memberN” to hold sets of size up to N is NOT acceptable - at least not in the spirit of normal form, as it requires very complex SQL to correctly query. This is not the case for native array columns, where query syntax has been extended to elegantly handle this.</p>
+
+<h3 id="performance-implications-of-first-normal-form">Performance Implications of First Normal Form</h3>
+
+<p>There is no performance benefit to “multiplexing types”, ie combining logically separated columns together into a single table with lots of columns.</p>
+
+<p>There is a performance benefit to “multiplexing values”, ie storing a collection of values within a single column, as long as you don’t actually perform operations on members of that set. However when you do, the performance hit is much worse than having a separate table.</p>
+
+<h2 id="second-normal-form">Second Normal Form</h2>
+
+<p>Requirement: “every column depends on the whole key”.</p>
+
+<p>This requires moving columns that only depend on part of the primary key to a separate table. This reduces duplicated data when there are two rows with the same partial-primary-key.</p>
+
+<p>Or in other words, it forces the creation of tables with a hierarchical general/detail style relationship, rather than duplicating the general data in each detail record.</p>
+
+<p>Hillyer’s example is a book database. Mixing author and book info in the same record is awkward - an author with multiple books results in duplicated data - thus not second normal form. An author with no books cannot be represented.</p>
+
+<p>Flattening of such relations (breaking 2nd normal) can provide performance benefits, due to avoiding a join. However it wastes space (duplicating facts on each detail row) and is ugly if a generic fact needs to be updated.</p>
+
+<h2 id="third-normal-form">Third Normal Form</h2>
+
+<p>Requirement: “every column depends on nothing but the key”:</p>
+
+<p>This requires moving columns that depend on the values of other columns. If two columns can be “inconsistent with each other”, ie updating col X forces an update for col Y, then a new table is needed. The new table will include X in the key, and have Y as a value to properly represent the dependency of Y on X.</p>
+
+<p>Breaking 3rd normal form can provide a performance benefit - avoiding a join. However when the number of valid (X,Y) pairs is low enough that the whole table can be easily cached in memory (or some values of X are far more common than others) then the cost of the join may be very small.</p>
+
+<h1 id="normal-form-alternative-definitions">Normal Form Alternative Definitions</h1>
+
+<p>The article from Kent talks about forms in terms of “facts”, which is an interesting alternative approach to understanding normal forms.</p>
+
+<p>The first normal form definition adds nothing to the discussion above.</p>
+
+<h2 id="second-normal-form-as-facts">Second Normal Form as Facts</h2>
+
+<p>Requirement: A non-key field must provide a fact about the whole key.</p>
+
+<p>When some column depends only on part of the key, then two records which share the same partial key will end up duplicating that fact. Obviously, this can only happen when the key is composite (there can neve rbe a partial value for a single-column key!).</p>
+
+<p>This is of course the same as the previous statement “every column depends on the whole key”.</p>
+
+<p>To make the table second-normal-form-compliant, it is necessary to create another table with structure <code>(partial-key, relevant-facts)</code>.</p>
+
+<p>This effectively means there is an implicit tree of generic/specific entities that has been squashed into a single layer. Create a table for the generic data, and put the relevant facts there.</p>
+
+<h2 id="third-normal-form-as-facts">Third Normal Form as Facts</h2>
+
+<p>Each non-key field must provide a fact about only the whole key (ie “depend on nothing but the key”) also elegantly expressed as having a non-key field Y which provides a fact about another non-key field X.</p>
+
+<p>The fix is to create a table TX for expressing <code>X-&gt;Y</code>, then from TA reference a row in TX (ie store a foreign-key to TX).</p>
+
+<p>This can also be considered as a variant of 2nd form problem: consider extending the kex of TA to include column X. That solves the 3rd-form problem for column Y, but creates a second-form problem: there are then other columns that do NOT depend on X.</p>
+
+<p>Breaking third form leads to duplicated data - there may be multiple identical (X1,Y1) pairings in the database. Externalizing these means storing (S1, X1, Y1) once then referencing it with just S1 (one value instead of two). It can also lead to inconsistencies when X is updated in a row, but Y is not.</p>
+
+<h1 id="fourth-normal-form">Fourth Normal Form</h1>
+
+<p>This form deals with the representation of 1:N and N:N relations.</p>
+
+<p>When an entity A has a 1:N relation (ie has a set) of property X and a separate set of property Y, then it is technically possible to represent this multi-valued relation in a relational DB without native sets as a single table that contains both X and Y in separate columns of the same row. However this should not be done, because</p>
+
+<ul>
+  <li>the columns for A and B must be nullable, as the parent object might only have one of them</li>
+  <li>logic updating A and B is more complex; “deleting” an instance of A might require deleting a row (when B is null) or might require “nulling out” A (when B is not null).</li>
+</ul>
+
+<p>The solution is simple: create separate tables for A and B.</p>
+
+<p>I think this is actually pretty natural for most DB designers. Once a set has been externalized as a 1:N or N:N table, then it is fairly obvious when columns do not belong together.</p>
+
+<p>In fact, unless I have misunderstood something, it seems that a table which combines unrelated properties X and Y is in fact breaking first normal form. Or is it that the description of first-normal-form is in fact pulling in a constraint from the fourth normal form? Regardless, it is pretty sensible and obvious not to combine uncorrelated data in the same table. Kent’s examples are good on this topic.</p>
+
+<h2 id="fifth-normal-form">Fifth Normal Form</h2>
+
+<p>Ensure that the foreign-keys used to represent these relations are minimal (don’t include unneeded components).</p>
+
+<p>As far as I can tell, this applies to cases where a table T has a 1:N or N:M relation to two or more other tables X and Y. In general, fourth normal form applies here. However in some cases there might be interactions between the different relations that rule out some combinations, ie not every (<code>T-&gt;X</code>) and (<code>T-&gt;Y</code>) combination is allowed. This situation requires the fifth normal form to properly express these constraints (ie prevent the invalid combinations).</p>
+
+<h1 id="normal-forms-as-anomalies">Normal Forms as Anomalies</h1>
+
+<p>Codd defines the objectives of the normal forms as a way to remove a series of “anomalies” (inconsistencies) in data representation in relational systems. I don’t find this particularly helpful myself, but here they are:</p>
+
+<p>Insertion anomaly: a row represents multiple logical objects, but has only one key - and thus one of those logical objects is a “primary” object, with the rest being secondary objects. This makes it impossible to represent secondary objects on their own - which may be valid if there really is a “part-of” relation between the primary and secondary objects, ie the secondary objects have no lifecycle independent of their “parent”. However it is an invalid schema if the secondary objects can exist alone - the model does not support that.</p>
+
+<p>Deletion anomaly: very similar to insertion anomaly. When a row represents multiple logical objects, and secondary object lifecycles are linked to the parent then all is fine. But if the secondaries might outlive the primary, the model is invalid - deleting the “parent” cannot be done as it would leave a row without a valid primary key.</p>
+
+<p>Update anomaly: occurs when data is duplicted; updating a single logical object then requires updating multiple rows. Note that the same constant occurring in multiple rows is not a problem: multiple “messages” with the same loglevel string, eg “error”, are acceptable as the loglevel is a per-message attribute rather than a reference to a shared logical entity. Updating the log-level for one message is separate from updating the level on another object. However multiple records referencing the same person object is wrong - updating the personal details should be reflected on all related data at once.</p>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/normalform/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

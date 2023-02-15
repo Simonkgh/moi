@@ -1,0 +1,468 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - In-memory Representation of Objects</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>In-memory Representation of Objects</h1>
+    <aside>First published on: December 29, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>Something I’ve been wondering about for ages: how exactly are objects in an oo-language represented in memory, and particularly what happens when <em>casting</em> is applied?</p>
+
+<p>The following notes is a summary of my reading about this topic. Primarily, this information relates to code compiled from C++, although it is also useful for Java developers to know (and some notes on Java are present towards the end of this article).</p>
+
+<h1 id="object-representations-in-dynamic-typed-languages">Object Representations in Dynamic-Typed Languages</h1>
+
+<p>First, some comments about languages like Javascript/Python/Ruby/Perl6.</p>
+
+<p>As these languages allow the definition of an object (its attributes and methods) to be <em>modified at runtime</em>, they need a representation which is much different than in compiled languages. In general, in such languages methods and attributes need to be <em>looked up</em> in a hashmap or similar when referenced. The language runtime may be able to perform “heuristic” optimisations such as <a href="https://en.wikipedia.org/wiki/Tracing_just-in-time_compilation">tracing</a>, but such optimisations are very interpreter-specific and far too complex/undocumented/often-modified to describe in this article.</p>
+
+<p>In languages in which OO behaviour is determined at compile-time (eg c++), how objects are represented and methods are dispatched efficiently is easier to understand.</p>
+
+<h1 id="simple-single-inheritance">Simple Single Inheritance</h1>
+
+<p>Given a linear inheritance tree <code>[BaseClass &lt;- SubClass &lt;- SubSubclass]</code> the memory-layout for an instance of BaseClass can look like:</p>
+
+<pre><code>BaseClass-vptr (a pointer to a vtable structure; see later)
+BaseClass-fields
+</code></pre>
+
+<p>and the memory-layout for an instance of SubSubClass looks like:</p>
+
+<pre><code>unified-vptr (a pointer to a vtable structure; see later)
+BaseClass-fields
+SubClass-fields
+SubSubClass-fields
+</code></pre>
+
+<p>This allows casting to be implemented trivially. Given:</p>
+
+<pre><code>BaseClass myBaseObj = new BaseClass();
+
+SubSubclass mySubSubObj = new SubSubClass();
+BaseClass mySubSubObjAsBase = mySubSubObj; // upcast
+</code></pre>
+
+<p>then due to the chosen memory layout, <code>mySubSubObjAsBase</code> simply holds the same address as pointer <code>mySubSubObj</code>. All fields on the BaseClass can be accessed without problems via <code>mySubSubObjAsBase</code>; they are at exactly the same offsets as the same fields in <code>myBaseObj</code>. The fact that for <code>mySubSubObjAsBase</code> additional data follows the “known” fields is irrelevant.</p>
+
+<p>The vptr actually points to a datastructure which contains:</p>
+
+<ul>
+  <li>a “type descriptor” which identifies the real type of the object (ie the type specified in the “new” operation)</li>
+  <li>an “offset to top of object” (relevant only in multiple-inheritance)</li>
+  <li>an array of pointers to virtual methods for the type</li>
+</ul>
+
+<p>This datastructure allows the correct determination of the concrete type of an object even after it has been cast to its base-type.</p>
+
+<p>The order of method-pointers in the unified vtable for SubSubClass must be: baseclass-methods followed by SubClass-methods followed by SubSubClass-methods. This allows any vtable indexes valid for the base class to also be valid for the vtable of the subclasses, ie <code>vtable.methods[0]</code> points to the “same method”. When a subclass overrides a method in an ancestor, then the pointer at that index in the vtable simply points to the new implementation. The “this” pointer points to the start of the object (the primary vptr), so fields defined in the subclass can be found by such a method in the expected places.</p>
+
+<p>This approach works to any depth of single-inheritance, and is relevant also for a hierarchy of “interfaces” (classes with no fields).</p>
+
+<h1 id="multiple-inheritance">Multiple Inheritance</h1>
+
+<p>When a class has multiple parents then multiple vptrs are required: one for each ancestor and potentially one for the subclass too (if it has virtual methods). In effect, the subclass memory layout is simply a concatenation of each parent (including its vptr).</p>
+
+<pre><code>class Base1 {
+  public:
+   int field1;
+   virtual void base1Do() {..}
+   virtual void base1Do2() {..}
+}
+
+class Base2 {
+  public:
+   int field2;
+   virtual void base2Do() {..}
+   virtual void base2Do2() {..}
+}
+
+class Child : public Base1, public Base2 {
+  public:
+   int fields;
+   virtual void base1Do() {..} // override
+   virtual void base2Do() {..} // override
+   virtual void childDo() {..} // implement own method
+}
+</code></pre>
+
+<p>produces in a naive implementation:</p>
+
+<pre><code>unifiedvptr          // vptr for object as type Child (ie contains an entry for every method available in Child) 
+  base1vptr_updated  // vptr for object as type Base1 - pointing to overridden impls in Child where they exist
+  base1fields        // fields inherited from base1
+  base2vptr_updated  // vptr for object as type Base2 (contains entries only for methods available in Base2)
+  base2fields        // fields inherited from Base2
+childfields          // fields defined in type Child
+</code></pre>
+
+<p>however the <code>[Base1 &lt;- Child]</code> inheritance chain can be considered a case of “simple single inheritance” as described earlier, and thus the Base1vptr_updated can be omitted; its contents are identical to the first N entries of the unifiedvptr table. The Base2vptr_updated table cannot be omitted as its function#0 is not the same as function#0 in the unified table, ie the offsets need tweaking. This results in an “optimised” representation of:</p>
+
+<pre><code>unifiedvptr
+Base1fields
+Base2vptr_updated
+Base2fields
+Childfields
+</code></pre>
+
+<p>Casting an object between type Child and Base1 is trivial, as in “simple single inheritance” described above: the pointer remains identical. Casting between type Child and Base2 is more complex: the result is a pointer to the address of Base2vptr_updated.</p>
+
+<p>Note that in this multiple-inheritance situation, one of the base types is considered the “primary” type and the “simple single inheritance” approach can be used for it (simplifying and optimising casting), while the others require a more complex implementation (embedding an extra vptr).  While the c++ standard does not (AFAIK) describe how to decide which of the types in a multiple-inheritance situation is considered the “primary” type, the standard approach is to simply choose the first in the list of ancestor types.</p>
+
+<p>In either case, after casting the referenced vptr points to a datastructure whose “type descriptor” points to a structure describing type Child, ie it is possible to know the “real original” type of the object. And in either case, this is followed by a table of function-pointers for the virtual methods on the type.</p>
+
+<p>In the unified vptr method table:</p>
+
+<ul>
+  <li>For methods defined in Base1 and overridden in Child, the corresponding entry simply points to the implementation from Child.</li>
+  <li>For methods defined in Base1 and not overridden in Child, the corresponding entry simply points to the implementation from Base1.</li>
+  <li>For methods defined in Base2 and overridden in Child, the corresponding entry simply points to the implementation from Child.</li>
+  <li>However for methods defined in Base2 and not overridden in Child, the entry needs to point to a <em>thunk</em>.</li>
+</ul>
+
+<p>The “thunk” is some code that adds a constant to the “this” pointer before invoking the implementation from Base2. This is necessary because the compiled code from Base2 expects that field “field2” can be found at a fixed offset from the “this” pointer, but the offset in a Child instance is larger (due to the presence of other inherited fields before it). In effect, an implicit <em>cast to type Base2</em> needs to be inserted before invoking the original implementation from type Base2.  The offset for “Base2 within Child” can be found in the datastructure pointed to by Base2vptr (the “offset to top of object” mentioned earlier), making it possible to <em>downcast</em> again from Base2 to Child.</p>
+
+<p>The method table pointed to by Base2vptr has similar behaviour. It is used only <em>after</em> a cast has earlier been applied, ie the “this” pointer is pointing at Base2vptr, so:</p>
+
+<ul>
+  <li>For methods defined in Base2 and not overridden in Child, the corresponding entry simply points to the implementation from Base2; the “this” pointer is already appropriate for that code.</li>
+  <li>For methods defined in Base2 and overridden in Child, the corresponding entry points to a <em>thunk</em> which adjusts the “this” pointer back to point to the unifiedvptr (ie the real base of the Child instance) before invoking the implementation from Child. The relevant offset to appy to the “this” pointer can be found in the “offset to top of object” field. In effect, an implicit <em>upcast to type Child</em> needs to be inserted before calling the implementation from type Child.</li>
+</ul>
+
+<p>Code that invokes virtual methods on Child compiles to instructions that load the appropriate method via the unifiedvptr. The Base2vptr is only used after casting has been applied.</p>
+
+<p>This approach to representing objects means that each additional base class increases the size of an object by a pointer - a class with 20 direct base classes and <em>a single int field</em> will have <code>19*sizeof(void*)</code> bytes of <em>overhead</em> in each instance just to support the ability to cast it to its various base types. However a <em>deep</em> hierarchy (many indirect ancestors, ie an ancestor who has an ancestor who has an ancestor etc) is not a problem and requires only one pointer per <em>direct</em> ancestor; it is <em>wide</em> hierarchies (many direct ancestors) which has more impact on memory usage.</p>
+
+<p>Some OO languages use a different approach called “dictionary passing”, in which a reference to an abstract type is actually a (typedescriptor, objectdata) pair of pointers.  In the C++ “vtable” approach, a reference to an abstract type is instead a single pointer to an address holding a pointer to a typedescriptor (aka vtable) followed by the objectdata. The negative side of the vtable approach is that objects must have multiple vtables embedded in them, ie are larger than they need to be even when never cast to their base types. The dictionary-passing approach only pays the cost of the extra storage (vptr,value) for variables holding a <em>reference to abstract type</em> (including function parameters). On the other hand, in dictionary-passing languages, a “reference” will then be <code>sizeof(void*)x1</code> for concrete types and <code>sizeof(void*)x2</code> for abstract types which doesn’t work well when detailed control over memory layout is desired.</p>
+
+<p>An interesting issue arises in garbage-collected languages using the vtable approach: if an object is created and then cast to an ancestor type (ie a pointer into the middle of the object), and then the original reference is thrown away, the garbage-collector <em>must not</em> garbage-collect the instance. This means that the garbage-collector must recognise during its mark-and-sweep pass when a reference points into the <em>middle</em> of an object, and not throw that object away. Because that object is live, the garbage-collector must also follow references in members of the <em>whole</em> original object, even though it sees only a reference to a base type.</p>
+
+<h1 id="inheritance-of-interfaces">Inheritance of Interfaces</h1>
+
+<p>C++ does not directly have anything corresponding to a Java interface type (a pure definition of methods with no data-fields). However a standard abstract class definition in which no fields are defined is effectively the same thing.</p>
+
+<p>However the difference between “interfaces” (abstract classes with no fields) and other types makes little difference to the memory layout: they still require the “multiple inheritance” structure where all base classes except the “primary” one cause an extra vptr to be embedded in the object data.</p>
+
+<h1 id="destructors">Destructors</h1>
+
+<p>As mentioned <a href="http://www.codeguru.com/cpp/cpp/cpp_mfc/oop/article.php/c9989/Using-Interfaces-in-C.htm">here</a>, it is important in C++ for all base type definitions to have virtual destructors. Without this, casting a reference to its base type then calling <code>delete</code> on it will not call the destructor in the concrete type.</p>
+
+<p>The “freeing memory” step that is triggered by <code>delete</code> after invocation of any custom destructors always looks in the current vtable (which may not be the primary vtable for the object), and retrieves the “offset to start of object” from it. This is then subtracted from the current this-pointer to find the correct address to pass to <code>free()</code>.</p>
+
+<p>The “primary” (unified) vtable for the object will always have an “offset to start of object” value of zero.</p>
+
+<p>In the simple single inheritance case, there is at most one vtable and casting doesn’t ever actually change the value of the “this” pointer. Deleting the object can therefore call <code>free</code> directly on the “this” pointer.</p>
+
+<h1 id="pointer-comparisons">Pointer Comparisons</h1>
+
+<p>Interesting issue: A pointer to a Child instance and a pointer to the same object after casting to a base type should compare “equal” - ie the tweaking that a cast to “non-primary base type” does should be invisible. This can be achieved by the compiler by ensuring both sides of a pointer-comparison are <em>the same type</em>:</p>
+
+<pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+// insert class defs from earlier
+
+extern int main() {
+  Child* c = new Child();
+  Base2 *i = (Base2*) c;
+
+  // Demonstrate that variable i really does have a different value
+  void* vc = (void*) c;
+  void* vi = (void*) i;
+  if (vc != vi) {
+    cout &lt;&lt; "expected: void pointers are different\n";
+  } else {
+    cout &lt;&lt; "unexpected: void pointers are equal\n";
+  }
+
+  // This comparison should be true for obvious reasons
+  if (((Base2*) c) == i) {
+    cout &lt;&lt; "expected: explicit cast compared equal\n";
+  } else {
+    cout &lt;&lt; "unexpected: explicit cast comparison failed\n";
+  }
+
+  // Compiler must treat this comparison as if an implicit cast was present (the case above) rather
+  // than comparing the raw values as if they were void-pointers.
+  if (c == i) {
+    cout &lt;&lt; "expected: uncast pointers compared equal\n";
+  } else {
+    cout &lt;&lt; "unexpected: uncast pointer comparison failed\n";
+  }
+
+  return 0;
+}
+</code></pre>
+
+<h1 id="vptr-after-fields">vptr-after-fields</h1>
+
+<p>Some older variants of c++ compilers put the vptr <em>after</em> the fields. This had the advantage that an object’s layout is identical to a C struct with the same members. An object pointer can therefore be passed directly to a “c” function.</p>
+
+<p>With this approach, laying out fields “base class first” would result in the offset from the start of an object to the vtable varies depending on concrete type. A real instance of the base type would look like:</p>
+
+<pre><code>base-class-fields
+vptr
+</code></pre>
+
+<p>where the vptr is N bytes from the start of the object, while an instance of the subclass cast to the base type would look like:</p>
+
+<pre><code>base-class-fields
+subclass-fields
+vptr
+</code></pre>
+
+<p>where the vptr is N+M bytes from the start of the object. A function taking a <em>base type</em> as parameter and then invoking a virtual method would therefore be unable to find the vtable.</p>
+
+<p>I can only guess that the field layouts are reversed when such a strategy is used:</p>
+
+<pre><code>subclass-fields
+base-class-fields
+vptr
+</code></pre>
+
+<p>and that invoking a method defined in the base class passes a “this” pointer that points at the base-class-fields address.</p>
+
+<p>One disadvantage of the “vptr after fields” layout is that loading any function address from the vtable requires an extra add-operation (base + vptr-offset) to find the location of the vtable. With the “vptr first” approach described earlier, the offset between pointer-to-object and the vptr location is zero so the add is not needed.</p>
+
+<p>In any case, this approach appears to have fallen out of favour; current versions of g++ always place the vptr at the start of an object.</p>
+
+<h1 id="diamond-inheritance-virtual-inheritance">Diamond Inheritance (Virtual Inheritance)</h1>
+
+<p>In C++, it is possible for multiple base classes to have fields. It is also possible for the same base class to be inherited indirectly multiple times. This causes problems that are solved via the “virtual inheritance” mechanism. Java doesn’t have these problems as multiple-inheritance is restricted to <em>interfaces</em> only.</p>
+
+<p>The solution to this C++ issue is more complexity with multiple vtables. I’m not really motivated to understand that, as it doesn’t apply to other programming languages, and won’t discuss it here.</p>
+
+<h1 id="interface-dispatch-in-java">Interface Dispatch in Java</h1>
+
+<p>Java <a href="https://en.wikipedia.org/wiki/Java_bytecode">bytecode</a> has <a href="https://en.wikipedia.org/wiki/Java_bytecode_instruction_listings">several instructions</a> for invoking methods: invokestatic, invokevirtual, invokeinterface, invokespecial, invokedynamic.</p>
+
+<ul>
+  <li>invokestatic is simply a direct call to a non-virtual method on a target object.</li>
+  <li>invokevirtual is the “simple single inheritance” approach, where the method to invoke is on an ancestor <em>class</em> of the target object.</li>
+  <li>invokeinterface is for when the method to invoke is on an ancestor <em>interface</em> (the multiple-inheritance case).</li>
+</ul>
+
+<p>While a JVM can choose which concrete ways to perform such dispatching, it is expected that invokevirtual uses the same vtable approach that C++ does for “single simple inheritance”. The implementation of invokeinterface is far less clear - there are several possible ways of doing this; see the following publications for example:</p>
+
+<ul>
+  <li><a href="http://cgi.di.uoa.gr/~smaragd/521-10/dispatch.pdf">Interface Dispatch in Java</a></li>
+  <li><a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.21.7133">InvokeInterface Considered Harmless</a></li>
+</ul>
+
+<p>From the above information, it is quite likely that in JVMs, hash-table-driven approaches are used for dispatching invokeinterface calls rather than multiple vptrs. In other words the same “simple single inheritance” used by c++ is also used by Java for extending from non-interfaces, while inheritance from <em>interfaces</em> is instead handled via a hashmap-lookup at runtime (like dynamic-typed languages do) instead of the traditional c++ multiple-vptrs-with-thunks approach.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://www.informit.com/guides/content.aspx?g=cplusplus&amp;seqNum=195">Informit: c++ reference guide</a></li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Virtual_method_table">Wikipedia: virtual method table</a> - describes multiple inheritance case</li>
+  <li><a href="http://www.micheltriana.com/blog/2011/02/03/polymorphism-back-to-school">Triana: polymorphism back to school</a></li>
+  <li><a href="http://www.phpcompiler.org/articles/virtualinheritance.html">PHC: Virtual Inheritance</a></li>
+  <li><a href="http://stackoverflow.com/questions/1831635/vptr-virtual-tables/1831872#1831872">Stackoverflow/Rodriguez: Memory Layout of Derived and Base Object</a></li>
+  <li><a href="http://mentorembedded.github.io/cxx-abi/abi.html#vtable">MentorEmbedded: CXX ABI for Itanium: Virtual Table Layout</a></li>
+  <li><a href="http://www.learncpp.com/cpp-tutorial/125-the-virtual-table/">LearnCPP: The Virtual Table</a></li>
+  <li><a href="http://compilers.iecc.com/comparch/article/94-08-092">comp.compilers newsgroup: Memory Layouts of C++ classes</a></li>
+  <li><a href="http://compilers.iecc.com/comparch/article/99-12-035">Anton Ertl: reading list for OO dispatch</a></li>
+</ul>
+
+<p>The folling book is a good reference for c++ compiler design:</p>
+
+<ul>
+  <li>Design and Evolution of C++ - Stroustrup</li>
+</ul>
+
+<p>The following have been recommended by the above sites, though I don’t have access to any of these:</p>
+
+<ul>
+  <li>Inside the C++ object model - Lippmann</li>
+  <li>Compiler Design - Wilhelm and Maurer</li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/oo-layout/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

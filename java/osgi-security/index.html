@@ -1,0 +1,446 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - OSGi Security</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>OSGi Security</h1>
+    <aside>First published on: March 4, 2013</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/OSGi/'>OSGi</a></p>
+      <p><a href="/java/osgi-intro">(back to Osgi Introduction)</a></p>
+
+<h1 id="about-this-article--osgi-security">About This Article : OSGi Security</h1>
+
+<p>OSGi is a Java-specific framework that improves the way that Java classes interact within a single JVM. It provides the following features:</p>
+
+<ol>
+  <li>a modified Java classloader which provides fine-grained control over symbolic linking with other code in the same JVM;</li>
+  <li>a central service registry for decoupling callers of an interface from the interface implementation;</li>
+  <li>an enhanced version of the java.lang.SecurityManager (ConditionalPermissionAdmin);</li>
+  <li>a large set of standardized optional services for things like loading configuration-files, publishing events, exposing Java servlets, etc.</li>
+</ol>
+
+<p>This article provides some details about how item (3), the security extension, is implemented.</p>
+
+<p>For further information about OSGi in general, see:</p>
+
+<ul>
+  <li><a href="http://www.osgi.org/Technology/WhyOSGi">http://www.osgi.org/Technology/WhyOSGi</a></li>
+  <li><a href="http://www.osgi.org/Technology/WhatIsOSGi">http://www.osgi.org/Technology/WhatIsOSGi</a></li>
+</ul>
+
+<h1 id="osgi-security-features">OSGi Security Features</h1>
+
+<p>Java provides a security framework that allows a “security policy” to grant <em>permissions</em> (such as reading a file or opening a network connection) to specific code (eg classes from the jarfile loaded from a specific URL, or a class signed by a specific key).</p>
+
+<p>OSGi builds on the standard security model to add the following (which are explained more fully later):</p>
+
+<ul>
+  <li>A set of OSGi-specific permission types, such as one that grants the right to register an OSGi service or “get” an OSGi service from the service registry;</li>
+  <li>The ability to dynamically modify permissions at runtime. This includes the ability to specify permissions via code rather than a textual config file;</li>
+  <li>A flexible “predicate-based” approach to determining which rules are applicable to which ProtectionDomain. This is much more powerful than the standard
+Java security policy which can only grant rights based on jarfile URL or class signature. A few standard predicates (conditions) are provided, including selecting
+rules based upon bundle symbolic-name;</li>
+  <li>Support for bundle “local permissions” policies with optional further constraints (“DENY” operations).</li>
+</ul>
+
+<p>Most of this functionality is accessed via the OSGi ConditionalPermissionAdmin service (which is part of the OSGi core and can be obtained from the OSGi service registry like any OSGi service). The ConditionalPermissionAdmin API replaces the earlier (now obsolete) “PermissionAdmin” API.</p>
+
+<h1 id="osgi-permission-types">OSGi Permission Types</h1>
+
+<p>The need for OSGi-specific permission types are reasonably clear, and the implementation is also fairly simple. Extensions are:</p>
+
+<ul>
+  <li>AdaptPermission : complex; see OSGi docs</li>
+  <li>AdminPermission : ability to access OSGi administration operations such as starting or stopping a bundle</li>
+  <li>BundlePermission : ability to register a bundle or load bundle fragments into a bundle</li>
+  <li>CapabilityPermission : ??</li>
+  <li>PackagePermission : ability to import or export a java package with a specific name</li>
+  <li>ServicePermission : ability to register or get a service with specific service properties</li>
+</ul>
+
+<h1 id="runtime-permission-modification">Runtime Permission Modification</h1>
+
+<p>OSGi allows runtime modification of the current permission rules. This is partly needed because of the dynamic nature of an OSGi environment; users are allowed to install and uninstall bundles at runtime, some of which may not have existed at the time the overall system was developed. Security policy therefore needs to be much more flexible. In particular, one of the use-cases for OSGi is that new bundles can be installed into a running system, and that system administrators should be able to add extra security constraints on such bundles without a system restart. Quite how useful this is is questionable; systems with high uptime requirements are typically clustered and therefore individual systems within the cluster should be restartable without causing outages anyway. However as it happens, support for dynamic updates is not particularly complex.</p>
+
+<p>Dynamic permissions are also useful when dealing with dynamic <em>authorization services</em>, eg identity cards that can be added/removed or when connections to authentication servers can come and go.</p>
+
+<p>The security rules can be updated as follows:</p>
+
+<pre><code>   // Get hold of OSGi ConditionalPermissionAdmin service...
+   ConditionalPermissionAdmin conPermAdmin = (ConditionalPermissionAdmin) context.getService(serviceRef);
+
+   // Create new "atomic rules update" object
+   ConditionalPermissionUpdate update = conPermAdmin.newConditionalPermissionUpdate();
+
+   // Get list of existing permissions (normally null)
+   List&lt;ConditionalPermissionInfo&gt; perms = update.getConditionalPermissionInfos();
+
+   // Optional : save existing permissions (usually empty, but just in case..)
+   List&lt;ConditionalPermissionInfo&gt; oldPermissions = new ArrayList&lt;ConditionalPermissionInfo&gt;(perms);
+
+   // Optional: clear any existing permissions
+   update.getConditionalPermissionInfos().clear();
+
+   // Add any desired rules..
+   perms.add(...)
+   perms.add(...)
+
+   // And push rules held in update.conditionalPermissionInfos into the system as an atomic operation
+   update.commit();
+</code></pre>
+
+<p>When an operation is performed which triggers a security-check, the existing rules are processed in the order they were registered. If a rule’s condition matches the calling bundle then the contained permissions are checked. If a nested permission matches the permission being checked for then the operation is <em>immediately</em> allowed or denied (and no further rules are checked).</p>
+
+<h1 id="selecting-permissions-with-conditions">Selecting Permissions with Conditions</h1>
+
+<p>OSGi clearly needs to extend the basic java url-or-signature test to determine which rules apply to which code. Rather than just hard-code the couple of extra OSGi-specific options that are definitely needed, a general-purpose extensible approach was developed that allows Condition classes to return a boolean state indicating which rules apply to which protection-domains.</p>
+
+<p>Each “permission-info” (ie rule) object is composed of the following parts:</p>
+
+<ul>
+  <li>a type (ALLOW or DENY);</li>
+  <li>an optional Condition class specifying <em>who</em> the rule applies to, eg “bundles with name X signed with signature Y”.
+this is used to decide whether this rule applies to a particular caller;</li>
+  <li>one or more permissions specifying <em>what</em> is allowed or denied, eg “get service S” or “register service P”;</li>
+  <li>a human-readable description (for debugging, or for display via a security-management user interface).</li>
+</ul>
+
+<p>The (optional) condition is specified as a <em>classname</em> and a list of arguments. The class must have a static <code>getCondition()</code> method that takes a Bundle
+and a ConditionInfo object as parameter and returns a Condition object (ie act as a factory), or otherwise must implement Condition itself. The former
+is more usual, and the “factory” method in fact normally does the work itself and just returns a Condition representing “true” or “false”. In either
+case, the only information the Condition class has access to is the calling bundle and the static “parameters” of the ConditionInfo object, ie the
+properties set on the original rule definition. In particular, it does <em>not</em> have information about what operation is being performed. See the
+<a href="http://www.osgi.org/javadoc/r4v43/core/index.html?org/osgi/service/condpermadmin/ConditionalPermissionAdmin.html">OSGi javadoc</a> for further details</p>
+
+<p>Rules can be defined via a string:</p>
+
+<pre><code>   // grant self all permissions
+   String permTemplate = 
+       "ALLOW {" +;
+       "[ org.osgi.service.condpermadmin.BundleLocationCondition  \"%s\" ]" +
+       "( java.security.AllPermission \"*\" \"*\" )" +
+       "} \"Management Agent\"";
+
+   String permStr = String.format(permTemplate, bundleContext.getBundle().getBundleLocation());
+   ConditionalPermissionInfo p1 = conPermAdmin.newConditionalPermissionInfo(permStr);
+   perms.add(p1);
+</code></pre>
+
+<p>The <code>[...]</code> part is the <em>condition</em>, and specifies a condition <em>class</em> together with an argument to that condition (the jarfile the current
+bundle was loaded from).</p>
+
+<p>The “(…)” part is a permission to be granted to callers matching the condition; a Permission object is constructed using that classname and arguments, and
+its <code>implies</code> method is invoked passing the permission object representing the attempted operation being checked; if this returns true then the operation is
+immediately permitted or denied. There can be multiple permissions guarded by a single Condition.</p>
+
+<p>Permissions can also be defined programmatically:</p>
+
+<pre><code>  // Create zero or more ConditionInfo objects consisting of a class-name and arguments
+  ConditionInfo condition = new ConditionInfo(BundleLocationCondition.class.getName(), new String[] {someBundle.getLocation()});
+
+  // Create an array of the ConditionInfo objects
+  ConditionInfo conditions = new ConditionInfo[] {condition};
+
+  // Create one or more PermissionInfo objects consisting of a class-name and arguments
+  PermissionInfo perm1 = new PermissionInfo(FilePermission.class.getName(), "/some/path", "read");
+  PermissionInfo perm2 = new PermissionInfo(FilePermission.class.getName(), "/other/path", "read,write");
+
+  // Create an array of the PermissionInfo objects
+  PermissionInfo[] permissions = new PermissionInfo[] {perm1, perm2};
+
+  // And create the ConditionalPermissionInfo object which can be added to the "atomic update" object..
+  return admin.newConditionalPermissionInfo(description, conditions, permissions, ConditionalPermissionInfo.ALLOW);
+</code></pre>
+
+<p>The programmatic API for building security rules lends itself well to the “builder pattern” if desired.</p>
+
+<p>It is reasonably simple to add custom Condition classes that select rule-sets based on other features. Note however that such custom Condition classes cannot be loaded from a normal bundle; their classpath location needs special treatment. See the OSGi documentation for details.</p>
+
+<p>One of the standard conditions is BundleLocationCondition; the current location of a bundle is is not a very reliable thing to base a security policy on, and using a signature is a much better approach. However “bundle location” can be quite useful for setting dynamic rules at runtime, ie authenticate a bundle via some process and then dynamically set up rules based on its current location.</p>
+
+<h1 id="bundle-local-permissions">Bundle Local Permissions</h1>
+
+<p>OSGi bundles can include a “local permissions” policy definition which is the set of permissions the developer of the bundle recommends for full functionality. The standard Java security checks are applied first (ie those from the JVM-wide static security policy). OSGi then checks the bundle permissions, and if they fail then the operation fails. OSGi then checks the “global” permissions configured via the ConditionalPermissionAdmin service (in the order the rules are defined) until one allows or denies the operation. If no rule matches, then the operation is denied, ie the “deny unless allowed” approach is still followed in the end.</p>
+
+<p>The “system integrator” can use the ability of OSGi to dynamically change security rules to add restrictions on top of the bundle’s “local permissions”, which has the effect of <em>partially</em> granting the requested permissions.</p>
+
+<p>The concept of bundle local permissions is somewhat similar to the Android Permission Model for “apps” running on the Android operating system: when an app is installed, the user is informed about the permissions it requests. However at the moment, standard Android systems offer just the option to “accept” or “reject” the entire app; with OSGi the permissions can be fine-tuned.</p>
+
+<h1 id="composing-security-policies-deny-operations">Composing Security Policies (DENY operations)</h1>
+
+<p>The standard Java security framework take the approach of “denied unless explicitly granted”, ie if security is enabled then all secure operations provided by the JDK are forbidden (a SecurityException is thrown) unless the current policy explicitly <em>grants</em> a matching permission. This is a very safe approach; unfortunately it makes it impossible to have a security system running on multiple <em>layers</em>; if a “lower layer” does not grant a right, then the upper layer can never do so, and if a “lower layer” grants a right then without a DENY operation, an upper layer can never forbid it.</p>
+
+<p>OSGi security however is built as a layered system : the lowest layer is native Java security with a static policy; the next layer are the “ConditionalPermissionAdmin” rules and bundle local permissions are effectively a third layer. The native security policy has no support for things like dynamic rules or conditions (including conditions based on bundle-location). To make this approach work, it is therefore necessary to configure the lowest (native) security layer with very liberal rules (allowing most operations) and then for the next layer (ConditionalPermissionAdmin) to be able to <em>take away</em> rights granted by the lower level. The ability to DENY rights rather than just <em>grant</em> them isn’t the best approach from a purist security viewpoint, but cannot be avoided in a layered system.</p>
+
+<p>Each OSGi rule therefore can be labelled as ALLOW or DENY, and if the condition and permission match then the operation is immediately allowed or denied. If the end of the rule-list is reached, then a security-exception is thrown, ie the behaviour is still “deny unless allowed”.</p>
+
+<h1 id="bundle-local-permissions-revisited">Bundle Local Permissions Revisited</h1>
+
+<p>Now that the concept of security layers and ALLOW/DENY have been introduced, it is worth reviewing how bundle local permissions are processed.</p>
+
+<p>At runtime, each time some code invokes a method which does a security-check, the security system looks at the classes on the stack, and asks the ProtectionDomain associated with each class whether it has the required permission (see later for details). The default behaviour is first to check whether the “bundle local policy” requests that permission - if not then the operation is rejected. If that passes, then the “global” policy is checked to see if there are any restrictions on top of the bundle’s requested policy - ie if the system integrator decided not to grant the bundle the full set of rights it requested. This approach is reasonably efficient - checking the bundle’s requested rights can be optimised because they are static. However in order for the “global” policy to be able to place additional limits on a bundle, it is necessary for the global policy to support “DENY” style operations rather than the standard Java approach of “denied unless explicitly granted”.</p>
+
+<p>When a bundle requests certain rights (eg network access and file-system access to /tmp) this should be the <em>maximum</em> set of rights the bundle needs. Having a bundle volunteer to restrict itself is rather like the behaviour of some Unix programs which deliberately “give up capabilities”; it ensures that even if the code has a bug that can be exploited to make the bundle do something it wasn’t intended to do, a full compromise of the overall system may fail because the bundle has deliberately not asked for rights it does not need. It is reasonable to then add extra site-specific constraints on top of the bundle’s “local permissions”. For example, a bundle that performs database access may need to specify “generic network access” to be able to access whatever database is specified in the configuration file; the system integrator may then further restrict network access to only the host/port on which the database is actually running in a particular system, limiting potential damage from a subverted bundle even further.</p>
+
+<p>An alternate view of the above is to imagine the “system integrator” specifying that most of the rights requested by a bundle be granted, “but not that one”. This is equally a “DENY” operation, preventing a specific right becoming part of the overall policy.</p>
+
+<p>The DENY approach to security should be used only in the above scenario of <em>limiting</em> rights from a bundle’s local permissions. In an open-ended system like OSGi where any bundle can later be loaded into an existing system, explicitly denying known bundles certain rights is not a safe approach.</p>
+
+<h1 id="the-standard-java-security-manager-and-access-controller--a-quick-review">The Standard Java Security Manager and Access Controller : a Quick Review</h1>
+
+<p>To understand how OSGi’s security system is implemented, it is important to first understand the standard Java security mechanism. This section gives a brief recap (which you can skip over if you’re a security guru).</p>
+
+<h2 id="securitymanager-accesscontroller-and-protectiondomains">SecurityManager, AccessController and ProtectionDomains</h2>
+
+<p>The Java standard library is littered with code like</p>
+
+<pre><code>  Permission p = new SomePermissionType(someparams);
+  System.getSecurityManager().checkPermission(p);
+</code></pre>
+
+<p>The currently installed jvm-wide security-manager object then determines if all code in the current call-stack has permission to do whatever operation object “p” describes.</p>
+
+<p>The security manager implementation can be overridden in any Java application. However the standard implementation simply delegates all its methods to the <code>AccessController.checkPermission()</code> method. There are many many operation-specific check methods on SecurityManager but they are almost all simply convenience methods that delegate to method <code>SecurityManager.checkPermission(Permission)</code> with an appropriate Permission object, and that method forwards to <code>AccessController.checkPermission</code>.</p>
+
+<p>The AccessController class implements security by verifying that the ProtectionDomain associated with each class in the current call-stack has the specified permission.</p>
+
+<p>Java classes are of course always loaded by some class-loader. When the class-loader first loads the class, it adds a reference from the Class object to some ProtectionDomain object that represents the “source” of that code. Protection Domains are the things that are granted or denied rights; all classes associated with a protection domain have the same permissions.</p>
+
+<p>Quite how Protection Domains are created, and how a ClassLoader decides which domain to associate a Class with depends upon the ClassLoader implementation. However in practice there is usually a separate ProtectionDomain per jarfile, with a URL property specifying the original location of the jarfile (whether a local file or a path on a remote server), and the cryptographic signatures within the jarfile. Technically, signatures apply to specific classes within a jarfile, so it is possible that a single jarfile has to be represented by multiple ProtectionDomain objects if different classes within the jar are signed by different keys.</p>
+
+<p>Classes loaded via the “bootstrap” classloader (eg classes loaded from jars in <code>$JDK_HOME/lib</code>) always have a “null” ProtectionDomain; JDK classes always have all access rights.</p>
+
+<p>The standard Java SecurityManager supports reading a “policy file” on startup which defines the permissions granted to each ProtectionDomain. In this model, if any policy file exists then <em>all</em> permissions for <em>all</em> code are denied by default, and a call to checkPermission() succeeds only if each class present in the callstack has an associated ProtectionDomain object which matches a rule in the policy file which grants a Permission which matches the requested one.</p>
+
+<p>[Q: what is responsible for reading the policy file and initialising the ProtectionDomain objects? SecurityManager or AccessController or something else?]</p>
+
+<h2 id="the-accesscontrollerdoprivileged-method">The AccessController.doPrivileged method</h2>
+
+<p>Sometimes a java library wishes to provide a low-security-risk service to callers which it internally implements by calling more generic (and therefore more dangerous) lower-level APIs. In this situation, it should carefully check the inputs it receives from its callers, and then start a “doPrivileged” block within which it invokes the lower-level functionality. Code using doPrivileged is effectively asserting that it has carefully checked its inputs, and that it is not passing on any “unsanitised” caller parameters, nor will it pass back any return objects that expose internal state. Or in other words, code using doPrivileged() is asserting that it is a kind of “firewall”, and that if <em>it</em> is trusted, then the call should be allowed regardless of who the calling code is.</p>
+
+<p>If a user or application trusts the provider of the above library (or has checked the code), a security policy can then grant <em>just that library</em> the right to make those dangerous calls even when the calling code higher up on the callstack normally would not have the right.</p>
+
+<p>To support this “doPrivileged” feature, method <code>java.security.AccessController.checkPermission</code> somehow “marks” the callstack, so that all classes “above” that point in the callstack are ignored when doing security checks</p>
+
+<h2 id="simplifying-the-call-stack">Simplifying the Call Stack</h2>
+
+<p>When performing a security check, AccessController first looks at all classes on the stack (stopping at a doPrivileged block if any), and builds a corresponding set of ProtectionDomain objects. The set is usually fairly small; each ProtectionDomain needs to be checked only once. It doesn’t matter what the exact methods in the callstack are, or even what classes they are on; the only important thing is which ProtectionDomains those classes belong to.</p>
+
+<p>Finally, AccessController asks each ProtectionDomain whether it has been granted a permission matching the specified permission parameter. If <em>any</em> ProtectionDomain does not explicitly have that permission, then access is refused and an exception is thrown.</p>
+
+<p>ProtectionDomain objects are only ever created via ClassLoader objects and ClassLoaders are implicitly trusted, ie if code has the right to create its own ClassLoader instances, then it can create corresponding PermissionDomain objects which grant all rights to the classes it loads.</p>
+
+<h2 id="standard-security-limitations">Standard Security Limitations</h2>
+
+<p>One important feature of the AccessController is that permissions are always <em>granted</em> and never <em>denied</em>. If you need to grant access to something for all code <em>except</em> something specific, that simply isn’t supported. This follows the security principle of “denied unless explicitly allowed” and is the safest approach; there is an infinite amount of code out there, and to deny access to just <em>specific</em> code while allowing unknown code to do it is just bad security.</p>
+
+<p>ProtectionDomains are informed of the permissions they have when they are constructed, and use this static data in their <code>ProtectionDomain.implies(Permission)</code> method to decide whether to throw a security exception or not. Because this data is static, the “security policy” which is the source of these permissions must already have been initialised before the ProtectionDomain was created (ie before any class was loaded from the associated jarfile). However Java1.4 added the ability for a ProtectionDomain to delegate to the <code>Policy.implies(ProtectionDomain, Permission)</code> method of “the currently installed Policy instance” (which is jvm-wide). It is therefore possible (with some effort) for security rules to be dynamic while using the standard ProtectionDomain implementations.</p>
+
+<h1 id="osgi-security-implementation">OSGi security implementation</h1>
+
+<p>OSGi uses custom classloaders to load code from bundles (see earlier article). These classloaders create a dedicated ProtectionDomain object for each bundle, and ensure the Class objects it creates point to the protection domain of the bundle the class was loaded from. This then automatically means that the OSGi ProtectionDomain objects are the ones responsible for determining whether code from a specific OSGi bundle is allowed to perform an action (ie whether checkPermission(p) will be allowed).</p>
+
+<p>OSGi’s ConditionalPermissionAdmin module then communicates with the ProtectionDomain objects to configure rights.</p>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>Some parts of the OSGi specification state that OSGi implementations will replace the SecurityManager object (ie the object returned by System.getSecurityManager). This appears to be an obsolete approach; both Felix and Equinox implement the OSGi security extensions via custom PermissionDomains rather than a custom SecurityManager.</p>
+
+<p>The OSGi security specification also states that it is necessary for OSGi to be started with a policy that initially grants all rights to all code. Given that OSGi implementations no longer need to replace the SecurityManager, this may no longer be true.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+    <p><a href="http://wiki.osgi.org/wiki/Main_Page">OSGi Wiki</a></p>
+  </li>
+  <li>
+    <p><a href="http://www.osgi.org/javadoc/r4v42/">The OSGi core r4.2 javadocs</a></p>
+  </li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/osgi-security/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

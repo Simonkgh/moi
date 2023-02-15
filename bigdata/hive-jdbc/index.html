@@ -1,0 +1,268 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Hive, JDBC and Array-typed Columns</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Hive, JDBC and Array-typed Columns</h1>
+    <aside>First published on: September 20, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>Relational databases traditionally support only primitive types for columns (int, string, date, etc). The SQL1999 standard does define an <em>array</em> type, ie allows a single column in a relational table to hold a sequence of values, class <code>java.sql.Types</code> defines an ARRAY type, and class <code>java.sql.ResultSet</code> offers a method <code>getArray(int columnNum)</code>. However in practice, very few relational databases ever implemented arrays (PostgreSQL being a notable exception), as it is actually a kind of “denormalization” and the same relation can be achieved by storing the values in a separate table with an appropriate common selector value. JDBC drivers for such databases usually just throw an <code>UnsupportedOperationException</code> if <code>ResultSet.getArray</code> is invoked.</p>
+
+<p>Although relational DBs don’t generally provide arrays, “big data” databases often support columns which hold <em>arrays</em>. In particular the <a href="/bigdata/hive">Hive database</a> supports array-typed columns, and I wanted to find out if such columns could be accessed via the JDBC driver for Hive.</p>
+
+<p>Hive is available as:</p>
+
+<ul>
+  <li>a library which can be embedded into a Java application; the library offers an API for SQL-like operations which it implements by launching tasks in an external Mesos, Yarn or Spark cluster</li>
+  <li>a standalone server (or cluster of servers) called <code>hiveserver2</code> which can be sent SQL-like requests over a network connection using its internal (thrift-based) network protocol.</li>
+</ul>
+
+<p>Here we are talking about <code>hiveserver2</code> and the associated JDBC driver which communicates with it using the server’s internal network protocol.</p>
+
+<h1 id="connecting-to-hive-with-jdbc">Connecting to Hive with JDBC</h1>
+
+<p>The specific hiveserver2 instance I was connecting to was secured with both SSL and Kerberos, and running in “high availability” mode where the addresses of the individual servers are held in Zookeeper. The connection URL passed to the JDBC driver therefore looked like:</p>
+
+<pre><code>jdbc:hive2://zkhost:zkport/;ssl=true;transportMode=http;serviceDiscoveryMode=zooKeeper;principal=hive/_HOST@PRODUCTION.LOCAL
+</code></pre>
+
+<p>Note that the principal field identifies the Kerberos principal for the service <em>being connected to</em>. The local Kerberos TGT (ticket-granting ticket) is then used to create a service-ticket <em>from</em> the local user <em>to</em> the specified service principal. The local user (as specified in the current Kerberos ticket or the JAAS config file) must have rights to access that service.</p>
+
+<p>I did initially encounter some problems authenticating with Kerberos; the solution <a href="/java/jaas-kerberos">can be found here</a>.</p>
+
+<p>The Hive version I needed to connect to was v1.2.1 (bundled in the Hortonworks Data Platform v2.5.3) - which is now somewhat old. Drivers for Hive earlier than v2.0 are unfortunately not in the central Maven repositories; they are available:</p>
+
+<ul>
+  <li>from a Hortonworks Maven repository - but unfortunately only over http which is not desirable for security reasons</li>
+  <li>from a Spring repository (https://repo.spring.io/plugins-release/)</li>
+</ul>
+
+<h1 id="using-method-getarray">Using method getArray</h1>
+
+<p>Testing showed that:</p>
+
+<ul>
+  <li>
+    <p>Hive JDBC driver version <code>1.2.1000.2.4.2.10-1</code> does not support optional JDBC method <code>getArray()</code>; that throws an UnsupportedOperationException. Calling <code>getObject</code> on an array-typed column returns a single string (and yes, it really is a plain string) which holds joined elements in form “<code>[a,b,c]</code>”. See later for more information on this..</p>
+  </li>
+  <li>
+    <p>Hive JDBC driver version <code>2.0.1</code> also works with Hive 1.2.1 (yay). But still does not support getArray (boo).</p>
+  </li>
+  <li>
+    <p>Hive JDBC driver version <code>2.1.0</code> does not work with Hive 1.2.1 (“required field client_protocol is unset”).</p>
+  </li>
+</ul>
+
+<h1 id="using-json">Using JSON</h1>
+
+<p>Although using method <code>getArray</code> was a failure, I did eventually notice that the <a href="https://cwiki.apache.org/confluence/display/Hive/HiveServer2+Clients#HiveServer2Clients-JDBC">Hive wiki page</a> states that the string which gets returned for array fields is actually JSON. So array fields <em>can</em> be read - by fetching them as strings and then passing that string to a JSON deserializer. That is actually a reasonably elegant solution, as it also works for <em>map</em> fields and <em>struct</em> fields - for which there are no corresponding method in the JDBC driver API.</p>
+
+<h1 id="beeline">Beeline</h1>
+
+<p>Just for reference, here is the URL for connecting to the same hiveserver2 instance via the <code>beeline</code> Hive interactive console (which uses JDBC internally):</p>
+
+<pre><code>beeline -u "jdbc:hive2://zkhost:zkport/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2;\
+  ssl=true;transportMode=http;httpPath=cliservice;principal=hive/_HOST@PRODUCTION.LOCAL?tez.queue.name=..."
+</code></pre>
+
+<h1 id="creating-test-data">Creating Test Data</h1>
+
+<p>Command <code>insert into .. values (...)</code> in Hive currently does not support UDFs in the values list - including the functions that create <em>array</em> and <em>map</em> objects. So inserting values into such fields interactively from a Hive commandline tool is tricky. The solution is:</p>
+
+<pre><code>-- do once
+create table dummy (s string);
+insert into table dummy values ('one');
+
+-- now use repeatedly
+create table tmp (f1 string, f2 array&lt;string&gt;, f3 int);
+insert into tmp select 'blah', array('s1', 's2', 's3'), 12 from dummy;
+</code></pre>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/hive-jdbc/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

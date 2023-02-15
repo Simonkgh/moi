@@ -1,0 +1,239 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - MemSQL Database Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>MemSQL Database Overview</h1>
+    <aside>First published on: September 2, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<p>I stumbled across the (proprietary) <a href="https://www.memsql.com/">MemSQL</a> database while reading the <a href="https://dataengweekly.com/index.html">Data Engineering Weekly News</a>, due to this article on <a href="https://engineering.pandora.com/using-memsql-at-pandora-79a86cb09b57">Pandora building dashboards with MemSQL</a>. I found the description interesting, and did a small amount of additional research; this article is simply the resulting notes.</p>
+
+<p>MemSQL is basically a relational database, supporting the usual concepts of tables, rows and columns. It is distributed, ie can be scaled out horizontally to many nodes.</p>
+
+<p>While the “mem” part of the name suggests this is a purely in-memory database, that isn’t entirely true. A table can be declared as “row-oriented” or “column-oriented”; row-oriented tables are persisted to disk, but must be completely loaded into memory in order to be queryable - ie the cluster must have sufficient RAM to hold all (active) row-oriented data. Column-oriented tables are persisted to disk, and do not need to be completely read into memory. A MemSQL table can also be configured to be in-memory-only, ie not persisted.</p>
+
+<p>Row-oriented tables can be used effectively for “operational” tasks, ie heavy read/write loads which affect just a few rows at a time. Examples are call-center systems, shopping carts.</p>
+
+<p>Column-oriented tables can be used effectively for “analytic” tasks over very large datasets, ie queries which scan large numbers of rows. Examples are reporting and compliance tasks. Row-oriented tables are also performant for analytics tasks in MemSQL (unlike other DBs), but are limited to datasets that fit into memory.</p>
+
+<p>Databases which use column-oriented storage are often not particularly good at streaming ingest or updates. MemSQL solves this by combining the two modes; changes to a column-oriented table are buffered in-memory using the row-oriented approach and only occasionally flushed to disk.</p>
+
+<p>As with most databases, write-ahead-logs are used for error recovery.</p>
+
+<p>As with most distributed databases, there is no support for foreign-key constraints, or uniqueness constraints except on the primary key.</p>
+
+<p>Other notes:</p>
+
+<ul>
+  <li>almost complete standard SQL support, including grouping/aggregation/windowing functions</li>
+  <li>clusters in impala-style: aggregator and leaf nodes</li>
+  <li>data sharded using hash(column+) where the column is specified at table definition (default: primary key)</li>
+  <li>data replicated to ONE other node IFF system set to “high availability”; sync via “log shipping”</li>
+  <li>supports “reference tables” which are replicated to every node</li>
+  <li>indexes are supported on rowstore tables (primary and multiple secondary indexes)</li>
+  <li>indexes are not supported on columnstore tables</li>
+  <li>native Kafka support, ie can ingest data directly from a Kafka topic</li>
+  <li>can be accessed using MySQL client libraries (eg JDBC driver)</li>
+  <li>works well with Spark</li>
+  <li>requires Linux as host OS</li>
+</ul>
+
+<p>In short, it looks rather like a combination of Cassandra and Kudu - or like Impala + Kudu.</p>
+
+<p>It would be interesting to compare performance of MemSQL with <a href="/bigdata/kudu">Kudu</a>.</p>
+
+<p>The MySQL driver compatibility looks useful - that opens the door to using a lot of standard reporting software.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://engineering.pandora.com/using-memsql-at-pandora-79a86cb09b57">Pandora: Using MemSQL</a></li>
+  <li><a href="https://docs.memsql.com/introduction/latest/how-memsql-works/">MemSQL: How MemSQL Works</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/memsql/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

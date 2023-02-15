@@ -1,0 +1,425 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - UI Libraries in Java</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>UI Libraries in Java</h1>
+    <aside>First published on: December 19, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>There are many different ways for a Java application to create a (non-web) graphical interface; the primary ones are:</p>
+
+<ul>
+  <li>AWT</li>
+  <li>Swing</li>
+  <li>SWT/JFace</li>
+  <li>JavaFX</li>
+  <li>GTK+ and Qt bindings</li>
+</ul>
+
+<p>This article looks briefly at the differences between these approaches.</p>
+
+<h1 id="low-level-graphics">Low-level Graphics</h1>
+
+<p>Operating systems generally support graphics in one of the following ways:</p>
+
+<ol>
+  <li>the kernel provides the absolute minimum needed for user-space to perform graphics;</li>
+  <li>the kernel provides moderate hooks; or</li>
+  <li>the kernel provides basic graphical rendering primitives directly;</li>
+</ol>
+
+<p>The Linux kernel originally supported category (1) only; it exposes raw kernel memory and machine registers via file <code>/dev/mem</code> which an X server implementation running in userspace as <em>root</em> can use to directly read/write the control registers of whichever graphics card the machine has.</p>
+
+<p>The Linux DRM (Direct Rendering Manager) framework falls into category (2); the DRM API is a moderately sophisticated way of communicating with graphics devices. However it stops short of providing specific “draw a line” type operations; the kernel just manages <em>modesetting</em> and the transfer of buffers of GPU-specific instructions from userspace to the graphics driver. Card-specific userspace code is still required to generate the appropriate card-specific drawing operations. The DRM infrastructure can be used for rendering both 2D and 3D graphics.</p>
+
+<p>Linux framebuffer drivers fall at least partially into category (3). They run within the kernel and provide an API to userspace for operations including rendering filled rectangles and performing “bitblits”. However graphics on Linux systems is generally not rendered via framebuffer drivers, as they are very limited and have insufficient performance - and are limited to 2D operations only.</p>
+
+<p>Microsoft Windows NT and later fall into category (3); the <a href="https://en.wikipedia.org/wiki/Graphics_Device_Interface#GDI.2B">GDI</a> API which provides <em>primitive rendering operations</em> is implemented within the kernel itself.</p>
+
+<p>No operating system (as far as I know) has ever supported <em>user interface widgets</em> as part of the operating system kernel; such code is always in userspace libraries which generate lower-level drawing commands (lines, etc) for execution either by the kernel (MS-Windows), or by additional userspace code.</p>
+
+<p>Even the X display server does not offer “widgets”, just drawing commands. X client applications</p>
+
+<h1 id="native-widget-toolkits-and-wrapper-toolkits">Native Widget Toolkits and Wrapper Toolkits</h1>
+
+<p>Most applications are not willing to “draw” their interfaces directly with low-level graphics operations (draw line, draw text, etc). There are various <em>libraries</em> of <a href="https://en.wikipedia.org/wiki/Widget_toolkit">widgets</a> (aka widget toolkits) that can be used to draw things such as menubars, labels, buttons, combo-boxes - and to simplify the rendering of application content into these widgets and to simplify the handling of user interaction with such widgets.</p>
+
+<p>Examples of such libraries are:</p>
+
+<ul>
+  <li>the original <a href="https://en.wikipedia.org/wiki/Windows_API">MS-Windows user interface libraries</a> (comctl32.dll, etc).</li>
+  <li><a href="https://en.wikipedia.org/wiki/Windows_Presentation_Foundation">Windows Presentation Foundation</a></li>
+  <li>Motif - the original widget library for X11 (and the open-source reimplementation, Lesstif)</li>
+  <li>GTK+ - best known as the widget library used by the Gnome desktop, but also used by other software (Gimp, Cinnamon, etc)</li>
+  <li>Qt - best known as the widget library used by the KDE desktop</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/FLTK">FLTK</a> - a “light-weight and portable” widget library</li>
+  <li>Elementary - part of the <a href="https://en.wikipedia.org/wiki/Enlightenment_Foundation_Libraries">Enlightenment Foundation Libraries</a> which are used by the Enlightenment desktop.</li>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Tk_%28software%29">Tk</a> - most commonly used from the Tcl language (Tcl/Tk)</li>
+  <li>Swing - a pure-java widget library (see later)</li>
+  <li>JavaFX - another pure-java widget library (see later)</li>
+</ul>
+
+<p>On MS-Windows operating systems, there are two official widget libraries from Microsoft, and 99% of MS-Windows software uses one of them. The GTK+ and Qt libraries can be run on MS-Windows.</p>
+
+<p>On Linux and other open-source unix-like systems, GTK+ and Qt are both in widespread use. Elementary is not widely used at the moment, but may become more significant in the future (under active development). Tk and FLTK are rarely used. Motif/Lesstif are almost dead.</p>
+
+<p>There are also libraries which <em>wrap</em> one or more of the above libraries, trying to either provide a “cross-platform API” that maps to whatever native widget library is available locally, or simply because they think they can improve on the API provided by the native library. Examples are:</p>
+
+<ul>
+  <li>MFC (Microsoft Foundation Classes) - a c++ wrapper around the base MS-Windows user interface APIs</li>
+  <li>Windows Forms - a .NET wrapper around the base MS-Windows user interface APIs</li>
+  <li>
+<a href="http://wxwidgets.org/">WxWidgets</a> - wraps MS-Windows and GTK+</li>
+  <li>gtkmm - a c++ wrapper around the GTK+ library</li>
+  <li>AWT - a pure-java library that wraps multiple underlying widget libraries</li>
+  <li>SWT - a pure-java library that wraps multiple underlying widget libraries</li>
+</ul>
+
+<h1 id="mixing-multiple-widget-libraries-on-one-platform">Mixing Multiple Widget Libraries on One Platform</h1>
+
+<p>As widget libraries sit “on top of” an operating system, it is possible to have multiple active at once, eg on MS-Windows to have some applications using the default MS-Windows API library while other applications are using GTK+ or Qt. In this case, the applications can potentially look somewhat different, which is rather confusing to the user. Most widget toolkits support the same core models: menus, buttons, scrollbars, text-input-fields, labels, etc. However the way they are drawn and the way they behave when interacted with can be somewhat different.</p>
+
+<p>Many toolkits support the concept of “themes” which change their appearance and behaviour. Ensuring all widget libraries on a single system use themes which make them behave similarly helps a good deal - but seldom lets them work 100% identically.</p>
+
+<p>Cross-platform widget libraries which <em>wrap</em> (delegate to) one of several <em>native</em> implementations do not suffer from this “inconsistency” problem; an app using the wrapping library is still (indirectly) using the components as other apps on the same system which use the system’s native library directly and so will behave identically. However such libraries either need to restrict themselves to offering a subset of functionality which is available on all supported (wrapped) platforms or need to do complicated emulation/transformation which can go wrong, sometimes leading to strange behaviour.</p>
+
+<h1 id="awt">AWT</h1>
+
+<p>AWT (Abstract Widget Toolkit) was the first attempt to build a widget toolkit for Java. The general approach is to delegate to whatever native widget library is available on the local platform, ie to build a <em>java wrapper class</em> for each of the native graphical “widgets”. An instance of a wrapper creates the corresponding native control and delegates to it.</p>
+
+<p>The API is cross-platform, ie identical on all platforms. In some cases, the “subset of functionality” approach has been taken, ie some functionality supported by platform X is not available in AWT because some other supported platform does not support it. In other cases, emulation is used on the platforms that do not support the behaviour natively.</p>
+
+<p>For a long time, AWT had a reputation for unreliability. The wrap/delegate approach led to many odd problems such as wrong “depth” of widgets (widgets being obscured by other widgets). Most of these were eventually fixed.</p>
+
+<p>A more significant problem in AWT is that it uses the then-trendy “deep class-based hierarchy” pattern. To handle events in an AWT widget (eg handle clicks), the programmer <em>subclasses</em> a concrete AWT class and overrides methods. Subclassing of concrete classes was eventually found to be a bad way to build OO programs; using <em>interfaces</em> rather than classes produces much cleaner and more maintainable code; see <a href="https://en.wikipedia.org/wiki/Composition_over_inheritance">composition over inheritance</a>.</p>
+
+<p>AWT does require some supporting native code to bridge from the Java world into the local native code APIs, but this native code does very little.</p>
+
+<h1 id="swing">Swing</h1>
+
+<p>The second attempt to build a widget toolkit for Java is <a href="https://en.wikipedia.org/wiki/Swing_%28Java%29">Swing</a>. This solved the problem of AWT’s deep class hierarchies by using the <em>listener</em> pattern extensively, where code <em>registers implementations of some listener interface</em> on a widget rather than subclassing it. This is a definite step forward.</p>
+
+<p>Swing also has a somewhat higher-level API between applications and widgets: a model-view-controller design.</p>
+
+<p>And Swing made a radical change to another aspect of AWT: rather than <em>delegate to</em> a native toolkit, it <em>draws the widgets itself</em>. This solves all of the nasty interactions that AWT was prone to, where widgets would obscure other widgets, or would not receive focus at the expected time, etc. It also fixes the problem that AWT sometimes breaks when the underlying operating-system is updated (changing the behaviour of the native widgets in subtle ways). And it means that cross-platform portability is far more reliable; an application that works on one platform is much more likely to work correctly on other platforms.</p>
+
+<p>However drawing widgets directly has another effect: the applications no longer look “native”. Swing-based applications look and feel different than the standard applications on the same operating system. Themes have been produced for Swing that attempt to mimic the look-and-feel of MS-Windows, GTK+, etc. The first attempts were pretty poor; later attempts are somewhat better but Swing-based applications still usually look out-of-place.</p>
+
+<p>The other drawback of drawing widgets directly is speed - Swing applications (particularly for early version of Swing) feel far less responsive than ones using native widgets. This also eventually improved; the developers of the NetBeans Java IDE claim that their UI code runs close to native speed, due to careful and efficient use of Swing. Nevertheless, many Swing-based apps still feel less than “snappy”.</p>
+
+<h1 id="swt-and-jface">SWT and JFace</h1>
+
+<p>Due to the problems with Swing, a development team at IBM created the <a href="https://en.wikipedia.org/wiki/Standard_Widget_Toolkit">SWT</a> library - basically a design half-way between AWT and Swing. This library was used as the basis for the Eclipse IDE, and eventually open-sourced.</p>
+
+<p>SWT delegates to a native toolkit (as AWT does) for most functionality. Behaviour/widgets not provided natively by the library are emulated. However calling into native widgets requires a layer of native code to bridge between Java and the (non-Java) target widget toolkit. The SWT jarfile has the relevant native code embedded into it, meaning that different jarfiles exist for each supportred CPU architecture, operating system, and target widget library. The standard AWT implementation also includes CPU/OS-specific native code but as it is part of the JRE download which is already CPU/OS-specific this isn’t a significant problem.</p>
+
+<p>SWT is less ambitious in the “portable” aspect than Swing or even AWT; its APIs are fairly close to Win32 APIs (with GTK+ also an influence). This makes development easier for users familiar with those APIs, and simplifies implementation of the native SWT libraries for those primary platforms. However SWT may not be implementable at all on some platforms.</p>
+
+<p>Because SWT delegates to native widgets, it is not independently themable and always has the look-and-feel of the underlying native library.</p>
+
+<p>Like the Win32/GTK+ APIs it is modelled on, SWT uses “composition over inheritance”, ie SWT classes are generally customised by registering handler-objects which implement appropriate interfaces, rather than the AWT approach of subclassing widget types. The only significant exceptions (ie SWT classes designed to support subclassing) are:</p>
+
+<ul>
+  <li>
+<code>org.eclipse.swt.widgets.Dialog</code> which is the base class for “popup” windows such as the file-selection dialog.</li>
+  <li>
+<code>org.eclipse.swt.widgets.Composite</code> which is a concrete class that holds multiple “child widgets”, and is sometimes subclassed to customise the way in which the child widgets interact.</li>
+  <li>
+<code>org.eclipse.swt.widgets.Canvas</code> which is an area on which arbitrary drawing operations can be performed</li>
+</ul>
+
+<p><a href="https://en.wikipedia.org/wiki/JFace">JFace</a> was created later as an “extension library” for SWT. It has a few widgets whose functionality <em>replaces</em> equivalent widgets in SWT but mostly it offers APIs dealing with higher-level tasks that may internally build multiple SWT widgets. The JFace API has a somewhat different flavour than SWT, with its own terminology and design patterns. In particular, SWT’s Win32-like API is not a “model-view-controller” style API, while JFace is. JFace does not attempt to <em>hide</em> its use of underlying SWT; it deliberately exposes SWT APIs itself. JFace and SWT widgets can be readily mixed together.</p>
+
+<p>The most significant users of SWT and JFace are still the Eclipse IDE - and any application built on the Eclipse Rich Client Platform (RCP).</p>
+
+<p>The SWT library can be downloaded from eclipse <a href="http://www.eclipse.org/swt/">here</a>. Alternately, <a href="http://search.maven.org">search the Maven repository</a> for groupId “org.eclipse.swt”, then download the latest jarfile for the appropriate platform (eg artifactId=”org.eclipse.swt.gtk.linux.x86_64”). The swt jarfile includes the necessary native libraries embedded within it.</p>
+
+<p>One significant difference between the Swing and SWT APIs is that in Swing it is traditional to create a child widget, then add it to its parent. In SWT, the parent must be created first. The constructors for widgets normally take a “parent widget” parameter, and automatically add themselves to that parent.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://www.javaworld.com/article/2074837/core-java/rich-clients-with-the-swt-and-jface.html">JavaWorld: Rich Clients with SWT and JFace</a></li>
+</ul>
+
+<h1 id="javafx-aka-jfx">JavaFX (aka JFX)</h1>
+
+<p>The name <a href="https://en.wikipedia.org/wiki/JavaFX">JavaFX</a> is presumably a pun on “Java Effects”. This section discusses JavaFX 2.2 and later only (1.x had a significantly different architecture).</p>
+
+<p>JavaFX is intended to be a <em>replacement for Swing</em>, providing similar functionality in a more efficient way.</p>
+
+<p>JavaFX was originally an optional package for Java; it is included by default in Java8 for some platforms (including x86). On some platforms (in particular ARM), JavaFX remains an <a href="http://openjdk.java.net/projects/openjfx/">optional add-on library</a>; Oracle <a href="https://www.linkedin.com/pulse/oracle-just-removed-javafx-support-arm-jan-snelders">state</a> that the reason for not providing JavaFX by default on ARM is that graphics varies wildly from system to system and they don’t have resources to guarantee it works in all cases - but will work with platform developers to provide it if possible.</p>
+
+<p>JavaFX is internally implemented like Swing: it renders all components directly using low-level rendering APIs. However while Swing uses the 2D drawing APIs, JavaFX uses 3D drawing APIs - thus getting access to the 3D acceleration features of a modern graphics chip when one is available. On the negative side, when no graphics chip is available then 3D rendering is emulated in software.</p>
+
+<p>JavaFX supports defining a UI in an xml-formatted file which is loaded at runtime (see “GUI Builders” later).  Alternately, a JavaFX-based UI can be built using code that is roughly similar to equivalent code in Swing, with Layout objects containing instances of Button, Label, etc.  A JavaFX UI can be <em>themed</em> via a cascading stylesheet (CSS).</p>
+
+<p>A sophisticated nested HTML browser widget is provided, and this can be manipulated from Java code (including the DOM of the content it is rendering) to provide all sorts of effects.</p>
+
+<p>Due to the use of 3D rendering, interesting effects are available such as the ability to <em>scale</em>, <em>shear</em>, and <em>rotate</em> nodes (trees of widgets).</p>
+
+<p>It is interesting that Microsoft’s original widget toolkit draws its supported widgets using a 2D API, while its newer <a href="https://en.wikipedia.org/wiki/Windows_Presentation_Foundation">WPF</a> toolkit draws using Direct3D. This is similar to the way Swing (using the Java 2D graphics API) is being replaced by JavaFX (using the Java 3D graphics API to draw 2D components). WPF also introduced an XML-based format for defining interfaces (XAML), and JavaFX does something similar.</p>
+
+<p>See Also:</p>
+
+<ul>
+  <li><a href="http://docs.oracle.com/javase/8/javafx/get-started-tutorial/jfx-overview.htm">Oracle: JavaFX Get Started Tutorial</a></li>
+</ul>
+
+<h1 id="gtk-and-qt-bindings">GTK+ and Qt Bindings</h1>
+
+<p>There are some open-source projects which provide bindings for GTK+ (eg java-gnome) and Qt (eg QtJambi). Sadly both the GTK and Qt bindings appear to be well behind the latest releases of the libraries they wrap.</p>
+
+<p>The GTK+ project does maintain a page that points to bindings to the GTK+ library <a href="http://www.gtk.org/language-bindings.php">for many languages</a>, including Java. Sadly (as noted in that page), Java is not one of the “official” language bindings which is part of the normal release cycle. There are also Wikipedia pages tracking bindings to <a href="https://en.wikipedia.org/wiki/List_of_language_bindings_for_GTK%2B">GTK+</a>, <a href="https://en.wikipedia.org/wiki/List_of_language_bindings_for_Qt_4">Qt4</a> and <a href="https://en.wikipedia.org/wiki/List_of_language_bindings_for_Qt_5">Qt5</a>.</p>
+
+<p>A Java program can use the provided API to be an entirely <em>native</em> GTK+ or Qt application.</p>
+
+<p>Interestingly, as GTK+ and Qt can run on MS-Windows, a Java application using these bindings is technically (indirectly) cross-platform.</p>
+
+<p>This <a href="http://java-gnome.sourceforge.net/doc/examples/button/ExamplePressMe.html">basic example</a> demonstrates how Java/GTK layouts and event-handling work - which is not too different from Swing or SWT.</p>
+
+<h1 id="layouts">Layouts</h1>
+
+<p>AWT, Swing and SWT all use the concepts of “layouts”, where a “compound widget” that has child widgets will also have a “layout” component that specifies where those child widgets will be located in relation to each other.</p>
+
+<p>As an example, SWT supports FillLayout, RowLayout, GridLayout, FormLayout, PageBookLayout (via PageBook), StackLayout.</p>
+
+<p>In the case of SWT, the <em>child</em> component can tweak the way it is layed out by its parent by having an associated LayoutData object of the corresponding type. If it has no LayoutData then the parent will lay it out using <em>default</em> settings.</p>
+
+<h1 id="the-event-loop">The Event Loop</h1>
+
+<p>Most (all?) native widget libraries are single-threaded. This saves a lot of complications in the code; widgets and event-handlers do not need to be multi-threaded, and the fact that a click-handler (or similar) runs completely before the next UI action begins processing avoids lots of race-conditions. This leads to the common design where a single thread-safe queue holds UI events waiting to be processed, and that a single thread is responsible for taking events from this queue and invoking the appropriate handler code. The consequences of this design are:</p>
+
+<ul>
+  <li>event-handlers must not run for long periods of time, as this leads to “unresponsive” applications;</li>
+  <li>any code running in the non-ui threads must not update the UI widgets but instead <em>request the UI thread to do so</em>.</li>
+</ul>
+
+<p>The normal way to “request the UI thread” to do something is to place an event on the UI event-queue which the UI thread then executes. The event can wrap any arbitrary piece of code, eg an object implementing java.lang.Runnable or a Java8 closure (lamba expression).</p>
+
+<h1 id="data-binding">Data Binding</h1>
+
+<p>Widgets display application-specific data, and many (eg text-fields, or checkboxes) allow users to modify that data. There must therefore be some kind of two-way communication between the widgets and the application itself.</p>
+
+<p>Most native widget toolkits take a very simple approach: widgets have setter methods that the application calls to set the data to display (eg <code>textField.setText("...")</code> or <code>checkbox.setEnabled(true)</code>) and to obtain the data again later (eg <code>textField.getText()</code> or <code>checkbox.isEnabled()</code>).  The application is then responsible for “pushing” its data into the corresponding widgets before displaying a screen and for “pulling” data from the widgets on some action such as the user clicking the “ok” button. However this approach leaves many complicated decisions up to the application, including <em>how to validate</em> data before copying it from the widgets into the application’s datastructures (model), how to display errors, and how to handle the case where the same application data is visible in multiple places at the same time.</p>
+
+<p>The AWT and SWT libraries take this approach (as does the native MS-Windows user interface library).</p>
+
+<p>Libraries such as Swing, Jface and JavaFX support the model-view-controller pattern where a <em>binding</em> is established between a widget and some field belonging to the application’s datamodel. Widgets still have their own <em>current value</em> stored internally, but the value from the application is now “pushed into” the widget automatically when the widget is first rendered. There is usually also some kind of <em>validator</em> support where an object that can verify the correctness of an entry is attached to each field; a single call from the application executes all validators on all fields and only if all report “ok” are the <em>current values</em> from the widgets pushed back (via the binding) into the matching fields in the application model. Such bindings/validators are part of the <em>controller</em> concept in the MVC pattern.</p>
+
+<p>In the case of JFace, the <em>data binding</em> features it provides can be applied not only to JFace widgets, but also to SWT widgets.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://www.vogella.com/tutorials/EclipseDataBinding/article.html">Vogella: JFace Data Binding Tutorial</a></li>
+</ul>
+
+<h1 id="gui-builders">GUI Builders</h1>
+
+<p>There are different possible ways to create a user interface at runtime:</p>
+
+<ul>
+  <li>a bunch of calls to the library API</li>
+  <li>loading a “UI description” from a text-file</li>
+  <li>loading a <em>serialized object tree</em> from a binary file</li>
+</ul>
+
+<p>A graphical <em>UI builder</em> can optionally be used to drag-and-drop components together and then either generate code, generate a “ui description” file, or serialise the result. Tools that <em>generate code</em> sometimes support <em>round-tripping</em> where the code can be manually edited, and still used within the UI builder tool.</p>
+
+<p>The first two options are common in many widget libraries (not just Java). For example, GTK+ and Qt both supports the first two; the Glade UI designer is the primary way to create GTK+ “description files”. Qt’s <a href="http://doc.qt.io/qt-5/qmlapplications.html">QML</a> is a kind of “UI description” with embedded scripting.</p>
+
+<p>Java’s default serialization implementation is not stable over software updates; serialized UI descriptions often become unloadable in the next release of an application. A project attempted to tweak Java’s serialization to make it more stable in respect to code changes; see <a href="http://docs.oracle.com/javase/tutorial/javabeans/advanced/longpersistence.html">long term persistence</a>. The primary motivation for this project was to be able to design UIs in a tool, serialize the result, and load it later. However this approach fell out of favour, and most UIs are now built via either plain Java code or loading a UI description in a format specifically designed for that purpose (rather than a general-purpose serialization format).</p>
+
+<p>The Eclipse4 “Application Model” is a kind of implementation of the “UI description in textfile” approach; an Eclipse RCP application can built its UI at runtime based on a “.xmi” XML file (at least down to the “part” level; widgets within a part are defined in code).</p>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/ui-libraries/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

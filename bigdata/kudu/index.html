@@ -1,0 +1,513 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Apache Kudu Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Apache Kudu Overview</h1>
+    <aside>First published on: August 25, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>Kudu is a relatively new <a href="/bigdata/nosql">NoSQL database</a> which aims to be useful for both operational data and analytics. It effectively provides similar features to <a href="/bigdata/hbase">HBase</a>/<a href="/bigdata/cassandra/">Cassandra</a> and <a href="/bigdata/hive">Hive</a>/Impala/<a href="/bigdata/spark">Spark</a>-over-Parquet/ORC at the same time.</p>
+
+<p>I haven’t used Kudu personally, but have recently done some research on it out of interest, and this article summarises the strengths and weaknesses of Kudu. Much of the information here comes from the Kudu website and the book “Getting Started with Kudu”; see those sources for more detail. All the following information is based on Kudu 1.7 (released March 2018).</p>
+
+<p>The Kudu website has a good <a href="https://kudu.apache.org/overview.html">overview</a>, but it omits a few things; these are addressed below.</p>
+
+<p>This article compares Kudu to HBase/Cassandra/Hive often - ie is most useful if you already know those databases.</p>
+
+<h1 id="overview">Overview</h1>
+
+<p>Technically, Kudu isn’t a complete database; it doesn’t offer any plaintext query-language (eg SQL) - only an API. As the Kudu website explains, it is more like a <em>data storage service</em>, offering a network API similar to HBase:</p>
+
+<ul>
+  <li><code>GET {key}</code></li>
+  <li><code>PUT {key}, {fields}</code></li>
+  <li><code>DELETE {key}</code></li>
+  <li><code>SCAN {keyprefix}</code></li>
+</ul>
+
+<p>Client applications are welcome to use this API directly, in the way many apps use HBase or key/value stores such as Redis directly. However Kudu also works well as a “back end” accessed via layers that offer more complex query languages; the following tools support Kudu as a back-end:</p>
+
+<ul>
+  <li>Impala</li>
+  <li>SparkQL</li>
+  <li>Hive (<a href="https://issues.apache.org/jira/browse/HIVE-12971">code in beta, currently stalled</a>)</li>
+</ul>
+
+<p>Client libraries are available for C++, Python (wraps the C++ lib) and Java. The client library is complex, ie not just a wrapper for building network messages.</p>
+
+<p>Kudu is currently being pushed by the Cloudera Hadoop distribution; it is not included in the Hortonworks distribution at the current time. This is why Impala (favoured by Cloudera) is well integrated with Kudu, but Hive (favoured by Hortonworks) is not.</p>
+
+<p>Kudu is an Apache Software Foundation project (like much software in the big-data space).</p>
+
+<h1 id="use-cases">Use Cases</h1>
+
+<p>HBase is great for fetching data by key and updating data by key. It is reasonably good at continual ingest (appending new records regularly). It is however not particularly good at doing a “foreach” over large numbers of records, and it uses quite a lot of disk space to store its contents. The same applies to Cassandra.</p>
+
+<p>Storing data on a distributed filesystem (eg HDFS) using formats such as Parquet or ORC, and then reading that data using parallelisable applications based on Spark, Hive, Impala, and similar also has tradeoffs. That approach is quite efficient on disk-space, and can provide very high throughput for very large analysis tasks. However:</p>
+
+<ul>
+  <li>lookup by key is extremely slow (no indexes, meaning lookup is effectively a table-scan with some optimisations)</li>
+  <li>update and delete by key are extremely inefficient (requires finding the file containing the record (slow) then rewriting the file)</li>
+  <li>queries have high startup costs (latency)</li>
+  <li>continual ingest is bad - regularly appending small amounts of data leads to a “lots of small files” problem</li>
+</ul>
+
+<p>Traditionally, business problems in the “operating” domain are addressed with HBase/Cassandra while business problems in “analytics” use a file-based approach. However the same data is often involved - in which case a company is dealing with <em>both</em> solutions and syncing between them. Kudu is reasonably good at <em>all</em> of the following and therefore can be used to address both types of problems resulting in simpler solutions:</p>
+
+<ul>
+  <li>get by key</li>
+  <li>update or delete by key</li>
+  <li>continual ingest</li>
+  <li>queries over large numbers of records</li>
+</ul>
+
+<p>At least that’s the idea - but it has its own constraints, which are discussed below.</p>
+
+<p>Kudu’s own performance goals are to be 50% as fast as HDFS-based Hive queries for large table-scans, and approximately as fast as HBase/Cassandra for random reads. The point of Kudu is not to be faster than either, but to do both at the same time.</p>
+
+<p>Machine learning algorithms need to read large amounts of data similarly to analytics queries - and therefore Kudu is also a reasonable place to store data used for machine learning.</p>
+
+<p>For client applications using Impala/SparkQL/etc, whether the data over which queries are executed is stored in Parquet/ORC on a distributed filesystem or stored in Kudu is mostly transparent; it should be possible to move data in existing Parquet/ORC files into Kudu then remap HCatalog (aka Hive Metastore) to point that tablename to Kudu instead. Existing Impala/SparkQL jobs should run just as before - but now you can update that dataset in real-time.</p>
+
+<p>When using Impala/Spark/etc, there is no problem joining tables from Kudu with data from other sources (eg Parquet/ORC on filesystem).</p>
+
+<p>Note that Hive-LLAP addresses the latency issue mentioned above, while Hive transactional tables address the continual-ingest (small files) issue and the update/delete issue (at least partially).</p>
+
+<h1 id="compared-to-traditional-hadoop-tools">Compared to Traditional Hadoop Tools</h1>
+
+<p>If you are already familiar with older Hadoop-related data storage technologies then this description of Kudu might help:</p>
+
+<ul>
+  <li>start with HBase</li>
+  <li>replace the HDFS storage layer with Cassandra’s local-file-storage plus consensus-replication approach (removes need for HDFS and Zookeeper)</li>
+  <li>replace the HBase HFile disk format with a Parquet/ORC-like columnar storage disk format (keeping the write-ahead-log and in-memory buffering of inserts and updates)</li>
+  <li>provide clients with (partition-to-node) mapping information via a Kudu <em>master node</em>, rather than keeping the information in Zookeeper as HBase does</li>
+</ul>
+
+<p>That is approximately what Kudu is - a hybrid of ideas from HBase, Cassandra and ORC/Parquet with some of the best features from each. Of course this description is only an approximation; see the rest of this article and the referenced documents for the complete story.</p>
+
+<h1 id="kudu-future-plans">Kudu Future Plans</h1>
+
+<p>According to Kudu developers, the following are theoretically possible and are being considered for implementation in the future:</p>
+
+<ul>
+  <li>support for row-oriented storage as an alternative to column-oriented</li>
+  <li>fractured mirrors, where some replicas of a tablet use row-oriented storage and others column-oriented, with OLTP-like operations directed to row-storage nodes and analytics-type ops to column-storage nodes</li>
+  <li>secondary indexes, foreign keys, transactional support</li>
+  <li>cross-datacenter replication</li>
+</ul>
+
+<p>For another interesting DB supporting both row and column storage in the same table, see <a href="/bigdata/memsql/">MemSQL</a>.</p>
+
+<h1 id="deployment-architecture">Deployment Architecture</h1>
+
+<p>Deploying Kudu just requires installing the core daemon services on multiple nodes and configuring them correctly. No external software is required - no Zookeeper or HDFS.</p>
+
+<p>Each node should have a large amount of local disk storage.</p>
+
+<p>One or more nodes are configured as <em>master</em> nodes (typically 3 for a moderate-sized cluster and 5 for a large or very-highly-available cluster); the remaining nodes are known as <em>tablet servers</em>. Like HBase (and unlike Cassandra) all nodes in the cluster need to be network-accessible to client applications.</p>
+
+<p>Data is replicated internally between the cluster nodes; each “tablet” (partition of a table) is owned by a single node (called the leader) and stored there, with a complete copy of that tablet being replicated (via “log-shipping”) to a configurable-per-table number of other nodes within the cluster (called followers) which act as <em>warm standbys</em> for that tablet (partition).  This approach to storing data is rather similar to the Cassandra database.</p>
+
+<p>Deploying Kudu is certainly simpler than deploying HBase; not having to deal with HDFS or Zookeeper is a bonus. The internal replication also means that Kudu node failover should be faster than with HBase (and similar to Cassandra). However Kudu is obviously a little less mature than HDFS; it is not clear if replication is quite as reliable - and it must be monitored with Kudu-specific tools. Backups might also be more complex than when HDFS is used as a backing store.</p>
+
+<p>File-based solutions (using ORC/Parquet/etc) have the advantage that data is available even when no “database server” is running; with Kudu no data is accessible unless the Kudu cluster nodes are up.</p>
+
+<h1 id="tables-and-schemas">Tables and Schemas</h1>
+
+<p>Kudu is quite like a traditional relational database with regards to tables and schemas; tables must have a schema, and schemas consist of a fixed number of columns each with a specific type.</p>
+
+<p>A client application can fetch the schema for a table from any master node.</p>
+
+<p>Kudu does not support dynamically adding columns as HBase/Cassandra do. Kudu also does not support array-typed or struct/record-typed columns; it stores <em>flat tabular</em> data only. Sparse tables (where many columns are null) are not as efficient as with HBase.</p>
+
+<p>Kudu tables must be explicitly partitioned at declaration time. One or more columns are specified as columns to partition by, with each column partitioned based upon ranges (eg ‘A-K’,’L-Z’) or by hashing into a specified number of buckets. Each partition of the table forms a <em>tablet</em> which is allocated to one node of the cluster, and all records in that tablet are stored and managed by that node (with standby nodes kept up-to-date via replication). Range partitioning may be incomplete; if a record being inserted does not match any of the defined ranges then the insert fails. Partitioning must be carefully defined to ensure that data in a partition does not become larger than the capacity of a single node in the cluster. This static partitioning is quite different from HBase/Cassandra where data is also partitioned (based on rowkey) but the partitions are dynamically <em>split</em> when they grow too large.</p>
+
+<p>Interestingly, when using range-based partitioning on a column then all data in a partition can be efficiently dropped (that <em>tablet</em> is deleted). Partitioning based upon record dates can therefore be a nice way to drop data when it reaches a certain age.</p>
+
+<p>Usually, hash-partitioning is applied to at least one column to avoid hotspotting - ie range-partitioning is typically used only when the primary key consists of multiple columns.</p>
+
+<p>Kudu requires a primary key for each table (which may be a compound key); lookup by this key is efficient (ie is indexed) and uniqueness is enforced - like HBase/Cassandra, and unlike Hive etc. However it does not support secondary indexes, secondary uniqueness constraints, or foreign key constraints. Like HBase and Cassandra, Kudu can suffer from “hot-spotting” if the primary key is not well chosen; see later in this article for more information.</p>
+
+<p>Kudu stores all tables in <em>column-oriented format</em>; this is discussed later. Because Kudu is pure-column-oriented, there are no “column families” as found in HBase/Cassandra.</p>
+
+<p>See the <a href="https://kudu.apache.org/docs/schema_design.html">Kudu Schema Design</a> page for more information on schemas.</p>
+
+<h1 id="transactions">Transactions</h1>
+
+<p>Updating a single record is an atomic operation. Kudu does not support cross-record transactions.</p>
+
+<p>Kudu does support “stable reads”, where data inserted does not affect reads/scans already in progress. Kudu also supports “read as at timestamp N” for viewing historical database state - as long as the necessary UNDO records have not been purged (see later).</p>
+
+<h1 id="master-nodes">Master Nodes</h1>
+
+<p>It is common in relational databases for the list of tables to itself be represented as a table called a <em>catalog</em>. Kudu uses exactly this approach; it has a <em>catalog table</em> which holds a list of all tables and associated metadata such as the schema and partitioning rules. This table is replicated fully across all master nodes (ie each master node has a complete copy of this table); one of the master nodes is the cluster <em>leader</em> and changes to the catalog are managed by it.</p>
+
+<p>Clients require a relatively smart client-side library to talk to Kudu; the library is responsible for determining which <em>single tablet server node</em> to send a GET/PUT/DELETE command to (ie which node holds the corresponding key), or which <em>tablet server nodes</em> it must send a SCAN operation to (which nodes might hold data relevant for the scan’s primary key prefix). For scans, the client library must also combine results from multiple <em>tablet servers</em> into an overall result.</p>
+
+<p>A client can contact any master node to retrieve the table schema, which includes the partitioning rules; this information is fairly static. A client can also use any master node to retrieve the current mapping from partition to <em>tablet server nodes</em> (leader and followers); this information changes as <em>tablet server</em> nodes join and leave the cluster. The client library caches partition-to-node mappings; when it ends up sending a request to a wrong node because the mapping has changed, it gets an error message and queries a master node to refresh its mapping. This approach is quite similar to HBase, except that in HBase the mapping of partition to node changes more often (due to dynamic partition splitting) and the client retrieves the mapping from Zookeeper.</p>
+
+<p>Because master nodes do not host any tables other than the catalog, they are not highly loaded. Requests for schema information and partition mappings are not frequent.</p>
+
+<p>When using Impala as a front-end to Kudu, the client logic is of course embedded into the Impala server process.</p>
+
+<p>The way that Kudu manages partitioning of tables, and providing that info to clients, reminds me strongly of the Kafka message broker.</p>
+
+<h1 id="sql-and-kudu">SQL and Kudu</h1>
+
+<p>Both Impala and SparkQL can consult HCatalog (also known as the Hadoop metadata-store) to obtain information about what <em>tables</em> exist. To access Kudu-managed data via HCatalog an entry in HCatalog must be created - ie a table declared via Impala, SparkQL or other. The HCatalog entry for a Kudu table simply contains the table-name, Kudu-internal table-name, and the addresses of the master nodes of the relevant Kudu cluster.</p>
+
+<p>When an SQL query is submitted to Impala or SparkQL for a specific table-name, table metadata is fetched from HCatalog to determine the Kudu master nodes and the Kudu internal table name. A query is then sent to a Kudu master node to fetch the schema for that table, and the current partition-to-node mappings. The SQL is then compiled into an execution-plan. The SCAN operator in Kudu accepts basic “filter operations” (eg comparisons against constants); the execution-plan rewrites where-clauses in the original SQL into equivalent filter-operations as much as possible (not everything can be mapped 1:1). A SCAN request is then sent to each tablet node holding a partition which matches the primary-key-range specified for the SCAN operation. The SQL query engine (Impala, etc) then combines the results from each <em>tablet server</em> and does any necessary post-processing which could not be expressed as filters on the SCAN operation. The step of rewriting where-clauses as SCAN filters is known as <em>predicate push-down</em>, and is very important for maximising performance and minimising network traffic..</p>
+
+<p>In SparkQL, the necessary metadata for the Kudu table can also be embedded in the application code rather than in HCatalog (using registerTempTable/createOrReplaceTempView).</p>
+
+<p>HBase can be queried from SQL engines, and the process works in a similar way. Cassandra is similar to HBase, but SQL processing is built-in to Cassandra and therefore <em>predicate push-down</em> works somewhat better. However in both HBase and Cassandra, columns are untyped (simply byte-arrays) which limits the filters that can be expressed. The Phoenix extension to HBase addresses this, but is not standard. Ineffective filtering leads to larger network traffic and additional processing on the client (poor <em>data locality</em>).</p>
+
+<p>Because SCAN operations are executed by each Kudu node against data stored locally, the initial filtering effectively has <em>data locality</em> - one of the big advantages of something like Hive. Due to strict typing of Kudu, scan filters should be relatively effective/flexible.</p>
+
+<p>Because SCAN operations are submitted over a network to a Kudu node which then executes it, and the results are then “post-processed”, SQL queries on top of Kudu is not as performant as Hive, Spark or Impala running against ORC/Parquet data stored within a distributed filesystem such as HDFS. However Kudu performance is not bad - and certainly significantly better than HBase. In short, for analytics (OLAP), Kudu is worse than Hive-with-ORC/Parquet but better than HBase.</p>
+
+<p>Simple SQL queries on key (“<code>select .. where key=N</code>”) and mutation operations such as “<code>insert into</code>” and “<code>update .. where key=N</code>” operations are mapped fairly directly to GET or PUT operations and are relatively efficient - but not as efficient as direct calls to Kudu, due to the SQL command parsing, etc. Direct GET/PUT calls to Kudu are approximately as efficient as with HBase.</p>
+
+<h1 id="reading-and-writing-data">Reading and Writing Data</h1>
+
+<p>When a client queries a master node for partition-to-tablet-server mapping information, it receives the address of the leader <em>and</em> follower nodes. The client can choose to send GET/SCAN operations to either leader or follower, ie queries can be satisfied via replicas - though stale data or latency may be the result, depending upon the read-mode and snapshot-id parameters specified. As far as I am aware, PUT/DELETE (mutations) must be sent to the leader. The Kudu library for Spark supports reading from followers since Kudu v1.7 (March 2018); it is not clear whether Impala supports reading from followers or not.</p>
+
+<p>The way data is partitioned by key and handled by a single node leads to the “hot-spotting” problem which also occurs on HBase and Cassandra; keys and partitioning need to be carefully chosen to avoid having one node in the cluster being overloaded while other nodes are idle. The possible solutions are similar to those for HBase and Cassandra.</p>
+
+<p>A <em>tablet server</em> performing a write operation waits until the operation has been replicated to a majority of cluster nodes before returning. Clients can therefore be sure that the operation has been reliably persisted.</p>
+
+<h1 id="security">Security</h1>
+
+<p>Kudu supports:</p>
+
+<ul>
+  <li>TLS encryption for network traffic</li>
+  <li>Authentication for inter-node traffic via client certificates</li>
+  <li>Kerberos authentication - but authorization currently supports only two roles: admin (can do anything) and user (can access all tables)</li>
+</ul>
+
+<p>Fine-grained control granting per-user access to specific tables is supported in Impala (requires that the user cannot access Kudu directly).</p>
+
+<p>Encryption of data on disk must be done via OS-level controls, eg something like dm-crypt.</p>
+
+<h1 id="monitoring-and-maintenance">Monitoring and Maintenance</h1>
+
+<p>The Kudu <em>master node</em> application provides a web interface for administration/monitoring purposes. The Kudu <em>tablet server</em> application also provides a web interface for administration/monitoring.</p>
+
+<h1 id="internal-storage-format">Internal Storage Format</h1>
+
+<p>As described earlier, tables are statically partitioned when declared (range-based mappings can be modified later). These partitions are called <em>tablets</em>, and each tablet has a <em>leader node</em> which stores all records in that partition (with replication).</p>
+
+<p>A tablet’s on-disk representation consists of:</p>
+
+<ul>
+  <li>a write-ahead-log holding changes not yet flushed to disk by the local Kudu daemon service</li>
+  <li>a set of DiskRowSet files (aka “base data”) each holding records in ORC-like columnar format - and unlike HBase, each primary key only occurs once in all files</li>
+  <li>a set of DeltaFile files for each DiskRowSet, containing REDO records with unmerged update operations (aka RedoDeltas)</li>
+  <li>a set of DeltaFile files for the tablet, containing UNDO records (history data)</li>
+</ul>
+
+<p>By default, UNDO records are kept for 15 minutes only, ie they are not really designed as a long-term history mechanism.</p>
+
+<p>Each DiskRowSet file is internally structured somewhat like an ORC file:</p>
+
+<ul>
+  <li>records are grouped into blocks of N, with each block sorted by primary key</li>
+  <li>for each block
+    <ul>
+      <li>write out all values for column 0</li>
+      <li>write out all values for column 1</li>
+      <li>..</li>
+      <li>write out all values for column N</li>
+      <li>write out some statistics about the block</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Grouping columns together provides the usual advantages of <em>column-oriented storage</em>:</p>
+
+<ul>
+  <li>when doing a “<code>select X from table where Y &gt; 10</code>” then disk-blocks containing columns other than X and Y can be skipped over</li>
+  <li>type-specific compression can be used</li>
+</ul>
+
+<p>Type-specific compression is extremely effective, and compressing data saves not only on disk-space but also improves performance due to reduced disk IO.</p>
+
+<p>DiskRowSet files also contain statistics (eg min/max value per block), and bloom-filters to allow searches to completely skip blocks when it is clear that no records match the search criteria.</p>
+
+<p>A Kudu node keeps newly-inserted records in a memory buffer (like HBase); when the buffer is full then it is written as a new DiskRowSet file. Before adding a new (inserted) record to the buffer, a check is done to ensure the key is not already known - this is a local check only, as the record is known to be in the local tablet. As with Hbase, records are sorted by key for faster lookup.</p>
+
+<p>Updates and deletes are transformed into REDO records and cached in memory; when this buffer is full then it is written as a new DeltaFile. This is different from HBase - Kudu does versioning via deltas rather than timestamped copies.</p>
+
+<p>Like HBase/Cassandra, on-disk files are immutable. The only thing that can change them are background “compaction” processes, and these only “swap out” files for new versions as an atomic operation. For Kudu, compaction primarily means eliminating REDO records; the “base data” in the DiskRowSet files is updated to the “current state” and UNDO records are written to keep track of the history. Apparently, using deltas is more efficient than HBase’s timestamp-based approach.</p>
+
+<p>The latest version of each record must be computed by finding the “base data” (which might be on-disk or in-memory) and applying any REDO records for the same primary key (which might be on-disk <em>and</em> in-memory). In a system where data is not being added, there will be no REDO records (compaction will have removed them).</p>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>Kudu’s UNDO records allow queries to be executed at a <em>point in time</em>, returning results that reflect the database contents at that time even if they have changed. This is also used to provide stable queries while data is being inserted.</p>
+
+<p>While this article compares Kudu to plain Hive and HBase, there are some advanced features of those products that make them more competitive with Kudu. It is a shame that the book “Getting started with Kudu” des not mention either of these:</p>
+
+<ul>
+  <li>Hive transactional tables</li>
+  <li>Hive-LLAP</li>
+  <li>Phoenix over HBase</li>
+</ul>
+
+<p>Kudu is implemented in C++, meaning install-packages are CPU- and OS-specific. Internal code naming standards appear to be a weird mashup of standard unix style with MS-style!  The C++ client library designers also have an odd interpretation of the <em>builder pattern</em>.</p>
+
+<p>A maximum of 64KB per column is recommended, and a maximum of 300 columns per table.</p>
+
+<p>The <a href="https://kudu.apache.org/kudu.pdf">Kudu academic design paper</a> is out-of-date in some respects. The most sigificant point is that the paper states that SCAN operations are limited to HBase-style ops: exact-equals or keyrange. However in the <a href="https://kudu.apache.org/apidocs/org/apache/kudu/client/KuduPredicate.html">Kudu Java API</a> it is clear that LESS-THAN/GREATER-THAN are also supported, which is a great help for <em>predicate pushdown</em>.</p>
+
+<p>A question I was unable to answer with research: how can <code>update T set x=1 where y=2</code> be efficiently implemented? This is neither a PUT nor a SCAN..</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>It does indeed look like Kudu is a “better HBase/Cassandra”:</p>
+
+<ul>
+  <li>has far better disk compression, due to typed schemas</li>
+  <li>has far better predicate push-down, due to typed schemas</li>
+  <li>column-oriented storage is efficient when querying just a few columns (OLAP)</li>
+  <li>provides similarly low-latency responses due to in-memory cacheing and continuously-running nodes</li>
+  <li>can effectively prune data during scans (due to sorted data, statistics, and bloom-filters)</li>
+  <li>recovery on node failure is faster than HBase</li>
+  <li>deployment is simple (no external dependencies)</li>
+</ul>
+
+<p>It also appears to have some advantages over Hive/etc:</p>
+
+<ul>
+  <li>has low latency (but maybe Hive-LLAP is competitive?)</li>
+  <li>far simpler deployment</li>
+  <li>primary-key uniqueness</li>
+  <li>efficient updates and deletes</li>
+</ul>
+
+<p>However there are some drawbacks:</p>
+
+<ul>
+  <li>Kudu doesn’t have the “dynamic columns” support of bigtable-like designs (adding columns on the fly) - (seldom needed)</li>
+  <li>scans are not guaranteed to return data sorted perfectly by row-key - (seldom needed)</li>
+</ul>
+
+<p>and some more significant issues:</p>
+
+<ul>
+  <li>arrays and nested records are not supported</li>
+  <li>hot-spotting is still a problem (one node is responsible for all records in a partition/tablet)</li>
+  <li>static partitioning of tables needs to be carefully managed</li>
+  <li>isn’t quite as fast as direct file-access for big analytic jobs or machine learning</li>
+  <li>still quite a young project</li>
+  <li>does not support Hive as a front-end SQL engine</li>
+</ul>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+<a href="https://kudu.apache.org/">Apache Kudu</a> - the project site</li>
+  <li>
+<a href="https://kudu.apache.org/overview.html">Apache Kudu Overview</a> - a pretty good overview of Kudu’s advantages (but not so good on the disadvantages)</li>
+  <li>
+<a href="https://kudu.apache.org/faq.html">Apache Kudu FAQ</a> - frequently asked questions list</li>
+  <li>
+<a href="https://kudu.apache.org/kudu.pdf">Kudu academic paper</a> - details on the internal design of Kudu (useful, but partly out-of-date)</li>
+  <li>
+<a href="https://kudu.apache.org/docs/schema_design.html">Kudu Schema Design</a> - how to design tables for best performance</li>
+  <li>
+<a href="https://github.com/apache/kudu/blob/master/docs/design-docs/tablet.md">Kudu Tablet Design</a> - internal details on how data is stored on disk</li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/kudu/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

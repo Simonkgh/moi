@@ -1,0 +1,487 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Dealing with Mutable Records in a BigQuery Data Warehouse</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Dealing with Mutable Records in a BigQuery Data Warehouse</h1>
+    <aside>First published on: April 21, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a>, <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>The <a href="/cloud/google-bigquery-overview">Google BigQuery database</a> database is intended for <em>business intelligence / data warehouse</em> workloads, ie analysis of static data. New records can be efficiently appended to a BigQuery table, but modifying existing records is complicated and inefficient. Unfortunately, “reference tables” that are needed in BigQuery for performing joins are often simply a replica of data stored in some “upstream” system such as SAP or a relational database. The upstream system often allows <em>mutating</em> records - but replicating these changes through to the BigQuery business intelligence system can be tricky to implement.</p>
+
+<p>The BigQuery documentation does have <a href="https://cloud.google.com/solutions/bigquery-data-warehouse#handling_change">a page that addresses this issue</a>. However it can be hard to grasp the purpose of this documentation without further context; this article aims to provide that context.</p>
+
+<p>Some other non-relational databases have the same issue; Apache Hive is one of them (although Hive streaming tables do allow more efficient updates than are available in BigQuery).</p>
+
+<p>If you are new to <em>data warehousing</em>, my article <a href="/programming/dwh-intro/">Introduction to Data Warehousing</a> might be useful.</p>
+
+<h1 id="facts-and-dimensions">Facts and Dimensions</h1>
+
+<p>In a conventional <a href="https://en.wikipedia.org/wiki/Data_warehouse">data warehouse</a>, stored data is divided into two categories: facts and dimensions.</p>
+
+<p>Fact tables hold data which represents events happening in an external system; for example:</p>
+
+<ul>
+  <li>in a retail system, the sale of a product is a fact (generated at the checkout for example)</li>
+  <li>in an inventory management system, each product ship or product received is a fact</li>
+  <li>in a factory-management system, sensor readings are facts (this sensor had this value at this time)</li>
+</ul>
+
+<p>Facts do not change once recorded. A product sold might later be returned - but that simply creates another fact of type “product returned” rather than modifying the original sale event record.</p>
+
+<p>Dimensions hold semi-static “reference” data against which the fact tables are joined; for example</p>
+
+<ul>
+  <li>a catalog of products (mapping from product-id to product description and attributes)</li>
+  <li>a catalog of sensors in a factory (mapping from sensor id to sensor type, last-calibrated, etc)</li>
+</ul>
+
+<p>BigQuery handles fact tables fine - appending to a table is efficient, and facts never change.</p>
+
+<p>Static dimension tables, ie reference data that never changes, are also no problem.</p>
+
+<p>When a dimension table receives updates, however, then this “semi-static” nature can be difficult to deal with. This is the issue that this article addresses.</p>
+
+<h1 id="linking-facts-to-dimensions">Linking Facts to Dimensions</h1>
+
+<p>The problem to be solved is:</p>
+
+<ul>
+  <li>how to store the dimension data (with or without “change history”)</li>
+  <li>while making it efficient to find the matching dimension record when inserting new records into the fact table</li>
+</ul>
+
+<p>Sometimes new fact records simply need to be linked to “the most current version” of the corresponding dimension record, and sometimes new fact records need to be linked to the dimension record which was active at some timestamp which is part of the fact record.</p>
+
+<p>Finding the appropriate dimension record for a fact record might be done at insert-time (ie the new fact record is stored with a new column holding the primary-key of the matching dimension record), or might be done later during queries. In general, data warehouses prefer the first approach - do the lookup once and early, in order to make later queries more efficient.</p>
+
+<h1 id="updates-in-bigquery">Updates in BigQuery</h1>
+
+<p>Before we discuss the solutions, it is useful to understand how updates and deletes work in BigQuery.</p>
+
+<p>A BigQuery table consists of a set of files on disk. Each file contains (roughly) a linear sequence of records. Unlike relational databases, records are not stored in BTree format, and existing files are never modified.</p>
+
+<p>To modify a record within a file, a new version of that file must be created - ie every record in that file must be read and rewritten. These files are generally quite large (typically holding thousands or millions of records and taking tens or hundreds of megabytes of disk-space).</p>
+
+<p>Here is a sensible usage of update, fixing a spelling-mistake in potentially millions of records:</p>
+
+<pre><code>#standardSQL
+UPDATE somedataset.sometable
+SET product_name='milk'
+WHERE product_name='mikl'
+</code></pre>
+
+<p>This will cause a rewrite of every file in the table in which the where-clause matched (at least; might trigger a rewrite of every file associated with the table depending upon how BigQuery is implemented). And that is not only slow, but also (relatively) expensive.</p>
+
+<p>When such updates are a rare occurrence, this is not a problem. However it is not something that should be done frequently. And in fact, BigQuery has a <a href="https://cloud.google.com/bigquery/quotas">quota for updates</a>:</p>
+
+<blockquote>
+  <p>Maximum number of combined UPDATE, DELETE, and MERGE statements per day per table — 96</p>
+</blockquote>
+
+<blockquote>
+  <p>Maximum number of combined UPDATE, DELETE, and MERGE statements per day per project — 10,000</p>
+</blockquote>
+
+<h1 id="slowly-changing-dimensions-in-other-data-warehouses">Slowly Changing Dimensions in other Data Warehouses</h1>
+
+<p>How traditional data warehouses deal with this issue is addressed nicely in <a href="https://en.wikipedia.org/wiki/Slowly_changing_dimension">this Wikipedia article on Slowly Changing Dimensions</a>. Unfortunately all of the solutions described there rely on mutating existing records in the database when updates are applied; they either</p>
+
+<ul>
+  <li>overwrite the old record with the new one (ie equivalent to delete + insert)</li>
+  <li>keep older records, but use an “isCurrent” flag to mark the active one (requires setting isCurrent=false on the older existing record when a newer version is inserted)</li>
+  <li>keep older records, and include an “end date” field on each record (requires updating end-date from null on the older existing record when a newer verson is inserted)</li>
+</ul>
+
+<p>In fact, the schemas suggested in the Wikipedia article <em>can be</em> useful - they just need to be applied a little differently (to work around the inefficiencies of small updates in BigQuery).</p>
+
+<h1 id="solution-a-replacing-dimension-tables-without-history">Solution A: Replacing Dimension Tables Without History</h1>
+
+<p>There is a simple solution when:</p>
+
+<ul>
+  <li>your analysis jobs don’t ever care about historical values for specific dimension values, ie all reports and analysis should always use the most recent value;</li>
+  <li>the dimension table isn’t updated very often;</li>
+  <li>the dimension table isn’t excessively large; and</li>
+  <li>the dimension table is simply a mirror (replica) of a table in a traditional relational system.</li>
+</ul>
+
+<p>In this case, the simplest solution is to just re-export the data from the upstream database whenever data changes (max once per day), and reimport it into BigQuery. A BigQuery <em>load job</em> is atomic, ie the new data replaces the old data in a single atomic step.</p>
+
+<p>This is effectively the “type 1” solution from the <a href="https://en.wikipedia.org/wiki/Slowly_changing_dimension">Slowly Changing Dimensions</a> article.</p>
+
+<p>One potential problem is that it is traditional for a dimension table to use a <em>surrogate key</em> for its records. Because existing fact records will refer to dimension records by their keys, a “reload” of a dimension table would need to somehow ensure that the keys remain identical.</p>
+
+<h1 id="solution-b-replacing-dimension-tables-with-history">Solution B: Replacing Dimension Tables With History</h1>
+
+<p>Assume you do care about change-history, eg want to be able to generate reports showing the dimension-value a fact record had <em>at the time the fact occurred</em>, but all the other factors from the above solution apply, ie:</p>
+
+<ul>
+  <li>the dimension table isn’t updated too often;</li>
+  <li>the dimension table isn’t too large; and</li>
+  <li>the upstream system is a relational database</li>
+</ul>
+
+<p>In this case, you may be able to apply one of the approaches from the <a href="https://en.wikipedia.org/wiki/Slowly_changing_dimension">Slowly Changing Dimensions</a> article in the relational DB, and then export/reimport the entire table into BigQuery. Or in other words, this approach pushes the problem of maintaining the mutable table in data-warehouse form upstream to the provider of that data.</p>
+
+<p>In particular, the “type 2b” (type 2 with effective-date) and “type 2c” (type 2 with effective-date and current-flag) solutions are good data models; they make it reasonably easy to write joins against the dimension table that pick out the right version of data either by date-range or simply by “<code>current_flag = Y</code>”.</p>
+
+<p>As with solution A above, record keys need to be stable to avoid updating fact tables that refer to the dimension records.</p>
+
+<h1 id="solution-c-batching-updates">Solution C: Batching Updates</h1>
+
+<p>This approach may be useful when the dimension table is too large to reimport on change, or an upstream relational DB cannot be used to structure the data in desired form before import.</p>
+
+<p>As records are modified in the upstream system, append the new data to a temporary table in BigQuery. Then occasionally (eg once per day) apply all queued changes to the target dimension table, producing a new table as output (which then replaces the original). This allows existing records to be modified or deleted, and the new records to be inserted with appropriate values.</p>
+
+<p>If changes are already being delivered from the upstream system as batches, then that makes things even easier.</p>
+
+<p>This approach allows the “type 2b” or “type 2c” approach from the <a href="https://en.wikipedia.org/wiki/Slowly_changing_dimension">Slowly Changing Dimensions</a> to be applied within BigQuery; in particular existing records for which a newer version now exists can be rewritten to have an <code>end_date</code> column, and their <code>current_flag</code> (if present) can be changed from <code>Y</code> to <code>N</code>.</p>
+
+<p>Of course rewriting a table is an expensive operation, which is why it is necessary to apply changes in batches.</p>
+
+<p>The disadvantage of this approach is that when small updates are being delivered frequently, eg as they are being made in the upstream mutable (and probably relational) system, then there will be a delay until this new information is available for joining fact-tables against. That is unfortunately the price to pay for using BigQuery - or any other database where updates are expensive and inefficient. The benefit of BigQuery is of course its cheap and fast (because scaleable) queries.</p>
+
+<p>The BigQuery UPDATE and DELETE statements are not useful for applying batches of changes to individual records. BigQuery supports a non-standard SQL statement <code>MERGE</code> which can be used to do such rewriting; the statement is extremely powerful - but also quite complex to use. If <code>merge</code> is not sufficient, then a <em>dataflow application</em> can be used to apply the batched updates to the target table.</p>
+
+<p>Running a <code>MERGE</code> or a dataflow application takes time; the results should be exposed <em>atomically</em> to other applications that are currently querying the dimension table being updated. The Google documentation suggests the following approaches for this:</p>
+
+<ul>
+  <li>write the records to a whole new table, and use a view used to atomically switch between old and new table versions; or</li>
+  <li>write the records to a file on disk, and then rely on the atomic behaviour of a load-job to replace the old table with the contents of the file</li>
+</ul>
+
+<h1 id="solution-d-append-updates-with-timestamp-non-mutating">Solution D: Append Updates With Timestamp (Non-mutating)</h1>
+
+<p>In this approach, updates to a dimension are simply appended to the existing table without modifying the original records at all. Each dimension record has a timestamp indicating when it was created, and joins against the table use SQL to pick out the version of the record with logical-key X which has the highest creation-timestamp.</p>
+
+<p>This is effectively option (2a) from the <a href="https://en.wikipedia.org/wiki/Slowly_changing_dimension">Slowly Changing Dimensions</a> article.</p>
+
+<p>Unfortunately, such queries are rather inefficient. This approach is therefore not particularly scalable. In addition, the SQL that is needed to implement this is complicated. Some queries which implement this are shown below.</p>
+
+<h2 id="finding-the-latest-record-with-a-max-based-query">Finding the Latest Record with a Max-based Query</h2>
+
+<p>Here is one possible solution for finding the “most recent” record for a table:</p>
+
+<pre><code>-- assume dimension table with form (key1, key2, rdata, lastModified)
+-- assume fact table with form (key1, key2, ldata)
+-- where (key1, key2) are a multipart primary key
+-- and we want to simply join each fact record against the "most recent version" from the dimension table
+
+#standardSQL
+select l.key1, l.key2, l.ldata, r.rdata
+from dataset.left l
+inner join (
+  select key1, key2, max(lastModified) as maxModified
+  from dataset.right
+  group by key1, key2) as rmax
+on l.key1=rmax.key1 and l.key2=rmax.key2
+inner join dataset.right r
+on l.key1=r.key1 and l.key2=r.key2 and r.lastModified=rmax.maxModified
+</code></pre>
+
+<p>The first inner join effectively derives a “lookup table” from the dimension-table which maps (key1, key2) to the most recent timestamp for that key. The fact table can then join to the dimension-table record with (key1, key2, maxModified) to get “the most recent record”.</p>
+
+<p>There is probably also a solution that uses the <code>row_number</code> analytic function rather than max + second join (see later).</p>
+
+<p>There are two problems with this whole approach, however:</p>
+
+<ul>
+  <li>the query (or other possible variants) is complex, even on its own (ie will not run fast), and</li>
+  <li>to join another table against this table, the query needs to be modified - making it even more complex.</li>
+</ul>
+
+<p>Finding the dimension record active at a date from the fact record is presumably also possible with the appropriate query, but even more complex. It would seem that an analytic function would be necessary in this case (rather than the max-based solution above).</p>
+
+<h2 id="finding-the-latest-record-with-an-analytics-based-query">Finding the Latest Record with an Analytics-based Query</h2>
+
+<p>The following query solves the “find most recent record” problem using the <code>row_number</code> analytic function rather than max + second join.</p>
+
+<pre><code>#standardSQL
+with
+  rtemp as (
+    select
+      r.key1, r.key2, r.rdata, r.lastModified,
+      row_number() over (partition by r.key1, r.key2 order by lastModified desc) as rn
+    from dataset.right r),
+  rlatest as (select * from rtemp where rtemp.rn = 1)
+select l.key1, l.key2, l.ldata, r.rdata, r.lastModified from
+  dataset.left l inner join rlatest r
+  on l.key1 = r.key1 and l.key2 = r.key2
+  order by l.key1, l.key2
+</code></pre>
+
+<p>This query works in a similar way to the “max” solution above; the inner select generates a table <em>rlatest</em> with just the most recent record from <code>dataset.right</code> for each <code>(key1, key2)</code> pair. Unfortunately, <a href="https://cloud.google.com/bigquery/docs/reference/standard-sql/query-syntax#where-clause">a BigQuery where-clause cannot reference column aliases</a>; it is therefore necessary to compute column “rn” in a nested select (rtemp).</p>
+
+<p>It is not clear (to me) how to write a function that uses timestamps from records in the “left” table to find the matching record in the right table.</p>
+
+<p>The BigQuery docs also provide <a href="https://cloud.google.com/bigquery/streaming-data-into-bigquery">a query for deduplicating tables</a> which might form a good starting-point for a “select most recent” query.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Slowly_changing_dimension">Slowly Changing Dimensions</a> article option with start-date and end-date requires record modification at first sight (to set end-date on existing records when a new version is inserted). However perhaps an analytic function with the correct window might be able to implicitly deduce an end-date which is equal to the start-date of the following record?</p>
+
+<h2 id="finding-the-latest-record-with-an-outer-join">Finding the Latest Record with an Outer Join</h2>
+
+<p><a href="https://www.brentozar.com/archive/2009/04/getting-the-most-recent-record/">This page</a> presents an interesting query that might be a good base for an alternative query to “find the most recent record”.</p>
+
+<pre><code>-- based on https://www.brentozar.com/archive/2009/04/getting-the-most-recent-record/
+-- find records from right where there is no record with a larger lastModified timestamp
+-- (and thus the outer-join populates the fields from rn with nulls)
+SELECT `r.*`
+  FROM dataset.right r
+    LEFT OUTER JOIN dataset.right rn
+    ON (r.key1 = rn.key1) and (r.key2 = rn.key2) and r.lastModified &lt; rn.lastModified
+  WHERE rn.key1 IS NULL
+</code></pre>
+
+<h2 id="test-data-for-latest-record-queries">Test Data for Latest Record Queries</h2>
+
+<p>In order to test the above queries, I wrote a small python program to generate test data. For reference, here it is:</p>
+
+<pre><code>TODO: add test code here
+!!
+</code></pre>
+
+<p>The test-data file can be loaded with</p>
+
+<pre><code>bq load --source_format=NEWLINE_DELIMITED_JSON dataset.left ./left.json
+</code></pre>
+
+<h1 id="solution-e-update-data-masking">Solution E: Update Data Masking</h1>
+
+<p>The <a href="https://cloud.google.com/solutions/bigquery-data-warehouse#handling_change">Google docs</a> describe an “update data masking” approach (“Technique 3”) with a main table for the dimension and a separate table for “updates”, with a view that joins the base table against the updates table.</p>
+
+<p>This is effectively a variant of the above solution, where clever SQL is used to pick out the “latest” record without mutating older records when they are made obsolete.</p>
+
+<p>When the number of updates is small relative to the size of the dimension table then this might be more efficient than inserting updates into the dimension table directly. It is, however, less elegant, and the SQL is complex.</p>
+
+<p>The example view Google provides relies on the non-standard <code>IF#introduction</code> SQL operator.</p>
+
+<h1 id="other-issues">Other Issues</h1>
+
+<h2 id="interactions-between-streaming-and-updates">Interactions between Streaming and Updates</h2>
+
+<p>UPDATE, DELETE and MERGE statements cannot be executed while streaming is “active” (a non-empty streaming buffer exists). Presumably solution D or E (join dimension table with update data) would work while streaming is active, but storing the results back to the original table would fail. However dimension tables are unlikely to be the target of streaming writes (unlike fact tables, where streaming inserts are common).</p>
+
+<p>NOTE: when using streaming as a workaround for <a href="/cloud/beam-send-pubsub/">unable-to-block-on-completed-upload</a>, this could be a problem.</p>
+
+<h2 id="the-merge-statement">The Merge Statement</h2>
+
+<p>The BigQuery MERGE statement <a href="https://cloud.google.com/bigquery/docs/reference/standard-sql/dml-syntax#merge_statement">is well documented</a> - but is complex. As a brief taste of what it looks like:</p>
+
+<pre><code>merge target_table t
+using updates_table u
+on t.id = u.id
+when matched and u.op="update" then update set t.foo = u.foo
+when matched and u.op="delete" then delete
+when not matched by target then ..
+when not matched by source then ..
+</code></pre>
+
+<h1 id="summary">Summary</h1>
+
+<p>At this point, this article has hopefully provided enough context to allow <a href="https://cloud.google.com/solutions/bigquery-data-warehouse#handling_change">the Google documentation on handling changing data</a> (which was mentioned in the introduction to this article) to be more easily understood.</p>
+
+<p>If you have any good solution to the problem that is not mentioned above, please let me know!</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="/programming/dwh-intro/">Vonos.net - Introduction to Data Warehousing</a></li>
+  <li><a href="https://cloud.google.com/solutions/bigquery-data-warehouse#designing_schema">Google: Designing schemas</a></li>
+  <li><a href="https://cloud.google.com/solutions/bigquery-data-warehouse#handling_change">Google: Handling Change</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Slowly_changing_dimension">wikipedia: slowly changing dimensions</a></li>
+  <li><a href="https://cloud.google.com/solutions/teradata-to-gcp#stage4">Google: teradata to BigQuery</a></li>
+  <li><a href="https://cloud.google.com/solutions/bigquery-data-warehouse">Google: BiqQuery</a></li>
+  <li>
+<a href="https://www.dremio.com/what-is-a-data-warehouse/">Dremio: What is a Data Warehouse</a> - a good summary of what a Data Warehouse is and does.</li>
+  <li><a href="https://www.lifewire.com/facts-vs-dimensions-1019646">Lifewire: Facts vs Dimensions</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Data_vault_modeling">Wikipedia: Data Vault Modelling</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/bigquery-mutable-dimensions/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

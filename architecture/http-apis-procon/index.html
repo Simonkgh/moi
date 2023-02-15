@@ -1,0 +1,382 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - HTTP APIs, REST APIs, and Others - Pros and Cons</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>HTTP APIs, REST APIs, and Others - Pros and Cons</h1>
+    <aside>First published on: December 1, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a>, <a href='/category/Programming/'>Programming</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>I recently watched <a href="https://www.youtube.com/watch?v=nS8XHgMvqNo">a video by Derek Comartin</a> in which he mentions that what most people call REST APIs aren’t actually consistent with the definition of REST - and therefore he prefers to call them HTTP APIs. This motivated me to actually read <a href="https://ics.uci.edu/~fielding/pubs/dissertation/top.htm">the original paper</a> by Roy Fielding on REST, and to consider the pros and cons of using HTTP as a basis for invoking remote services.</p>
+
+<p>Fielding’s paper (from the year 2000) is actually rather hard to read. Understanding it requires understanding the standard conventions of software development and networks at the time it was written, ie the things it was a reaction to are not clearly spelled out. Interestingly, Fielding saw what we now know as <a href="https://en.wikipedia.org/wiki/HATEOAS">HATEOAS</a> as a core part of <a href="https://en.wikipedia.org/wiki/REST">REST</a>; this is discussed further in the section on HATEOAS. What is important here is that in <a href="https://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven">an article from 2008</a>, Fielding states “Please adhere to (the above rules) or choose some other buzzword for your API” - and that clearly includes HATEOAS (which he calls “hypertext-driven”). Therefore HTTP-API is indeed the correct description for the interface to most systems.</p>
+
+<p>In addition to addressing “what is REST”, this article looks at the pros and cons of using HTTP for client/server communication (API calls) versus other protocols (eg <a href="https://en.wikipedia.org/wiki/GRPC">gRPC</a>, <a href="https://en.wikipedia.org/wiki/Common_Object_Request_Broker_Architecture">CORBA</a>, <a href="https://en.wikipedia.org/wiki/Java_remote_method_invocation">RMI</a>). The primary benefits of HTTP-centric APIs are:</p>
+
+<ul>
+  <li>outbound firewall friendly (ports 80/443)</li>
+  <li>inbound firewall friendly (ports 80/443)</li>
+  <li>supports cacheing at front-end, back-end, and intermediate levels</li>
+  <li>scalable server-side due to stateless requests</li>
+  <li>HTTP-level security protection</li>
+  <li>routable (supports federation of services)</li>
+  <li>decoupling of language and technology between client and server</li>
+  <li>resource-centric design promotes endpoint stability</li>
+  <li>simply well-known and widely supported</li>
+  <li>debuggable</li>
+  <li>testable</li>
+  <li>and optionally HATEOAS</li>
+</ul>
+
+<p>The primary disadvantages are:</p>
+
+<ul>
+  <li>verbose wire representations (lots of headers and often JSON text body)</li>
+  <li>high volume of data transfer due to statelessness</li>
+  <li>firewalls and protocol-level routers add latency</li>
+  <li>need for a reverse proxy (in most cases)</li>
+  <li>poor version management of body content</li>
+</ul>
+
+<p>These topics are discussed further below; I don’t have any particular agenda to promote, but found quite a lot of interesting discussion-points when considering this. Your feedback is very welcome.</p>
+
+<p>Note that the Wikipedia page on REST also covers some of these topics, but in less detail.</p>
+
+<h1 id="hateoas-and-rest-vs-http-api">HATEOAS and REST-vs-HTTP-API</h1>
+
+<p>First, lets look at the issue of what is and is not “REST”.</p>
+
+<p>In 2008, Fielding <a href="https://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven">addressed the issue</a> of what is and is not REST, though (as in his original dissertation) I find much of the article unclear. The point starting “A REST API must not define fixed resource names..” is definitely a reference to what is often referred to as <a href="https://en.wikipedia.org/wiki/HATEOAS">HATEOAS</a> and does make an interesting analogy with HTML forms where the “submit” button already has the target URL for the form embedded in it (generated server-side). Fielding uses the term “hypertext-driven” for this approach; the only URL that a client needs to know is the entry-point for the system.</p>
+
+<p>Derek’s video, which inspired my research, states that many systems claiming to be “RESTful” are in fact not at all so, and that the term “HTTP API” is probably a better one. The <a href="https://en.wikipedia.org/wiki/REST">Wikipedia article on REST</a> states something similar:</p>
+
+<blockquote>
+  <p>An application that obeys the REST constraints may be informally described as RESTful, although this term is more commonly associated with the design of HTTP-based APIs and what are widely considered best practices regarding the “verbs” (HTTP methods) a resource responds to while having little to do with REST as originally formulated—and is often even at odds with the concept.</p>
+</blockquote>
+
+<p>Another article I found suggests that any time a client must build a URL by concatenating values (including inserting resource-ids), that API is not REST-compliant.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Richardson_Maturity_Model">Richardson Maturity Model</a> is somewhat more generous, supporting “levels” of REST compatibility in which HATEOAS is “level 3”.</p>
+
+<p>The hypertext/HATEOAS approach enhances decoupling between client and server by reducing the need for the client to embed knowledge about the URL(s) required for “the next steps” for any operation. Instead the server can return a table (map) of <code>(stepid-&gt;url)</code>. Given that clients still need to build the body for requests, and interpret the body of responses, I’m not convinced that this really helps a huge amount with decoupling - and in over 20 years in the IT industry I’ve never created or even used such an API. However I can see the approach being useful for some things - eg paging through data.</p>
+
+<p>This kind of decoupling is hard to imagine in any other kind of API protocol; it is tightly coupled to the REST concept of URLs as the core reference mechanism.</p>
+
+<p>One issue with REST’s focus on “resources” is that it fits the needs of a CRUD-centric API well - operations to create/read/update/delete specific entities. However not all services can (or should) be mapped to a CRUD model; sometimes an API better maps to “business level operations”.</p>
+
+<h1 id="the-evolution-of-http">The Evolution of HTTP</h1>
+
+<p>Before addressing specific topics, it may be worth pointing out how radically different HTTP/2 is from previous protocols.</p>
+
+<p>In HTTP/1.0, a client opens a network socket, makes a request, waits for the response, and closes the socket; this is repeated for each request. While simple, and easy to deal with at the server side, it turns out to be a major performance bottleneck.</p>
+
+<p>In HTTP/1.1, a client opens a network socket and can then make multiple requests for resources from that host - although requests cannot be issued in parallel, ie the client must wait for a response before issuing the next request<sup id="fnref:pipeline" role="doc-noteref"><a href="#fn:pipeline" class="footnote" rel="footnote">1</a></sup>. This version of HTTP therefore removes delays due to TCP socket setup (including acceptance of the socket by the target host), but does not address other bottlenecks.</p>
+
+<p>In both HTTP/1.0 and 1.1 it is common for clients to open multiple sockets in order to request resources in parallel, but this is both tricky to manage and increases load on the server.</p>
+
+<p>In <a href="https://httpwg.org/specs/rfc7540.html">HTTP/2.0</a>, a client opens a network socket and exchanges a sequence of <em>binary packets</em> with the server. The format of data transfer over the socket is no longer just blocks of ASCII of form <code>headers\n\nbody</code> but is instead a binary protocol that divides transferred data into “packets” of form <code>(length, type, flags, streamid, data)</code>. For a specific streamid, selecting only frames with type=DATA and combining all their <code>data</code> sections will result in a traditional HTTP/1.0 request. The server returns data in the same way, ie an HTTP/1.0 response for a request received “in stream N” is split into packets each labelled with the matching streamid. This approach is called “multiplexing” and allows multiple requests to be sent truly in parallel; not only can new requests be sent before earlier response, but large requests are split into packets so that smaller requests aren’t “blocked” until it is transmitted. Responses from the server are similarly sent in parallel, ie a large response is “packetized” and so doesn’t block smaller responses. And in addition, the <em>server</em> can create a stream, ie “push” data to a client.</p>
+
+<p>The features of HTTP/2 actually resemble the TCP protocol in some ways, ie produce a “userspace packet network”. Clearly this requires radical upgrades to clients, servers, proxies, caches, etc. It also radically changes the kinds of security checks that can be applied to HTTP data “at the firewall”, the logs that proxies generate, etc. However on the other hand, each (client-initiated) “stream” is a traditional HTTP/1.0 request so at least some traditional checks can be applied at the stream level if not the socket level.</p>
+
+<p>Often, proxies handle HTTP/2 by extracting the “streams” and making simpler HTTP/1.0 requests to the actual targets of each request, ie the business software that actually serves resources or handles API requests doesn’t need to be aware of parallel streams. This is particularly the case for applications with “REST apis”, as traditional REST pre-dates HTTP/2. However gRPC requires HTTP/2 and explicitly supports “server side push”.</p>
+
+<h1 id="firewalling">Firewalling</h1>
+
+<p>Internet service providers (ISPs) for private customers often limit the set of ports that their users can open outbound - primarily in order to prevent their customers from abusing other sites which then causes problems for the providing ISP. However ISPs <em>always</em> support HTTP/HTTPS outbound from customer systems - and therefore tunnelling API calls over those ports avoids all firewalling issues. This same issue often also applies to clients within an organisation’s IT network. I think an argument could be made for allocating a new port for API calls, separated from normal web usage (browsing websites), but that boat has sailed.</p>
+
+<p>On the server side, using HTTP also resolves firewall issues. Any organisation with a web presence must allow inbound traffic to HTTP ports on relevant servers - it’s just a typical thing. Providing an API on a different port will be regarded by network administration and IT security staff as “weird” and therefore be more complex to get approved and applied. That doesn’t mean that HTTP ports are necessarily the <em>right</em> place for that traffic - just that it’s the path of least resistance. And those used to the cloud world with routing rules managed via infrastructure-as-code must remember that REST was developed in the days when network routing was always managed by a dedicated team of network experts.</p>
+
+<p>These issues were important motivators of Fielding’s original work.</p>
+
+<h1 id="cacheing">Cacheing</h1>
+
+<p>Web content is often very stable - and sometimes immutable. Examples include newspaper articles or programming tutorials. Other things such as the current weather report can be relatively slow-changing. It therefore makes sense for such content to be cached, either at the client (browser level), server-side at some higher level than the server which “owns” the content, or at some intermediate level eg at an ISP or general-purpose caching provider.</p>
+
+<p>APIs can also under some circumstances return data that is relatively stable. However in order to cache something effectively, it needs to have a suitable <em>key</em>. The REST principles of having URLs represent <em>resources</em> is designed to allow <em>urls</em> to (often) act as an appropriate cache key.</p>
+
+<p>I suspect this feature is not terribly important in modern APIs; modern systems often do very heavy per-user customisation and anything user-specific cannot be cached. However where it does apply, it can produce huge benefits - particularly for systems with very large numbers of users.</p>
+
+<p>HTTP has a large suite of headers related to cacheing. Server responses can specify cache eligibility and duration while client requests can include headers such as “if-modified-since” or etags.</p>
+
+<p>REST emphasises using standard HTTP verbs (GET/POST/PUT/DELETE/etc) for operations. Using GET for reads (and only for reads) is indeed important as it interacts with cacheing; the others are mostly important for consistency/understandability.</p>
+
+<h1 id="statelessness">Statelessness</h1>
+
+<p>REST was a reaction to things such as CORBA, DCOM, and RMI, in which a client application would logically connect to “a particular object instance” and then “invoke methods on that object”. This typically resulted in that object’s state being maintained in memory on a particular server, and requiring all network requests for that object instance to be routed to that particular server. The approach in theory has some elegance, being a distributed version of the same code we developers are used to writing for use within a single process. However when used over a network it leads to scalability and reliability issues.</p>
+
+<p>Statelessness improves scalability; any incoming request can be dispatched to any member of a pool of servers. It also improves availability; when a server from that pool fails, subsequent requests can be dispatched to any other server which is still up. Both of these can be supported if state is stored externally to the process, eg in something like Redis, but that has a significant performance hit - and that central store can itself become a performance bottleneck.</p>
+
+<p>The benefits of being able to route a request to any server in a pool is also important for continuous deployment, where new versions of (server-side) software are deployed transparently to users, and for cloud systems where processes may be migrated between hosts.</p>
+
+<p>Statelessness does have a cost; it requires significant additional data to be transmitted with each request (in both directions). It also departs from the design patterns used for object-oriented programming in which objects naturally hold state between method calls.</p>
+
+<p>Note that any time a client must pass a “state id” (often known as a session-id) in a request, then that request is stateful - even if the data associated with that stateid is stored in a database. Obviously, not all IDs in requests indicate a “stateless” request; passing a “userid” that refers to user settings which evolve over time is not stateful. The primary aspect of “state data” is that it is “uncommitted”, ie doesn’t affect business processes until some “commit” or “complete” or “publish” operation occurs. State often also “expires”, while real data does not. However there can be grey areas; is an “orderid” which refers to an incompleted order stateful or stateless? If stored in memory, definitely state; if stored in a “cache” type database such as Redis then also definitely state; if stored in a regular persistent database until a user completes or cancels the order, then it is probably not state and a request referencing that in-progress-order would not be stateful.</p>
+
+<p>REST services should definitely be stateless. I would also recommend that anything offering an HTTP-API also be stateless, and that state be limited only to “presentation tier” code. This does in turn suggest that it is dangerous to mix presentation-logic and business-logic in the same tier - ie a process which offers an API to business functionality should do <em>only that</em>, and anything returning HTML markup or similar should be separated into a different process. Without clear separation, it is all too easy for supposedly-stateless APIs to start relying on data stored in a stateful datastructure originally created for the use of the presentation tier.</p>
+
+<h1 id="security">Security</h1>
+
+<p>When using REST, various security checks can be done “at the firewall” (proxy server), based on the URL and any HTTP headers. When the payload is a standard protocol such as JSON or XML then there are potentially other checks that can be done on that payload itself - though that is relatively rare. This is not the case for binary protocols such as CORBA.</p>
+
+<p>Even when other protocols use HTTP to carry their payloads (eg gRPC), the lack of clear URLs and standardised headers limit the set of security checks that can be done outside of the service to which the request is addressed.</p>
+
+<h1 id="routing">Routing</h1>
+
+<p>HTTP requests can be received at a single point and then forwarded to various systems depending upon the URL path for the request, thus making a set of services appear like a single system. Alternatively, multiple hostnames (typically subdomains of a common parent domain) can be mapped to a single entrypoint (which can be a pool of reverse proxies) and then forwarded based on hostname. This ability makes scaling and refactoring of systems much easier - particularly when client applications are not under the control of the service implementers (open APIs).</p>
+
+<p><a href="https://graphql.org/">GraphQL</a> takes this to its logical extreme, allowing a single request to be forwarded to <em>multiple systems in parallel</em> with the responses from the systems then being merged together into a single response.</p>
+
+<p>Support for this behaviour can be difficult for protocols that don’t have an explicit “path” equivalent to a URL.</p>
+
+<p>Fielding does mention “layered systems” but even after reading his description of these multiple times, it isn’t clear whether this forwardability was what “layered systems” was meant to imply. The Wikipedia entry on REST, however, includes this feature as an attribute of “layering”.</p>
+
+<h1 id="decoupling">Decoupling</h1>
+
+<p>HTTP is a language-independent protocol, and every language ever invented has multiple libraries for interacting with a remote HTTP server. Using HTTP as the API protocol therefore opens up a server to the maximum number of clients. If you need a network API to be available to the widest possible audience, REST is the right tool.</p>
+
+<p>Servers can support multiple data formats as input and output for the same API, eg HTTP-forms, JSON, XML, or various binary formats. Clients can select any supported format, potentially allowing an API to be more accessible to a wider range of client applications. However in practice, the effort needed to support multiple data formats is significant and I suspect it’s pretty rare.</p>
+
+<p>The resource-centric nature of REST (and of many HTTP-APIs) does, in my experience, lead to APIs which are relatively stable over the lifetime of an application. Protocols such as CORBA or RMI are probably harder to evolve while maintaining backwards compatibility. The gRPC <em>protobuf</em> encoding format for messages does have some ability to be extended while keeping backwards compatibility for older clients.</p>
+
+<p>REST (with HATEOAS) does decouple clients from the paths at which endpoints are available - unlike HTTP-API and other RPC-centric approaches in which clients need to be explicitly aware of the names of all endpoints that they invoke. However, as noted earlier, a client presumably needs to be aware of request and response formats for any endpoint so I’m not sure how valuable that is in practice.</p>
+
+<h1 id="debugging-and-testing">Debugging and Testing</h1>
+
+<p>Services based upon URLs with text payloads are much easier to debug and test than services based upon binary payloads and opaque endpoint specifiers.</p>
+
+<p>Standard logfiles or log collectors can be used to view requests. Tools such as <code>curl</code> can be used to submit test requests.</p>
+
+<h1 id="api-stability">API Stability</h1>
+
+<p>REST’s focus on “resources” rather than “services” potentially improves API stability. It isn’t a big difference, but developers are likely to think more deeply about “should this resource exist” and “is this resource part of my domain model” than about “should this operation/function/method be exposed”.</p>
+
+<h1 id="some-notes-on-grpc">Some Notes on gRPC</h1>
+
+<p>One significant alternative to REST is <a href="https://en.wikipedia.org/wiki/GRPC">gRPC</a>, an open-source protocol originally created by Google and used extensively within Google’s systems.</p>
+
+<p>gRPC combines HTTP/2 with <em>Protocol Buffers</em> binary encoding for the message body (payload). It therefore gets some of the benefits of REST (firewall transition in particular) while getting more compact representation, faster serialization/deserialization, and standardised payload evolution.</p>
+
+<p>The API for a system is defined as messages in a “protocol definition file” and then a tool is used to generate appropriate client and server stubs from that definition file in <a href="https://grpc.io/docs/languages/">any programming language which the tool supports</a> (12 at the time of writing this article). If an API needs to be made available to the widest possible range of clients, then it is necessary to offer a REST or other HTTP API instead of, or in parallel to, a gRPC API.</p>
+
+<p>Like REST, gRPC is stateless. Unlike REST, gRPC natively supports “streaming” of events from the server to the client - something that, for a server offering a REST or other HTTP API, requires a separate protocol such as <a href="https://en.wikipedia.org/wiki/Comet_(programming)">comet</a>.</p>
+
+<p>Although gRPC is carried over HTTP/2, which requires each request to specify a target URL, gRPC doesn’t provide the developer with any control over the URLs that are used by the client and server. These are automatically derived by the gRPC stub-generation tools from the interface specifications. This in turn means that performing security at any HTTP/2-compatible reverse proxy is difficult. However the URLs are reasonable and so proxy logs showing “urls invoked” should still be helpful; AFAICT the URLs should be of form <code>{host}://{package}.{service}/{method}</code>.</p>
+
+<p>It isn’t clear to me whether <em>caching</em> works effectively; HTTP/2 can specify caching headers but without a suitable <em>key</em> for the caching (the URL), caching is not effective. As noted earlier, cacheing is only occasionally useful for <em>api responses</em> - but when it applies, it can be powerful.</p>
+
+<p>gRPC does support limited modifications of existing messages without breaking backwards compatibility, in the same way that JSON-based APIs can be evolved.</p>
+
+<p>gRPC cannot currently be used directly from browsers (ie is restricted to server-to-server and mobile-app-to-server), due to browsers failing to provide adequate APIs for HTTP/2. However the <a href="https://github.com/grpc/grpc-web">gRPC-web</a> project provides browser libraries that can communicate with a suitable <em>proxy</em> to connect to gRPC services.</p>
+
+<p>Because gRPC is a binary protocol, debugging and testing are not as simple as with JSON; data cannot be so easily viewed and tools such as <code>curl</code> cannot be used to submit test messages (though <a href="https://github.com/fullstorydev/grpcurl">grpcurl</a> can be used).</p>
+
+<h1 id="other-notes">Other Notes</h1>
+
+<p>Any architecture which requires statelessness (which includes REST) does depart from object-oriented conventions, ie it results in a clear “break” between APIs for internal use and those intended for external clients.</p>
+
+<p>Even ignoring the state issue, HTTP-APIs (and more specifically REST) are distinctly different from regular APIs that would be found in a library. Protocols such as gRPC are far more “natural” and therefore may be easier to implement and maintain.</p>
+
+<h1 id="additional-references-and-further-reading">Additional References and Further Reading</h1>
+
+<ul>
+  <li><a href="https://aws.amazon.com/compare/the-difference-between-grpc-and-rest/">Amazon: gRPC vs REST</a></li>
+  <li><a href="https://cloud.google.com/blog/products/api-management/understanding-grpc-openapi-and-rest-and-when-to-use-them">Google: gRPC vs REST</a></li>
+</ul>
+
+<h1 id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:pipeline" role="doc-endnote">
+      <p>Well, HTTP1.1 does theoretically support <a href="https://en.wikipedia.org/wiki/HTTP_pipelining">pipelining</a>, but it has limitations and is so poorly supported by many clients and servers that it isn’t practical. <a href="#fnref:pipeline" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/http-apis-procon/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

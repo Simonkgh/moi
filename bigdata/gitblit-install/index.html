@@ -1,0 +1,349 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Gitblit - a simple Git Repository Manager</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Gitblit - a simple Git Repository Manager</h1>
+    <aside>First published on: March 18, 2019</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>This page describes the <a href="http://gitblit.com/">gitblit</a> Git repository manager, and how to install it on Linux.</p>
+
+<p>Gitblit provides:</p>
+
+<ul>
+  <li>a server that understands the Git remote network protocols, ie supports pull/push from remote systems (with authentication) via <code>http://</code>, <code>ssh://</code> and <code>git://</code> urls</li>
+  <li>a web interface that allows git repos to be defined, users and credentials to be managed, and code to be browsed.</li>
+</ul>
+
+<p>Gitblit is much simpler than alternatives like Github/Gitlab/Bitbucket - but far less resource-hungry. It is also very simple to install.</p>
+
+<p>The <a href="https://github.com/gitblit/gitblit">Github project page for gitblit</a> is rather inactive (and I could not find any active forks) - but Gitblit just works.</p>
+
+<p>There are two bundles offered by the project: a Java war-file intended to be run within a Java Servlet Engine, and the “Gitblit GO” bundle that embeds a servlet engine. Given that the downloads are so old (inactive project), I would recommend using the war-file with an up-to-date servlet engine, and that is the approach documented below.</p>
+
+<h1 id="preparation">Preparation</h1>
+
+<h2 id="java">Java</h2>
+
+<p>Install Java - eg on Ubuntu <code>apt install openjdk-8-jre-headless</code>.</p>
+
+<p>Note that gitblit has problems with Java 9 and later:</p>
+
+<ul>
+  <li>the launcher for “Gitblit GO” requires access to URLClassLoader, but this is class is inaccessible in Java 9 and later</li>
+  <li>the war-file requires various libraries (including <code>javax.activation</code>) which are not included in Java 9; this is potentially fixable by adding the necessary libraries into Tomcat’s lib directory but using openjdk-8 seems a simpler solution (at least as long as Java 8 is supported).</li>
+</ul>
+
+<h2 id="other-tools">Other Tools</h2>
+
+<p>Ensure that Git is installed, eg on Ubuntu <code>apt install git</code>.</p>
+
+<h1 id="installing-tomcat">Installing Tomcat</h1>
+
+<p>Install the Apache Tomcat Java Servlet Engine. Ubuntu has a standard package for this (<code>apt install tomcat8</code>) but this creates a user <code>tomcat8</code> and automatically starts Tomcat on the standard ports as that user; ideally gitblit would be run as its own user. I therefore recommend installing Tomcat manually as follows.</p>
+
+<p>To install Tomcat 9 manually into <code>/opt</code>, run the following instructions as root:</p>
+
+<pre><code>cd /tmp
+wget http://.../apache-tomcat-9.*.tar.gz  # obtain actual link to current release from http://tomcat.apache.org
+tar zxf apache-tomcat*
+rm apache-tomcat-9*.tar.gz
+mv apache-tomcat-9* /opt
+cd /opt
+ln -s apache-tomcat-9* tomcat9
+cd tomcat9
+find . -type d -exec chmod o+x {} \;
+chmod -R o+r . 
+chmod o+x bin/*.sh
+</code></pre>
+
+<p>The instructions below take advantage of Tomcat’s ability to store the core binaries in a central location, and have each “tomcat instance” just consist of the necessary config-files and directories while referencing the core binaries from the central location. In particular, script “<code>bin/makeinst.sh</code>” makes this easy - but that is only included in Tomcat 9 and later. Gitblit works fine with Tomcat 9.</p>
+
+<h1 id="install-gitblit-files">Install Gitblit Files</h1>
+
+<p>First, (as root) create a user for gitblit to run as:</p>
+
+<pre><code>mkdir /opt/gitblit
+useradd --system --home /opt/gitblit --shell /usr/sbin/nologin gitblit
+chown -R gitblit:gitblit /opt/gitblit
+</code></pre>
+
+<p>Then as the gitblit user (<code>su --shell /bin/bash gitblit</code>):</p>
+
+<ul>
+  <li>Download the gitblit warfile from the gitblit home site, eg to <code>/tmp/gitblit.war</code> (wget is the recommended tool)</li>
+  <li>Run the following instructions</li>
+</ul>
+
+<pre><code>cd ~
+sh /opt/tomcat9/bin/makebase.sh tomcat
+
+# Optionally edit ~/tomcat/conf/server.xml to change the default ports
+
+# Install gitblit into tomcat
+mv /tmp/gitblit.war ~/tomcat/webapps/gitblit.war
+
+# Unzip manually so that files can be edited
+cd ~/tomcat/webapps/
+unzip gitblit.war
+
+# Optionally, configure gitblit
+# By default, {basefolder} is WEB-INF/data, ie git repos are stored under WEB-INF/data/git
+edit gitblit/WEB-INF/data/gitblit.properties 
+</code></pre>
+
+<h1 id="ports">Ports</h1>
+
+<p>The gitblit application:</p>
+
+<ul>
+  <li>opens a port for <code>git://</code> access to the repos (defined in WEB-INF/data/defaults.properties as 9418; can be overridden in WEB-INF/data/gitblit.properties)</li>
+  <li>opens a port for <code>ssh://</code> access to the repos (defined in WEB-INF/data/defaults.properties as 29418; can be overridden in WEB-INF/data/gitblit.properties)</li>
+  <li>and of course uses the tomcat ports specified in conf/server.xml
+    <ul>
+      <li>8080 for http</li>
+      <li>8443 for https</li>
+      <li>8005 for startup/shutdown - localhost interface only</li>
+      <li>8009 for AJP1.3 protocol (when a webserver such as Apache HTTPD is forwarding requests to Tomcat) - localhost interface only</li>
+    </ul>
+  </li>
+</ul>
+
+<h1 id="set-up-systemd-init">Set up systemd-init</h1>
+
+<p>As root, set up systemd as follows:</p>
+
+<pre><code>cat &gt; /etc/systemd/system/gitblit.service &lt;&lt;EOF
+[Unit]
+Description=Gitblit
+After=syslog.target network.target
+ 
+[Service]
+User=gitblit
+Group=gitblit
+UMask=0007
+
+Type=simple
+
+Environment=JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'
+Environment=CATALINA_HOME=/opt/tomcat9
+Environment=CATALINA_BASE=/opt/gitblit/tomcat
+Environment='CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC -Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true'
+ 
+WorkingDirectory=/opt/gitblit/tomcat
+ExecStart=/bin/sh /opt/tomcat9/bin/catalina.sh run
+ 
+RestartSec=10
+Restart=always
+ 
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now gitblit
+systemctl status gitblit
+journalctl --unit=gitblit --since="- 5 minutes"
+</code></pre>
+
+<h1 id="use-gitblit">Use Gitblit</h1>
+
+<p>Now you can visit the app at <code>http://{yourhost}:8080/gitblit/</code>. The default login credentials are admin/admin.</p>
+
+<p>Within the web UI, you can:</p>
+
+<ul>
+  <li>create new repositories (which creates a git repo on local filesystem)</li>
+  <li>add users and grant them access to repos</li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/gitblit-install/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

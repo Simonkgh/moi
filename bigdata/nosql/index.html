@@ -1,0 +1,684 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - NoSQL Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>NoSQL Overview</h1>
+    <aside>First published on: April 16, 2016</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      <h1 id="introduction">Introduction</h1>
+
+<p>Recently a friend asked me what “NoSQL” was about.  A while ago I wrote an article on <a href="/bigdata/datastorage">big data storage</a> which includes some info on NoSQL databases, but I thought it might be helpful to write something shorter and specifically focused. I hope my personal view of the topic is helpful.</p>
+
+<p>The label “NoSQL” is used in two different ways:</p>
+
+<ul>
+  <li>as “No SQL” or “Not SQL”, meaning data storage and processing approaches that do not store data in a <em>relational database management system (RDMBS)</em> using the <em>relational model</em>, and do not query/process the data using the SQL language that most/all RDBMS products now support;</li>
+  <li>as “Not Only SQL”,  meaning complete IT solutions that may include RDBMS-based and SQL-based components where appropriate, but non-RDMBS storage components and non-SQL-based query/processing tools where appropriate too.</li>
+</ul>
+
+<p>In either case, NoSQL is a pretty generic description for many different tools for handling persistent data. Despite being rather vague, the term is nevertheless useful for discussion high-level concepts as done here. NoSQL databases are generally divided into key-value, document-based, bigtable-based, or graph-based. There is a fifth category which I will call “analytics-centric”.</p>
+
+<p>The category “key-value” is fairly widely known; these are hardly “databases” at all, with just the ability to store data associated with some unique identifier and later to read it back using that same identifier. Some key-value stores dond’t even support persistence (run completely in memory). Nevertheless, they can be extremely useful.</p>
+
+<p>Document-based databases store “objects” (data-structures). Like key-value stores, there is usually a single unique identifier (key) for each object, but (unlike key-value stores) queries can be used to find all objects whose fields match some search-criteria.</p>
+
+<p>The category “bigtable-based” includes such tools as Apache HBase and Apache Cassandra; these are also sometimes called “column family store” databases. These are tabular (like relational databases) but schemaless - the reader and writer need to agree on schemas.</p>
+
+<p>Graph-based databases are interesting for storing datasets where the relationships between records is more interesting than the record attributes (social networks, geographical data, various topics in biology and chemistry, etc). There is a set of queries which are easy and efficient to express over graph databases which are very difficult and inefficient to express over a relational database.</p>
+
+<p>I have invented the name “analytics-centric” to cover that set of technologies which optimise storage for running reporting and similar analysis topics over large amounts of read-only data. These systems almost always use column-oriented storage and put emphasis on parallel processing. The best know is Apache Hive combined with ORC-format files in a distributed filesystem. While the implementation is quite different from bigtable-based databases, some of the features are similar - at least at the level of this article.</p>
+
+<p>Interestingly, SQL-like (or even nearly-standard-SQL-compatible) support is provided on top of some NoSQL tools (particularly bigtable-based and analytics-centric); these are sometimes called “NewSQL”. In these cases, the underlying storage does not provide all standard relational database behaviour (otherwise it would be a relational db); things like foreign-key references and transactions are often sacrificed as a tradeoff for scalability - but at least queries often work the same.</p>
+
+<h1 id="structured-data-and-the-relational-model">Structured Data and the Relational Model</h1>
+
+<p>One of the most sigificant differences between NoSQL and relational systems is how structured data is represented.</p>
+
+<p>Let’s take a simple datamodel as an example. Persistent information about a “person” might look something like the following:</p>
+
+<pre><code>userid: 123
+personalname: Sue
+familyname: Smith
+emails:
+  type=private  sue.smith@google.com
+  type=work     sue.smith@mycompany.com
+phones:
+  type=home     1234567
+  type=work     666777888
+  type=mobile   999888777
+bookmarks:
+  name=...  url=...
+  name=...  url=...
+  name=...  url=...
+</code></pre>
+
+<p>In a relational database, this kind of information would be modelled as several different tables, eg:</p>
+
+<ul>
+  <li>table persons</li>
+  <li>table emails</li>
+  <li>table phones</li>
+  <li>table bookmarks</li>
+</ul>
+
+<p>The relational tables are then linked together with foreign-key references that allow the original datastructure above to be reconstructed when needed via <em>joins</em>.</p>
+
+<p>Among the “NoSQL” data storage tools, most instead store data such as the above as a single object with many properties (ie name, value pairs). Some properties hold primitive types such as strings or numbers while others are compound types - lists or structures holding more data. This is certainly true for NoSQL key-value-stores and document-stores, and partially true for graph databases and bigtable-based stores.</p>
+
+<p>There are naturally advantages and disadvantages to both relational and NoSQL approaches. This article generally assumes that the reader is familiar with relational databases and less familiar with the NoSQL approach, and thus the early points in this discussion emphasise the positive features of NoSQL. This article is, however, intended to be balanced, and pro-relational points are specifically mentioned towards the end.</p>
+
+<h1 id="why-nosql">Why NoSQL</h1>
+
+<p>Relational databases have been the king of data storage for many decades now. There are three primary reasons why there is currently a boom in alternative “NoSQL” storage technologies:</p>
+
+<ul>
+  <li>a desire to increase software developer productivity;</li>
+  <li>very large datasets;</li>
+  <li>very rapidly-changing datasets; and</li>
+  <li>very large numbers of concurrent users (for public web-accessible systems).</li>
+</ul>
+
+<p>The way data is modelled in memory by a programmer and the way it is stored in relational systems is radically different - particularly since the demise of procedural programming languages such as COBOL. Mapping between these two representations, and keeping the database schemas in-sync with the code (particularly when releasing a new version of a program to production) is a major nuisance. The NoSQL datastores are often considered to be better here - particularly in small/medium-sized projects with rapid development and release cycles.</p>
+
+<p>There is an increase in projects dealing with extreme volumes of data - hundreds of millions of records of data. These are best dealt with via clusters of servers (often hundreds) working together. Relational systems struggle with such architectures. They also struggle with environments in which data is being <em>rapidly inserted</em>, ie the datavolume is not only large, but growing.</p>
+
+<p>And companies now wish to provide access to their stored data via websites with potentially thousands, or hundreds of thousands, of concurrent users - with reasonable response-times.</p>
+
+<p>Sometimes all these issues come together, eg in companies like Twitter and Facebook.</p>
+
+<p>Relational databases do support clustering for scalability - but usually only up to a few dozen nodes. Many of the NoSQL databases can scale to thousands of nodes, with near linear improvement in storage volume and read/write performance. Of course they do sacrifice features found in relational systems to achieve this.</p>
+
+<h1 id="nosql-as-decomposed-databases">NoSQL as Decomposed Databases</h1>
+
+<p>Relational databases such as Oracle, DB2, SQLServer, and even MySQL and Postgres are extremely complex and powerful tools. They offer not only the ability to store data on disk, but also:</p>
+
+<ul>
+  <li>provide their own optimised filestorage formats</li>
+  <li>handle partitioning of data across multiple disks</li>
+  <li>handle bad disk sectors (maintain checksums, etc)</li>
+  <li>provide tools for bulk import and export</li>
+  <li>automatically update indexes when records are inserted/updated/deleted</li>
+  <li>provide an SQL compiler and optimiser</li>
+  <li>maintain statistics for use by the SQL optimiser</li>
+  <li>verify the integrity of inserts/updates/deletes</li>
+  <li>support schema alterations (sometimes online)</li>
+  <li>sometimes support clustering/sharding</li>
+  <li>support triggers and stored-procedures (in multiple languages)</li>
+  <li>support transactions (via locking or multi-version-concurrency)</li>
+  <li>detect deadlocks during transactions</li>
+  <li>provide reliable data storage in the presence of server crashes (journalling etc)</li>
+  <li>and much more</li>
+</ul>
+
+<p>In many cases, NoSQL tools are more like “toolkits” where a single component provides only a few of the above features. Often multiple NoSQL tools are then combined together to solve a specific problem. It is also common for a feature that in a relational-based system would be found within the database layer to instead be solved at a different layer, eg in the “business logic tier” of a multi-tier application. Alternatively, NoSQL tools can be seen as “decomposed” databases, ie where a monolithic RDBMS database product has been split into multiple cooperating components, such that the architect/developer can directly access APIs from various layers, and deploy only the relevant subset of components needed for a specific system.</p>
+
+<p>It is also common for an SQL-based RDBMS to be used as part of the solution, with NoSQL components used for the rest. In particular, NoSQL components are excellent for providing highly-scalable read-mostly caches of data held within a relational system.</p>
+
+<p>The term “NoSQL datastore” is often used as an alternative to “database” to indicate that the featureset is not necessarily as complex as an RDBMS (though performance, scalability and flexibility may be superior).</p>
+
+<h1 id="seeks-and-joins">Seeks and Joins</h1>
+
+<p>My earlier article on <a href="/bigdata/datastorage">big data storage</a> includes a section entitled “Seek Considered Harmful”; the title is a joking reference to the classic programming article “Go To Statement Considered Harmful” but the point is serious - sequential access to persistently-stored data is <em>far far</em> faster than accessing it randomly. This applies not only to traditional “rotating” storage devices, but also to modern solid-state disks (SSDs).  Therefore one of the core principles in NoSQL datastores is to avoid seeks, and this has a major effect on the design of NoSQL datastores. It’s worth discussing this first.</p>
+
+<p>A program which often seeks (changes disk read location) before reading from rotating storage is going to be many <em>orders of magnitude</em> slower than one which reads data in order. Even non-rotating SSD storage doesn’t help a huge amount; the seek prevents both the program and the underlying operating-system from knowing which data it might need <em>in the near future</em>. Databases and operating-systems which are reading data sequentially can perform speculative read-ahead, ie when blocks N and N+1 are read then blocks N+2 and N+3 will also be read, just in case they will be needed in the near future. This can produce massive improvements in performance - even when SSDs are being used. Unfortunately this helps only if the application is reading data in a predictable manner.</p>
+
+<p>Unfortunately for relational databases,  a <em>join</em> is intrinsically a seek, where the first record’s foreign key is used to look up an index on the second table to find the offset of the “joined to” record(s), and then a seek is performed to read it/them. There are a few cases where joins can be acceptable; if the joined-to table is small enough to fit entirely in memory then no problem. Alternatively, if the primary table being processed is <em>sorted</em> in order of the join-column, and the joined-to table is also sorted in order of the join-column, and the data for both tables is held on the same host, then both tables can be processed without ever seeking backward and without network traffic. However in other cases, joins are performance killers.</p>
+
+<p>By storing structured objects together with any nested structured properties as single blocks of data rather than splitting them up into tables, NoSQL databases don’t need to do joins to fetch the <em>whole</em> object back again and thus offer better performance.</p>
+
+<p>To summarize: in NoSQL databases, a query to the database matches one or more objects, and all data associated with each matched object is returned. Because the data for each object is stored <em>together</em>, joins are less frequently needed (and in fact not supported at all by some NoSQL databases) which avoids random access to the persistent storage, and thus significantly improves performance and makes very large datasets manageable.</p>
+
+<p>There are definitely problems for which RDBMSes will perform better, and others in which NoSQL systems will perform better - and these often come back to the tradeoffs between linear storage access vs seeks.</p>
+
+<h1 id="indexes">Indexes</h1>
+
+<p>Relational systems rely heavily on indexes for performance. However indexes must be kept up-to-date on every insert, update or delete. As the indexes themselves are effectively separate tables, this means a write to a table also triggers at least one seek+write for each affected index on the table - unless all indexes are being held in memory, which has limits for scalability.</p>
+
+<p>Indexes are not relevant for key-value datastores; they simply allow retrieval of a single object by key. Document-stores do support indexes, and in a scalable way. Bigtable-based datastores generally don’t bother with indexes, and rely extensively on table-scans (ie efficient sequential reads without seeks); however they do effectively maintain an index on the key (by maintaining records in order sorted by key) and use techniques such as partitioning, block-based statistics and bloom-filters to minimise the amount of data that needs to be read. Graph datastores are efficient at retrieving objects based upon constraints applied to the <em>relations</em> between data-items, but don’t support queries about the object properties.</p>
+
+<p>In systems that use bigtable-based datastores, “indexes” are often built manually. In a data-warehouse-type environment where data is inserted only periodically in batches, and is otherwise read-only then “index tables” can manually be derived from the original table, in which the key of the “index table” contains the column-values to be searched for. However relational indexes map such a key only to the <em>rowid</em> of the actual record, and then seek to that record to retrieve the actual data. In a read-only NoSQL environment, such a table would normally contain <em>copies of relevant columns</em> from the indexed record so that a match using the “index” can immediately return useful information without a further seek. This is of course <em>denormalization</em>, but as mentioned earlier, denormalization in a read-only environment is not a significant concern. Such tables in the relational world are referred to as “covering indexes” or even “materialized views”.</p>
+
+<p>Apache Phoenix provides “secondary indexing” for HBase (indexing on fields other than the key); it is both a plugin for the HBase server and a custom JDBC driver for HBase clients which work together to intercept inserts/updates/deletes in order to keep relevant index-tables updated, and rewrite queries to use relevant index-tables. Of course using Phoenix implies tradeoffs for performance (more seeks, more writes) and flexibility (columns and their types must be pre-declared).</p>
+
+<h1 id="acid-vs-base">ACID vs BASE</h1>
+
+<p>Relational databases implement the <a href="https://en.wikipedia.org/wiki/ACID">ACID</a> principles:</p>
+
+<ul>
+  <li>Atomicity means that a failure triggers a rollback to the earlier state;</li>
+  <li>Consistency means that “in-progress” transactions are not visible, ie “no dirty reads”;</li>
+  <li>Isolation means that programmers don’t need to worry about two transactions altering the same data concurrently (though they do have to be aware that a transaction might <em>fail</em> due to this situation);</li>
+  <li>Durability means robustness against server or disk crashes, etc.</li>
+</ul>
+
+<p>NoSQL databases often follow the <a href="https://en.wikipedia.org/wiki/Eventual_consistency">BASE</a> principles instead:</p>
+
+<ul>
+  <li>Basic Availability means that in a clustered environment where some servers are “not available”, read operations are still allowed - even though they may return stale data, and writes are allowed - even when they could conflict with changes made elsewhere;</li>
+  <li>Soft State - multiple reads of the same data may return different values, due to the system replicating data and approaching eventual consistency;</li>
+  <li>Eventual Consistency - reads against different members of the database cluster may return different data for some period of time, but eventually all reads will return the same values.</li>
+</ul>
+
+<p>Clearly, the ACID features are desirable. However they do limit the uptime (availability) and scalability of a database cluster; BASE is the best that can be done with a truly high-availability and scalable system.</p>
+
+<p>Does giving up on ACID sound scary? Remember that the point of most IT systems is to maximise profit; if a high-volume online ecommerce system (eg Amazon bookstore) occasionally loses an order it may cost a few thousand dollars per year to handle the resulting complaint, but being unable to take customer orders due to overloading may cost millions. Sometimes reliability is more important, and sometimes performance is.</p>
+
+<h1 id="structured-data-and-nosql">Structured Data and NoSQL</h1>
+
+<p>A rich datastructure such as the person example above can be perfectly validly viewed in two ways:</p>
+
+<ul>
+  <li>as an object with a dynamic list of named properties, some of which hold primitive values and some of which hold a nested object or a list of values; or</li>
+  <li>as a table with a dynamic list of named columns, where each column may hold a primitive value, a nested table, or list of values.</li>
+</ul>
+
+<p>These two are both valid descriptions, ie whether a system that persistently stores data is “document-based” or “table-based” is simply a matter of viewpoint. However it
+is different from standard relational systems, in which columns can only hold primitive values (some of which may be foreign-keys).</p>
+
+<p>Key-value stores never look inside the data they are given to store; the data is a “blob” that can only be retrieved via the registered key.</p>
+
+<p>Document-stores do look inside the data they are given. The key is the <em>most important</em> thing about the data, but they can also execute queries that return all objects with specific properties - and build indexes over the data to implement such queries efficiently. They aren’t normally considered to “support joins” but building a merged document containing a base document and the properties of the documents it references can be done and is AFAICT the same thing.</p>
+
+<p>Bigtable-based datastores such as Cassandra and HBase present themselves much more like relational systems, with their documentation describing data in terms of tables and columns. However unlike most RDBMSes, the value of a column can be a list or a complex datastructure. In general bigtable-based systems treat the data they store in each column as an “opaque blob” (columns don’t have declared types for example). This means that these systems don’t maintain indexes on any columns - although lookup by <em>key</em> is efficient (as records are stored in sorted order), and the key can be a compound of any desired columns.</p>
+
+<p>As noted earlier, NoSQL systems can sometimes be viewed as “decomposed” databases, and although Cassandra/HBase don’t support joins themselves, the same effect (merging data based on common column-values) can be done via tools such as Pig or Spark if really desired. The performance characteristics of bigtable-based datastores are somewhat different from document-stores, in particular being faster at reading (and updating) subsets of the columns (properties) while being slower at accessing and updating entire objects. In the previous section addressing indexing, it has been described how Apache Phoenix adds secondary indexing (ie indexes for non-key properties) “on top of” standard Apache HBase.</p>
+
+<p>Despite the <em>ability</em> to apply joins in some NoSQL systems, the user needs to be aware that this is an <em>inefficient</em> operation. Sometimes it is necessary, but many problems don’t need it. It certainly does not need to be the <em>primary</em> way to build relations between pieces of data - particularly in a clustered system.</p>
+
+<p>Regardless of whether the system supports joins or not, there is no NoSQL system which enforces foreign-key references as relational systems do. This is just too inefficient to do in a clustered system. NoSQL systems also do not support transactions (see later), again due to scalability in clustered systems. In general, an update to a single object (ie a rich datastructure) is atomic, thus consistent updates to <em>embedded</em> data (which would be modelled as separate tables in a relational system) does not need transactions.</p>
+
+<h1 id="aggregation-vs-reference">Aggregation vs Reference</h1>
+
+<p>Above we have discussed storing structured data as a single “object”. There are of course limits to embedding data into some other record; the key point is to determine whether the relationship between two pieces of data is <em>aggregation</em> (ownership, or “part-of”) or just <em>association</em>.</p>
+
+<p>If two pieces of data A and B are related such that B cannot exist without A, and must be deleted if its associated A is deleted, then this is an <em>aggregation</em> or “part-of” relation, and B can be embedded into the storage for A.</p>
+
+<p>If this is not the case, ie A and B can exist independently, then embedding B into A is denormalization (as other things could refer to the same B), and such a decision needs to be taken with care. In a read-only “data warehouse” type of project, it is pretty harmless. In a read/write environment such embedding/denormalization should be done only if the performance benefits are really necessary. In that case, it is a very good idea to embed the unique identifier for B into the denormalized data, to ensure that deduplication can be done at a later time if the denormalization turns out to be a bad idea (see links in the references section at the end of this article).</p>
+
+<p>An “is-friend-of” relation between two Person objects would clearly be an <em>association</em>, not an <em>aggregation</em>. Even in a NoSQL database, this is represented by having one object hold the key of the other - ie effectively a “foreign key”. However NoSQL databases typically do not require these references to be declared to the database as “foreign keys”. Enforcing foreign-key constraints is a time-consuming task, particularly in a distributed database. The exact approach to linking depends upon the direction in which a relation should be traversable: a type A could have a property containing a list of keys for type B, which would implement a <code>1:N</code> relation navigable only from <code>A-&gt;B</code>. An N:M relation is typically implemented by having both sides hold a list of keys, rather than having a separate “join table” to link the two. This is less flexible than the relational model, where a relation can be followed in either direction, but is very natural to software developers where in-memory pointer/references can only be followed in one direction.</p>
+
+<p>As noted earlier, some tools (eg Pig, Spark) can implement joins for bigtable-based databases; they often do this by dynamically generating a <em>program</em> which then executes in a server cluster to gather and merge the relevant records before returning the result. An alternative is to simply first fetch the primary object A then make a second query to fetch the set of objects B whose ids are held in object A. More round-trips to the database are naturally less efficient, but</p>
+
+<ul>
+  <li>they are less common than joins in purely relational apps, as they are used only for <em>associated</em> objects and not <em>aggregated</em> ones; and</li>
+  <li>in a clustered database, the direct query for an object of type B with key B1 is correctly directed to exactly the node that contains the data - something
+ that an SQL join will have trouble doing efficiently.</li>
+</ul>
+
+<p>Note that some relational databases (PostgreSQL in particular) do allow columns to contain non-primitive types. See:</p>
+
+<ul>
+  <li><a href="http://www.postgresql.org/docs/current/static/rowtypes.html">Composite types</a></li>
+  <li>
+<a href="http://www.postgresql.org/docs/current/static/datatype-json.html">jsonb support</a>  and <a href="http://clarkdave.net/2013/06/what-can-you-do-with-postgresql-and-json/">this brief tutorial</a>
+</li>
+</ul>
+
+<p>Storing structured data in a relational database may be useful for improving developer productivity, but does not help in scaling to big-data workloads.</p>
+
+<h1 id="benefits-of-structured-storage">Benefits of Structured Storage</h1>
+
+<p>Embedding structured data into another object is an old concept (see <em>hierarchical databases</em>, which existed before relational ones). It happens often in computing that ideas which are popular for a while, then are replaced, but eventually return under another name. Balance has oscillated between centralized and decentralized processing for many decades. Hierarchical databases were replaced by relational databases for good reasons; relational systems are indeed elegant. However the relational approach is suffering under the pressures of new hardware and software, in particular:</p>
+
+<ul>
+  <li>low/end servers are now very cheap, while high-end servers are still expensive (ie scale-out is cheaper than scale-up);</li>
+  <li>disk storage has vastly increased, as has the amount of data that we want to store and process;</li>
+  <li>sequential disk IO performance has significantly increased, while seeks are proportionally much slower;</li>
+  <li>network bandwidth has increased, but much slower than the volumes of data to be processed;</li>
+  <li>software development is now a much higher proportion of a system’s costs relative to hardware;</li>
+  <li>software development is no longer being done in procedural languages;</li>
+  <li>software development and testing processes have become more sophisticated.</li>
+</ul>
+
+<p>Altogether these changes shift the emphasis onto developer productivity, and onto clustered systems (ie using many servers in parallel). In many cases NoSQL databases are the best fit - though it depends on circumstances, and sometimes a combination of relational and NoSQL in different parts of a project is the best solution of all.</p>
+
+<h1 id="avoiding-joins-in-nosql-client-applications">Avoiding Joins in NoSQL Client Applications</h1>
+
+<p>One of the first things a student of relational databases learns is the various “normal forms”. They are taught that data duplication is bad - there should be only one copy of any particular datavalue. When two objects need to “have” the same value, they should use a foreign-key to refer to some record that holds the “master copy” of that value.</p>
+
+<p>In a system based on joins, this works elegantly. Records stay automatically in sync; change the master version of an item of data and all queries that <em>reference</em> that data item via foreign keys see the updated value.</p>
+
+<p>However we’ve just talked about how NoSQL systems try to avoid joins. So what is the solution?</p>
+
+<ul>
+  <li>For an <em>aggregate</em> relation, the “dependent” data can be embedded with the owning record.</li>
+  <li>For associations in read-only systems, denormalization can be effective.</li>
+  <li>For associations in read-write systems, sometimes the best option is simply for the client application to make multiple round-trips to the database, passing the relevant key (or list of keys).</li>
+  <li>And sometimes associations in read-write systems deliberately denormalize data to increase read performance.</li>
+</ul>
+
+<p>NoSQL systems handling read-only data is actually quite common; data is stored in a traditional relational database for OLTP purposes (On Line Transaction Processing) where records are randomly accessed and often updated, and periodically <em>exported</em> to an “analytical” system (OLAP) run on big-data/NoSQL principles. Denormalization of data can be applied during the export step; there is no danger that multiple copies of data can become inconsistent (the biggest danger with denormalized data) when the data is read-only! The term “data warehouse” is used to describe a large database (whether relational or NoSQL) in which data is read-only, and denormalization has been extensively applied to speed up queries against the read-only data. A data warehouse also commonly contains “tables” with useful precomputed data, such as “rolled up” data over various time-periods.</p>
+
+<p>Making multiple round-trips to a database to load first a “primary” record, then its children, is something that relational developers try to avoid, and the solution there is to use a join. However multiple round-trips is not always inacceptable; lookup by key is always efficient - even in a clustered database running over many nodes.</p>
+
+<p>However there are occasions where an approach based on multiple round-trips just doesn’t meet the performance requirements. In specific cases, denormalizing the data may be considered. In modern systems, there should be only one “service” responsible for managing a specific datatype in a datastore; if multiple programs need to update the same entity in the database then they should all use the API of that common service to do so. This therefore provides a single point at which all copies of denormalized data can be updated as appropriate - ie keeping data consistent is the responsibility of that service, not the database. It is a risk, but can be a fair tradeoff for other advantages. As noted above, it is desirable to keep the “real entity key” together with any denormalized data, so the original “master copy” of denormalized can be determined if needed.</p>
+
+<h1 id="database-enforced-schemas-aka-schema-on-write">Database-enforced Schemas (aka Schema-on-write)</h1>
+
+<p>In relational systems, each table has a fixed set of columns, each column has a fixed type and other attributes. Attempting to insert data that does not comply with the schema results in an error. Columns can be declared as foreign-keys to other tables in which case the database verifies that such references are valid at insert, and remain valid (including preventing the deletion of records referenced from elsewhere).</p>
+
+<p>Many NoSQL databases ignore the concept of database-side schema validation completely. Instead, they rely on the application performing inserts/updates/deletes to perform validation.</p>
+
+<p>One of the problems with database-side validation is that the constraints available are only a subset of the ones that an application can apply. An application using a database as its storage layer must perform all validation itself anyway, in order to provide proper error feedback to users. In addition, some rules cannot be enforce in the database - eg that the “membersince” date must be non-null if the “onleave” column is true. Having two validation approaches in the same system is difficult to manage, as any programmer who has developed code using a relational database can confirm.</p>
+
+<p>Not having server-side schema validation makes life nicer for software developers in many ways. Adding columns to a NoSQL “table” is just a code-change; a new version of an application can persist properties that previously didn’t exist and the NoSQL database will not complain.  No DDL change needs to be carefully synchronized with the new software release; the new code just needs to be aware that “older” records might not have that property and handle them appropriately.</p>
+
+<p>In the “good old days” it wasn’t unusual for administrators to poke around an SQL database with SQL-level tools, inserting and modifying data. In such scenarios, it is clearly useful to have some kind of validation. Such things are more vigorously discouraged these days. In addition, applications have become more sophisticated, and in particular software testing procedures have advanced significantly. The benefits of database-side schema validation have therefore reduced while the costs/inconvenience of database-side validation have increased. This shift in cost/benefit balance is one reason why NoSQL databases generally don’t emphasise schemas.</p>
+
+<p>Schemas are also a problem with distributed databases, particularly foreign-key references. If deleting a record requires checking every other node in the cluster to see whether a record exists with a foreign-key-reference to the record being deleted, then performance will clearly suffer. Instead, NoSQL systems leave the responsibility for such checks with the application layer.</p>
+
+<p>It is true that relational schemas guarantee basic data consistency, which is a comfort - application bugs can sometimes be caught this way. This is particularly useful when multiple applications share a common database.  A possible solution here is to refactor code to provide a central server which manages access to the database and provides an API (eg via REST) which other applications can then use. Data validation rules then reside in this central server.</p>
+
+<p>Some NoSQL systems do support a kind of optional schema validation; for example MongoDB allows a “validation query” to be attached to a table. Inserting or updating an object in the database will be rejected if the new object does not “match” the query. This allows validation to be expressed using the full power of the standard query language.</p>
+
+<p>Not having a clearly-defined schema is also an issue when using reporting tools to directly access the database - in particular, the lack of formally-declared foreign-key references. A standard relational database is certainly easier to use for such ad-hoc reporting. I’m not sure what the best way to deal with this in a NoSQL world is.</p>
+
+<h1 id="viewing-nosql-rows-as-json-or-xml">Viewing NoSQL Rows as JSON or XML</h1>
+
+<p>While it is possible to think of entries in a NoSQL “table” as “rows” where columns might be dynamically added or missing, it is often better to think of the entries as “map” or “dictionary” objects instead, ie a set of (<code>propertyname-&gt;value</code>) items.</p>
+
+<p>Such a structure can be made available by the database to external systems in various forms. To a Java program, such a structure could be represented as a HashMap where the key for each entry is a string (property-name aka column-name) and the value of each entry might be a primitive (string, int, etc) or a list or another hashmap. Python/Ruby/Perl/etc developers can substitute their relevant types here.  Alternatively, a table entry (row) could be printed as JSON or as XML. Note that this does not imply that the database internally <em>stores</em> data in such a format - only that the database sees each row as a piece of “structured data” with propertynames and values (which may themselves be structured data), and that hashmaps/json/xml/etc are all capable of representing such a structure.</p>
+
+<h1 id="disk-space-usage">Disk Space Usage</h1>
+
+<p>Relational databases are efficient at disk usage; data is normalized and indexes contain only rowids etc. NoSQL systems are less efficient due to frequent denormalization of data and indexes with embedded data. However disk-space is cheap these days.</p>
+
+<h1 id="column-oriented-storage">Column Oriented Storage</h1>
+
+<p>The term “column-oriented”, “column store” or “column family store” often comes up in presentations on NoSQL databases. It is actually a technique that can be used with relational or NoSQL databases. I have written a short article on <a href="/bigdata/columndbs">column oriented storage</a>, but as a quick summary:</p>
+
+<ul>
+  <li>Row-oriented storage groups all column-values of a row (properties of an object) in adjacent addresses on disk. Reading the entire row (object) is therefore a single disk read operation. This is the mode used by most relational systems and many NoSQL systems too.</li>
+  <li>Column-oriented storage groups values for a specific column (property of an object) for many rows in adjacent addresses on disk. Reading that single property for many records is therefore a
+single disk operation. Some tools offer this as an option, while a few use it as their only storage format.</li>
+</ul>
+
+<p>For applications which typically read/write whole records at a time, row-oriented storage is best. This includes “OLTP” applications such as those in call-centers.</p>
+
+<p>For applications which perform statistical analysis over many records, column-oriented storage is best; this includes OLAP applications used for business forecasting and similar purposes. This layout is also useful for applications which scan large numbers of records to retrieve a small matching set, eg computing the set of customers for a marketing campaign. When running queries which only read a subset of columns for each record, column-oriented layout can reduce disk IO by an order of magnitude and disk IO performance is often the bottleneck for such processing. However disk IO <em>increases</em> when reading or writing <em>all</em> columns for a record, hence OLTP-style workloads become slower.</p>
+
+<h1 id="bigtable-datastores">Bigtable Datastores</h1>
+
+<p>In order to efficiently support searching of millions (now billions) of pages of web content, Google had to solve two problems: how to store vast amounts of information and how to process it. Their original solution to the first was “bigtable” and the second was “mapreduce”. While Google never released their implementation of either solution as open-source, the inventors of the concepts did publish academic papers describing the approach and Google chose not to patent the algorithms thus allowing various groups to reimplement the ideas (often as open-source).</p>
+
+<p>The core concepts of Bigtable are the <a href="/bigdata/datastorage">SSTable</a> and the log-structured-merge-tree. In very brief summary, a sequence of records are stored in a single file, sorted by a single string “key” value. The data associated with the key is irrelevant, thus each record is often described as a (key,value) pair although often the “value” is a list of fields. If a new record must be inserted into the existing data then it is simply held in memory (with usually a database-like logfile used for recovery in the case of a crash); when the in-memory buffer gets full, it is written as a sorted sequence of records to a new file.  When a lookup needs to be done, all files plus the current in-memory buffer are all checked, with newest-data winning. The result is that files on disk are <em>internally sorted</em>, and <em>immutable</em>. A background thread merges partial files into a single larger one, and then remove the old partial files. The partial files in effect act as “overlays” from oldest to newest.</p>
+
+<p>Apache HBase, Apache Cassandra, and several other NoSQL databases use this approach as the core of their storage. Queries that run over <em>ranges of keys</em> are efficient, as the data is sorted; there might be a couple of files and an in-memory buffer to scan in parallel, but the on-disk storage can be read using efficient sequential read operations. Inserts are efficient, just affecting the in-memory buffer. Updates must seek/fetch the desired record (if it isn’t already in memory) and the new version is then stored in memory until being flushed. Each property/column is treated as a separate record that happens to have the same key; updating a single property thus requires adding a single entry to the in-memory buffer, which is eventually flushed to disk (sorted) when the in-memory buffer becomes too full.</p>
+
+<p>This approach works well for both “row-store” format (where all properties for a key are stored adjacent) and “column-store” format (where all values for a specific column are stored adjacent, sorted by row key). See the above section for information about column-oriented storage.</p>
+
+<p>Column-family storage is a hybrid of row-store and column-store; all columns within a column-family are stored together (ie row-store-style) and thus can be efficiently read together while different column-families are stored separately and thus can be queried efficiently. In effect, each column-family acts like a separate table.</p>
+
+<p>Because the Bigtable approach relies on in-memory buffers for efficiency, each record must be managed by a single node in a cluster, ie data must be <em>sharded</em> rather than truly distributed. One way to distribute the records within a table over a cluster is to simply hash the key and use that to determine the “owning node” (falling back to the next node if the owner is not responding). This provides very even distribution of load and storage requirements across a cluster but makes queries against ranges of keys ineffective. Alteranatively, the database can be told to group specific ranges of keys together on a single node (partitioning); range-based queries are then efficient but there is a danger of having excessive load on a single server while others sit inactive. There are various ways to design keys and partition records, and this is one of the most important factors when designing a system using a clustered bigtable-based datastore. It isn’t trivial, but nevertheless implementing a properly scalable system is usually easier with these tools than achieving scalability with an RDBMS.</p>
+
+<p>Bigtable-based systems can also be seen as a key-value store whose key is a tuple of (tablename, rowkey, column-id) which points to a value. For a datastore that supports “column families”, this key would be (tablename, rowkey, column-family-id, column-id). The value may be a primitive data type (eg an integer) or a complex datastructure.  Of course, (tablename, rowkey) also identifies a <em>record</em>. Sometimes bigtable-based systems are described as a kind of multi-dimensional spreadsheet; in a spread-sheet, a (row,column) pair identify a cell and similarly in bigtable-based systems (tablename, rowkey, column-family-id, column-id) identify a value. A bigtable-based system can therefore be called a “sparse matrix”, similar to a spreadsheet in which only some cells have values.</p>
+
+<p>Bigtable-based datastores don’t have indexes against the content of the <em>values</em> in the datastore, though some do use per-block min/max and bloom-filters to allow pruning of blocks when doing searches for specific column-values. Indexes can be maintained externally, though of course this comes with a significant performance hit (see comments on seeking).</p>
+
+<h1 id="analytics-centric-databases">Analytics-centric Databases</h1>
+
+<p>As noted in the introduction, there is a category of systems which are kind of database-like but which don’t fit into the four standard categories. I’ve called these “analytic-centric” databases here.</p>
+
+<p>The most well-known system of this type is Apache Hive, though cloud-based systems such as Google BigQuery or AWS Athena serve similar use-cases.</p>
+
+<p>Hive is possible the most extreme “deconstructed database” available. There are two primary parts to Hive:</p>
+
+<ul>
+  <li>a library of reader/writer classes for various data storage formats; and</li>
+  <li>the hive query language compiler library.</li>
+</ul>
+
+<p>The most relevant of the supported data-storage formats for this article is ORCFile. The writer class basically implements the SSTable/log-structured-merge-tree algorithm that is also used by Apache HBase, Apache Cassandra, and other tools. Using this library, records can be efficiently written to files and read back from them. In addition, this library stores data in <em>column store</em> layout on disk, as HBase/Cassandra do. And the SSTable/log-structured-merge-tree algorithm makes inserts/updates/deletes relatively efficient while still keeping records in the file <em>sorted by key</em>. This library also divides files up into <em>blocks</em> of records, and optionally tracks statistics for each block (min/max for columns, bloom-filters, etc) which can be used to optimise queries.</p>
+
+<p>The hive query compiler library accepts a query-string in HiveQL format (an SQL-like language). It compiles these operations into executable code which it then submits for execution <em>on a cluster</em> to perform the requested operation against any <em>set of files</em> which are in a format for which it has reader/writer support - eg ORCFile. The compiler library can be embedded into a client application directly. Alternatively, the Hiveserver daemon is a standalone application that wraps the library; it accepts HiveQL commands over a network connection, submits the compiled program for execution, and returns the results.</p>
+
+<p>Together, HiveQL + ORCFile + a suitable cluster in which to store data and execute compiled queries is effectively a database. In comparison to an RDBMS there are obviously many features that are not included, but when it comes to applying SQL-like operations to vast amounts of input, Apache Hive is hard to beat.</p>
+
+<p>The Parquet file format is similar to ORCFile.</p>
+
+<p>The Spark parallel-processing framework can also read and write data in ORCFile or Parquet format, filling use-cases similar to Hive.</p>
+
+<h1 id="replication-and-eventual-consistency">Replication and Eventual Consistency</h1>
+
+<p>NoSQL systems often use replicated filesystems to store their data. This provides not only robustness vs storage node failure, but also robustness vs compute node failure as the data is available to other compute nodes in the cluster. This is often a builtin/default feature of NoSQL databases, equivalent to RDBMS multi-master replication with little or no configuration required.</p>
+
+<p>While distributed databases have definite advantages related to scalability and reliability, it does introduce a significant issue: what should be done if one or more nodes in the cluster can no longer communicate with other nodes? This could well occur when a cluster spans multiple datacenters in different parts of the world. This issue is discussed in great detail elsewhere on the internet, and in books so it will only be addressed briefly here.</p>
+
+<p>When such a scenario occurs, and then a client application tries to write to the database then there are only two options:</p>
+
+<ul>
+  <li>refuse the write, or</li>
+  <li>accept the write and replicate the data later when the cluster is “whole again”.</li>
+</ul>
+
+<p>The latter approch is called “eventual consistency”. It does mean that users who get connected to different parts of the cluster will temporarily see different data; whether that matters depends upon the specific system requirements.</p>
+
+<p>This is a tradeoff: if 100% perfect output at all times is desired, then customers must expect occasional “system not available” messages. If it is acceptable to show imperfect output for short time periods, then eventual-consistency approach provides more responsive UIs under normal circumstances, and a useable UI for customers even while system problems are occurring - with the guarantee that eventually the correct data will be displayed.</p>
+
+<h1 id="mapping-to-and-from-application-memory">Mapping to and from Application Memory</h1>
+
+<p>Programmers typically deal with in-memory datastructures that look like the example datamodel described at the start of this article. Mapping to a NoSQL-style storage is definitely more natural and less work than decomposing such structures into table-oriented formats - and recomposing table-based query results back into in-memory datastructures. There are many software libraries that try to bridge the difference between datastructures (particularly object-oriented ones) and relational models - eg Hibernate. None of them are entirely successful however; NoSQL is undoubtably easier on software developers.</p>
+
+<p>As noted earlier, applications also implement data-validation, and having a second data-validation system in the database often brings more disadvantages than advantages (as long as nothing else is messing with the database contents behind the application’s back).</p>
+
+<h1 id="versioned-data">Versioned Data</h1>
+
+<p>Relational systems usually keep track of just the <em>current value</em> for each item of data. A change to the record is performed as an update that overwrites some column values of that record, and the previous state is lost. It is reasonably common in big-data systems to instead treat records as immutable, and include a version-number or timestamp in each record/object. This obviously increases the amount of disk storage required, but has some significant advantages, including:</p>
+
+<ul>
+  <li>a query can return values <em>as they were at any desired time in the past</em>; and</li>
+  <li>bugs are far less likely to lead to irreversible data corruption.</li>
+</ul>
+
+<p>Apache HBase in particular is designed to support this approach and to efficiently return results <em>as they were at any time in the past</em> (although it is not mandatory) by including a version-number (which may be a timestamp) as part of the key, and providing efficient lookup of “the most recent” version of any record (which is the most common way to access data). This is achieved simply by including the “version-number” column value as the last part of the <em>key</em>, ie a value is identified by (tablename, rowid, column-family-id, column-id, timestamp).</p>
+
+<p>This approach could be implemented in a relational system (just include a version-number or timestamp in every primary key), but standard relational queries and indexes don’t handle this well.</p>
+
+<h1 id="advantages-of-relational-systems">Advantages of Relational Systems</h1>
+
+<p>Many of the above points have talked about the advantages of NoSQL. However every coin has two sides, and here are the advantages of the traditional relational model which I am aware of…</p>
+
+<p>NoSQL databases need both the “structured” concept and the “foreign key” concept; when to use one vs the other depends on whether the relation is <em>aggregation</em> or <em>association</em> - something that not all developers are good at telling apart. In fact it may not be clear from the original requirements which category a particular piece of data falls into. It may also be something that <em>changes</em> later as the system evolves. SQL has only one choice - “foreign key”, thus the developer cannot make the wrong choice.</p>
+
+<p>Embedding a piece of data even when it is an <em>association</em> (ie performing denormalization) is problematic (though sometimes useful for performance). A relational developer has little choice - the system doesn’t support embedding of structured data, so a foreign-key is the only option, leaving the database to deal with the performance issues. Having only a single solution is conceptually elegant.</p>
+
+<p>Decomposition of the original datamodel into tables allows data to be recomposed into different forms. For example, given our example datamodel at the start of this article a relational system can query all telephone-numbers regardless of who they belong to. This might be useful for analysing geographic distribution of customers. The best way to do this in a NoSQL system would probably be to define a new table and then iterate over all customers and insert their telephone-number into the new table - ie denormalize the data. Note that writing queries that return only subsets of data (to reduce network bandwidth) are possible in both kinds of systems.</p>
+
+<p>Composing the results of a query from a select + join naturally provides the ability to return only the relevant child records and columns, thus minimising the amount of data returned from a query. However in practice, given that relational queries are usually mapped into in-memory data-structures or objects, and partially-populated structures or objects are difficult to deal with, this ability is in practice rarely used by software developers.</p>
+
+<p>Transactions are a core concept in the relational model, and very useful. Many NoSQL databases do not support transactions at all, while many others have sort-of-but-not-really transactional features. Transactions in relational database aren’t perfect - it is possible to get deadlocks, and there is a rather complex set of available options such as “phantom reads” which improve performance at the cost of consistency.  Sadly, they also have a significant performance impact - and are particularly nasty for clustered systems (eg where a single logical database is distributed across dozens or hundreds of nodes). Nevertheless, relational transactions are at the core of many useful systems. NoSQL documentation often talks about “eventual consistency” and various other options, but very few (if any) offer proper traditional transactions.</p>
+
+<p>Most relational databases have sophisticated access-control, with roles and privileges, and some can even grant access rights per-record (not just per-table). Some NoSQL databases have basic access-control while others have none at all; they generally rely on the fact that users only have access to a database via an application, and the application performs access-control. In practice, this is how IT systems that use an RDBMS for storage work too; the business-tier of an application connects to the RDBMS as an “application user”, not as the end-user that actions are being performed on behalf of, and thus the application must enforce per-user access-control. However generating reports is one case where this becomes problematic; it is not unusual for different users within an organisation to be granted direct read-access to a database for the purpose of generating reports, and potentially these internal reporting users need to be granted different access rights. In that case, an RDBMS system could be the right solution - or different NoSQL databases for different users, into which only relevant data is periodically exported.</p>
+
+<p>SQL is pretty similar across multiple relational database vendors. It wasn’t always so, and there are still some database-specific components but generally SQL written for one relational database will work on others. Perhaps more importantly, someone with experience of SQL on one database can quickly get used to any other. This isn’t the case for NoSQL databases; each tends to have its own query language. Some NoSQL query languages are rather like SQL-without-joins, while others are significantly different.</p>
+
+<p>Relational databases are currently far more mature - better tools, better documentation, etc.  In particular, ad-hoc reporting systems for relational databases are currently far superior and retraining non-technical business staff who are nevertheless used to writing their own reports is a significant issue.</p>
+
+<p>When data is gathered from multiple independent sources, it makes sense to store the data in its “original” format in the database, and then build <em>links</em> between that data and related other data. Implementing this is natural in relational systems. Document-stores or bigtable-based systems may have problems here. Graph-databases may be a good fit in this case.</p>
+
+<h1 id="free-text-searches">Free Text Searches</h1>
+
+<p>One common misunderstanding of “NoSQL” systems is that they provide some kind of “nonstructured search” feature in which all properties can be queried concurrently, and all relevant records returned.</p>
+
+<p>Implementing such free-text-searches can be done via “unstructured search” tools such as ElasticSearch and Solr. These tools must be fed with blocks of text “associated with a key”, and can then be queried in a google-like manner, returning the relevant keys.  Such keys can then be used to look up data in any kind of storage; ElasticSearch/Solr are often used with NoSQL-type databases, but can also be used with relational databases - or even a plain filesystem.</p>
+
+<p>A few NoSQL document-based datastores have a subset of ElasticSearch/Solr functionality built-in. MongoDB, for example, can create word-based indexes on any document property declared as type “text” and supports queries against all text-fields for a specified document-group, returning results sorted by “best match”. The MongoDB documentation explicitly ackowledges that only “basic search” is available, and that it should be used with an external search tool if support for more advanced features is needed.</p>
+
+<h1 id="other-opinions">Other Opinions</h1>
+
+<p>While searching for articles on NoSQL vs relational, I found a couple of interesting pro-relational discussions which are linked to below, with commentary, so you can make up your own mind.</p>
+
+<h2 id="discussion-when-and-why-are-database-joins-expensive">Discussion: When and Why Are Database Joins Expensive</h2>
+
+<p>The stack-overflow discussion <a href="http://stackoverflow.com/questions/173726/when-and-why-are-database-joins-expensive">when and why are database joins expensive</a> has some interesting comments from Peter Wone, Dave Aldridge and Mark Brackett, mostly from the pro-relational (at least pro-normalization) viewpoint. It is worth reading as a contrast to my opinion here.</p>
+
+<p>My responses to the overall discussion:</p>
+
+<ul>
+  <li>
+    <p>I’m still not personally convinced that joins are superior in performance to a request to load all “associated objects by id” for following <em>associations</em>. I’m certain that for <em>aggregate relations</em>, embedding in the parent object is superior in performance.</p>
+  </li>
+  <li>
+    <p>I would also debate the claims that Codd/Date foresaw current systems - I really doubt that anyone publishing in 1970-1980 (Codd) or even 1980-1990 (Date) predicted clusters of 100+ servers each with 16 cores and 128GB of memory, nor input datasets in the petabyte range.</p>
+  </li>
+  <li>
+    <p>Possibly even more relevant is whether they foresaw that <em>serial read performance</em> (transfer rate) would scale much faster than seek performance - ie the cost of a seek relative to a read is much worse than it was. Also relevant for clustered databases is the cost of reading <em>local</em> data vs fetching data over a network.</p>
+  </li>
+  <li>
+    <p>I would therefore definitely dispute the statement that “bulk disk reads are the most expensive aspect of the exercise” - bulk disk reads are now <em>cheap</em> in comparison to seeks or fetches of remote data. A table-scan of thousands of records to find three matching records involves one seek plus lots of reading; this can be <em>faster</em> than reading an index to find the exact location on disk of the required records (a seek and a small read), followed by another seek and read to get the actual records.</p>
+  </li>
+  <li>
+    <p>Maintaining indexes is expensive - an index is effectively another table whose key is the indexed columns and whose value is the address of the relevant record. This table must also be stored as a <em>sorted</em> collection (eg a btree) or hashmap; on insert of a new record the index needs to be updated which involves seeking, and writing - and possibly writing multiple blocks if btree nodes need to be rebalanced, etc. Of course with sufficient memory such indexes can be cached in memory and flushed as a background task - though in-memory caches can be tricky with a <em>clustered</em> database.</p>
+  </li>
+  <li>
+    <p>For bulk-processing of data (OLAP style systems), technologies such as Hive + ORC + Spark/MapReduce are very effective. They don’t bother much with indexes, using ORC block-headers with precomputed ranges of values for columns and/or bloom-filters to exclude irrelevant blocks of records and just performing table-scans on the relevant blocks. More data is read, but it is read <em>sequentially</em> with few seeks.</p>
+  </li>
+  <li>
+    <p>For OLTP-style systems, I would contend (from experience) that most “joins” are in fact simple “load the associated objects of the object I am interested in” which can be implemented effectively without indexes or joins using 2 DB round trips; N+1 requests to load a record and its N associates is undesirable, but 2 is not significant.</p>
+  </li>
+</ul>
+
+<p>In reply to this specific comment:</p>
+
+<blockquote>
+  <p>Denormalising to precompute a join - notwithstanding the update anomalies entailed - is a commitment to a particular join. If you need a different join, that commitment is going to cost you big.</p>
+</blockquote>
+
+<p>I would reply that yes, relational databases <em>are</em> better at unexpected joins; they are more “general purpose”. However the question is: how often does a join get invented which was not expected when the datamodel was invented? Normally, I want to find and read a set of matching <em>objects</em> (persons, accounts) and don’t need to randomly pick rows from various tables and combine them together.</p>
+
+<p>In reply to this specific comment:</p>
+
+<blockquote>
+  <p>If everything is cached in RAM, JOINs are rather cheap</p>
+</blockquote>
+
+<p>I would rephrase the reply as: if everything relevant is cached in RAM <em>on the node on which the join is being executed</em>, joins are cheap. If the cached data needs to be fetched across a network connection, not so much..</p>
+
+<h2 id="discussion-why-you-should-never-use-mongodb">Discussion: Why You Should Never Use MongoDB</h2>
+
+<p>This article has a good description of when using a NoSQL database (mongodb) to model data items with lots of non-ownership relations gets ugly:</p>
+
+<ul>
+  <li><a href="http://www.sarahmei.com/blog/2013/11/11/why-you-should-never-use-mongodb/">Sarah Mei: Why You Should Never Use MongoDB</a></li>
+</ul>
+
+<p>The example of tv-shows is interesting:</p>
+
+<ul>
+  <li>a season <em>belongs</em> to a tv-show and is relatively static data</li>
+  <li>an episode <em>belongs</em> to a season and is relatively static</li>
+  <li>a review <em>belongs</em> to an episode</li>
+  <li>a cast-member is <em>associated</em> with an episode.</li>
+</ul>
+
+<p>Thus the tvshow datamodel really <em>is</em> appropriate for a document-based system. The cast-member information is the only controversial part; it may be represented either as a <em>foreign key</em> reference to some “actors” info, or as denormalized data. Using denormalization is appropriate if this is information about a person at the point-in-time that they acted in the episode. Using a foreign-key is more appropriate if the intent is to link to a “dynamic” biography of the actor which may later be updated with other information.</p>
+
+<p>The social-network system the author of the article describes has completely different properties, with almost all being <em>associations</em>. Trying to use a document-database to model data that is almost <em>purely</em> links to associated data is pointless. The “objects” stored in the NoSQL database degenerate into fairly flat datastructures whose properties are mostly foreign-keys. The application then ends up having to effectively (and badly) reimplement “joins” that a relational database would do for you. The NoSQL performance advantages due to colocation of structured data evaporate, while the problems with the joins (seeks) are even worse.</p>
+
+<p>On the above article, there was an interesting point (by lega) about cacheing. One of the nice things about <em>not</em> doing joins in the DB but instead letting the client fetch related data if it needs it is that the client can cache commonly-referenced objects, in which case fetching a new object that <em>references the common object</em> doesn’t need a new round-trip to the server. In a relational model, loading A which references B, where B is already cached, won’t work: instead, only cacheing A works. If A is not cached, then a join loads (A join B) even when B is already cached.</p>
+
+<p>Interesting points too about using NoSQL for “incoming data yet to be analysed” and “cache for outgoing data”. Structured data coming in can be rapidly stored in NoSQL and then later split apart into its relational parts. And a relational store holding the “master copy” can be used to export data into denormalized NoSQL form, whether for data-warehouse use or for answering user queries. However the <em>one true</em> representation has no denormalized data - entities are entities.</p>
+
+<p>See also the “lambda architecture” in which all data is captured as an “event stream” in the rawest possible form. Other useful forms are then derived from this, and cached; the caches are used to answer queries. However the original events are kept forever so that the caches can be regenerated as needed - and kept in a normalized form.</p>
+
+<p>If denormalization is necessary for performance, then it is advisable to include the “foreign key” too. In the tvshow example, the actors could have been represented as (actorid, data) where actorid is some unique key. Loads are then fast while there is still proper traceability that would have helped with the “linking” problem documented.</p>
+
+<p>As a counter-point, here is a pro-mongodb article:</p>
+
+<ul>
+  <li><a href="http://luigimontanez.com/2012/developer-happiness-mongodb/">Developer Happiness MongoDB</a></li>
+</ul>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>Making Sense of NoSQL - a Guide for Managers and the Rest of Us (McCreary and Kelly, Manning Publications). Despite the name, the book is moderately technical. It is for “technical managers, solution architects and data architects”.</li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/nosql/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

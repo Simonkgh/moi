@@ -1,0 +1,229 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - systemd is not bloated</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='post'>
+    <h1>systemd is not bloated</h1>
+    <aside>Posted on: January 15, 2015</aside>
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <p>Today I saw yet another discussion about linux init-system <code>systemd</code> on slashdot, full of rabidly uninformed postings (and a few comments from people who actually understand the situation). The init application provided by the systemd team is <em>not</em> bloated or insecure. Here’s why…</p>
+
+<!-- more -->
+
+<p>BSD-based and Linux-based operating system distributions have quite different approaches to managing core source-code:</p>
+
+<ul>
+  <li>
+    <p>With the BSD family of distributions, each distro has one large version control repository which has a directory for the source-code for the entire kernel, and a directory holding the source-code for each user-space application in the distribution’s “core”. Yes, everything in one repository.</p>
+  </li>
+  <li>
+    <p>The linux family instead has a version control repository for the kernel, and just about every user-space application that exists for Linux is maintained by its own dev team in its own repository. A distro like Debian or Fedora then is responsible for finding the set of applications that it wants to include, and picking the appropriate versions so they all work together. Each application also tries to keep itself compatible with a range of kernels and library versions, adding backwards-compatibility code where necessary.</p>
+  </li>
+</ul>
+
+<p>The above is a slight simplification (eg Debian offer a verson containing a BSD kernel plus the same user-space apps that normally ship with a Linux kernel). But it is close enough.</p>
+
+<p>The benefits of the BSD approach are that things stay “in sync” better. Each application has its “official version” and its “official development team” (those with rights to commit to the corresponding dir in the single version-control-repo). When an interface in the kernel or a “low level” userspace app changes, the entire repository can be recompiled to see what breaks/needs fixing. At any time, a snapshot of the repository should produce a complete system that “works together properly”. The disadvantage of this approach is that there is little/no competition in each project; it isn’t easy for a developer or group of developers to try a new approach.</p>
+
+<p>The Linux approach allows much more competition; anyone can fork an existing userspace project and take it in a new direction - or even start from scratch. They then just need to persuade some distribution to include their app instead of the original. Or a distro may include both and let the end users decide which to install. Distributions can also compete by choosing different sets of libaries and applications. There are many cases in Linux’ history where a “fork” or complete replacement of an existing project has brought new energy and ideas. The disadvantage of this approach is that user-space apps often have dependencies on each other; handling API changes is tricky. When app X changes, it needs to negotiate with the development teams of other projects that depend on it and persuade them to adapt their code to the new APIs. And the distributors need to pick the versions that belong together which is often far from trivial.</p>
+
+<p>The systemd <em>team</em> have decided to take an approach somewhere between the BSD and Linux approaches. They maintain a repository which holds the source-code for a number of separate applications whose nature require them to interact strongly (and therefore are very dependent on each other’s APIs). By having a single repository it is much easier to build a set of executables which work together properly. Having these apps in separate repos makes this job much harder.</p>
+
+<p>The applications in the systemd repository are all associated with starting the system and starting/monitoring daemon processes. And <em>one</em> of the applications whose source-code is in this repository is the “init process” which runs with PID=1 and user-id of “root”. The source-code for this application is <em>small</em>; for security reasons it avoids doing much itself and instead delegates to helper applications which run with more-constrained security permissions.</p>
+
+<p>So previously there were a dozen applications associated with starting the system and handling daemon processes, and each app was in its own source-code repository. The systemd team maintain a single repository that <em>also</em> produces a set of small applications_ - very little difference except that it is easier to keep the source-code for the different apps “compatible with each other”. Which is just what happens in BSD distributions.</p>
+
+<p>This is why I find it so ironic when people claim they are switching from Linux to BSD because of a “monolithic” systemd :-)</p>
+
+<p>From time to time, a news article states that “systemd has added a new feature”. Usually what this means is that the systemd team have decided that some <em>existing userspace application</em> has a dependency on the startup system, and therefore it would make life easier if the source-code lived inside the same repository as the rest of the init system so that when an API in the init system changes the corresponding change to that app can be made immediately. This does <em>not</em> mean that the systemd init application has grown larger, but instead that the systemd repository now produces another executable which can replace the one previously built from a separate repo.</p>
+
+<p>Of course the systemd team aren’t just maintaining a copy of existing code. Having all code which depends on init-system APIs in one repo allows them to evolve the init-system much faster than was previously possible. And they are taking it in some different directions and adding features that didn’t previously exist. If you don’t like this direction, then fine - that is a reasonable opinion. But it is NOT true that systemd is “violating the unix tradition of writing small apps that work together” - they are doing <em>exactly</em> that. In fact, they are doing it <em>better</em> than before; it is easier to write many small cooperating applications when you have more freedom to evolve inter-application APIs. And the project is run BSD-style (one repo for multiple apps) which nobody can claim “violates the spirit of unix”.</p>
+
+<p>Rant over…</p>
+
+<p>Update: A <a href="http://www.linuxvoice.com/interview-lennart-poettering/">recently-published interview</a> with one of the main systemd developers discusses exactly these issues.</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/posts/2015-01-15-systemd-not-bloated/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

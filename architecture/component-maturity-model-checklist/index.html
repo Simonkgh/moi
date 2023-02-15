@@ -1,0 +1,835 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Component Maturity Model Checklist</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Component Maturity Model Checklist</h1>
+    <aside>First published on: March 25, 2023</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Architecture/'>Architecture</a></p>
+      
+<h1 class="no_toc" id="introduction">Introduction</h1>
+
+<p>My colleagues and I (as architects) created (in collaboration with development teams) a list of architectural characteristics that we decided were important for business-tier software components (deployable artifacts). This list was used to assess existing components, ie determine which were most in need of a refresh, and to evaluate proposals for new components.</p>
+
+<p>The name Component Maturity Model<sup id="fnref:cmm-name" role="doc-noteref"><a href="#fn:cmm-name" class="footnote" rel="footnote">1</a></sup> is related to the topic of <a href="https://en.wikipedia.org/wiki/Capability_Maturity_Model">Process Capability Maturity Models</a>, but has a slightly different focus.</p>
+
+<p>The reasons behind each item are sometimes complex, and the justification does not fit well into a checklist document. However most of these are well documented in general literature on software architecture.</p>
+
+<p>We attempt in this document to specify <em>goals</em> and not <em>technologies</em>, allowing individual teams to select any technology which achieves the goals that we believe are important. This is, however, a difficult task.</p>
+
+<p>I have left out any items which are specific to our architecture, or turned them into general items.</p>
+
+<p>If you find this list useful, please let me know.</p>
+
+<h1 class="no_toc" id="applying-the-checklist">Applying the Checklist</h1>
+
+<p>Checklists are not a great way to guide architecture; developers generally don’t read them unless they are pushed to do so as day-to-day work tends to take priority. This meant that we (as architects) need to schedule meetings with development teams to review existing components against this checklist, and need to ensure we are aware of all new components in order to schedule reviews of them before coding started. Ideally the ideas in this checklist would instead be automated, ie violation of the rules by existing components would be automatically detected, and new components which don’t follow the rules would just not be deployable. However automating all these checks is a non-trivial thing to do.</p>
+
+<p>An (internal) tool was developed to present the items below as a form/survey/questionnaire. Each item can be answered as fulfilled/not-fulfilled/not-applicable, and notes can be added (eg a link to relevant documentation, dashboards, etc). An “overall score” can then be computed. Typically when performing a review, an appropriate number of tickets are raised to resolve the not-fulfilled items which have the greatest benefit/cost ratio. Future reviews then focus only on the still-unfulfilled items.</p>
+
+<p>One positive side of this checklist is that it is at least more graspable than an “architecture guidelines” document - developers <em>really</em> don’t read those. By going through this checklist for a few projects, and discussing where necessary <em>why</em> some items are present in this list, a lot of knowledge was shared about what we (as architects) would like to see and why.</p>
+
+<p>Developing this list also acted as a good focus for discussions (with all developers) about what is important to us as an organisation and software development group.</p>
+
+<p>Note: The term “tribe” refers to a cross-functional software development team responsible for several <em>software domains</em>. The term “domain” means “a set of business functionality belonging to a team/tribe”; others might call this a subdomain, and in many cases it is equivalent to a bounded context.</p>
+
+<h1 class="no_toc" id="topics-and-items">Topics and Items</h1>
+
+<ul id="markdown-toc">
+  <li>
+<a href="#topic-1-domain-independence" id="markdown-toc-topic-1-domain-independence">Topic 1: Domain Independence</a>    <ul>
+      <li><a href="#code-ownership" id="markdown-toc-code-ownership">Code Ownership</a></li>
+      <li><a href="#code-quality-standards-independence" id="markdown-toc-code-quality-standards-independence">Code Quality Standards Independence</a></li>
+      <li><a href="#code-independence" id="markdown-toc-code-independence">Code Independence</a></li>
+      <li><a href="#deployment-independence" id="markdown-toc-deployment-independence">Deployment Independence</a></li>
+      <li><a href="#runtime-independence" id="markdown-toc-runtime-independence">Runtime Independence</a></li>
+      <li><a href="#persistence-independence" id="markdown-toc-persistence-independence">Persistence Independence</a></li>
+      <li><a href="#no-shared-functionality" id="markdown-toc-no-shared-functionality">No Shared Functionality</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#topic-2-datastores-and-external-services" id="markdown-toc-topic-2-datastores-and-external-services">Topic 2: Datastores and External Services</a>    <ul>
+      <li><a href="#schema-independence" id="markdown-toc-schema-independence">Schema Independence</a></li>
+      <li><a href="#cache-ownership" id="markdown-toc-cache-ownership">Cache Ownership</a></li>
+      <li><a href="#data-access-permission-ownership" id="markdown-toc-data-access-permission-ownership">Data Access Permission Ownership</a></li>
+      <li><a href="#isolation-from-external-datastores" id="markdown-toc-isolation-from-external-datastores">Isolation from External Datastores</a></li>
+      <li><a href="#private-record-keys" id="markdown-toc-private-record-keys">Private Record Keys</a></li>
+      <li><a href="#external-resource-addresses-are-configurable" id="markdown-toc-external-resource-addresses-are-configurable">External Resource Addresses are Configurable</a></li>
+      <li><a href="#external-resource-access-rights-are-minimised" id="markdown-toc-external-resource-access-rights-are-minimised">External Resource Access Rights are Minimised</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#topic-3-availability" id="markdown-toc-topic-3-availability">Topic 3: Availability</a>    <ul>
+      <li><a href="#slos-and-slas" id="markdown-toc-slos-and-slas">SLOs and SLAs</a></li>
+      <li><a href="#backup-policy" id="markdown-toc-backup-policy">Backup Policy</a></li>
+      <li><a href="#datastore-availability" id="markdown-toc-datastore-availability">Datastore Availability</a></li>
+      <li><a href="#disposability" id="markdown-toc-disposability">Disposability</a></li>
+      <li><a href="#statelessness" id="markdown-toc-statelessness">Statelessness</a></li>
+      <li><a href="#startup-dependency-isolation" id="markdown-toc-startup-dependency-isolation">Startup Dependency Isolation</a></li>
+      <li><a href="#rapid-startup" id="markdown-toc-rapid-startup">Rapid Startup</a></li>
+      <li><a href="#supports-readiness" id="markdown-toc-supports-readiness">Supports Readiness</a></li>
+      <li><a href="#reports-status" id="markdown-toc-reports-status">Reports Status</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#topic-4-deployability" id="markdown-toc-topic-4-deployability">Topic 4: Deployability</a>    <ul>
+      <li><a href="#continuous-integration" id="markdown-toc-continuous-integration">Continuous Integration</a></li>
+      <li><a href="#automated-deployment-of-non-main-branches" id="markdown-toc-automated-deployment-of-non-main-branches">Automated Deployment of non-main branches</a></li>
+      <li><a href="#automated-deployment-of-main-branch" id="markdown-toc-automated-deployment-of-main-branch">Automated Deployment of Main Branch</a></li>
+      <li><a href="#alert-generation" id="markdown-toc-alert-generation">Alert Generation</a></li>
+      <li><a href="#versioned-build-pipeline" id="markdown-toc-versioned-build-pipeline">Versioned Build Pipeline</a></li>
+      <li><a href="#versioned-deployment-pipeline" id="markdown-toc-versioned-deployment-pipeline">Versioned Deployment Pipeline</a></li>
+      <li><a href="#pipeline-independence" id="markdown-toc-pipeline-independence">Pipeline Independence</a></li>
+      <li><a href="#containerized-deployment" id="markdown-toc-containerized-deployment">Containerized Deployment</a></li>
+      <li><a href="#rollback" id="markdown-toc-rollback">Rollback</a></li>
+      <li><a href="#zero-downtime-deployment" id="markdown-toc-zero-downtime-deployment">Zero Downtime Deployment</a></li>
+      <li><a href="#progressive-rollout" id="markdown-toc-progressive-rollout">Progressive Rollout</a></li>
+      <li><a href="#trusted-dependencies" id="markdown-toc-trusted-dependencies">Trusted Dependencies</a></li>
+      <li><a href="#pipeline-ownership" id="markdown-toc-pipeline-ownership">Pipeline Ownership</a></li>
+      <li><a href="#environment-consistency" id="markdown-toc-environment-consistency">Environment Consistency</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#topic-5-interoperability" id="markdown-toc-topic-5-interoperability">Topic 5: Interoperability</a>    <ul>
+      <li><a href="#events-availability" id="markdown-toc-events-availability">Events Availability</a></li>
+      <li><a href="#event-format" id="markdown-toc-event-format">Event Format</a></li>
+      <li><a href="#events-are-documented" id="markdown-toc-events-are-documented">Events are Documented</a></li>
+      <li><a href="#schema-evolution" id="markdown-toc-schema-evolution">Schema Evolution</a></li>
+      <li><a href="#self-contained" id="markdown-toc-self-contained">Self-Contained</a></li>
+      <li><a href="#code-documentation" id="markdown-toc-code-documentation">Code Documentation</a></li>
+      <li><a href="#api-documentation" id="markdown-toc-api-documentation">API Documentation</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#topic-6-feature-toggles" id="markdown-toc-topic-6-feature-toggles">Topic 6: Feature Toggles</a>    <ul>
+      <li><a href="#supports-feature-toggles" id="markdown-toc-supports-feature-toggles">Supports Feature Toggles</a></li>
+      <li><a href="#toggles-are-off-by-default" id="markdown-toc-toggles-are-off-by-default">Toggles are Off By Default</a></li>
+      <li><a href="#toggle-removal" id="markdown-toc-toggle-removal">Toggle Removal</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#topic-7-security" id="markdown-toc-topic-7-security">Topic 7: Security</a>    <ul>
+      <li><a href="#follow-organisation-security-guidelines" id="markdown-toc-follow-organisation-security-guidelines">Follow Organisation Security Guidelines</a></li>
+      <li><a href="#documents-security-variance" id="markdown-toc-documents-security-variance">Documents Security Variance</a></li>
+      <li><a href="#threat-modelling" id="markdown-toc-threat-modelling">Threat Modelling</a></li>
+      <li><a href="#initial-security-review" id="markdown-toc-initial-security-review">Initial Security Review</a></li>
+      <li><a href="#recent-security-review" id="markdown-toc-recent-security-review">Recent Security Review</a></li>
+      <li><a href="#standardized-authentication" id="markdown-toc-standardized-authentication">Standardized Authentication</a></li>
+      <li><a href="#standardized-authorization" id="markdown-toc-standardized-authorization">Standardized Authorization</a></li>
+      <li><a href="#document-roles" id="markdown-toc-document-roles">Document Roles</a></li>
+      <li><a href="#credentials-are-configured" id="markdown-toc-credentials-are-configured">Credentials are Configured</a></li>
+      <li><a href="#supplychain-security-for-dependencies" id="markdown-toc-supplychain-security-for-dependencies">Supplychain Security for Dependencies</a></li>
+      <li><a href="#modern-dependencies" id="markdown-toc-modern-dependencies">Modern Dependencies</a></li>
+      <li><a href="#external-security-relevant-dependencies-are-registered" id="markdown-toc-external-security-relevant-dependencies-are-registered">External Security-relevant Dependencies are Registered</a></li>
+      <li><a href="#environment-isolation" id="markdown-toc-environment-isolation">Environment Isolation</a></li>
+      <li><a href="#supply-chain-security-for-base-images" id="markdown-toc-supply-chain-security-for-base-images">Supply-chain Security for Base Images</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#topic-8-observability" id="markdown-toc-topic-8-observability">Topic 8: Observability</a>    <ul>
+      <li><a href="#export-process-metrics" id="markdown-toc-export-process-metrics">Export Process Metrics</a></li>
+      <li><a href="#export-business-metrics" id="markdown-toc-export-business-metrics">Export Business Metrics</a></li>
+      <li><a href="#export-slosla-metrics" id="markdown-toc-export-slosla-metrics">Export SLO/SLA metrics</a></li>
+      <li><a href="#has-a-monitoring-dashboard" id="markdown-toc-has-a-monitoring-dashboard">Has a Monitoring Dashboard</a></li>
+      <li><a href="#low-cardinality-metrics" id="markdown-toc-low-cardinality-metrics">Low-cardinality metrics</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#topic-9-traceability" id="markdown-toc-topic-9-traceability">Topic 9: Traceability</a>    <ul>
+      <li><a href="#generates-logs" id="markdown-toc-generates-logs">Generates Logs</a></li>
+      <li><a href="#log-layout" id="markdown-toc-log-layout">Log Layout</a></li>
+      <li><a href="#distributed-tracing" id="markdown-toc-distributed-tracing">Distributed Tracing</a></li>
+      <li><a href="#private-data-access-monitoring" id="markdown-toc-private-data-access-monitoring">Private Data Access Monitoring</a></li>
+      <li><a href="#security-events" id="markdown-toc-security-events">Security Events</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#topic-10-alerts-and-notifications" id="markdown-toc-topic-10-alerts-and-notifications">Topic 10: Alerts and Notifications</a>    <ul>
+      <li><a href="#alert-policy" id="markdown-toc-alert-policy">Alert Policy</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#topic-11-tech-fitness-kpis" id="markdown-toc-topic-11-tech-fitness-kpis">Topic 11: Tech Fitness KPIs</a>    <ul>
+      <li><a href="#kpi-policy" id="markdown-toc-kpi-policy">KPI Policy</a></li>
+      <li><a href="#measures-kpis" id="markdown-toc-measures-kpis">Measures KPIs</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#topic-12-communication" id="markdown-toc-topic-12-communication">Topic 12: Communication</a>    <ul>
+      <li><a href="#contact-channel" id="markdown-toc-contact-channel">Contact Channel</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#topic-13-workflow" id="markdown-toc-topic-13-workflow">Topic 13: Workflow</a>    <ul>
+      <li><a href="#trunk-based-development" id="markdown-toc-trunk-based-development">Trunk-based Development</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="topic-1-domain-independence">Topic 1: Domain Independence</h2>
+
+<p>Topic Goal: Each back-end (business-tier) component in a domain (typically 1) is decoupled from components in other domains during development, testing, deployment and at runtime. This allows development to scale linearly with the number of components.</p>
+
+<p>Notes: In the case where a single domain is implemented as multiple back-end components, then a higher level of coupling between these components can be tolerated as the same development team is responsible for all of them. Component independence is nevertheless helpful even in this scenario.</p>
+
+<h3 id="code-ownership">Code Ownership</h3>
+
+<p>Goal: The component owner and only the component owner decides what code goes into their components (as long as that is consistent with organisation architectural requirements). There is no “cross coding” from other tribes/domains and no non-library code is shared with other tribes.</p>
+
+<p>Hint: The list of contributors in the VCS (version control system) might give you a hint if mostly the owners contribute to a component or not. This does not mean that people outside the tribe cannot contribute to a component they do not own. However, changes to a component’s codebase must always be approved by the component owner.</p>
+
+<p>Note: Pull-requests from other teams are acceptable, and even encouraged, as long as the component owners have full rights to accept or decline.</p>
+
+<h3 id="code-quality-standards-independence">Code Quality Standards Independence</h3>
+
+<p>Goal: The component owner agrees on and enforces code quality standards (as long as that is consistent with the tech KPI goals set by the organisation)</p>
+
+<p>Hint: This item can be fulfilled by setting a quality gate in a tool such as <a href="https://www.sonarsource.com/products/sonarqube/">Sonarqube</a> that verifies bugs and code smells.</p>
+
+<h3 id="code-independence">Code Independence</h3>
+
+<p>Goal: New features can be implemented without waiting for changes in other component codebases.</p>
+
+<p>Prerequisite: No libraries are shared with other projects.</p>
+
+<p>Prerequisite: Minimal coupling to other components via APIs or messaging (general-purpose APIs and messages are better than purpose-specific ones).</p>
+
+<h3 id="deployment-independence">Deployment Independence</h3>
+
+<p>Goal: The component can be deployed at any time without the need to coordinate with other tribes.</p>
+
+<p>Prerequisite: All interface changes are backwards-compatible, ie integration-points of a component which are visible to other software have to remain stable. As a result, there are no strict dependencies between application deployments regarding the deployment order. This also enables rollback of an unsuccessful deployment.</p>
+
+<p>Prerequisite: The codebase for the component is small enough to be maintained by a single tribe.</p>
+
+<p>Prerequisite: Private datastores (not readable by any other component); see section “Datastores”.</p>
+
+<h3 id="runtime-independence">Runtime Independence</h3>
+
+<p>Goal: The deployed component remains largely functional during outages of other components.</p>
+
+<p>Hint: Dependencies to authentication/authorization systems are excepted from this rule.</p>
+
+<p>Prerequisite: There is no synchronous communication between backend components that perform business logic (ideally), or appropriate fallback behaviour is in place.</p>
+
+<h3 id="persistence-independence">Persistence Independence</h3>
+
+<p>Goal: The component guarantees the integrity and privacy of its own persistent data per component.</p>
+
+<p>Prerequisite: Component uses a private datastore (not writable by any other component); see section “Datastores”.</p>
+
+<h3 id="no-shared-functionality">No Shared Functionality</h3>
+
+<p>Goal: The component’s codebase does not share functionality with any other domain (eg via common libraries encoding business logic).</p>
+
+<p>Hint: Code sharing of components within the same domain can be acceptable to a certain degree.</p>
+
+<h2 id="topic-2-datastores-and-external-services">Topic 2: Datastores and External Services</h2>
+
+<p>Topic Goal: Data is persisted in a way that allows development to scale linearly with the number of components.</p>
+
+<p>Note: A datastore can be anything that holds data. Examples: databases, memcached, file-caching-servers.</p>
+
+<h3 id="schema-independence">Schema Independence</h3>
+
+<p>Goal: Ability to change data schemas without the need to coordinate with any other tribe.</p>
+
+<p>Hint: This is the case if no other component directly accesses the database <em>and</em> any messages emitted from the component are appropriately decoupled from the storage schema.</p>
+
+<p>Links: <a href="https://martinfowler.com/bliki/IntegrationDatabase.html">Integration Database</a>, <a href="https://microservices.io/patterns/data/shared-database.html">Shared Database</a></p>
+
+<h3 id="cache-ownership">Cache Ownership</h3>
+
+<p>Goal: Ability to cache db results without danger that the underlying data is modified by another component.</p>
+
+<p>Hint: This is especially risky when using things such as a shared cache-server; ensure keys are appropriately namespaced.</p>
+
+<h3 id="data-access-permission-ownership">Data Access Permission Ownership</h3>
+
+<p>Goal: Ability to enforce rules on data access (only the component owners can grant and revoke permissions, no one else).</p>
+
+<h3 id="isolation-from-external-datastores">Isolation from External Datastores</h3>
+
+<p>Goal: Stability of <em>this</em> component regardless of changes made to data persistence in other components.</p>
+
+<h3 id="private-record-keys">Private Record Keys</h3>
+
+<p>Goal: No internal (potentially DB specific) surrogate keys are exposed (and thereby used by other components).</p>
+
+<p>Note: When an external system depends upon an internal key, then that field cannot be changed in future without breaking backwards compatibility.</p>
+
+<p>Prerequisite: Every business entity should get an organisation-wide artificial unique ID that does not change if the leading component or any implementation detail changes (e.g. by re-inserting entries into the database and thus re-generating auto-allocated keys).</p>
+
+<p>Hint: This is only relevant for data that is owned by this component and under your control. Data that you process as part of a read model needs to be fixed by the owner of the data. Also exposing randomly generated UUIDs is fine (as they are neither auto-incremented nor numeric).</p>
+
+<h3 id="external-resource-addresses-are-configurable">External Resource Addresses are Configurable</h3>
+
+<p>Goal: Accesses external services (including databases) via a configurable address, i.e. backing services are attached resources.  This is fulfilled if endpoints and their connection properties are configurable and not hardcoded.</p>
+
+<p>Link: <a href="https://12factor.net/backing-services">12 Factor App: IV. Backing services</a></p>
+
+<h3 id="external-resource-access-rights-are-minimised">External Resource Access Rights are Minimised</h3>
+
+<p>Goal: Application users and administrative users (that perform db migrations, for instance) are separated to limit the damage if this component has vulnerabilities.</p>
+
+<p>Hint: For each (accountid, credential) provided as configuration for this component, are the privileges associated with that account truly as low as possible?</p>
+
+<h2 id="topic-3-availability">Topic 3: Availability</h2>
+
+<p>Goal: To provide a service which is available “around the clock” and which has no user-visible downtime.</p>
+
+<h3 id="slos-and-slas">SLOs and SLAs</h3>
+
+<p>Goal: The component has defined SLO/SLAs based upon business requirements and they are reflected in alerting.</p>
+
+<h3 id="backup-policy">Backup Policy</h3>
+
+<p>Goal: Component has a documented backup policy. The implementation of a policy might be done by another tribe (eg one responsible for infrastructure), but the component needs should be defined by the tribe and the respective SLO.</p>
+
+<h3 id="datastore-availability">Datastore Availability</h3>
+
+<p>Goal: Component relies only on datastores that are highly available or does so only opportunistically (eg a cache, where unavailability does not lead to an SLO miss).</p>
+
+<h3 id="disposability">Disposability</h3>
+
+<p>Goal: Component is “disposable” - an instance can be terminated and replaced by a new one without significant system impact.</p>
+
+<p>Prerequisite: The component should pick up service (e.g. serve requests or start batch processing) from the time it starts within a few seconds. It should also shut down clean when it receives a SIGTERM signal.</p>
+
+<p>Links: <a href="https://12factor.net/disposability">12 Factor App: IX. Disposability</a></p>
+
+<h3 id="statelessness">Statelessness</h3>
+
+<p>Goal: Component is stateless and share-nothing; any data that needs to persist must be stored in a stateful backing service, typically a database.</p>
+
+<p>Prerequisite: The component does not rely on sticky sessions; any instance can process any request.</p>
+
+<p>Links: <a href="https://12factor.net/processes">12 Factor App: VI. Processes</a></p>
+
+<h3 id="startup-dependency-isolation">Startup Dependency Isolation</h3>
+
+<p>Goal: Component starts up even when external services are unavailable (private databases are excluded).</p>
+
+<p>Hint: Requiring an external service on startup can lead to circular dependencies which makes it impossible to bootstrap the platform in case of a complete platform outage.</p>
+
+<h3 id="rapid-startup">Rapid Startup</h3>
+
+<p>Goal: Component starts rapidly.</p>
+
+<p>Prerequisite: Avoids designs that need long warmup times on new deployments (e.g. by building up large cache structures).</p>
+
+<p>Hint: This question deals with long startup times on new deployments, and is not related to performance when serving requests.</p>
+
+<h3 id="supports-readiness">Supports Readiness</h3>
+
+<p>Goal: Accept requests only when an instance is ready to process them.</p>
+
+<p>Hint: Many runtimes rely on the component responding appropriately to a “readiness check”.</p>
+
+<h3 id="reports-status">Reports Status</h3>
+
+<p>Goal: Provides health, readiness and status data (see Observability).</p>
+
+<p>Hint: It isn’t enough to be available; availability must also be measurable.</p>
+
+<h2 id="topic-4-deployability">Topic 4: Deployability</h2>
+
+<p>Topic Goal: To achieve rapid delivery of features, the component and associated infrastructure must be easily and rapidly deployable.</p>
+
+<h3 id="continuous-integration">Continuous Integration</h3>
+
+<p>Goal: Component is built automatically on push of changes to version control system (Continuous Integration).</p>
+
+<h3 id="automated-deployment-of-non-main-branches">Automated Deployment of non-main branches</h3>
+
+<p>Goal: Component can be deployed with no manual steps (other than authorizing the deployment) - to both test and production environments (Continuous Delivery).</p>
+
+<h3 id="automated-deployment-of-main-branch">Automated Deployment of Main Branch</h3>
+
+<p>Goal: Component is automatically deployed to production on merge to the main branch.</p>
+
+<h3 id="alert-generation">Alert Generation</h3>
+
+<p>Goal: Alerts are generated automatically on deployment failure.</p>
+
+<h3 id="versioned-build-pipeline">Versioned Build Pipeline</h3>
+
+<p>Goal: Build-pipeline configuration is stored together with the code (under version control).</p>
+
+<h3 id="versioned-deployment-pipeline">Versioned Deployment Pipeline</h3>
+
+<p>Goal: Deployment-pipeline configuration is stored together with the code (under version control).</p>
+
+<h3 id="pipeline-independence">Pipeline Independence</h3>
+
+<p>Goal: Build and deployment pipelines are isolated from performance or stability of other components. Expressed differently: build and deployment is possible even when other services are not currently available.</p>
+
+<p>Prerequisites: Integration tests mock all external components.</p>
+
+<p>Hint: This is a primary use case for <a href="https://docs.pact.io/">PACT</a>.</p>
+
+<h3 id="containerized-deployment">Containerized Deployment</h3>
+
+<p>Goal: Support deployment to modern environments by packaging the component as a container image and supporting the organisation’s container-management system in deployment pipelines.</p>
+
+<h3 id="rollback">Rollback</h3>
+
+<p>Goal: Supports rapid rollback of a deployment.</p>
+
+<h3 id="zero-downtime-deployment">Zero Downtime Deployment</h3>
+
+<p>Goal: Can do zero-downtime deployments, ie be able to deploy the component during normal working hours.</p>
+
+<h3 id="progressive-rollout">Progressive Rollout</h3>
+
+<p>Goal: Supports gradual rollout of a deployment driven by health metrics (eg blue-green or automated canary deployments).</p>
+
+<p>Note: This is an advanced capability…desirable but not expected of every component.</p>
+
+<p>Links: <a href="https://martinfowler.com/bliki/BlueGreenDeployment.html">BlueGreen Deployment</a>, <a href="https://martinfowler.com/bliki/CanaryRelease.html">Canary Releases</a>.</p>
+
+<h3 id="trusted-dependencies">Trusted Dependencies</h3>
+
+<p>Goal: Builds rely only on trusted image repositories (e.g. no downloads from arbitrary urls in the build process).</p>
+
+<p>Hint: Downloading from untrusted sources poses two risks: 1) Continuity Risk: The artefact may suddenly become unavailable and 2) Security Risk: It might be possible to perform a supply chain attack by replacing the artefact.</p>
+
+<h3 id="pipeline-ownership">Pipeline Ownership</h3>
+
+<p>Goal: The component owner has the ability to modify the build and deployment pipelines.</p>
+
+<h3 id="environment-consistency">Environment Consistency</h3>
+
+<p>Goal: Dev/Test/Prod environments are structurally as similar as possible.</p>
+
+<p>Note: This item is only concerned about structural similarity, not about the data and config from prod. Non-production environments must never have production data or configuration.</p>
+
+<p>Links: <a href="https://12factor.net/dev-prod-parity">12 Factor App: X. Dev/prod parity</a></p>
+
+<h2 id="topic-5-interoperability">Topic 5: Interoperability</h2>
+
+<p>Topic Goal: Support a scalable, loosely-coupled organisation-wide architecture.</p>
+
+<h3 id="events-availability">Events Availability</h3>
+
+<p>Goal: Publishes events of significance via a message-broker (significance is defined by your team or the organisation needs).</p>
+
+<h3 id="event-format">Event Format</h3>
+
+<p>Goal: Events are generic and self descriptive. Topics and fields have descriptive names and use enums instead of status codes.</p>
+
+<p>Hint: Where relevant, event schemas should be registered in an appropriate registry (eg Confluent Schema Registry).</p>
+
+<h3 id="events-are-documented">Events are Documented</h3>
+
+<p>Goal: The events emitted by the component are documented in the appropriate place.</p>
+
+<h3 id="schema-evolution">Schema Evolution</h3>
+
+<p>Goal: Has a documented plan for schema evolution and versioning to avoid communication breaking unexpectedly because of schema changes (backwards-compatibility).</p>
+
+<p>Hint: A schema registry may assist in verifying backwards compatibility (if appropriately configured).</p>
+
+<p>Links: <a href="https://docs.confluent.io/platform/current/schema-registry/avro.html">Schema Evolution and Compatibility</a></p>
+
+<h3 id="self-contained">Self-Contained</h3>
+
+<p>Goal: The component is completely self contained and provides its service via port binding.</p>
+
+<p>Prerequisite: The deployable artifact is directly executable. An artifact which is deployed into some “host” application does not fulfil this.</p>
+
+<p>Links: <a href="https://12factor.net/port-binding">12 Factor App: VII. Port binding</a></p>
+
+<h3 id="code-documentation">Code Documentation</h3>
+
+<p>Goal: Source code is meaningfully documented.</p>
+
+<p>Hint: Documentation should help a reader of the code (including your future self) understand the context why a particular class/method exists or why particular design or configuration choices have been made.  Code comments that simply describe what the code does (“getter/setter javadoc”) is not helpful.</p>
+
+<h3 id="api-documentation">API Documentation</h3>
+
+<p>Goal: Provides automated documentation generation for api interfaces.</p>
+
+<h2 id="topic-6-feature-toggles">Topic 6: Feature Toggles</h2>
+
+<p>Topic Goal: Support trunk based development (which in turn supports rapid software deployment).</p>
+
+<p>Hint: Trunk-based development means avoiding long-lived code branches; most branches should be merged to the main branch (and thus be released to production) within 2 days. Having not-yet-ready code active only when a feature-flag is enabled allows testing of code in non-production environments without having it active in production.</p>
+
+<h3 id="supports-feature-toggles">Supports Feature Toggles</h3>
+
+<p>Goal: Code-paths within the component can be enabled and disabled via external configuration at runtime.</p>
+
+<h3 id="toggles-are-off-by-default">Toggles are Off By Default</h3>
+
+<p>Goal: Uses feature toggles to enable features, not disable them (i.e. a feature is off by default).</p>
+
+<h3 id="toggle-removal">Toggle Removal</h3>
+
+<p>Goal: A process exists to ensure feature toggles are removed from the code as soon as the feature is complete.</p>
+
+<p>Hint: Feature toggles are intended only to support merge of not-yet-production-ready code into the main branch.</p>
+
+<h2 id="topic-7-security">Topic 7: Security</h2>
+
+<p>Topic Goal: Provide a service which protects data and operations.</p>
+
+<h3 id="follow-organisation-security-guidelines">Follow Organisation Security Guidelines</h3>
+
+<p>Goal: Component follows any organisation-relevant guidelines - and this is documented.</p>
+
+<h3 id="documents-security-variance">Documents Security Variance</h3>
+
+<p>Goal: Component documentation explicitly describes any security requirements beyond the minimum requirements.</p>
+
+<h3 id="threat-modelling">Threat Modelling</h3>
+
+<p>Goal: Project documents the results of at least one threat modelling session.</p>
+
+<h3 id="initial-security-review">Initial Security Review</h3>
+
+<p>Goal: Project documents the results of at least one independent security review.</p>
+
+<p>Hint: The review can be internal to the organisation or an external party.</p>
+
+<h3 id="recent-security-review">Recent Security Review</h3>
+
+<p>Goal: Project has had at least one security review in the last 2 years.</p>
+
+<h3 id="standardized-authentication">Standardized Authentication</h3>
+
+<p>Goal: The component authenticates incoming requests with the organisation standard, eg OpenID Connect.</p>
+
+<p>Note: Applies only to components which need <em>authentication</em> - typically webservers. Business-tier components usually require <em>authorization</em> only.</p>
+
+<h3 id="standardized-authorization">Standardized Authorization</h3>
+
+<p>Goal: The component verifies that incoming requests have appropriate authorization to perform the requested operation, and do so via the organisation standard approach (eg OAuth2). Originating IP address is never used as the sole factor for Authorization. Roles used for authorization are appropriately sized (no “superuser” permissions).</p>
+
+<p>Links: <a href="https://en.wikipedia.org/wiki/Zero_trust_security_model">Zero Trust</a></p>
+
+<h3 id="document-roles">Document Roles</h3>
+
+<p>Goal: The set of roles used for authorization decision are appropriately documented.</p>
+
+<h3 id="credentials-are-configured">Credentials are Configured</h3>
+
+<p>Goal: Uses credentials/secrets only from a designated secret storage with appropriate access restrictions (does NOT embed secrets in code).</p>
+
+<h3 id="supplychain-security-for-dependencies">Supplychain Security for Dependencies</h3>
+
+<p>Goal: Project has a process for regular review and reporting of dependency security issues, ie ensures that third-party libraries are kept up-to-date with security patches.</p>
+
+<p>Hint: The use of an automated dependency-scanning tool <em>on a regular schedule</em> is a sufficient process.</p>
+
+<h3 id="modern-dependencies">Modern Dependencies</h3>
+
+<p>Goal: All dependencies are regularly updated to new versions, even in the absence of known security vulnerabilities.</p>
+
+<p>Note: Security patches are often only available for newer versions of libraries; these may be hard to apply to components relying on older dependency versions. Keeping dependencies up-to-date is therefore good <em>preparation</em> for applying security fixes.</p>
+
+<h3 id="external-security-relevant-dependencies-are-registered">External Security-relevant Dependencies are Registered</h3>
+
+<p>Goal: Any external sites or other resources which the component interacts with are registered with the organisation’s relevant security tools.</p>
+
+<h3 id="environment-isolation">Environment Isolation</h3>
+
+<p>Goal: Deployment environments (dev/test/prod/etc) are separated and do not allow artifacts or data to move between them except under approved conditions.</p>
+
+<p>Hint: This forbids the use of production data in test environments, and use of production services from non-production environments.</p>
+
+<h3 id="supply-chain-security-for-base-images">Supply-chain Security for Base Images</h3>
+
+<p>Goal: When building container images, use only approved base images.</p>
+
+<p>Hint: The organisation security team may not wish to allow every image to be used in production environments.</p>
+
+<h2 id="topic-8-observability">Topic 8: Observability</h2>
+
+<p>Topic Goal: To ensure component state can be inspected at runtime. This supports detection and analysis of problems.</p>
+
+<h3 id="export-process-metrics">Export Process Metrics</h3>
+
+<p>Goal: Export metrics that are related to technical state (Eg for a java application, jvm metrics).</p>
+
+<h3 id="export-business-metrics">Export Business Metrics</h3>
+
+<p>Goal: Export metrics that are related to business processes, eg counts of active users.</p>
+
+<h3 id="export-slosla-metrics">Export SLO/SLA metrics</h3>
+
+<p>Goal: Export metrics related to SLO/SLAs (counts of failing requests, errors/exceptions emitted, response times, etc).</p>
+
+<h3 id="has-a-monitoring-dashboard">Has a Monitoring Dashboard</h3>
+
+<p>Goal: Project has a live dashboard which shows all important metrics related to the component - particularly whether SLOs/SLAs are satisfied.</p>
+
+<h3 id="low-cardinality-metrics">Low-cardinality metrics</h3>
+
+<p>Goal: All exported metrics have labels with low cardinalities to avoid performance issues with the monitoring system.</p>
+
+<p>Links: <a href="https://grafana.com/blog/2022/02/15/what-are-cardinality-spikes-and-why-do-they-matter/">Further information on cardinality spikes and their (potential) impact</a></p>
+
+<h2 id="topic-9-traceability">Topic 9: Traceability</h2>
+
+<p>Topic Goal: Component records audit/trace data to enable debugging of problems in production environments.</p>
+
+<h3 id="generates-logs">Generates Logs</h3>
+
+<p>Goal: Treats logs as event streams: Each running process writes its log-messages, unbuffered, to stdout. In staging or production deploys, the stream for each process will be captured by the execution environment, collated together with all other streams from the app, and routed to one or more final destinations for viewing and secure, read-only long-term storage.</p>
+
+<p>Hint: Storing logs as files on the host of each component instance does not fulfil this requirement.</p>
+
+<p>Links: <a href="https://12factor.net/logs">12 Factor App: XI. Logs</a></p>
+
+<h3 id="log-layout">Log Layout</h3>
+
+<p>Goal: Uses log levels and log formats consistently (as agreed by tribe).</p>
+
+<h3 id="distributed-tracing">Distributed Tracing</h3>
+
+<p>Goal: Supports the organisation’s distributed request tracing tool.</p>
+
+<h3 id="private-data-access-monitoring">Private Data Access Monitoring</h3>
+
+<p>Goal: Logs all interactions with personal data not belonging to the originator of the request. This is mandatory for data classified as PII under the GDPR. Such logs must be kept for at least 90 days.</p>
+
+<h3 id="security-events">Security Events</h3>
+
+<p>Goal: Logs security-relevant events (eg logon, logoff, configuration changes).</p>
+
+<h2 id="topic-10-alerts-and-notifications">Topic 10: Alerts and Notifications</h2>
+
+<p>Topic Goal: Generate alerts and notifications for early problem detection and remediation.</p>
+
+<h3 id="alert-policy">Alert Policy</h3>
+
+<p>Goal: Project has a defined Alerting Policy following organisation guidelines, and the component complies with those guidelines.</p>
+
+<h2 id="topic-11-tech-fitness-kpis">Topic 11: Tech Fitness KPIs</h2>
+
+<p>Topic Goal: Provide visibility of project status to the owner and management.</p>
+
+<h3 id="kpi-policy">KPI Policy</h3>
+
+<p>Goal: Project has documented goals for metrics Lead Time for Change (LTC), Deployment Frequency (DF), Change Fail Rate (CFR), and Mean Time to Recover/Restore (MTTR).</p>
+
+<h3 id="measures-kpis">Measures KPIs</h3>
+
+<p>Goal: Project publishes its LTC, DF, CFR, and MTTR.</p>
+
+<h2 id="topic-12-communication">Topic 12: Communication</h2>
+
+<p>Topic Goal: Ensure other tribes and individuals within the organisation can get in touch with the owners of this component.</p>
+
+<h3 id="contact-channel">Contact Channel</h3>
+
+<p>Goal: Have a well-documented chat channel or email group through which questions or information can be sent to the component owners.</p>
+
+<h2 id="topic-13-workflow">Topic 13: Workflow</h2>
+
+<p>Topic Goal: Use best-practice workflows for development.</p>
+
+<h3 id="trunk-based-development">Trunk-based Development</h3>
+
+<p>Goal: Use trunk-based development, ie branches used to develop features should be very short-lived (in most cases less than 2 days).</p>
+
+<p>Hint: Feature toggles can allow code which is not yet production-ready to be merged into the main branch.</p>
+
+<p>Links: <a href="https://trunkbaseddevelopment.com/">Trunk Based Development</a></p>
+
+<h1 class="no_toc" id="footnotes">Footnotes</h1>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:cmm-name" role="doc-endnote">
+      <p>The original list had a somewhat different name. I have changed the name for the purposes of this article. <a href="#fnref:cmm-name" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/architecture/component-maturity-model-checklist/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

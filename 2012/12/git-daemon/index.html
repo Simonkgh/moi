@@ -1,0 +1,279 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Exporting a Git repo with 'git daemon'</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='post'>
+    <h1>Exporting a Git repo with 'git daemon'</h1>
+    <aside>Posted on: December 11, 2012</aside>
+    <article>
+    <p>Categories: <a href='/category/Git/'>Git</a></p>
+      <h1 id="exporting-a-git-repo">Exporting a Git Repo</h1>
+
+<p>While my work environment has a ‘central’ Git repository for approved code, I recently wanted to directly share just one branch of my local repo with work colleagues on the local lan. Although there is a vast amount of information about Git on the internet, documentation on a simple procedure to achieve this was surprisingly hard to find. So here is a simple way for a Linux system to provide a read-only view of a branch in a local repo, based on the <code>git daemon</code> command that is part of git-core.</p>
+
+<p>This assumes you are running a recent Ubuntu release (12.10 in my case), and have a recent version of Git installed.</p>
+
+<!-- more -->
+
+<h1 id="setting-up-git-daemon-and-xinetd">Setting up git daemon and xinetd</h1>
+
+<p>First, create a directory to hold a set of ‘bare repositories’. You could just point the daemon directly at the root dir of a single repo to export, but having the option of multiple repos is nice. You could also point it directly at a directory under your $HOME, but having the repo somewhere common (ie not under $HOME) seems right for a system service. I’ve named my repo <code>for-review</code>. I’m also going to make the directory owned by me, as I’ll <code>git push</code> directly to the directory rather than configure <code>git daemon</code> to handle writes too.</p>
+
+<pre><code>sudo mkdir -p /var/git/for-review
+sudo chown muyser:myuser /var/git/for-review
+cd /var/git/for-review
+git init --bare
+</code></pre>
+
+<p>Now, set up git as an xinetd service; this isn’t absolutely necessary (you can just run <code>git daemon</code> by hand when needed) but generally having a permanent way to share a repo is a convenient thing to have.</p>
+
+<p>Ubuntu doesn’t install xinetd by default (it prefers an ‘upstart’ rule); Fedora doesn’t install xinetd by default either (it prefers a ‘systemd’ rule). However xinetd is available for many platforms, so the config below can be used regardless of OS once xinetd has been installed.</p>
+
+<p>For Ubuntu/Debian systems, installing xinetd is simply a matter of:</p>
+
+<pre><code>sudo apt-get install xinetd
+sudo -e /etc/xinetd.d/git  # or 'cat | sudo dd of=/etc/xinetd.d/git' then paste and ctrl-d
+</code></pre>
+
+<p>The contents of the <code>/xinetd.d/git</code> file should be:</p>
+
+<pre><code># default: on
+# description: An xinetd internal service which serves GIT repo requests
+service git
+{
+  disable         = no
+  type            = UNLISTED
+  port            = 9418
+  socket_type     = stream
+  wait            = no
+  user            = nobody
+  server          = /usr/bin/git
+  server_args     = daemon --inetd --export-all --base-path=/var/git
+  log_on_failure  += USERID
+}                                                                          
+</code></pre>
+
+<p>And restart xinetd (if you have any problems connecting to git later, check the end of <code>/var/log/syslog</code> for error messages from xinetd)..</p>
+
+<pre><code>sudo service xinetd restart
+</code></pre>
+
+<p>Now to populate this new repo with some data..</p>
+
+<pre><code>cd ~/my-git-repo
+git remote add for-review file:///var/git/for-review
+git push for-review topic1  # topic1 is the name of a branch
+</code></pre>
+
+<p>And at the other end, my colleagues just need to do this to pull my patches into their repo (which was cloned from the same original source as mine)..</p>
+
+<pre><code>git remote add simon-review git://somehost/for-review
+git fetch simon-review
+git branch --track simon-topic1 simon-review/topic1
+git checkout simon-topic1
+</code></pre>
+
+<p>I can push more patches to the <code>for-review</code> repo as desired, and my colleages can use <code>git pull</code> to see those patches. I can also set up more repos as needed under <code>/var/git</code>.</p>
+
+<h1 id="alternatives">Alternatives</h1>
+
+<p>A simpler option is to point <code>git daemon</code> directly at the main git repo. This does work, and saves the work needed to <code>git push</code> to the bare repository. However when others use <code>git fetch</code> they will see every experimental branch and every rough patch in my local repo, which is a little pointless.</p>
+
+<p>Of course, git daemon can be run directly without xinetd. However it is so little extra effort to set xinetd up.</p>
+
+<p>Pushing via file:// urls of course only works when the bare repo is on the same machine, which is not always desirable, but works for my use-case. And of course nobody else can push to this repo; it only supports <em>me</em> publishing things, but again that’s fine for this use-case.</p>
+
+<p>There are more sophisticated solutions out there that allow fine-grained control of access-rights, pushing by multiple people, pushing from remote hosts etc. See <a href="http://www.jedi.be/blog/2009/05/06/8-ways-to-share-your-git-repository">8 ways to share your git repository</a> for more ideas.</p>
+
+<h1 id="notes">Notes</h1>
+
+<p>If you forget what remote mappings you have, <code>git remote</code> is your friend.</p>
+
+<p>Once you have pushed a branch to the bare repo, don’t rebase it!</p>
+
+<p>I have seen a lot of documentation out there referring to <code>git-daemon</code>, but this appears to be obsolete (or at least not supported on my Ubuntu system). There is no separate <code>git-daemon program</code>; <code>daemon</code> is just a parameter to git.</p>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/posts/2012-12-11-git-daemon/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

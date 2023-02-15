@@ -1,0 +1,477 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - The PCI Bus</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>The PCI Bus</h1>
+    <aside>First published on: September 29, 2012</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      <h1 class="no_toc" id="intro">Intro</h1>
+
+<p>The PCI (Peripheral Computer Interconnect) or PCIe bus is a major component of a modern computer, and understanding how it works is important for understanding many Linux device-drivers.</p>
+
+<p>There is quite a lot of good information on the PCI bus itself (on Wikipedia and other locations), and there is documentation in the Linux kernel about the actual implementation of the PCI handling subsystem. However there is a gap between these two existing sources that this article hopes to cover.</p>
+
+<p>While my focus here is on understanding PCI/PCIe in the context of Linux for x86, much of this content should also be relevant for other operating systems and other non-x86 hardware.</p>
+
+<p>Because this is an overview of PCI, not a textbook, there are many simplifications and omissions here.</p>
+
+<p>WARNING: I’m not an expert in these areas. The following information has been gathered from dozens of different sources across the internet, and integrated together into a hopefully consistent whole. Corrections are welcome!</p>
+
+<h1 class="no_toc" id="table-of-contents">Table of Contents</h1>
+
+<ul id="markdown-toc">
+  <li><a href="#the-role-of-the-pci-bus" id="markdown-toc-the-role-of-the-pci-bus">The Role of the PCI Bus</a></li>
+  <li><a href="#cpu-memory-bus-ich-and-other-buses" id="markdown-toc-cpu-memory-bus-ich-and-other-buses">CPU, Memory bus, ICH and other buses</a></li>
+  <li><a href="#the-x86-io-address-space" id="markdown-toc-the-x86-io-address-space">The x86 IO Address Space</a></li>
+  <li><a href="#pci-and-pcie-electrical-wiring" id="markdown-toc-pci-and-pcie-electrical-wiring">PCI and PCIe electrical wiring</a></li>
+  <li><a href="#pcie" id="markdown-toc-pcie">PCIe</a></li>
+  <li><a href="#the-agp-bus" id="markdown-toc-the-agp-bus">The AGP Bus</a></li>
+  <li><a href="#pci-configuration-space" id="markdown-toc-pci-configuration-space">PCI Configuration Space</a></li>
+  <li><a href="#pci-device-ids" id="markdown-toc-pci-device-ids">PCI Device IDs</a></li>
+  <li><a href="#pci-bars" id="markdown-toc-pci-bars">PCI BARs</a></li>
+  <li><a href="#linux-pci-bus-probing" id="markdown-toc-linux-pci-bus-probing">Linux PCI bus probing</a></li>
+  <li><a href="#bus-mastering-and-dma" id="markdown-toc-bus-mastering-and-dma">Bus Mastering and DMA</a></li>
+  <li><a href="#userspace-access-to-pci-devices" id="markdown-toc-userspace-access-to-pci-devices">Userspace access to PCI devices</a></li>
+  <li><a href="#dma-controllers-and-cache-coherency" id="markdown-toc-dma-controllers-and-cache-coherency">DMA Controllers and Cache Coherency</a></li>
+  <li><a href="#iommus-and-garts" id="markdown-toc-iommus-and-garts">IOMMUs and GARTs</a></li>
+  <li><a href="#mtrrs-memory-type-range-registers" id="markdown-toc-mtrrs-memory-type-range-registers">MTRRs (Memory Type Range Registers)</a></li>
+  <li><a href="#references" id="markdown-toc-references">References</a></li>
+</ul>
+
+<h1 id="the-role-of-the-pci-bus">The Role of the PCI Bus</h1>
+
+<p>The CPU needs to talk to memory-controllers, disk-controllers, network-controllers, keyboards, mice, video graphics chips, other CPUs in a cluster, and many other things. Some of these things are soldered onto the motherboard while others plug in to extension slots.</p>
+
+<p>CPUs have a native data bus of some sort on the pins leading from the chip itself. On early PCs, all onboard devices (whether using mem-space or io-space addresses) were simply designed to connect to this native wiring.  Extension slots were simply slightly protected extensions to the same wiring, forcing external devices to also comply with the same wiring and timing standards. The problem with this is that the CPU’s interface changes quite often - forcing the manufacturers of all other chips and devices to change their products too.</p>
+
+<p>PCI is a <em>cpu-independent</em> bus specification; the motherboard must provide a PCI controller which acts as a gateway between the CPU and PCI devices; the PCI controller interface is still strongly coupled to the CPU, but devices on the non-CPU side simply have to comply with the PCI standard, and not that of the CPU.  Importantly, PCI also has a mechanism for the operating system to dynamically determine what devices are present on the bus, and allowing the OS to configure the addresses and interrupt lines that will later be used for communication between the device and the OS.</p>
+
+<p>While there were brief flirts with the idea of also attaching memory to the PCI bus, the CPU-Memory bandwidth soon increased far beyond the capability of a more generic bus such as PCI to keep up and the idea has long been discarded. There are other buses that claim to be able to support both peripherals and memory (eg Hypertransport, Infiniband, QPI) but so far nothing has displaced PCI for general-purpose computing.</p>
+
+<p>The PCI electrical protocols aren’t compatible with long cables, so devices that live outside the computer case typically have to use other protocols; for example the PCI bus can have USB bridge and SATA bridge devices on it. Those devices then have connector ports that devices can be plugged in to. The “PCI card” standard <em>is</em> a way for external devices to plug directly into PCI slots, and is moderately common.</p>
+
+<p>For more about the PCI bus (esp. electrically), see: <a href="http://en.wikipedia.org/Conventional_PCI">http://en.wikipedia.org/Conventional_PCI</a>. For buses in general, see: <a href="http://en.wikipedia.org/wiki/Bus_(computing)">http://en.wikipedia.org/wiki/Bus_(computing)</a></p>
+
+<h1 id="cpu-memory-bus-ich-and-other-buses">CPU, Memory bus, ICH and other buses</h1>
+
+<p>A CPU has an internal address size (eg 32 bits or 64 bits).</p>
+
+<p>In a standard “parallel” system bus, there will be N electrical pins leaving the CPU.  On a read, the internal address optionally gets mapped (via an MMU or segment registers or other mechanism) then is output on these N pins as an address. The bus address width does not have to be the same width as the CPU internal address size; it might be smaller (eg a 64-bit CPU may only have 40 address bits, and therefore can only address 2^40 bytes of memory even though the internal registers are larger). It can also be larger, using tricks such as MMU mappings; a 32-bit CPU may have 40-bit hardware addresses, allowing 2^40 bytes of ram to be installed although each userspace application is still limited to 2^32 bytes).</p>
+
+<p>In modern systems, the system bus may not be parallel at all; the CPU pins themselves may present a serial interface instead, communicating with everything external to the CPU in a way resembling a packetised network protocol.</p>
+
+<p>The traditional Intel architecture has:</p>
+
+<pre><code>CPU 
+      -&gt; northbridge (via cpu-specific bus)
+          --&gt; Memory controller -&gt; RAM (via bus like DDR, GDDR, rambus)
+          --&gt; AGP controller -&gt; dedicated PCI bus -&gt; graphics card [although AGP is somewhat obsolete now..]
+          --&gt; ICH (aka southbridge)
+                 --&gt; PCI bridge 
+                      --&gt; onboard PCI devices
+                      --&gt; extension slots --&gt; plugin boards
+                 --&gt; USB bridge
+                 --&gt; oldstyle keyboard, mouse controllers
+</code></pre>
+
+<p>Recently, the “memory controller” circuits have moved from the Northbridge to the CPU die itself.</p>
+
+<h1 id="the-x86-io-address-space">The x86 IO Address Space</h1>
+
+<p>Some CPU architectures, including the x86, have the concept of separate “IO” and “Memory” address spaces. The IO address space is effectively deprecated in modern x86 systems, but still exists in both the CPU and in the PCI specification.</p>
+
+<p>A “separate address space” means that “the data at location 0x01FC” as a memory address is a completely different thing from the same location as an IO address. A read of the first will simply return a previously-stored data value, while the second might cause an A-to-D converter to sample a voltage input, or might return a value indicating what key has been pressed on a keyboard.</p>
+
+<p>In some systems, there is a single parallel bus attached to the CPU with N address pins, and an extra pin is used to indicate whether the address on the bus is “mem” or “io” (named ‘M/IO#’ on the Pentium for example). In more advanced systems a CPU might actually have two separate buses (separate sets of pins on the CPU), allowing the CPU to perform IO and memory accesses at the same time.</p>
+
+<p>In more modern systems, the system bus is a serial bus, and a read operation effectively sends a “network packet” over this bus. In this case, the packet sent contains some kind of data field indicating whether the address is Mem or IO.</p>
+
+<p>The x86 CPU has two instructions that cause the address to be flagged as an “IO” address: IN and OUT. These instructions do come in a number of different flavours to indicate whether 8, 16 or 32 bits of data should be transferred. These instructions can only read from or write to a limited choice of CPU registers - instructions for accessing memory addresses are far more flexible. There are INS/OUTS instructions that copy a sequence of N values from memory to a specific IO address, or read an IO address N times and copy the values to adjacent memory locations; these make clear that IO addresses are expected to be “volatile” data. In fact, accesses to IO addresses also imply “flushes” that memory accesses don’t by default; volatile PCI device data ranges mapped as normal memory have to be carefully marked as non-cacheable and even then drivers sometimes need to perform explicit operations to ensure race conditions are avoided.</p>
+
+<p>In addition, the x86 architecture limits IO addresses to 16 bits, ie 64Kbytes.</p>
+
+<p>The IBM-PC (x86-based) architecture reserves quite a few fixed IO addresses for traditional devices (such as the keyboard, speaker, interrupt controller).</p>
+
+<p>PCI devices (ie third-party components intended to be attached to a PCI bus) can be designed to be accessed via either memory or IO operations; because of the limitations of x86 IO addressing the PCI specification strongly recommends that all devices be fully functional using only memory addressing (either exclusively or with a redundant IO-address-based alternative also provided).</p>
+
+<p>WARNING: Terminology about address spaces appears to be very loose and confusing. Often the term “I/O Memory” is used to refer to a physical or virtual <em>memory address range</em> that happens to be used for communicating with a device. The presence of the term “I/O” does not imply an x86 IO port (ie an address in the IO address space).</p>
+
+<h1 id="pci-and-pcie-electrical-wiring">PCI and PCIe electrical wiring</h1>
+
+<p>The PCI bus itself (ie on the device side of the PCI controller circuits) is a parallel shared bus - the same 32 address/data + N control wires run to each PCI device on the motherboard, and to each extension slot. There can be a maximum of 32 devices on a PCI bus, although some of them can be a PCI “bridge” that provides a subsidiary PCI bus.</p>
+
+<p>On complicated systems, the motherboard can have multiple PCI controllers attached to the system bus.</p>
+
+<p>When the CPU makes a read request, the PCI controller circuitry then uses the PCU address/data wires to pass that address to every device on the bus. Whichever device is configured to respond to that address raises the “DEVSEL” line, does its work, then places response data on the same wires. The PCI controller circuitry then passes this data across to the system bus where the CPU can see it.</p>
+
+<p>Like the x86 bus, the PCI bus supports the concept of separate “IO” and “Memory” addresses. Rather than a “flag”, it actually prefixes each operation with a 4-bit code, like “IO Read” or “Mem Write”.  The PCI bus preserves whatever address type the CPU specified (IO or Mem).</p>
+
+<p>There is actually a third address type: “Configuration”. This is discussed in the section on PCI Configuration Space.</p>
+
+<p>A PCI bus also has interrupt lines, ie wires that PCI devices can raise to indicate a change of status. There are 4 interrupt wires but up to 32 devices on a PCI bus. To evenly distribute interrupts across the 4 wires, the 4 interrupt lines are wired differently at each slot. Nevertheless, an interrupt line is shared across up to 8 devices, so the OS will need to determine which device actually created the interrupt.</p>
+
+<h1 id="pcie">PCIe</h1>
+
+<p>A PCIe bus appears almost identical to the operating system, but internally acts more like a network hub. Devices are attached in a “star” configuration rather than a shared bus. This would not be feasable if parallel wires were used (about 60 wires per device for parallel PCI). However PCIe uses serial data transmission, so needs only 4 wires “per lane”. Some onboard devices and slots are connected to the PCIe controller via a single lane (4 wires) while others are connected by up to 16 lanes (ie 64 wires), depending upon the maximum speed supported for that device or extension slot.</p>
+
+<p>Because PCIe buses are dedicated controller-to-device links, multiple devices can communicate in parallel (unlike traditional PCI).</p>
+
+<p>A PCIe port can support from 1 to 16 lanes; transmitted data is “striped across lanes” (one byte per lane, N bytes in parallel). The PCIe controller and PCIe device negotiate during setup how many lines should be used - ie min(lanes supported for that PCIe connection, lanes supported by the device). Cheap devices can implement fewer lanes for cost savings, and the motherboard can offer 1-lane external ports for external devices to simplify cabling. Each lane is fully duplex.</p>
+
+<p>It is possible to put an x4 card into an x8 slot; speed is simply negotiated to x4. Slots can also be “open ended”, allowing an x8 card to be inserted into an x4 slot, and likewise speed gets negotiated to x4 - although this of course depends on there being physical space available for the larger card.</p>
+
+<p>PCIe controllers offer a few extra features like “advanced error reporting” which is accessable via BIOS or ACPI functions. And the number of configuration registers is increased to 1024 for each “function” (see section on PCI configuration space).</p>
+
+<p>In the rest of this article, “PCI” also implies “PCIe”, as they present the same interface to the system.</p>
+
+<h1 id="the-agp-bus">The AGP Bus</h1>
+
+<p>Graphics card manufacturers adopted the PCI specification with enthusiasm. Unfortunately, the bandwidth requirements of graphics cards soon outran the capabilities of PCI. Computer manufacturers therefore developed a custom high-speed version of PCI specifically for this purpose: AGP. AGP bus controllers also provided a few extra features, in particular an “AGP GART” which is a limited form of IOMMU.</p>
+
+<p>The AGP bus was however limited to just one device on the bus.</p>
+
+<p>The PCIe specification now provides higher bandwidth than AGP, and modern computers no longer have an AGP slot.</p>
+
+<h1 id="pci-configuration-space">PCI Configuration Space</h1>
+
+<p>Each PCI device can have up to 8 “functions” (eg camera + microphone + led, or 8 audio a-to-d converters) though most devices provide just one “function”. A function is basically completely independent. Each “function” can request a maximum of 6 address-ranges (“BARs”) for communicating with the host system.</p>
+
+<p>During OS bootup, devices are assigned address-ranges that they should respond to (see section on PCI BARs below). This avoids the need for devices to be reconfigured via dip-switches etc to avoid data collision. The PCI configuration space is used to set up these addresses (among other purposes)</p>
+
+<p>The Nth device attached to a PCI bus always has its configuration registers starting at <code>N&lt;&lt;3&lt;&lt;8</code> (Nth device, 2^3 functions per device, 2^8 config registers per function). And certain configuration registers are mandatory, ie a device must always return a valid value when the corresponding configuration-space address is read. The first 64 bytes of the configuration range for each function are standardised by PCI; the remainder are device-specific (ie can be interpreted by the appropriate device driver). A device must always have at least function#0 defined.</p>
+
+<p>At boot, the operating system is responsible for talking to the PCI controller and iterating over all 32 possible connected devices (and all 8 possible functions), checking whether there is actually a device/function connected at that location and if so what it is. Addresses in the “configuration address space” map directly to specific physical positions on the PCI bus. Because the x86 CPU has no concept of “PCI config address space” (just IO and Mem), accessing such addresses is system-specific. As an x86 CPU only has two ways of communicating with external devices - read/write of IO-space addresses, and read/write of memory-space addresses, performing PCI “configuration” is done via mem or IO reads and writes using some magical addresses, and the PCI controller then interprets these as “configuration-space” operations. However exactly which addresses a PCI controller interprets as “configuration-space” reads or writes are not in the PCI specification, ie are system-specific. In practice, the following ways to perform PCI configuration are supported:</p>
+
+<ul>
+  <li>an ACPI table may expose an ACPI function for config operations (which maps to read/writes of the appropriate addresses embedded into the ACPI firmware tables)</li>
+  <li>or other…</li>
+  <li>See Linux functions pci_read_config_byte, pci_bus_read_config_byte for more details.</li>
+</ul>
+
+<p>A read of a configuration-space address for which there is no device/function present causes a PCI “timeout error” which typically returns ~0. The PCI spec usually prevents configuration registers having ~0 as a valid value. This behaviour makes it possible for an operating system to “probe” all the possible device/function addresses and see whether something is present there.</p>
+
+<h1 id="pci-device-ids">PCI Device IDs</h1>
+
+<p>Every PCI device is required to have a unique PCI-ID, composed of a (vendor, device) pair of values. This value is accessable by reading address N of the configuration address space for the “slot” on the PCI bus that this device is attached to. An operating system can then use a table-lookup to select the appropriate device-driver to load.</p>
+
+<p>In practice, there are many poor-quality vendors who don’t allocate unique ids to their products, and device drivers have to do tricky things to determine exactly which physical device is present - and therefore which driver to use.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://en.wikipedia.org/wiki/PCI_Local_Bus">http://en.wikipedia.org/wiki/PCI_Local_Bus</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/PCI_configuration_space">http://en.wikipedia.org/wiki/PCI_configuration_space</a></li>
+</ul>
+
+<h1 id="pci-bars">PCI BARs</h1>
+
+<p>A PCI device cannot simply be hard-wired to respond to specific memory or IO addresses, because the manufacturer can’t know what other devices will be present and what addresses <em>they</em> will want. It is also very inefficient for an operating system to have to deal with memory-mapped devices whose addresses are scattered all over the place.</p>
+
+<p>Therefore, a PCI device uses specific configuration registers named BARs (Base Address Registers) to declares how <em>many bytes</em> it wishes to have mapped into the system address space. The configuration space layout part of the PCI specification defines 6 BARs (not all of which must be used). A BAR also indicates whether the addresses should be IO or Memory addresses. BAR registers are a little weird; on startup, reading them returns the size (and type) of memory that the device wants to expose to the operating system; writing them tells the device what base address will be used in future to talk to the device. Once programmed, reading returns the written value - unless ~0 is written to the register, in which case reading the returns the size/type info again.</p>
+
+<p>The Linux PCI subsystem automatically looks at the BAR registers for all PCI devices, and stores this info in a device “descriptor” structure. When a suitable device driver is found for the device, it is responsible for allocating suitable memory in the kernel address space (or the global IO address space) and writing that allocated location back into the PCI BAR registers. Of course the OS needs to be careful not to allocate overlapping addresses to different PCI devices.</p>
+
+<p>BAR addresses in the memory space are bus (physical) addresses, not virtual addresses. Presumably they would mask any real ram at the same physical address - ie where possible the OS should map PCI BARs to bus addresses which do not correspond to real memory. Recently, some consumer-grade hardware has started to become available with IOMMU devices in it, which do allow the BAR addresses to be mapped. The primary advantages are that (a) large BAR address ranges no longer need to map to contiguous hardware addresses, and (b) devices can be limited to accessing only mapped addresses, ie rogue devices can no longer read or write <em>any</em> address in memory (see Bus Mastering).</p>
+
+<p>Note that IO-space addresses are not “virtual”; an MMU does not map IO-space addresses. This is another reason not to use IO addresses to talk to PCI devices.</p>
+
+<p>The PCI specification strongly recommends that all functionality of a PCI device be accessable via memory address space accesses. Many PCI devices will expose their functionality (their control registers) via both a Memory and an IO BAR, and let the operating system’s device driver decide which it prefers to use. In this case, it is the device driver for that device that determines which of the specified BARs will actually get mapped; in almost all cases the driver will ignore the IO BARs (never map them) as full functionality is available via the memory BARs only.</p>
+
+<p>See: Linux functions <code>pci_resource_start(pci_dev, bar)</code> and <code>pci_resource_end()</code>.  The caller must know whether that BAR is IO or Mem (ie whether IN/OUT or read/write are appropriate with that address). In the case of Mem addresses, this is presumably a virtual address in the kernel memory range (above 3GB) <sup id="fnref:note-memlayout" role="doc-noteref"><a href="#fn:note-memlayout" class="footnote" rel="footnote">1</a></sup>, although what was written to the BAR register is a hardware address.</p>
+
+<p>AFAIK, what appears to be a single BAR register belonging to some device plugged in to the PCI bus is actually split between the PCI controller and the plugged-in device. A device on the PCI bus is responsible for providing information about <em>how many blocks</em> of addresses it supports, and <em>what size</em> they are. However it is the PCI controller that tracks the mapping from IO-space or mem-space addresses to each BAR, ie when the OS writes to a BAR register it is the PCI controller that handles that. It is also the PCI controller which “watches” the system bus for reads or writes to any address previously set up via a write to a BAR; it then forwards that information on to the appropriate slot on the PCI bus - ie PCI devices don’t actually know or care which addresses their BARs have been mapped to. The PCI bus has an IDSEL line that the PCI controller uses to indicate to a device that it is the target of a particular read or write request.  For PCIe, which has a star-shaped connectivity rather than shared-bus, the PCI controller directly forwards reads/writes to whichever device corresponds to the written address (ie the one associated with the BAR which matched the read or written address).</p>
+
+<h1 id="linux-pci-bus-probing">Linux PCI bus probing</h1>
+
+<p>In Linux:</p>
+
+<ul>
+  <li>compiled-in modules register the PCI ids that they handle</li>
+  <li>the core PCI subsystem iterates over the bus on boot, and for each device
+it finds it looks for a registered module which “matches” the id.</li>
+  <li>if no already-loaded module is registered for that ID, then it passes the
+id to userspace “udev”. Udev then runs modprobe which uses the file
+<code>/lib/modules/{version}/modules.alias</code> to determine a module-name, then
+loads that module.</li>
+</ul>
+
+<h1 id="bus-mastering-and-dma">Bus Mastering and DMA</h1>
+
+<p>Some PCI devices are capable of “bus mastering”. In this scenario, the device (triggered either by an event, or by a request from the CPU) raises a request across the PCI bus to become “bus master”. When the PCI controller agrees, the device can then start sending read or write requests. These are transferred by the PCI controller onto the main system bus, and on to the memory controller.</p>
+
+<p>The result is data transfer (in either direction) between RAM and the device without the CPU being explicitly involved.</p>
+
+<p>Note that in most systems there is also a “DMA controller” device that the CPU can program. This is separate, and not involved in PCI-initiated bus mastering. Of course the CPU <em>could</em> program the DMA controller to read or write a range of PCI memory-mapped addresses too.</p>
+
+<p>DMA initiated by a PCI device is sometimes referred to as BM-DMA (Bus Mastering Direct Memory Access) to distinguish it from DMA which is performed by the standard system DMA controller.</p>
+
+<h1 id="userspace-access-to-pci-devices">Userspace access to PCI devices</h1>
+
+<p>Userspace applications generally are not allowed to execute IN or OUT instructions, ie to access the IO address space. The x86 architecture has a control flag that indicates whether that is allowed for the current mode, and Linux sets this to off for all non-root userspace processes. Any process that can arbitrarily issue IN/OUT instructions can do things like program the system DMA controller to overwrite kernel datastructures - so it’s a no go.</p>
+
+<p>The mmap() systemcall can be used to map addresses which are programmed into a BAR on on a PCI card into a userspace application’s address-space. The userspace app can then read/write this mapped memory to directly communicate with the PCI device without the need to perform any system calls. Traditional “user-space” graphics drivers for the X server work in this way.</p>
+
+<p>Question: for X userspace drivers to work, some kernel-space code still needs to determine which BARs to map into kernel address space. Is there a “generic PCI driver” that does this for all video cards, or is there some tricky way for X to itself arrange for this to be done?</p>
+
+<p>The typical alternative to mmap() is for the driver of that PCI device to expose a file in /dev, and for the userspace application to open that file and use seek/read/write syscalls to transfer data from userspace via the kernel to the device-driver, with the driver then forwarding the data on to the target device’s mapped memory location. The Linux “framebuffer” video drivers use this approach for example.</p>
+
+<p>Modern KMS graphics drivers actually use a combination of the two approaches, with the driver providing an API to allocate buffers that directly expose data that the PCIe device also has direct access to.</p>
+
+<p>Question: do old X drivers use IN/OUT instructions to configure graphics cards?</p>
+
+<h1 id="dma-controllers-and-cache-coherency">DMA Controllers and Cache Coherency</h1>
+
+<p>When data needs to be transferred from system RAM to a device, there are three possibilities:</p>
+
+<ol>
+  <li>
+    <p>the CPU reads a word (4 bytes) from RAM, and writes the data to the device (via the PCI controller). Repeat for every word to be transferred. Slow (because read and write operations are separate cycles) and ties up the CPU. Also possibly power-inefficient. And can pollute the CPU caches.</p>
+  </li>
+  <li>
+    <p>the CPU configures the DMA controller (part of the system memory controller, ie on the MCH (northbridge) chip for older Intel designs, part of the integrated memory controller for newer AMD and Intel chips). The DMA controller then fetches data from memory and sends it to the appropriate device word-by-word, while the CPU can continue with other work. This is much more efficient, although the CPU will still slow down if it also needs to access memory, due to contention. A DMA controller usually has a fixed number of available “channels”, ie can potentially be doing N transfers concurrently (most useful when accessing devices that are much slower than memory).</p>
+  </li>
+  <li>
+    <p>some bus types support “bus mastering” (eg PCI, PCIe). If a device on such a bus is also capable of “bus mastering, then the CPU can configure the device itself with a source memory address and length. The CPU can then continue with other work while the device itself reads the data: it places read requests on its local bus which are then transferred to the system bus and detected by the memory controller which then responds with the appropriate data from RAM. This is sometimes referred to as “BM-DMA” (Bus Mastering Direct Memory Access).</p>
+  </li>
+</ol>
+
+<p>DMA also works the other way around, where data is fetched from devices and put into system RAM.</p>
+
+<p>Note that while (1) has the disadvantage that it pollutes the CPU caches, options (2) and (3) have the opposite issue: they can result in data in memory being inconsistent with data in the CPU cache. So the CPU may have read data, and the cache may have retained it for later reuse. However when the CPU comes to read that data again, DMA writes may have caused the data in memory to be updated. In the other direction, CPU writes may also be cached, then a DMA transfer may not see this data that has not yet reached RAM. On some computer architectures it is the responsibility of software to ensure that this does not happen; on other architectures, the memory controller must “notify” the cache of updates, causing the cache to discard stale read data. Not sure about what happens with writes..</p>
+
+<p>See: <a href="http://compare-processors.com/integrated-memory-controller/2225/">http://compare-processors.com/integrated-memory-controller/2225/</a></p>
+
+<h1 id="iommus-and-garts">IOMMUs and GARTs</h1>
+
+<p>An MMU is the electronics that implements virtual memory addresses for RAM (ie sits between CPU and memory bus).</p>
+
+<p>An IOMMU is an equivalent that sits between PCI devices and the memory bus. This means that PCI devices that “steal” system RAM (to use as working storage for their own purposes) no longer have to be allocated contiguous physical memory. Potentially, it even allows the memory to  have “holes” or be paged out. It doesn’t make BARs obsolete because multiple devices on a single PCI bus still need a mechanism to ensure their own addresses don’t overlap.</p>
+
+<p>Having an IOMMU also protects RAM from rogue devices; bus-mastering devices can only address RAM addresses which are programmed into the IOMMU by the CPU.</p>
+
+<p>Potentially, a virtual machine can access hardware devices directly, because bus addresses can now be virtualised.</p>
+
+<p>Works around devices that have address ranges smaller than the host, eg a 32-bit device on a 64-bit system no longer requires its RAM to be allocated in the low 4GM of physical memory.</p>
+
+<p>The now slightly obsolete AGP bus (which was a high-speed PCI bus supporting just one device, and intended to be used for a graphics card) had a limited form of IOMMU called an “AGP GART” built in to the APG controller. Many modern video cards have a limited IOMMU called a “PCI GART” on the card itself, for similar reasons.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://en.wikipedia.org/wiki/IOMMU">http://en.wikipedia.org/wiki/IOMMU</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Front-side_bus">http://en.wikipedia.org/wiki/Front-side_bus</a></li>
+</ul>
+
+<h1 id="mtrrs-memory-type-range-registers">MTRRs (Memory Type Range Registers)</h1>
+
+<p>Accesses to normal RAM can be sped up with a range of optimisations. The primary one is “cacheing”, where a CPU has a limited map of (address, data) values that hold a copy of data previously read from RAM (or written to it). Another is “posting”, where a CPU write operation is treated as complete by the CPU even when the data is still on the way to the RAM.</p>
+
+<p>These optimisations can interact very badly with memory mapped devices (such as PCI devices). Therefore x86 systems have a way of marking certain addresses as not being eligible for certain optimisations.</p>
+
+<p>In modern x86 systems with MMUs supporting PAT (Page Attribute Tables), memory type settings are part of the MMU page definitions.</p>
+
+<p>In older systems, there are instead a fixed number of control registers (Memory Type Range Registers) which must be configured with physical address ranges. Any CPU read or write which matches an MTRR range then uses the control flags associated with the register.</p>
+
+<h1 id="references">References</h1>
+
+<p>Additional documents that have useful information on the PCI bus include:</p>
+
+<ul>
+  <li><a href="http://people.freedesktop.org/~marcheu/linuxgraphicsdrivers.pdf">http://people.freedesktop.org/~marcheu/linuxgraphicsdrivers.pdf</a></li>
+  <li><a href="http://wiki.osdev.org/PCI">http://wiki.osdev.org/PCI</a></li>
+</ul>
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:note-memlayout" role="doc-endnote">
+
+      <p>In traditional 32-bit linux memory layout, the kernel code and data-structures are mapped into the upper 1GB of the memory space of each userspace process. When a transition to kernel mode occurs, the VM mapping of the current userspace process does not change. So the low 3GB are the mappings of the interrupted userspace process, and the top 1GB are the kernel and its data. <a href="#fnref:note-memlayout" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/the-pci-bus/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

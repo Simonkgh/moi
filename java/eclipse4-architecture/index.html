@@ -1,0 +1,609 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Overview of the Eclipse4 Architecture</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Overview of the Eclipse4 Architecture</h1>
+    <aside>First published on: December 19, 2015</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Java/'>Java</a>, <a href='/category/OSGi/'>OSGi</a></p>
+      <h1 id="overview">Overview</h1>
+
+<p>The <a href="www.eclipse.org">Eclipse Rich Client Platform</a> (aka RCP) is a framework for creating graphical applications consisting of multiple nested windows, menubars, etc.</p>
+
+<p>The Eclipse IDE is just one of the kinds of applications that can be built on the RCP. Actually, Eclipse RCP’s architecture is a core with <em>plugins</em>, and what functionality the end application provides (Java IDE, C++ IDE, report designer, stock management tool, etc) is simply a matter of which plugins are present.</p>
+
+<p>The architecture behind Eclipse has gone through several revisions; the change from version 3 to version 4 was a major one. The Eclipse4 (aka E4) architecture has proved very successful, and how it is put together is rather interesting. This article looks at some of the principles behind the framework. The topics of <em>building</em> and <em>testing</em> Eclipse RCP applications are also briefly discussed.</p>
+
+<p>There are many books and articles on Eclipse; this article is intended to cover the “big picture” so that information elsewhere which focuses on particular details can be understood in context.</p>
+
+<p>The draft version of this article covered many architectural features of Eclipse as I was unable to find any documentation on Eclipse at that level. As it was almost finished, I found an excellent <a href="http://www.aosabook.org/en/eclipse.html">article on Eclipse architecture</a> by Kim Moir which presents similar information. Moir is an expert on this topic, while I am certainly not, so I suggest you read that article first.</p>
+
+<p>The content below may be useful for a developer creating an EclipseRCP-based application or a plugin for use with the Eclipse IDE.</p>
+
+<h1 id="background">Background</h1>
+
+<p>Eclipse has always had a “core plus plugins” architecture that allowed the system to be extended.</p>
+
+<p>The E3 architecture (ie Eclipse v3.x) introduced a major change, using OSGi for the plugin architecture rather than the previous Eclipse-specific plugin framework. This change also included a new system for <em>provisioning</em> (selecting, downloading and installing) OSGi-based plugins, called P2.</p>
+
+<p>The E4 architecture (ie Eclipse v4.x) introduced additional significant changes: extensive <em>dependency injection</em> and an <em>application model</em> (a datastructure representing the high-level user-interface layout).</p>
+
+<p>The first release of an Eclipse IDE based on E4 was “Juno”, in June 2012. As of late 2015, Eclipse has reached version 4.5 - ie is still based on the same general architecture as the first 4.0 release.</p>
+
+<p>The OSGi core (Eclipse Equinox) provides dynamic loading of modules (plugins), dynamic lookup of services, etc. If you are not familiar with OSGi, then I suggest reading <a href="/java/osgi-intro">this article on OSGi</a> first.  If you are not familiar with the Eclipse P2 plugin manager, then you should also read <a href="/java/osgi-p2">this article on P2</a>.</p>
+
+<p>The “bootstrap code” used to start an Eclipse-based application (including the Eclipse IDE) does little more than load the Equinox and P2 libraries, and pass it a P2 “features” file. P2 scans its local repository of OSGi bundles (jarfiles) to find the required packages, and invokes the OSGi “loadBundle” method in Equinox to load the required jarfiles.</p>
+
+<p>Building a custom application on Eclipse RCP v4 therefore involves:</p>
+
+<ul>
+  <li>implementing one or more custom plugins (ie OSGi bundles which use Eclipse APIs or Eclipse annotations);</li>
+  <li>writing one or more feature configuration files;</li>
+  <li>defining an application model (as an XML file);</li>
+  <li>and generating the “executable product”, which is just a simple wrapper that starts the eclipse core with the specified application model and features.</li>
+</ul>
+
+<h1 id="the-eclipse-ide---an-initial-overview">The Eclipse IDE - an Initial Overview</h1>
+
+<p>An Eclipse IDE install includes a “feature” configuration file that defines a “workbench feature” as a specific set of plugins (osgi bundles, ie jarfiles) which provide UI classes and other helpers useful for an IDE-like application. Plugins which are intended to be used as part of an IDE usually make significant use of the workbench APIs.</p>
+
+<p>The same Eclipse RCP framework used to build the Eclipse IDE can be used to build other similar applications. The concept of an application model, plugins, UI parts, dockable windows, perspectives, etc. are all reusable - just the standard editor and view classes are specific for code-development, and they are implemented as plugins that do not need to be loaded.</p>
+
+<p>RCP applications which are not “IDEs” typically do not use the workbench plugins (ie don’t load the workbench feature).</p>
+
+<p>The release of E3 included backwards compatibility support so that older Eclipse-based code could still run. The E4 release has similar backwards-compatibility code for E3. Sadly, many books, sites and much documentation out there still recommends old approaches for which there are improved solutions.</p>
+
+<p>As noted previously, Eclipse 3.x+ is built on a standard OSGi framework. Sadly, while Eclipse has been under heavy development, so has OSGi. As a consequence of this, and also due to the need for backwards compatibility with earlier Eclipse code, there are a number of Eclipse-specific APIs which duplicate functionality available in standard OSGi.</p>
+
+<p>Further implementation details about the Eclipse IDE are discussed later.</p>
+
+<h1 id="eclipse-plugins-and-features---an-initial-overview">Eclipse Plugins and Features - an Initial Overview</h1>
+
+<p>An Eclipse plugin is an OSGi bundle, ie a jarfile with an OSGi-compatible META-INF/MANIFEST.MF. The jarfile usually also contains an Eclipse-specific META-INF/plugin.xml.</p>
+
+<p>A <em>plugin</em> is the smallest deployable unit. A <em>feature</em> is a set of 1 or more plugins. A feature definition has an associated “url” pointing to the repository from which plugins associated with this feature can be downloaded.</p>
+
+<p>A product is the eclipse core (ie the plugin loader) plus one or more features. This is then an “executable” application.</p>
+
+<p>Plugins may contain code or data (eg helppages, icons..).</p>
+
+<p>Just about every single feature or plugin depends on plugin “org.eclipse.core.runtime”.</p>
+
+<p>A feature may “import” a plugin (ie declare a dependency on it), or “provide” a plugin. The “provide” form should be used when this feature is the only way the plugin can be installed; “import” is used when some other feature is expected to provide the bundle.</p>
+
+<p>OSGi also supports the concept of “fragments”, which are jars that are “optional extensions” to real bundles; when the referenced bundle  is loaded, the associated fragments will also be loaded. But a fragment can’t be loaded on its own. Bundle fragments are often used in Eclipse RCP.</p>
+
+<p>A plugin can (via its metadata) add options to menubars, icons to toolbars, handlers that get triggered on specific “hot key” sequences, etc. This makes each plugin truly “optional” and self-contained; new functionality can be added without editing any “core framework” code or configuration. I am not aware of any other UI framework that supports such modularity.</p>
+
+<h1 id="plugin-loading">Plugin Loading</h1>
+
+<p>When the Eclipse RCP framework launches, the P2 “provisioning” layer tells the OSGi layer (Equinox) which jarfiles to load. Equinox analyses the MANIFEST.MF and plugin.xml files:</p>
+
+<ul>
+  <li>For each “Require-Bundle” and “Require-Package” declaration in the MANIFEST.MF, the framework verifies that the bundle or package is available. If not, then the plugin is disabled (not yet runnable).</li>
+  <li>When the plugin.xml defines an “extension”, then the extension-point-provider is notified that another extension is available for it; an example is the menu extension which allows a plugin to define new menus and menu-items that the MenuBarManager will then automatically integrate into the app-wide menubar. An “extension point” provides similar functionality to the Whiteboard pattern.</li>
+  <li>When the MANIFEST.MF contains a Service-Component entry then the specified dependency-injection configuration file is registered with the OSGi Service Component Runtime (SCR). This will instantiate the specified class (service) as soon as its dependencies are available.</li>
+  <li>When the MANIFEST.MF contains a Bundle-Activator entry then the specified class is instantiated and invoked.</li>
+</ul>
+
+<p>Together, this functionality allows a plugin jarfile to automatically integrate itself into the surrounding framework.</p>
+
+<p>This is mostly standard OSGi behaviour - except for the “extension point” behaviour of plugin.xml files. See the section on the “application model” for more information about extension points in E4.</p>
+
+<p>In general, Bundle-Activator entries are discouraged because they require the classes in the plugin jarfile (OSGi bundle) to be loaded and initialised, which can take some time. An Eclipse RCP application (and an Eclipse IDE in particular) can have many plugins, some of which the user may rarely use; it is a shame to initialise every one of them on each startup. The plugin.xml is designed so that the supporting classes only need to be loaded if that menu option is selected by the user. Various other options are available to delay initialisation of plugins until actually accessed.</p>
+
+<h1 id="the-eclipse-modelling-framework-emf">The Eclipse Modelling Framework (EMF)</h1>
+
+<p>EMF is a compile-time code generator; you declare a class and a set of properties and EMF then generates a matching Java code.</p>
+
+<p>The concepts of EMF are important to understand as the UI of an Eclipse-based application can be defined via an <em>application model</em> - a tree of EMF objects representing menus, views, editors, etc.</p>
+
+<p>Benefits of EMF:</p>
+
+<ul>
+  <li>it can generate appropriate Factory classes for the modelled types.</li>
+  <li>it can generate efficient serialization/deserialization code that does not depend on reflection.</li>
+  <li>it can generate helper classes that are an alternative to using Java native reflection/introspection.</li>
+  <li>it can ensure all property setters generate change-notification events (including changing the contents of properties that are collections - ie the properties hold a subclass of the desired collection-type which trigger change notifications).</li>
+  <li>an EMF model can be used for purposes other than code-generation, eg generating database schemas corresponding to the model or generating documentation.</li>
+  <li>an EMF model is not language-specific; the same model can be used to generate code (eg for serialization/deserialization) in multiple languages</li>
+</ul>
+
+<p>Serialization is particularly important in an OSGi environment, as external deserialization mechanisms such as JAXB don’t work well when the classes being created/introspected are private to an OSGi bundle. It is more reliable for the objects themselves to provide a serialization method that they then internally implement - and in the case of deserialization, for the Java package to provide appropriate factory methods.</p>
+
+<p>The change-notification facility can be used for many purposes, including implementing undo/redo support, sending just object <em>diffs</em> across a network, and driving database persistence (knowing which fields have changed).</p>
+
+<p>Drawbacks:</p>
+
+<ul>
+  <li>code generation never works well with IDEs (ie hand-written classes stored under version control which refer to <em>generated</em> classes will not compile until the generation phase has completed)</li>
+  <li>the generated classes have strange base-classes from the EMF library</li>
+  <li>collection fields in the generated classes are of strange types such as EList</li>
+  <li>it is difficult to add real logic to generated classes; they are <em>anemic domain models</em>
+</li>
+  <li>defining classes through a graphical UI (click, click, click) is far slower than defining them directly in Java</li>
+</ul>
+
+<h1 id="the-eclipse-application-model">The Eclipse Application Model</h1>
+
+<p>The Eclipse application model is a datastructure which models the application user interface in a “high level” way. Like a tree of widgets, or an HTML dom, it represents parent/child relations between windows. However:</p>
+
+<ul>
+  <li>it does not hold UI details below the level of a <em>part</em>; each <em>part</em> implementation uses traditional SWT/JFace components to build its detailed UI directly</li>
+  <li>it holds information about some things that are not directly “renderable”, eg “command handlers” and hotkey-mappings (see below);</li>
+  <li>it holds <em>templates</em> for part windows (see PartDescriptors below)</li>
+  <li>it holds <em>templates</em> for dialog windows</li>
+</ul>
+
+<p>An initial application model (xml format) is read from a file to create the application’s default state on startup, similar to how loading an HTML file results in a DOM being built. And just as Javascript can modify the DOM of an HTML document at runtime, the eclipse application model can be manipulated by Java plugins at runtime (eg to add/remove/move windows).</p>
+
+<p>The application model includes:</p>
+
+<ul>
+  <li>the main menubar, with its default entries.</li>
+  <li>a list of windows, starting from the global window. Windows have children, which may be layout components; for example the PartSashContainer implements either a horizontal or vertical tiled layout, while the PartStack container provides a tab-like layout (where child components are stacked on top of each other).</li>
+  <li>a list of global “command handlers” that can be triggered via menu-options, shortcut keys, etc.</li>
+  <li>a list of top-level PartDescriptors, which are sort of “templates” or “factories” for Java classes implementing editors or views. These define:
+    <ul>
+      <li>how to instantiate the various windows (eg ant configuration editor, junit executor).</li>
+      <li>what menu-entries should be added when such a part is “active”, and what shortcut-key handler classes should be installed.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Runtime code uses the PartDescriptors to “instantiate a part” based on a descriptor, ie create the part implementation and its appropriate child objects and wire them together using injection. These are commonly used when multiple instances of a part can be opened, eg multiple java-code-editor windows.</p>
+
+<p>The application model also holds template-definitions for standard application dialog windows; code can <em>instantiate</em> these standard windows without needing to know the exact implementing class (which is configured in the template).</p>
+
+<p>The code that loads/handles/renders the application model is itself defined as an Eclipse feature : “org.eclipse.e4.rcp”. You can find the definition of this feature in your $(ECLIPSE_HOME)/features/org.eclipse.e4.rcp_{version}/feature.xml file.</p>
+
+<p>The classes for nodes (objects) in the Eclipse application model happen to have been defined using EMF (and the concrete implementations generated by EMF). As noted in the section on EMF, the emf project provides an “emf.liveeditor” editor part which can browse any tree of EMF-generated objects (using the EMF introspection data). Therefore the standard “emf.liveeditor” part can be used to browse the application model; if the e4 tools plugin has been installed then alt-shift-F9 brings up the liveeditor on the current Eclipse application (rather like firebug can explore the DOM tree for firefox’s chrome itself). Note that the types in the application model are not extensible by the user. However these types point to “implementations” for handlers, views, editors, etc. which live in OSGi plugins.</p>
+
+<p>Not all components in the application model are necessarily rendered at the same time; some may be marked “hidden”. As an example, within a parent “Perspective Stack”, typically only one of the child perspectives (ie set of windows) is rendered. Some menu items might also be hidden depending upon application context.</p>
+
+<p>A “presentation engine” creates the <em>widgets</em> that correspond to the EMF application model; the default engine uses SWT. This separation theoretically allows significantly different renderings of the same application model.</p>
+
+<p>As is usual with EMF, the application model objects are “simple data transfer” representations, without any significant logic. In the model-view-controller structure, they act as the <em>model</em> that is updated as the user moves windows, opens new perspectives, etc. Almost all logic related to the model is held outside, in the “controllers” which are recreated on application startup.</p>
+
+<p>The application model is not used just at application startup; code can gain access to the MApplication object which is the current model (usually by dependency injection), and then modify its properties. Adding a new MWindow child to the application will display a new window for example. Adding an MPart to the child list of an MWindow already in the application model will insert a new view or editor into an existing window.</p>
+
+<p>The primary benefit of an Application Model is that a view or editor can in many cases be implemented without using any eclipse-specific interfaces or types - just plain SWT/JFace logic. The application model effectively acts as the binding from the eclipse-specific world to the implementations.  A “part definition” in the application model may contain the <em>name</em> of a class that implements that part; when that item in the application model must be rendered then the specified class is instantiated. Dependency injection and annotations are heavily used to allow the application-model and implementations to integrate properly.</p>
+
+<p>In the previous E3 architecture (without an Application Model), views/editors/commandhandlers/etc must implement eclipse-specific interfaces.</p>
+
+<p>Avoiding heavy use of eclipse-specific types in plugin code makes the code more portable/reusable elsewhere, and more easily unit-testable.</p>
+
+<p>Eclipse plugins can define “application model fragments” which get merged into the main application model, eg to add menu items to the global toolbar. This is the E4 equivalent of the earlier “extension point” mechanism. See later for more information on this.</p>
+
+<h1 id="dependency-injection">Dependency Injection</h1>
+
+<p>Eclipse has (sadly) invented its own kind of dependency-injection framework. Injection is available:</p>
+
+<ul>
+  <li>on components created by the application model</li>
+  <li>on components defined declaratively in plugin.xml or SCR files</li>
+  <li>programmatically via interface IEclipseContext</li>
+</ul>
+
+<p>When instantiating an object given a class-name and a base “context”, Eclipse uses introspection to look for standard javax.inject annotations on constructors, fields and methods, and then searches for matching objects in the context. The context depends (not surprisingly) on the circumstances which triggered creation of the class; each part typically has a context which is used when creating children of that part.</p>
+
+<p>If the injection annotation does not specify a “name”, then the fully-qualified name of the required type is used as a key to look up the necessary object. If a name is specified, then that is used as the key.</p>
+
+<p>In a slightly unusual twist on injection, Eclipse <em>keeps track</em> of values injected into fields (and methods?), and if they change, then injects the new value into existing objects.</p>
+
+<p>Lookup is done by following a chain of MContext objects until the first match is found; the root context is the set of OSGi services; parent windows and perspectives have their own MContext objects (and therefore can override the definition for a specific name). For example, injecting an object of type @Composite will always pass the parent container of the part.</p>
+
+<p>Eclipse dependency injection also supports standard lifecycle annotations such as @PostConstruct, @PreDestroy, @Focus, @Persist (save-file), @PersistState.  To avoid requiring plugin code to extend Eclipse interfaces, other interesting annotations are supported such as @Execute (command handler), @EventTopic (subscribe to events).  If the annotated methods declare parameters, then they are located as for dependency injection.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://eclipsesource.com/blogs/tutorials/eclipse-4-e4-tutorial-part-4-dependency-injection-basics/">E4 Dependency Injection</a></li>
+</ul>
+
+<h1 id="eclipse-rendering">Eclipse Rendering</h1>
+
+<p>Eclipse has always used the SWT graphics toolkit rather than Swing or AWT. It also extensively uses the JFaces library which adds functionality on top of SWT.</p>
+
+<p>Application model objects often have an associated SWT widget, and parts create SWT widgets which are children of the SWT widget of their parent application model object.</p>
+
+<h1 id="commands-and-handlers">Commands and Handlers</h1>
+
+<p>A “command” is simply data that specifies an abstract action that can be performed, eg “save”. Menu options specify a command to run, as do keybindings, toolbars, etc. A command has no “implementation”; it is really just an object with a unique string id. The string can be anything, but is by convention structured like a java package-name. There are a set of standard command-strings, such as “org.eclipe.ui.file.exit” which should be used to indicate a “quit application” command.</p>
+
+<p>A command is then mapped to a “handler” class via a handler declaration in the Application Model; when the command is “triggered”, the handler is executed.</p>
+
+<p>The standard set of commands is defined in <code>org.eclipse.ui.IWorkbenchCommandConstants</code>.</p>
+
+<p>Using commands is optional; it is possible to connect a menu-item, toolbar-icon, or hotkey directly to a Handler that should be executed. Using a <em>command</em> simply allows the same handler to be invoked via multiple paths.</p>
+
+<h1 id="event-brokers">Event Brokers</h1>
+
+<p>Eclipse has its own built-in event-broker (even though OGSi already has one). See IEventBroker.</p>
+
+<p>The event broker can be useful for coordinating various components within an application, eg an update in one custom window could post an event which other components can subscribe to.</p>
+
+<h1 id="eclipse-rap">Eclipse RAP</h1>
+
+<p>The RAP project implements a new set of UI widgets which have exactly the same interfaces as the original “native” SWT/JFace widgets, but which instead generate HTML and javascript, and which implement “listener callbacks” via AJAX calls from client browser to server. This is a significant amount of work for the RAP team, but does allow web-enabled applications to be developed using the same approach as for RCP applications. In fact, with a little care it is possible to implement an application that can be compiled against either the native widget-set or the RAP widget-set.</p>
+
+<p>Compiling with RAP generates a .war-file that can be deployed inside a servlet container! HTTP requests are mapped into the same callbacks that the custom plugins would get in a desktop environment.</p>
+
+<p>RAP is not as efficient as a native-for-the-web application; the SWT/JFace APIs were designed for an environment where listener callbacks are cheap. An RAP application will therefore not scale up to large numbers of concurrent users, and it is more heavily affected by high latency between client and server. Nevertheless, in appropriate deployment environments it does function well, and makes it reasonably easy to build sophisticated multi-window-style applications.</p>
+
+<p>Unfortunately the initial development of RAP development, though open-source, was primarily driven by one company. How up-to-date the RAP libraries are with respect to new Eclipse releases varies significantly depending upon that company’s priorities. Development of RAP for E4 was long delayed. However from information on the project, it <em>appears</em> that RAP is now available for E4, and is considered a “core” project now.</p>
+
+<h1 id="updating-and-adding-features">Updating and Adding Features</h1>
+
+<p>Eclipse includes the P2 provisioning platform, ie a “bundle management” library. Its primary function is to take a set of “desired plugins” and determine which other plugins must also be loaded to satisfy their transitive requirements. This is a non-trivial problem, given that dependencies can be expressed on <em>java packages</em> rather than <em>bundles</em>, can include version-ranges, and other constraints.</p>
+
+<p>P2 is used on each boot to select the set of plugins that are “loadable” by the OSGi container from the pool of available bundles. The same library can be used to determine which plugins from a remote repository are installable (and which additional plugins are required).</p>
+
+<p>Due to the use of OSGi, new plugins can also (usually) be loaded while an application is running, and <em>sometimes</em> be unloaded without having to restart the application (depending on how well the code has been written).</p>
+
+<p>See <a href="/java/eclipse-p2">this article</a> for more information on p2.</p>
+
+<h1 id="oomph">Oomph!</h1>
+
+<p>Eclipse caches plugins under its <em>install directory</em>. Each <em>workspace</em> then specifies the plugins it needs. With a workspace active, new plugins can be downloaded and installed, which puts the jarfiles into the install-wide cache and then enables them <em>just in the current workspace</em>. Other existing workspaces are not altered.</p>
+
+<p>It is good that other workspaces don’t get updated (each is independently “locked” to a set of plugins at specific versions). However on the negative side, this means that bugfixes/upgrades don’t get applied until the user selects “update” in each workspace.</p>
+
+<p>What is more problematic is <em>setting up</em> the set of plugins for each workspace. A new workspace will by default inherit <em>all available plugins</em>.</p>
+
+<p>This is why there are separate download-bundles for eclipse-for-jse, eclipse-for-jee, eclipse-for-c, etc. Not only are the appropriate plugins <em>included</em>, they are also <em>enabled</em>.</p>
+
+<p>The number of different eclipse download bundles has been growing to an unmanageable value. In addition, the “autoupdate” feature of Eclipse is somewhat flaky, particularly between major releases. When a major release comes out, it is generally better to download a whole new distribution and start from scratch.</p>
+
+<p>The oomph project is a tool which takes a config-file specifying the desired set of eclipse plugins, and then builds an appropriate system. This has been used to create a generic “eclipse installer”, where the initial download is just enough to get oomph running, and then the user chooses an appropriate configuration and oomph downloads and enables the appropriate plugins. Yes, this is roughly what the builtin eclipse installer should be doing anyway, but apparently oomph does it better. Like the builtin installer, most of the hard work is done by the “p2 director” module.</p>
+
+<p>Oomph also integrates into a running eclipse application to “track” the installation/update of any plugins. It is therefore possible to “export” the current state of an Eclipse environment as a new oomph config-file, which others can then use to replicate the same setup.</p>
+
+<p>Oomph is not just for eclipse-ide users; it is also useful for anyone building an eclipse-rcp application.</p>
+
+<p>Sadly, the official oomph documentation is <em>extremely poor</em>, and has been for a long while.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="https://projects.eclipse.org/projects/tools.oomph">Eclipse.org: Oomph</a></li>
+  <li><a href="http://www.winklerweb.net/index.php/blog/12-eclipse/20-creating-custom-installations-with-oomph">Winklerweb: Creating Custom Installations with Oomph</a></li>
+  <li><a href="https://wiki.eclipse.org/Eclipse_Oomph_Authoring">Eclipse wiki: oomph authoring</a></li>
+</ul>
+
+<h1 id="extension-points">Extension Points</h1>
+
+<p>The plugin.xml file allows the developer to specify “extension points” and “extensions”. These are roughly equivalent to use of the whiteboard-pattern in OSGi, ie:</p>
+
+<ul>
+  <li>an extension-point represents some service which wants to _find all other services implementing interface X; and</li>
+  <li>an extension specifies a service that <em>provides interface X</em>.</li>
+</ul>
+
+<p>This provides “dynamic discovery” of all services of a specific type. One standard use is to find all plugins that wish to <em>register a menu item</em>; there is an official extension-point for registering menu items and any plugin which wants to provide a menu-item when loaded then puts a matching “extension” element in its plugin.xml file.</p>
+
+<p>The recommended way to use extension-points in E4 is for the plugin to use something like the following to <em>enhance the global application model</em>:</p>
+
+<pre><code>&lt;extension id="id" point="org.eclipse.e4.workbench.model"&gt;
+  &lt;fragment uri="fragment.e4xmi"/&gt;
+  &lt;processor beforefragment=”true” class=”...”&gt;
+&lt;/extension&gt;
+</code></pre>
+
+<p>The org.eclipse.e4.workbench.model extension-point is a generic way of inserting data into the global application model. The specified fragment then specifies a sequence of elements to insert, and uses an xml-element-id from the global application model to specify <em>where</em> they are to be inserted. As alternative, a processor-class can be instantiated to modify the application model programmatically. This allows menu-items, parts, and any other item supported by the application model to be integrated. In E3, there were many different extension-points for integrating with the surrounding environment.</p>
+
+<p>In E3, extension-points were simply a generic “whiteboard” mechanism for one plugin to “find” (or be notified of) all other plugins that support a particular interface. This functionality still exists in addition to the <em>application model</em> approach above.</p>
+
+<h1 id="inactive-menu-and-toolbar-items">Inactive Menu and Toolbar Items</h1>
+
+<p>The toolbar/menus defined in an E4 application model (or E3-style in the plugin.xml) may include items which are not relevant at all times. The definitions therefore include an optional “is-active” test clause; this is evaluated at appropriate times (eg when focus changes).</p>
+
+<h1 id="eclipse-ide-specific-features">Eclipse IDE-specific features</h1>
+
+<h2 id="overview-1">Overview</h2>
+
+<p>This section looks at some features within the Eclipse IDE relevant for the development of standalone Eclipse-RCP applications, or for development of additional plugins intended for use within the Eclipse IDE.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://help.eclipse.org/luna/index.jsp?nav=%2F4">Eclipse help: Plugin Development Environment</a></li>
+</ul>
+
+<h2 id="the-eclipse-plugin-development-environment-pde">The Eclipse Plugin Development Environment (PDE)</h2>
+
+<p>Eclipse plugins are best developed using the help of the “E4 Plugin Development Tools” (installable in the usual manner). The IDE menu option “File|New” now has a “Plugin-Product” option that launches a wizard to configure a new project for development of a plugin. If you choose “RCP application” within the wizard, you will also need to have the RCP support installed.</p>
+
+<p>When a new “plugin project” is created in the Eclipse IDE using the PDE, the following standard Eclipse-IDE files are created:</p>
+
+<ul>
+  <li>dot-project - a standard Eclipse IDE file that specifies how the project is displayed within the IDE (name, etc), which plugins to use to build the code (eg JavaBuilder)</li>
+  <li>dot-classpath - a standard Eclipse IDE file that specifies which libraries to put on the classpath during compilation. Additional items will be added based on the <em>target</em>, and the set of required pugins defined within the IDE. When launching the application from within the IDE, the <em>launch configuration</em> specifies additional libraries.</li>
+  <li>dot-settings - directory containing per-ide-plugin configuration such as window layouts</li>
+  <li>build.properties - specifies additional resources to be included when building a “deployable product”. Also specifies compiler-related settings like target JVM version and arbitrary compiler-args.</li>
+</ul>
+
+<p>and the following plugin-project-specific files are created:</p>
+
+<ul>
+  <li>
+<code>{projname}.product</code> - specifies which components to include when building a “standalone executable” containing this plugin. Also defines the “branding” (css, icons, etc) to be applied.</li>
+  <li>MANIFEST.MF - contains standard OSGi attributes such as the plugin’s unique id, its version, and a list of other plugins that are required at runtime</li>
+  <li>plugin.xml - used at runtime by the Equinox framework to provide information about a plugin (jarfile) when it is loaded. In effect, an eclipse-specific extension of the MANIFEST.MF.</li>
+  <li>Application.e4xmi - the application model, ie a user-interface definition as XML which is loaded at runtime. The E4 tools provide help working with these.</li>
+</ul>
+
+<p>A plugin always has a list of other plugins it depends on. The developer enters this information via the MANIFEST.MF editor. Sadly, Eclipse duplicates this information in several other files:</p>
+
+<ul>
+  <li>the dot-product file</li>
+  <li>the launch configuration</li>
+</ul>
+
+<p>In a somewhat odd design-choice, the editor for the MANIFEST.MF, “plugin.xml” and build.properties files have been unified; clicking on any of these files opens the same editor window. That editor window has tabs; the “overview” and “dependencies” tabs generally edit the MANIFEST.MF file while the “extensions” and “extension points” tabs edit the plugin.xml file and the “build” tab edits the build.properties file. The editor also has tabs to edit/view these three files in their “raw” format.</p>
+
+<p>When developing software that consists of multiple plugins, then a separate “feature project” needs to be created. This project consists primarily of a “feature.xml” file which lists the <em>plugins</em> and <em>other features</em> that belong together in this “feature”. Options are available to generate a standalone executable, or to “publish” this configuration to a P2 repository.</p>
+
+<h2 id="targets">Targets</h2>
+
+<p>When a plugin project is created, it will be compiled against a large number of supporting eclipse libraries. But which ones/versions? The answer is that by default they are the ones used by the <em>current eclipse IDE</em>. However a <em>target</em> can be selected which defines a different release of those Eclipse libraries (eg so development can occur against a stable release even when developers upgrade their IDE).</p>
+
+<p>The target can be selected via menu “Window|Preferences|Plugin Development|Target Platform”. The nicest option is to select “empty” initially, then select a “software site” and point to any eclipse IDE release of your choice.</p>
+
+<p>This of course affects only those libraries specified with version=”0.0.0”, ie undefined.</p>
+
+<h2 id="eclipse-ide-project-natures">Eclipse IDE Project Natures</h2>
+
+<p>An Eclipse IDE <em>project</em> can have zero or more <em>natures</em>. A nature is basically a set of tools that get executed during the build process. As example, when a project has the “java nature”, then the java builder plugin will be invoked whenever a build is triggered.</p>
+
+<p>See:</p>
+
+<ul>
+  <li><a href="http://www.eclipse.org/articles/Article-Builders/builders.html">Eclipse.org: Project Builders</a></li>
+</ul>
+
+<h2 id="building-tycho-etc">Building (Tycho etc)</h2>
+
+<p>Compiling the source-code and building “deployable” artifacts can be done interactively through the Eclipse IDE user interface.</p>
+
+<p>Right-clicking on the project and selecting “plugin tools|create ant buildfile” will create an Ant “build.xml” file which references all the relevant dependencies and invokes the eclipse java compiler appropriately. Note that this Ant buildfile references files from the local Eclipse IDE installation, ie is not generally reusable.</p>
+
+<p>The <a href="http://www.eclipse.org/tycho/">tycho</a> project is a set of tools that allow an Eclipse plugin project to be built from Maven, without requiring any local Eclipse installation. Artifacts required during a Tycho build are retrieved from an Eclipse P2 repository. Tycho defines a set of new artifact <em>packaging types</em>, eg eclipse-plugin or eclipse-feature. A pomfile for a tycho build typically has no <code>&lt;dependencies&gt;</code> section, instead deducing dependency information from the MANIFEST.MF.</p>
+
+<p>The original solution that the Eclipse developers recommended for “headless builds” of the kind done by automated systems was called “releng” (Release Engineering), and is documented <a href="http://www.eclipse.org/articles/article.php?file=Article-PDE-Automation/article.html">here</a>. IMO, that’s pretty scary crazy stuff  - tycho (for all its flaws) is a far more industry-standard way to do “headless builds”. In particular, trying to version-control the configuration of a complete Eclipse IDE install is difficult.</p>
+
+<p>Some Maven repository managers have extensions that support P2 repositories, ie such repository managers can be used from Tycho builds rather than having a separate P2 repository. The commercial Nexus Pro includes <a href="http://books.sonatype.com/nexus-book/reference/p2.html">p2 support</a> by default. AFAICT, the open-source Nexus OSS version can also support P2 repositories; it just requires installing the plugins as listed in the documentation.  The <a href="http://wiki.eclipse.org/Tycho/Nexus_Unzip_Plugin">Eclipse Nexus Unzip Plugin</a> also looks interesting; it is a <em>nexus plugin</em> that adds a new repository type suitable for P2 artifacts.</p>
+
+<p>Although building <em>plugin</em> projects with Maven is non-trivial (requires Tycho), building standard (non-plugin) projects with Maven is straightforward; developing the maven <code>pom.xml</code> is mostly a separate step from developing/compiling the code within the Eclipse IDE. Alternatively, the “m2e” plugins can be installed into the Eclipse IDE which then replaces the normal Eclipse interactive build-tools with calls to maven instead, resulting in a more consistent result between interactive and batch builds.</p>
+
+<p>One significant issue with eclipse/maven integration is that maven requires artifact version-numbers to be <em>absolute</em> or end in “.snapshot”. Eclipse-P2 does not support the concept of “snapshot” artifact versions, instead assigning a “build version” (incrementing integer per compilation) or datestamp. In the Eclipse IDE, artifacts without absolute version-numbers are shown in form “1.2.3.qualifier”, where the literal text “qualifier” gets replaced automatically during the build process. Eclipse also shows “unspecified version numbers” as “0.0.0”.</p>
+
+<h2 id="deploying-a-plugin">Deploying a Plugin</h2>
+
+<p>To add a plugin to an existing Eclipse installation, a plugin jarfile can simply be unzipped in the appropriate location under the Eclipse install directory. However this only works if all plugins <em>required by this plugin</em> have already been installed.</p>
+
+<p>A more elegant alternative is to upload the new plugin to a P2 repository, and then use the Eclipse “Help|Install New Software” menu to specify the location of that P2 repository and then select the plugin.</p>
+
+<h2 id="unit-and-integration-testing">Unit and Integration Testing</h2>
+
+<p>An Eclipse plugin project can contain JUnit tests in the normal manner; such tests validate the behaviour of individual classes or small sets of classes.</p>
+
+<p>Eclipse also provides an interesting variant of <em>integration testing</em> driven by JUnit. Tests can be written as a <em>bundle fragment</em> (ie in a separate project), and these tests can then be executed within a <em>running eclipse container</em>. This verifies the interaction of the plugin under test with the whole Eclipse framework.</p>
+
+<h1 id="other-items">Other Items</h1>
+
+<p>It appear that the Eclipse Wazaabi project is trying to extend the application model concept down into the parts themselves, where code (or a graphical editor) creates an application-model-like tree consisting of abstract containers, buttons, etc. A “viewer” then renders this model using SWT, GWT, RAP, or any other similar widget toolkit. This project is currently under development.</p>
+
+<h1 id="useful-term-definitions">Useful Term Definitions</h1>
+
+<p>Terms:</p>
+
+<ul>
+  <li>Editor: a single window that can render a particular file in a user-friendly way, and support modifying it</li>
+  <li>View: a single window that concentrates mostly on <em>displaying</em> data (but not a specific file), eg a filesystem navigation view</li>
+  <li>Perspective: a top-level graphical layout component, holding a set of editor and view windows.</li>
+  <li>Working set: a collection of files or directories. A file can belong to multiple working sets.</li>
+  <li>Application Model: a datastructure holding definitions for the initial window layout, menu items, command-handlers, etc.</li>
+  <li>Plugin Development Environment (PDE): an Eclipse IDE with the necessary plugins to develop plugins (used for RCP development too)</li>
+</ul>
+
+<p>Note that the word “part” is used for either an editor or a view; they are fairly similar from the eclipse application’s point of view.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+<a href="http://www.aosabook.org/en/eclipse.html">AOSABook: eclipse</a> - an excellent description of Eclipse architecture up to v4.0</li>
+  <li><a href="http://www.vogella.com/tutorials/EclipseRCP/article.html">Vogella: Eclipse RCP 4 RCP - Tutorial</a></li>
+  <li>
+<a href="http://download.eclipse.org/e4/sdk/drops/R-4.0-201007271520/eclipse-news.html">Eclipse 4.0 news</a> - includes some information on the “rearchitecture” of Eclipse into its 4.x form</li>
+  <li><a href="http://eclipsesource.com/blogs/2012/05/10/eclipse-4-final-sprint-part-1-the-e4-application-model/">EclipseSource: E4 Tutorial</a></li>
+  <li><a href="http://tomsondev.bestsolution.at/2010/07/28/eclipse-4-0-and-tutorial-on-writing-e4-rcp-application-released/">Tom Schindl: E4 tutorial</a></li>
+  <li><a href="http://eclipsesource.com/blogs/2012/05/10/eclipse-4-final-sprint-part-1-the-e4-application-model/">Eclipse Tutorial</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/eclipse4-architecture/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

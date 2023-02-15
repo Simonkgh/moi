@@ -1,0 +1,1103 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Talend Basic Install on Linux - Manual</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Talend Basic Install on Linux - Manual</h1>
+    <aside>First published on: March 18, 2019</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="overview">Overview</h1>
+
+<p>This page describes how to install the core components of the Talend software suite on Linux using “manual” setup (rather than the official installer, which produces a poor result). The <a href="/bigdata/talend-install">overall install process description</a> should be read first; it convers setting up the VMs on which these instructions are carried out.</p>
+
+<p>The instructions here do not replace the Talend installation guide; the guide has far more detail than included here. However the guide is also incomplete, and poorly structured - hopefully this page provides a better “flow” through the necessary steps.</p>
+
+<p>The following components are addressed in this page:</p>
+
+<ul>
+  <li>Nexus</li>
+  <li>Admin Center (aka TAC)</li>
+  <li>CommandLine</li>
+  <li>LogServer</li>
+  <li>AMC (activity monitoring console)</li>
+  <li>Jobserver</li>
+  <li>Runtime (aka Talend Container)</li>
+</ul>
+
+<p>together with all of their dependencies (eg Java, Tomcat, mysql, systemd-init).</p>
+
+<p>The following issues and components are NOT addressed in this page:</p>
+
+<ul>
+  <li>Setting up ssl</li>
+  <li>Setting up high availability</li>
+  <li>Setting up single-signon (SSO)</li>
+  <li>Setting up more complex Talend components including:
+    <ul>
+      <li>IAM (optionally used by DataStewardship, DataPrep, DictionaryService)</li>
+      <li>BRMS (business rules server)</li>
+      <li>SAP RFC Server (SAP integration component)</li>
+      <li>MDM (Master Data Management)</li>
+      <li>ESB Container and subcomponents
+        <ul>
+          <li>service-locator</li>
+          <li>service-activity-monitor (SAM)</li>
+          <li>security-token-services (STS)</li>
+        </ul>
+      </li>
+      <li>DQPortal (data quality component)</li>
+      <li>DataStewardship</li>
+      <li>DataPrep and subcomponents
+        <ul>
+          <li>streams-runner</li>
+          <li>spark-job-server</li>
+          <li>components-catalog</li>
+        </ul>
+      </li>
+      <li>DictionaryService</li>
+      <li>Repository manager (an obsolete component)</li>
+      <li>CI Builder (a maven plugin for integrating external CI tools such as Jenkins into the Talend dev/rollout cycle)</li>
+    </ul>
+  </li>
+  <li>Setting up core dependencies:
+    <ul>
+      <li>zookeeper (required by ESB-locator-service and Kafka)</li>
+      <li>kafka (optionally used by DataSteward)</li>
+      <li>activemq (optionally used by Talend ESB)</li>
+      <li>MongoDB (used by DataStewardship, DataPrep, DictionaryService)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Unless mentioned otherwise, all commands below are expected to be run as the <code>root</code> user. The result is:</p>
+
+<ul>
+  <li>a tree of files at <code>/opt/talend</code>
+</li>
+  <li>a set of system user accounts with home-dirs under <code>/opt/talend</code> and</li>
+  <li>a set of systemd configuration files in <code>/etc/systemd</code>
+</li>
+</ul>
+
+<h1 id="install-necessary-os-packages">Install Necessary OS Packages</h1>
+
+<p>Some basic software is needed:</p>
+
+<pre><code>apt install openjdk-8-jre-headless
+apt install zip unzip
+apt install libmysql-java  # assuming you are using mysql of course..
+</code></pre>
+
+<h1 id="download-talend-files">Download Talend Files</h1>
+
+<p>The following will download all necessary files from the Talend download site to a directory on the local machine. This list of links is usually provided by Talend in an email, together with the licence file.</p>
+
+<pre><code>mkdir /usr/share/talend
+cd /usr/share/talend
+
+cat &gt;urls.txt &lt;&lt;EOF
+http://www.opensourceetl.net/tis/tdf_701/Talend-Studio-20180411_1414-V7.0.1.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-Studio-20180411_1414-V7.0.1.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-AdministrationCenter-20180411_1414-V7.0.1.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-AdministrationCenter-20180411_1414-V7.0.1.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-JobServer-20180411_1414-V7.0.1.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-JobServer-20180411_1414-V7.0.1.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-AMC_Web-20180411_1414-V7.0.1.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-AMC_Web-20180411_1414-V7.0.1.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-BRMS-20180411_1414-V7.0.1.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-BRMS-20180411_1414-V7.0.1.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-SAP-RFC-Server-20180411_1414-V7.0.1.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-SAP-RFC-Server-20180411_1414-V7.0.1.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-IAM-V7.0.1.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-IAM-V7.0.1.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-DataPreparation-Server-full-V2.5.0.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-DataPreparation-Server-full-V2.5.0.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-DataStewardship-V7.0.1.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-DataStewardship-V7.0.1.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-DictionaryService-2.1.2.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-DictionaryService-2.1.2.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-DQPortal-20180411_1414-V7.0.1.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-DQPortal-20180411_1414-V7.0.1.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-MDMServer-20180411_1414-V7.0.1.jar
+http://www.opensourceetl.net/tis/tdf_701/Talend-MDMServer-20180411_1414-V7.0.1.jar.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-MDMServer-20180411_1414-V7.0.1.war
+http://www.opensourceetl.net/tis/tdf_701/Talend-MDMServer-20180411_1414-V7.0.1.war.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-MDMServer-20180411_1414-V7.0.1-HOME.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-MDMServer-20180411_1414-V7.0.1-HOME.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-ESB-V7.0.1-20180411143409.tar.gz
+http://www.opensourceetl.net/tis/tdf_701/Talend-ESB-V7.0.1-20180411143409.tar.gz.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-ESB-V7.0.1-20180411143409.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-ESB-V7.0.1-20180411143409.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-Runtime-V7.0.1-20180411143409.zip
+http://www.opensourceetl.net/tis/tdf_701/Talend-Runtime-V7.0.1-20180411143409.zip.MD5
+http://www.opensourceetl.net/tis/tdf_701/Talend-LogServer-V7.0.1-linux-x86_64.tar.gz
+http://www.opensourceetl.net/tis/tdf_701/Talend-LogServer-V7.0.1-linux-x86_64.tar.gz.MD5
+EOF
+
+wget --input-file=urls.txt --continue --show-progress --user=.... --password=....
+</code></pre>
+
+<p>Yes, Talend-studio is on the list; tool <code>talend-commandline</code> that (usually) needs to be installed on the server is actually implemented as an Eclipse plugin, and distributed as part of the studio. See installation instructions for the commandline component for more details.</p>
+
+<p>The above list does include some components whose installation is not covered in this page. You may of course remove from the above list any components that you do not intend to install.</p>
+
+<p>Also download Tomcat - the exact version of course depends on what has most recently been released.</p>
+
+<ul>
+  <li><code>wget https://www-eu.apache.org/dist/tomcat/tomcat-9/v9.0.14/bin/apache-tomcat-9.0.14.zip</code></li>
+</ul>
+
+<p>For some components (eg commandline) you will also need the Talend licence file on the host on which the component is being installed.</p>
+
+<p>If you see mention of component “RepositoryManager”, you can ignore it - it is deprecated. Note however that the Artifact Repository (aka Nexus) is something different, and very much needed.</p>
+
+<h1 id="notes-on-installing-tomcat">Notes on Installing Tomcat</h1>
+
+<p>Many Talend components need to run within a Java Servlet Container; the one chosen for this installation walkthrough is Apache Tomcat.</p>
+
+<p>The approach used below is to create different system-accounts for different components of the Talend suite, for security and cleanliness.</p>
+
+<p>When a component (running as a system-account) needs a Tomcat instance to run within, a Tomcat “config dir” is created in the account but the Tomcat core files are taken from a central/shared location. In this approach, standard Tomcat environment variables <code>CATALINA_BASE</code> and <code>CATALINA_HOME</code> are different (one pointing to the base install, and the other to the config-files and extra libs needed by a specific instance).</p>
+
+<p>An alternative would be to create a single user account for all Talend components, running a single Tomcat instance with various Talend web-app components running within that single Tomcat instance. However that has two significant disadvantages:</p>
+
+<ul>
+  <li>security - a problem with one app can lead to breach of that single user-account, and thus access to data for all Talend components</li>
+  <li>stability - an out-of-memory problem with one component would take all components down, high CPU in one component would interfere with others, etc.</li>
+</ul>
+
+<p>The approach used below uses a Tomcat release downloaded directly from the Apache site and unpacked.  Some linux distributions include Tomcat as a standard package (eg Ubuntu 18.04 can “<code>apt install tomcat-8</code>”); this approach does potentially have benefits for security support.</p>
+
+<p>It might also be a good idea to configure all Tomcat instances to just open an AJP port on the localhost interface, and then to use an http-proxy (eg <code>nginx</code>) to forward requests for specific ports to the Tomcat instance. SSL termination could then be done at the proxy rather than within Tomcat - easier to configure.</p>
+
+<p>The Talend TAC can be configured in a “high availability mode” which is also described as “Tomcat in cluster mode”. However this is actually nothing to do with Tomcat itself - the high availability mode is implemented via code in each TAC instance writing “heartbeat” records into the shared database, and client tools (particularly Talend Studio instances) using data from the DB to choose the “active” server instance. No special Tomcat configuration is required.</p>
+
+<h1 id="notes-on-systemd-init-service-files">Notes on systemd-init Service Files</h1>
+
+<p>All the main Linux distros (including RedHat, Centos, and Ubuntu) use systemd-init to manage services.</p>
+
+<p>When using the Talend wizard installer, directory <code>/opt/Talend-*/utils</code> is filled with sysv-init scripts and systemd-init service-unit files. As services are configured by the wizard the service-unit files are migrated to <code>/etc/systemd/system</code> (and renamed). Sadly, the service-unit files mostly just point to the sysv-init scripts, ie don’t take advantage of any of systemd-init’s features. The service-unit files are nevertheless useful as a starting-point for writing real service-unit files.</p>
+
+<p>The Talend install manual for Linux does have a few systemd-init service-unit file examples (starting from page 216; search for “systemd”), but not all services are covered - and the examples are not particularly good.</p>
+
+<p>This article provides a basic <code>systemd-init</code> service unit file for each component. However they could be significantly improved; there are many security features in systemd-init that I have not bothered to enable/configure.</p>
+
+<h1 id="configure-java">Configure Java</h1>
+
+<p>Much of the Talend suite runs in a JVM, and ideally wants variable JAVA_HOME to be set. Rather than have variables everywhere, it seems easiest to create a single symbolic-link that all configuration can refer to:</p>
+
+<pre><code>mkdir -p /opt/talend
+cd /opt/talend
+ln -s /usr/lib/jvm/java-8-openjdk-amd64/jre jre-curr  # or wherever "apt install openjdk-8-jre-headless" put its files
+</code></pre>
+
+<p>This provides a link <code>/opt/talend/jre-curr</code> which points to a JDK installation and can be modified at any time to point to an updated JDK.</p>
+
+<h1 id="install-tomcat-core">Install Tomcat Core</h1>
+
+<p>Various components need to be run as separate Tomcat instances. It is therefore useful to install Tomcat once, and reference it from the other instances.</p>
+
+<pre><code>mkdir -p /opt/talend
+cd /opt/talend
+unzip /usr/share/talend/apache-tomcat-*.zip
+mv apache-tomcat-* tomcat
+</code></pre>
+
+<h1 id="install-nexus">Install Nexus</h1>
+
+<h2 id="overview-1">Overview</h2>
+
+<p>A Maven artifact repository is needed by various Talend components; if you need to install the one provided by Talend (Nexus) then it makes sense to install it first.</p>
+
+<p>If you already have a Nexus instance on some other machine that you wish to use for storing Talend-generated artifacts (workflow jobs), then this can be skipped. Note however that the “migration scripts” embedded within the file <code>Artifact-Repository-Nexus-*.zip</code> (which is embedded in the TAC zipfile) should be applied when not using the provided Nexus image.</p>
+
+<h2 id="unpack-files">Unpack Files</h2>
+
+<pre><code>mkdir -p /opt/talend/artifactrepo
+cd /opt/talend/artifactrepo
+unzip /usr/share/talend/Talend-AdministrationCenter-*.zip
+unzip Talend-AdministrationCenter-*/Artifact-Repository-Nexus-*.zip
+mv Artifact-Repository-Nexus-*-unix nexus
+rm -rf Talend-AdministrationCenter-*
+rm -rf Artifact-Repository-Nexus-*
+# should leave just "nexus" and "migration*" remaining
+cd nexus
+ln -s nexus-* curr
+</code></pre>
+
+<h2 id="create-user-account-for-nexus">Create User Account for Nexus</h2>
+
+<pre><code>useradd --system --home /opt/talend/artifactrepo/nexus --shell /usr/sbin/nologin talendnexus
+chown -R talendnexus:talendnexus /opt/talend/artifactrepo/nexus
+</code></pre>
+
+<h2 id="configure-systemd-init-to-start-nexus">Configure systemd-init to start Nexus</h2>
+
+<p>Create a systemd-init unit file with:</p>
+
+<pre><code>cat &gt; /etc/systemd/system/talend-nexus.service &lt;&lt;EOF
+[Unit]
+Description=Talend Nexus service
+After=syslog.target network.target
+
+[Service]
+User=talendnexus
+Group=talendnexus
+LimitNOFILE=65536
+
+Type=forking
+Environment=JAVA_HOME=/opt/talend/jre-curr
+WorkingDirectory=/opt/talend/artifactrepo/nexus/curr
+ExecStart=/opt/talend/artifactrepo/nexus/curr/bin/nexus start
+ExecStop=/opt/talend/artifactrepo/nexus/curr/bin/nexus stop
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now talend-nexus
+</code></pre>
+
+<h2 id="summary">Summary</h2>
+
+<p>The above steps start an application listening on http port 8081.</p>
+
+<p>There are probably a bunch of options that should be configured for a truly production-quality install of Nexus - I haven’t bothered with these.</p>
+
+<p>By default, Nexus appears to write logs and artifacts into <code>curr/sonatype-work/nexus3</code> - which is acceptable for a toy environment, but not for production (large amounts of data will be written). A prod environment should probably configure the app (somehow) to store data under <code>/var/nexus</code> or similar.</p>
+
+<h1 id="install-tac">Install TAC</h1>
+
+<h2 id="overview-2">Overview</h2>
+
+<p>This section creates a Tomcat instance running the Talend admin-center webapp. This Tomcat instance may run other webapps (depending on what you install), and various other tools need to run as the same user that runs the TAC webapp, so the user-account created is named “talendadmin” rather than “talendtac”.</p>
+
+<h2 id="install-tac-files">Install TAC files</h2>
+
+<pre><code>mkdir -p /opt/talend/admin
+cd /opt/talend/admin
+
+sh /opt/talend/tomcat/bin/makebase.sh tomcat
+
+unzip /usr/share/talend/Talend-AdministrationCenter*.zip
+mv Talend-AdministrationCenter-*/endorsed/*.jar tomcat/lib/
+mv Talend-AdministrationCenter-*/org.talend.administrator-*.war tomcat/webapps/org.talend.administrator.war
+rm -rf Talend-AdministrationCenter-*  # no longer needed
+cd tomcat/webapps
+unzip org.talend.administrator.war  # gives access to config-files
+</code></pre>
+
+<h2 id="set-database-connection-params">Set Database Connection Params</h2>
+
+<p>Edit file <code>tomcat/webapps/org.talend.administrator/WEB-INF/classes/configuration.properties</code>, setting:</p>
+
+<pre><code>database.url=jdbc:mysql://{yourhostname}:3306/talend_admin
+database.driver=org.gjt.mm.mysql.Driver
+database.username=talend_admin
+database.password=pwd1
+</code></pre>
+
+<p>Note that this is a “workaround” - theoretically, the db parameters can be set from the TAC web interface and then saved to this file with the “finalize” button. However I was unable to get to the point in the web interface where the “finalize” button was enabled without first setting the parameters manually in this file! When the “finalize” button is finally pressed in the UI, the password will be updated with an encrypted version.</p>
+
+<p>Note: File <code>webapps/org.talend.administrator/META-INF/context.xml</code> also has DB connection parameters in it. However AFAICT, these are only used if the webapp is configured to allow Tomcat to manage the database connection pool at servlet-container level, rather than the default approach of having the webapp manage its own database connection pool. It isn’t clear to me what the advantages/disadvantages of these two approaches are. Config-item “database.useContext” (in file <code>WEB-INF/classes/configuration.properties</code>) selects the active option - and defaults to webapp-level connection pooling, ie db connection params are in configuration.properties itself. See the Talend installation guide for more information.</p>
+
+<p>It is also recommended that you change option “database.config.password” so that arbitrary users cannot reconfigure the database that the TAC uses.</p>
+
+<h2 id="install-mysql-driver">Install mysql driver</h2>
+
+<p>If using mysql as the central database, then:</p>
+
+<ul>
+  <li><code>cp /usr/share/java/mysql-connector-java-*.jar tomcat/lib</code></li>
+</ul>
+
+<p>which will later allow you to configure the TAC webapp to use that driver.</p>
+
+<h2 id="create-a-user">Create a User</h2>
+
+<pre><code>useradd --system --home /opt/talend/admin --shell /usr/sbin/nologin talendadmin
+chown -R talendadmin:talendadmin /opt/talend/admin
+</code></pre>
+
+<h2 id="ports">Ports</h2>
+
+<p>By default, Tomcat opens the following ports - which are fine for the TAC:</p>
+
+<ul>
+  <li>admin port: 8005</li>
+  <li>http port: 8080</li>
+  <li>AJP port: 8009</li>
+</ul>
+
+<p>Note that Talend supports “clustering” of TAC instances for high-availability. This is not done by clustering Tomcat itself, but instead by adding a Talend-specific module to Talend which updates “heartbeat records” in the central Talend database instance; Talend client apps check the database to find out which http server address is the “current master” and make requests to that instance. Setting this up is NOT described on this page - see the Talend install guide.</p>
+
+<p>The TAC application itself dynamically opens listening ports; each time it launches a job on an “execution server” it opens a “free” port so that the execution-server (jobserver, runtime, or esb) can report statistics. The port is closed when the job completes. The default port-range that it uses is 10000-11000.</p>
+
+<h2 id="configure-systemd-init-to-start-tomcat">Configure systemd-init to start Tomcat</h2>
+
+<pre><code>cat &gt; /etc/systemd/system/talend-admin.service &lt;&lt;EOF
+[Unit]
+Description=Talend Admin Console (Tomcat instance)
+After=syslog.target network.target mysql.service
+ 
+[Service]
+User=talendadmin
+Group=talendadmin
+UMask=0007
+
+Type=simple
+ 
+Environment=JAVA_HOME=/opt/talend/jre-curr
+Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'
+Environment=CATALINA_HOME=/opt/talend/tomcat
+Environment=CATALINA_BASE=/opt/talend/admin/tomcat
+Environment='CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC'
+ 
+ExecStart=/bin/sh /opt/talend/tomcat/bin/catalina.sh run
+ 
+RestartSec=10
+Restart=always
+ 
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now talend-admin
+systemctl status talend-admin
+journalctl --unit=talend-admin
+</code></pre>
+
+<h2 id="configure-ssh-for-git-access">Configure SSH for Git Access</h2>
+
+<p>The TAC instance will later be configured with credentials to access a git or svn repository in which developer code is to be stored. When using SVN, or using Git with access-protocol http, nothing needs to be done yet. However when using Git with access-protocol ssh, some setup is needed. Running command “<code>git clone ssh://someuser@somehost:someport/reponame</code>” at the command-line as user <code>talendadmin</code> would result in the following prompt:</p>
+
+<pre><code>The authenticity of host '[somehost]:someport)' can't be established.
+RSA key fingerprint is SHA256:ABCDEF0123456789...
+Are you sure you want to continue connecting (yes/no)?
+</code></pre>
+
+<p>The TAC cannot handle such a prompt, so it is necessary to approve the associated ssh key beforehand. The easiest way to do this is (as root):</p>
+
+<pre><code>mkdir --mode 0700 ~talendadmin/.ssh
+ssh-keyscan -p someport somehost &gt; ~talendadmin/.ssh/known_hosts
+chown -R talendadmin:talendadmin ~talendadmin/.ssh
+</code></pre>
+
+<p>where somehost and someport are the address of the git server, eg “<code>{yourhostname}</code>” and “<code>29418</code>” when using gitblit on the local host.</p>
+
+<h2 id="configure-storage-directories">Configure Storage Directories</h2>
+
+<p>Create a few storage dirs that will be needed later when configuring the TAC via its UI:</p>
+
+<pre><code>mkdir -p /var/talend/audit/reports
+chown -R talendadmin:talendadmin /var/talend/audit
+
+mkdir -p /var/talend/admin/generated-jobs
+mkdir -p /var/talend/admin/execution-logs
+chown -R talendadmin:talendadmin /var/talend/admin
+</code></pre>
+
+<p>Note: when setting up an HA system, it might be necessary to map these dirs to a shared fs.</p>
+
+<p>During TAC graphical configuration, entries “Settings/Configuration/Audit” and “Settings/Configuration/Job conductor” need to be updated to point to these dirs.</p>
+
+<h2 id="verify-installation">Verify Installation</h2>
+
+<p>Visit “<code>http://{yourhostname}:8080/org.talend.administrator</code>” to see the Talend admin page</p>
+
+<p>See the <a href="/bigdata/talend-install">parent install page</a> for info on configuring the TAC webapp itself.</p>
+
+<h1 id="install-activity-monitoring-console-amc">Install Activity Monitoring Console (AMC)</h1>
+
+<h2 id="overview-3">Overview</h2>
+
+<p>Various Talend components record status and errors by writing data into a central database. The AMC web app then provides a way for users/admins to view and search these records; Talend Studio also provides a UI for viewing these records.</p>
+
+<p>For more information, see the Talend Activity Monitoring Console User Guide</p>
+
+<p>AMC is a single java servlet engine warfile, and the easiest way to deploy it is to use the TAC server’s Tomcat instance. There might be slight security and stability benefits to running it under a separate Tomcat instance, but I am not sure that Talend supports this (ie it seems from initial experiments that the TAC expects AMC to be running on the same port as it is).</p>
+
+<p>AMC is (afaik) only used via the TAC; when option “monitoring/activity monitoring console” is chosen in the TAC UI, the TAC generates an html page which contains an iframe whose “src” attribute points back to the AMC instance. The AMC instance then renders html through which the user can view records in the AMC schema within the database. Note:</p>
+
+<ul>
+  <li>it is not currently clear to me how the database connection parameters are passed to the AMC webapp; they are configured in the TAC interface, not in AMC. Perhaps AMC assumes that “<code>localhost:myport/org.talend.administrator</code>” points to a TAC instance?</li>
+  <li>the “AMC url” configured within the TAC needs to use an absolute hostname, not “localhost”, as the url is evaluated in the user’s browser.</li>
+  <li>it is not currently clear to me how authentication works for AMC requests</li>
+</ul>
+
+<p>Talend studio also has an “AMC view” through which logging data can be viewed, but this code reads directly from the database rather than going through the AMC webapp.</p>
+
+<p>Even though the only user of the AMC webapp is the TAC, the code cannot simply be integrated into the TAC for technical reasons. The TAC is implemented as a fairly traditional webapp - it uses GWT (Google Widget Toolkit) to generate HTML; it does use some eclipse libraries but not the eclipse framework. The AMC webapp is instead implemented as an Eclipse application using RAP to generate HTML rather than using SWT to generate native graphical widgets; this approach allows the AMC webapp to reuse the same eclipse code that the Talend Studio uses to present the AMC ui - but means that it must be deployed as a separate app rather than merged into the TAC codebase.</p>
+
+<h2 id="create-table-schema">Create Table Schema</h2>
+
+<p>(following information extracted from the Talend Activity Monitoring Console User Guide)</p>
+
+<pre><code>cat &gt;/tmp/amcsetup.sql &lt;&lt;"EOF"
+CREATE DATABASE `amc`;
+USE `amc`;
+
+DROP TABLE IF EXISTS `tflowmetercatcher`;
+CREATE TABLE `tflowmetercatcher` (
+  `moment` datetime DEFAULT NULL,
+  `pid` varchar(20) DEFAULT NULL,
+  `father_pid` varchar(20) DEFAULT NULL,
+  `root_pid` varchar(20) DEFAULT NULL,
+  `system_pid` bigint(8) DEFAULT NULL,
+  `project` varchar(50) DEFAULT NULL,
+  `job` varchar(255) DEFAULT NULL,
+  `job_repository_id` varchar(255) DEFAULT NULL,
+  `job_version` varchar(255) DEFAULT NULL,
+  `context` varchar(50) DEFAULT NULL,
+  `origin` varchar(255) DEFAULT NULL,
+  `label` varchar(255) DEFAULT NULL,
+  `count` int(3) DEFAULT NULL,
+  `reference` int(3) DEFAULT NULL,
+  `thresholds` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+DROP TABLE IF EXISTS `tlogcatcher`;
+CREATE TABLE `tlogcatcher` (
+  `moment` datetime DEFAULT NULL,
+  `pid` varchar(20) DEFAULT NULL,
+  `root_pid` varchar(20) DEFAULT NULL,
+  `father_pid` varchar(20) DEFAULT NULL,
+  `project` varchar(50) DEFAULT NULL,
+  `job` varchar(255) DEFAULT NULL,
+  `context` varchar(50) DEFAULT NULL,
+  `priority` int(3) DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `origin` varchar(255) DEFAULT NULL,
+  `message` varchar(255) DEFAULT NULL,
+  `code` int(3) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+DROP TABLE IF EXISTS `tstatcatcher`;
+CREATE TABLE `tstatcatcher` (
+  `moment` datetime DEFAULT NULL,
+  `pid` varchar(20) DEFAULT NULL,
+  `father_pid` varchar(20) DEFAULT NULL,
+  `root_pid` varchar(20) DEFAULT NULL,
+  `system_pid` bigint(8) DEFAULT NULL,
+  `project` varchar(50) DEFAULT NULL,
+  `job` varchar(255) DEFAULT NULL,
+  `job_repository_id` varchar(255) DEFAULT NULL,
+  `job_version` varchar(255) DEFAULT NULL,
+  `context` varchar(50) DEFAULT NULL,
+  `origin` varchar(255) DEFAULT NULL,
+  `message_type` varchar(255) DEFAULT NULL,
+  `message` varchar(255) DEFAULT NULL,
+  `duration` bigint(8) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+GRANT ALL ON amc.* TO amc@'%' identified by 'pwd1'; -- create user
+EOF
+
+mysql &lt; /tmp/amcsetup.sql   # or mysql -p {password} &lt; /tmp/amcsetup.sql etc
+</code></pre>
+
+<p>A developer using Talend Studio usually configures a whole “project” with some DB credentials that have rights to write to the above tables (often via variables so the values can be different in each deployment environment). The “monitoring” section of the TAC web ui must also be configured with DB credentials that have rights to at least read the above tables.</p>
+
+<p>The above SQL creates an “amc” user which has all rights on the amc schema, which works for both the TAC and Talend workflow execution - but a properly secured system might want to restrict this (maybe creating multiple db users).</p>
+
+<h2 id="install-amc-webapp-into-tac-tomcat-instance">Install AMC Webapp into TAC Tomcat Instance</h2>
+
+<pre><code>cd /opt/talend
+unzip /usr/share/talend/Talend-AMC_Web-*
+mv Talend-AMC_Web-*/amc.war admin/tomcat/webapps/
+chown talendadmin:talendadmin admin/tomcat/webapps/amc.war
+rmdir Talend-AMC_Web-*
+</code></pre>
+
+<h2 id="install-mysql-driver-1">Install MySQL driver</h2>
+
+<p>The AMC app will obviously need a suitable JDBC driver to communicate with the AMC database. However because <code>amc.war</code> is an eclipse-based application rather than a normal webapp (see overview), the Tomcat standard lib directory is ignored; the mysql driver file must instead be installed as follows:</p>
+
+<pre><code>cp /usr/share/java/mysql-connector-java-*.jar admin/tomcat/webapps/amc/WEB-INF/plugins/org.talend.amc.libraries_*/lib/ext/
+</code></pre>
+
+<h1 id="install-log-server">Install Log Server</h1>
+
+<h2 id="overview-4">Overview</h2>
+
+<p>The Talend LogServer consists of:</p>
+
+<ul>
+  <li>elasticsearch - a distributed database optimised for full-text search and real-time analytics</li>
+  <li>kibana - for building realtime graphical dashboards of data in elasticsearch</li>
+  <li>logstash - for parsing logfiles (splitting records into fields) and uploading</li>
+  <li>filebeat - for uploading logfiles into elasticsearch</li>
+</ul>
+
+<p>The above components are all open-source but primarily developed by elastic.co and together are known as the ELK stack (Elasticsearch + Logstash + Kibana).</p>
+
+<p>Together, these provide a web UI through which administrators and users can view/search-for all information written to monitored logfiles.</p>
+
+<p>Note: this is separate from <code>talend-amc</code>, the “activity monitoring console”, which is based on writing to a relational database.</p>
+
+<p>File “<code>/usr/share/talend/Talend-LogServer-*.zip</code>” contains all four components. Theoretically:</p>
+
+<ul>
+  <li>elasticsearch should be installed on N hosts for scalability (data is sharded across all instances) and high-availability; N is usually in the range 1..3.</li>
+  <li>kibana should be installed on N hosts for high-availability; N is usually 1 or 2.</li>
+  <li>logstash should be installed on N hosts for high-availability; N is usually 1 or 2</li>
+  <li>filebeat needs to be installed on each host where logfiles exist that should be monitored, sending files to logstash</li>
+</ul>
+
+<p>In practice, <code>talend-logserver</code> will usually be installed on the same hosts as the TAC component (ie 1 host for non-ha environment, and 2 hosts for ha-environment). <code>Filebeat</code> is not usually needed on other hosts, as:</p>
+
+<ul>
+  <li>the TAC launches jobs via the jobserver, and the jobserver streams data back and stores it on the filesystem of the controlling TAC instance; and</li>
+  <li>jobserver instances are typically configured to store their logs on a shared-filesystem which is mounted on all hosts; the <code>filebeat</code> instances on just 1 or 2 instances can therefore upload the files from the shared-fs.</li>
+</ul>
+
+<p>TODO: when <code>filebeat</code> is on multiple hosts, and watching files on a shared filesystem, won’t <code>filebeat</code> upload the same data multiple times?</p>
+
+<p>Actually, <code>talend-logserver</code> is often not considered critical, ie is often not configured as high-availability even when the TAC is.</p>
+
+<h2 id="installing-files">Installing Files</h2>
+
+<pre><code># initial setup
+mkdir -p /opt/talend
+cd /opt/talend
+
+# unpack files
+tar zxf /usr/share/talend/Talend-LogServer-*-linux-*.tar.gz
+cd logserv
+
+# create user
+useradd --system --home /opt/talend/logserv --shell /usr/sbin/nologin talendlogserv
+chown -R talendlogserv:talendlogserv /opt/talend/logserv
+</code></pre>
+
+<p>No configuration is usually necessary.</p>
+
+<p>Warning: File <code>/usr/share/talend/Talend-Logserver-*.zip</code> is actually the windows-specific version! Make sure you unpack the one with “linux” in the name.</p>
+
+<h2 id="configure-systemd-init-to-start-elk-core">Configure systemd-init to start ELK core</h2>
+
+<pre><code>cat &gt; /etc/systemd/system/talend-log.service &lt;&lt;EOF
+#
+# This service is a little odd - file "start_logserver.sh" actually starts
+# three processes: elasticsearch, logstash, and kibana. All three create
+# pid-files in the working-directory. Because systemd-init is really
+# intended only for monitoring a single primary process, and there is
+# no primary process here, restart-on-failure is not really applicable.
+#
+
+[Unit]
+Description=Talend LogServ
+After=network.target
+
+[Service]
+User=talendlogserv
+Group=talendlogserv
+
+Type=forking
+Environment=JAVA_HOME=/opt/talend/jre-curr
+WorkingDirectory=/opt/talend/logserv
+ExecStart=/opt/talend/logserv/start_logserver.sh
+ExecStop=/opt/talend/logserv/stop_logserver.sh
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now talend-log
+systemctl status talend-log
+journalctl --unit=talend-log
+</code></pre>
+
+<h2 id="configure-filebeat">Configure Filebeat</h2>
+
+<p>This step is actually needed on each server on which files to monitor are present, even when the ELK core is not present. However the following instructions assume the current host already has the rest of the Talend logging components installed - ie you will need to adapt these instructions when installing Filebeat on other servers..</p>
+
+<pre><code>cd /opt/talend
+ln -s logserv/filebeat-* filebeat-curr
+cd filebeat-curr
+vi filebeat.yml # see following instructions
+</code></pre>
+
+<p>File <code>filebeat.yml</code> should contain one section under “<code>filebeat.prospectors</code>” for each set of files to be monitored. Here is the config for monitoring the Tomcat “admin” logs:</p>
+
+<pre><code>filebeat.prospectors:
+- type: log
+  enabled: true
+  paths:
+    - ${LOG_PATH:/opt/talend/admin/tomcat/logs/*}
+  fields:
+    app_id: ${APP_NAME:TAC}
+  fields_under_root: true
+</code></pre>
+
+<p>And of course, <code>filebeat</code> needs to be able to read the specified files. Filebeat will be run as user “<code>talendlogserv</code>” below, so grant that user access to the logs:</p>
+
+<pre><code>usermod --append --groups talendadmin talendlogserv 
+</code></pre>
+
+<h2 id="configure-systemd-init-to-start-filebeat">Configure systemd-init to start filebeat</h2>
+
+<pre><code>cat &gt; /etc/systemd/system/talend-filebeat.service &lt;&lt;EOF
+[Unit]
+Description=Talend Filebeat (part of logserv)
+After=network.target
+
+[Service]
+User=talendlogserv
+Group=talendlogserv
+
+Type=simple
+Environment=JAVA_HOME=/opt/talend/jre-curr
+WorkingDirectory=/opt/talend/filebeat-curr
+ExecStart=/opt/talend/filebeat-curr/filebeat -e -c filebeat.yml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable --now talend-filebeat
+systemctl status talend-filebeat
+</code></pre>
+
+<h1 id="install-commandline-tool">Install Commandline Tool</h1>
+
+<h2 id="overview-5">Overview</h2>
+
+<p>This component is a server that:</p>
+
+<ul>
+  <li>listens for requests on a network port</li>
+  <li>connects to version-control (git or svn) and checks out the repo</li>
+  <li>compiles a specific Talend workflow (ie transforms xml into a jarfile)</li>
+  <li>and uploads the resulting jarfile into Nexus</li>
+</ul>
+
+<p>The TAC then downloads artifacts from Nexus and executes them on an “execution server” via the jobserver/runtime/esb components.</p>
+
+<p>It is possible for developers to generate jarfiles themselves on their development PCs, and run them on jobserver etc. for testing purposes. However uploading into Nexus is not automatic. In a production-quality environment, it is usual for all Nexus artifacts to be generated via a commandline instance running on a controlled server, rather than allowing developers to push arbitrary code to Nexus.</p>
+
+<p>While commandline instances can be deployed anywhere, it is typical to run one on each server where the TAC is running - there should be more than one for high-availability, but more than two is not needed as the rate at which new compilations are done is not likely to be high.</p>
+
+<p>Why is it called “commandline”? Afaik, because the “network protocol” with which clients communicate with this component is effectively an interactive commandline, rather than REST or other application protocol.</p>
+
+<h2 id="implementation-notes">Implementation Notes</h2>
+
+<p>The compilation feature is actually implemented as an Eclipse plugin. That obviously makes it available for developers running the IDE. Running it as a server is done by starting a “headless” Talend studio (Eclipse) instance on the server.</p>
+
+<p>Does it make sense to implement a system service on Eclipse? Well, it can - the core of Eclipse is a very small OSGi container, with the rest being OSGi modules (plugins). If the commandline tool was just the OSGi core plus the few required plugins, that would be a reasonable implementation. Sadly, the provided install is the complete studio, including graphical components - rather nonsensical.</p>
+
+<h2 id="ports-1">Ports</h2>
+
+<p>The server opens only a single port (8002 by default).</p>
+
+<h2 id="installation">Installation</h2>
+
+<pre><code>cd /opt/talend
+unzip /usr/share/Talend-Studio-*
+ln -s Talend-Studio-* cmdline
+# also copy your Talend license file into /opt/talend/cmdline
+
+useradd --system --home /opt/talend/cmdline --shell /usr/sbin/nologin talendcmdline
+chown -R talendcmdline:talendcmdline /opt/talend/cmdline # necessary to allow user talendcmdline to write files...
+
+cat &gt;/etc/systemd/system/talend-cmdline.service &lt;&lt;EOF
+[Unit]
+Description=Talend Commandline
+After=network.target
+[Service]
+User=talendcmdline
+Group=talendcmdline
+Type=simple
+Environment=JAVA_HOME=/opt/talend/jre-curr
+WorkingDirectory=/opt/talend/cmdline
+ExecStart=/bin/sh /opt/talend/cmdline/commandline-linux.sh
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now talend-cmdline
+systemctl status talend-cmdline
+</code></pre>
+
+<p>Note that after startup, the application logs a bunch of errors. This appears to be harmless, and is typical for Talend.</p>
+
+<p>To test, “<code>telnet localhost 8002</code>” and at the prompt, type “help”.</p>
+
+<h2 id="configure-storage-directories-1">Configure Storage Directories</h2>
+
+<p>Create a storage dir (on the commandline host) that will be needed later when configuring the TAC via its UI:</p>
+
+<pre><code>mkdir -p /var/talend/commandline/exports
+chown -R talendcmdline:talendcmdline /var/talend/commandline
+</code></pre>
+
+<p>The directory must be identical on each host running the commandline server.</p>
+
+<p>AFAICT, the commandline tool itself does not need to be configured with the location of these dirs; that info is presumably passed as part of the network protocol.</p>
+
+<p>Note: when setting up an HA system, it might be necessary to put this dir on a shared fs - not clear at the moment.</p>
+
+<p>During TAC graphical configuration, entry “Settings/Configuration/CommandLine” needs to be updated to point to this dir.</p>
+
+<h1 id="install-jobserver">Install Jobserver</h1>
+
+<h2 id="overview-6">Overview</h2>
+
+<p>The jobserver is a simple agent that a client (usually the TAC or TalendStudio) can send Java jarfiles to; the jobserver then executes that jarfile in a separate JVM process. The jobserver also reports various statistics back to its client while the job is running.</p>
+
+<p>The installation process should be repeated on each host on which you wish to run Talend jobs - which might or might not include the server on which the TAC(s) run.</p>
+
+<p>NOTE: the “talend runtime” component provides multiple features including an alternate implementation of the jobserver - ie either jobserver or “talend runtime” should be installed, but not both. When only jobserver functionality is needed, then the jobserver component should be used as it is simpler and less resource-intensive. When ESB-related functionality is also needed, use the runtime instead. It is theoretically possible to install both talend-jobserver and talend-runtime, and this might provide slight security benefits (launching jobs can be done via the simpler-and-thus-more-secure jobserver binary) but this could be rather confusing (multiple servers on same host), and might interfere with resource management (estimating free capacity on a host).</p>
+
+<h2 id="install-and-configure-application">Install and Configure Application</h2>
+
+<pre><code>cd /opt/talend
+unzip /usr/share/talend/Talend-JobServer-*.zip
+mv Talend-JobServer-* jobserver
+
+mkdir -p /var/talend/jobserver # for data storage
+
+vi jobserver/conf/TalendJobServer.properties
+# uncomment line "*.TAC_URLS=..." and modify to point to the actual TAC servers that have been installed
+# set ROOT_PATH to point to /var/talend/jobserver
+
+useradd --system --home /opt/talend/jobserver --shell /usr/sbin/nologin talendjobs
+chown -R talendjobs:talendjobs /opt/talend/jobserver
+chown -R talendjobs:talendjobs /var/talend/jobserver
+</code></pre>
+
+<p>Note that the default config-settings settings use ports 8000, 8001 and 8888 - this should not need to be changed.</p>
+
+<p>It is possible to configure the jobserver to launch jobs as another user - but that requires setting up suid scripts, allow sudo, etc. And in particular, the configuration process in the Talend installation guide states that enabling this requires the user-account that runs the jobserver itself to have sudo-rights for command “/bin/sh” - ie that user-account is effectively root on the machine. IMO, it is more secure to not enable this “user impersonation” and run all jobs as the jobserver user.</p>
+
+<h2 id="configure-systemd-init-to-start-jobserver">Configure systemd-init to start Jobserver</h2>
+
+<pre><code>cat &gt; /etc/systemd/system/talend-jobserver.service &lt;&lt;EOF
+[Unit]
+Description=Talend Jobserver
+After=syslog.target network.target
+
+[Service]
+User=talendjobs
+Group=talendjobs
+
+Type=simple
+WorkingDirectory=/opt/talend/jobserver 
+ExecStart=/opt/talend/jobserver/start_rs.sh
+# ExecStop not needed when type=simple
+Restart=on-failure
+RestartPreventExitStatus=255
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now talend-jobserver
+systemctl status talend-jobserver
+journalctl --unit=talend-jobserver
+</code></pre>
+
+<p>After the jobserver installations have been started, they need to be registered with the TAC via the TAC web ui - see the Talend installation guide.</p>
+
+<h1 id="install-runtime">Install Runtime</h1>
+
+<h2 id="overview-7">Overview</h2>
+
+<p>The component named “runtime” is rather too generically named; it is actually a component that provides a single Java process running an Apache Karaf OSGi environment, with a collection of plugins. The “camel” plugin provides generic message-bus functionality (data transformation and routing), and “endpoints” for integrating with other software - ie an “enterprise service bus” aka ESB. Talend studio users can develop transformations, routing rules, etc. and then upload them into the Nexus artifact repository, from where a “runtime” will download and install them.</p>
+
+<p>The runtime component includes a plugin that supports executing “jobserver” jobs, ie when runtime is installed, jobserver should not be. If ESB functionality is not needed, just install the (simpler) jobserver component.</p>
+
+<h2 id="install-component-files">Install Component Files</h2>
+
+<pre><code>cd /opt/talend
+unzip /usr/share/talend/Talend-Runtime-*.zip
+mv Talend-Runtime-* runtime
+
+useradd --system --home /opt/talend/runtime --shell /usr/sbin/nologin talendrt
+chown -R talendrt:talendrt runtime
+</code></pre>
+
+<p>Note that in version 7.0.1, file runtime/bin/setmem line 68 is not compatible with openjdk - the code parses the output of “java -version”, but expects only oracle-java, not openjdk. This can be fixed by replacing line 68 with:</p>
+
+<pre><code># if [ ${JAVA_VERSION_MINOR} -lt 8 ]; then
+if [ 0 ]; then
+</code></pre>
+
+<h2 id="ports-2">Ports</h2>
+
+<p>By default, <code>talend-runtime</code> opens the following ports:</p>
+
+<ul>
+  <li>karaf rmi access: 1009 (rmi registry port) and 44444 (rmi server port)</li>
+  <li>karaf ssh access: 8101</li>
+  <li>jobserver support: port 8000 (command), 8001 (filetransfer), 8555 (message-port for status info) and 8888 (monitoring)</li>
+  <li>esb support: port 8040 (http) and 9001 (https)</li>
+</ul>
+
+<p>In addition:</p>
+
+<ul>
+  <li>looks like some Talend ESB components expect zookeeper to be on port 2181 on localhost</li>
+  <li>looks like some Talend ESB components expect a WSDL service to be on port 8042, but none is started</li>
+  <li>looks like some Talend ESB components expect an OIDC auth service to be on port 9080, but none is started</li>
+</ul>
+
+<p>If port or ssl changes are necessary, see files in directory “runtime/etc/”.</p>
+
+<h2 id="other-config">Other Config</h2>
+
+<p>The config settings mentioned for “jobserver” above also apply to <code>talend-runtime</code>; see file “<code>runtime/etc/org.talend.remote.jobserver.server.cfg</code>”.</p>
+
+<h2 id="configure-systemd-init-to-start-jobserver-1">Configure systemd-init to start Jobserver</h2>
+
+<pre><code>cat &gt;/etc/systemd/system/talend-runtime.service &lt;&lt;EOF
+[Unit]
+Description=Talend Runtime
+After=syslog.target network.target
+
+[Service]
+User=talendrt
+Group=talendrt
+
+Type=forking
+WorkingDirectory=/opt/talend/runtime
+PIDFile=/opt/talend/runtime/karaf.pid
+ExecStart=/opt/talend/runtime/bin/start
+ExecStop=/opt/talend/runtime/bin/stop 
+Restart=on-failure
+RestartPreventExitStatus=255
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl enable --now talend-runtime
+systemctl status talend-runtime
+journalctl --unit=talend-runtime
+</code></pre>
+
+<p>Note that the Talend install guide recommends executing command “<code>runtime/bin/trun</code>” rather than “<code>runtime/bin/start</code>”. However doing that from systemd-init results in a NullPointerException in the <code>talend-runtime</code>; afaict the cause is that “trun” starts an interactive console reading from stdin, but systemd-init provides <code>/dev/null</code> as the stdin for processes it launches. Running “<code>runtime/bin/trun &lt;/dev/null</code>” reproduces the NullPointerException problem. Using script “start” appears to work from systemd-init.</p>
+
+<h1 id="re-zookeeper">Re Zookeeper</h1>
+
+<p>Zookeeper has 2 different use-cases within Talend Platform:</p>
+
+<ul>
+  <li>As the Infrastructure Resource Manager of Apache Kafka, in order to allow for internal communication with Talend Data Preparation, Talend Data Stewardship and Talend Dictionary Service.</li>
+  <li>As the Service Discovery and Failover functionality of Talend ESB called Talend Service Locator and running inside Talend Runtime.</li>
+</ul>
+
+<p>It is not needed if you do not intend to run DataPrep/DataStewardship/DictionaryService, and do not intend to use a service-locator with ESB-based services.</p>
+
+<p>The ESB-container and Runtime-container components include a Zookeeper server. However this is for simple setup only; for high-availability, Zookeeper should be run standalone on either 3 or 5 nodes (depending on your uptime requirements), and that is best done via a standalone Zookeeper cluster. See the following references:</p>
+
+<ul>
+  <li><a href="https://help.talend.com/reader/yCUrnvz2nwmX~kXh97F_Mg/B8NjqXFBGj35AHvqzXHboQ">Talend: Running a Replicated Service Locator</a></li>
+  <li><a href="https://help.talend.com/reader/yCUrnvz2nwmX~kXh97F_Mg/MCT~4WuToXifdQd1tMCZXg">Talend: Alternative Installation of the Service Locator</a></li>
+</ul>
+
+<h1 id="re-kafka">Re Kafka</h1>
+
+<p>As noted under Zookeeper, Kafka is needed by DataPrep/DataStewardship/DictionaryService. If you need one of these, then also install a Kafka cluster (which can be one node for testing).</p>
+
+<h1 id="re-mongodb">Re MongoDB</h1>
+
+<p>Some components require a MongoDB instance. If you are running these components, then also install a MongoDB cluster (which can be one node for testing).</p>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/bigdata/talend-install-manual/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

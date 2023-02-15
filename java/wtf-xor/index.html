@@ -1,0 +1,280 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - WTF - Java XOR</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>WTF - Java XOR</h1>
+    <aside>First published on: October 10, 2016</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a>, <a href='/category/Off-topic/'>Off-topic</a></p>
+      
+<p>I love <a href="http://thedailywtf.com">The Daily WTF</a> site. Recently I came across some code that, in my opinion, qualifies.</p>
+
+<p>The developer of the following fragment of code from a Java-based <em>banking application</em> has an obsession with the Java boolean-xor operation.</p>
+
+<p>Interestingly, many Java tutorial websites don’t even <em>know</em> that such a thing exists (though it is defined in the Java language specification).</p>
+
+<p>Lets start with a simple example from the code:</p>
+
+<pre><code>  if ((transaction.getCode().equals("181") ^ transaction.getCode().equals("G5E"))
+</code></pre>
+
+<p>Here the value being tested is the same on both sides, so a truth table has only three options:</p>
+
+<ul>
+  <li>when code=181:  true xor false –&gt; true</li>
+  <li>when code=G5E:  false xor true –&gt; true</li>
+  <li>when code=other: false xor false –&gt; false</li>
+</ul>
+
+<p>So in this case, the xor is identical to the more conventional OR operator (“<code>||</code>”).</p>
+
+<p>Now try this more advanced example:</p>
+
+<pre><code>        if ((transaction.getFlgReceipts() != null &amp;&amp; transaction.getFlgPrintRec() != null)
+                &amp;&amp; (transaction.getFlgReceipts().equals("B") &amp;&amp; transaction.getFlgPrintRec().equals("Y"))
+                        ^ (transaction.getFlgReceipts().equals("I") &amp;&amp; transaction.getFlgPrintRec().equals("Y"))
+                        ^ (transaction.getFlgReceipts().equals("B") &amp;&amp; transaction.getFlgPrintRec().equals("T"))
+                        ^ (transaction.getFlgReceipts().equals("I") &amp;&amp; transaction.getFlgPrintRec().equals("T"))) {
+
+            if ((transaction.getFlgReceipts().equals("B") || transaction.getFlgReceipts().equals("I"))
+                    &amp;&amp; (!Strings.isEmpty(transaction.getText1()) || !Strings.isEmpty(transaction.getText2())
+                            || !Strings.isEmpty(transaction.getText3()))) {
+                if (transaction.getText1() != null) {
+                    bookingtext.add(transaction.getText1().trim());
+                }
+                if (transaction.getText2() != null &amp;&amp; !Strings.isEmpty(transaction.getText2())) {
+                    bookingtext.add(transaction.getText2().trim());
+
+                    if (!Strings.isEmpty(transaction.getText3())) {
+                        bookingtext.add(transaction.getText3().trim());
+                    }
+                }
+            } else {
+                if (transaction.getBigALP().length() &gt; 34) {
+                    bookingtext.add(transaction.getBigALP().substring(0, 34).trim());
+                } else {
+
+                    bookingtext.add(transaction.getBigALP().trim());
+
+                }
+            }
+      .....
+      }
+</code></pre>
+
+<p>The ridiculously complicated if-structure is there just for amusement, as are the repeated getter invocations. The interesting part is the chain of xors in the first conditional clause.</p>
+
+<p>As it happens,  a chain of xors is true iff an odd number of inputs are true. In particular, it is:</p>
+
+<ul>
+  <li>false if all terms are false (zero true terms)</li>
+  <li>true if exactly one of the terms is true</li>
+</ul>
+
+<p>Here the terms are mutually exclusive: no two can be true at the same time, ie either zero or one of the terms is true, never more. So, yes, here the xor is also equivalent to an or.</p>
+
+<p>As a bonus, later in the same file, there is similar enthusiasm for regular expressions in Java:</p>
+
+<pre><code>    private List&lt;String&gt; performXSSPrevention(List&lt;String&gt; bookingtext) {
+
+        final String replaceSEQUENCE = "&lt;/|/&gt;|--&gt;|\'&gt;|\"&gt;|&lt;!|[iI][mM][gG]|[hH][tT][tT][pP]|[sS][cC][rR][iI][pP][tT"
+                + "]|[sS][rR][cC]|[cC][oO][oO][kK][iI][eE]|[aA][lL][eE][rR][tT]|[dD][oO][cC"
+                + "][uU][mM][eE][nN][tT]\\.|[hH][iI][sS][tT][oO][rR][yY]\\.|[iI][fF][rR][aA" + "][mM][eE]|//";
+
+        for (int i = 0; i &lt; bookingtext.size(); i++) {
+            if (!Strings.isEmpty(bookingtext.get(i))) {
+                bookingtext.get(i).replaceAll(replaceSEQUENCE, " ");
+            }
+        }
+        return bookingtext;
+
+    }
+</code></pre>
+
+<p>The bank in question shall remain unnamed. The developer’s employer, however, is consulting firm Accenture. Apparently this is not a case of “you get what you pay for”…</p>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/wtf-xor/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

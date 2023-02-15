@@ -1,0 +1,446 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Email Theory</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Email Theory</h1>
+    <aside>First published on: January 5, 2017</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a></p>
+      
+<p>(Back to the <a href="/linux/email-overview">main article</a>)</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>This article describes how email works, and what various email-related expressions mean. The intention is to make documentation and articles related to email configuration easier to understand. In particular, the info here should help anyone setting up their own personal email server.</p>
+
+<h1 id="history-of-email">History of Email</h1>
+
+<p>Email is one of the oldest networking technologies. In fact, it was one of the driving reasons why the internet was invented - for researchers at various universities to exchange messages with each other.</p>
+
+<p>Email predates much of the internet as we know it. In particular, it was designed at a time when many computers (even those at universities) had dial-up connections; the mailserver at university A would periodically <em>phone</em> the mailserver at university B and then exchange any queued emails. Repeat for each “direct peer”. Email addressed to a system which is not a “direct peer” would instead be delegated to one of those direct peers for forwarding (multi-hop delivery).</p>
+
+<p>Email also predated all the problems that now plague the internet - spammers, those who want to read our email (eg to find credit-card numbers), and those who want to modify our email (eg to attach trojans to valid emails).</p>
+
+<p>The result of old design, old features, and new security problems, means that email servers are unfortunately some of the most complicated beasts around. There are some very good people working on the major mailserver programs, and the various programs <em>can</em> usually be made to work in a safe and sensible manner. However the configuration process is often very cryptic and old-fashioned, and the manuals full of advice on how to do things that are not relevant for most people.</p>
+
+<p>Mailservers are also heavily used by <em>large companies</em> and <em>ISPs</em>, so often advice for the “small user” case gets lost.</p>
+
+<h1 id="email-server-infrastructure">Email Server Infrastructure</h1>
+
+<p>Here is the rough structure that is necessary to send and receive email. I’ll then discuss why each part is there, how the parts communicate, and what alternatives exist.</p>
+
+<p>This diagram assumes a common configuration consisting of Postfix (for core email send/receive) + Dovecot (for POP/IMAP access to mailboxes) + Roundcube (for html-based access to mailboxes). However the description is sufficiently high-level that it should apply to most alternatives. The <code>spamassassin</code> application (or an equivalent) is also often used, but is not shown in this diagram.</p>
+
+<p><img src="/linux/email-theory-png.png" height="1024" width="768"></p>
+
+<h1 id="an-example-message-flow">An Example Message Flow</h1>
+
+<p>To put the diagram above into context, let’s look at how an email gets sent and received. For just about every step in this process there are options and quirks which are discussed in more detail later.</p>
+
+<h2 id="outgoing-mail-example">Outgoing Mail Example</h2>
+
+<p>On a laptop, an email client application (eg Thunderbird) is used to write an email. When the “send” button is clicked:</p>
+
+<ul>
+  <li>the client application connects to the mailserver host on port 587 (aka “submission port”).</li>
+  <li>the server accepts the network connection, and sends a “greeting” in the SMTP protocol</li>
+  <li>the client sends an SMTP EHLO command stating its “name” (which is not very important)</li>
+  <li>the client sends an SMTP STARTTLS command, and the client/server then exchange a few datapackets to set up encryption. After this is completed, all other data on the socket is unreadable to snoopers.</li>
+  <li>the client sends an SMTP AUTH command, providing a username and credentials (eg password). There are various kinds of authentication possible here.</li>
+  <li>the client sends MAIL, RCPT and DATA commands to provide the “return address”, “destination address” and “email body” information respectively.</li>
+  <li>the client closes its socket.</li>
+</ul>
+
+<p>The mailserver computes a DKIM signature for the email (using a local private key), adds it to the email headers, and puts the received email on an “outbound queue”. DKIM is optional, but recommended.</p>
+
+<p>At some later time the email server then processes its output queue. For each email it:</p>
+
+<ul>
+  <li>extracts the destination address(es) of the email, eg “coyote@acme.example”</li>
+  <li>performs a DNS lookup of the MX record for the domain-part (“acme.example”). This returns the name of the <em>host</em> for that address.</li>
+  <li>performs another DNS lookup of the A record for the hostname to get an IP address.</li>
+  <li>opens a socket to port 25 (the “smtp” port) on that server, and passes the emails over to the destination email server using the SMTP protocol.</li>
+</ul>
+
+<p>The receiving server will perform some security checks on incoming mail (sadly necessary in the modern network world) which are described below - they are the same checks our server will do on its incoming mail. Hopefully all checks will pass, and the email is stored for viewing by the intended recipient.</p>
+
+<p>Note that the mailserver needs to know all valid (username, credential) pairs in order to verify the user during the AUTH step - but does not need to know anything else about the user (eg where their incoming email is stored). The topic of storing users and credentials is discussed further below, as there are many possibilities here.</p>
+
+<p>The mailserver must also have an <em>SSL certificate</em> for the STARTTLS step.</p>
+
+<h2 id="incoming-mail-example">Incoming Mail Example</h2>
+
+<p>On the mailserver, a service (daemon process) waits for incoming connections (“listens”) on port 25 (“smtp port”). When a connection arrives, a well-configured smtpd server typically:</p>
+
+<ul>
+  <li>Makes a DNS PTR-record check (reverse map from incoming IP address to DNS name) to detect people using desktops as email-servers (almost certainly spammers); if reverse lookup fails then the connection is rejected (see later for more info on PTR records).</li>
+  <li>Checks the incoming hostname (from PTR lookup) against lists of “known spammers” (blocklist check); if test fails then connection is rejected.</li>
+  <li>Checks the destination domain of the emails passed in. In our case, we are <em>not</em> running a “mail relay” so any incoming email for anything but the domain we want to receive email for are immediately rejected. We should never receive email here for anything but the local domain, so any such sender is almost certainly a spammer hoping this is an “open relay”.</li>
+  <li>Certifies the recipient (to-address) is a “known user”; if not found then the email is rejected as “undeliverable”.</li>
+  <li>Checks SPF, DKIM and DMARC records for the incoming mail - any suspect emails are dropped.</li>
+  <li>Stores the email on the “incoming queue” and returns success</li>
+</ul>
+
+<p>Later:</p>
+
+<ul>
+  <li>Mail is passed through an external spamassassin daemon, ie emails are passed to it and they are passed back - with modified headers that indicate the estimated probability that the email is spam.</li>
+  <li>Mail is passed to a “delivery agent” - in this case, something that communicates with the the Dovecot lmtp daemon via the LMTP protocol (a variant of SMTP designed for local delivery on one host only).</li>
+  <li>Dovecot stores the email in a location that depends on the account-name and the desired storage-format.</li>
+</ul>
+
+<p>Note that the smtpd server needs to know all valid users (so it can reject email with invalid to-addresses), but nothing more. The Dovecot lmtpd server needs additional information about users (such as where to store their email and in which format). However neither need to know <em>passwords</em> for the users to handle incoming mail.</p>
+
+<h2 id="viewing-mail">Viewing Mail</h2>
+
+<ul>
+  <li>user clicks “load mail”/refresh/etc in their desktop client (or the client does it automatically on a timer)</li>
+  <li>desktop application connects to dovecot POP3 port, uses STARTTLS to enable encryption, and then authenticates with a username/password.</li>
+  <li>desktop application then sends a “list all emails” and dovecot returns a list of message-ids, using the account’s local store of emails.</li>
+  <li>desktop application repeatedly issues “get {id}” (and optionally “delete {id}”) to get any messages it doesn’t already have locally.</li>
+  <li>desktop application then displays the messages to the user.</li>
+</ul>
+
+<p>The client could alternatively use the IMAP protocol, ie talk to Dovecot on a different port and with a more powerful set of commands - but that doesn’t change the flow much.</p>
+
+<h2 id="a-web-interface">A Web Interface</h2>
+
+<p>The process for writing/viewing emails via a web-interface is fairly similar to the desktop-client flow. A webserver on the mailserver includes a bunch of CGI pages for some application like “roundcube”. User requests for a URL execute the corresponding script on the server. For reading of emails, the scripts typically communicate with Dovecot via IMAP and then renders HTML back to the user.</p>
+
+<p>When the user has written an email using the web interface and clicks “send”, the server-side script that is triggered does not communicate with Dovecot but instead with the mailserver directly, via the “sendmail” application. The mailserver will recognise that the email is coming from the localhost, and applies quite different checks - it doesn’t apply RBL checks, and doesn’t limit the destination address to local addresses only. If the destination <em>is</em> local, then the email is delivered locally as with the normal incoming email flow, but in the more common case it just places the submitted mail on its outgoing mail queue.</p>
+
+<h1 id="direct-delivery-the-death-of-relayed-mail-and-smart-hosts">Direct Delivery (the death of relayed mail) and Smart Hosts</h1>
+
+<p>Originally, mail was a multi-hop process.</p>
+
+<p>Now that the internet connects any server with any other server, mail is usually directly delivered from the server that first accepted it from the client app to the server responsible for the destination address domain. The old multi-hop approach is therefore mostly dead - with a few exceptions. A mailserver which runs as a mail relay (ie acts as middle-man in a multi-hop delivery) is nowadays called a “smart host” (see later) - and is always (or should be) very carefully configured to relay only under specific conditions - eg when the source server has a specific IP address, or the destination domain for the email is a specific domain.</p>
+
+<p>A mailserver configured to relay email without strict constraints is called an “open relay”, and will almost immediately be detected and used by spammers to relay their email. As soon as you register an MX domain record for your email address, spammers will start probing your email server to see if it can be used as a relay. If it can, your server will then soon after be registered on an anti-spam blocklist and it is time to buy a new domainname..</p>
+
+<p>One exception to the “direct delivery” rule is that a large institution (company, university, etc) might have a mailserver-per-department which then forwards to a central mailserver. And reverse, email may be delivered to the central mailserver and then forwarded to the appropriate per-department server.</p>
+
+<p>Another exception is ISP-specific “smart hosts”. ISPs offer a mailserver which desktop applications can connect directly to, as in the flow described above. However a few of their customers might also be running their own mailservers. ISP firewalls often prevent their customers from connecting to port 25 on any server (see below). Some ISPs allow customers who pay for a static IP address to disable this rule, allowing customer mailservers to deliver “directly”, as described earlier. Other ISPs refuse to relax this rule for any customer, in which case the mailserver must be configured to <em>relay</em> mail via the ISP’s mailserver - which must then be configured to allow that.</p>
+
+<p>While talking about “direct delivery”, why do email clients need a local mailserver at all?</p>
+
+<p>Client email applications don’t typically deliver email directly to the target email server - they <em>could</em> (eg from my desktop direct to @acme.example rather than to my local email server), but:</p>
+
+<ul>
+  <li>the receiver won’t be able to verify me via (username, password) - and I don’t want to register with every server I might send an email to;</li>
+  <li>the receiver won’t be able to verify me via my network address as my desktop is using a dynamic address (ie is not in DNS);</li>
+</ul>
+
+<p>And in the reverse direction, email servers cannot deliver email directly to desktops, because they have a network address that can’t be derived in any way from the email address, and firewalls will block such connections anyway. And such systems are often turned off for long periods.</p>
+
+<h1 id="why-a-separate-submission-port-587">Why a Separate Submission Port (587)?</h1>
+
+<p>Originally, client applications for submitting email would just connect to port 25 of some server running email software and submit their messages there. Originally, SMTP servers wouldn’t even require passwords - email was accepted from anyone, for anyone. Eventually, authentication was added - but on the same port, which was tricky as for a mailserver some connections were from desktops wanting to deliver “outbound” mail while some connections were from remote SMTP servers wanting to deliver “inbound” mail. The desktops (outbound mail) can authenticate via registered (username, password) pairs - but the inbound servers cannot as there are far too many of them. The solution was to have security-rules that applied different checks depending on whether email addresses indicated they were “outbound” (reject unless AUTH previously done) or “inbound” (reject unless DNS checks of PTR/A records pass). Possible but complex.</p>
+
+<p>And in addition, there were simply too many amateur system-admins out there running “open mail relays” on port25, and too many spammers probing for them. Serious ISPs therefore started blocking outbound connections from their domestic (dynamic-ip) customers to port 25 - and sometimes even for customers with static IP addresses.</p>
+
+<p>The answer was to separate the traffic: server-to-server should use port 25, and client-to-server should use port 587. The SMTP server rules become easier, and ISPs can continue to block port 25 while allowing 587 so that their customers who bring work laptops home can still contact their company mailserver submission port.</p>
+
+<h1 id="blocklist-lookup">Blocklist lookup</h1>
+
+<p>DNS Blocklists (DNSBLs aka RBLs) are a nice way to filter out a <em>lot</em> of incoming spam.</p>
+
+<p>A DNS lookup of the PTR record for the incoming IP address is done; this should return a <em>hostname</em>. If no PTR record is found at all, then the incoming connection is not a “serious server” and the connection is dropped. A PTR record maps an IP address back to a hostname (ie a “reverse lookup”). Only the owner of an IP address range is permitted to register a PTR record for an address in their range. An ISP certainly never registers PTR records for the “dynamic IP addresses” it hands out to domestic customers, so this simple check blocks all spammers using domestic ISP accounts to send spam mail. Even more importantly, it also blocks all those spammers who have taken over poorly-secured private desktops connected to domestic ISP accounts, and are using them as a mail botnet. For customers who have paid their ISP for a static IP address, the ISP <em>might</em> provide them with a way to publish a PTR record for that address - or might not.</p>
+
+<p>Unfortunately, the lists of all domains associated with spam is just too large to distribute directly; instead the providers of such blocklist information usually use a clever trick to allow email servers to know if some domain (the result of a PTR lookup on an incoming network connection) is in the list or not - they distribute the information via the DNS registry, by registering a special DNS entry for each spam-domain.  For each “blocklist” server the mailserver has been configured with, a DNS lookup of the MX record for name “<code>{hostname}.{bldomain}</code>” is made where <code>{bldomain}</code> is the domain of the blocklist-provider, and <code>{hostname}</code> is the name of the computer trying to send email to our mailserver.  If such a record exists then this is a known spammer, and the connection is dropped. In effect, the RBL managers are using DNS as a “distributed database” in which they publish the names of bad actors. The owner of a domain-name can publish any MX records they like as long as they end in their domain-name. So “spamhaus.org” (one of the best-known RBLs) can publish “some.bad.domain.spamhaus.org” to indicate that they consider “some.bad.domain” to be a spammer.</p>
+
+<p>Blocklists can also be implemented at the <em>spamassassin</em> level, but doing it earlier is nice for performance. Actually, on BSD systems, OpenSMTPD works with “spamd” which then communicates with the “pf” firewall to ensure that repeat emails from a bad source are dropped <em>really</em> early in processing. AFAIK this isn’t available on Linux.</p>
+
+<p>Blocklist providers generally provide their service for free (the info in DNS is effectively free). Big email consumers are expected to <em>download</em> a copy of the blocklist instead (for a fee) to lighten the load on DNS.</p>
+
+<p>To reduce network traffic, DNS responses should be cached on your local system - ie the mailserver should be running a <em>caching DNS server</em>.</p>
+
+<h1 id="starttls-and-certificates">StartTLS and Certificates</h1>
+
+<p>Data passed between a desktop email client application and the “submission port” of an email server should be encrypted, to hide both login passwords and email contents. There are two ways to provide an encrypted connection for SMTP messages:</p>
+
+<ul>
+  <li>the mailserver listens on a port for incoming connections, and <em>immediately</em> starts setting up TLS encryption, or</li>
+  <li>the mailserver listens on a port for incoming connections, and initially starts exchanging SMTP messages in plain-text. When the client application sends a STARTTLS command, then the TLS encryption is set up and the remainder of the SMTP messages are encrypted.</li>
+</ul>
+
+<p>Setting up TLS encryption usually requires that the server side (the machine being connected to) has an SSL Certificate which includes its identity (servername) and is signed by some other certificate which is signed by some other certificate etc until eventually it is signed by a “well known certificate” that the client application already has installed.</p>
+
+<p>SSL Certificates can be purchased for a reasonable fee. Since 2016, it has also been possible to obtain an SSL certificate for free from the <em>letsencrypt</em> project.</p>
+
+<h1 id="spf-dkim-and-dmarc">SPF, DKIM and DMARC</h1>
+
+<p>SPF (Sender Policy Framework) allows the owner of an email-domain to indicate exactly which email-servers are permitted to send emails with a MAIL-FROM (aka “Return-Path”) address belonging to that domain. This is done by configuring a DNS record of type TXT with special contents. If a spammer then tries to send emails with fake MAIL-FROM data that references your email servers, any email-server which performs SPF checks will see that these emails are “fake” and can reject them. While this is useful, it does <em>not</em> prevent spammers from sending emails with your domain in the “From:” field that the recipient sees - DMARC (paired with either SPF or DKIM) is necessary for that.</p>
+
+<p>DKIM performs a similar task to SPF. You register a public-key for your email domain in DNS, and then as each email is sent via your email server, the server computes a checksum and signs it with the private part of that key, and adds that signature as an extra email header. Any email-server that receives a mail with a signed DKIM header can verify that the header is valid (was originally signed by your server); spammers do not have access to your private key, so cannot generate an email with a signed header for your domain. Unfortunately, like SPF, this alone does <em>not</em> prevent spammers from sending emails with your domain in the “From:” field and simply not including a DKIM header. To protect the “From:” field, DMARC is needed.</p>
+
+<p>DMARC allows the owner of an email-domain to publish a DMARC record for that email domain in DNS. A DMARC-enabled mailserver extracts the domain-name of the “From:” header from each email, then checks whether a DMARC record exists. If one does, then the incoming email with a specific address in the “From:” header must either (a) be sent from a server that has an SPF record matching that domain, or (b) have a valid DKIM header (signed as described above). Or in short, either (DMARC+SPF) or (DMARC+DKIM) are needed to prevent spammers from using your domain in their “From:” headers. Note however that the “From:” header was not originally designed to be used this way, and a few <em>valid</em> usecases are not possible when DMARC is enabled for a domain.</p>
+
+<h1 id="dns-records--a-ptr-mx">DNS records : A, PTR, MX</h1>
+
+<p>DNS is a world-wide distributed database which provides information related to networking. The records in this database are keyed by IP-addresses or domain-names, and theoretically those organisations that have rights to update the DNS database only allow the <em>owner</em> of a domain or ip-address to publish such records (sadly not 100% effective, but nevertheless reasonably true).</p>
+
+<ul>
+  <li>NS records map a domain-name to a DNS server which can serve up the following records for that domain</li>
+  <li>A records map a <code>hostname</code> to an IPv4 address</li>
+  <li>AAAA records map a <code>hostname</code> to an IPv6 address</li>
+  <li>PTR records map an IPv4 or IPv6 address to a hostname (aka “reverse lookup”)</li>
+  <li>CNAME records map a hostname to another hostname (define “aliases”)</li>
+  <li>MX records map an email-domain to a hostname (ie point to the mailserver host for that email domain)</li>
+  <li>TXT records hold small amounts of arbitrary data associated with a hostname (eg a public key or an SPF declaration)</li>
+</ul>
+
+<p>When setting up a mail-server, it is necessary to register appropriate DNS records. A new MX record is definitely needed, and other records may need to be registered if they do not already exist.</p>
+
+<p>Note that there is no direct link between an MX (email) domain and a hostname domain (A or AAAA). It is common for email addresses of form <code>someone@acme.example</code> to be handled by a server which has name <code>mail.acme.example</code> or similar, but that is not a requirement. There is in fact a very common exception - an MX domain belonging to some company or person often points to a commercially-run email server, eg from Google. The owner of the MX domain must of course first have an <em>account</em> with the email-server provider (otherwise the emails will just be rejected), but this provides “personalized” email addresses without the effort of running an email server.</p>
+
+<h1 id="user-authentication-and-information">User Authentication and Information</h1>
+
+<p>As mentioned earlier, for outbound email the <em>smtp server</em> needs a (user,credentials) pair to authenticate the user (because sending to non-local addresses should not be permitted for unknown remote users, to prevent spam). No other information about the user is required.</p>
+
+<p>For inbound email, the SMTP server really should reject email for invalid destinations, ie return an error to the remote SMTP server, rather than accept the email and then later fail to deliver it. Rejecting while the SMTP data-transfer is still in progress makes the invalid-destination the sending server’s problem, which is an improvement from the receiver’s point of view. When an email is accepted, then cannot be delivered, then the only options are to either (a) silently discard the email, or (b) send an “undeliverable message” (aka bounce) email back to the sender address. Discarding email is not a good user-experience for a sender who has just mistyped an address. Sending bounce emails is unfortunately a bad idea in this era of spammers, as they often use fake sender-addresses pointing at real but innocent people. This means that an SMTP server handling inbound mail ideally needs a way to determine which email-addresses are valid, ie which users exist on the local system, before handing the email off to a Mail Delivery Agent. Note that the user does not need to be <em>authenticated</em>, ie no password-test is done, just a test for existence. The SMTP servers are therefore usually configured with some kind of “user database”.</p>
+
+<p>When handling inbound email the Mail Delivery Agent (MDA) needs to know the user’s desired email storage format and location, quotas, etc. in order to be able to write the email to the appropriate location. The MDA must therefore also be configured with some kind of “user database”.</p>
+
+<p>In addition, Dovecot needs (username, password, userinfo) in order to support POP3 and IMAP. A webmail interface (eg roundcube) also needs username/password info when a user “logs in” to it.</p>
+
+<p>The primary “userinfo” is: directory to write into, and uid/gid values to assign to the file(s).</p>
+
+<p>I have been careful to separate the concepts of (user,creds) and (user,info) because some tools such as Postfix are also careful to separate these concepts, and allow different sources of information to be configured for each.</p>
+
+<p>There are many possible combinations/solutions here.</p>
+
+<p>The traditional solution is to use /etc/passwd:</p>
+
+<ul>
+  <li>/etc/passwd can be used for userlist, and pam for credentials – ie require all users to be local</li>
+  <li>userinfo can be assumed to be uid/gid/homedir from /etc/passwd (directories relative to homedir for that user)</li>
+</ul>
+
+<p>A solution using similar files but not directly linked to linux accounts is:</p>
+
+<ul>
+  <li>one text file for (user,creds) and another for (user,info) which is shared by all components.</li>
+</ul>
+
+<p>Another popular solution is an SQL database shared by all components. Unlike the textfiles, this makes updating of information (eg via Dovecot interface) easier to implement.</p>
+
+<p>And of course there is LDAP.</p>
+
+<p>Some SMTP servers can be configured to <em>delegate</em> username/creds and username/info lookups to an external process via SASL (a protocol originally invented for the Cyrus email server). Postfix supports this, and this can be used to unify the user creds and info with</p>
+
+<h1 id="transfer-agents-and-delivery-agents">Transfer Agents and Delivery Agents</h1>
+
+<p>Mailservers have had many security-holes over the years; they are exposed to data from the internet and must parse such untrusted data in order to process it. To grant such an application superuser rights in order to <em>deliver</em> mail is obviously a significant escalation in the dangers. Mailservers are therefore often implemented as a set of cooperating processes, each with just the minimum of system-access-rights to do its specific job.</p>
+
+<p>The two primary components in a mailsystem are the Mail Transfer Agents (MTAs) and Mail Delivery Agents (MDAs). As a very brief summary:</p>
+
+<ul>
+  <li>MTAs accept email over a network and write it to a local queue</li>
+  <li>MDAs take email from a local queue and write it to a user-specific “mailbox”</li>
+</ul>
+
+<h1 id="mailbox-formats">Mailbox Formats</h1>
+
+<p>Over the many decades that email has existed, several ways to represent emails on disk have been developed. The primary ones are:</p>
+
+<ul>
+  <li>mbox: all email for a user is appended to a single file, with a basic index-structure included.</li>
+  <li>maildir: each email is stored as a separate file within a directory</li>
+</ul>
+
+<h1 id="undeliverable-mail">Undeliverable Mail</h1>
+
+<p>When a remote system submits an email and the SMTP server detects that there is no such local user, then an error can immediately be reported. However in some cases email is first accepted, and buffered and the user-check is only done later after the remote system has disconnected. In this case, the choices are to send a “bounce email” to the original sender address, or just ignore the email. Bounces were popular earlier, but with the prevalence of spam which uses faked “from” addresses this just causes more problems than it solves.</p>
+
+<h1 id="further-reading">Further Reading</h1>
+
+<ul>
+  <li><a href="https://workaround.org/ispmail/buster/big-picture/">ispmail: The big picture</a></li>
+</ul>
+
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/email-theory/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

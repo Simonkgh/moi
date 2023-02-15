@@ -1,0 +1,282 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Java Serialization and Synthetic Methods</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Java Serialization and Synthetic Methods</h1>
+    <aside>First published on: March 7, 2014</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Java/'>Java</a></p>
+      <p>(<a href="/2014/03/serialization-synthetic">back to main post</a>)</p>
+
+<h1 id="introduction">Introduction</h1>
+
+<p>In <a href="/java/serialization">this article</a> I describe why manually setting serialVersionUID is generally a bad idea, and instead the JVM should be allowed to compute the value itself.</p>
+
+<p>In my opinion, this is still a sound approach. However  a few projects may need the same sourcecode <em>built with different compilers</em> to be serialization-compatible; in this case a small subset of classes may need explicitly-defined serialVersionUID values. The rest of this article explains why, and how to identify these classes.</p>
+
+<h1 id="the-problem">The Problem</h1>
+
+<p>The javadoc for class java.io.Serializable states the following:</p>
+
+<blockquote>
+  <p>.. the default serialVersionUID computation is highly sensitive to class details that may vary depending on compiler implementations,
+and can thus result in unexpected InvalidClassExceptions during deserialization. Therefore, to guarantee a consistent serialVersionUID
+value across different java compiler implementations, a serializable class must declare an explicit serialVersionUID value.</p>
+</blockquote>
+
+<p>Note that the problem is not related to different JVMs at runtime; this kind of incompatibility is instead triggered by different <em>compilers</em> at compiletime, together with an odd decision by the designers of the Java serialization specification.</p>
+
+<p>Normally, this is not a problem : it is not common for the same <em>source code</em> to be compiled by <em>different compilers</em>, and objects instantiated from the resulting binaries then exchanged via java serialization. It is far more common for a software producer (commercial or opensource) to generate a <em>binary jarfile</em> which both client and server applications then use. However there are a few cases where this can happen; examples are:</p>
+
+<ul>
+  <li>
+    <p>when a developer compiles a server application with one tool (eg javac via maven) and compiles a client application with another tool (eg the Eclipse IDE).</p>
+  </li>
+  <li>
+    <p>when somebody applies a bugfix to a software version, compiles a jarfile from it, and then attempts to communicate with a non-patched (ie original) version. If the person who generated the patched jar has used a different compiler, then problems can occur</p>
+  </li>
+  <li>
+    <p>when the binary release of the latest version of a library is compiled with a newer compiler (or possibly a totally different compiler) than the previous version</p>
+  </li>
+</ul>
+
+<h1 id="what-actually-happens">What actually happens</h1>
+
+<p>The Java Serialization specification tightly defines the algorithm used to compute a serialVersionUID. And, strangely, the algorithm includes the names of <em>all nonprivate methods</em> on the serializable class.</p>
+
+<p>The specification doesn’t explicitly state whether “synthetic” methods (ie methods added automatically by a compiler) should be included, but in practice the Oracle (formerly Sun) jvm has always done this.</p>
+
+<p>The result of these decisions is that if a compiler decides (quite reasonably) to automatically add some “synthetic” methods to the class for its own personal reasons, then the <em>names</em> of these methods affect the serialVersionUID output. And sadly, different compilers generate different methods (or just choose different names). As the javadoc quote above states, even different versions of compilers from the same organisation can theoretically output different synthetic methods.</p>
+
+<p>When a compiler does generate a method automatically (ie adds a method which was never in the source-code), it sets a special flag in the generated bytecode to mark that method as “synthetic”. This can be seen at runtime via <code>java.lang.reflect.Method.isSynthetic()</code>. It also usually (always?) uses a ‘$’ character as part of the method name (this character is reserved in the Java specification for exactly this sort of use); this shows up clearly in the output of the <code>javap</code> command.</p>
+
+<h1 id="why-would-synthetic-methods-be-needed">Why would synthetic methods be needed?</h1>
+
+<p>According to the Java language specification, a class is permitted to declare a nested inner class, and then access private properties or methods of that inner class from within methods of the outer (containing) class. However the JVM doesn’t support this! To the JVM, an inner class is simply a normal classes with a name like Outer$Inner. And no class can ever access private methods or properties of another class. To work around this mismatch between language and runtime, a java compiler must add package-scoped “helper” methods to the inner class and rewrite the code that accesses private properties or methods to instead call the helper methods.</p>
+
+<p>A compiler may also choose to add methods for performance optimisation reasons. When a method contains a long switch-statement, a compiler may choose to generate a static “lookup table” which is then indexed by the variable being switched on. This table must then somehow be made accessable to the method in which the switch statement exists; one solution is to add a synthetic method which returns the table.</p>
+
+<p>A few other source-code structures may cause a compiler to emit new methods into the generated bytecode; in a large application I have found that about 1% of serializable classes are affected.</p>
+
+<p>UPDATE: Java 11 adds the concept of “nests” (JEP 181) that makes it possible for an inner class to access private properties and methods of its enclosing class without needing to go via a synthetic helper method added by the compiler. Nests are a bytecode-level feature, not a sourcecode-level feature - ie a compiler can mark outer/inner classes as belonging to the same “nest”.</p>
+
+<h1 id="why-does-the-serialization-algorithm-include-synthetic-method-names-when-computing-the-serialversionuid">Why does the serialization algorithm include synthetic method names when computing the serialVersionUID?</h1>
+
+<p>If anyone has a good answer to this question, I’d very much like to hear it.</p>
+
+<p>Changing the java specification so that method-names are not included <em>at all</em> would seem like a major improvement to me. At the very least, excluding methods marked as “synthetic” would be sensible and do absolutely no harm at all. However it is unlikely to ever happen, as changing the algorithm used by a JVM version will break serialization compatibility with any other JVM that still uses the old algorithm. Possibly the ObjectOutputStream could take a ‘serialVersionUID algorithm version’ parameter, so that at least applications that <em>know</em> the receiver is running on a <em>new enough</em> JVM could opt in to the newer approach. This is not likely to get to the head of the JVM team’s feature list in the near future though..</p>
+
+<h1 id="workarounds">Workarounds</h1>
+
+<p>The approach I’ve used is to create custom ObjectOutputStream/ObjectInputStream classes that override <code>ObjectOutputStream.annotateClass</code> and <code>ObjectInputStream.resoveClass</code> to throw an exception if the class being written or read:</p>
+
+<ul>
+  <li>has one or more synthetic methods, and</li>
+  <li>has no explicit serialVersionUID</li>
+</ul>
+
+<p>Then running the integration-test suite points out any problems; such classes (sadly) are updated with manually-assigned serialVersionUID values.</p>
+
+<p>Note that it isn’t necessary to test libraries compiled with different compilers against each other; the problem can be detected simply by looking for synthetic methods on any serializable class. Possibly this could even be detected statically (ie by direct analysis of the generated classfiles) but it requires finding every class which has a Serializable type in its ancestry.</p>
+
+<h1 id="summary">Summary</h1>
+
+<p>The original implementers of Java’s Serialization have unfortunately made life rather difficult for developers. They made an incorrect design decision (to include all method names in the serialVersionUID calculation) and then state the solution is to <em>manually</em> maintain serialVersionUID values on classes - a task that is impossible for any real-world project. Yay.</p>
+
+<p>However it is possible to detect the 1% of problem classes and add explicit serialVersionUID values on <em>only</em> those classes, with the remaining classes using default serialVersionUIDs (the sane approach for most projects).</p>
+
+<p>See section 4.6 of <a href="http://docs.oracle.com/javase/6/docs/platform/serialization/spec/class.html">the Java Object Serialization Specification</a> : all methods except <em>private</em> methods are included as part of the serialVersionUID calculation.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://wiki.eclipse.org/FAQ_Why_does_the_Eclipse_compiler_create_a_different_serialVersionUID_from_javac%3F">http://wiki.eclipse.org/FAQ_Why_does_the_Eclipse_compiler_create_a_different_serialVersionUID_from_javac%3F</a></li>
+  <li>
+<a href="http://docs.oracle.com/javase/tutorial/java/javaOO/nested.html">Nested Classes and Synthetic Methods</a> (see last paragraph)</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/java/serialization-synthetic/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

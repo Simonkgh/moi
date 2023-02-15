@@ -1,0 +1,457 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Apache Beam and Google Dataflow Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Apache Beam and Google Dataflow Overview</h1>
+    <aside>First published on: April 13, 2018</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Cloud/'>Cloud</a>, <a href='/category/BigData/'>BigData</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p><a href="https://beam.apache.org/">Apache Beam</a> is a programming API and runtime for writing applications that process large amounts of data in parallel. It can be used to process bounded (fixed-size) input (“batch processing”) or unbounded (continually-arriving) input (“stream processing”). Other technologies that address similar problems include Spark, Flink, and Storm.</p>
+
+<p>The major feature that makes Beam different from existing big-data-processing frameworks is its support for <em>windowing</em> of incoming data. If you need to compute things such as “running totals” over records that fall into specific time-ranges, then Beam is worth a serious look.</p>
+
+<p>The other major feature of Beam is that it is the API for executing logic on Google’s <a href="https://cloud.google.com/dataflow/">Dataflow cloud service</a>. If you want to process big data in the Google cloud using code (rather than using a database query language) then you will probably need to learn Beam. Interestingly, Beam is divided into separate “front end” and “back end” layers, and Google’s Dataflow Engine is just one possible back-end; Beam applications can also be executed on a cluster of Flink servers or Spark servers (more on this later).</p>
+
+<p>Much of the following information is taken from a good article by one of the authors of Google Dataflow; see the References section for the relevant links. This article does, however, provide some context that (in my opinion) that article lacks.</p>
+
+<p>Note: I have been using Beam for only about a month now (having previously done a moderate amount of Spark work). Corrections to anything below are welcome.</p>
+
+<h1 id="history">History</h1>
+
+<p>Google developed a parallel-programming API called FlumeJava; this Java API allowed the transformations to be applied to incoming data to be defined in an elegant, functional-programming-like style. Google also developed several parallel-processing engines for executing such transformations, including MillWheel. The Google Dataflow team then took the best ideas from FlumeJava and MillWheel, and built the Dataflow service. Later they donated the “front end” programming API (ie that bit descended from FlumeJava) to the Apache foundation, and it is now called Apache Beam.</p>
+
+<p>Google itself is a very heavy user of big-data-processing applications, and Dataflow was initially created to solve some of the problems they had which no other frameworks (internal or external) solved well. In particular, they have many use-cases that depend heavily on <em>windowing</em> input data. Google profiles users in order to drive their advertising placements, their recommendation-engines, and other components that bring them money (remember, Google is primarily about profile-driven advertising). Analysing user interactions with computer systems really needs to take into account the <em>timestamp</em> at which such interaction-events occurred - and thus requires windowing.</p>
+
+<p>Of course, competing software products have not stood still. Bean was designed a few years ago, while Spark was still in version 1.x. Spark 1.4 added support for windowing-functions, but only in Spark-SQL and it does not appear to really address the issues regarding time-based windowing that Beam deals with. Spark 2.0 introduced the concept of “structured streaming” which unified batch and streaming processing (as Beam did from the start). Spark 2.3.0 (Feb 2018) introduces “continous processing” as an alternative to “micro-batching”, which might finally make Spark interesting competition to Beam for time-windowed processing (I would need to ask a Spark expert if the issues in the Beam paper/article can now be dealt with via Spark).</p>
+
+<p>Note that “FlumeJava” is unrelated to the <a href="https://flume.apache.org">Apache Flume</a> log-aggregation application.</p>
+
+<h1 id="bounded-and-unbounded-data-and-windowing">Bounded and Unbounded Data, and Windowing</h1>
+
+<p>The Beam documentation avoids the use of the words “batch” and “streaming”. Instead, it refers to <em>bounded input</em>, ie where the application will eventually reach “the last record”, and <em>unbounded input</em>.</p>
+
+<p>When dealing with unbounded input, it is obviously necessary to emit results at intervals - either regular intervals (such as once per minute), or based on “triggers” in the incoming data. Beam has specific support for this concept, and calls them (unsurprisingly) triggers. In addition, the results that are emitted will be the result of computing values over some set of records - often a set of records whose “event time” lies within some time-range. Beam also has specific support for this concept - each record has an implicit timestamp, and Beam automatically links records into the corresponding “windows”.</p>
+
+<p>When processing bounded input, triggers and windows can still sometimes be relevant, and can be used if needed. If not (ie if the logic is a simple “process all records” kind of app) then Beam simply assigns every record the same timestamp, and assigns them to a single “global” window. This means that “traditional batch” processing is simply a special case of unbounded, triggered, windowed processing. Or in short, <em>batch</em> is a special case of <em>streaming</em>.</p>
+
+<p>One particularly interesting window-type is the <em>session</em> - a set of timestamped events that occurred “close to” each other, followed by an interval of inactivity. Google analyses data within sessions for internal purposes, eg user interactions with youtube. Beam has inbuilt support for session-windows. Building session-windows in Spark 1.x was apparently extremely complex; I am not sure whether this is improved in Spark 2.x.</p>
+
+<p>The Beam articles in the References section explain all this much better than I can..</p>
+
+<h1 id="the-beam-programming-api-aka-front-end">The Beam Programming API (aka “front end”)</h1>
+
+<p>The primary programming language for writing Beam applications is Java (1.8+). The Apache Beam project is currently working on a reimplementation of Beam in Python (to allow writing Beam apps in Python) - this is mostly complete but still “experimental” at the current time.</p>
+
+<p>The external <a href="https://github.com/spotify/scio">Scio</a> project provides a Scala-based wrapper over Beam; I haven’t tried it but at first glance it looks elegant and could be interesting if you are used to writing Spark applications in Scala.</p>
+
+<p>The Beam Java API is actually reasonably nice. It isn’t as terse and elegant as the Spark Scala API, but in my opinion it is good enough for general use.</p>
+
+<h1 id="the-execution-graph">The Execution Graph</h1>
+
+<p>A Beam application runs in two very separate phases:</p>
+
+<ul>
+  <li>defining the execution-graph</li>
+  <li>running the execution-graph</li>
+</ul>
+
+<p>The “main method” of a Beam application is a normal Java main-method, and simply makes calls to the Beam API which result in the construction of a “pipeline” object which wraps a “graph of transform nodes”.</p>
+
+<p>Calling method <code>Pipeline.run</code> causes the execution-graph to be handed over to some “runner module” which arranges for execution of that graph.</p>
+
+<p>When using the DirectRunner, execution is simple: threads are forked and evaluation of the graph starts immediately.</p>
+
+<p>When using the DataflowRunner (ie when executing the Beam application on Google’s Dataflow Engine), then the local runner component:</p>
+
+<ul>
+  <li>serializes the execution-graph and uploads it to shared storage (google cloud storage)</li>
+  <li>uploads the application binary itself (and anything in its $CLASSPATH) to shared storage</li>
+  <li>generates a JSON object which contains an additional serialized version of the execution-graph plus metadata such as the path to the above files</li>
+  <li>and then either:
+    <ul>
+      <li>sends the JSON object to the Dataflow service to start immediate evaluation of the execution-graph</li>
+      <li>or uploads the JSON object to shared storage, from which it can later be executed (potentially many times) without needing to run the “main” method again.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The mode in which the pipeline gets saved into shared storage is called “template mode” and is triggered via commandline arg “<code>--templateLocation=</code>”.</p>
+
+<p>Because of these two very clear separate phases, the code in a Beam application is split into two kinds:</p>
+
+<ul>
+  <li>code that is executed during “define graph time”, and</li>
+  <li>code (methods and lambdas) which are only executed at “run graph time”, ie as records are being processed.</li>
+</ul>
+
+<p>If you are familiar with Spark, this separation will be no great surprise.</p>
+
+<p>Similarly, there are are two kinds of “arguments” that can be passed to a Beam application:</p>
+
+<ul>
+  <li>arguments which are available during the “define graph” phase (and thus can be used to change the “shape” of the graph), and</li>
+  <li>arguments which are only available during the “run graph” phase (see class <code>ValueProvider</code>).</li>
+</ul>
+
+<p>The first kind of argument can also be accessed from within transformations executed at runtime. However if the execution-graph has been uploaded to shared storage (a template) for later execution, then such arguments cannot be changed - their value from the “define graph” phase is simply captured during serialization. The second kind of argument can be specified when the execution-graph is executed at any later time - but its value is obviously NOT available at define-graph-time (consider the case where execution is triggered via a previously-uploaded template).</p>
+
+<h1 id="beam-transforms">Beam Transforms</h1>
+
+<p>Beam class <code>PTransform</code> is the base type for all types which are “builders of execution-graph nodes”.</p>
+
+<p>The Beam standard library provides a number of standard <code>PTransform</code> classes, including ones that build nodes for:</p>
+
+<ul>
+  <li>reading from data-sources (messaging systems, filesystems, serialized lists of objects that the define-graph phase provided, etc)</li>
+  <li>writing to data-sinks (messaging-systems, filesystems, databases, etc)</li>
+  <li>mapping, flatmapping, and filtering records (ie nodes that wrap a lambda that transforms or discards a record)</li>
+  <li>group-by-key</li>
+  <li>cogrouping multiple record streams (on top of which standard “joins” can be built)</li>
+  <li>combine operations (ie “reduce-like” operations)</li>
+</ul>
+
+<p>Method <code>PTransform.expand(...)</code> is executed at define-graph-time.</p>
+
+<p>The <code>PTransform</code> subclass <code>ParDo</code> is the generic tool for processing records (ie applying logic to each record in the input stream). Method <code>ParDo.of(..)</code> takes a
+<code>DoFn</code> object as parameter, and this object is executed at execute-graph-time (its <code>processElement</code> method is applied to each record).</p>
+
+<p>The map/flatmap/filter transforms are built on top of <code>ParDo</code>, and the lambda provided to the transform is invoked via the <code>processElement</code> method of a <code>ParDo</code>.</p>
+
+<p>Type <code>PCollection</code> represents a stream of records of some type.</p>
+
+<p>A Spark <code>RDD</code> is equivalent to a combination of Beam’s <code>PTransform</code> and <code>PCollection</code> types.</p>
+
+<h1 id="extension-libraries">Extension Libraries</h1>
+
+<p>The Apache Beam project provides not only the “core sdk”, but also a handful of “extension libraries”. The most significant of these extension libraries is one that provides the standard “join” operators (inner-join, outer-join, etc) - which are mostly implemented on top of the core CoGroup transform.</p>
+
+<h1 id="side-inputs-and-outputs">Side Inputs and Outputs</h1>
+
+<p>Operators like map/flatmap/filter are passed a stream of input records. Sometimes such functions need additional “reference data”; the <em>side inputs</em> feature allows this.</p>
+
+<p>When writing a simple non-windowed batch processing application, a Spark <em>broadcast variable</em> and a Beam <em>side input</em> are effectively the same thing. However a <em>side input</em> can be windowed, ie when a transform-operation is processing input records from window X, then the <em>side input</em> object can provide “shared” data for window X - something that is difficult to implement in Spark.</p>
+
+<p>Operators like map/flatmap/filter can also potentially generate multiple independent “categories” of output. One solution to this is to generate (key, value) pairs as output where the key is the category - but this isn’t always elegant (particularly when the value is itself a key/value pair). Beam’s <em>side outputs</em> mechanism effectively tags records output by an operator with a category. Records with different categories can then be directed down different paths in the pipeline.</p>
+
+<h1 id="beam-execution-engines-aka-back-end">Beam Execution Engines (aka “back end”)</h1>
+
+<p>Although a Beam application can be executed via a “runner”, and there are runners for Spark and Flink, this does not mean that Beam is simply a “portability wrapper”.</p>
+
+<p>A Beam application which processes <em>bounded</em> data and which does not use windowing (technically, puts all records into a global window) is rather similar in structure to Spark, and when the SparkRunner is used then it will in fact generate logic that is pretty much a 1:1 mapping to Spark functionality, and it would be possible to simply write the equivalent program by hand using the Spark API. However when a Beam application uses windows, then the code generated by the Spark Runner is likely to be very complex - nothing that a developer would like to write themselves.</p>
+
+<p>Tools like Hive and Pig work in a similar way; a developer specifies their logic in hive-sql or in the pig language, and then that is converted to a form that some other “engine” can execute - whether it is traditional MapReduce, Tez, or Spark. This does not mean that hive-sql or pig is simply a “portability wrapper” over those languages, but rather that they are “higher-level” tools which delegate execution of logic to external processing-engines by using a language that those processing-engines can handle. Beam likewise delegates execution of a “processing pipeline” which has been defined via the Beam API to any supported processing-engine.</p>
+
+<p>One particularly useful “back end” is the DirectRunner, which executes the Beam application in the local VM. This is roughly equivalent to Spark’s “<code>local[*]</code>” mode. Running code with the DirectRunner makes it possible to launch it from an IDE, use breakpoints and stepping, and to see logged output in the local console. Debugging an app which is running remotely on the GCP Dataflow Engine is <em>much harder</em> (and I say that from experience!).</p>
+
+<p>The DataflowRunner “back end” works together with the Google Dataflow service. Dataflow provides a number of nice features for Beam applications, including:</p>
+
+<ul>
+  <li>automatically instantiating ComputeEngine instances on which to run the application</li>
+  <li>handling ComputeEngine node failures transparently</li>
+  <li>forwarding log-messages to the Google StackDriver log-monitoring service</li>
+  <li>providing authentication credentials for the Dataflow code, so that calls can be made to other Google services (such as BigQuery)</li>
+  <li>providing a basic Dataflow-job web admin interface, where the structure of an executed job can be seen as a visual graph-of-nodes, together with
+the state (success/fail) of each node and the execution time.</li>
+</ul>
+
+<h1 id="beam-sql">Beam SQL</h1>
+
+<p>A Beam application can express logic in the form of a sql-like string, rather than having to write Java (or Python or Scala) code. The Beam runtime uses the Apache Calcite library to parse and optimise the expressed logic (eg joins, filters) and generate the appropriate logic. This is very similar to using Spark-SQL.</p>
+
+<h1 id="beam-vs-spark">Beam vs Spark</h1>
+
+<p>If you are writing purely “batch” programs (ie ones processing “bounded input”) and do not need to deal with the concept of time-ordering of data within the input stream, then Beam and Spark are roughly equivalent.</p>
+
+<p>Beam is (at least in my opinion) more difficult to reason about at runtime than Spark. With Spark in “batch” or “micro-batch” mode, I have a good grasp of how the driver-node and worker-nodes interact, how dynamic scaling works, and related concepts that may have an impact on application performance. Beam is more “abstract”, particularly due to the fact that it has different “runners” that may be implemented very differently, and are not well documented. The fact that the DataflowRunner targets a proprietary execution engine makes this even more tricky. When all works well, this is not so important - but I suspect that if performance issues pop up then tracking down the cause would be harder with Beam than Spark.</p>
+
+<p>If you need to deal with an incoming event-stream where the events have timestamps and where analysis of the data is affected by these timestamps, then <em>according to the Beam paper</em>, Beam can deal correctly and efficiently with this data where the equivalent Spark application would be extremely complex. See the Beam article in the References section below for a full description. As noted above, the Beam article was written a while ago, and Spark has since gained support for “structured streaming” and “continuous processing”. Regardless, Beam does deal elegantly with windowed processing of time-sensitive records.</p>
+
+<p>And if you are using the Google platform to execute code, then Beam + Dataflow is easier to manage/deploy, and cheaper to run, than using Spark + Google Dataproc (Google’s hadoop-as-a-service offering) or than running a hadoop cluster on a set of Google Compute Engine instances.</p>
+
+<p>If you know Spark, you will find Beam quite similar in many ways. The primary differences are:</p>
+
+<ul>
+  <li>there is no “driver” node</li>
+  <li>there are no “action” operators; everything is a “transform”</li>
+  <li>there are no “broadcast variables”; these are replaced by “side inputs” instead</li>
+</ul>
+
+<h1 id="maturity-and-external-tools">Maturity and External Tools</h1>
+
+<p>Beam is a much younger project than Spark, and this sometimes shows. Bugs and missing features are (in my experience) still quite common (as of early 2018). Tutorials are also easier to find for Spark, documentation for Spark is better, and the Spark community is significantly larger.</p>
+
+<p>I am not sure how performant/efficient Beam is with respect to Spark, but would not be surprised if Spark is currently faster. However when running Beam applications on Google Dataflow, CPU and RAM are effectively unlimited, which makes comparisons difficult. It would be interesting to run the same application written in Beam and Spark on the same Spark cluster (ie use the Beam SparkRunner) and compare execution times. That assumes, of course, that the application does not need to use Beam features like windowing.</p>
+
+<h1 id="dataflow-scaling-and-pricing">Dataflow Scaling and Pricing</h1>
+
+<p>This section addresses the issues of scaling and pricing when executing a Beam application on the Google Dataflow Engine.</p>
+
+<p>The Beam framework core provides a way of expressing an algorithm such that it can be executed in parallel. Exactly how that parallel processing occurs is a combination of:</p>
+
+<ul>
+  <li>the Runner implementation selected and linked into the Beam application that is deployed;</li>
+  <li>the parameters that are passed to that Runner implementation (whether explicitly by code, or via command-line-arg passthrough to an Options class)</li>
+  <li>services provided by the environment, eg the Dataflow “coordinator” service</li>
+</ul>
+
+<p>The <code>DataflowRunner</code> class is the Runner implementation used when executing a Beam app on the Google Dataflow platform. The dataflow-specific Beam library includes several Options classes, eg <code>DataflowPipelineWorkerPoolOptions</code>, which can be configured via code or via commandline arguments. As usual, options which are defined as primitive types are “graph-creation-time-only” parameters, which affect the shape of the generated execution graph or constants which are “captured” when that graph is built. Options which are defined using ValueProvider can be applied at runtime instead (eg provided when a pipeline template is executed).</p>
+
+<p>Dataflow supports three primary configuration properties:</p>
+
+<ul>
+  <li>autoscaling mode</li>
+  <li>numWorkers</li>
+  <li>maxNumWorkers</li>
+</ul>
+
+<p>The autoscaling mode may be:</p>
+
+<ul>
+  <li>“none”, in which case a fixed number of workers (processes) is started and all tasks included in the execution-graph are distributed across this pool of workers</li>
+  <li>“throughput-based”, in which case an initial number of workers (processes) is started and then the nodes report their “progress percentage” periodically to the dataflow service, which decides whether to start additional workers (or reduce the number).</li>
+</ul>
+
+<p>The throughput-based autoscaling mode applies to both bounded (batch) and unbounded (streaming) input, but in somewhat different ways.</p>
+
+<p>When the datasource is <em>bounded</em> and numWorkers is not specified then Dataflow tries to estimate the size of the input by calling <code>datasource.getEstimatedSizeBytes()</code> <em>at execution graph creation time</em> and applying some heuristic to determine a suitable numWorkers value. This works for cases where the graph is created and then immediately executed; the input details (eg filename) are available. Obviously, this <em>doesn’t</em> work well when deploying a template; it seems that in this case numWorker is effectively zero. In either case, numWorkers instances are started initially and then, while the app is running, method <code>reader.getFractionConsumed</code> is polled regularly to check how much of the data has been read; when this is progressing too slowly then more worker instances are started.</p>
+
+<p>When the datasource is <em>unbounded</em> then <code>numWorkers</code> workers are initially started (with minimum of maxNumWorkers/15). The Dataflow engine periodically applies a heuristic to adjust the number of workers (ComputeEngine instances) between <code>maxNumWorkers/15</code> and <code>maxNumWorkers</code>, with a minimum of one.</p>
+
+<p>While the Google and Beam documentation is usually pretty good, it is (in my opinion) seriously lacking when it comes to describing the configuration options for scaling a Beam application on Dataflow, ie specifying the number of parallel processes (workers) to use. The current <em>implementation</em> also seems rather lacking and a “work in progress”.</p>
+
+<p>After reading the docs and making some experiments, my tentative conclusions are:</p>
+
+<ul>
+  <li>the autoscaling mode can only be set when deploying a template; it is not possible to change the mode when <em>executing</em> a template.</li>
+  <li>
+<code>num-workers</code> (aka numWorkers) can only be set when deploying a template, and cannot be set when executing one.</li>
+</ul>
+
+<p>The template-deploy-time nature of these settings is reinforced by looking at class DataflowPipelineWorkerPoolOptions; the corresponding getter/setter methods use primitive types (String, etc) rather than ValueProvider wrappers which generally implies that these values are bound at graph-creation-time (ie template deploy time).</p>
+
+<p>Oddly, the web UI for executing a template includes option “machine type” - which is not documented via “gcloud dataflow jobs run –help”. And <code>DataflowPipelineWorkerPoolOptions.getWorkerMachineType()</code> returns a primitive string, suggesting this is indeed a graph-creation-time-only option.</p>
+
+<p>It is not clear whether “max-workers” (runtime) and “maxNumWorkers” (deploytime) are the same thing.</p>
+
+<p>See <a href="https://cloud.google.com/dataflow/docs/templates/executing-templates">Google: Executing Templates</a> for the vague documentation that currently exists.</p>
+
+<p>Pricing for executing a Beam/Dataflow job depends upon compute-engine and disk resources. A disk is always allocated for each worker (maxNumWorkers for unbounded streaming), but the number of compute-engine instances may vary during autoscaling and are only charged when actually used.</p>
+
+<h1 id="file-compression">File Compression</h1>
+
+<p>The standard Beam transforms which read files from disk support <em>compressed</em> files (gzip, bzip2, and deflate); when no compression algorithm is specified via the API then they try to deduce the algorithm to use from the filename suffix (<code>Compression.AUTO</code>).</p>
+
+<p>Some compression formats are <em>splittable</em>, ie it is possible to seek to an offset within the file, scan to find some marker, and start decompressing data. This feature is necessary in order to be able to read an input file via multiple parallel processes (workers). Splittable algorithms include bzip2 and lz4 (which is not currently supported).</p>
+
+<p>Unfortunately, some other compression formats are not <em>splittable</em>, ie data can only be compressed by starting from the beginning of the file. This includes gzip and deflate. Such input files must be read by a single process (worker).</p>
+
+<p>And unfortunately, although bzip2 (suffix “.bz2”) is theoretically splittable, Beam 2.4.0 does <a href="https://issues.apache.org/jira/browse/BEAM-683">not yet implement this</a>; bzip2 files are read in a single worker just like gzip files.</p>
+
+<p>In summary: if you feed a Beam/Dataflow application a large compressed file, then it will be processed but only <em>single threaded</em>.</p>
+
+<p>Google Cloud Storage supports a metadata property “content-type” for each file; setting this to “gzip” is supposed to indicate to reading applications that the content is compressed with the gzip algorithm, regardless of the filename suffix. Unfortunately, the file-reader transforms in Beam 2.4.0 do not yet support this; ensure that compressed files have the correct filename suffix.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>
+<a href="https://beam.apache.org/">The Apache Beam Site</a> - The official Beam site.</li>
+  <li>
+<a href="https://cloud.google.com/dataflow/blog/dataflow-beam-and-spark-comparison">Beam vs Spark</a> - Start your reading here!</li>
+  <li>
+<a href="https://www.oreilly.com/ideas/the-world-beyond-batch-streaming-101">Streaming 101</a> and <a href="https://www.oreilly.com/ideas/the-world-beyond-batch-streaming-102">Streaming 102</a>
+</li>
+  <li>
+<a href="http://www.vldb.org/pvldb/vol8/p1792-Akidau.pdf">The Beam Paper</a> - Definitely worth reading in addition to the above articles.</li>
+  <li>
+<a href="http://www.waitingforcode.com/apache-beam">Waiting For Code: Apache Beam</a> - Blog articles about Apache Beam.</li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/cloud/beam-dataflow-overview/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

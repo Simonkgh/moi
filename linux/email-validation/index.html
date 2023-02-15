@@ -1,0 +1,767 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Email Sender Validation - SPF, DKIM, DMARC</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Email Sender Validation - SPF, DKIM, DMARC</h1>
+    <aside>First published on: October 29, 2019</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Linux/'>Linux</a>, <a href='/category/Network/'>Network</a>, <a href='/category/Security/'>Security</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p>This article consists of notes I made while researching <a href="https://en.wikipedia.org/wiki/Email_authentication">email-validation-related topics</a> such as <a href="https://en.wikipedia.org/wiki/Sender_Policy_Framework">SPF</a> (Sender Policy Framework), <a href="https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail">DKIM</a> (Domain Keys Identified Mail) and <a href="https://en.wikipedia.org/wiki/DMARC">DMARC</a> (Domain-based Message Authentication, Reporting &amp; Conformance).</p>
+
+<p>I run my own personal email server (<a href="/linux/email-overview">setup described here</a>) - more out of principle and curiosity as for practical reasons. It is a nice feeling to have full control over my own data and email is an important part of that. However it is a lot of work, and a lot to learn. One of the things I described in the above article is how to set up an SPF record; this is relatively simple and important to:</p>
+
+<ul>
+  <li>cause most spam filters to give emails from your domain a few plus-points (thus making it less likely your outgoing emails will be categorised as spam);</li>
+  <li>prevent spammers from faking emails which have your domain as the “bounce address” (sadly, it does not prevent emails with your domain as from-address);</li>
+  <li>and reduce the chances of your domain landing on a blacklist due to misuse by spammers.</li>
+</ul>
+
+<p>I also have one somewhat unusual requirement I didn’t initially implement: I need to allow email with a from-address in my domain <code>@vonos.net</code> to be sent via yahoo.com’s email servers. This requires some custom SPF configuration, and was the motivation for the research in this article. While investigating the details of SPF, I also looked into DKIM and DMARC.</p>
+
+<p>This article has become rather longer than I originally intended, and contains far more detail than most people will need. If you just want to get SPF working, and move on to other topics that interest you more, this might not be the right page to read - or at least you will want to just skim over the details. The <a href="https://en.wikipedia.org/wiki/Email_authentication">Wikipedia article on Email Authentication</a> is an excellent (and simpler) starting-point.  <a href="https://glockapps.com/blog/email-authentication/">This article from GlockApps</a> covers some of the same topics as this article.</p>
+
+<p>And actually, while researching all this it became clear just how complicated email-spam-prevention is. Other ways of communicating (eg <a href="https://matrix.org/">matrix</a> or <a href="https://en.wikipedia.org/wiki/Mastodon_(software)">mastodon</a>) are certainly worth considering..</p>
+
+<p>Just to clarify: if you are running your own server, then it is very important to publish into DNS both an SPF record and a simple DMARC record. You don’t <em>have</em> to do anything else. I would recommend setting up SPF validation on incoming messages, though - it is useful. Setting up DKIM for outbound messages doesn’t seem necessary (it helps with reputation but I haven’t had any problems). Doing DMARC validation on incoming messages might be helpful if you have some naive users on your system - but it’s pretty hard.</p>
+
+<p>Note that I am not a professional mailserver administrator; use the info and advice below at your own risk. All corrections and comments are welcome.</p>
+
+<h1 id="terminology">Terminology</h1>
+
+<p>If you’re reading this then I presume you’re reasonably familiar with how email works. However just to save confusion, here are a few definitions:</p>
+
+<ul>
+  <li>MTA: Mail Transfer Agent. A program which either
+    <ul>
+      <li>receives email: listens on network port 25 for incoming mail, verifies it, and passes it to a “delivery agent” for storage in a mailbox, or</li>
+      <li>sends email: monitors a local “mail queue”, and for each email (or possibly batch) makes an outgoing network network connection to port 25 on some target server and transmits the email headers and content.</li>
+    </ul>
+  </li>
+  <li>
+    <p><a href="https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol">SMTP</a>: Simple Mail Transfer Protocol. A set of commands that a “sending MTA” and “receiving MTA” exchange over a network socket in order to transfer one or more emails from the sender to the receiver. Wikipedia has <a href="https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol#SMTP_transport_example">an example SMTP session</a> that is the easiest way to quickly grasp what SMTP does.</p>
+  </li>
+  <li>
+<a href="http://www.postfix.org/">Postfix</a>: A set of programs which implement various functions related to processing email. The primary application is called <code>smtp</code> and implements an MTA.</li>
+</ul>
+
+<h1 id="email-from-envelope-from-heloehlo">Email-From, Envelope-From, HELO/EHLO</h1>
+
+<p>Before describing SPF, DKIM and DMARC, it is necessary to understand exactly what they are intended to validate.</p>
+
+<p>When an email is transferred over a network connection between two MTAs (Mail Transfer Agents), then the “sender address” is actually described in several places:</p>
+
+<ul>
+  <li>email message headers “From:” and “Sender:”</li>
+  <li>SMTP protocol header “MAIL-FROM” (aka return-path-address or bounce-address)</li>
+  <li>SMTP HELO/EHLO command (sending server or domain)</li>
+</ul>
+
+<p>An email itself is a block of data as described in <a href="https://tools.ietf.org/html/rfc5322">the Internet Message Format specification</a>. It consists of a set of headers followed by a body; the available headers are defined <a href="https://tools.ietf.org/html/rfc4021">in this specification</a>. Two headers are of interest here: “From:” and “Sender:”.  The original intention of having both headers is that “From:” describes “who wrote the email” and “Sender:” describes “who sent it out”. However in most cases, the email sender and author are identical - in which case the Sender header can be omitted. If both are present, then some email clients will display just the “From:” header while others will display “<code>From $Sender on behalf of $From</code>”. There is some potential for an attacker to use different sender/from values to attempt to confuse users, but this appears to be rare and not a significant concern. There is also an optional “Reply-To:” header which indicates where any replies should be sent to; when not defined then the “From:” header value is used. None of the validation techniques in this article address the Sender or Reply-To headers.</p>
+
+<p>The SMTP protocol used when an MTA sends a message to another MTA specifies the originator of the email in SMTP command <code>MAIL FROM</code>, separate from the email headers. The reason why SMTP specifies the from-address independently is:</p>
+
+<ul>
+  <li>emails might be large; from- and to- addresses should be sent first and separately so that the receiving MTA can choose to accept or reject the email without having to read it all (or even all headers)</li>
+  <li>email header “From:” is intended to be human-readable. The email RFC allows quite complex text in this field, which can be hard to parse correctly and efficiently. The <code>MAIL FROM</code> value is simply a raw email address that is primarily intended to let the email infrastructure know where the email originated from, rather than intended for presentation to a human.</li>
+  <li>emails might be transferred over protocols other than SMTP, ie the concept of email-format and SMTP protocol should be independent</li>
+</ul>
+
+<p>Email headers “From:” and “Sender:” are not completely free-text, but have a specification that allows some quite complex content; they are often of form <code>"some description" &lt;someuser@somedomain&gt;</code> but other variants are also valid. Interestingly, header “From:” contains ONE OR MORE addresses. When exactly one from-address is present, header “Sender:” is optional. When more than one from-address is present, header “Sender:” is required. Sender can only have one address. The fact that header “From:” has complex content is one of the reasons the SPF specification validates the <code>MAIL FROM</code> rather than “From:”.</p>
+
+<p>The SMTP “envelope from” (aka MAIL FROM) value is a simple email address only. Comparing envelope-from and mail-from is therefore not trivial - and SPF does not do this (though DMARC validation effectively does). MAIL FROM is intended to represent the “bounce address for delivery problems”, also known as the Return-Path; this may not be the same as the “author of the email” - particularly for automated systems. This is just one of the reasons why <a href="https://serverfault.com/questions/518119/legitimate-reasons-smtp-mail-from-will-not-match-from-header-in-data">the From header and MAIL FROM may differ</a>. The “envelope from” value is normally not displayed to the end email recipient.</p>
+
+<p>To a receiving MTA, the <code>MAIL FROM</code> value is just data sent by an unknown remote application, and therefore is not trustworthy; SPF is a technique for validating the provided value. The SMTP specification also states that a sending MTA must identify itself with command <code>HELO {id}</code> or <code>EHLO {id}</code>. Usually this id is the fully-qualified DNS domain name of the host that the MTA is running on. As with <code>MAIL FROM</code>, this value is not trustworthy; options for performing some validation on this field are described below.</p>
+
+<p>When a user writes an email and clicks “send”, the email client application passes the email to an “email submission agent” using the SMTP protocol. The email client always declares who they are (sending email account) - and almost always with credentials (eg a password). Then one or more emails are passed from the email client to the server - including “To:” and “From:” information. However the “From:” information does not necessarily match the account that the email client is using; there are some valid reasons for this (eg users or systems with multiple email addresses) - and some not so honest reasons.</p>
+
+<p>The submitted email is stored by the “email submission agent” on a queue with from/to values provided by the client in SMTP fields. Eventually that queued item is processed by an “outgoing MTA”; the MTA determines which host corresponds to the “To:” domain, opens a socket, optionally sets up TLS, and sends a HELO or EHLO message declaring the sending system’s id (usually its hostname). For each email to be sent (the queuing system can group/batch emails) it then sends a MAIL-FROM header followed by an envelope with “From:” and “To:”; when the receiving server accepts the envelope, the email body is sent.</p>
+
+<p>Spammers attempt to trick the email infrastructure by:</p>
+
+<ul>
+  <li>sending from their own, or some hacked, server using a HELO and MAIL-FROM that specifies a domain that has nothing to do with the sending server; SPF fixes that (by validating those fields via DNS) and DKIM+DMARC also fixes that (by ignoring those fields and instead validating the domain embedded in the email signature)</li>
+  <li>sending from a server with a valid HELO and MAIL-FROM, but a different “From:” header; DMARC validation fixes that. Possibly spam-filters will also detect this.</li>
+</ul>
+
+<p>Usually, the <code>MAIL FROM</code> value in an SMTP dialog is inserted (by the receiving MTA) into an email header named <code>Return-Path:</code>, and is thus available to later processing/validation steps. The Return-Path value is used to deliver “bounce messages” indicating that the specified recipient is not available, their mailbox is full, etc. However many receiving MTAs do not bother to send “bounce messages” at all, as spammers so often use fake MAIL-FROM values in their emails and the bounce-messages are therefore being sent to a server that does not know or care about that particular email.</p>
+
+<h1 id="why-spf-dkim-and-dmarc">Why SPF, DKIM and DMARC</h1>
+
+<p>When a MTA receives an email from a remote source, it needs to make two decisions:</p>
+
+<ul>
+  <li>what “reputation score” should be assigned to this email (reject, accept, or something inbetween)?</li>
+  <li>should notifications related to the email (eg undeliverable) be reported back to the specified “return-path” (ie MAIL FROM) address?</li>
+</ul>
+
+<p>Spammers try to manipulate the first decision by faking various data assocated with the email, including the SMTP <code>MAIL FROM</code>, the email header ‘From:’, and occasionally other fields. This manipulation also serves to obscure their identity, making it difficult to block (or prosecute) them. This has several implications:</p>
+
+<ul>
+  <li>Your MTA should try to detect such faked data and discard the emails (or at least mark them as probably-spam)</li>
+  <li>You should make it possible for other MTAs to detect emails which claim to be <em>from users in your email domain</em> but are actually not</li>
+</ul>
+
+<p>Implementing the first protects your users from receiving misleading emails, or just unwanted spam.</p>
+
+<p>Implementing the second:</p>
+
+<ul>
+  <li>protects users on your domain from being blamed for sending spam (and possibly receiving angry replies)</li>
+  <li>prevents your domain from ending up on a black-list</li>
+  <li>prevents your users from getting notifications (eg “email cannot be delivered”) for emails generated by spammers using a fake address belonging to your domain</li>
+</ul>
+
+<p>When the identity of the sending system can be verified (associated with a specific email domain), then the reputation of that email domain can be used as a basis for the score of the email. Emails from a sender on a “whitelist” are likely to be valid while emails from a sender on a blacklist should be dropped. Emails from a system that is not known, but at least has a verified identity are more trustworthy than ones from an anonymous sender - because the sender can be held accountable (placed on a blacklist) if too many emails from that sender later turn out to be spam. Note that even “well-known” sending systems (eg gmail) might carry spam - they cannot control all emails leaving their system, but do react to reports of spam by monitoring and closing accounts when needed. Various organisations maintain lists of untrustworthy email domains called “Realtime Blackhole Lists” aka <a href="https://en.wikipedia.org/wiki/DNSBL">RBLs</a>. As far as I know, there are no standard “whitelists” - and that is a good thing, as large organisations/ISPs would likely end up on them but private mailservers (such as mine) would have no chance.</p>
+
+<p>Emails are typically sent over TCP; encryption is often used - but only traditional one-sided TLS where only the receiving party presents a “certificate” proving their identity. This means that the receiving MTA cannot use TLS itself to verify that the remote end of a TCP connection is an official “agent” of a specific email domain; SPF and DKIM are needed to do that.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Sender_Policy_Framework">SPF</a> is one way of dealing with this: your MTA fetches SPF rules from DNS for the domain incoming emails are <em>supposedly</em> coming from, and verifies that those rules trace back to the IP address the sender is using. And you publish the SPF rules for <em>your</em> domain in DNS for use by others. SPF is <em>not intended to block spammers directly</em>, but instead to ensure that any host sending email is properly associated with a DNS domain. Blacklists and whitelists can then be applied to filter email based on the domain, ie a spammer can register their own DNS domain and get past SPF - but that domain will hopefully soon land on a blacklist. Conversely, SPF ensures that a spammer cannot use an arbitrary server to send email using a MAIL-FROM indicating <em>your</em> email domain - SPF blocks that, and thus your email domain does NOT land on a blacklist. Sadly, SPF is applied <em>only</em> to the “MAIL-FROM” value, which provides fairly weak validation (see below for more details); combining SPF with DMARC is far stronger - although it does prevent users with email-addresses from your domain sending their emails via third-party servers (a rare requirement that I unfortunately have).</p>
+
+<p><a href="https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail">DKIM</a> is an alternate way to verify the domain associated with an email: your MTA extracts a (signed) origin domain from an incoming email then fetches a DKIM key from DNS for that origin and validates the signature. Only the owner of that domain can publish a valid key in DNS. This does not check the IP address of the sender or the MAIL FROM, but instead checks the email itself - including an “originating domain” header that is embedded in the signature. Unfortunately, while this proves which domain sent a message with such a signature, it does not prevent spammers from sending a message claiming the same origin but without a signature. DKIM is therefore only useful in combination with some other standard that indicates that signatures are expected for a specific domain; DMARC is the currently accepted way to do this.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/DMARC">DMARC</a> is an “extension” to SPF and DKIM that (a) validates the “From:” header (which is distinct from the MAIL-FROM that SPF checks), and (b) allows the owner of a DNS domain to declare validation rules that apply to all subdomains (SPF has to be separately configured for each subdomain, and DKIM itself does not say what to do when an email has no signature). In addition, DMARC allows an email domain owner to request that other MTAs report statistics about emails associated with that domain.</p>
+
+<p>When you run your own MTA, supporting SPF in both directions (checking inbound mails AND publishing your SPF policy in DNS) is very important. Supporting DKIM (inbound and outbound) is recommended but not critical. And SPF and DKIM are only effective for preventing misuse of your domain in “From:” headers if you also publish a matching DMARC record - which is trivial (just one simple DNS record). Applying DMARC checks on incoming email is somewhat more complex to set up, but worthwhile - particularly if you have less-sophisticated email users who might be too trusting of a faked from-address.</p>
+
+<p>Note that SMTP is also used between an email client and a mail-submission-agent. However SPF/DKIM are not applied to such connections; instead user-authentication (eg username/password) is used.</p>
+
+<h1 id="spf-basic-setup">SPF Basic Setup</h1>
+
+<h2 id="general-info">General Info</h2>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Sender_Policy_Framework">Wikipedia page on SPF</a> is an excellent overview. The info below is mainly an <em>extension</em> of that page (though some content is repeated to give context).</p>
+
+<p>SPF configuration records are stored in DNS, keyed by a “domain name”. A record should be published for each <em>email domain</em> (eg <code>vonos.net</code>); optionally a record can be published for the <code>hostname</code> of each host on which a (sending) MTA is running (eg <code>mail.vonos.net</code>). The <code>MAIL FROM</code> value and <code>From:</code> header are email addresses; the SMTP HELO command instead usually provides a HOSTNAME.</p>
+
+<p>When a receiving MTA applies SPF checks to incoming email, this:</p>
+
+<ul>
+  <li>prevents unwanted backscatter (see below)</li>
+  <li>ensures that the sending system is associated with a known DNS domain-name (email-domain and optionally host-domain)</li>
+</ul>
+
+<p>Unwanted backscatter occurs when some spammer sends emails using faked addresses belonging to someone else’s email domain in the MAIL FROM field. If the receiving system cannot deliver the email, then it may send a <em>notification email</em> back to the address in the MAIL FROM (aka Return-Path) - and the user whose address was faked gets unexpected “cannot deliver” messages. By publishing SPF records for your domain (effectively listing all the source IP addresses for MTAs that are allowed to send email from your domain), a receiving MTA can determine that the MAIL FROM is not valid, and discard the email.</p>
+
+<p>Simply checking that the sending MTA is associated with <em>any</em> DNS domain name is a useful check that filters out many spammers, particularly those who take over desktop systems or internet-enabled devices belonging to other people in order to send mail. It is possible to give these systems a valid DNS record mapping to their IP address (see Dynamic DNS later), but that is not completely trivial and many spammers do not bother.</p>
+
+<p>More importantly, verifying that the sending MTA is associated with <em>some DNS domain</em> means that the receiving MTA can check that domain against a blacklist (see RBLs later). As a receiver of emails, you can use blacklist checking to filter out a lot of email. Note that RBL checks are not <em>part</em> of SPF - SPF just makes them reliable.</p>
+
+<p>And most importantly of all, the systems that <em>add</em> domains to the blacklists don’t do so if your domain publishes SPF records and a spammer fakes your address but does not validate against your SPF rules - ie is detectable as not actually being one of your servers. This is why it is <em>extremely important to publish an SPF record for your email domain</em>.</p>
+
+<p>SPF does not work well when emails are delivered indirectly, eg when my server uses another server to deliver email to the final destination host. Early “relays” just passed a message on using the original MAIL-FROM (so that bounces/notifications would go directly to the original sender of an email; see Return-Path). Such relays were very common in the early days of email, but in general email is now delivered directly from origin server to destination server. Large corporations do sometimes have “relay hosts” internally, but in that case only their “external gateways” should check SPF records. Nevertheless, when relays are needed then DKIM works better than SPF. Alternatively, <a href="https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme">SRS</a> defines a way to “rewrite” forwarded emails.</p>
+
+<p>Section 2.2 of the <a href="https://tools.ietf.org/html/rfc7208">SPF specification</a> makes clear that only the “HELO Domain” and “MAIL FROM” values should be used when validating; email headers “From:” and “Sender:” should not be checked as “there are cases that are known to give incorrect results”. To be specific, the spec states: “Without explicit approval of the publishing ADMD, checking other identities … is NOT RECOMMENDED”. DMARC does support checks on header “From:” - effectively, a DMARC record with “spf strict checks” enabled gives “explicit approval”; see later for more info on DMARC.</p>
+
+<p>Because SPF without DMARC does not check header “From:” it is possible:</p>
+
+<ul>
+  <li>for an arbitrary spammer to send emails with their own domain in the envelope, but my domain in the “From:” header of the email - which is what the recipient sees</li>
+  <li>for a person with a real account on my server to send emails with my domain in the envelope and any arbitrary domain in the “From:” header of the email.</li>
+</ul>
+
+<p>The wrapped email can optionally have a header field “Reply-To:” which hints to the recipient’s email client application what address should be placed in the “To:” field if they choose “reply” in their email client. As this is part of the email, not the envelope, SPF does not do any checks on the reply-address. In practice, the reply-to field is not of great security concern as the recipient sees that address when they choose “reply” - a spammer can add an irrelevant address there but it is not likely to fool many people.</p>
+
+<p>If you publish DMARC config for your domain with “SPF strict validation” then receivers that support DMARC also use the same SPF rules to validate the “From:” email header; this protects your domain from having its email-address used in the “From:” address of spam emails - but only for receivers whose MTA checks DMARC. Similarly, if you enable DMARC inbound then your users are protected from spam emails that use faked addresses <em>belonging to sending domains which enable DMARC restricted checks in their published DMARC config</em>.</p>
+
+<p>MAIL-FROM can be empty in cases where the sender does not want/expect any “confirmation/notification” replies to be sent to them. This is the case for notification emails themselves. In this case, SPF has to check the HELO instead.</p>
+
+<p>An SPF record can also be used to indicate that a specific email-domain is NOT in use. If you have a website under a specific domain-name, but don’t use that domain-name in email addresses then it might be a good idea to use SPF to block spammers from faking that domain in order to protect your reputation.</p>
+
+<p>There can be only one SPF record for a domain, ie for a specific (domain=x, type=txt) pair only one record should start with <code>v=spf1</code>. The <em>total length of all TXT records for a domain</em> has an upper size limit; the entire “response” to a DNS query must fit into one UDP packet (512 bytes minus UDP headers). SPF rules therefore should not be complex.</p>
+
+<h2 id="setting-up-postfix-to-perform-spf-verification-on-inbound-emails">Setting up Postfix to Perform SPF Verification on Inbound Emails</h2>
+
+<p>If you are already running Postfix, then the changes needed to perform SPF validation on incoming emails are relatively small; <a href="https://help.ubuntu.com/community/Postfix/SPF">this Ubuntu Community article</a> documents them well.</p>
+
+<p>The SPF validation is done by a separate process which the Postfix SMTP application communicates with. All SPF-relevant data is written to a local socket; the SPF validator checks it (possibly issuing some DNS queries while doing so) and then writes the result (pass/fail/etc) back to the same local socket.</p>
+
+<h2 id="publishing-spf-validation-rules-for-hostnames">Publishing SPF Validation Rules for Hostnames</h2>
+
+<p>As noted above, SPF records can be published not only per-email-domain but also per-host. This section discusses per-host records.</p>
+
+<p>Per-host records are applied to the “identity” provided in the HELO command sent by a sending MTA; this is normally the hostname of the sending system.</p>
+
+<p>I’m personally somewhat confused about the purpose of per-host SPF records. The <a href="https://tools.ietf.org/html/rfc7208">SPF specification (RFC-7208)</a> clearly recommends publishing such records, and the recommended SPF record for an individual host is:</p>
+
+<ul>
+  <li>(hostname, TXT) -&gt; <code>v=spf1 a -all</code>
+</li>
+</ul>
+
+<p>When this rule is applied to incoming mail, it simply ensures that whatever server is sending email, there exists a DNS A-record with the domain specified in the HELO command which holds the IP address of that sender. As noted earlier, that does filter out many “hacked” systems (eg desktops and internet-enabled devices) used to send emails. It also means that a spammer has to use a real DNS domain that they own (ie for which they can publish A-records) - and that domain can then be checked against blacklists. However it doesn’t do much more than that, as Dynamic DNS can be used to map a domain-name to an arbitrary IP address quickly.</p>
+
+<p>However a spammer would not publish such a record - and therefore this rule is not effective in filtering spam at all. When a domain voluntarily publishes such a record, and incoming email for that domain passes that test, then possibly the receiver’s spam-filter will give the email a slight “reputation boost” - though that is up to the receiver.</p>
+
+<p>Oddly, RFC 7208 also includes the following statements:</p>
+
+<ul>
+  <li>If a conclusive determination about the message can be made based on a check of “HELO”, then the use of DNS resources to process the typically more complex “MAIL FROM” can be avoided.</li>
+  <li>SPF verifiers MUST check the “MAIL FROM” identity if a “HELO” check either has not been performed or has not reached a definitive policy result</li>
+</ul>
+
+<p>To me, this implies that if the above per-host record test passes, then the MAIL FROM tests do not need to be applied. However that would mean that <em>any</em> sending host with the standard SPF record published for it would then be able to specify MAIL FROM values from any domain - which would be nonsense. <a href="https://www.sparkpost.com/blog/spf-authentication">This article from Sparkpost</a> states that an SPF implementation MUST always check the MAIL FROM (except for notifications with NULL sender), which makes more sense - and is in fact what the earlier (obsolete) SPF specification RFC-4408 states. I’m confused about this - but in the end, it doesn’t matter; the important point is:</p>
+
+<ul>
+  <li>publishing per-host SPF records is not particularly important AFAICT, but won’t do any harm.</li>
+  <li>checking per-host SPF records inbound doesn’t help a huge amount - but could possibly allow identifying bad hosts via blacklists</li>
+</ul>
+
+<h2 id="publishing-spf-validation-rules-for-mail-from-aka-envelope-from-aka-return-path">Publishing SPF Validation Rules for MAIL FROM (aka Envelope-from aka Return-Path)</h2>
+
+<p>As each email is transferred from the sending MTA to the receiving MTA, the sending MTA issues a “<code>MAIL FROM &lt;someuser@somedomain&gt;</code>”. When SPF is enabled, tests are performed to verify that the sending host is permitted to send emails from that domain. Usually, this means verifying that the address of the other end of the connection is a “permitted IP-address”.</p>
+
+<p>A basic SPF declaration for my email server consists of a single DNS record:</p>
+
+<ul>
+  <li>(<code>vonos.net</code>, TXT) -&gt; <code>v=spf1 ip4:128.199.42.176/32 mx a -all</code>
+</li>
+</ul>
+
+<p>When I send an email to some address of form <code>user@gmail.com</code> then my server opens a TCP connection to one of Google’s email servers (identified via the MX record for gmail.com) and sends an “email envelope” declaring that the sender of the email is of form <code>someuser@vonos.net</code>.</p>
+
+<p>Google’s server checks for an SPF record by performing a DNS lookup for name <code>vonos.net</code> with type TXT. Records that do not start with <code>v=spf1</code> are ignored; the result is:</p>
+
+<ul>
+  <li>zero records found - SPF is not enabled for this email domain</li>
+  <li>multiple records found - SPF is incorrectly configured for this email domain</li>
+  <li>exactly one record - the incoming email is evaluated against the SPF declarations in the DNS record</li>
+</ul>
+
+<p>Following expression <code>v=..</code> is a sequence of “terms” (match-expressions). Terms prefixed with “+” mean “accept email if matched”. Terms prefixed with “-“ mean “reject email if matched”. No prefix implies “+”. Each term is evaluated in turn; when a term does not “match” then it is discarded and the next term is evaluated.</p>
+
+<p>Term <code>ip4:128.199.42.176/32</code> (implicit +) means: accept the email if the IP address of the other end of the sending TCP socket matches the range. This is a very efficient operation for the receiver - no DNS lookups required - which is why I have it as the first term in my SPF record. Systems with many sending MTAs might not be able to use explicit IP addresses in this way.</p>
+
+<p>Term <code>mx</code> (implicit +) meails: do a DNS lookup of the MX record for the email domain (<code>vonos.net</code> in this case) to get a hostname then do a DNS lookup of the A-record (or AAAA record) of that hostname to get a set of IP addresses (normally one). Accept the email if the IP address of the other end of the sending TCP socket is in the set. Note that <code>mx</code> is equivalent to <code>+mx:%{d}</code> which is equivalent to <code>+mx:vonos.net</code> as long as the SPF record is not the target of an <code>_include</code> or <code>_redirect</code> clause.</p>
+
+<p>Note also that the “mx” check assumes that the hosts sending an email for a domain are identical to the hosts that receive email for that domain. For larger email systems, that will probably not be the case, ie the mx check is useful only for small email environments.</p>
+
+<p>Term <code>a</code> (implicit +) means: do a DNS lookup of the A record for the email domain (ie use the email domain directly as a hostname) to get a set of IP addresses and check the sender as above. This works in the relatively common case where the host that sends emails for a domain has the same host-name as the domain (seldom true for larger email senders, but can be true in small setups). Alternatively, an alias-record could be used to map the email-domain-name to the actual host on which the MTA is running. Or one or more A-records could be published for the email-domain-name pointing to the hosts for all sending MTAs of the domain. Note that <code>a</code> without a following “<code>:&lt;domain-spec&gt;</code>“ie equivalent to <code>+a:%{d}</code>.</p>
+
+<p>Term <code>-all</code> means: always match, and reject (minus) all matching emails. Obviously this has to be the last clause.</p>
+
+<p>For real emails send via my infrastructure, the receiving MTA will find that the first term matches and SPF validation will succeed. If I change the IP address of my server but forget to update the SPF record, then the second or third term might match anyway (depending on how badly I stuffed up). If my email-server connects via IPv6 then the A and MX tests should automatically work (theoretically - not tested).</p>
+
+<p>If a spammer tries to send an “envelope” with a MAIL FROM address indicating <code>@vonos.net</code> then all matches will fail until “-all” is encountered at which point the email will be rejected as SPF-invalid and my email domain’s reputation will remain intact. This would of course also work with a simpler SPF rule that just has the ip4-term followed by -all, and that would cause even less load on the receiving MTA in the case of invalid emails. However invalid emails are expected to be rare, and having the extra terms somewhat protects me against stuffing up (eg changing the IP address of my MTA without updating my SPF records).</p>
+
+<h1 id="dkim">DKIM</h1>
+
+<p>A DKIM-compatible sending MTA binds a message to a domain by creating a signature that includes the email-domain associated with that sending MTA (or what domain it thinks the user who submitted the email is associated with). It therefore does not matter what the MAIL-FROM string or the From-header says; as long as the signature is valid then the “origin domain” for the email is the one embedded in the signature. The signature contains enough data from the email body to ensure that a signature cannot be detached from one email and attached to a different one.</p>
+
+<p>In effect, DKIM allows every email sent from a specific source (email server or cluster of servers) to have a “reputation” that is linked to the reputation of the sending (signing) source. This potentially allows a kind of whitelisting system - all email sent via a specific domain’s servers is effectively “vouched for” by that server. That doesn’t mean that none of it is spam - but it is a good indication of reliability, as a “trustworthy” sender will quickly close the account of any user caught sending spam. Whether whitelisting is actually a widely spread practice is not clear to me - I hope not, as smaller domains (such as mine) would never be able to get onto such a whitelist. There are organisations that run blacklists (RBLs) of known spammers, but as far as I know no generic whitelisting service is available.</p>
+
+<p>An advantage of DKIM-signed email is that it can be forwarded/relayed without problems (unlike SPF) - the signature does not change.</p>
+
+<p>One major limitation of plain DKIM is that when an email does not include a DKIM signature, then the receiver cannot know whether one should be present or not - a spammer can send fake emails supposedly from some domain that usually uses DKIM (eg <code>@yahoo.com</code>) and as long as no signature is included, the receiver will see nothing wrong. The solution is to use combine DKIM and DMARC - DMARC indicates that a signature is expected, and DKIM then manages the signature. Due to the way a DKIM signature is defined, and the way public-keys are published in DNS, it is not possible to check directly for the presence of a signature for a specific domain (see the DKIM spec section on “selectors”) in order to know whether signatures are expected for a domain; DMARC is needed to indicate that.</p>
+
+<p>Note that the DKIM spec refers to a companion “Sender Signing Practices” spec - but this specification was never released; The <a href="https://en.wikipedia.org/wiki/Author_Domain_Signing_Practices">ADSP</a> specification was another attempt to indicate which domains support DKIM but it apparently never got widespread use, and the DMARC spec states that it is flawed. DMARC appears to be the official way to indicate that all messages from a specific domain are expected to be signed.</p>
+
+<p>In my particular case (emails “from” my domain but sent via <code>yahoo.com</code>), Yahoo adds DKIM signatures to them and this works fine - the “origin” in the signature is <code>yahoo.com</code>, and the email inherits Yahoo’s reputation. There is no conflict with the fact that the mail-from or reply-to are a different domain.</p>
+
+<h1 id="dmarc">DMARC</h1>
+
+<p><a href="https://dmarc.org/overview/">DMARC</a> validation performs three tasks (when enabled):</p>
+
+<ul>
+  <li>it indicates whether a DKIM signature is expected on an email (based on the domain embedded in the “From:” header)</li>
+  <li>it indicates whether a SPF record is expected for an email (based on the domain embedded in the “From:” header)</li>
+  <li>if an SPF record exists, then it applies the standard SPF rules to the <em>email domain</em> specified in the from-header (rather than the domain specified in MAIL-FROM)</li>
+  <li>if a DKIM signature exists, then the domain embedded in that header is matched against the “From:” header</li>
+  <li>it tells the receiving MTA what should be done with an incoming mail when SPF or DKIM tests fail (reject is just one of the options)</li>
+  <li>it tells MTAs that they should gather statistics about the number of valid and invalid email messages they have received which are associated with a specific domain.</li>
+</ul>
+
+<p>For servers which support gathering statistics, the results are sent via email (of course) to an address specified in the DMARC record. Doing this is optional, but major ISPs do support this (eg gmail); it can be very useful to know whether spammers are trying to use your domain as a source address!</p>
+
+<p>There is an excellent <a href="https://blog.returnpath.com/how-to-explain-dmarc-in-plain-english/">article on DMARC here</a>.</p>
+
+<p>Applying SPF and/or DKIM validation to the email-domain specified in the “From:” header is very useful - this is what is shown to the end user as the “sender” of the email, so it is important that it is valid. In contrast, SPF validates the “envelope from” while DKIM validates the domain stored in a signature header; neither supports indicating whether “email from” must be consistent or not - and neither field is directly shown to the user reading the email. Any receiving MTA which integrates DMARC into its validation automatically protects its users from incoming email with misleading “From:” headers - but only as long as the domain in the “From:” header has published a DMARC record. For “From:” addresses specifying origins that do not publish DMARC records, no protection is provided.</p>
+
+<p>Note however that some “From:” headers are problematic; the official email standards allow an incredible variety of syntaxes in this field and not all are easily parseable to extract a domain-name. This is one of the reasons why SPF uses MAIL-FROM instead; origin email servers that allow such from-addresses simply cannot use DMARC - though all such servers can use SPF. This problem is not critical, as DMARC is optional - and less important than SPF.</p>
+
+<p>Having DMARC indicate whether an SPF record should exist for a specific domain is not very useful - just trying to load the SPF record is just as fast. Having DMARC enabled does ensure that if the SPF record gets deleted for some reason then this is detected, but that is an unlikely problem. DMARC does, however, also indicate that SPF should exist for all subdomains; if you publish an SPF record just for <code>example.com</code> but do not publish a DMARC record then a spammer could send emails from <code>admin@security.example.com</code> and the receiver will simply think <em>SPF is not enabled</em> for the domain.</p>
+
+<p>Having DMARC indicate whether DKIM is enabled for a domain is very useful - a receiving MTA can detect whether the DKIM header on a specific email has been modified, and can verify the originating domain embedded in the signature, but cannot know if an email without a DKIM header should be allowed or not for a specific MAIL-FROM or “From:” header. As far as I can tell, the use of “selectors” when looking up DKIM public key DNS records (used for key rollover) makes it impossible to check for the existence of a DKIM public key DNS record for the domain specified in MAIL FROM (like SPF does). An external system (eg DMARC) is therefore needed.</p>
+
+<p>The ADSP spec was an early attempt at allowing MTAs to detect emails with “missing” DKIM signatures. However <a href="https://tools.ietf.org/html/rfc7489#section-3.1.2">the DMARC spec</a> lists <a href="https://tools.ietf.org/html/rfc7489#page-54">some problems with ADSP that its approach solves</a>; when a DMARC record exists for a domain, ADSP records should be ignored.</p>
+
+<p>DMARC configuration for a domain is published as a DNS record of type <code>TXT</code>. The name part of the record is of form <code>_dmarc.{email-domain}</code>, eg in my case <code>_dmarc.vonos.net</code>. The fields available in the body of the record are described in the <a href="https://tools.ietf.org/html/rfc7489#section-3.1.2">dmarc spec</a>; the simple record which follows ensures that receiving MTAs which support DMARC+SPF will block anyone from using subdomains of my email domain (base SPF protects only the base domain):</p>
+
+<ul>
+  <li>(<code>_dmarc.vonos.net</code>, txt) -&gt; <code>v=DMARC1;p=reject</code>
+</li>
+</ul>
+
+<p>and one in which basic failure reporting is enabled would be:</p>
+
+<ul>
+  <li>(<code>_dmarc.vonos.net</code>, txt) -&gt; <code>v=DMARC1;p=reject;ruf=postmaster@vonos.net</code>
+</li>
+</ul>
+
+<p>As an alternative, <code>p=none</code> can be used to enable reporting while disabling other checks.</p>
+
+<p>DMARC tests should pass if <em>either</em> the SPF record matches the email-from OR a DKIM signature exists that matches the email-from. In my particular case where emails via yahoo’s infrastructure must be supported, the DKIM checks fail (the DKIM header in the email is not signed by a key published in a DNS record belonging to the domain in the email-from header ie <code>vonos.net</code>). However the SPF checks do pass; the host sending the email (one of yahoo’s servers) is explicitly allowed by the SPF record belonging to the domain in the email-from header (ie my domain) due to the “include: ..” of yahoo’s own published SPF record (see earlier).</p>
+
+<p>The requirement to use prefix <code>_dmarc</code> for DNS records solves a problem with SPF. A DNS TXT query returns <em>all</em> matching records in one UDP packet, ie the total length of all records with the same domain is limited. As an SPF record just uses the domain-name as the key, the limit applies to all TXT records for that domain-name. By using a dmarc-specific prefix for the lookup, the dmarc record has the complete limit for itself (around 450 bytes max).</p>
+
+<p>The domain that DMARC uses to perform DNS lookup of the DMARC config record is extracted from the “From:” email header, not the MAIL FROM or DKIM signature. If no DMARC record is found for the complete domain of the “From:” address, then the “organisational domain” (base part of the address domain, eg <code>vonos.net</code> when email is <code>@users.vonos.net</code>) is used. If a DMARC record is found (based on the From address) but no SPF record existed for the MAIL-FROM and no DKIM signature was embedded in the email, then DMARC checks fail - thus DMARC “enforces” either SPF or DKIM based on the “From:” address.</p>
+
+<p>From various information pages on the internet, it appears that setting up DMARC and SPF can be tricky for large companies, particularly those that use third-party companies to send marketing emails on their behalf; in that case DMARC+DKIM might be simpler. However that situation is not the focus of this article; for a simple personal email-server it seems to be not particularly difficult to set up DMARC.</p>
+
+<h2 id="dmarc-strict-vs-relaxed-mode-from-header-checks">DMARC Strict vs Relaxed mode (From-header checks)</h2>
+
+<p>SPF validates (a) the “sending hostname” as provided in the <em>HELO</em> SMTP command, and (b) the “envelope from” aka “MAIL FROM” value provided as part of the SMTP protocol. Both of these are part of the SMTP “mail transfer protocol” and not part of the email itself. The email itself has an additional “From:” header which is intended for display by email client applications - and this is <em>not</em> validated when an MTA does SPF checks.</p>
+
+<p>As noted above, DMARC looks up its config-record using the domain of the “From:” header, ie the owner of that domain can use a DMARC record to protect against others faking their domain in “From:” addresses. This protection can be “strict” or “relaxed”.</p>
+
+<p>When DMARC config specifies “SPF strict checking”, and the receiving MTA has DMARC enabled, then the domain-part of the MAIL FROM value (aka header “Return-Path:”) must exactly match the domain-part of header “From:”. When “relaxed mode” is enabled, then only the “organisational part” (base) of the two domains must match. Enabling relaxed mode allows a single SPF record for the base domain to be used for all mail-subdomains, ie new email subdomains can be invented without needing to publish more SPF records to DNS.</p>
+
+<p>When DMARC config specifies “DKIM strict checking”, and the receiving MTA has DMARC enabled, then the domain of the “From:” address and the domain embedded in the DKIM signature must be identical. When relaxed mode is enabled, the DKIM signature can be for the base domain. This allows new email subdomains to be invented without needing to publish more DKIM signature records to DNS.</p>
+
+<p>In addition, users with multiple aliases at subdomains of the same base domain-name (eg “user1@news.example.com” and “user1@example.com”) can use one as the “From:” address and the other as the “MAIL FROM” address if-and-only-if DMARC relaxed mode is enabled.</p>
+
+<p>Users who have a “primary address” such as “user1@example.com” and an alias at a different domain such as “me@example2.com” will have problems if the sending MTA uses the primary address in MAIL-FROM or the DKIM signature and the secondary address in the “From:” header; DMARC will see such a setup as invalid. However for my use-case (user with primary address at yahoo, sending with an alias at vonos.net) the Yahoo infrastructure sets MAIL-FROM to the alias used, not the primary address - ie this does not appear to be a problem.</p>
+
+<h2 id="enabling-dmarc-in-postfix">Enabling DMARC in Postfix</h2>
+
+<p>There appears to be just one major open-source implementation of <a href="https://tools.ietf.org/html/rfc7489#section-3.1.2">the DMARC spec</a>: <a href="http://www.trusteddomain.org/opendmarc/">OpenDMARC</a>. This implements the “milter API” and is thus compatible with any MTA that supports milter (including Postfix).</p>
+
+<p>Sadly, OpenDMARC’s documentation is not particularly good. And OpenDMARC is implemented in C, so the code is rather difficult to read.</p>
+
+<p>The SPF and DKIM specs both define headers that the MTA will add to an email as it is received, indicating the results of the respective tests. It therefore seems to me that a DMARC implementation could just check for these headers and then apply any additional checks necessary. However at least for SPF, this does not appear to be the case; from examining the source-code, OpenDMARC appears to have its own embedded implementation of SPF - and thus the SPF checks will be done twice (once for MAIL-FROM and once for “From:” domain, which are almost always identical) if both the standard SPF module and OpenDMARC are enabled for an MTA.  However I have seen comments that suggest that the Postfix SPF implementation (see section above) is superior to DMARC’s and thus it is recommended to have both.</p>
+
+<p>It is not clear to me whether OpenDMARC has its own DKIM implementation or not. For safety, it appears sensible to enable standard DKIM checks in addition to OpenDMARC.</p>
+
+<h2 id="dmarc-and-authentication-results">DMARC and Authentication-Results</h2>
+
+<p>The DMARC specification defines an email header named “Authentication-Results:” which any DMARC implementation should add to each processed email.</p>
+
+<p>Example:</p>
+
+<pre><code>Authentication-Results: receiver.example.org;
+ spf=pass smtp.mailfrom=example.com;
+ dkim=pass header.i=@example.com
+</code></pre>
+
+<p>The standard header added to emails by SPF is “Received-SPF:”.</p>
+
+<h2 id="dmarc-reporting">DMARC Reporting</h2>
+
+<p>Here is an example of a DMARC report, received via email:</p>
+
+<pre><code>&lt;feedback&gt;
+  &lt;report_metadata&gt;
+    &lt;org_name&gt;google.com&lt;/org_name&gt;
+    &lt;email&gt;noreply-dmarc-support@google.com&lt;/email&gt;
+    &lt;extra_contact_info&gt;https://support.google.com/a/answer/2466580&lt;/extra_contact_info&gt;
+    &lt;report_id&gt;11688563388637997065&lt;/report_id&gt;
+    &lt;date_range&gt;
+        &lt;begin&gt;1557446400&lt;/begin&gt;
+        &lt;end&gt;1557532799&lt;/end&gt;
+    &lt;/date_range&gt;
+  &lt;/report_metadata&gt;
+  &lt;policy_published&gt;
+    &lt;domain&gt;vonos.net&lt;/domain&gt;
+    &lt;adkim&gt;r&lt;/adkim&gt;
+    &lt;aspf&gt;r&lt;/aspf&gt;
+    &lt;p&gt;none&lt;/p&gt;
+    &lt;sp&gt;none&lt;/sp&gt;
+    &lt;pct&gt;100&lt;/pct&gt;
+  &lt;/policy_published&gt;
+  &lt;record&gt;
+    &lt;row&gt;
+      &lt;source_ip&gt;128.199.42.176&lt;/source_ip&gt;
+      &lt;count&gt;1&lt;/count&gt;
+      &lt;policy_evaluated&gt;
+        &lt;disposition&gt;none&lt;/disposition&gt;
+        &lt;dkim&gt;fail&lt;/dkim&gt;
+        &lt;spf&gt;pass&lt;/spf&gt;
+      &lt;/policy_evaluated&gt;
+    &lt;/row&gt;
+    &lt;identifiers&gt;
+      &lt;header_from&gt;vonos.net&lt;/header_from&gt;
+    &lt;/identifiers&gt;
+    &lt;auth_results&gt;
+      &lt;spf&gt;
+        &lt;domain&gt;vonos.net&lt;/domain&gt;
+        &lt;result&gt;pass&lt;/result&gt;
+      &lt;/spf&gt;
+    &lt;/auth_results&gt;
+  &lt;/record&gt;
+&lt;/feedback&gt;
+</code></pre>
+
+<h1 id="permitting-email-via-yahoo">Permitting Email via Yahoo</h1>
+
+<p>Now that the primary topics of SPF/DKIM/DMARC have been covered, I want to briefly address a specific problem I have that some, but not all, administrators of small private email domains will have.</p>
+
+<p>I have given a few people email addresses at my domain, ie addresses of form <code>@vonos.net</code>. One of them has had an <code>@yahoo.com</code> email address for a long time, and prefers using the yahoo.com web interface for reading and composing email (yes, Yahoo does still exist!). However this caused problems with SPF - and was the primary motivation for the research that led to this article.</p>
+
+<p>Using the Yahoo web interface to read mail sent to a <code>someuser@vonos.net</code> address is easy - a simple forwarding-rule on my server passes emails on to the corresponding <code>yahoo.com</code> mailbox.</p>
+
+<p>And for composing emails, Yahoo makes it very easy to set an alternate from-address in its webmail interface. When Yahoo’s infrastructure sends the email:</p>
+
+<ul>
+  <li>the HELO domain is a Yahoo hostname</li>
+  <li>the SMTP <code>MAIL FROM</code> is the selected sender address</li>
+  <li>the email <code>From:</code> header is the selected sender address</li>
+  <li>the email <code>Sender:</code> header is not present</li>
+</ul>
+
+<p>This means that a standard SPF setup which only includes the domain-owners SMTP host IP addresses does not match such messages; MTAs that received such messages from Yahoo were fully entitled to reject them because the <code>MAIL FROM</code> domain pointed to an SPF record that did not include the actual sending IP address.</p>
+
+<p>Fortunately, SPF does have some flexibility. A description of exactly how Yahoo sends such emails is described below, but in summary the solution I took is to add “<code>include:_spf.yahoo.com</code>” to the SPF records I publish in DNS for my email domain, ie DNS now has the following record (which you can view yourself!):</p>
+
+<ul>
+  <li>(domain=<code>vonos.net.</code>, type=txt) =&gt; <code>v=spf1 ip4:128.199.42.176/32 mx a include:_spf.mail.yahoo.com -all</code>
+</li>
+</ul>
+
+<p>where Yahoo’s own SPF records are:</p>
+
+<ul>
+  <li>(<code>_spf.mail.yahoo.com</code>, txt) -&gt; <code>v=spf1 ptr:yahoo.com ptr:yahoo.net ?all</code>
+</li>
+  <li>(<code>yahoo.com</code>, txt) -&gt; <code>v=spf1 redirect=_spf.mail.yahoo.com</code>  – used for emails where MAIL FROM is really <code>@yahoo.com</code>
+</li>
+</ul>
+
+<p>This solution isn’t perfect - it allows anyone with a valid <code>@yahoo.com</code> address to send emails as any user at my domain (please don’t try it). However SPF rules don’t support combining terms with “AND”. In practice, this is good enough for me; if a Yahoo user does fake my domain as origin, I can report that user to Yahoo and get their account banned. See the more detailed section on SPF below for some other possibilities.</p>
+
+<p>As far as I can tell, DMARC validation should be compatible with the above; DMARC checks should pass if <em>either</em> SPF or DKIM checks on the “email from” header pass, and the “include” statement above ensures that the SPF check should pass (by specifying that all yahoo servers are valid origins for my domain). DKIM checks will fail (see later), but my understanding of the spec is that this does not matter. Unfortanately in practice, it looks like it <em>does</em> matter - enabling DMARC for my domain appears to cause such emails sent via Yahoo to be blocked. The exact cause is unknown.</p>
+
+<p>Yahoo.com also adds DKIM headers, ie:</p>
+
+<ul>
+  <li><code>DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com;...</code></li>
+</ul>
+
+<p>Note that the domain specified is yahoo.com, ie the signature confirms that Yahoo really sent this mail. That possibly gives the email a reputation-boost (Yahoo thinks it is ok to send this email, and any complaints about spam can be sent to Yahoo who presumably know who the user is that is listed in the <code>MAIL FROM</code> header). As far as I can tell, this should be ok - DKIM itself explicitly does not validate the “From:” header - only DMARC does that.</p>
+
+<p>It would of course be better for this user to send emails from the Yahoo.com webmail with the (correct) yahoo.com “From:” address, and just the “Reply-To:” set to the address at <code>vonos.net</code>; that would actually solve all problems without needing any hacks. However that’s currently not an option for non-technical reasons…</p>
+
+<h2 id="detailed-spf-processing">Detailed SPF processing</h2>
+
+<p>Given the above SPF records for domain <code>vonos.net</code> (using include), the processing that occurs when some MTA receives an email from one of Yahoo’s servers using a vonos.net email address is:</p>
+
+<ul>
+  <li>email is received from IP address SRC and has a MAIL-FROM of <code>someuser@vonos.net</code>
+</li>
+  <li>if any of the following are successful then mail is accepted:
+    <ul>
+      <li>SRC equals 128.199.42.176 (my email server’s current IP address)</li>
+      <li>a DNS lookup for DOMAIN with type=MX returns a record with servername=<code>mail.vonos.net</code> and another DNS lookup of that servername with type=A or type=AAAA returns a record with an IP address that matches SRC</li>
+      <li>a DNS lookup for DOMAIN with type=A or type=AAAA returns a set of records containing at least one record with an IP address that matches SRC</li>
+      <li>a DNS lookup for <code>_spf.mail.yahoo.com</code> with type=TXT returns a record that starts with “v=spf1 “, and applying the rules in that record result in a match</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Oddly, Yahoo’s SPF record uses the “deprecated” ptr: match rule, but it works, telling MTAs that they should allow mail of form “<code>user@yahoo.com</code>” if a reverse-dns-lookup on the IP address of the sending process returns a record with a subdomain of DNS name “<code>yahoo.com</code>” or “<code>yahoo.net</code>”.  The reason the PTR approach is deprecated in the SPF specification is that it is inefficient to verify - particularly if the PTR records are not set up correctly. In the case of Yahoo, we can presume that the PTR records <em>are</em> set up correctly, so that is not a major worry.</p>
+
+<p>As noted above, there is a significant problem with this solution: it allows <em>any Yahoo customer</em> to send emails with address <code>@vonos.net</code>, not just the one user I want to allow. However SPF only supports using “or” to join terms, not “and”. However if anyone abuses this, I can complain to Yahoo (as it is one of their customers) - and DMARC reporting might let me know if that is happening (see later).</p>
+
+<p>Instead of using the <code>include</code> term, it might be possible to use the “exists:” term to allow <em>any MTA</em> to send email with address “<code>someuser@vonos.net</code>” - eg with entry</p>
+
+<ul>
+  <li><code>exists:%{l}._spf.vonos.net</code></li>
+</ul>
+
+<p>then I just need to publish an A-record for “<code>someuser._spf.vonos.net</code>” that has arbitrary content (eg 127.0.0.1). That solves the “any address via Yahoo” problem - but replaces it with a “any MTA for a specific address” weakness.</p>
+
+<p>It might be possible to tie things down further by limiting to an exact sending server:</p>
+
+<ul>
+  <li><code>exists:%{l}.{i}._spf.vonos.net</code></li>
+</ul>
+
+<p>where there is a record for every allowed “i” (src sending server). However that means that each time a server is added at Yahoo, I would need to update DNS. That doesn’t seem acceptable.</p>
+
+<p>Possibly <code>exists:%{l}.{h2}._spf.vonos.net</code> could be used. When DNS contains <code>myuser.yahoo.com._spf.vonos.net</code> then only MTAs claiming to be <code>someserver.yahoo.com</code> would be able to send email for <code>myuser@vonos.net</code>. However the hostname presented via HELO is not verified. That doesn’t seem acceptable.</p>
+
+<p>No other solutions occur to me, and the one based on include seems sufficient for my purposes.</p>
+
+<h1 id="using-ptr-records-to-combat-spam">Using PTR Records to Combat Spam</h1>
+
+<p>There is another security-check that is not directly related to SPF, DKIM or DMARC but is often applied separately by MTAs - checking DNS PTR records. This article seems a reasonable place to also discuss this. There are two points relevant to email:</p>
+
+<ul>
+  <li>having your email server check PTR records for remote mailservers to detect spammers; and</li>
+  <li>publishing a PTR record for your server so that other email servers can check you</li>
+</ul>
+
+<p>DNS names are divided into two parts:</p>
+
+<ul>
+  <li>the core domain-name which needs to be “registered” with the internet infrastructure (eg <code>vonos.net</code>), and</li>
+  <li>hostnames which you can create at will (eg <code>server1.vonos.net</code>, <code>server2.vonos.net</code>)</li>
+</ul>
+
+<p>When you register a domain-name, you tell your <em>domain registrar</em> which “DNS nameservers” should be responsible for that domain. That information is passed to the official organisation for the top-level-domain, eg “<code>.com</code>” or “<code>.net</code>”. Usually, you choose a set of nameservers from your ISP (eg <code>ns1.digitalocean.com</code>, <code>ns2.digitalocean.com</code>, etc) but you can choose other DNS nameservers (including your own hosts) if you desire. The nameservers then hold the A-records that map hostname to IP-address.</p>
+
+<p>ISPs which offer nameservers for use by their customers (and they all do) also provide an API through which hostname-to-ip-address mappings (A-records) can be created, deleted and updated; this is known as <a href="https://en.wikipedia.org/wiki/Dynamic_DNS">Dynamic DNS</a>. Dynamic DNS can be very useful, but can also be a potential way for spammers to deceive email-servers; fortunately DNS PTR records are not so easily updated and thus can be checked by email servers to detect hacked servers which are being used to send email.</p>
+
+<p>A and AAAA records exist to answer the question: “given hostname SOMEHOST, what is its IP address?”. This is a very common question - HTML links almost always refer to their target host via a name, and the browser must fetch the corresponding IP address before making a request to that host.</p>
+
+<p>Each A-record can contain only one IPv4 address, but it is allowed for multiple A records to exist for the same name. What a client OS or application will do if multiple records are returned by a query is not defined - in some cases the client app asks for just one address and lets the OS pick one from the available set while in others the client app explicitly asks for the list and picks one itself. When decided at the OS level, it sometimes picks the first one always, or picks one at random, or picks one that “looks nearest” based on its IP address. When decided at the client level, some clients work their way through the list from first to last until one is accessible on the desired port (something the OS cannot do) - ie provide “fallback” behaviour. And some clients try to “round-robin” requests over the list. Or pick a random server. Or other. In general, modern web-browsers do request the full list of addresses and use the first working address; it may therefore be possible to implement coarse-grained load-balancing for such clients by regularly modifying the order of A records in DNS.</p>
+
+<p>PTR records exist to answer the question: “given IP address SOMEIP, what is its HOSTNAME?”. This question is not often asked - it is really useful only for performing “security checks” of some kind.</p>
+
+<p>An ISP (or other large organisation) owns a range of IP addresses. That organisation’s DNS nameservers also host the “reverse mapping” PTR records that indicate for a specific IP address what the hostname is (only a small subset of IP addresses have a reverse-mapping PTR record). Note that although a domain-owner can specify their own DNS nameservers for A-records, only the owner of an IP-range can host PTR-records. And ISPs are much stricter about allowing customers to create and update PTR-records than they are about updating A-records. In particular, an ISP usually only allow registration of PTR records with IP-addresses that they know to be “static”, ie are not in the ranges that the ISP’s DHCP servers hand out. That prevents hackers from pointing PTR records at simple PCs or other devices that they have taken over.</p>
+
+<p>In general, “servers” that are intended to “serve” requests over the internet have an A-record, ie a name that is resolvable to an IP address (so clients do not need to use the raw IP address). Desktops typically do not. Servers are generally passive - a client connects to them; the client uses a hostname and maps to IP-address via the DNS A-record entry, thus proving that the server is “serious” - registering an A-record for an address is typically only allowed for the owner of the name (though there are ways around this; a TLS certificate is better proof). However there are a few cases when a server “pushes” data - the most common case being a mail-server which “pushes” mail to other mail-servers. In this case, the receiving mail-server just knows the IP address of the machine connecting to it, and needs to know if this is a “serious” machine; a good way is to check whether there is an A-record pointing to that IP address. The vast majority of devices connected to the internet are desktops or IP-enabled devices such as webcams; these are often taken over by spammers and used to send email. However such devices don’t have A-records. Given just an IP-address, however, it is not possible to directly find the A-record that corresponds to that address. Instead, a PTR record needs to be looked up, which gives the name of an A-record. Possibly the check could stop there, as publishing a PTR record for an IP-address is not trivial for spammers - but even better is to then look up the A-record corresponding to the PTR record, and verifying that it traces back to the original IP-address. When a mail-receiver accepts a new connection from an IP address for which there is a valid PTR-record and corresponding A-record, then this is at least no “trivial spammer”. It also indicates that the owner of this server expected “reverse lookups”, ie ip-address security-checks, to be applied to this server - and therefore this server really is meant to be used for “push communication” of some sort.</p>
+
+<p>Mailservers often use missing PTR records for a client as a very strong indication that the incoming messages are spam.</p>
+
+<p>Note that multiple A-records for a name can be used to point to multiple IP-addresses. However there can be only one PTR record for an IP-address.</p>
+
+<p>When <em>sending</em> email, it is also common for the sender to check for a PTR record, ie</p>
+
+<ul>
+  <li>load the MX-record for the target domain to get a host-name</li>
+  <li>load the A-record for the host-name to get an IP-address</li>
+  <li>load the PTR-record for the IP-address and check it matches the host-name</li>
+  <li>connect to the IP-address</li>
+</ul>
+
+<p>One of the things this protects against is non-server-class systems using Dynamic DNS to point an A-record at their (current, short-lived) IP address. As noted earlier, the PTR record is owned by the ISP that allocated the (current, short-lived) IP address - and that ISP will not allow the PTR record to be updated like the A-record can.</p>
+
+<p>IRC (text chat) servers may also care about PTR records (reverse DNS).</p>
+
+<p>Incidentally, the ability to run your own DNS nameservers for a domain-name is what makes <a href="https://en.wikipedia.org/wiki/DNS_rebinding">DNS rebinding attacks</a> feasible; you can host your own apparently innocent content and serve up javascript that runs in a victim’s browser. Most browsers implement a same-origin-policy which prevents such javascript from POSTing to other sites (eg yourbank.com or localhost), but it can post to your domain-name - and your DNS servers can remap your domain-name to whatever target IP address you want (eg the IP address of a bank’s gateway), thus avoiding the “same-origin-policy”.</p>
+
+<h1 id="running-a-mailserver-on-non-server-systems">Running a Mailserver on Non-server Systems</h1>
+
+<p>Occasionally it might be useful to run an MTA (for inbound or outbound mail) on a laptop or similar device. Unfortunately, spammers do exactly this - with devices owned by other people that they have “hacked”; most mailservers therefore try hard to detect such systems and actively block them (see PTR checks above for example).</p>
+
+<p>One problem with running your own mailserver on “non-server-class” infrastructure is that you might be behind a NAT gateway - in which case you have no external IP address at all. In addition, any incoming TCP connections will be blocked at the NAT gateway (usually a router). That can be worked around by configuring “port forwarding” on the NAT gateway.</p>
+
+<p>Even then, a home router does not usually have a static IP address; instead it is allocated a random address from your ISP’s pool of addresses. Nevertheless, these addresses are reasonably stable - often unchanged over weeks or months. It is therefore possible for the host on which you run the mailserver to detect its external IP address and then update the DNS A-record that maps your mail-hostname (from MX record) to that IP address. That gets basic communication working. Note that DNS records have a TTL (time-to-live) which indicates how long a value can be cached for; changes are therefore not immediately visible to everyone.</p>
+
+<p>However in order to send email to most external MTAs, there also needs to be a PTR record that maps your IP address back to the expected hostname. And for most ISPs, that is not possible to do. Outbound email will therefore be unlikely to work. That’s also the reason why email is not completely swamped by spam..</p>
+
+<h1 id="using-certificate-authority-authorization-to-protect-your-tls-certificates">Using Certificate Authority Authorization to Protect your TLS Certificates</h1>
+
+<p>An MTA (mailserver) that receives mail from other servers should really offer its services over an encrypted port, and provide a valid server certificate which includes its hostname.</p>
+
+<p>I am not aware of any sending MTA which actually validates the hostname embedded in the certificate of remote MTAs it sends email to - but it would seem like a good idea. Such checks would then rely upon the fact that attackers generally cannot get hold of a certificate for a host in a domain they do not own.</p>
+
+<p>In general, certificate authorities (CAs) do some reasonable checks when someone applies for a certificate. However they are not perfect, and it is therefore possible that an attacker can get a cert from a well-known CA for a domain they do not own.</p>
+
+<p>You can strengthen your defences against such attacks by publishing a <a href="https://letsencrypt.org/docs/caa/">CAA</a> record in DNS. Effectively, you declare which CA you use for your domain; other CAs should then check this declaration when they receive a request for a new certificate.</p>
+
+<p>Of course this does not protect against truly rogue or incompetent CAs, but does help when an attacker has found a weakness in a CA’s validation processes but cannot bypass the CAA check. In addition, the <a href="https://www.certificate-transparency.org/">Certificate Transparency Project</a> works with major organisations (including Google) to maintain a database of all TLS certificates they encounter. This database (actually a log) can be used to detect certificates that are not consistent with the published CAA record for the domain.</p>
+
+<p>I use Letsencrypt for a free certificate, and therefore have registered the following record in DNS:</p>
+
+<ul>
+  <li><code>("vonos.net.", CAA) -&gt; 0 issue "letsencrypt.org"</code></li>
+</ul>
+
+<p>ie issuing of certs for vonos.net is only allowed for CA letsencrypt.org; additional flags field is 0.</p>
+
+<p>Note that the DNS-record-type “CAA” is relatively new and not supported by all DNS registrars.</p>
+
+<h1 id="references-and-further-reading">References and Further Reading</h1>
+
+<ul>
+  <li><a href="https://www.skelleton.net/2015/03/21/how-to-eliminate-spam-and-protect-your-name-with-dmarc/">Skelleton: How to Eliminate Spam and Protect Your Name with DMARC</a></li>
+  <li><a href="http://en.redinskala.com/the-smtp-protocol-fundamentals/">RedinSkala: SMTP Protocol Fundamentals</a></li>
+  <li><a href="http://en.redinskala.com/what-is-spf/#more-102">RedinSkala: What is SPF</a></li>
+  <li><a href="http://www.samlogic.net/articles/smtp-commands-reference.htm">Samlogic: Basic SMTP Commands</a></li>
+  <li>
+<a href="https://www.rfc-editor.org/rfc/rfc4686.txt">RFC: Threads Motivating DKIM</a> – discusses potential vulnerabilities in Email that DKIM is intended to address.</li>
+  <li>
+<a href="https://news.slashdot.org/story/19/05/11/0438258/ask-slashdot-how-would-you-host-your-own-email-server">Slashdot: How to Host an Email Server</a> - a discussion of various options for handling email yourself</li>
+  <li><a href="https://www.sparkpost.com/blog/spf-authentication">Sparkpost: SPF Authentication</a></li>
+  <li><a href="https://yro.slashdot.org/story/19/07/29/1723256/dmarcs-abysmal-adoption-explains-why-email-spoofing-is-still-a-thing">DMARC’s abysmal adoption</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/linux/email-validation/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+

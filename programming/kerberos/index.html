@@ -1,0 +1,405 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Mine of Information - Kerberos Authentication Overview</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/coderay.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/stylesheet.css">
+    <link type="application/atom+xml" title="Mine of Information" rel="alternate" href="/atom.xml"> 
+
+    <meta name="generator" content="nanoc 4.12.15"> 
+    <meta name="author" content="Simon Kitching"> 
+  </head>
+  <body>
+    <section id="header">
+      <span class='title'>The Mine of Information</span> <span class='desc'>(Nuggets of Programming and Linux)</span>
+    </section>
+    <div id="main">
+      <section id='navpane'>
+        <section>
+  <ul id="navicons">
+      <li class="nav">
+      <a href="/" title="Home"><img src="/assets/images/Home.png"></a>
+      <a href="/archives/" title="Archives"><img src="/assets/images/Calendar.png"></a>
+      <a href="/site/welcome" title="E-Mail"><img src="/assets/images/Envelope.png"></a>
+      <a href="/atom.xml" title="Subscribe Feed"><img src="/assets/images/RSS.png"></a>
+      </li>
+  </ul>
+</section>
+
+<section>
+  <h1>About</h1>
+  <ul id="about">
+    <li>
+      <a href="/site/welcome">Welcome</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+<h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2023/12/monorepos/">Monorepos and Polyrepos</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/12/httpapis/">HTTP APIs, REST APIs, and Others</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/biden/">Biden on Democracy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/09/tech-breadth/">Maintaining Technical Depth</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/08/vpns/">The Uselessness of Consumer VPNs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/microservices/">Some Aspects of Implementing Microservices..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/06/dtest-evolution-scrum-monad/">DDD, Architecture patterns, and More..</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2023/05/testing/">Should Unit Tests Verify Requirements Only?</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    
+      <li class="catlink">
+        <a href='/category/Architecture/'>Architecture</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/BigData/'>BigData</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cloud/'>Cloud</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Cryptography/'>Cryptography</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Git/'>Git</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Infrastructure/'>Infrastructure</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Java/'>Java</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Links/'>Links</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Linux/'>Linux</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Network/'>Network</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OSGi/'>OSGi</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Off-topic/'>Off-topic</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/OpenWRT/'>OpenWRT</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Programming/'>Programming</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Security/'>Security</a>
+      </li>
+    
+      <li class="catlink">
+        <a href='/category/Site/'>Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+      </section>
+  
+      <section id='content'>
+        
+  <div class='page'>
+    <h1>Kerberos Authentication Overview</h1>
+    <aside>First published on: October 22, 2016</aside>
+    
+    <article>
+    <p>Categories: <a href='/category/Programming/'>Programming</a>, <a href='/category/Cryptography/'>Cryptography</a>, <a href='/category/Security/'>Security</a></p>
+      
+<h1 id="introduction">Introduction</h1>
+
+<p><a href="https://en.wikipedia.org/wiki/Kerberos_(protocol)">Kerberos</a> is probably the world’s most widely used authentication system, both in Unix and Windows environments.</p>
+
+<p>The Wikipedia article on Kerberos describes exactly <em>how</em> the protocol works, but does not (in my opinion) do a good job of describing why. This article is intended to provide additional background/context to the algorithm described there.</p>
+
+<h1 id="definitions">Definitions</h1>
+
+<p>Some quick definitions:</p>
+
+<ul>
+  <li>Service: a software system that can be interacted with. Often a service is a <em>single daemon process</em>, but may also be a set of processes (eg for load-balancing), or a set of cooperating processes with a single entry-point, or something that is started on-demand.</li>
+  <li>Principal: something with an <em>identity</em> and associated rights. A principal may represent a user (user-account), or a specific service. An alternative definition is that a principal is an endpoint for communication, ie a person or system that sends or receives a network message.</li>
+  <li>Authentication: when a software process proves (over a network connection) that it actually a specific Principal.</li>
+  <li>Authorization: determining whether a principal is permitted to perform a specific operation (eg access a specific service).</li>
+</ul>
+
+<p>Things this article assumes you know:</p>
+
+<ul>
+  <li>what <a href="/programming/symmetric-encryption">symmetric encryption</a> is (see here)</li>
+  <li>what <a href="/programming/certificates">asymmetric encryption and digital certificates</a> (also known as public-key-cryptography) are</li>
+</ul>
+
+<h1 id="overview">Overview</h1>
+
+<p>Kerberos is based on <em>symmetric</em> encryption, not asymmetric (public/private key). This makes it somewhat more complicated than a comparable public-key-based system in some ways, and simpler in others.</p>
+
+<p>Every principal has their own symmetric key. This symmetric key can be simply generated locally, and saved in a local “keytab file”. Alternatively the symmetric key can be derived from a password, in which case the key can be recreated when needed by <em>prompting</em> the user for the password and reapplying the key-derivation algorithm. Each (principal, key) pair must be registered with the central Kerberos Key Distribution Center (KDC).</p>
+
+<p>Authentication with Kerberos works in several phases:</p>
+
+<ul>
+  <li>A principal communicates with Kerberos itself (the TGS or Ticket Granting Service), providing its principal-id and proving it knows the associated key (see below); Kerberos returns a small block of bytes called a “ticket granting ticket” (TGT) which effectively represents an “active session” between the principal and Kerberos itself. This ticket remains valid for a configurable period - typically several hours.</li>
+  <li>For each other service the principal wishes to communicate with, the principal communicates with Kerberos again, providing its TGT and the id of the service (which is itself a principal). If the Kerberos server is willing to allow the principal to access that service, it returns a small block of bytes known as a “service ticket” which effectively represents an “active session” between the principal and that specific service. This ticket remains valid for a configurable period - typically 15 minutes or so (but can be “renewed”).</li>
+  <li>The principal then connects to some (host, port), which it hopes is the desired service, and presents the “service ticket”. The service connected to will only be able to generate a valid response (encrypted with the expected session-key) if it is indeed the correct one (has access to the symmetric key registered in the KDC for that service name).</li>
+</ul>
+
+<p>Issuing of a ticket-granting-ticket is <em>authentication</em>, as the principal provides their id and proves they have access to the same key registered with the KDC for that id (though the key itself is never transferred over the network).</p>
+
+<p>Issuing of a service-ticket is sometimes referred to as <em>authorization</em>, due to the fact that Kerberos can decide whether to issue a specific principal a service-ticket for a specific service or not. However the term authorization is generally used for finer-grained decisions than that, and it is normal for the target service to apply additional user-specific checks to any incoming service calls even when the remote user is reliably identified via Kerberos. Kerberos does <em>not</em> provide or manage any information on groups, roles, ACLs, or similar; the target service just gets informed of the connecting principal’s id.</p>
+
+<p>Note that the service connected <em>to</em> does not need to communicate with Kerberos at any time, making this a very scalable system. The client only needs to contact the ticket-granting-service when it wishes to open a new connection to a service and it has no (unexpired) ticket for that service.</p>
+
+<p>The TGT can be considered a “master token”, and must be held private (not given out to external applications). The service-tickets are shorter-lived per-service tokens, each wrapping a different “session” symmetric key. These can be exposed to various external applications without concerns; the recipient service cannot use it to impersonate the user with some other service. Some security-sensitive users have a “password management tool” on their workstation, and have a different password for every website into which they log; the password management tool autopopulates login forms to make this manageable. Kerberos ticket-granting-tickets are somewhat like the “password management tool” and service-tickets like the per-service passwords.</p>
+
+<p>Kerberos guarantees mutual authentication between principals, not just the “one way auth” common between a web-browser and an https-enabled webserver.</p>
+
+<p>The primary limitation of Kerberos is that every principal must be registered with a shared KDC - thus it is a solution for a “closed environment”, and not appropriate for authentication between domains. In particular, it cannot be used to authenticate against arbitrary remote systems or websites (unlike the digital certificate system).</p>
+
+<p>Another minor disadvantage is that when Kerberos is not available, clients cannot obtain new “service tickets”, ie no new connections can be established. Authentication directly between principals is not supported (in contrast to mutual authentification via certificates for example). This isn’t a significant problem in practice.</p>
+
+<h1 id="enabling-kerberos-for-a-service">Enabling Kerberos for a Service</h1>
+
+<p>The kerberos specification defines:</p>
+
+<ul>
+  <li>a mechanism/protocol for obtaining and validating tickets (ie the relevant messages to be exchanged, in ASN.1 format), ie authentication, and</li>
+  <li>a mechanism/protocol for transferring data-packets which are signed or encrypted with the session-key from a Kerberos ticket, ie establishing a channel.</li>
+</ul>
+
+<h2 id="using-a-ticket-for-authentication-only">Using a Ticket for Authentication Only</h2>
+
+<p>It is entirely valid to just use the first ticket-obtaining part, and then transfer the ticket over some arbitrary protocol. When Kerberos is used just for authentication, and not for encrypting transferred data, then the Kerberos ticket can be passed as part of some other message, eg in an HTTP header. The service ticket is itself encrypted (with the symmetric key of the target service), so may be transferred without further protection. The format of a service-ticket is well-defined, and service-tickets can be decoded by the receiver (to extract the clientid) without including any complicated libraries. Unlike TLS, Kerberos needs no “handshake” - just a one-way transfer of a service-ticket provides the service with sufficient information to verify/authenticate the client.</p>
+
+<p>There is, however, a problem with sending a service-ticket and data as a single step (eg an HTTP post with the ticket in the header): the server can authenticate the client, but the client cannot authenticate the server. If the data to be sent is “private” then it is important that the service is not a “man in the middle” and therefore it is necessary to first <em>establish a secure channel</em> (with mutual authentication) before sending such data.</p>
+
+<p>See also section “Single Signon and HTTP” below.</p>
+
+<h2 id="using-a-ticket-to-establish-a-secure-channel">Using a Ticket to Establish a Secure Channel</h2>
+
+<p>When a network is considered to be “secure”, then passing a (service-ticket, plaintext) message and checking the service-ticket to authenticate the client may be adequate. However when a network may include man-in-the-middle attackers, then it is not useful; the attacker can simply replace the plaintext with whatever they desire or attach the service-ticket to a different message (a “replay attack”). For security, it is therefore necessary that either the plaintext component is digitally signed (so it can be read but not modified), or the whole channel is somehow encrypted.</p>
+
+<p>The Kerberos specification defines a set of data-packets for different purposes, using ASN.1 to specify their exact byte-layouts. Most of these types are sent over a network during ticket-request, ticket-granting, etc. However two packet-types are specifically designed for use as wrappers of encrypted or signed user-data:</p>
+
+<ul>
+  <li>
+<code>KRB_SAFE</code> packets include “user data” which is unencrypted but signed, and</li>
+  <li>
+<code>KRB_PRIV</code> packets include “user data” which is encrypted.</li>
+</ul>
+
+<p>The intention was that applications would encrypt or sign data using Kerberos session-keys, then wrap them in these packet-types and exchange them over some insecure network. However the use of these packet-types (fairly simple headers plus space for user-data payload) never caught on, and are seldom used. In fact many Kerberos libraries do not actually provide an API to generate or consume such packets. Instead, setting up an <em>encrypted channel</em> based upon a Kerberos service ticket is usually done by using the gss-api-kerberos protocol (on both client and server), directly or via the GSSAPI or SASL wrappers.</p>
+
+<p>Note that <a href="https://en.wikipedia.org/wiki/IPsec">IPsec</a> or TLS can provide encryption, but do not necessarily provide the <em>mutual authentication</em> that Kerberos automatically does.</p>
+
+<p>The gss-api-kerberos protocol is implemented by various libraries, but it is best understood in the context of the GSSAPI framework. See <a href="/programming/gssapi">this article on GSSAPI</a> for more information.</p>
+
+<p>A gssapi-enabled server application listens on a dedicated port for gss-api-kerberos packets.</p>
+
+<h1 id="kerberos-as-a-login-protocol">Kerberos as a Login Protocol</h1>
+
+<p>Kerberos can be used for authenticating “desktop logins” in a straightforward manner - and Windows systems do exactly this. A user interactively enters a (userid, password) pair at login; the standard key-derivation algorithm is applied to the password to derive a key, and then Kerberos is contacted to request a “ticket granting ticket” for the userid. If Kerberos returns a ticket-granting-ticket which can be successfully decrypted with the local key, then the (userid, password) pair is correct and the local login-process can continue. In addition, that ticket-granting-ticket can be used to obtain service-tickets for various other purposes (eg accessing remote fileservers).</p>
+
+<h1 id="single-signon-and-http">Single Signon and HTTP</h1>
+
+<p>Kerberos is sometimes referred to as a “single signon” tool. If the process of “user login” to a workstation includes using their entered password to authenticate against Kerberos and obtain a TGT (ticket granting ticket), then service-tickets for other services can be obtained via this TGT without having to prompt the user for their password again.</p>
+
+<p>One particularly common case is when a user accesses a company-internal website that requires user-authentication. The website can return a standard HTTP-Authenticate header, with “Kerberos” as one of the authentication options. The browser can then use an operating-system-specific call to request the OS to use the current user’s TGT to obtain a service-ticket for that website, and the browser can then retry the request with the service-ticket in the relevant http authentication header. The service ticket can be obtained via the TGT without prompting the user to enter their password again. This convenient sequence does require that:</p>
+
+<ul>
+  <li>the website has access to the same Kerberos servers that the client authenticated against at login;</li>
+  <li>the website is kerberos-enabled (has a key registered in the KDC, and accepts kerberos-tickets in the HTTP authentication header);</li>
+  <li>the webbrowser is kerberos-enabled (can handle auth-required responses where one of the options is kerberos);</li>
+  <li>the operating-system has a current TGT for the user.</li>
+</ul>
+
+<p>There is an excellent <a href="http://fusionsecurity.blogspot.co.at/2011/01/how-does-kerberos-actually-work-in-http.html">article describing the full process for HTTP authentication using Kerberos</a>. To summarize, an HTTP server accepts a normal HTTP or HTTPS request, and returns an “authentication required” header specifying that Kerberos should be used (strangely, it is called “Negotiate”). The client then obtains a ticket and includes it in an “Authorization” header in the subsequent request. As described elsewhere in this article, the server then uses its symmetric key from a local keytab file to decrypt the Authorization header (a service-ticket), and extract a client-id which is guaranteed to be correct because the data has been encrypted with the http-server’s secret symmetric key, and the only entity other than the http server which has that key is Kerberos. This process does not set up an “encrypted socket” as TLS does; it is purely for authentication.</p>
+
+<h1 id="java-and-gss">Java and GSS</h1>
+
+<p>The Java JAAS mechanism for authenticating users includes support for Kerberos. On the server-side, it can be configured to load the server’s symmetric key from a local keytab file, and can then be used to validate service-tickets provided by external applications (extracting the client-id and binding it to the current login-context). On the client-side, it can be configured to obtain (userid, password) from various sources and then to communicate with Kerberos to obtain a TGT. The actual implementation is within JAAS login module <code>com.sun.security.auth.module.Krb5LoginModule</code>.</p>
+
+<p>Classes in package <code>javax.security.auth.kerberos</code> are also useful for interacting with Kerberos.</p>
+
+<p>One way to interact with the gss-api-kerberos library (ie to establish an <em>authenticated and encrypted channel</em> based on a Kerberos service-ticket) is via the Java-GSS (aka JGSS) classes included in the Java SDK. The Java standard libraries include GSS-related classes such as GSSContext, and the official Java documentation includes examples of how to use them. However they are far from trivial to use! See this <a href="/programming/gssapi">GSSAPI</a> article for more information.</p>
+
+<p>When a Kerberos ticket has been passed in an Authentication HTTP header to a Java-based webserver, the client identity from the ticket can often be obtained via <code>HttpServletRequest.getUserPrincipal().getName()</code>. See “Single Signon and HTTP” for more information.</p>
+
+<h1 id="the-ticket-issuing-process-in-detail">The Ticket Issuing Process in Detail</h1>
+
+<p>Here is the TGT authentication process in more detail:</p>
+
+<ul>
+  <li>Client sends a request with their id (in plain text) to Kerberos</li>
+  <li>Kerberos validates the id is valid (eg in some database) and:
+    <ul>
+      <li>generates a unique “session key”</li>
+      <li>creates two small blocks of bytes holding:
+        <ul>
+          <li>the session-key encrypted with the client’s symmetric key</li>
+          <li>a (client-id, session-key, expiry-time) structure encrypted with the Kerberos server’s secret key - known as a TGT</li>
+        </ul>
+      </li>
+      <li>returns those two small blocks of bytes</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The first part of the response is of course useless to anyone that does not have access to the client’s symmetric key (ie the client themself), as they cannot decrypt the returned data in order to extract the session-key. In other words, anyone can fake a Kerberos login request for an arbitrary principal but only the real principal can use the response.</p>
+
+<p>The second part of the response is totally opaque to the client, and is there just to be echoed back to the Kerberos server later (so the server does not need to be stateful).</p>
+
+<p>Here is the service-ticket authentication process in more detail:</p>
+
+<ul>
+  <li>Client sends a request to Kerberos consisting of two small blocks of bytes:
+    <ul>
+      <li>the opaque TGT structure from the earlier login</li>
+      <li>client-id and target-service-id, encrypted with the session-key (aka an “authenticator”)</li>
+    </ul>
+  </li>
+  <li>Kerberos decrypts the TGT using its private symmetric key, extracts the session-key, validates the expiry-date, then decrypts the second part using the session-key.</li>
+  <li>Kerberos decides whether to allow this client principal to access this target principal; if so it:
+    <ul>
+      <li>generates another unique “service session key”</li>
+      <li>creates two small blocks of bytes holding:
+        <ul>
+          <li>the service-session-key encrypted by the client-session-key</li>
+          <li>the client-id, timestamp and service-session-key, encrypted by the target service id’s symmetric key (aka “service ticket”)</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>Again, this response is of no use to anyone who does not have the client-session-key, as they cannot extract the service-session-key. The second part of the response is opaque to the client, and just for forwarding to the target service.</p>
+
+<p>Finally, the client connects to the target service:</p>
+
+<ul>
+  <li>client sends a request to the target service consisting of two small blocks of bytes:
+    <ul>
+      <li>the service ticket</li>
+      <li>a (client-id, timestamp), encrypted by the service-session-key</li>
+    </ul>
+  </li>
+  <li>the target service decrypts the first part using its own symmetric key, and extracts the service-session-key</li>
+  <li>the target service then decrypts and verifies the second part using the service-session-key.</li>
+</ul>
+
+<p>Only the Kerberos server itself could have created that part encrypted with the target service key, so the target service knows that this is a “real message” from Kerberos, even when indirectly delivered. Or in other words:</p>
+
+<ul>
+  <li>part A is encrypted with the service private key, proving that the client was in contact with the Kerberos server</li>
+  <li>part B is encrypted with a session-key embedded in part A, proving the client is the <em>same entity</em> the Kerberos server revealed the contents of part A to.</li>
+</ul>
+
+<p>The client and target service then encrypt subsequent communications with that session-key - or use it to exchange yet another temporary key for this specific socket.</p>
+
+<p>Kerberos authentication is symmetrical - client and server roles do not exist as far as Kerberos is concerned.</p>
+
+<p>Each TGT contains a fixed expiry time (typically a few hours).  Each communication channel between two principals has its own “session”, with its own timeout. Renewing the session for such a channel requires a valid “TGT” - which must of course itself not be expired.</p>
+
+<h1 id="registering-a-new-key">Registering a New Key</h1>
+
+<p>Registering of (principal, key) pairs needs to be done securely; if the transfer of the key from principal to the Kerberos Key Distribution Center (KDC) is intercepted then of course security is broken.</p>
+
+<p>For principals who are end-users, the usual practice is to generate a random password on the KDC or some other central system, derive a key from it and register that with the KDC, and then transfer the password to the user via some hopefully secure method (eg in person, by post, or by telephone).</p>
+
+<p>For principals which are services running on some arbitrary server, the usual practice is for a system-administrator to log on to that system and use the regular Kerberos tools to generate a key (not via a password). This key is saved in a local “keytab file” for use by the local service. The system-administrator then transfers the key to the KDC over a channel set up via a system-administrator <em>password</em> (ie using a key derived from a password they enter on the system being configured). The transfer is thus over an encrypted channel, and the KDC can verify that the principal registering this new key has rights to do so.</p>
+
+<p>The usual solution for this is to use a tool on the “registering system” to connect to Kerberos via key-based authentication, using an existing “admin” principal-id of some kind, then send the new-to-be-registered key to the KDC using that tool - ie have the new key temporarily encrypted using some other principal.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://tools.ietf.org/html/rfc4120">RFC: Kerberos Network Authentication Service V5</a></li>
+  <li><a href="http://www.kerberos.org/software/appskerberos.pdf">Kerberos.org: Best Practices for Integrating Kerberos into Your Application</a></li>
+</ul>
+
+    </article>
+  </div>
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_shortname = 'mineofinformation'; // mineofinformation (disqus site id)
+      var disqus_pageid = '/programming/kerberos/'; // /relative/path/to/article/dir
+
+      var disqus_config = function () {
+        this.page.identifier = disqus_pageid;
+        this.page.url = 'https://moi.vonos.net' + disqus_pageid;
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+
+
+      </section>
+    </div>
+    <section id="footer">
+      <p>Copyright &copy; 2025 - Simon Kitching</p>
+    </section>
+  </body>
+</html>
+
