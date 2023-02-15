@@ -1,0 +1,18 @@
+[Unit]
+Description=Apache Kafka server (broker)
+Documentation=http://kafka.apache.org/documentation.html
+Requires=network.target remote-fs.target zookeeper.service
+After=network.target remote-fs.target zookeeper.service
+
+[Service]
+Type=simple
+User=kafka
+Group=nogroup
+# Ugly hack: sleep before starting so that zookeeper has a chance to open its socket before kafka runs.
+ExecStartPre=/bin/sleep 10
+ExecStart=/opt/kafka/current/bin/kafka-server-start.sh /opt/kafka/config/kafka.properties
+Restart=on-failure
+SyslogIdentifier=kafka
+
+[Install]
+WantedBy=multi-user.target

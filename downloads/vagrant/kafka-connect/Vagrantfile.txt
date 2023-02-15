@@ -1,0 +1,38 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/xenial64"
+
+  # Network
+  config.vm.network "private_network", ip: "192.168.33.10"
+
+  # Zookeeper port (binary)
+  config.vm.network "forwarded_port", guest: 9099, host: 9099
+
+  # Kafka port (binary)
+  # It is important that kafka nodes are forwarded 1:1 without remapping, as
+  # kafka clients outside the VM will ask a "bootstrap kafka server" for a
+  # list of the (host,port) addresses of all other kafka nodes in the cluster,
+  # and these (host,port) addresses must then be valid for the client.
+  config.vm.network "forwarded_port", guest: 9095, host: 9095
+
+  # Kafka-connect port (REST)
+  config.vm.network "forwarded_port", guest: 9091, host: 9091
+  config.vm.network "forwarded_port", guest: 9092, host: 9092
+
+  # Kerberos KDC
+  #
+  # Allow the host (with a suitable /etc/krb5.conf file) to access the KDC in the VM
+  config.vm.network "forwarded_port", guest: 88, host: 9088, protocol: "tcp"
+  config.vm.network "forwarded_port", guest: 88, host: 9088, protocol: "udp"
+
+  config.vm.provider "virtualbox" do |vb|
+    #   vb.gui = true
+    vb.memory = "2048"
+  end
+
+  config.vm.synced_folder ".", "/vagrant", type: "rsync"
+
+  config.vm.provision "shell", path: "bootstrap.sh"
+end
